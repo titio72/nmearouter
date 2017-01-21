@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Router>
+	<Log level="INFO"/>
+	<SimulatorAgent name="SIM" active="true">
+	    <qos>rmc2vtg;enrich_hdg</qos>
+	</SimulatorAgent>
+	<MeteoAgent name="METEO" active="false"/>
+	<ConsoleAgent name="CONSOLE" active="true"/>
+	<SensorAgent name="SENSOR" active="false"/>
+	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
+		<qos>rmc2vtg;enrich_hdg</qos>
+	</SerialAgent>
+	<TcpAgent name="TCPIN" host="192.168.2.149" port="1111" inout="IN" active="true">
+		<qos>enrich_hdg</qos>
+	</TcpAgent>
+	<TrackAgent name="TRACK" active="false" file="t.log"/>
+	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="true"/>
+	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="true">
+		<to>192.168.2.255</to>
+		<to>192.168.2.130</to>
+		<to>192.168.2.151</to>
+	</UdpAgent>
+	<JSONAgent name="JSON" port="1113" active="false"/>
+	<MWDAgent name="MWD" active="true">
+		<qos>longthreshold</qos>
+	</MWDAgent>
+	<SerialAgent name="SOUT" device="/dev/ttyUSB1" bps="4800" inout="OUT" active="false"/>
+</Router>

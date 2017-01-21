@@ -1,0 +1,2 @@
+date -u -s "$1"
+echo $1 >> settime.log
