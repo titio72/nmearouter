@@ -59,6 +59,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	public NMEAAgentImpl(String name) {
 		this(name, null);
 	}
+	
+	protected void setBuiltIn() {
+		builtin = true;
+	}
 
 	protected void setSourceTarget(boolean isSource, boolean isTarget) {
 	    target = isTarget;
@@ -230,5 +234,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 
     protected final boolean isTarget() {
     	return getSource()!=null;
+    }
+    
+    @Override
+    public boolean isUserCanStartAndStop() {
+    	return true;
     }
 }

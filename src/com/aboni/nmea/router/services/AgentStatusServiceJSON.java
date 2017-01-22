@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.services;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -24,21 +25,10 @@ public class AgentStatusServiceJSON implements WebService {
 
             
             Collection<String> agentKeys = NMEARouterProvider.getRouter().getAgents();
-            for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
-                String agentKey = i.next();
-                NMEAAgent ag = NMEARouterProvider.getRouter().getAgent(agentKey);
-                if (ag!=null) {
-                    response.getWriter().print(
-                            "{\"agent\":\"" + ag.getName() + "\", " + 
-                                    "\"type\":\"" + ag.getClass().getSimpleName() + "\", " + 
-                                    "\"started\":\"" + ag.isStarted() + "\", " + 
-                                    "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
-                                    "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 
-                                    "\"builtin\":\"" + ag.isBuiltIn() + "\"}");
-                    if (i.hasNext())
-                        response.getWriter().println(",");
-                }
-            }
+            
+            ServiceDumper d = new ServiceDumper(response);
+            dumpServices(d, agentKeys, true);
+            dumpServices(d, agentKeys, false);
             
             response.getWriter().println("]}");
         } catch (Exception e) {
@@ -48,6 +38,42 @@ public class AgentStatusServiceJSON implements WebService {
         }
         
     }
+    
+    private class ServiceDumper {
+    	
+    	boolean first = true;
+    	ServiceOutput response;
+    	
+    	ServiceDumper(ServiceOutput response) {
+    		this.response = response;
+    	}
+    	
+    	void dumpServices(NMEAAgent ag) throws IOException {
+    		if (!first)
+                response.getWriter().print(",");
+    		
+    		first = false;
+    		response.getWriter().print(
+                "{\"agent\":\"" + ag.getName() + "\", " + 
+                        "\"type\":\"" + ag.getClass().getSimpleName() + "\", " + 
+                        "\"started\":\"" + ag.isStarted() + "\", " + 
+                        "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
+                        "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 
+                        "\"startStop\":\"" + ag.isUserCanStartAndStop() + "\", " + 
+                        "\"builtin\":\"" + ag.isBuiltIn() + "\"}");
+    	}
+    	
+    }
+    
+	private void dumpServices(ServiceDumper r, Collection<String> agentKeys, boolean builtIn) throws IOException {
+		for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
+		    String agentKey = i.next();
+		    NMEAAgent ag = NMEARouterProvider.getRouter().getAgent(agentKey);
+		    if (ag!=null && ag.isBuiltIn()==builtIn) {
+		    	r.dumpServices(ag);
+		    }
+		}
+	}
 
     private String doActivate(ServiceConfig config) {
 		String msg = "";

@@ -35,6 +35,7 @@ public class AgentStatusService implements WebService {
                                     "started=\"" + ag.isStarted() + "\" " + 
                                     "source=\"" + (ag.getSource()!=null) + "\" " + 
                                     "target=\"" + (ag.getTarget()!=null) + "\" " + 
+                                    "startStop=\"" + ag.isUserCanStartAndStop() + "\" " + 
                                     "builtin=\"" + ag.isBuiltIn() + "\"/>");
                 }
             }

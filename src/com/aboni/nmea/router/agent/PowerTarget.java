@@ -76,4 +76,8 @@ public class PowerTarget extends NMEAAgentImpl {
        pinGps.high();
     }
 
+    @Override
+    public boolean isUserCanStartAndStop() {
+    	return false;
+    }
 }
