@@ -93,4 +93,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 	protected void onDeactivate() {
 	}
 
+    @Override
+    public boolean isUserCanStartAndStop() {
+    	return false;
+    }
 }

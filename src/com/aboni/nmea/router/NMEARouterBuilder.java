@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
 import com.aboni.nmea.router.agent.DepthStatsAgent;
+import com.aboni.nmea.router.agent.NMEA2FileAgent;
 import com.aboni.nmea.router.agent.NMEA2JSONSocketTarget;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAConsoleTarget;
@@ -79,14 +80,21 @@ public class NMEARouterBuilder {
         		default: break;
         	}
         }
-        
+        buildStreamDump(conf, r);
         buildGPSTimeTarget(conf, r);
         buildPowerLedTarget(conf, r);
         buildDPTStats(conf, r);
         return r;
     }
 
-    private void buildUDP(UdpAgent conf, NMEARouterImpl r) {
+    private void buildStreamDump(Router conf2, NMEARouterImpl r) {
+        QOS q = new QOS();
+        q.addProp("builtin");
+        NMEA2FileAgent dumper = new NMEA2FileAgent("nmea", q);
+        r.addAgent(dumper);
+	}
+
+	private void buildUDP(UdpAgent conf, NMEARouterImpl r) {
         NMEAUDPTarget a = new NMEAUDPTarget(conf.getName(), 1111);
         for (String s: conf.getTo()) {
         	a.addTarget(s);

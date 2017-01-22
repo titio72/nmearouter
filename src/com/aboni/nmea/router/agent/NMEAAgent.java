@@ -14,5 +14,7 @@ public interface NMEAAgent extends Startable {
     
 	NMEASource getSource();
 	NMEATarget getTarget();
+
+	public boolean isUserCanStartAndStop();
 	
 }
