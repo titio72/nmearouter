@@ -22,9 +22,23 @@
 <xs:complexType name="AgentBase">
 	<xs:sequence>
 		<xs:element name="qos" type="xs:string" minOccurs="0" maxOccurs="1"/>
+		<xs:element name="filter" type="FilterSet" minOccurs="0" maxOccurs="1"/>
 	</xs:sequence>
 	<xs:attribute name="name" type="xs:string" use="required"/>
 	<xs:attribute name="active" type="xs:boolean" default="false"/>
+</xs:complexType>
+
+<xs:complexType name="FilterSet">
+	<xs:sequence>
+		<xs:element name="Filter" type="Filter" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+	<xs:attribute name="whitelist" type="xs:boolean" default="false"/>
+</xs:complexType>
+
+<xs:complexType name="Filter">
+	<xs:attribute name="source" type="xs:string" default="*"/>
+	<xs:attribute name="sentence" type="xs:string" default="*"/>
+	<xs:attribute name="talker" type="xs:string" default="*"/>
 </xs:complexType>
 
 <xs:complexType name="SerialAgent">
