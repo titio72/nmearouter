@@ -27,8 +27,7 @@ public class AgentStatusServiceJSON implements WebService {
             Collection<String> agentKeys = NMEARouterProvider.getRouter().getAgents();
             
             ServiceDumper d = new ServiceDumper(response);
-            dumpServices(d, agentKeys, true);
-            dumpServices(d, agentKeys, false);
+            dumpServices(d, agentKeys);
             
             response.getWriter().println("]}");
         } catch (Exception e) {
@@ -65,13 +64,11 @@ public class AgentStatusServiceJSON implements WebService {
     	
     }
     
-	private void dumpServices(ServiceDumper r, Collection<String> agentKeys, boolean builtIn) throws IOException {
+	private void dumpServices(ServiceDumper r, Collection<String> agentKeys) throws IOException {
 		for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
 		    String agentKey = i.next();
 		    NMEAAgent ag = NMEARouterProvider.getRouter().getAgent(agentKey);
-		    if (ag!=null && ag.isBuiltIn()==builtIn) {
-		    	r.dumpServices(ag);
-		    }
+	    	r.dumpServices(ag);
 		}
 	}
 
