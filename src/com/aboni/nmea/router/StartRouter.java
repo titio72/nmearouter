@@ -9,12 +9,9 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.log.Log;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEAPlayer;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
 import com.aboni.nmea.router.agent.GPXPlayerAgent;
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.conf.Router;
 import com.aboni.nmea.router.services.WebInterface;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XXXPParser;
@@ -43,26 +40,27 @@ public class StartRouter {
 	}
     
 	public static void main(String[] args) {
+		int ix;
         if (checkFlag(HELP, args)>=0) {
             System.out.println("-web : activate web interface\r\n" + 
                     "-playGpx : gpx to play\r\n" +
                     "-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
-        } else if (checkFlag(PLAY, args)>=0) {
-        	startPlay(args[1]);
+        } else if ((ix = checkFlag(PLAY, args))>=0) {
+        	startRouter(args, new NMEARouterPlayerBuilderImpl(args[ix + 1]));
         } else if (checkFlag(SENSOR, args)>=0) {
             startSensors(args);
         } else if (checkFlag(CALIBRATION, args)>=0) {
             startCalibration(args);
 	    } else {
-            startRouter(args);
+            startRouter(args, new NMEARouterDefaultBuilderImpl("router.xml"));
             startWebInterface(args);
-            startPlayer(args);
+            startGPXPlayer(args);
 	    }
 	}
 
-    private static void startPlayer(String[] args) {
+    private static void startGPXPlayer(String[] args) {
     	int i = checkFlag(PLAYGPX, args); 
     	 if (i>=0) {
     		 try {
@@ -73,18 +71,6 @@ public class StartRouter {
 				e.printStackTrace();
 			}
     	 }		
-	}
-
-	private static void startPlay(String playFile) {
-        System.out.println("Start player " + playFile);
-        NMEAUtils.registerExtraSentences();
-        NMEAStreamProvider.getStreamInstance(); // be sure the stream started
-        
-        try {
-            NMEAPlayer.main(new String[] {playFile});
-        } catch (Exception e) {
-        	e.printStackTrace();
-        }
 	}
 
 	private static void startWebInterface(String[] args) {
@@ -120,7 +106,7 @@ public class StartRouter {
     private static void startSensors(String args[]) {
         System.out.println("Start");
         NMEAUtils.registerExtraSentences();
-        NMEASourceSensor s = new NMEASourceSensor("test");
+        NMEASourceSensor s = new NMEASourceSensor("test", null);
         s.setSentenceListener(new NMEASentenceListener() {
             
             @Override
@@ -150,31 +136,26 @@ public class StartRouter {
         }
     }
     
-    private static void startRouter(String[] args) {
+    private static void startRouter(String[] args, NMEARouterBuilder builder) {
         System.out.println("Start");
         NMEAUtils.registerExtraSentences();
         NMEAStreamProvider.getStreamInstance(); // be sure the stream started
-        
-        try {
-            NMEARouterBuilder builder = new NMEARouterBuilder();
-        	builder.init("router.xml");
-            Router configuration = builder.getConfiguration(); 
-            if (configuration.getLog().getLevel().equals("INFO")) {
-            	ServerLog.getLogger().setInfo();
-            } if (configuration.getLog().getLevel().equals("DEBUG")) {
-            	ServerLog.getLogger().setDebug();
-            } if (configuration.getLog().getLevel().equals("WARNING")) {
-            	ServerLog.getLogger().setWarning();
-            } if (configuration.getLog().getLevel().equals("ERROR")) {
-            	ServerLog.getLogger().setError();
-            } if (configuration.getLog().getLevel().equals("NONE")) {
-            	ServerLog.getLogger().setNone();
-            }
-        	NMEARouter r = builder.getRouter();
+    	if (builder.init()!=null) {
+    		NMEARouter r = builder.getRouter();
+    		switch (r.getPreferredLogLevelType()) {
+	    		case DEBUG: 
+	            	ServerLog.getLogger().setDebug(); break;
+	    		case WARNING: 
+	            	ServerLog.getLogger().setWarning(); break;
+	    		case ERROR: 
+	            	ServerLog.getLogger().setError(); break;
+	    		case NONE: 
+	            	ServerLog.getLogger().setNone(); break;
+            	default:
+	            	ServerLog.getLogger().setInfo(); break;
+    		}
         	NMEARouterProvider.setRouter(r);
         	r.start();
-        } catch (MalformedConfigurationException e) {
-        	e.printStackTrace();
-        }
+    	}
     }
 }

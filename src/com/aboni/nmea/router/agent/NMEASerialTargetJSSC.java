@@ -14,8 +14,8 @@ public class NMEASerialTargetJSSC extends NMEAAgentImpl {
 	private String portName;
 	private int speed;
 	
-	public NMEASerialTargetJSSC(String name, String portName, int speed) {
-		super(name);
+	public NMEASerialTargetJSSC(String name, String portName, int speed, QOS q) {
+		super(name, q);
 		this.portName = portName;
 		this.speed = speed;
         setSourceTarget(false, true);

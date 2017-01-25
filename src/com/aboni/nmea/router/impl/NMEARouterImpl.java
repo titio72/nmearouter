@@ -14,6 +14,7 @@ import com.aboni.nmea.router.NMEAStreamProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEATarget;
+import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -62,6 +63,7 @@ public class NMEARouterImpl implements NMEARouter {
 	private Queue<SentenceEvent> sentenceQueue;
 	
 	private Thread processingThread;
+	private LogLevelType logLevel = LogLevelType.INFO;
 	
 	public NMEARouterImpl() {
 	    agents = new HashMap<String, NMEAAgent>();
@@ -187,4 +189,12 @@ public class NMEARouterImpl implements NMEARouter {
         return headPosCache;
     }
 
+    public void setPreferedLogLevel(LogLevelType level) {
+    	logLevel = level;
+    }
+
+	@Override
+	public LogLevelType getPreferredLogLevelType() {
+    	return logLevel ;
+	}
 }

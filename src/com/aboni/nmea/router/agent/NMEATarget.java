@@ -6,7 +6,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public interface NMEATarget {
 
-    Filterable getInputFilter();
+    Filterable getTargetFilter();
 
     void pushSentence(Sentence e, NMEAAgent src);
 

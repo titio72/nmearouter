@@ -19,8 +19,8 @@ public class NMEAUDPTarget extends NMEAAgentImpl {
 	private int portTarget;
 	private Set<InetAddress> targets;
 
-	public NMEAUDPTarget(String name, int portTarget) {
-		super(name);
+	public NMEAUDPTarget(String name, QOS qos, int portTarget) {
+		super(name, qos);
 		this.portTarget = portTarget;
         setSourceTarget(false, true);
         targets = new HashSet<InetAddress>();

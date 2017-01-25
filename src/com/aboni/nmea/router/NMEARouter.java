@@ -3,6 +3,7 @@ package com.aboni.nmea.router;
 import java.util.Collection;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.conf.LogLevelType;
 
 public interface NMEARouter extends Startable {
 
@@ -11,4 +12,6 @@ public interface NMEARouter extends Startable {
     Collection<String> getAgents();
     
     NMEACache getCache();
+    
+    LogLevelType getPreferredLogLevelType();
 }

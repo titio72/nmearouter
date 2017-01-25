@@ -65,8 +65,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     
     private SensorProperties props;
     
-    public NMEASourceSensor(String name) {
-        super(name);
+    public NMEASourceSensor(String name, QOS q) {
+        super(name, q);
         setSourceTarget(true, false);
         data = new NMEACacheImpl();
         props = new SensorProperties();

@@ -35,8 +35,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	
     public NMEAAgentImpl(String name, QOS qos) {
         this.name = name;
-        fsetInput = new NMEAFilterSet();
-        fsetOutput = new NMEAFilterSet();
+        fsetInput = null;
+        fsetOutput = null;
         proc = new ArrayList<NMEAPostProcess>();
         active = false;
         if (qos!=null) { 
@@ -68,6 +68,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	    target = isTarget;
 	    source = isSource;
 	}
+	
 	
 	protected Log getLogger() {
 		return ServerLog.getLogger();
@@ -126,12 +127,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
     }
 	
 	@Override
-	public Filterable getInputFilter() {
+	public Filterable getTargetFilter() {
 		return fsetInput;
 	}
 	
 	@Override
-	public Filterable getOutputFilter() {
+	public Filterable getSourceFilter() {
 		return fsetOutput;
 	}
 	
@@ -148,21 +149,13 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	    
 	}
 	
-	protected final NMEAFilterSet getOutputFilterSet() {
-		return fsetOutput;
-	}
-
-	protected final NMEAFilterSet getInputFilterSet() {
-		return fsetInput;
-	}
-	
 	/**
 	 * Used by "sources" to push sentences into the stream
 	 * @param sentence
 	 */
 	protected final void notify(Sentence sentence) {
 		if (isStarted()) {
-			if (getOutputFilterSet().accept(sentence, getName())) {
+			if (getSourceFilter()==null || getSourceFilter().accept(sentence, getName())) {
 				getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
                 for (NMEAPostProcess pp: proc) {
                     Sentence[] outSS = pp.process(sentence, this.getName());
@@ -213,7 +206,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
     
     @Override
     public final void pushSentence(Sentence s, NMEAAgent source) {
-    	if (isStarted()) {
+    	if (isStarted() && (getTargetFilter()==null || getTargetFilter().accept(s,  source.getName()))) {
     		doWithSentence(s, source);
     	}
     }
