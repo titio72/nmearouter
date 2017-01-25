@@ -4,7 +4,7 @@ import com.aboni.nmea.router.Filterable;
 
 public interface NMEASource {
 
-    Filterable getOutputFilter();
+    Filterable getSourceFilter();
 
     void setSentenceListener(NMEASentenceListener listener);
 

@@ -9,8 +9,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAConsoleTarget extends NMEAAgentImpl {
 
-	public NMEAConsoleTarget(String name) {
-		super(name);
+	public NMEAConsoleTarget(String name, QOS q) {
+		super(name, q);
 	      setSourceTarget(false, true);
 	}
 	
