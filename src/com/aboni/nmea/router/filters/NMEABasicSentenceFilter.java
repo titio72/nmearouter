@@ -61,14 +61,14 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 	}
 	
 	@Override
-	public FILTERACTION accept(Sentence s, String src) {
+	public boolean match(Sentence s, String src) {
 		if (isAllSources() || getSource().equals(src)) {
 			if (isAllSentences() || getSentenceId().equals(s.getSentenceId())) {
 				if (isAllTalkers() || getTalkerId().equals(s.getTalkerId())) {
-					return FILTERACTION.ACCEPT;
+					return true;
 				}
 			}
 		}
-		return FILTERACTION.REJECT;
+		return false;
 	}
 }

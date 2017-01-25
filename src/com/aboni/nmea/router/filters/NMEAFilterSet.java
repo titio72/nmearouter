@@ -15,12 +15,31 @@ public class NMEAFilterSet implements Filterable {
 	private List<NMEASentenceFilter> filters;
 	private Set<NMEASentenceFilter> filters_s;
 	
-	public NMEAFilterSet() {
+	private boolean blackList;
+	
+	public enum TYPE {
+		BLACKLIST,
+		WHITELIST
+	}
+	
+	public NMEAFilterSet(TYPE type) {
 		filters = new ArrayList<NMEASentenceFilter>();
 		filters_s = new HashSet<NMEASentenceFilter>();
+		blackList = type==TYPE.BLACKLIST;
+	}
+	
+	public NMEAFilterSet() {
+		this(TYPE.BLACKLIST);
 	}
 
+	public void setType(TYPE t) {
+		blackList = (t==TYPE.BLACKLIST);
+	}
 
+	public TYPE getType() {
+		return (blackList?TYPE.BLACKLIST:TYPE.WHITELIST);
+	}
+	
 	public void addFilter(NMEASentenceFilter f) {
 		if (filters_s.contains(f)) {
 			// do nothing... exists already
@@ -45,15 +64,12 @@ public class NMEAFilterSet implements Filterable {
 	
 	public boolean accept(Sentence sentence, String src) {
 		if (filters.isEmpty()) {
-			return true;
+			return blackList;
 		} else {
 			for (Iterator<NMEASentenceFilter> i = getFilters(); i.hasNext(); ) {
-				NMEASentenceFilter.FILTERACTION r = i.next().accept(sentence, src);
-				if (r==NMEASentenceFilter.FILTERACTION.REJECT) {
-					return false;
-				}
+				if (i.next().match(sentence, src)) return !blackList;
 			}
-			return true;
+			return blackList;
 		}
 	}
 }
