@@ -8,6 +8,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.Startable;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
+import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
@@ -19,12 +20,7 @@ import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
 public class NMEACacheImpl implements Startable, NMEASentenceListener, NMEACache {
-    
-    public class DataEvent<T> {
-        public T data;
-        public long timestamp;
-        public String source;
-    }
+
 
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;

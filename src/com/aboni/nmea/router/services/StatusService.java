@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterProvider;
-import com.aboni.nmea.router.impl.NMEACacheImpl.DataEvent;
+import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.util.Measurement;

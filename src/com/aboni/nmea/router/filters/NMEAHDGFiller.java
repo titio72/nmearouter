@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
-import com.aboni.nmea.router.NMEARouterProvider;
-import com.aboni.nmea.router.impl.NMEACacheImpl.DataEvent;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.utils.DataEvent;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -31,15 +31,17 @@ public class NMEAHDGFiller implements NMEAPostProcess {
     private NMEAMagnetic2TrueConverter m;
     private boolean doHDM;
     private boolean doHDT;
+    private NMEACache cache;
     
-    public NMEAHDGFiller(boolean createHDM, boolean createHDT) {
+    public NMEAHDGFiller(boolean createHDM, boolean createHDT, NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
         doHDM = createHDM;
         doHDT = createHDT;
+        this.cache = cache;
     }
 
-    public NMEAHDGFiller() {
-        this(false, false);
+    public NMEAHDGFiller(NMEACache cache) {
+        this(false, false, cache);
     }
 
     @Override
@@ -48,7 +50,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
             
             if (sentence instanceof HDGSentence) {
                 Position lastPosition = null;
-                DataEvent<PositionSentence> ev = NMEARouterProvider.getRouter().getCache().getLastPosition();
+                DataEvent<PositionSentence> ev = cache.getLastPosition();
                 if (ev!=null) {
                     lastPosition = ev.data.getPosition(); 
                 }
@@ -56,11 +58,6 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                 boolean canDoT = false;
                 List<Sentence> out = new ArrayList<Sentence>(3); 
                 HDGSentence hdg = (HDGSentence)sentence;
-                try {
-                    hdg.getDeviation(); 
-                } catch (DataNotAvailableException e) {
-                    hdg.setDeviation(0.0);
-                }
                 try {
                     hdg.getVariation();
                     canDoT = true;
@@ -71,7 +68,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                         hdg.setVariation(d);
                         canDoT = true;
                     } else {
-                        hdg.setVariation(0.0);
+                        //hdg.setVariation(0.0);
                     }
                 }
                 if (doHDM) {
@@ -81,7 +78,11 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                 }
                 if (doHDT && canDoT) {
                     HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
-                    hdt.setHeading(hdg.getHeading() + hdg.getVariation());
+                    double var = 0.0;
+                    double dev = 0.0;
+                    try { var = hdg.getVariation(); } catch (Exception e) {}
+                    try { dev = hdg.getDeviation(); } catch (Exception e) {}
+                    hdt.setHeading(hdg.getHeading() + var + dev);
                     out.add(hdt);
                 }
                 
