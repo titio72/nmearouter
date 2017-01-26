@@ -44,6 +44,10 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 	    m = new NMEAMagnetic2TrueConverter();
 	}
 
+	public NMEARMC2VTGProcessor(double year) {
+	    m = new NMEAMagnetic2TrueConverter(year);
+	}
+
 	@Override
 	public Sentence[] process(Sentence sentence, String src) {
 		try {
