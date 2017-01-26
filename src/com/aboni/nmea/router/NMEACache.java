@@ -2,7 +2,7 @@ package com.aboni.nmea.router;
 
 import java.util.Collection;
 
-import com.aboni.nmea.router.impl.NMEACacheImpl.DataEvent;
+import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
