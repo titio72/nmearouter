@@ -3,7 +3,7 @@ package com.aboni.nmea.router.agent;
 import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
-import com.aboni.nmea.router.Filterable;
+import com.aboni.nmea.router.NMEASentenceFilterSet;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
@@ -67,13 +67,13 @@ public class NMEAAgentBuilder {
 			default: break;
 		}
         if (agent!=null) {
-        	if (agent.getSource()!=null) setFilter(a.getFilter(), agent.getSource().getSourceFilter());
-        	else if (agent.getTarget()!=null) setFilter(a.getFilter(), agent.getTarget().getTargetFilter());
+        	if (agent.getSource()!=null) setFilter(a.getFilterSource(), agent.getSource().getSourceFilter());
+        	if (agent.getTarget()!=null) setFilter(a.getFilterTarget(), agent.getTarget().getTargetFilter());
         }
 		return agent;
 	}
 	
-    private static void setFilter(FilterSet conf, Filterable dest) {
+    private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
     	if (conf!=null && dest!=null) {
     		for (Filter fConf: conf.getFilter()) {
     			NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(

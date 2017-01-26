@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.agent;
 
-import com.aboni.nmea.router.Filterable;
+import com.aboni.nmea.router.NMEASentenceFilterSet;
 
 public interface NMEASource {
 
-    Filterable getSourceFilter();
+    NMEASentenceFilterSet getSourceFilter();
 
     void setSentenceListener(NMEASentenceListener listener);
 

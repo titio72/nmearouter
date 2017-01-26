@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.aboni.nmea.router.Filterable;
+import com.aboni.nmea.router.NMEASentenceFilterSet;
 import com.aboni.nmea.router.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
@@ -127,12 +127,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
     }
 	
 	@Override
-	public Filterable getTargetFilter() {
+	public NMEASentenceFilterSet getTargetFilter() {
 		return fsetInput;
 	}
 	
 	@Override
-	public Filterable getSourceFilter() {
+	public NMEASentenceFilterSet getSourceFilter() {
 		return fsetOutput;
 	}
 	
@@ -155,7 +155,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	 */
 	protected final void notify(Sentence sentence) {
 		if (isStarted()) {
-			if (getSourceFilter()==null || getSourceFilter().accept(sentence, getName())) {
+			if (getSourceFilter()==null || getSourceFilter().match(sentence, getName())) {
 				getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
                 for (NMEAPostProcess pp: proc) {
                     Sentence[] outSS = pp.process(sentence, this.getName());
@@ -206,7 +206,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
     
     @Override
     public final void pushSentence(Sentence s, NMEAAgent source) {
-    	if (isStarted() && (getTargetFilter()==null || getTargetFilter().accept(s,  source.getName()))) {
+    	if (isStarted() && (getTargetFilter()==null || getTargetFilter().match(s,  source.getName()))) {
     		doWithSentence(s, source);
     	}
     }

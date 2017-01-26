@@ -4,11 +4,7 @@ import java.util.Iterator;
 
 import com.aboni.nmea.router.filters.NMEASentenceFilter;
 
-import net.sf.marineapi.nmea.sentence.Sentence;
-
-public interface Filterable {
-	
-	boolean accept(Sentence s, String soucre);
+public interface NMEASentenceFilterSet extends NMEASentenceFilter {
 	
 	Iterator<NMEASentenceFilter> getFilters();
 	void addFilter(NMEASentenceFilter f);
