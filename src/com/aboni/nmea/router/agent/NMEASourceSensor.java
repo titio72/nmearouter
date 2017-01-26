@@ -15,8 +15,8 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
-import com.aboni.nmea.router.filters.NMEAHDM2HDTConverter;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.impl.NMEACacheImpl;
 import com.aboni.nmea.sentences.MMBSentence;
@@ -231,7 +231,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	            }
 	            
 	            if (data.getLastPosition().data != null) {
-	                NMEAHDM2HDTConverter m = new NMEAHDM2HDTConverter();
+	                NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
 	                m.setPosition(data.getLastPosition().data.getPosition());
 	                
 	                if (sendHDT) {
@@ -239,7 +239,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     	                notify(hdt);
 	                }
 	                
-	                HDGSentence hdg = m.getTrueSentenceX(b, 0.0, TalkerId.II);
+	                HDGSentence hdg = m.getSentence(TalkerId.II, b, 0.0);
 	                notify(hdg);
 	            } else {
 	                HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
