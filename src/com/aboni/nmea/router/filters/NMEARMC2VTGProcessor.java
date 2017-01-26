@@ -17,7 +17,27 @@ import net.sf.marineapi.nmea.util.FaaMode;
  * @author aboni
  */
 public class NMEARMC2VTGProcessor implements NMEAPostProcess {
-
+	/*
+	RMC Recommended Minimum Navigation Information
+	 12
+	 1 2 3 4 5 6 7 8 9 10 11|
+	 | | | | | | | | | | | |
+	$--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a*hh
+	 1) Time (UTC)
+	 2) Status, V = Navigation receiver warning
+	 3) Latitude
+	 4) N or S
+	 5) Longitude
+	 6) E or W
+	 7) Speed over ground, knots
+	 8) Track made good, degrees true
+	 9) Date, ddmmyy
+	10) Magnetic Variation, degrees
+	11) E or W
+	12) Checksum
+	*/
+	
+	
     private NMEAMagnetic2TrueConverter m;
     
 	public NMEARMC2VTGProcessor() {

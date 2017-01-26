@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.aboni.nmea.router.Filterable;
+import com.aboni.nmea.router.NMEASentenceFilterSet;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public class NMEAFilterSet implements Filterable {
+public class NMEAFilterSet implements NMEASentenceFilterSet {
 	
 	private List<NMEASentenceFilter> filters;
 	private Set<NMEASentenceFilter> filters_s;
@@ -62,7 +62,7 @@ public class NMEAFilterSet implements Filterable {
 		return filters.iterator();
 	}
 	
-	public boolean accept(Sentence sentence, String src) {
+	public boolean match(Sentence sentence, String src) {
 		if (filters.isEmpty()) {
 			return blackList;
 		} else {
