@@ -34,6 +34,11 @@ public class NMEAMagnetic2TrueConverter {
 		this.year = year;
 	}
 	
+    public double getTrue(double magnetic) {
+        double declination = geo.getDeclination(pos.getLatitude(), pos.getLongitude(), year, 0);
+        return Utils.normalizeDegrees0_360(magnetic + declination);
+    }
+
     public double getTrue(double magnetic, Position p) {
         double declination = geo.getDeclination(p.getLatitude(), p.getLongitude(), year, 0);
         return Utils.normalizeDegrees0_360(magnetic + declination);
