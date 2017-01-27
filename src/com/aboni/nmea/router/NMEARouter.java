@@ -11,7 +11,5 @@ public interface NMEARouter extends Startable {
     NMEAAgent getAgent(String name);
     Collection<String> getAgents();
     
-    NMEACache getCache();
-    
     LogLevelType getPreferredLogLevelType();
 }

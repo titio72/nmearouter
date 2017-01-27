@@ -3,7 +3,7 @@ package com.aboni.nmea.router.services;
 import java.io.PrintWriter;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterProvider;
+import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.PositionSentence;
@@ -62,7 +62,7 @@ public class StatusService implements WebService {
         
             response.getWriter().print(json?"\"sensor\":{":"<Sensor>\n");
 
-            NMEACache c = NMEARouterProvider.getRouter().getCache();
+            NMEACache c = NMEACacheProvider.getCache();
             int counter = 0;
             for (String sensor: c.getSensors()) {
             	if (counter>0) response.getWriter().print(",");

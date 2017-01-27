@@ -6,8 +6,6 @@ import java.util.Map;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.Startable;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;
@@ -19,7 +17,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
-public class NMEACacheImpl implements Startable, NMEASentenceListener, NMEACache {
+public class NMEACacheImpl implements Startable, NMEACache {
 
 
     private DataEvent<HeadingSentence> lastHeading;
@@ -58,25 +56,25 @@ public class NMEACacheImpl implements Startable, NMEASentenceListener, NMEACache
     }
     
     @Override
-    public void onSentence(Sentence s, NMEAAgent src) {
+    public void onSentence(Sentence s, String src) {
     	if (isStarted()) {
 	        if (s instanceof HDGSentence ||
 	        		s instanceof HDTSentence ||
 	        		s instanceof HDMSentence) {
 	            lastHeading.timestamp = System.currentTimeMillis();
-	            lastHeading.source = src.getName();
+	            lastHeading.source = src;
 	            lastHeading.data = (HeadingSentence)s;
 	        }
 	        else if (s instanceof PositionSentence) {
 	            lastPosition.data = (PositionSentence)s;
-	            lastPosition.source = src.getName();
+	            lastPosition.source = src;
 	            lastPosition.timestamp = System.currentTimeMillis();
 	        }
 	        else if (s instanceof XDRSentence) {
 	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
 	        		DataEvent<Measurement> x = new DataEvent<Measurement>();
 	        		x.data = m;
-	        		x.source = src.getName();
+	        		x.source = src;
 	        		x.timestamp = System.currentTimeMillis();
 	        		synchronized (sensors) {
 	            		sensors.put(m.getName(), x);

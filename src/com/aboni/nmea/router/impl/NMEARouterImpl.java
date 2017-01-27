@@ -8,7 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.aboni.nmea.router.NMEAAgentStatusListener;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStreamProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -23,7 +23,6 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private NMEAAgentStatusListener agentStatusListener;
 	private NMEASentenceListener sentenceListener;
-	private NMEACacheImpl headPosCache;
 	
 	private boolean started;
 	
@@ -71,7 +70,6 @@ public class NMEARouterImpl implements NMEARouter {
 		sentenceListener = new InternalSentenceListener();
 		sentenceQueue = new ConcurrentLinkedQueue<NMEARouterImpl.SentenceEvent>();
 		started = false;
-		headPosCache = new NMEACacheImpl();
 	}
 	
 	/* (non-Javadoc)
@@ -81,7 +79,6 @@ public class NMEARouterImpl implements NMEARouter {
 	public synchronized void start() {
 		if (!started) {
 			started = true;
-			headPosCache.start();
 			initProcessingThread();
 		}
 	}
@@ -95,7 +92,6 @@ public class NMEARouterImpl implements NMEARouter {
 		if (processingThread!=null) {
 			processingThread = null;
 		}
-        headPosCache.stop();
 	}
 	
 	/* (non-Javadoc)
@@ -161,7 +157,7 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private synchronized void _onSentence(Sentence s, NMEAAgent src) {
 		if (started) {
-			headPosCache.onSentence(s, src);
+			NMEACacheProvider.getCache().onSentence(s, src.getName());
 			NMEAStreamProvider.getStreamInstance().pushSentence(s, src);
 			routeToTarget(s, src);
 		}
@@ -183,11 +179,6 @@ public class NMEARouterImpl implements NMEARouter {
 			}
 		}
 	}
-
-    @Override
-    public NMEACache getCache() {
-        return headPosCache;
-    }
 
     public void setPreferedLogLevel(LogLevelType level) {
     	logLevel = level;

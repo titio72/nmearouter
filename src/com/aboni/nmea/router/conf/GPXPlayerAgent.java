@@ -15,15 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for MeteoAgent complex type.
+ * <p>Java class for GPXPlayerAgent complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="MeteoAgent">
+ * &lt;complexType name="GPXPlayerAgent">
  *   &lt;complexContent>
  *     &lt;extension base="{}AgentBase">
- *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="Meteo" />
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="GPXPlayer" />
+ *       &lt;attribute name="gpxFile" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -32,13 +33,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "MeteoAgent")
-public class MeteoAgent
+@XmlType(name = "GPXPlayerAgent")
+public class GPXPlayerAgent
     extends AgentBase
 {
 
     @XmlAttribute(name = "type")
     protected String type;
+    @XmlAttribute(name = "gpxFile", required = true)
+    protected String gpxFile;
 
     /**
      * Gets the value of the type property.
@@ -50,7 +53,7 @@ public class MeteoAgent
      */
     public String getType() {
         if (type == null) {
-            return "Meteo";
+            return "GPXPlayer";
         } else {
             return type;
         }
@@ -66,6 +69,30 @@ public class MeteoAgent
      */
     public void setType(String value) {
         this.type = value;
+    }
+
+    /**
+     * Gets the value of the gpxFile property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getGpxFile() {
+        return gpxFile;
+    }
+
+    /**
+     * Sets the value of the gpxFile property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setGpxFile(String value) {
+        this.gpxFile = value;
     }
 
 }
