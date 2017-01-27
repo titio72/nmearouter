@@ -43,7 +43,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
             XDPSentence x = (XDPSentence)SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
             x.setDepth((float)d.depth/10f);
             if (min!=Integer.MAX_VALUE) x.setMinDepth1h((float)min/10f);
-            if (min!=Integer.MIN_VALUE)x.setMaxDepth1h((float)max/10f);
+            if (min!=Integer.MIN_VALUE) x.setMaxDepth1h((float)max/10f);
             notify(x);
         }
     }

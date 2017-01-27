@@ -79,8 +79,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     }
 
     boolean _vhw   = true;  // water spead and heading
-    boolean _gll   = true;  // gps
-    boolean _rmc   = true;  // gps
+    boolean _gll   = false;  // gps
+    boolean _rmc   = false;  // gps
     boolean _dpt   = true;  // depth
     boolean _dbt   = true;  // depth
     boolean _mtw   = true;  // water temp
