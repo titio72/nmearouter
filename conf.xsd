@@ -15,6 +15,7 @@
 			<xs:element name="SimulatorAgent" type="SimulatorAgent"/>
 			<xs:element name="MeteoAgent" type="MeteoAgent"/>
 			<xs:element name="MWDAgent" type="MWDAgent"/>
+			<xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
 		</xs:choice>
 	</xs:sequence>
 </xs:complexType>
@@ -49,6 +50,15 @@
 			<xs:attribute name="device" type="xs:string" use="required"/>
 			<xs:attribute name="bps" type="xs:int" default="4800"/>
 			<xs:attribute name="inout" type="InOut" use="required"/>
+		</xs:extension>
+	</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="GPXPlayerAgent">
+	<xs:complexContent>
+	    <xs:extension base="AgentBase">
+			<xs:attribute name="type" type="xs:string" fixed="GPXPlayer"/>
+			<xs:attribute name="gpxFile" type="xs:string" use="required"/>
 		</xs:extension>
 	</xs:complexContent>
 </xs:complexType>

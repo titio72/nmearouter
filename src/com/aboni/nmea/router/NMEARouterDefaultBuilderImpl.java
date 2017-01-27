@@ -42,7 +42,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         NMEARouterImpl r = new NMEARouterImpl();
         
         for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
-        	NMEAAgent agent = builder.createAgent(a);
+        	NMEAAgent agent = builder.createAgent(a, r);
             if (agent!=null) {
             	r.addAgent(agent);
             	if (a.isActive()) agent.start();

@@ -61,6 +61,9 @@ public class NMEAHDGFillerTest {
 
 		@Override
 		public boolean isPositionOlderThan(long time, long threshold) { return false; }
+
+		@Override
+		public void onSentence(Sentence s, String src) {}
 		
 	}
 	

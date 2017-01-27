@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -33,17 +34,42 @@ public class GPXPlayerAgent extends NMEAAgentImpl {
 	private GeoPositionT prevPos;
 	private long t0Play;
 	private long t0;
+	private String file;
+	private boolean stop;
 	
-	public GPXPlayerAgent(String name, String file) throws Exception {
-		super(name);
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		d = dBuilder.parse(file);
-		d.getDocumentElement().normalize();
+	public GPXPlayerAgent(String name, String file, QOS q) throws Exception {
+		super(name, q);
 		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+		this.file = file;
 	}
 	
-	public void play() {
+	@Override
+	protected boolean onActivate() {
+		synchronized (this) {
+			stop = false;
+		}
+		return play();
+	}
+	
+	@Override
+	protected void onDeactivate() {
+		synchronized (this) {
+			stop = true;
+		}
+	}
+	
+	public boolean play() {
+		try {
+			d = null;
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			d = dBuilder.parse(file);
+			d.getDocumentElement().normalize();
+		} catch (Exception e) {
+			ServerLog.getLogger().Error("Cannot parse GPX file " + file, e);
+			return false;
+		}
+	
 		Thread t = new Thread(new Runnable() {
 
 			@Override
@@ -53,6 +79,7 @@ public class GPXPlayerAgent extends NMEAAgentImpl {
 				Element track = (Element)tracks.item(0);
 				NodeList segments = track.getElementsByTagName("trkseg");
 				for (int i = 0; i<segments.getLength(); i++) {
+					if (isStop()) break;
 					Element segment = (Element)segments.item(i);
 					NodeList points = segment.getElementsByTagName("trkpt");
 					for (int j = 1; j<points.getLength(); j++) {
@@ -66,12 +93,23 @@ public class GPXPlayerAgent extends NMEAAgentImpl {
 						} catch (Exception e) {}
 					}
 				}
+				if (!isStop()) {
+					stop();
+				}
 			}
 		});
 		t.setDaemon(true);
 		t.start();
+
+		return true;
 	}
 	
+
+	protected boolean isStop() {
+		synchronized (this) {
+			return stop;
+		}
+	}
 
 	private void doIt(GeoPositionT pos) {
 		if (t0==0) {

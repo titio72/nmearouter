@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.aboni.nmea.router.NMEASentenceFilterSet;
 import com.aboni.nmea.router.NMEAAgentStatusListener;
-import com.aboni.nmea.router.NMEARouterProvider;
+import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASource;
@@ -47,7 +47,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
             }
             if (qos.get("enrich_hdg")) {
                 getLogger().Info("QoS {ENRICH_HDG}");
-                addProc(new NMEAHDGFiller(true, true, NMEARouterProvider.getRouter().getCache()));
+                addProc(new NMEAHDGFiller(true, true, NMEACacheProvider.getCache()));
             }
             if (qos.get("builtin")) {
                 builtin = true;

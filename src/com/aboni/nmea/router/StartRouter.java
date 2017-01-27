@@ -11,7 +11,6 @@ import org.eclipse.jetty.util.log.Log;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
-import com.aboni.nmea.router.agent.GPXPlayerAgent;
 import com.aboni.nmea.router.services.WebInterface;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XXXPParser;
@@ -25,7 +24,6 @@ public class StartRouter {
 
     private static final String CALIBRATION = "-cal";
     private static final String PLAY = "-play";
-    private static final String PLAYGPX = "-playGpx";
     private static final String SENSOR = "-sensor";
     private static final String WEB = "-web";
     private static final String HELP = "-help";
@@ -43,7 +41,6 @@ public class StartRouter {
 		int ix;
         if (checkFlag(HELP, args)>=0) {
             System.out.println("-web : activate web interface\r\n" + 
-                    "-playGpx : gpx to play\r\n" +
                     "-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
@@ -56,21 +53,7 @@ public class StartRouter {
 	    } else {
             startRouter(args, new NMEARouterDefaultBuilderImpl("router.xml"));
             startWebInterface(args);
-            startGPXPlayer(args);
 	    }
-	}
-
-    private static void startGPXPlayer(String[] args) {
-    	int i = checkFlag(PLAYGPX, args); 
-    	 if (i>=0) {
-    		 try {
-				GPXPlayerAgent p = new GPXPlayerAgent("gpxPlayer", "file:" + args[i+1]);
-				NMEARouterProvider.getRouter().addAgent(p);
-				p.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-    	 }		
 	}
 
 	private static void startWebInterface(String[] args) {
