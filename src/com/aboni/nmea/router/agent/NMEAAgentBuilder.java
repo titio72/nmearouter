@@ -3,6 +3,7 @@ package com.aboni.nmea.router.agent;
 import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
+import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEASentenceFilterSet;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
@@ -51,7 +52,7 @@ public class NMEAAgentBuilder {
 		return q;
 	}
     
-	public NMEAAgent createAgent(AgentBase a) {
+	public NMEAAgent createAgent(AgentBase a, NMEARouter r) {
 		NMEAAgent agent = null;
 		QOS q = getQos(a.getQos());
 		switch (getType(a)) {
@@ -64,6 +65,7 @@ public class NMEAAgentBuilder {
 		    case "Track": agent = buildTrackTarget((TrackAgent)a, q); break;
 		    case "Meteo": agent = buildMeteoTarget((MeteoAgent)a, q); break;
 		    case "MWDSynthetizer": agent = buildMWDSynt((MWDAgent)a, q); break;
+		    case "GPXPlayer": agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent)a, q); break;
 			default: break;
 		}
         if (agent!=null) {
@@ -72,8 +74,8 @@ public class NMEAAgentBuilder {
         }
 		return agent;
 	}
-	
-    private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
+
+	private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
     	if (conf!=null && dest!=null) {
     		for (Filter fConf: conf.getFilter()) {
     			NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(
@@ -85,6 +87,17 @@ public class NMEAAgentBuilder {
     		}
     	}
     }
+	
+    private NMEAAgent buildGPXPlayer(com.aboni.nmea.router.conf.GPXPlayerAgent g, QOS q) {
+    	String file = g.getGpxFile();
+    	GPXPlayerAgent gpx = null;
+		try {
+			gpx = new GPXPlayerAgent(g.getName(), file, q);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return gpx;
+	}
     
 	private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
     	NMEAAgent console = new NMEAConsoleTarget(c.getName(), q);
