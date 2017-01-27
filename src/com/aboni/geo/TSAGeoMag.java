@@ -53,6 +53,8 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.aboni.utils.Constants;
+
 /**<p>
  * 
  *  Last updated on May 26, 2015</p><p>
@@ -534,7 +536,7 @@ public class TSAGeoMag
             //InputStream is;
             Reader is;
                         
-            InputStream input = new FileInputStream(new File("WMM.COF"));
+            InputStream input = new FileInputStream(new File(Constants.WMM));
             //if(input == null) throw new FileNotFoundException("WMM.COF not found");
             is = new InputStreamReader(input);
             StreamTokenizer str = new StreamTokenizer(is);

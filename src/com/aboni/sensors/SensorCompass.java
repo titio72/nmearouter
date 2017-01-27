@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.aboni.geo.DeviationManager;
+import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
@@ -102,7 +103,7 @@ public class SensorCompass extends I2CSensor {
 
     private void updateDeviationTable() {
         try {
-        	File f = new File("deviation.csv");
+        	File f = new File(Constants.DEVIATION);
         	if (f.exists() && f.lastModified()>lastModifiedDevTable) {
         		ServerLog.getLogger().Info("Reloading deviation table.");
         		lastModifiedDevTable = f.lastModified();

@@ -48,7 +48,7 @@ public class ServerLog implements Log {
 	    try {  
             lg.setUseParentHandlers(false);
 
-            fh = new FileHandler("NMEARouter.log");
+            fh = new FileHandler(Constants.LOG);
             lg.addHandler(fh);
 
             //Formatter formatter = new SimpleFormatter();  

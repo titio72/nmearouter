@@ -16,6 +16,7 @@ import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XXXPParser;
 import com.aboni.nmea.sentences.XXXPSentence;
 import com.aboni.sensors.DoCalibration;
+import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -51,7 +52,7 @@ public class StartRouter {
         } else if (checkFlag(CALIBRATION, args)>=0) {
             startCalibration(args);
 	    } else {
-            startRouter(args, new NMEARouterDefaultBuilderImpl("router.xml"));
+            startRouter(args, new NMEARouterDefaultBuilderImpl(Constants.ROUTER_CONF));
             startWebInterface(args);
 	    }
 	}
