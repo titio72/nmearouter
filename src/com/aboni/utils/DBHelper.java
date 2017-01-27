@@ -24,7 +24,7 @@ public class DBHelper {
 
     protected void readConf() {
         try {
-            File f = new File("db.properties");
+            File f = new File(Constants.DB);
             FileInputStream propInput = new FileInputStream(f);
             Properties p = new Properties();
             p.load(propInput);
