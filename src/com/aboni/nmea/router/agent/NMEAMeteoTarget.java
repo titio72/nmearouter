@@ -9,11 +9,11 @@ import java.util.TimerTask;
 
 import com.aboni.geo.Utils;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
-import com.aboni.nmea.sentences.MMBSentence;
-import com.aboni.nmea.sentences.MTASentence;
 import com.aboni.utils.DBHelper;
 
 import net.sf.marineapi.nmea.sentence.MHUSentence;
+import net.sf.marineapi.nmea.sentence.MMBSentence;
+import net.sf.marineapi.nmea.sentence.MTASentence;
 import net.sf.marineapi.nmea.sentence.MTWSentence;
 import net.sf.marineapi.nmea.sentence.MWDSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -113,7 +113,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-        if (s instanceof MTASentence) {
+        if (s instanceof net.sf.marineapi.nmea.sentence.MTASentence) {
             processTemp((MTASentence)s);
         } else if (s instanceof MMBSentence) {
             processPressure((MMBSentence)s);
@@ -162,7 +162,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void processPressure(MMBSentence s) {
-        collect(PRESS, s.getPresBar() * 1000);
+        collect(PRESS, s.getBars() * 1000);
     }
 
     private void processTemp(MTASentence s) {

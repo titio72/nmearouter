@@ -19,8 +19,6 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.impl.NMEACacheImpl;
-import com.aboni.nmea.sentences.MMBSentence;
-import com.aboni.nmea.sentences.MTASentence; 
 import com.aboni.nmea.sentences.XXXPSentence;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -28,6 +26,8 @@ import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
 import net.sf.marineapi.nmea.sentence.HDTSentence;
 import net.sf.marineapi.nmea.sentence.MHUSentence;
+import net.sf.marineapi.nmea.sentence.MMBSentence;
+import net.sf.marineapi.nmea.sentence.MTASentence;
 import net.sf.marineapi.nmea.sentence.RPMSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
@@ -261,7 +261,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		    if (pressureTempSensors[sensor]!=null) {
     	        double pr = pressureTempSensors[sensor].getPressureMB();
     	        MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-    	        mmb.setPresBar(pr / 1000.0);
+    	        mmb.setBars(pr / 1000.0);
     	        notify(mmb);
 		    }
 		} catch (Exception e) {

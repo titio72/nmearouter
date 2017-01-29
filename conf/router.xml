@@ -25,5 +25,5 @@
 		<qos>longthreshold</qos>
 	</MWDAgent>
 	<SerialAgent name="SOUT" device="/dev/ttyUSB1" bps="4800" inout="OUT" active="false"/>
-	<GPXPlayerAgent name="MWD" active="false" file="x.gpx"/>
+	<GPXPlayerAgent name="GPX" active="false" file="x.gpx"/>
 </Router>

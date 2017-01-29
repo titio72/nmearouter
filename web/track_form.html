@@ -206,13 +206,13 @@ html, body {
 			<li class="breadcrumb-item active">Track</li>
 		</ol>
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-6" style="min-width:600px">
 				<div id="TripsPanel" class="panel panel-primary" ng-controller="myCtrl">
 					<div class="panel-heading">
 						<h3 class="panel-title">Tracking</h3>
 					</div>
-					<div id="panel_details" class="panel-body">
-						<div class="table-responsive DocumentList">
+					<div id="panel_details" class="panel-body" style="height: 400px">
+						<div class="table-responsive DocumentList" style="height: 100%">
 							<table class="table">
 								<tr ng-repeat="t in days.trips">
 									<td>
@@ -255,14 +255,12 @@ html, body {
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12" style="min-width: 100%">
+			<div class="col-md-6" style="min-width:600px">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">Map</h3>
 					</div>
-					<div id="map" class="panel-body" style="min-height: 400px"></div>
+					<div id="map" class="panel-body" style="height: 400px"></div>
 					<div id="mapToolbar">
 						<button name="dwlGPX" type="button" 
 							class="btn btn-default" onclick="downloadGPX()">
@@ -279,20 +277,45 @@ html, body {
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12" style="min-width: 100%">
+			<div class="col-md-6" style="min-width:600px">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
-						<h3 class="panel-title">Meteo</h3>
+						<h3 class="panel-title">Temperature</h3>
 					</div>
-					<div class="panel-body" style="min-height: 400px">
-						<div class="col-md-6"><canvas style="min-width: 400px; height: 250px" id="tempChart"></canvas></div>
-						<div class="col-md-6"><canvas style="min-width: 400px; height: 250px" id="windChart"></canvas></div>
-						<div class="col-md-6"><canvas style="min-width: 400px; height: 250px" id="pressChart"></canvas></div>
-						<div class="col-md-6"><canvas style="min-width: 400px; height: 250px" id="humChart"></canvas></div>
+					<div class="panel-body">
+						<canvas style="min-width: 400px; height: 250px" id="tempChart"></canvas>
 					</div>
-				</div>	
+				</div>
+			</div>
+			<div class="col-md-6" style="min-width:600px">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Wind</h3>
+					</div>
+					<div class="panel-body">
+						<canvas style="min-width: 400px; height: 250px" id="windChart"></canvas>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6" style="min-width:600px">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Pressure</h3>
+					</div>
+					<div class="panel-body">
+						<canvas style="min-width: 400px; height: 250px" id="pressChart"></canvas>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6" style="min-width:600px">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Humidity</h3>
+					</div>
+					<div class="panel-body">
+						<canvas style="min-width: 400px; height: 250px" id="humChart"></canvas>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -51,7 +51,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
             if (sentence instanceof HDGSentence) {
                 Position lastPosition = null;
                 DataEvent<PositionSentence> ev = cache.getLastPosition();
-                if (ev!=null) {
+                if (ev!=null && ev.data!=null) {
                     lastPosition = ev.data.getPosition(); 
                 }
                 
