@@ -145,4 +145,12 @@ public class NMEATrackTargetDB extends NMEAAgentImpl {
             		point.period);
         }
     }
+    
+    @Override
+    public String getDescription() {
+    	String res = "Tracking " + listenSentence;
+    	return res;
+    }
+    
+
 }

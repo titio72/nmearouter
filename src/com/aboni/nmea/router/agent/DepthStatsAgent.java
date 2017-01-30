@@ -35,6 +35,11 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         queue = new LinkedList<DepthStatsAgent.DepthT>();
     }
 
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
         if (s instanceof DPTSentence) {

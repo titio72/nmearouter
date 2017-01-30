@@ -6,7 +6,7 @@ public class Constants {
 	public static final String ROUTER_CONF	= CONF_DIR + "/router.xml";
 	public static final String WMM			= CONF_DIR + "/WMM.COF";
 	public static final String DEVIATION	= CONF_DIR + "/deviation.csv";
-	public static final String SENSOR		= CONF_DIR + "/sensor.properties";
+	public static final String SENSOR		= CONF_DIR + "/sensors.properties";
 	public static final String DB			= CONF_DIR + "/db.properties";
 	public static final String SIM			= CONF_DIR + "/sim.properties";
 }

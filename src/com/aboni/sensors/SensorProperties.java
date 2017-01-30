@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 
 public class SensorProperties {
@@ -17,8 +18,9 @@ public class SensorProperties {
 	
     protected Properties readConf() {
         try {
-            File f = new File("sensors.properties");
+            File f = new File(Constants.SENSOR);
             if (f.exists() && f.lastModified() > lastProp) {
+                ServerLog.getLogger().Info("Reading sensor configuration file");
                 FileInputStream propInput = new FileInputStream(f);
                 Properties p = new Properties();
                 p.load(propInput);

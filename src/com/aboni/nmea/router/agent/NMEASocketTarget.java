@@ -46,6 +46,11 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "TCP Port " + getPort();
+	}
+	
+	@Override
 	protected boolean onActivate() {
 		try {
 			serverSocket = new ServerSocket(port);

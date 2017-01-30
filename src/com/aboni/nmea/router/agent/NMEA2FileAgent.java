@@ -33,6 +33,11 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 	}
 
 	@Override
+	public String getDescription() {
+		return "";
+	}
+
+	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent source) {
 		SentenceEvent e = new SentenceEvent();
 		e.sentence = s;

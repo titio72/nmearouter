@@ -44,6 +44,11 @@ public class GPXPlayerAgent extends NMEAAgentImpl {
 	}
 	
 	@Override
+	public String getDescription() {
+		return (file!=null)?("File " + file):"";
+	}
+
+	@Override
 	protected boolean onActivate() {
 		synchronized (this) {
 			stop = false;

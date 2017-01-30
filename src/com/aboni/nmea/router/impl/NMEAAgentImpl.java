@@ -234,4 +234,5 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
     public boolean isUserCanStartAndStop() {
     	return true;
     }
+    
 }

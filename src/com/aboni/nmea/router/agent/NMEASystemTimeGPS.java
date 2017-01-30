@@ -24,7 +24,13 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 		super(name, qos);
 		setSourceTarget(false, true);
 	}
-	
+
+	@Override
+    public String getDescription() {
+    	return "";
+    }
+    
+
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		if (!timestampset) {

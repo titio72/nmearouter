@@ -53,13 +53,14 @@ public class AgentStatusServiceJSON implements WebService {
     		
     		first = false;
     		response.getWriter().print(
-                "{\"agent\":\"" + ag.getName() + "\", " + 
-                        "\"type\":\"" + ag.getClass().getSimpleName() + "\", " + 
-                        "\"started\":\"" + ag.isStarted() + "\", " + 
-                        "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
-                        "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 
-                        "\"startStop\":\"" + ag.isUserCanStartAndStop() + "\", " + 
-                        "\"builtin\":\"" + ag.isBuiltIn() + "\"}");
+                    "{\"agent\":\"" + ag.getName() + "\", " + 
+                    "\"description\":\"" + ag.getDescription() + "\", " + 
+                    "\"type\":\"" + ag.getClass().getSimpleName() + "\", " + 
+                    "\"started\":\"" + ag.isStarted() + "\", " + 
+                    "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
+                    "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 
+                    "\"startStop\":\"" + ag.isUserCanStartAndStop() + "\", " + 
+                    "\"builtin\":\"" + ag.isBuiltIn() + "\"}");
     	}
     	
     }
@@ -78,9 +79,7 @@ public class AgentStatusServiceJSON implements WebService {
 		if (agent!=null) {
 			NMEAAgent a = NMEARouterProvider.getRouter().getAgent(agent);
 			if (a!=null) {
-				if (a.isBuiltIn()) {
-					msg = "Cannot change activation status for built in agents";
-				} else {
+				if (a.isUserCanStartAndStop()) {
 		        	String activate = config.getParameter("active");
 		        	if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
 		        		if (a.isStarted()) {
@@ -99,6 +98,8 @@ public class AgentStatusServiceJSON implements WebService {
 		        	} else {
 		        		msg = "Unknown status '" + activate + "'"; 
 		        	}
+				} else {
+					msg = "This agent does not support starting/stopping";
 				}
 			} else {
 				msg = "Unknown agent '" + agent + "'";

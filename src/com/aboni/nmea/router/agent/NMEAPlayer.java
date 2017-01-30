@@ -23,6 +23,12 @@ public class NMEAPlayer extends NMEAAgentImpl {
 		setSourceTarget(true, false);
 	}
 
+	@Override
+	public String getDescription() {
+		return "Fille " + getFile();
+	}
+	
+	
 	public void setFile(String file) {
 		this.file = file;
 	}

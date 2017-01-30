@@ -6,8 +6,10 @@ import com.aboni.nmea.router.Startable;
 public interface NMEAAgent extends Startable {
 	
 	String getName();
+	String getDescription();
 	
 	boolean isBuiltIn();
+	boolean isUserCanStartAndStop();
 	
 	void setStatusListener(NMEAAgentStatusListener listener);
 	void unsetStatusListener();
@@ -15,6 +17,7 @@ public interface NMEAAgent extends Startable {
 	NMEASource getSource();
 	NMEATarget getTarget();
 
-	public boolean isUserCanStartAndStop();
+	
+	
 	
 }

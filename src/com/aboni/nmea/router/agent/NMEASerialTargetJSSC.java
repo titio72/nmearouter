@@ -20,6 +20,11 @@ public class NMEASerialTargetJSSC extends NMEAAgentImpl {
 		this.speed = speed;
         setSourceTarget(false, true);
 	}
+
+	@Override
+	public String getDescription() {
+		return "Serial " + portName + " " + speed;
+	}
 	
 	@Override
 	public String toString() {

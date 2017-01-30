@@ -71,6 +71,12 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     @Override
+	public String getDescription() {
+		return "";
+	}
+	
+
+    @Override
     protected boolean onActivate() {
         try {
             db = new DBHelper(true);

@@ -19,21 +19,27 @@
     xmlHttp.send( null );
 	var agentList = JSON.parse(xmlHttp.responseText).agents;
 	var msg = "-";
-	
-	for (var i = 0; i<agentList.length; i++) {
-		var a = agentList[i];
-		if (a.builtin=='false' && a.started=='false') a.color = "lightgray";
-		else if (a.builtin=='false' && a.started=='true') a.color = "lightgreen";
-		else if (a.builtin=='true' && a.started=='false') a.color = "lightblue";
-		else a.color = "lightyellow";
-	}
-	
+	setColors(agentList);
+	agentList.sort(compare);
 	
 	app.controller("myCtrl", function($scope) {
-		$scope.agents = agentList.sort(compare);  
+		$scope.agents = agentList  
 		$scope.message = msg;  
 	});
    	
+	function setColors(agentList) {
+		for (var i = 0; i<agentList.length; i++) {
+			var a = agentList[i];
+			/*if (a.builtin=='false' && a.started=='false') a.color = "lightgray";
+			else if (a.builtin=='false' && a.started=='true') a.color = "lightgreen";
+			else if (a.builtin=='true' && a.started=='false') a.color = "lightblue";
+			else a.color = "lightyellow";*/
+			if (a.started=='false') a.color = "lightgray";
+			else a.color = "lightgreen";
+
+		}		
+	}
+	
     function compare(a, b) {
     	if (a.builtin=="true" && b.builtin=="false") return 1
     	else if (a.builtin=="false" && b.builtin=="true") return -1;
@@ -50,10 +56,12 @@
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	    xmlHttp.send( null );
 	    var json = JSON.parse(xmlHttp.responseText);
-		var agentList = json.agents.sort(compare);
+		var agentList = json.agents;
 		var msg = json.message;
 		var controllerElement = document.getElementById('agentGrid');
 		var controllerScope = angular.element(controllerElement).scope();
+		setColors(agentList);
+		agentList.sort(compare);
 		controllerScope.agents = agentList;
 		controllerScope.message = msg;  
 		controllerScope.$evalAsync();
@@ -78,6 +86,7 @@
 						<tr>
 							<th>Agent</th>
 							<th>Type</th>
+							<th>Details</th>
 							<th>Source</th>
 							<th>Target</th>
 							<th>BuiltIn</th>
@@ -85,9 +94,10 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="a in agents" style="background: {{a.color}}">
+						<tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='false'">
 							<td>{{a.agent}}</td>
 							<td>{{a.type}}</td>
+							<td>{{a.description}}</td>
 							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
@@ -105,9 +115,30 @@
 	                        	</div>
 	                        	</div>
 	                        </td>
-	
 						</tr>
-					</tbody>
+						<tr><td>&nbsp;</td></tr>
+						<tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='true'">
+							<td>{{a.agent}}</td>
+							<td>{{a.type}}</td>
+							<td>{{a.description}}</td>
+							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<td align="center">
+								<div ng-if="a.startStop=='true'">
+								<div ng-if="a.started=='false'">
+	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 1)">
+	                        		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+	                        	</button>
+	                        	</div>
+								<div ng-if="a.started=='true'">
+	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 0)">
+	                        		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+	                        	</button>
+	                        	</div>
+	                        	</div>
+	                        </td>
+						</tr>					</tbody>
 				</table>
 			</div>
 		</div>

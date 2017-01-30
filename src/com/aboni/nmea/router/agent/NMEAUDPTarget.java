@@ -26,6 +26,13 @@ public class NMEAUDPTarget extends NMEAAgentImpl {
         targets = new HashSet<InetAddress>();
 	}
 
+    @Override
+    public String getDescription() {
+    	String res = "Port " + getPort() + " ";
+    	for (InetAddress a: targets) res += " " + a.getHostName();
+    	return res;
+    }
+    
 	public int getPort() {
 		return portTarget;
 	}

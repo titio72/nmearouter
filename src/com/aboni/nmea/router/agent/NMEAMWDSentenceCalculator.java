@@ -44,4 +44,10 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 		}
 	}
 
+	@Override
+	public String getDescription() {
+		return "";
+	}
+	
+
 }

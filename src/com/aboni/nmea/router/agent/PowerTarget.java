@@ -28,6 +28,11 @@ public class PowerTarget extends NMEAAgentImpl {
         pinGps.setShutdownOptions(true, PinState.LOW);
         setSourceTarget(false, true);
     }
+
+    @Override
+    public String getDescription() {
+    	return "";
+    }
     
     @Override
     protected boolean onActivate() {

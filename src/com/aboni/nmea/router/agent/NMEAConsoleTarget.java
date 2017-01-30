@@ -20,4 +20,10 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 				DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) + 
 				" [" + getName() + "] [" + src.getName() + "] " + s);
 	}
+	
+	@Override
+	public String getDescription() {
+		return "";
+	}
+
 }

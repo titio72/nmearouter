@@ -60,6 +60,11 @@ public class NMEASerialSourceJSSC extends NMEAAgentImpl {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "Serial " + portName + " " + speed;
+	}
+	
+	@Override
 	public String toString() {
 		return super.toString() + " {Serial port " + portName + " " + speed + "}";
 	}

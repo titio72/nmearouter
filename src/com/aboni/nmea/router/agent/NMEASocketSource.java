@@ -148,6 +148,11 @@ public class NMEASocketSource extends NMEAAgentImpl {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "TCP " + reader.getServer() + ":" + reader.getPort();
+	}
+	
+	@Override
 	protected boolean onActivate() {
         Thread t = new Thread(reader);
         t.setDaemon(true);

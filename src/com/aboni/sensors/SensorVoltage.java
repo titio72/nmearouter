@@ -26,12 +26,11 @@ public class SensorVoltage extends I2CSensor {
     	super();
         ads = null;
 
-        // use 0x49 instead of 0x48 so not to overlap with RPM sensor
-        this.address = ADS1115.ADS1115_ADDRESS_0x49;
+        this.address = ADS1115.ADS1115_ADDRESS_0x48;
         
         Properties p = getProps().readConf();
         if (p!=null) {
-            String s_address = p.getProperty("analog.voltage", "0x49");
+            String s_address = p.getProperty("analog.voltage", "0x48");
             String[] s_adjust = new String[] { p.getProperty("analog.voltage.adjust.0", "1"),
             	p.getProperty("analog.voltage.adjust.1", "1"),
             	p.getProperty("analog.voltage.adjust.2", "1"),

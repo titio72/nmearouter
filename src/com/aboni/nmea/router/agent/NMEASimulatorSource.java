@@ -70,6 +70,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	@Override
 	protected void onDeactivate() {
 	}
+	
+	@Override
+	public String getDescription() {
+		return "";
+	}
+	
 /*
     private double rec_heading = Double.NaN;
 	

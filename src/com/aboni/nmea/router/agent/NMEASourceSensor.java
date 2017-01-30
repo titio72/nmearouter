@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent;
 
 import com.aboni.sensors.SensorPressureTemp;
 import com.aboni.sensors.SensorProperties;
-import com.aboni.sensors.SensorRPM;
 import com.aboni.sensors.SensorTemp;
 import com.aboni.sensors.Sensor;
 import com.aboni.sensors.SensorCompass;
@@ -28,7 +27,6 @@ import net.sf.marineapi.nmea.sentence.HDTSentence;
 import net.sf.marineapi.nmea.sentence.MHUSentence;
 import net.sf.marineapi.nmea.sentence.MMBSentence;
 import net.sf.marineapi.nmea.sentence.MTASentence;
-import net.sf.marineapi.nmea.sentence.RPMSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -45,8 +43,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      */
     private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
 	
-    private static boolean ENABLE_RPM = false;
-    
     private NMEACacheImpl data;
     private boolean started;
     
@@ -57,7 +53,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private SensorPressureTemp pressureTempSensor0;
     private SensorPressureTemp pressureTempSensor1;
     private SensorPressureTemp[] pressureTempSensors;
-    private SensorRPM rpmSensor;
     private SensorTemp tempSensor;
     
     private boolean sendHDM = false;
@@ -73,6 +68,16 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     }
     
     @Override
+    public String getDescription() {
+    	return 
+    			"Temp(" + (tempSensor==null?"-":"*") + ") " + 
+    			"Volt(" + (voltageSensor==null?"-":"*") + ") " + 
+    			"Gyro(" + (compassSensor==null?"-":"*") + ") " + 
+    			"Atm1(" + (pressureTempSensor0==null?"-":"*") + ") " + 
+    			"Atm2(" + (pressureTempSensor1==null?"-":"*") + ")";
+    }
+    
+    @Override
     protected boolean onActivate() {
         started = true;
     
@@ -82,10 +87,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         pressureTempSensor1 = createTempPressure(1);
         pressureTempSensors = new SensorPressureTemp[] {pressureTempSensor0, pressureTempSensor1};
         voltageSensor = createVoltage();
-        rpmSensor = createRPM();
-        if (rpmSensor!=null) { 
-            rpmSensor.startReading();
-        }
         
         TimerTask t = new TimerTask() {
             
@@ -122,7 +123,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             sendMMB(mmbSensor);
             sendMHU(mhuSensor);
             sendHDx();
-            sendRPM();
             sendXDR();
         }            
     }
@@ -136,21 +136,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             getLogger().Error("Error creating temp sensor ", e);
             return null;
     	}
-    }
-    
-    private SensorRPM createRPM() {
-        if (ENABLE_RPM) {
-	    	try {
-	            SensorRPM r = new SensorRPM();
-	            r.init();
-	            return r;
-	        } catch (Exception e) {
-	            getLogger().Error("Error creating rpm sensor ", e);
-	            return null;
-	        }
-        } else {
-        	return null;
-        }
     }
 
     private SensorVoltage createVoltage() {
@@ -191,7 +176,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private void readSensors() {
         try {
         	tempSensor = (SensorTemp)readSensor(tempSensor);
-        	rpmSensor = (SensorRPM)readSensor(rpmSensor);
             voltageSensor = (SensorVoltage)readSensor(voltageSensor);
             pressureTempSensor0 = (SensorPressureTemp)readSensor(pressureTempSensor0);
             pressureTempSensor1 = (SensorPressureTemp)readSensor(pressureTempSensor1);
@@ -294,18 +278,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		}
 	}
 
-	private void sendRPM() {
-        try {
-            if (rpmSensor!=null) {
-                String s = String.format("$IIRPM,E,1,%.0f,0.0,A", rpmSensor.getRPM());
-                RPMSentence rpm = (RPMSentence) SentenceFactory.getInstance().createParser(s);
-                notify(rpm);
-            }
-        } catch (Exception e) {
-            getLogger().Error("Cannot post RPM", e);
-        }
-    }
-
 	private void sendXDR() {
 	    XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 	    if (compassSensor!=null) {
@@ -385,9 +357,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             if (voltageSensor!=null) {
                 sentence.setVoltage(voltageSensor.getVoltage0());
                 sentence.setVoltage1(voltageSensor.getVoltage1());
-            }
-            if (rpmSensor!=null) {
-                sentence.setRPM(rpmSensor.getRPM());
             }
 	        notify(sentence);
 		} catch (Exception e) {
