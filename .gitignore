@@ -1,2 +1,13 @@
 /target/
-conf/db.properties
+/conf/db.properties
+/misc/
+/temp/
+/log/
+/bin/
+/.svn/
+/.settings/
+/.project
+/.classpath
+/dependency-reduced-pom.xml
+/settime.log
+/shutdown.log
