@@ -16,3 +16,6 @@
 /NMEARouter.log.lck
 /.classpath
 /.project
+/db_dumps/
+/deploy
+/deployProd
