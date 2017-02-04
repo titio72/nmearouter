@@ -1,0 +1,7 @@
+/target/
+/db.properties
+/NMEARouter.log
+/NMEARouter.log.1
+/NMEARouter.log.lck
+/.classpath
+/.project
