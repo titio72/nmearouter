@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.streamer;
 
+import java.util.StringTokenizer;
+
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -21,10 +23,10 @@ public class NMEASentenceItem {
 	}
 	
 	public NMEASentenceItem(String line) throws Exception {
-		String[] s = line.split("]");
-		String sT = s[0].substring(1);
-		String sD = s[1].substring(1);
-		String sS = s[2].substring(1);
+		StringTokenizer tkz = new StringTokenizer(line, "]");
+		String sT = tkz.nextToken().substring(1);
+		String sD = tkz.nextToken().substring(1);
+		String sS = tkz.nextToken().substring(1);
 		sentence = SentenceFactory.getInstance().createParser(sS);
 		timestamp = Long.parseLong(sT);
 		data = sD;
