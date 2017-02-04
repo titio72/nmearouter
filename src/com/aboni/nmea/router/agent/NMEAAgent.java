@@ -18,6 +18,4 @@ public interface NMEAAgent extends Startable {
 	NMEATarget getTarget();
 
 	
-	
-	
 }

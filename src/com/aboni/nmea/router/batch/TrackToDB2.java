@@ -1,4 +1,4 @@
-package batch;
+package com.aboni.nmea.router.batch;
 
 
 import java.io.BufferedReader;

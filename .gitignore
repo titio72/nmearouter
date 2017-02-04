@@ -11,3 +11,8 @@
 /dependency-reduced-pom.xml
 /settime.log
 /shutdown.log
+/NMEARouter.log
+/NMEARouter.log.1
+/NMEARouter.log.lck
+/.classpath
+/.project
