@@ -17,6 +17,8 @@
     xmlHttp.setRequestHeader('Content-Type', 'text/plain');
     xmlHttp.send( null );
 	var sensor = JSON.parse(xmlHttp.responseText);
+	if (sensor.sensor.Barometer_0!=null) sensor.sensor.Barometer_0 *= 1000;  
+	if (sensor.sensor.Barometer_1!=null) sensor.sensor.Barometer_1 *= 1000;  
     app.controller("myCtrl", function($scope) {
 		$scope.sensor = sensor;  
    });
