@@ -1,6 +1,7 @@
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.agent.DepthStatsAgent;
+import com.aboni.nmea.router.agent.FanAgent;
 import com.aboni.nmea.router.agent.NMEA2FileAgent;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
@@ -52,6 +53,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         buildStreamDump(conf, r);
         buildGPSTimeTarget(conf, r);
         buildPowerLedTarget(conf, r);
+        buildFanTarget(conf, r);
         buildDPTStats(conf, r);
         return r;
     }
@@ -76,6 +78,13 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	        r.addAgent(pwrled);
 	        pwrled.start();
     	}
+    }
+
+    private void buildFanTarget(Router conf2, NMEARouterImpl r) {
+        QOS q = createBuiltInQOS();
+        FanAgent fan = new FanAgent("FAN", q);
+        r.addAgent(fan);
+        fan.start();
     }
 
     private void buildGPSTimeTarget(Router conf2, NMEARouter r) {
