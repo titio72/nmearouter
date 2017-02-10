@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.streamer.NMEASentenceItem;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -74,13 +75,33 @@ public class NMEAPlayer extends NMEAAgentImpl {
 				FileReader fr = new FileReader(getFile());
 				BufferedReader r = new BufferedReader(fr);
 				String line = null;
+				long log_t0 = 0;
+				long t0 = 0;
 				while ((line=r.readLine())!=null) {
-					try {
-						Sentence s = SentenceFactory.getInstance().createParser(line);
-						Thread.sleep(55);
-						notify(s);
-					} catch (Exception e) {
-						getLogger().Error("Error playing sentence {" + line + "}", e);
+					if (line.startsWith("[")) {
+						try {
+							NMEASentenceItem itm = new NMEASentenceItem(line);
+							long t = System.currentTimeMillis();
+							long log_t = itm.getTimestamp();
+							long dt = t-t0;
+							long dLog_t = log_t - log_t0;
+							if (dLog_t>dt) {
+								try { Thread.sleep(dLog_t-dt); } catch (Exception pp) {}
+							}
+							notify(itm.getSentence());
+							t0 = System.currentTimeMillis();
+							log_t0 = log_t;
+						} catch (Exception e) {
+							getLogger().Error("Error playing sentence {" + line + "}", e);
+						}
+					} else {
+						try {
+							Sentence s = SentenceFactory.getInstance().createParser(line);
+							Thread.sleep(55);
+							notify(s);
+						} catch (Exception e) {
+							getLogger().Error("Error playing sentence {" + line + "}", e);
+						}
 					}
 				}
 				r.close();
@@ -150,7 +171,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 		startServer();
 		while (true) {
 			try {
-				FileReader fr = new FileReader("mascino.log");
+				FileReader fr = new FileReader(args[0]);
 				BufferedReader r = new BufferedReader(fr);
 				String line = null;
 				while ((line=r.readLine())!=null) {
