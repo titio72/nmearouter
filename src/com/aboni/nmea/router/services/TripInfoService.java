@@ -9,6 +9,7 @@ import com.aboni.utils.DBHelper;
 
 public class TripInfoService implements WebService {
 
+	private static final String APPLICATION_JSON = "application/json";
 	private DBHelper db;
 	
 	public TripInfoService() {
@@ -17,7 +18,7 @@ public class TripInfoService implements WebService {
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
 		String sql = "select sum(dist), max(speed), min(TS), max(TS) from track where tripid=?";
-        response.setContentType("application/json");
+        response.setContentType(APPLICATION_JSON);
 		try {
             db = new DBHelper(true);
             
