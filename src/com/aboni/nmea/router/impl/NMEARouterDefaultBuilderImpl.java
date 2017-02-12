@@ -1,5 +1,7 @@
-package com.aboni.nmea.router;
+package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.agent.DepthStatsAgent;
 import com.aboni.nmea.router.agent.FanAgent;
 import com.aboni.nmea.router.agent.NMEA2FileAgent;
@@ -8,13 +10,12 @@ import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAPlayer;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
 import com.aboni.nmea.router.agent.NMEASystemTimeGPS;
-import com.aboni.nmea.router.agent.PowerTarget;
+import com.aboni.nmea.router.agent.PowerLedAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConfParser;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.conf.Router;
-import com.aboni.nmea.router.impl.NMEARouterImpl;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
@@ -74,7 +75,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildPowerLedTarget(Router conf2, NMEARouterImpl r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
 	        QOS q = createBuiltInQOS();
-	        PowerTarget pwrled = new PowerTarget("PWRLED", q);
+	        PowerLedAgent pwrled = new PowerLedAgent("PWRLED", q);
 	        r.addAgent(pwrled);
 	        pwrled.start();
     	}

@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.aboni.nmea.router.NMEASentenceFilterSet;
-import com.aboni.nmea.router.NMEAAgentStatusListener;
 import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
@@ -16,6 +15,7 @@ import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
 import com.aboni.nmea.router.filters.NMEAPostProcess;
 import com.aboni.nmea.router.filters.NMEARMC2VTGProcessor;
+import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.utils.Log;
 import com.aboni.utils.ServerLog;
 

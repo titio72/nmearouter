@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEASentenceFilterSet;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
@@ -19,6 +18,7 @@ import com.aboni.nmea.router.conf.TcpAgent;
 import com.aboni.nmea.router.conf.TrackAgent;
 import com.aboni.nmea.router.conf.UdpAgent;
 import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
@@ -90,9 +90,9 @@ public class NMEAAgentBuilder {
 	
     private NMEAAgent buildGPXPlayer(com.aboni.nmea.router.conf.GPXPlayerAgent g, QOS q) {
     	String file = g.getGpxFile();
-    	GPXPlayerAgent gpx = null;
+    	NMEAGPXPlayerAgent gpx = null;
 		try {
-			gpx = new GPXPlayerAgent(g.getName(), file, q);
+			gpx = new NMEAGPXPlayerAgent(g.getName(), file, q);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

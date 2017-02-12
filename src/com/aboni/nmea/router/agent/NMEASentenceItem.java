@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.streamer;
+package com.aboni.nmea.router.agent;
 
 import java.util.StringTokenizer;
 

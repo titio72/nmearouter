@@ -25,7 +25,8 @@ public class Track2GPXTest {
 	
 	@Test
 	public void testTrackDefaultName() throws Exception {
-		Track2GPX g = new Track2GPX(createPositionHistory());
+		TrackDumper g = new Track2GPX();
+		g.setTrack(createPositionHistory());
 		StringWriter w = new StringWriter();
 		g.dump(w);
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -37,7 +38,8 @@ public class Track2GPXTest {
 
 	@Test
 	public void testTrackName() throws Exception {
-		Track2GPX g = new Track2GPX(createPositionHistory());
+		TrackDumper g = new Track2GPX();
+		g.setTrack(createPositionHistory());
 		g.setTrackName("pippo");
 		StringWriter w = new StringWriter();
 		g.dump(w);

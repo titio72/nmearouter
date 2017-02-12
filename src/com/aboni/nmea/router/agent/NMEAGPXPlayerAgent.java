@@ -27,7 +27,7 @@ import net.sf.marineapi.nmea.util.CompassPoint;
 import net.sf.marineapi.nmea.util.FaaMode;
 
 
-public class GPXPlayerAgent extends NMEAAgentImpl {
+public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
 	private SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private Document d;
@@ -37,7 +37,7 @@ public class GPXPlayerAgent extends NMEAAgentImpl {
 	private String file;
 	private boolean stop;
 	
-	public GPXPlayerAgent(String name, String file, QOS q) throws Exception {
+	public NMEAGPXPlayerAgent(String name, String file, QOS q) throws Exception {
 		super(name, q);
 		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		this.file = file;

@@ -12,23 +12,19 @@ import java.util.List;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
+import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEA2FileAgent extends NMEAAgentImpl {
-
-	private class SentenceEvent {
-		Sentence sentence;
-		long time; 
-	}
 
 	private static final long DUMP_PERIOD = 10*1000;
 	private SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 	
 	private long lastDump = 0;
-	private List<SentenceEvent> queue = new LinkedList<>();
+	private List<NMEASentenceItem> queue = new LinkedList<>();
 	
-	public NMEA2FileAgent(String string, QOS q) {
-		super("NMEA2FILE", q);
+	public NMEA2FileAgent(String n, QOS q) {
+		super(n, q);
 		setSourceTarget(false, true);
 	}
 
@@ -39,9 +35,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent source) {
-		SentenceEvent e = new SentenceEvent();
-		e.sentence = s;
-		e.time = System.currentTimeMillis();
+		NMEASentenceItem e = new NMEASentenceItem(s, System.currentTimeMillis(), "  ");
 		synchronized (queue) {
 			if (isStarted()) {
 				queue.add(e);
@@ -61,8 +55,8 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 			File f = new File("nmea" + df.format(new Date()) + ".log");
 			FileWriter w = new FileWriter(f, true);
 			BufferedWriter bw = new BufferedWriter(w);
-			for (SentenceEvent e: queue) {
-				bw.write("[" + e.time + "][**] " + e.sentence.toSentence() + "\n");
+			for (NMEASentenceItem e: queue) {
+				bw.write(e.toString());
 			}
 			queue.clear();
 			bw.flush();

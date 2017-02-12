@@ -5,6 +5,7 @@ import java.util.Calendar;
 import com.aboni.geo.Track2GPX;
 import com.aboni.geo.Track2JSON;
 import com.aboni.geo.Track2KML;
+import com.aboni.geo.TrackDumper;
 import com.aboni.geo.TrackLoader;
 import com.aboni.geo.TrackLoaderDB;
 
@@ -28,24 +29,39 @@ public class TrackService  implements WebService {
         	
         	String f = config.getParameter("format");
         	if (f==null) f = "gpx";
+
+        	String d = config.getParameter("download");
+        	if (d==null) d = "0";
+        	boolean download = "1".equals(d);
         	
         	if (cFrom!=null && cTo!=null) {
 	        	TrackLoader loader = new TrackLoaderDB();
 	            if (loader.load(cFrom, cTo)) {
+	            	TrackDumper dumper = null;
+	            	String mime = null;
+	            	String fileName = null;
+	            	
 		            if (f.equals("gpx")) {
-			            response.setContentType("application/octet-stream");
-			            response.setHeader("Content-Disposition", "attachment; filename=\"track.gpx\"");
-		                new Track2GPX(loader.getTrack()).dump(response.getWriter());
-		                response.ok();
+			            mime = "application/gpx+xml";
+			            fileName = "track.gpx";
+		                dumper = new Track2GPX();
 		            } else if (f.equals("kml")) {
-			            response.setContentType("application/octet-stream");
-			            response.setHeader("Content-Disposition", "attachment; filename=\"track.gpx\"");
-	                    new Track2KML(loader.getTrack()).dump(response.getWriter());
-	                    response.ok();
+			            mime = "application/vnd.google-earth.kml+xml";
+			            fileName = "track.kml";
+	                    dumper = new Track2KML();
 		            } else if (f.equals("json")) {
-		            	response.setContentType("application/json");
-		            	new Track2JSON(loader.getTrack()).dump(response.getWriter());
+		            	mime = "application/json";
+		            	fileName = "track.json";
+		            	dumper = new Track2JSON();
+		            }
+
+		            if (dumper!=null) {
+			            response.setContentType(mime);
+			            if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+		            	dumper.setTrack(loader.getTrack());
+		            	dumper.dump(response.getWriter());
 	                    response.ok();
+
 		            } else {
 		                response.setContentType("text/html;charset=utf-8");
 		                response.error("Unknown format '" + f + "'");

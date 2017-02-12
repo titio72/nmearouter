@@ -8,7 +8,7 @@ import com.aboni.geo.PositionHistory.DoWithPoint;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 
-public class Track2KML {
+public class Track2KML implements TrackDumper {
 
 	public class PointWriter implements DoWithPoint {
 
@@ -32,15 +32,25 @@ public class Track2KML {
 	private PositionHistory track;
 	private Kml kml;
 	
-	public Track2KML(PositionHistory t) {
-		track = t;
+	public Track2KML() {
 	    kml = new Kml();
 	}
 	
+	public PositionHistory getTrack() {
+		return track;
+	}
+
+	@Override
+	public void setTrack(PositionHistory track) {
+		this.track = track;
+	}
+
 	public void dump(Writer w) throws IOException {
-	    LineString s = createString();
-		writePoints(s);
-		kml.marshal(w);
+		if (track!=null) {
+		    LineString s = createString();
+			writePoints(s);
+			kml.marshal(w);
+		}
 	}
 
 	private void writePoints(LineString w) {
@@ -63,6 +73,11 @@ public class Track2KML {
 	private LineString createString() throws IOException {
 	    LineString pmk = kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();
 	    return pmk;
+	}
+
+	@Override
+	public void setTrackName(String trackName) {
+		// not supported
 	}	
 	
 }

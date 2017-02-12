@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.aboni.utils.ServerLog;
 
-public class NMEASocketClient implements Runnable {
+public class SocketClient implements Runnable {
 	
 	private Socket clientSocket;
 	private PrintWriter out;
@@ -17,7 +17,7 @@ public class NMEASocketClient implements Runnable {
 	private static long counter;
 	private long id;
 	
-	public NMEASocketClient(Socket socket) {
+	public SocketClient(Socket socket) {
 		closed = false;
 		counter++;
 		id = counter;

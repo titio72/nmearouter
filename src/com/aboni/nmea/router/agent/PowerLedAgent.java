@@ -13,13 +13,13 @@ import com.pi4j.io.gpio.RaspiPin;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public class PowerTarget extends NMEAAgentImpl {
+public class PowerLedAgent extends NMEAAgentImpl {
 
     private final GpioController gpio;
     private final GpioPinDigitalOutput pin, pinGps;
     private long lastGps;
 
-    public PowerTarget(String name, QOS qos) {
+    public PowerLedAgent(String name, QOS qos) {
         super(name, qos);
         gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "pwr", PinState.LOW);

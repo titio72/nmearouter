@@ -26,7 +26,7 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 		super(name, q);
 		this.port = port;
         setSourceTarget(false, true);
-		clients = new HashSet<NMEASocketClient>();
+		clients = new HashSet<SocketClient>();
 	}
 
 	public NMEASocketTarget(String name) {
@@ -37,9 +37,9 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 		return port;
 	}
 	
-	private Set<NMEASocketClient> clients;
+	private Set<SocketClient> clients;
 
-	private void addClient(NMEASocketClient c) {
+	private void addClient(SocketClient c) {
 		synchronized (clients) {
 			clients.add(c);
 		}
@@ -61,7 +61,7 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 						Socket s = null;
 						try {
 							s = serverSocket.accept();
-							NMEASocketClient r = new NMEASocketClient(s);
+							SocketClient r = new SocketClient(s);
 							addClient(r);
 							new Thread(r).start();
 						} catch (IOException e) {
@@ -80,11 +80,11 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	protected void onDeactivate() {
 		try {
 			synchronized (clients) {
-				for (Iterator<NMEASocketClient> i = clients.iterator(); i.hasNext(); ) {
+				for (Iterator<SocketClient> i = clients.iterator(); i.hasNext(); ) {
 					i.next().doClose();
 				}				
 				serverSocket.close();
-				purgeClients(new ArrayList<NMEASocketClient>(clients));
+				purgeClients(new ArrayList<SocketClient>(clients));
 			}
 		} catch (IOException e) {
 			ServerLog.getLogger().equals("Cannot open port " + port);
@@ -95,13 +95,13 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		synchronized (clients) {
 			String output = null;
-			List<NMEASocketClient> purge = new ArrayList<NMEASocketClient>();
-			for (Iterator<NMEASocketClient> i = clients.iterator(); i.hasNext(); ) {
+			List<SocketClient> purge = new ArrayList<SocketClient>();
+			for (Iterator<SocketClient> i = clients.iterator(); i.hasNext(); ) {
 				try {
 					if (output==null) {
 						output = getOutSentence(s);
 					}
-					NMEASocketClient c = i.next();
+					SocketClient c = i.next();
 					if (c.isClosed()) {
 						purge.add(c);
 					} else {
@@ -124,8 +124,8 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 		//return s1.substring(0, s1.length()-2);
 	}
 	
-	private void purgeClients(Collection<NMEASocketClient> purge) {
-		for (Iterator<NMEASocketClient> i = purge.iterator(); i.hasNext(); ) {
+	private void purgeClients(Collection<SocketClient> purge) {
+		for (Iterator<SocketClient> i = purge.iterator(); i.hasNext(); ) {
 			clients.remove(i.next());
 		}
 	}

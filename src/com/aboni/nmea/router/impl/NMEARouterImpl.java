@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.aboni.nmea.router.NMEAAgentStatusListener;
 import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStreamProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.conf.LogLevelType;

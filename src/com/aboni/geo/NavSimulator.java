@@ -74,7 +74,8 @@ public class NavSimulator {
 		Course c = new Course(new Position(lat, lon), new Position(n.lat, n.lon));
 		System.out.println(c.getDistance());
 		
-		Track2GPX gpx = new Track2GPX(p);
+		TrackDumper gpx = new Track2GPX();
+		gpx.setTrack(p);
 		try {
 			gpx.dump(new FileWriter("x.gpx"));
 		} catch (IOException e) {

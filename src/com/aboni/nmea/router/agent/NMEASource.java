@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.agent;
 
-import com.aboni.nmea.router.NMEASentenceFilterSet;
+import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 
 public interface NMEASource {
 

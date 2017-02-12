@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
 
-public class Track2JSON {
+public class Track2JSON implements TrackDumper {
 
 	public class PointWriter implements DoWithPoint {
 
@@ -35,8 +35,7 @@ public class Track2JSON {
   	private static boolean TRACK_THEM_ALL = true;
 	public static String DEFAULT_TRACK_NAME = "track";
 	
-	public Track2JSON(PositionHistory t) {
-		track = t;
+	public Track2JSON() {
 		jsonTrack = new JSONObject();
 		trackName = DEFAULT_TRACK_NAME;
 	}
@@ -50,9 +49,11 @@ public class Track2JSON {
   	}
 	
 	public void dump(Writer w) throws IOException {
-		createPath();
-		writePoints();
-		writeIt(w);
+		if (track!=null) {
+			createPath();
+			writePoints();
+			writeIt(w);
+		}
 	}
 
 	private void writeIt(Writer w) throws IOException {
@@ -100,6 +101,15 @@ public class Track2JSON {
 	
 	private List<JSONObject> getPath() {
 		return innerPath;
+	}
+
+	@Override
+	public void setTrack(PositionHistory track) {
+		this.track = track;
+	}
+
+	public PositionHistory getTrack() {
+		return track;
 	}
 	
 }

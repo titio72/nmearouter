@@ -8,7 +8,7 @@ import java.util.Date;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
 
-public class Track2GPX {
+public class Track2GPX implements TrackDumper {
 
 	public class PointWriter implements DoWithPoint {
 
@@ -33,14 +33,31 @@ public class Track2GPX {
 	private String trackName = DEFAULT_TRACK_NAME;
 	public static final String DEFAULT_TRACK_NAME = "track";
 	
-	public Track2GPX(PositionHistory t) {
-		track = t;
+	public Track2GPX() {
 	}
 	
+	public PositionHistory getTrack() {
+		return track;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.aboni.geo.TrackDumper#setTrack(com.aboni.geo.PositionHistory)
+	 */
+	@Override
+	public void setTrack(PositionHistory track) {
+		this.track = track;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.aboni.geo.TrackDumper#dump(java.io.Writer)
+	 */
+	@Override
 	public void dump(Writer w) throws IOException {
-		writeHeader(w);
-		writePoints(w);
-		writeFooter(w);
+		if (track!=null) {
+			writeHeader(w);
+			writePoints(w);
+			writeFooter(w);
+		}
 	}
 
 	private void writeFooter(Writer w) throws IOException {
@@ -102,6 +119,10 @@ public class Track2GPX {
 		return trackName;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.aboni.geo.TrackDumper#setTrackName(java.lang.String)
+	 */
+	@Override
 	public void setTrackName(String trackName) {
 		this.trackName = trackName;
 	}

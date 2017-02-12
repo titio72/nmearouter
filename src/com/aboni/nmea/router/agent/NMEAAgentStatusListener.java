@@ -1,6 +1,4 @@
-package com.aboni.nmea.router;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
+package com.aboni.nmea.router.agent;
 
 public interface NMEAAgentStatusListener {
 	

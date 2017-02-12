@@ -24,7 +24,8 @@ public class Track2JSONTest {
 	
 	@Test
 	public void testPath() throws Exception {
-		Track2JSON j = new Track2JSON(createPositionHistory());
+		Track2JSON j = new Track2JSON();
+		j.setTrack(createPositionHistory());
 		StringWriter w = new StringWriter();
 		j.dump(w);
 		JSONObject jTrack = new JSONObject(w.toString());
@@ -48,7 +49,8 @@ public class Track2JSONTest {
 	
 	@Test
 	public void testName() throws Exception {
-		Track2JSON j = new Track2JSON(createPositionHistory());
+		Track2JSON j = new Track2JSON();
+		j.setTrack(createPositionHistory());
 		j.setTrackName("pippo");
 		StringWriter w = new StringWriter();
 		j.dump(w);
@@ -59,7 +61,8 @@ public class Track2JSONTest {
 	
 	@Test
 	public void testDefaultName() throws Exception {
-		Track2JSON j = new Track2JSON(createPositionHistory());
+		Track2JSON j = new Track2JSON();
+		j.setTrack(createPositionHistory());
 		StringWriter w = new StringWriter();
 		j.dump(w);
 		JSONObject jTrack = new JSONObject(w.toString());
