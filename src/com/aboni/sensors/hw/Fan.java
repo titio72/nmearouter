@@ -15,7 +15,7 @@ public class Fan {
     	arm = (System.getProperty("os.arch").startsWith("arm"));
     	if (arm) {
 	        GpioController gpio = GpioFactory.getInstance();
-	        pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_21, "fan", PinState.LOW);
+	        pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25, "fan", PinState.LOW);
 	        pin.setShutdownOptions(true, PinState.LOW);
     	}
     }

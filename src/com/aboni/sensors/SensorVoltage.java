@@ -31,14 +31,7 @@ public class SensorVoltage extends I2CSensor {
         Properties p = getProps().readConf();
         if (p!=null) {
             String s_address = p.getProperty("analog.voltage", "0x48");
-            String[] s_adjust = new String[] { p.getProperty("analog.voltage.adjust.0", "1"),
-            	p.getProperty("analog.voltage.adjust.1", "1"),
-            	p.getProperty("analog.voltage.adjust.2", "1"),
-            	p.getProperty("analog.voltage.adjust.3", "1") };
-            
-            for (int i = 0; i<4; i++) {
-            	adj[i] = Double.parseDouble(s_adjust[i]);
-            }
+            loadAdjustment();
             
             if (s_address.startsWith("0x")) {
                 this.address = Integer.parseInt(s_address.substring(2), 16);
@@ -47,6 +40,19 @@ public class SensorVoltage extends I2CSensor {
             }
         }
     }
+
+	private void loadAdjustment() {
+        Properties p = getProps().readConf();
+		String[] s_adjust = new String[] { 
+			p.getProperty("analog.voltage.adjust.0", "1"),
+			p.getProperty("analog.voltage.adjust.1", "1"),
+			p.getProperty("analog.voltage.adjust.2", "1"),
+			p.getProperty("analog.voltage.adjust.3", "1") };
+		
+		for (int i = 0; i<4; i++) {
+			adj[i] = Double.parseDouble(s_adjust[i]);
+		}
+	}
 
     public double getVoltage0() {
         return v[0] * adj[0];
@@ -76,6 +82,7 @@ public class SensorVoltage extends I2CSensor {
 
     @Override
     protected void _read() throws Exception {
+    	loadAdjustment();
         for (int i = 0; i<4; i++) {
             double _v = ads.getVoltage(i);
         	v[i] = DataFilter.getLPFReading(getDefaultSmootingAlpha(), v[i], _v);

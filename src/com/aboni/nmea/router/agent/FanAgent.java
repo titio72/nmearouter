@@ -18,7 +18,8 @@ public class FanAgent extends NMEAAgentImpl {
 	private Timer timer;
 	private static final int READ_THRESHOLD = 5000;
 	private static final int TIMER = 1000;
-	private static final double FAN_THRESHOLD = 65.0;
+	private static final double FAN_THRESHOLD_ON = 55.0;
+	private static final double FAN_THRESHOLD_OFF = 52.0;
     private Fan fan;
     
 	public FanAgent(String name, QOS qos) {
@@ -69,7 +70,10 @@ public class FanAgent extends NMEAAgentImpl {
 	}
 
 	protected void onTimer() {
-		fan(getTemp()>FAN_THRESHOLD);
+		double temp = getTemp();
+		if (fan.isFanOn() && temp<FAN_THRESHOLD_OFF) fan(false);
+		else if (!fan.isFanOn() && temp>FAN_THRESHOLD_ON) fan(true);
+
 	}
 
 	@Override
