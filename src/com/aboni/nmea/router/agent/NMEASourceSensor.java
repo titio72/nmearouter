@@ -7,6 +7,7 @@ import com.aboni.sensors.Sensor;
 import com.aboni.sensors.SensorCompass;
 import com.aboni.sensors.SensorNotInititalizedException;
 import com.aboni.sensors.SensorVoltage;
+import com.aboni.sensors.hw.CPUTemp;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -124,6 +125,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             sendMHU(mhuSensor);
             sendHDx();
             sendXDR();
+            sendCPUTemp();
         }            
     }
 
@@ -275,6 +277,16 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		    }
 		} catch (Exception e) {
 			getLogger().Error("Cannot post temperature data", e);
+		}
+	}
+	
+	private void sendCPUTemp() {
+		try {
+			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+			xdr.addMeasurement(new Measurement("C", Math.round(CPUTemp.getTemp()*100d)/100d, "C", "CPUTemp"));
+			notify(xdr);
+		} catch (Exception e) {
+			getLogger().Error("Cannot post XDR data", e);
 		}
 	}
 

@@ -13,10 +13,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class FanAgent extends NMEAAgentImpl {
 
-	private CPUTemp cpuTemp;
-	private Sample temp; 
 	private Timer timer;
-	private static final int READ_THRESHOLD = 5000;
 	private static final int TIMER = 1000;
 	private static final double FAN_THRESHOLD_ON = 55.0;
 	private static final double FAN_THRESHOLD_OFF = 52.0;
@@ -24,30 +21,13 @@ public class FanAgent extends NMEAAgentImpl {
     
 	public FanAgent(String name, QOS qos) {
 		super(name, qos);
-		cpuTemp = new CPUTemp();
-		temp = new Sample(0, 0);
 		timer = null;
 		fan = new Fan();
 	}
 	
-	private double getTemp() {
-		synchronized (this) {
-			try {
-				long t = System.currentTimeMillis();
-				if (temp.getAge(t)>READ_THRESHOLD) {
-					temp = new Sample(t, cpuTemp.read());
-				}
-				return temp.getValue();
-			} catch (Exception e) {
-				ServerLog.getLogger().Error("Error reading cpu temperature", e);
-			}
-			return 0.0;
-		}
-	}
-	
 	@Override
 	public String getDescription() {
-		return "CPU Temp " + getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") ;
+		return "CPU Temp " + CPUTemp.getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") + " [" + FAN_THRESHOLD_OFF + "/" + FAN_THRESHOLD_ON + "]";
 	}
 
 	@Override
@@ -70,7 +50,7 @@ public class FanAgent extends NMEAAgentImpl {
 	}
 
 	protected void onTimer() {
-		double temp = getTemp();
+		double temp = CPUTemp.getTemp();
 		if (fan.isFanOn() && temp<FAN_THRESHOLD_OFF) fan(false);
 		else if (!fan.isFanOn() && temp>FAN_THRESHOLD_ON) fan(true);
 
