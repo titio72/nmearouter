@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Router>
 	<Log level="INFO"/>
-	<SimulatorAgent name="SIM" active="true">
+	<SimulatorAgent name="SIM" active="false">
 	    <qos>rmc2vtg;enrich_hdg</qos>
 	</SimulatorAgent>
 	<MeteoAgent name="METEO" active="false"/>
-	<ConsoleAgent name="CONSOLE" active="true"/>
+	<ConsoleAgent name="CONSOLE" active="false"/>
 	<SensorAgent name="SENSOR" active="false"/>
 	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
 		<qos>rmc2vtg;enrich_hdg</qos>
 	</SerialAgent>
-	<TcpAgent name="TCPIN" host="192.168.2.149" port="1111" inout="IN" active="true">
+	<TcpAgent name="TCPIN" host="192.168.2.149" port="1111" inout="IN" active="false">
 		<qos>enrich_hdg</qos>
 	</TcpAgent>
 	<TrackAgent name="TRACK" active="false" file="t.log"/>
-	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="true"/>
-	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="true">
+	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="false"/>
+	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
 		<to>192.168.2.255</to>
 		<to>192.168.2.130</to>
 		<to>192.168.2.151</to>
 	</UdpAgent>
 	<JSONAgent name="JSON" port="1113" active="false"/>
-	<MWDAgent name="MWD" active="true">
+	<MWDAgent name="MWD" active="false">
 		<qos>longthreshold</qos>
 	</MWDAgent>
 	<SerialAgent name="SOUT" device="/dev/ttyUSB1" bps="4800" inout="OUT" active="false"/>
