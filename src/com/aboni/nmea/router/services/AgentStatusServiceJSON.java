@@ -6,6 +6,9 @@ import java.util.Iterator;
 
 import com.aboni.nmea.router.NMEARouterProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.conf.db.AgentStatus;
+import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
+import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 
 public class AgentStatusServiceJSON implements WebService {
 
@@ -50,6 +53,8 @@ public class AgentStatusServiceJSON implements WebService {
     	void dumpServices(NMEAAgent ag) throws IOException {
     		if (!first)
                 response.getWriter().print(",");
+
+    		boolean auto = AgentStatusProvider.getAgentStatus().getStartMode(ag.getName())==STATUS.AUTO;
     		
     		first = false;
     		response.getWriter().print(
@@ -60,7 +65,9 @@ public class AgentStatusServiceJSON implements WebService {
                     "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
                     "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 
                     "\"startStop\":\"" + ag.isUserCanStartAndStop() + "\", " + 
-                    "\"builtin\":\"" + ag.isBuiltIn() + "\"}");
+                    "\"builtin\":\"" + ag.isBuiltIn() + "\", " + 
+                    "\"auto\":\"" + auto + "\"" + 
+                    "}");
     	}
     	
     }
@@ -76,34 +83,48 @@ public class AgentStatusServiceJSON implements WebService {
     private String doActivate(ServiceConfig config) {
 		String msg = "";
 		String agent = config.getParameter("agent");
+		String auto = config.getParameter("auto");
+		String active = config.getParameter("active");
 		if (agent!=null) {
 			NMEAAgent a = NMEARouterProvider.getRouter().getAgent(agent);
 			if (a!=null) {
-				if (a.isUserCanStartAndStop()) {
-		        	String activate = config.getParameter("active");
-		        	if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
-		        		if (a.isStarted()) {
-		        			msg = "Agent '" + agent + "' alread started";
-		        		} else {
-		        			a.start();
-		        			msg = "Agent '" + agent + "' started";
-		        		}
-		        	} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
-		        		if (a.isStarted()) {
-		        			a.stop();
-		        			msg = "Agent '" + agent + "' stopped";
-		        		} else {
-		        			msg = "Agent '" + agent + "' not started";
-		        		}
-		        	} else {
-		        		msg = "Unknown status '" + activate + "'"; 
-		        	}
-				} else {
-					msg = "This agent does not support starting/stopping";
+				if (active!=null) {
+					msg = startStopService(a, active);
+				} 
+				
+				if (auto!=null) {
+					AgentStatus as = AgentStatusProvider.getAgentStatus();
+					as.setStartMode(agent, "1".equals(auto)?STATUS.AUTO:STATUS.MANUAL);
 				}
 			} else {
 				msg = "Unknown agent '" + agent + "'";
 			}
+		}
+		return msg;
+	}
+
+	private String startStopService(NMEAAgent a, String activate) {
+		String msg;
+		if (a.isUserCanStartAndStop()) {
+			if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
+				if (a.isStarted()) {
+					msg = "Agent '" + a.getName() + "' alread started";
+				} else {
+					a.start();
+					msg = "Agent '" + a.getName() + "' started";
+				}
+			} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
+				if (a.isStarted()) {
+					a.stop();
+					msg = "Agent '" + a.getName() + "' stopped";
+				} else {
+					msg = "Agent '" + a.getName() + "' not started";
+				}
+			} else {
+				msg = "Unknown status '" + activate + "'"; 
+			}
+		} else {
+			msg = "This agent does not support starting/stopping";
 		}
 		return msg;
 	}

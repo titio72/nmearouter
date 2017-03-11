@@ -67,6 +67,23 @@
 		controllerScope.$evalAsync();
 	}
    
+    function httpGetSynAuto(a, auto) {
+	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/agentsj?agent=" + a.name + "&auto=" + auto , false);
+	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	    xmlHttp.send( null );
+	    var json = JSON.parse(xmlHttp.responseText);
+		var agentList = json.agents;
+		var msg = json.message;
+		var controllerElement = document.getElementById('agentGrid');
+		var controllerScope = angular.element(controllerElement).scope();
+		setColors(agentList);
+		agentList.sort(compare);
+		controllerScope.agents = agentList;
+		controllerScope.message = msg;  
+		controllerScope.$evalAsync();
+	}
+   
 	</script>
 
 
@@ -90,6 +107,7 @@
 							<th>Source</th>
 							<th>Target</th>
 							<th>BuiltIn</th>
+							<th>Auto</th>
 							<th>Status</th>
 						</tr>
 					</thead>
@@ -101,18 +119,33 @@
 							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<!-- td align="center"><div ng-if="a.auto=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td-->
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
-								<div ng-if="a.started=='false'">
-	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 1)">
-	                        		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-	                        	</button>
+									<div ng-if="a.auto=='false'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSynAuto(this, 1)">
+			                        		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
+									<div ng-if="a.auto=='true'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSynAuto(this, 0)">
+			                        		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
 	                        	</div>
-								<div ng-if="a.started=='true'">
-	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 0)">
-	                        		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-	                        	</button>
-	                        	</div>
+	                        </td>
+							<td align="center">
+								<div ng-if="a.startStop=='true'">
+									<div ng-if="a.started=='false'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 1)">
+			                        		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
+									<div ng-if="a.started=='true'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 0)">
+			                        		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
 	                        	</div>
 	                        </td>
 						</tr>
@@ -124,6 +157,7 @@
 							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<td align="center">&nbsp;</td>
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
 								<div ng-if="a.started=='false'">

@@ -40,8 +40,9 @@
 		   				<h2 class="panel-title">Voltage</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>{{sensor.sensor.V0}} V<br>
-						{{sensor.sensor.V1}} V</h3>
+						<h3>Svc {{sensor.sensor.V0}} V<br>
+						Eng {{sensor.sensor.V1}} V<br>
+						<br>CPU {{sensor.sensor.CPUTemp}} °C</h3>
 			  		</div>
 			  	</div>
 			</div>
@@ -51,12 +52,13 @@
 		   				<h2 class="panel-title">Meteo</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>{{sensor.sensor.AirTemp}} °C<br>
-						{{sensor.sensor.Barometer}} MB<br>
-						{{sensor.sensor.Humidity}} %<br>
+						<h3>{{sensor.sensor.AirTemp_0}} °C<br>
+						{{sensor.sensor.Barometer_0}} MB<br>
 						<br>{{sensor.sensor.AirTemp_1}} °C<br>
 						{{sensor.sensor.Barometer_1}} MB<br>
-						{{sensor.sensor.Humidity_1}} %</h3>
+						{{sensor.sensor.Humidity_1}} %<br>
+						<br>{{sensor.sensor.ExtAirTemp}} °C<br>
+						</h3>
 			  		</div>
 			  	</div>
 			</div>

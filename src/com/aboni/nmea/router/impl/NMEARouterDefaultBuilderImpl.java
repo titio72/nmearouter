@@ -16,6 +16,9 @@ import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConfParser;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.conf.Router;
+import com.aboni.nmea.router.conf.db.AgentStatus;
+import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
+import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
@@ -47,7 +50,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         	NMEAAgent agent = builder.createAgent(a, r);
             if (agent!=null) {
             	r.addAgent(agent);
-            	if (a.isActive()) agent.start();
+            	handleActivatation(agent, a);
             }
         }
         
@@ -57,6 +60,20 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         buildFanTarget(conf, r);
         buildDPTStats(conf, r);
         return r;
+    }
+    
+    private void handleActivatation(NMEAAgent agent, AgentBase a) {
+    	AgentStatus s = AgentStatusProvider.getAgentStatus();
+    	boolean active = a.isActive();
+    	if (s!=null) {
+    		AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());  
+    		if (requestedStatus==STATUS.UNKNOWN) {
+    			s.setStartMode(agent.getName(), active?STATUS.AUTO:STATUS.MANUAL);
+    		} else {
+    			active = (requestedStatus==STATUS.AUTO);
+    		}
+    	}
+    	if (active) agent.start();
     }
     
     private void buildStreamDump(Router conf2, NMEARouterImpl r) {

@@ -3,11 +3,9 @@ package com.aboni.nmea.router.agent;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.aboni.misc.Sample;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
-import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -69,4 +67,10 @@ public class FanAgent extends NMEAAgentImpl {
 	private void fan(boolean on) {
 		fan.switchFan(on);
 	}
+	
+    @Override
+    public boolean isUserCanStartAndStop() {
+    	return false;
+    }
+
 }
