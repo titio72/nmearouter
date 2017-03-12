@@ -1,10 +1,10 @@
 package com.aboni.sensors;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import com.aboni.sensors.hw.ADS1115;
 import com.aboni.utils.DataFilter;
+import com.aboni.utils.HWSettings;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorVoltage extends I2CSensor {
@@ -28,29 +28,19 @@ public class SensorVoltage extends I2CSensor {
 
         this.address = ADS1115.ADS1115_ADDRESS_0x48;
         
-        Properties p = getProps().readConf();
-        if (p!=null) {
-            String s_address = p.getProperty("analog.voltage", "0x48");
-            loadAdjustment();
-            
-            if (s_address.startsWith("0x")) {
-                this.address = Integer.parseInt(s_address.substring(2), 16);
-            } else {
-                this.address = Integer.parseInt(s_address);
-            }
+        String s_address = HWSettings.getProperty("analog.voltage", "0x48");
+        loadAdjustment();
+        
+        if (s_address.startsWith("0x")) {
+            this.address = Integer.parseInt(s_address.substring(2), 16);
+        } else {
+            this.address = Integer.parseInt(s_address);
         }
     }
 
 	private void loadAdjustment() {
-        Properties p = getProps().readConf();
-		String[] s_adjust = new String[] { 
-			p.getProperty("analog.voltage.adjust.0", "1"),
-			p.getProperty("analog.voltage.adjust.1", "1"),
-			p.getProperty("analog.voltage.adjust.2", "1"),
-			p.getProperty("analog.voltage.adjust.3", "1") };
-		
 		for (int i = 0; i<4; i++) {
-			adj[i] = Double.parseDouble(s_adjust[i]);
+			adj[i] = HWSettings.getPropertyAsDouble("analog.voltage.adjust." + i, 1.0);
 		}
 	}
 
@@ -88,6 +78,4 @@ public class SensorVoltage extends I2CSensor {
         	v[i] = DataFilter.getLPFReading(getDefaultSmootingAlpha(), v[i], _v);
         }
     }
-
-    
 }

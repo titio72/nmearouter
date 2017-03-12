@@ -12,7 +12,6 @@ import java.util.List;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
-import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEA2FileAgent extends NMEAAgentImpl {

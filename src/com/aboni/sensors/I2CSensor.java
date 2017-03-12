@@ -1,8 +1,8 @@
 package com.aboni.sensors;
 
 import java.io.IOException;
-import java.util.Properties;
 
+import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
@@ -57,8 +57,6 @@ public abstract class I2CSensor implements Sensor {
     
     private boolean initialized;
     
-    private SensorProperties prop;
-    
     public I2CSensor() {
         readTs = 0;
         setDefaultSmootingAlpha(LPF_ALPHA);
@@ -67,7 +65,6 @@ public abstract class I2CSensor implements Sensor {
         initialized = false;
         failures = 0;
         maxFailures = MAX_FAILURES;
-        prop = new SensorProperties();
     }
 
     /* (non-Javadoc)
@@ -136,20 +133,6 @@ public abstract class I2CSensor implements Sensor {
     }
     
     protected int getBus() {
-        Properties p = prop.readConf();
-        if (p!=null) {
-            try {
-                return Integer.parseInt(p.getProperty("bus", "1"));
-            } catch (Exception e) {
-                error("Error reading properties for bus number - assuming default", e);
-                return 1;
-            }
-        } else {
-            return 1;
-        }
-    }
-    
-    public SensorProperties getProps() {
-    	return prop;
+        return HWSettings.getPropertyAsInteger("bus", 1);
     }
 }

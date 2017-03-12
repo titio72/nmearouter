@@ -3,10 +3,10 @@ package com.aboni.sensors;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.utils.Constants;
+import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
@@ -88,17 +88,14 @@ public class SensorCompass extends I2CSensor {
     }
 
     private void updateCalibration() {
-        Properties configuration = getProps().getProperties();
-    	if (configuration!=null) {
-    	    try {
-    	        int x = Integer.parseInt(configuration.getProperty("calibration.x"));
-    	        int y = Integer.parseInt(configuration.getProperty("calibration.y"));
-    	        int z = Integer.parseInt(configuration.getProperty("calibration.z"));
-    	        compass.setCalibration(x, y, z);
-            } catch (Exception e) {
-                ServerLog.getLogger().Error("Cannot load compass calibration!", e);
-            }
-    	}
+	    try {
+	        int x = HWSettings.getPropertyAsInteger("calibration.x", 0);
+	        int y = HWSettings.getPropertyAsInteger("calibration.y", 0);
+	        int z = HWSettings.getPropertyAsInteger("calibration.z", 0);
+	        compass.setCalibration(x, y, z);
+        } catch (Exception e) {
+            ServerLog.getLogger().Error("Cannot load compass calibration!", e);
+        }
     }
 
     private void updateDeviationTable() {

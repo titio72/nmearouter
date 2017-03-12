@@ -1,17 +1,16 @@
 package com.aboni.nmea.router.agent;
 
 import com.aboni.sensors.SensorPressureTemp;
-import com.aboni.sensors.SensorProperties;
 import com.aboni.sensors.SensorTemp;
 import com.aboni.sensors.Sensor;
 import com.aboni.sensors.SensorCompass;
 import com.aboni.sensors.SensorNotInititalizedException;
 import com.aboni.sensors.SensorVoltage;
 import com.aboni.sensors.hw.CPUTemp;
+import com.aboni.utils.HWSettings;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -59,13 +58,10 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private boolean sendHDM = false;
     private boolean sendHDT = false;
     
-    private SensorProperties props;
-    
     public NMEASourceSensor(String name, QOS q) {
         super(name, q);
         setSourceTarget(true, false);
         data = new NMEACacheImpl();
-        props = new SensorProperties();
     }
     
     @Override
@@ -115,10 +111,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private void doLF() {
         if (started) {
         	readSensors();
-        	Properties p = props.getProperties();
-        	int mtaSensor = "1".equals(p.getProperty("mta.sensor", "0"))?1:0;
-        	int mmbSensor = "1".equals(p.getProperty("mmb.sensor", "0"))?1:0;
-        	int mhuSensor = "1".equals(p.getProperty("mhu.sensor", "0"))?1:0;
+        	int mtaSensor = HWSettings.getPropertyAsInteger("mta.sensor", 0);
+        	int mmbSensor = HWSettings.getPropertyAsInteger("mmb.sensor", 0);
+        	int mhuSensor = HWSettings.getPropertyAsInteger("mhu.sensor", 0);
             sendXXX();
             sendMTA(mtaSensor);
             sendMMB(mmbSensor);
@@ -322,7 +317,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     				SensorTemp.Reading tr = i.next();
     				if ((System.currentTimeMillis() - tr.ts) < 1000) {
     					String name = tr.k.substring(tr.k.length()-4, tr.k.length()-1);
-    					String mappedName = props.getProperties().getProperty("temp.map." + name);
+    					String mappedName = HWSettings.getProperty("temp.map." + name);
     					if (mappedName==null) mappedName = name;
     					xdr.addMeasurement(
             				new Measurement("C", Math.round(tr.v*10d)/10d, "C", mappedName));

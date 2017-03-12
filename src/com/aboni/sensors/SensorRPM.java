@@ -1,10 +1,10 @@
 package com.aboni.sensors;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import com.aboni.sensors.hw.ADS1115;
 import com.aboni.sensors.hw.ADS1115FrequencyCounter;
+import com.aboni.utils.HWSettings;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorRPM extends I2CSensor {
@@ -18,14 +18,11 @@ public class SensorRPM extends I2CSensor {
     	super();
         address = ADS1115.ADS1115_ADDRESS_0x48;
 
-        Properties p = getProps().readConf();
-        if (p!=null) {
-            String address = p.getProperty("analog.rpm", "0x48");
-            if (address.startsWith("0x")) {
-                this.address = Integer.parseInt(address.substring(2), 16);
-            } else {
-                this.address = Integer.parseInt(address);
-            }
+        String address = HWSettings.getProperty("analog.rpm", "0x48");
+        if (address.startsWith("0x")) {
+            this.address = Integer.parseInt(address.substring(2), 16);
+        } else {
+            this.address = Integer.parseInt(address);
         }
     }
     

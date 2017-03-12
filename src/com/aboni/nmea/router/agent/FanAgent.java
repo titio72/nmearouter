@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
+import com.aboni.utils.HWSettings;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -25,7 +26,8 @@ public class FanAgent extends NMEAAgentImpl {
 	
 	@Override
 	public String getDescription() {
-		return "CPU Temp " + CPUTemp.getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") + " [" + FAN_THRESHOLD_OFF + "/" + FAN_THRESHOLD_ON + "]";
+		return "CPU Temp " + CPUTemp.getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") + 
+				" [" + getThresholdOff() + "/" + getThresholdOn() + "]";
 	}
 
 	@Override
@@ -49,9 +51,17 @@ public class FanAgent extends NMEAAgentImpl {
 
 	protected void onTimer() {
 		double temp = CPUTemp.getTemp();
-		if (fan.isFanOn() && temp<FAN_THRESHOLD_OFF) fan(false);
-		else if (!fan.isFanOn() && temp>FAN_THRESHOLD_ON) fan(true);
+		if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
+		else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
 
+	}
+	
+	private double getThresholdOff() {
+		return HWSettings.getPropertyAsDouble("fan.off", FAN_THRESHOLD_OFF);
+	}
+	
+	private double getThresholdOn() {
+		return HWSettings.getPropertyAsDouble("fan.on", FAN_THRESHOLD_ON);
 	}
 
 	@Override
