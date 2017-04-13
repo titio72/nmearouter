@@ -27,7 +27,7 @@ public class NMEASentenceItem {
 		String sT = tkz.nextToken().substring(1);
 		String sD = tkz.nextToken().substring(1);
 		String sS = tkz.nextToken().substring(1);
-		sentence = SentenceFactory.getInstance().createParser(sS);
+		sentence = SentenceFactory.getInstance().createParser(sS.trim());
 		timestamp = Long.parseLong(sT);
 		data = sD;
 	}

@@ -338,7 +338,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         if (_hdg) {
                             HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
                             hdg.setHeading(heading);
-                            hdg.setDeviation(0.0);
+                            //hdg.setDeviation(0.0);
                             NMEASimulatorSource.this.notify(hdg);
                         }
                         

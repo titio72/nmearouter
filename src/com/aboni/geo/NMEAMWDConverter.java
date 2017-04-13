@@ -13,7 +13,7 @@ public class NMEAMWDConverter {
 	private MWVSentence trueWind;
 	long tsHeading, tsWind;
 	private TalkerId id;
-	private static final int THRESHOLD = 100 /*ms*/;
+	private static final int THRESHOLD = 300 /*ms*/;
 	
 	public NMEAMWDConverter(TalkerId id) {
 		this.id = id;

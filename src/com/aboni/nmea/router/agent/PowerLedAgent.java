@@ -31,7 +31,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-    	return "";
+    	return ((System.currentTimeMillis()-lastGps)<2000)?"On Gps[on]":"On Gps[off]";
     }
     
     @Override

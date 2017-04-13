@@ -173,9 +173,35 @@ public class NMEAPlayer extends NMEAAgentImpl {
 				FileReader fr = new FileReader(args[0]);
 				BufferedReader r = new BufferedReader(fr);
 				String line = null;
+				long t0 = System.currentTimeMillis();
+				long log_t0 = 0;
 				while ((line=r.readLine())!=null) {
 					try {
-						Thread.sleep(55);
+						if (line.startsWith("[")) {
+							try {
+								NMEASentenceItem itm = new NMEASentenceItem(line);
+								long t = System.currentTimeMillis();
+								long log_t = itm.getTimestamp();
+								long dt = t-t0;
+								long dLog_t = log_t - log_t0;
+								if (dLog_t>dt && log_t0!=0) {
+									try { Thread.sleep(dLog_t-dt); } catch (Exception pp) {}
+								}
+								send(itm.getSentence().toSentence());
+								t0 = System.currentTimeMillis();
+								log_t0 = log_t;
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						} else {
+							try {
+								Sentence s = SentenceFactory.getInstance().createParser(line);
+								Thread.sleep(55);
+								send(s.toSentence());
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
 						System.out.println(line);
 						send(line);
 					} catch (Exception e) {
