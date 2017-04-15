@@ -102,7 +102,8 @@ function tripInfo(trip) {
 		message: 
 		"<p>" + json.start + " - " + json.end + " UTC</p>" +			
 		"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + d + "d " + h + "h " + m + "m</b></p>" +
-		"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>"
+		"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
+		"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>"
 	});
 	
 }

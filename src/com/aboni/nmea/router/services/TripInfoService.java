@@ -17,7 +17,7 @@ public class TripInfoService implements WebService {
 
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
-		String sql = "select sum(dist), max(speed), min(TS), max(TS) from track where tripid=?";
+		String sql = "select sum(dist), max(speed), min(TS), max(TS), max(maxSpeed) from track where tripid=?";
         response.setContentType(APPLICATION_JSON);
 		try {
             db = new DBHelper(true);
@@ -31,11 +31,14 @@ public class TripInfoService implements WebService {
 
             if (rs.next()) {
             	double dist = rs.getDouble(1);
-            	double maxSpeed = rs.getDouble(2);
+            	double maxSpeed30 = rs.getDouble(2);
+            	double maxSpeed = rs.getDouble(5);
             	Timestamp start = rs.getTimestamp(3);
             	Timestamp end = rs.getTimestamp(4);
             	response.getWriter().append("{");
             	response.getWriter().append("\"dist\":" + dist);
+            	response.getWriter().append(",");
+            	response.getWriter().append("\"maxspeed30\":" + maxSpeed30);
             	response.getWriter().append(",");
             	response.getWriter().append("\"maxspeed\":" + maxSpeed);
             	response.getWriter().append(",");
