@@ -26,7 +26,7 @@ public class FanAgent extends NMEAAgentImpl {
 	
 	@Override
 	public String getDescription() {
-		return "CPU Temp " + CPUTemp.getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") + 
+		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "° Fan " + (fan.isFanOn()?"On":"Off") + 
 				" [" + getThresholdOff() + "/" + getThresholdOn() + "]";
 	}
 
@@ -50,7 +50,7 @@ public class FanAgent extends NMEAAgentImpl {
 	}
 
 	protected void onTimer() {
-		double temp = CPUTemp.getTemp();
+		double temp = CPUTemp.getInstance().getTemp();
 		if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
 		else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
 

@@ -16,8 +16,8 @@ import java.util.TimerTask;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
+import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.impl.NMEACacheImpl;
 import com.aboni.nmea.sentences.XXXPSentence;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -43,7 +43,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      */
     private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
 	
-    private NMEACacheImpl data;
     private boolean started;
     
     private Timer timer;
@@ -61,7 +60,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     public NMEASourceSensor(String name, QOS q) {
         super(name, q);
         setSourceTarget(true, false);
-        data = new NMEACacheImpl();
     }
     
     @Override
@@ -94,16 +92,12 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         };
         timer = new Timer(getName(), true);
         timer.scheduleAtFixedRate(t, 1000 /* wait 1s before starting reading*/, PERIOD);
-        
-        data.start();
-        
         return true;
     }
     
     @Override
     protected synchronized void onDeactivate() {
         started = false;
-        data.stop();
         timer.cancel();
         timer = null;
     }
@@ -201,8 +195,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private void sendHDx() {
     	try {
     	    if (compassSensor!=null && 
-    	    		(data.isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME)
-    	    		|| getName().equals(data.getLastHeading().source))) {
+    	    		(NMEACacheProvider.getCache().isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME)
+    	    		|| getName().equals(NMEACacheProvider.getCache().getLastHeading().source))) {
 	            double b = compassSensor.getHeading();
 	            
 	            if (sendHDM) {
@@ -211,9 +205,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     	            notify(hdm);
 	            }
 	            
-	            if (data.getLastPosition().data != null) {
+	            if (NMEACacheProvider.getCache().getLastPosition().data != null) {
 	                NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
-	                m.setPosition(data.getLastPosition().data.getPosition());
+	                m.setPosition(NMEACacheProvider.getCache().getLastPosition().data.getPosition());
 	                
 	                if (sendHDT) {
     	                HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);
@@ -278,7 +272,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	private void sendCPUTemp() {
 		try {
 			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-			xdr.addMeasurement(new Measurement("C", Math.round(CPUTemp.getTemp()*100d)/100d, "C", "CPUTemp"));
+			xdr.addMeasurement(new Measurement("C", Math.round(CPUTemp.getInstance().getTemp()*100d)/100d, "C", "CPUTemp"));
 			notify(xdr);
 		} catch (Exception e) {
 			getLogger().Error("Cannot post XDR data", e);
