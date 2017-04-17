@@ -8,18 +8,21 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEASentenceItem {
 
 	private Sentence sentence;
+	private String string;
 	private long timestamp;
 	private String data;
 	
 	@Override
 	public String toString() {
-		return "[" + timestamp + "][" + data + "] " + sentence.toSentence();
+		return "[" + timestamp + "][" + data + "] " + string;
 	}
 
 	public NMEASentenceItem(Sentence sentence, long timestamp, String data) {
 		this.sentence = sentence;
 		this.timestamp = timestamp;
 		this.data = data;
+		this.string = sentence.toSentence();
+		
 	}
 	
 	public NMEASentenceItem(String line) throws Exception {
@@ -27,7 +30,12 @@ public class NMEASentenceItem {
 		String sT = tkz.nextToken().substring(1);
 		String sD = tkz.nextToken().substring(1);
 		String sS = tkz.nextToken().substring(1);
-		sentence = SentenceFactory.getInstance().createParser(sS.trim());
+		string = sS.trim();
+		try {
+			sentence = SentenceFactory.getInstance().createParser(string);
+		} catch (Exception e) {
+			sentence = null;
+		}
 		timestamp = Long.parseLong(sT);
 		data = sD;
 	}
@@ -35,19 +43,28 @@ public class NMEASentenceItem {
 	public Sentence getSentence() {
 		return sentence;
 	}
+	
 	public void setSentence(Sentence sentence) {
 		this.sentence = sentence;
 	}
+	
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
+	
 	public String getData() {
 		return data;
 	}
+	
 	public void setData(String data) {
 		this.data = data;
+	}
+	
+	public String getString() {
+		return string;
 	}
 }

@@ -29,8 +29,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int WIND_D = 4; 
     private static final int HUM = 5; 
     private Sample[] samples = new Sample[6];
-    private static final String[] TYPES = new String[] {"AT0", "WT_", "PR_", "TW_", "TWD", "HUM"};
-    private static final String[] TYPES_D = new String[] {"V", "V", "V", "V", "A", "V"};
+    private static final String[] TYPES = new String[] 		{"AT0", "WT_", 	"PR_", 	"TW_", 	"TWD", 	"HUM"};
+    private static final String[] TYPES_D = new String[] 	{"V", 	"V", 	"V", 	"V", 	"A", 	"V"};
     
     private class Sample {
         double Avg = Double.NaN;
@@ -51,11 +51,11 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 	                Avg = ((Avg * Samples) +  a) / (Samples +1);
 	                Avg = Utils.normalizeDegrees0_360(Avg);
 	                Max = Utils.normalizeDegrees0_360(Math.max(Max,  a));
-	                Min = Utils.normalizeDegrees0_360(Math.min(Max,  a));
+	                Min = Utils.normalizeDegrees0_360(Math.min(Min,  a));
             	} else {
 	                Avg = ((Avg * Samples) +  v) / (Samples +1);
 	                Max = Math.max(Max,  v);
-	                Min = Math.min(Max,  v);
+	                Min = Math.min(Min,  v);
             	}
                 Samples++;
             }
@@ -159,7 +159,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void processWind(MWDSentence s) {
-        collect(WIND, s.getWindSpeed()/0.51444444444);
+        collect(WIND, s.getWindSpeedKnots());
         collect(WIND_D, s.getMagneticWindDirection());
     }
 

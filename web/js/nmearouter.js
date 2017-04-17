@@ -22,6 +22,18 @@ function httpLoadMeteoByDate(tp, all, dt) {
 		return getMeteoData(tp, json.serie)
 }
 
+function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	var json = JSON.parse(xmlHttp.responseText);
+	if (all==1) 
+		return getMeteoDataA(tp, json.serie)
+	else
+		return getMeteoData(tp, json.serie)
+}
+
 function getMeteoData(caption, sr) {
 	var data = new Object();
 	data.datasets = [];

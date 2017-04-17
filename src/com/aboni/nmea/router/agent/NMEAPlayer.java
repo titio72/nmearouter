@@ -187,7 +187,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 								if (dLog_t>dt && log_t0!=0) {
 									try { Thread.sleep(dLog_t-dt); } catch (Exception pp) {}
 								}
-								send(itm.getSentence().toSentence());
+								send(itm.getString());
 								t0 = System.currentTimeMillis();
 								log_t0 = log_t;
 							} catch (Exception e) {
@@ -202,8 +202,8 @@ public class NMEAPlayer extends NMEAAgentImpl {
 								e.printStackTrace();
 							}
 						}
-						System.out.println(line);
-						send(line);
+						//System.out.println(line);
+						//send(line);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

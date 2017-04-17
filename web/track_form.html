@@ -54,12 +54,17 @@ html, body {
 <script src="js/bootbox.min.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/Chart.js"></script>
-<script src="js/nmearouter.js?1"></script>
+<script src="js/nmearouter.js?2"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
 
 <script type="text/javascript">
 	var app = angular.module("nmearouter", []);
 
+	var tempChart = null;
+	var windChart = null;
+	var pressChart = null;
+	var humChart = null;
+	
 	var dateFrom = null;
 	var dateTo = null;
 	
@@ -126,25 +131,27 @@ html, body {
 		//var dtF = document.getElementById("dateFrom").value;
 		//var dtT = document.getElementById("dateTo").value;
 		loadMap(dateFrom, dateTo);	  		
-		var tempChart = refreshChart(tempChart, "tempChart", "AT0", 0);
-		var windChart = refreshChart(windChart, "windChart", "TW_", 1);
-		var pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
-		var humChart = refreshChart(humChart, "humChart", "HUM", 0);
+		tempChart = refreshChart(tempChart, "tempChart", "AT0", 0);
+		windChart = refreshChart(windChart, "windChart", "TW_", 1);
+		pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
+		humChart = refreshChart(humChart, "humChart", "HUM", 0);
   	}
   	
   	function refreshChart(c, chart, type, style) {
 		var ctx = document.getElementById(chart);
-		if (c!=null) c.destroy();
+		if (c!=null) {
+			c.destroy();
+	  	}
 		var c1 = new Chart(ctx, {
-		    type: 'line',
-		    data: httpLoadMeteoByDate(type, style, dateFrom + "2359"),
-		    options: {
-		        scales: {
-		        	xAxes: [{
-		                type: 'time',
-		            }]
-		        }
-		    }
+	    type: 'line',
+	    data: httpLoadMeteoDateRange(type, style, dateFrom + "0000", dateTo + "2359"),
+	    options: {
+	        scales: {
+	        	xAxes: [{
+	                type: 'time',
+	            }]
+	        }
+	    }
 		});
 		return c1;
   	}

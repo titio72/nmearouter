@@ -23,16 +23,21 @@ public class MeteoService implements WebService {
         response.setContentType("application/json");
         
         // set today by default
-        Calendar c = Calendar.getInstance();
-        Calendar cFrom = config.getParamAsCalendar(config, "date", c, "yyyyMMddHHmm");
+        Calendar c0 = Calendar.getInstance();
+        c0.add(Calendar.SECOND, -24*60*60);
+        Calendar cFrom = config.getParamAsCalendar(config, "date", c0, "yyyyMMddHHmm");
+        
+        Calendar c1 = Calendar.getInstance();
+        c1.setTimeInMillis(c0.getTimeInMillis() + 24L*60L*60L*1000L);
+        Calendar cTo = config.getParamAsCalendar(config, "dateTo", c1, "yyyyMMddHHmm");
         
         try {
             db = new DBHelper(true);
             stm = db.getConnection().prepareStatement("select TS, vMax, v, vMin from meteo where type=? and TS>=? and TS<=?");
 
             stm.setString(1, type);
-        	stm.setTimestamp(2, new java.sql.Timestamp(cFrom.getTimeInMillis() - (24*60*60*1000)));
-        	stm.setTimestamp(3, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+        	stm.setTimestamp(2, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+        	stm.setTimestamp(3, new java.sql.Timestamp(cTo.getTimeInMillis() ));
             ResultSet rs = stm.executeQuery();
             
             response.getWriter().write("{\"type\":\""+ type +"\", \"serie\":[");
