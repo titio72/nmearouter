@@ -48,7 +48,7 @@ public class ServerLog implements Log {
 	    try {  
             lg.setUseParentHandlers(false);
 
-            fh = new FileHandler(Constants.LOG);
+            fh = new FileHandler(Constants.LOG, 0, 1, true);
             lg.addHandler(fh);
 
             //Formatter formatter = new SimpleFormatter();  

@@ -1,6 +1,8 @@
 package com.aboni.nmea.router;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -124,6 +126,13 @@ public class StartRouter {
     
     private static void startRouter(String[] args, NMEARouterBuilder builder) {
         System.out.println("Start");
+		Date date = new Date();
+		SimpleDateFormat f = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().Info("---- NMEARouter ----------------------------------------------------------------");
+		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().Info("---- Start " + f.format(date) + "--------------------------------------------------");
+		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
         NMEAUtils.registerExtraSentences();
         NMEAStreamProvider.getStreamInstance(); // be sure the stream started
     	if (builder.init()!=null) {
