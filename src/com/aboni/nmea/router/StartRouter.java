@@ -4,17 +4,22 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.websocket.server.ServerContainer;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
 import com.aboni.nmea.router.impl.NMEARouterDefaultBuilderImpl;
 import com.aboni.nmea.router.impl.NMEARouterPlayerBuilderImpl;
+import com.aboni.nmea.router.services.EventSocket;
 import com.aboni.nmea.router.services.WebInterface;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XXXPParser;
@@ -72,15 +77,27 @@ public class StartRouter {
                 Server server = new Server(1112);
              
                 ResourceHandler resource_handler = new ResourceHandler();
-                //resource_handler.setDirectoriesListed(true);
                 resource_handler.setWelcomeFiles(new String[]{ "index.html" });
                 resource_handler.setResourceBase("./web");
-         
+
+                // Setup the basic application "context" for this application at "/"
+                // This is also known as the handler tree (in jetty speak)
+                ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+                context.setContextPath("/");
+                server.setHandler(context);
+                
+                
                 HandlerList handlers = new HandlerList();
-                handlers.setHandlers(new Handler[] { resource_handler, new WebInterface() });
+                handlers.setHandlers(new Handler[] { resource_handler, new WebInterface(), context });
                 server.setHandler(handlers);
+
+                ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
+                wscontainer.addEndpoint(EventSocket.class);
+                
                 server.start();
+                server.dump(System.err);
                 server.join();
+                
             } catch (Exception e) {
                 e.printStackTrace();
             }
