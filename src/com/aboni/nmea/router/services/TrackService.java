@@ -19,12 +19,12 @@ public class TrackService  implements WebService {
         try {
         	Calendar c = Calendar.getInstance();
         	c.setTimeInMillis( c.getTimeInMillis() - (c.getTimeInMillis()%(24*60*60*1000)) );
-            Calendar cFrom = config.getParamAsCalendar(config, "from", c, "yyyyMMdd");
+            Calendar cFrom = config.getParamAsCalendar(config, "dateFrom", c, "yyyyMMdd");
             
             Calendar c1 = Calendar.getInstance();
             c1.setTime(cFrom.getTime());
         	c.setTimeInMillis( c.getTimeInMillis() - (c.getTimeInMillis()%(24*60*60*1000)) );
-        	Calendar cTo = config.getParamAsCalendar(config, "to", c1, "yyyyMMdd");
+        	Calendar cTo = config.getParamAsCalendar(config, "dateTo", c1, "yyyyMMdd");
         	cTo.add(Calendar.HOUR, 24);
         	
         	String f = config.getParameter("format");

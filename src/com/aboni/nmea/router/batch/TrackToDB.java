@@ -32,7 +32,7 @@ public class TrackToDB {
 	}
 	
 	public void load(String file) throws Exception {
-	    int i = 0;
+	    //int i = 0;
 	    //db = new DBHelper(false);
 	    
 	    //PreparedStatement st = db.getConnection().prepareStatement("insert into track (lat, lon, TS, anchor) values (?, ?, ?, ?)");
@@ -66,7 +66,7 @@ public class TrackToDB {
 			    st.setInt(4, 0);
 			    st.execute();
 			    */
-			    i++;
+			    //i++;
 			    /*
 			    if (i%1000==0) {
 			        db.getConnection().commit();
