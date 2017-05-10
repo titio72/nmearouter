@@ -15,15 +15,11 @@ import javax.websocket.server.ServerEndpoint;
 import org.json.JSONObject;
 
 import com.aboni.nmea.router.NMEAStreamProvider;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
-import com.aboni.nmea.sentences.NMEA2JSONb;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.utils.ServerLog;
 
-import net.sf.marineapi.nmea.sentence.Sentence;
-
 @ClientEndpoint
-@ServerEndpoint(value="/events/")
+@ServerEndpoint(value="/events")
 public class EventSocket
 {
 	private static Map<Session, MySession> sessions = new HashMap<>();
@@ -36,6 +32,7 @@ public class EventSocket
     {
     	synchronized (sessions) {
 	    	MySession s = new MySession(sess);
+    		sessions.put(sess,  s);
 	        s.start();
     	}
     }
@@ -44,12 +41,6 @@ public class EventSocket
     public void onWebSocketText(String message)
     {
     }
-    
-    /*@OnClose
-    public void onWebSocketClose(CloseReason reason)
-    {
-        //stop();
-    }*/
 
     @OnClose
     public void onWebSocketClose(Session sess)
@@ -62,45 +53,40 @@ public class EventSocket
 	    	}
     	}
     }
-    	@OnError
+    	
+    @OnError
     public void onWebSocketError(Throwable cause)
     {
         ServerLog.getLogger().Error("Error handling websockets", cause);
     }
-    
     	
-    private static class MySession implements NMEASentenceListener {
+    public static class MySession {
     	private Session sess;
-		private NMEA2JSONb nmea2json;
     	private static long sc;
     	private long id;
     	
     	MySession(Session s) {
     		sess = s;
-    		nmea2json = new NMEA2JSONb();
     		id = sc++;
     	}
     	
 	    private void start() {
 	    	synchronized (this) {
-		    	System.out.println("WS Session Opened " + id);
 		    	ServerLog.getLogger().Info("Start new WS session " + id);
-		    	NMEAStreamProvider.getStreamInstance().addSentenceListener(this);
+		    	NMEAStreamProvider.getStreamInstance().subscribe(this);
 	    	}
 	    }
 	    
 	    private void stop() {
 	    	synchronized (this) {
-		    	System.out.println("WS Session Closed " + id);
 		    	ServerLog.getLogger().Info("Close WS session " + id);
-		    	NMEAStreamProvider.getStreamInstance().dropSentenceListener(this);
+		    	NMEAStreamProvider.getStreamInstance().unsubscribe(this);
 	    	}
 		}
 
-		@Override
-		public void onSentence(Sentence s, NMEAAgent src) {
+		@OnSentence
+		public void onSentence(JSONObject obj) {
 			synchronized (this) {
-				JSONObject obj = nmea2json.convert(s);
 				if (obj!=null) {
 					try {
 						sess.getBasicRemote().sendText(obj.toString());

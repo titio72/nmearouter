@@ -11,4 +11,7 @@ public interface NMEAStream {
 	void dropSentenceListener(NMEASentenceListener listener);
 	void pushSentence(Sentence s, NMEAAgent src);
 
+	void subscribe(Object b);
+	void unsubscribe(Object b);
+	
 }

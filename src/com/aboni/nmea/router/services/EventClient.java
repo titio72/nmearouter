@@ -2,48 +2,55 @@ package com.aboni.nmea.router.services;
 
 import java.net.URI;
 
+import javax.websocket.ClientEndpoint;
 import javax.websocket.ContainerProvider;
+import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-import org.eclipse.jetty.util.component.LifeCycle;
 
-public class EventClient
-{
-    public static void main(String[] args)
-    {
-        URI uri = URI.create("ws://localhost:1112/events/");
 
-        try
-        {
-            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+@ClientEndpoint
+public class EventClient {
+	
+	private static Object waitLock = new Object();
 
-            try
-            {
-                // Attempt Connect
-                Session session = container.connectToServer(EventSocket.class,uri);
-                
-                // Send a message
-                session.getBasicRemote().sendText("Hello");
-                
-                // Close session
-                session.close();
-            }
-            finally
-            {
-                // Force lifecycle stop when done with container.
-                // This is to free up threads and resources that the
-                // JSR-356 container allocates. But unfortunately
-                // the JSR-356 spec does not handle lifecycles (yet)
-                if (container instanceof LifeCycle)
-                {
-                    ((LifeCycle)container).stop();
-                }
-            }
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace(System.err);
-        }
-    }
+	@OnMessage
+	public void onMessage(String message) {
+		// the new USD rate arrives from the websocket server side.
+		System.out.println("Received msg: " + message);
+	}
+
+	private static void wait4TerminateSignal() {
+		synchronized (waitLock) {
+			try {
+				waitLock.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		WebSocketContainer container = null;//
+		Session session = null;
+		try {
+			// Tyrus is plugged via ServiceLoader API. See notes above
+			container = ContainerProvider.getWebSocketContainer();
+			// WS1 is the context-root of my web.app
+			// ratesrv is the path given in the ServerEndPoint annotation on
+			// server implementation
+			session = container.connectToServer(EventClient.class, URI.create("ws://localhost:1112/events"));
+			wait4TerminateSignal();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }
