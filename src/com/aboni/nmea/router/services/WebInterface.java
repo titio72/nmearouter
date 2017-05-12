@@ -27,6 +27,8 @@ public class WebInterface extends AbstractHandler
         	s.doIt(new ServletRequestServiceConfig(request), 
         			new ServletResponseOutput(response));
             baseRequest.setHandled(true);
+    	} else {
+    		baseRequest.setHandled(false);
     	}
     }
 

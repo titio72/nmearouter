@@ -35,7 +35,7 @@ public class NMEASerialTargetJSSC extends NMEAAgentImpl {
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		if (isStarted()) {
 			try {
-				String toSend = s.toSentence() + "\n";
+				String toSend = s.toSentence() + "\r\n";
 				port.writeBytes(toSend.getBytes());
 			} catch (SerialPortException e) {
 				getLogger().Error("ERROR: cannot write on port " + portName, e);
