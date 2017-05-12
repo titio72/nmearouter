@@ -5,29 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Andrea Boni NMEARouter</title>
 <link href="css/bootstrap.min.css" rel="stylesheet">
+<style>
+.panelText {
+font-family: monospace; 
+font-size: 18pt;
+}
+</style>
 </head>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/angular.min.js"></script>
 <script type="text/javascript">
     var app = angular.module("nmearouter", []);
-
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/sensor?format=json" , false);
-    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-    xmlHttp.send( null );
-	var sensor = JSON.parse(xmlHttp.responseText);
-	if (sensor.sensor.Barometer_0!=null) sensor.sensor.Barometer_0 *= 1000;  
-	if (sensor.sensor.Barometer_1!=null) sensor.sensor.Barometer_1 *= 1000;  
     app.controller("myCtrl", function($scope) {
-		$scope.sensor = sensor;  
-   });
+		$scope.V0 = { value: 0.0 };
+		$scope.V1 = { value: 0.0 };
+    });
    
+    var socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
+    socket.onmessage = function (event) {
+    	var msg = JSON.parse(event.data);
+		if (msg.topic=='XDR') {
+			for (var prop in msg) {
+				if (prop!='XDR') {
+					var controllerElement = document.getElementById('sensorPanel');
+					var controllerScope = angular.element(controllerElement).scope();
+					controllerScope[prop] = msg[prop];
+					controllerScope.$evalAsync();
+				}
+			}
+		} else if (msg.topic=='RMC') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['rmc'] = msg;
+			controllerScope.$evalAsync();
+		} else if (msg.topic=='DPT') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['depth'] = msg;
+			controllerScope.$evalAsync();
+		} else if (msg.topic=='VHW') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['vector'] = msg;
+			controllerScope.$evalAsync();
+		} else if (msg.topic=='MWV_R') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['wind_r'] = msg;
+			controllerScope.$evalAsync();
+		} else if (msg.topic=='MWV_T') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['wind_t'] = msg;
+			controllerScope.$evalAsync();
+		}
+    }
 </script>
 
 
 <body ng-app="nmearouter">
-	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
+	<div id="sensorPanel" class="container-fluid" ng-controller="myCtrl">
 		<ol class="breadcrumb">
 		  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
 		  <li class="breadcrumb-item active">Sensors</li>
@@ -35,53 +73,88 @@
 		
 		<div class="row">
 			<div class="col-lg-3">
-				<div class="panel panel-default">
+				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Voltage</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>Svc {{sensor.sensor.V0}} V<br>
-						Eng {{sensor.sensor.V1}} V<br>
-						<br>CPU {{sensor.sensor.CPUTemp}} °C</h3>
+						<div class="panelText">Svc {{V0.value | number:1}} V<br>
+						Eng {{V1.value | number:1}} V<br>
+						<br>CPU {{CPUTemp.value | number:1}} °C</div>
 			  		</div>
 			  	</div>
 			</div>
 			<div class="col-lg-3">
-				<div class="panel panel-default">
+				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Meteo</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>{{sensor.sensor.AirTemp_0}} °C<br>
-						{{sensor.sensor.Barometer_0}} MB<br>
-						<br>{{sensor.sensor.AirTemp_1}} °C<br>
-						{{sensor.sensor.Barometer_1}} MB<br>
-						{{sensor.sensor.Humidity_1}} %<br>
-						<br>{{sensor.sensor.ExtAirTemp}} °C<br>
-						</h3>
+						<div class="panelText">
+						{{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:1}}MB<br>
+						{{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:1}}MB<br>
+						Hum {{Humidity_1.value | number:1}}%<br>
+						{{ExtAirTemp.value | number:1}}°C<br>
+						</div>
 			  		</div>
 			  	</div>
 			</div>
 			<div class="col-lg-3">
-				<div class="panel panel-default">
+				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Gyro</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>Head: {{sensor.sensor.HEAD}}°</h3>
-						<h3>Roll: {{sensor.sensor.ROLL}}°</h3>
-						<h3>Pitch: {{sensor.sensor.PITCH}}°</h3>
+						<div class="panelText">Head: {{HEAD.value | number:1}}°</div>
+						<div class="panelText">Roll: {{ROLL.value | number:1}}°</div>
+						<div class="panelText">Pitch: {{PITCH.value | number:1}}°</div>
 			  		</div>
 			  	</div>
 			</div>
 			<div class="col-lg-3">
-				<div class="panel panel-default">
+				<div class="panel panel-primary">
 		 			<div class="panel-heading">
-		   				<h2 class="panel-title">Position</h2>
+		   				<h2 class="panel-title">GPS</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<h3>{{sensor.Position.Latitude}}<br>
-						{{sensor.Position.Longitude}}</h3>
+						<div class="panelText">Lat {{rmc.latitude}}<br>
+						Lon {{rmc.longitude}}
+						</div>
+						<div class="panelText">
+						SOG {{rmc.SOG | number:1}}Kn<br>
+						COG {{rmc.COG | number:1}}°
+						</div>
+			  		</div>
+			  	</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="panel panel-primary">
+		 			<div class="panel-heading">
+		   				<h2 class="panel-title">Navi</h2>
+		 			</div>
+			  		<div class="panel-body" style="height: 250px">
+						<div class="panelText">
+						Speed {{vector.speed | number:1}}Kn<br>
+						Head {{vector.true_angle | number:1}}°
+						</div>
+						<div class="panelText">
+						Depth {{depth.depth | number:1}}m<br>
+						</div>
+			  		</div>
+			  	</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="panel panel-primary">
+		 			<div class="panel-heading">
+		   				<h2 class="panel-title">Wind</h2>
+		 			</div>
+			  		<div class="panel-body" style="height: 250px">
+						<div class="panelText">
+						True {{wind_t.speed | number:1}}Kn {{wind_t.angle}}°
+						</div>
+						<div class="panelText">
+						App {{wind_r.speed | number:1}}Kn {{wind_r.angle}}°
+						</div>
 			  		</div>
 			  	</div>
 			</div>
