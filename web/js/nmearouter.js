@@ -22,6 +22,15 @@ function httpLoadMeteoByDate(tp, all, dt) {
 		return getMeteoData(tp, json.serie)
 }
 
+function httpLoadSpeedDateRange(dt0, dt1) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?date=" + dt0 + "&dateTo=" + dt1, false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	var json = JSON.parse(xmlHttp.responseText);
+	return getMeteoDataA(tp, json.serie)
+}
+
 function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, false);
@@ -174,8 +183,8 @@ function httpGetCruisingDays() {
 function httpGetTrack(dtF, dtT) {
 	var caption;
 	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/track?format=json&from=" + dtF +
-			"&to=" + dtT, false);
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/track?format=json&dateFrom=" + dtF +
+			"&dateTo=" + dtT, false);
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);

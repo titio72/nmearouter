@@ -58,6 +58,8 @@ public class WebInterface extends AbstractHandler
         	s = new ChangeTripDescService();
         } else if (target.equals("/tripinfo")) {
         	s = new TripInfoService();
+        } else if (target.equals("/speed")) {
+        	s = new SpeedService();
         }
 		return s;
 	}

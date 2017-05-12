@@ -392,9 +392,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         if (_xdrMeteo) {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 
-	                        if (_xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer"));
-	                        if (_xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "TempAir"));
-	                        if (_xdrMeteoHum) xdr.addMeasurement(new Measurement("C", _hum, "H", "Humidity"));
+	                        if (_xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
+	                        if (_xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_0"));
+	                        if (_xdrMeteoHum) xdr.addMeasurement(new Measurement("C", _hum, "H", "Humidity_0"));
+	                        if (_xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_1"));
+	                        if (_xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
+	                        if (_xdrMeteoHum) xdr.addMeasurement(new Measurement("C", _hum, "H", "Humidity_1"));
                             NMEASimulatorSource.this.notify(xdr);
                         }
                         
