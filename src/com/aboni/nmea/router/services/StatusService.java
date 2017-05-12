@@ -73,7 +73,7 @@ public class StatusService implements WebService {
 
             if (c.getLastPosition()!=null) {
             	PositionSentence lastPos = c.getLastPosition().data;
-            	if (lastPos!=null && json) response.getWriter().print(",");
+            	//if (lastPos!=null && json) response.getWriter().print(",");
                 response.getWriter().print(json?
                         ",\"Position\":{" 
                         :"<Position>\n");

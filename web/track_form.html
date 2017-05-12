@@ -54,7 +54,7 @@ html, body {
 <script src="js/bootbox.min.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/Chart.js"></script>
-<script src="js/nmearouter.js?5"></script>
+<script src="js/nmearouter.js?7"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
 
 <script type="text/javascript">
@@ -302,10 +302,10 @@ html, body {
 			<div class="col-md-6" style="min-width:600px">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
-						<h3 class="panel-title">Temperature</h3>
+						<h3 class="panel-title">Speed</h3>
 					</div>
 					<div class="panel-body">
-						<canvas style="min-width: 400px; height: 250px" id="tempChart"></canvas>
+						<canvas style="min-width: 400px; height: 250px" id="speedChart"></canvas>
 					</div>
 				</div>
 			</div>
@@ -316,6 +316,16 @@ html, body {
 					</div>
 					<div class="panel-body">
 						<canvas style="min-width: 400px; height: 250px" id="windChart"></canvas>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6" style="min-width:600px">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Temperature</h3>
+					</div>
+					<div class="panel-body">
+						<canvas style="min-width: 400px; height: 250px" id="tempChart"></canvas>
 					</div>
 				</div>
 			</div>
@@ -336,16 +346,6 @@ html, body {
 					</div>
 					<div class="panel-body">
 						<canvas style="min-width: 400px; height: 250px" id="humChart"></canvas>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-6" style="min-width:600px">
-				<div class="panel panel-primary">
-					<div class="panel-heading">
-						<h3 class="panel-title">Speed</h3>
-					</div>
-					<div class="panel-body">
-						<canvas style="min-width: 400px; height: 250px" id="speedChart"></canvas>
 					</div>
 				</div>
 			</div>

@@ -8,9 +8,6 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 
 public class AgentStatusService implements WebService {
 
-    public AgentStatusService() {
-    }
-    
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("text/xml;charset=utf-8");

@@ -28,7 +28,7 @@ function httpLoadSpeedDateRange(dt0, dt1) {
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
-	return getMeteoDataA(tp, json.serie)
+	return getSpeedData("Speed", json.serie)
 }
 
 function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
@@ -60,7 +60,7 @@ function getMeteoData(caption, sr) {
 	data.datasets.push(dataset);
 	return data;
 }
-		
+
 function getMeteoDataA(caption, sr) {
 	var data = new Object();
 	data.datasets = [];
@@ -90,6 +90,39 @@ function getMeteoDataA(caption, sr) {
     datasetMin.pointBackgroundColor = "#00FF00",
     datasetMin.pointBorderColor = "#22FF22",
 	data.datasets.push(datasetMin);
+
+	var datasetMax = new Object();
+	datasetMax.label = caption + "Max";
+	datasetMax.data = [];
+	for (i = 0; i<sr.length; i++) {
+		var item = sr[i];
+		var datapoint = new Object();
+		datapoint.x = Date.parse(item.time);
+		datapoint.y = parseFloat(item.vMax);
+		datasetMax.data.push(datapoint);
+	}
+    datasetMax.pointBackgroundColor = "#FF0000",
+    datasetMax.pointBorderColor = "#FF2222",
+	data.datasets.push(datasetMax);
+	
+	return data;
+}
+
+function getSpeedData(caption, sr) {
+	var data = new Object();
+	data.datasets = [];
+	
+	var dataset = new Object();
+	dataset.label = caption;
+	dataset.data = [];
+	for (i = 0; i<sr.length; i++) {
+		var item = sr[i];
+		var datapoint = new Object();
+		datapoint.x = Date.parse(item.time);
+		datapoint.y = parseFloat(item.v);
+		dataset.data.push(datapoint);
+	}
+	data.datasets.push(dataset);
 
 	var datasetMax = new Object();
 	datasetMax.label = caption + "Max";

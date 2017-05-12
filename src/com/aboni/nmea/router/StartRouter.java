@@ -84,7 +84,7 @@ public class StartRouter {
                 // This is also known as the handler tree (in jetty speak)
                 ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 context.setContextPath("/");
-                server.setHandler(context);
+                //server.setHandler(context);
                 
                 
                 HandlerList handlers = new HandlerList();

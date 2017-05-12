@@ -12,9 +12,6 @@ import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 
 public class AgentStatusServiceJSON implements WebService {
 
-    public AgentStatusServiceJSON() {
-    }
-
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("application/json");
