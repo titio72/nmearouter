@@ -2,10 +2,13 @@ package com.aboni.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.Timestamp;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.Calendar;
 import java.util.Properties;
 
 public class DBHelper {
@@ -55,6 +58,17 @@ public class DBHelper {
     
     public void close() throws SQLException {
         conn.close();
+    }
+    
+    public Timestamp[] getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
+        PreparedStatement stm = getConnection().prepareStatement("select max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
+    	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+    	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+        ResultSet rs = stm.executeQuery();
+        if (rs.next()) 
+        	return new Timestamp[] { rs.getTimestamp(1), rs.getTimestamp(2) };
+        else 
+        	return null;
     }
     
 }
