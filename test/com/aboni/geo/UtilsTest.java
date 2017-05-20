@@ -58,6 +58,4 @@ public class UtilsTest {
 		assertEquals(2.0, Utils.getNormal(-1.0, 2.0), 0.00001);
 		assertEquals(392.0, Utils.getNormal(359.0, 32.0), 0.00001);
 	}
-	
-
 }
