@@ -14,7 +14,6 @@ import com.aboni.utils.ServerLog;
 
 public class MeteoService implements WebService {
 
-    private static final int SAMPLING = 600000; //10m
 	private DBHelper db;
     private PreparedStatement stm;
     

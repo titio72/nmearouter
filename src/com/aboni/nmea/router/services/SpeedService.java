@@ -14,8 +14,6 @@ import com.aboni.utils.ServerLog;
 
 public class SpeedService implements WebService {
 
-	private static final int SAMPLING = 30000; //10m
-
     private DBHelper db;
     private PreparedStatement stm;
     
@@ -75,6 +73,7 @@ public class SpeedService implements WebService {
 	                response.getWriter().write(",");
 	        	}
 	            response.getWriter().write("{\"time\":\"" + new Timestamp(s.t0).toString() + "\",");
+	            response.getWriter().write("\"vMin\":" + s.vMin + ",");
 	            response.getWriter().write("\"v\":" + s.v + ",");
 	            response.getWriter().write("\"vMax\":" + s.vMax + "}");
 	            first = false;

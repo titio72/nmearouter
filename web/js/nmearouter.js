@@ -1,13 +1,10 @@
-function httpLoadMeteo(tp, all) {
+/*function httpLoadMeteo(tp, all) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?type=" + tp, false);
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
-	if (all==1)
-		return getMeteoDataA(tp, json.serie)
-	else
-		return getMeteoData(tp, json.serie)
+	return getDataset(tp, json.serie, all, 1, all);
 }
 
 function httpLoadMeteoByDate(tp, all, dt) {
@@ -16,11 +13,8 @@ function httpLoadMeteoByDate(tp, all, dt) {
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
-	if (all==1) 
-		return getMeteoDataA(tp, json.serie)
-	else
-		return getMeteoData(tp, json.serie)
-}
+	return getDataset(tp, json.serie, all, 1, all);
+}*/
 
 function httpLoadSpeedDateRange(dt0, dt1) {
 	var xmlHttp = new XMLHttpRequest();
@@ -28,7 +22,7 @@ function httpLoadSpeedDateRange(dt0, dt1) {
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
-	return getSpeedData("Speed", json.serie)
+	return getDataset("Speed", json.serie, 1, 1, 1);
 }
 
 function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
@@ -37,108 +31,32 @@ function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
-	if (all==1) 
-		return getMeteoDataA(tp, json.serie)
-	else
-		return getMeteoData(tp, json.serie)
+	return getDataset(tp, json.serie, all, 1, all);
 }
 
-function getMeteoData(caption, sr) {
+function getDataset(caption, sr, min, avg, max) {
 	var data = new Object();
 	data.datasets = [];
-	
+	if (min>0) data.datasets.push(fillDataset(caption + "Min", sr, "vMin", "#00FF00", "#22FF22"));
+	if (avg>0) data.datasets.push(fillDataset(caption, 		sr, "v", 	"#555555", "#222222"));
+	if (max>0) data.datasets.push(fillDataset(caption + "Max", sr, "vMax", "#FF0000", "#FF2222"));
+	return data;
+}
+
+function fillDataset(caption, sr, attr, color, borderColor) {
 	var dataset = new Object();
 	dataset.label = caption;
 	dataset.data = [];
 	for (i = 0; i<sr.length; i++) {
 		var item = sr[i];
 		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.v);
+		datapoint.x = Date.parse(item['time']);
+		datapoint.y = parseFloat(item[attr]);
 		dataset.data.push(datapoint);
 	}
-	data.datasets.push(dataset);
-	return data;
-}
-
-function getMeteoDataA(caption, sr) {
-	var data = new Object();
-	data.datasets = [];
-	
-	var dataset = new Object();
-	dataset.label = caption;
-	dataset.data = [];
-	for (i = 0; i<sr.length; i++) {
-		var item = sr[i];
-		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.v);
-		dataset.data.push(datapoint);
-	}
-	data.datasets.push(dataset);
-
-	var datasetMin = new Object();
-	datasetMin.label = caption + "Min";
-	datasetMin.data = [];
-	for (i = 0; i<sr.length; i++) {
-		var item = sr[i];
-		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.vMin);
-		datasetMin.data.push(datapoint);
-	}
-    datasetMin.pointBackgroundColor = "#00FF00",
-    datasetMin.pointBorderColor = "#22FF22",
-	data.datasets.push(datasetMin);
-
-	var datasetMax = new Object();
-	datasetMax.label = caption + "Max";
-	datasetMax.data = [];
-	for (i = 0; i<sr.length; i++) {
-		var item = sr[i];
-		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.vMax);
-		datasetMax.data.push(datapoint);
-	}
-    datasetMax.pointBackgroundColor = "#FF0000",
-    datasetMax.pointBorderColor = "#FF2222",
-	data.datasets.push(datasetMax);
-	
-	return data;
-}
-
-function getSpeedData(caption, sr) {
-	var data = new Object();
-	data.datasets = [];
-	
-	var dataset = new Object();
-	dataset.label = caption;
-	dataset.data = [];
-	for (i = 0; i<sr.length; i++) {
-		var item = sr[i];
-		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.v);
-		dataset.data.push(datapoint);
-	}
-	data.datasets.push(dataset);
-
-	var datasetMax = new Object();
-	datasetMax.label = caption + "Max";
-	datasetMax.data = [];
-	for (i = 0; i<sr.length; i++) {
-		var item = sr[i];
-		var datapoint = new Object();
-		datapoint.x = Date.parse(item.time);
-		datapoint.y = parseFloat(item.vMax);
-		datasetMax.data.push(datapoint);
-	}
-    datasetMax.pointBackgroundColor = "#FF0000",
-    datasetMax.pointBorderColor = "#FF2222",
-	data.datasets.push(datasetMax);
-	
-	return data;
+    dataset.pointBackgroundColor = color;"#FF0000",
+    dataset.pointBorderColor = borderColor;
+	return dataset;
 }
 
 function tripInfo(trip) {

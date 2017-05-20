@@ -60,15 +60,19 @@ public class DBHelper {
         conn.close();
     }
     
-    public Timestamp[] getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
+    public synchronized Timestamp[] getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
         PreparedStatement stm = getConnection().prepareStatement("select max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
     	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
     	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
         ResultSet rs = stm.executeQuery();
-        if (rs.next()) 
-        	return new Timestamp[] { rs.getTimestamp(1), rs.getTimestamp(2) };
-        else 
-        	return null;
+        if (rs.next()) {
+        	Timestamp tMax = rs.getTimestamp(1);
+        	Timestamp tMin = rs.getTimestamp(2);
+        	if (tMax!=null && tMin!=null) {
+	        	return new Timestamp[] { rs.getTimestamp(1), rs.getTimestamp(2) };
+        	}
+        }
+        return null;
     }
     
 }

@@ -2,8 +2,6 @@ package com.aboni.nmea.router.agent;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -99,9 +97,10 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     protected void dumpStats() {
         synchronized (samples) {
+        	long ts = System.currentTimeMillis() - SAMPLING;
             for (int i = 0; i<samples.length; i++) {
                 if (samples[i]!=null) {
-                    write(TYPES[i], samples[i]);
+                    write(TYPES[i], samples[i], ts);
                     samples[i] = null;
                 }
             }
@@ -139,18 +138,14 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         }
     }
 
-    private void write(String type, Sample v) {
+    private void write(String type, Sample v, long ts) {
         try {
             if (v.Samples>0) {
                 stm.setString(1, type);
                 stm.setDouble(2, v.Avg);
                 stm.setDouble(3, v.Max);
                 stm.setDouble(4, v.Min);
-                
-                Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                Timestamp x = new Timestamp(c.getTimeInMillis());
-                stm.setTimestamp(5, x, c);
-                
+                stm.setTimestamp(5, new Timestamp(ts));
                 stm.execute();
             }
         } catch (Exception e) {
@@ -159,7 +154,11 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void processWind(MWDSentence s) {
-        collect(WIND, s.getWindSpeedKnots());
+    	if (Double.isNaN(s.getWindSpeedKnots())) {
+    		collect(WIND, s.getWindSpeed() * 1.94384);
+    	} else {
+    		collect(WIND, s.getWindSpeedKnots());
+    	}
         collect(WIND_D, s.getMagneticWindDirection());
     }
 
