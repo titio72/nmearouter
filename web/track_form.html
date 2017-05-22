@@ -125,13 +125,13 @@ html, body {
 	}
 	
   	function refreshMap() {
-		loadMap(dateFrom, dateTo);	  		
 		tempChart = refreshChart(tempChart, "tempChart", "AT0", 0);
 		windChart = refreshChart(windChart, "windChart", "TW_", 1);
 		pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
 		humChart = refreshChart(humChart, "humChart", "HUM", 0);
 		speedChart = refreshSpeedChart(speedChart, "speedChart");
-  	}
+		loadMap(dateFrom, dateTo);	  		
+	}
 
   	function refreshSpeedChart(c, chart) {
 		var ctx = document.getElementById(chart);
