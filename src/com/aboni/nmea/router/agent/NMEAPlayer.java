@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.sentences.NMEASentenceItem;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
