@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
