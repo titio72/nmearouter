@@ -38,6 +38,7 @@ public class MeteoService implements WebService {
         try {
             db = new DBHelper(true);
             Timestamp[] range = db.getTimeframe("meteo", cFrom, cTo);
+            List<Sample> samples = new LinkedList<>();
             if (range!=null) {
 	            long interval = Math.abs(range[0].getTime() - range[1].getTime());
 	            interval = interval/150;
@@ -48,7 +49,6 @@ public class MeteoService implements WebService {
 	        	stm.setTimestamp(3, new java.sql.Timestamp(cTo.getTimeInMillis() ));
 	            ResultSet rs = stm.executeQuery();
 	            
-	            List<Sample> samples = new LinkedList<>();
 	            while (rs.next()) {
 	                Timestamp ts = rs.getTimestamp(1);
 	                double vMax = rs.getDouble(2);
@@ -56,8 +56,8 @@ public class MeteoService implements WebService {
 	                double vMin = rs.getDouble(4);
 	                Sample.doSampling(samples, ts.getTime(), vMax, v, vMin, interval);
 	            }
-	            fillResponse(response, type, samples);
             }
+        	fillResponse(response, type, samples);
         } catch (Exception e) {
         	e.printStackTrace();
             ServerLog.getLogger().Error("Error writing sample", e);
