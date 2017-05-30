@@ -360,7 +360,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         
                         if (_mbb) {
                             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(id, "MMB");
-                            mmb.setBars(press);
+                            mmb.setBars(press/1000.0);
                             NMEASimulatorSource.this.notify(mmb);
                         }
                         
