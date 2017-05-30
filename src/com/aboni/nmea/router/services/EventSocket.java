@@ -25,12 +25,14 @@ public class EventSocket
 	private static Map<Session, MySession> sessions = new HashMap<>();
 
 	public EventSocket() {
+		ServerLog.getLogger().Info("Init web-socket");
 	}
 	
     @OnOpen
     public void onWebSocketConnect(Session sess)
     {
     	synchronized (sessions) {
+    		ServerLog.getLogger().Info("Started web-socket session {" + sess.getId() + "}");
 	    	MySession s = new MySession(sess);
     		sessions.put(sess,  s);
 	        s.start();
@@ -46,8 +48,10 @@ public class EventSocket
     public void onWebSocketClose(Session sess)
     {
     	synchronized (sessions) {
+    		ServerLog.getLogger().Info("Closed web-socket session {" + sess.getId() + "}");
 	    	if (sessions.containsKey(sess)) {
 	    		MySession s = sessions.get(sess);
+	    		ServerLog.getLogger().Info("Stopping updates for web-socket id {" + s.id + "}");
 	    		s.stop();
 	    		sessions.remove(sess);
 	    	}

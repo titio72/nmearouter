@@ -61,11 +61,11 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 		}
 	}
 
+	private static DecimalFormat fh = new DecimalFormat("+00");
+	private static DecimalFormat fm = new DecimalFormat("00");
 	private static Calendar getCalendar(Time t, Date d) {
         int hh = t.getOffsetHours();
         int hm = t.getOffsetHours();
-        DecimalFormat fh = new DecimalFormat("+00");
-        DecimalFormat fm = new DecimalFormat("00");
         String h = "GMT" + fh.format(hh) + ":" + fm.format(hm); 
         TimeZone tz = TimeZone.getTimeZone(h);
 
