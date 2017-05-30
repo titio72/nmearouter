@@ -80,7 +80,8 @@ font-size: 18pt;
 			  		<div class="panel-body" style="height: 250px">
 						<div class="panelText">Svc {{V0.value | number:1}} V<br>
 						Eng {{V1.value | number:1}} V<br>
-						<br>CPU {{CPUTemp.value | number:1}} °C</div>
+						<br>CPU {{CPUTemp.value | number:1}} °C
+						<br>Eng {{EngineTemp.value | number:1}} °C</div>
 			  		</div>
 			  	</div>
 			</div>
@@ -91,10 +92,10 @@ font-size: 18pt;
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
 						<div class="panelText">
-						{{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:1}}MB<br>
-						{{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:1}}MB<br>
+						Cab {{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:0}}<br>
+						Eqp {{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:0}}<br>
+						Ext {{ExtAirTemp.value | number:1}}°C<br>
 						Hum {{Humidity_1.value | number:1}}%<br>
-						{{ExtAirTemp.value | number:1}}°C<br>
 						</div>
 			  		</div>
 			  	</div>
