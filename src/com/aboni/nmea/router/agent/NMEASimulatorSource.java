@@ -309,7 +309,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             vt.setSpeedUnit(Units.KNOT);
                             vt.setAngle(Utils.normalizeDegrees0_360(trueWind.getTrueWindDeg()));
-                            vt.setSpeed(trueWind.getTrueWindSpeed());
+                            vt.setSpeed(trueWind.getTrueWindSpeed() + 25.0);
                             vt.setTrue(true);
                             NMEASimulatorSource.this.notify(vt);
 						}
