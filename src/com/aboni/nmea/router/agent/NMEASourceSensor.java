@@ -43,6 +43,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      */
     private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
 	
+    private static boolean sendXXX = false; // disable it
+
     private boolean started;
     
     private Timer timer;
@@ -335,33 +337,35 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	}
 	
 	private void sendXXX() {
-        try {
-            XXXPSentence sentence = (XXXPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, "XXP");
-            if (compassSensor!=null) {
-            	double[] rot = compassSensor.getRotationDegrees();
-                double[] xyz = compassSensor.getMagReading();
-                double b = compassSensor.getHeading();
-                sentence.setHeading(b);
-                sentence.setMagX(xyz[0]);
-                sentence.setMagY(xyz[1]);
-                sentence.setMagZ(xyz[2]);
-                sentence.setRotationX(rot[0]);
-                sentence.setRotationY(rot[1]);
-                sentence.setRotationZ(rot[2]);
-            }
-            if (pressureTempSensor0!=null) {
-            	double t = pressureTempSensor0.getTemperatureCelsius();
-    	        double pr = pressureTempSensor0.getPressureMB();
-    	        sentence.setPressure(pr);
-    	        sentence.setTemperature(t);
-            }
-            if (voltageSensor!=null) {
-                sentence.setVoltage(voltageSensor.getVoltage0());
-                sentence.setVoltage1(voltageSensor.getVoltage1());
-            }
-	        notify(sentence);
-		} catch (Exception e) {
-			getLogger().Error("Cannot post XXX data", e);
+		if (sendXXX) {
+	        try {
+	            XXXPSentence sentence = (XXXPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, "XXP");
+	            if (compassSensor!=null) {
+	            	double[] rot = compassSensor.getRotationDegrees();
+	                double[] xyz = compassSensor.getMagReading();
+	                double b = compassSensor.getHeading();
+	                sentence.setHeading(b);
+	                sentence.setMagX(xyz[0]);
+	                sentence.setMagY(xyz[1]);
+	                sentence.setMagZ(xyz[2]);
+	                sentence.setRotationX(rot[0]);
+	                sentence.setRotationY(rot[1]);
+	                sentence.setRotationZ(rot[2]);
+	            }
+	            if (pressureTempSensor0!=null) {
+	            	double t = pressureTempSensor0.getTemperatureCelsius();
+	    	        double pr = pressureTempSensor0.getPressureMB();
+	    	        sentence.setPressure(pr);
+	    	        sentence.setTemperature(t);
+	            }
+	            if (voltageSensor!=null) {
+	                sentence.setVoltage(voltageSensor.getVoltage0());
+	                sentence.setVoltage1(voltageSensor.getVoltage1());
+	            }
+		        notify(sentence);
+			} catch (Exception e) {
+				getLogger().Error("Cannot post XXX data", e);
+			}
 		}
 	}
 

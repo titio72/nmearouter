@@ -28,7 +28,6 @@ public class TrackManager {
 		int period;
 		
 		public TrackPoint() {
-			// TODO Auto-generated constructor stub
 		}
 
 		public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {

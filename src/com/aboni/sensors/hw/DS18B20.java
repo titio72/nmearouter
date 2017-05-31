@@ -75,21 +75,4 @@ public class DS18B20 {
 			return new HashMap<String, Double>(values);
 		}
 	}
-	
-	public static void main(String[] args) {
-		DS18B20 s = new DS18B20();
-		while (true) {
-			s.read();
-			Map<String, Double> m = s.getValues();
-			for (Iterator<String> i = m.keySet().iterator(); i.hasNext(); ) {
-				String k = i.next(); 
-				System.out.println(System.currentTimeMillis() + " " + k + " " + m.get(k));
-			}
-			try {
-				Thread.sleep(500);
-			} catch (Exception e) {}
-		}
-		
-		
-	}
 }

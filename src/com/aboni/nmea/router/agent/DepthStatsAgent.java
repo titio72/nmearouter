@@ -25,6 +25,8 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private int max = Integer.MIN_VALUE;
     private int min = Integer.MAX_VALUE;    
     
+    private static long DEFAULT_WINDOW = 60 * 60 * 1000; // 1 hour
+    
     public DepthStatsAgent(String name) {
         this(name, null);
     }
@@ -80,7 +82,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
                 while (goon) {
                     goon = false;
                     DepthT d0 = queue.getFirst();
-                    if ((d.TS-d0.TS)>60*60*1000) {
+                    if ((d.TS-d0.TS)>DEFAULT_WINDOW) {
                         DepthT dd = queue.pop();
                         dirty = dirty || (!(dd.depth<max && dd.depth>min));
                         goon = true;

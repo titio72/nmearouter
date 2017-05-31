@@ -94,27 +94,23 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		synchronized (clients) {
-			String output = null;
-			List<SocketClient> purge = new ArrayList<SocketClient>();
-			for (Iterator<SocketClient> i = clients.iterator(); i.hasNext(); ) {
-				try {
-					if (output==null) {
-						output = getOutSentence(s);
-					}
+			if (!clients.isEmpty()) {
+				String output = getOutSentence(s);
+				List<SocketClient> purge = new ArrayList<SocketClient>();
+				for (Iterator<SocketClient> i = clients.iterator(); i.hasNext(); ) {
 					SocketClient c = i.next();
-					if (c.isClosed()) {
-						purge.add(c);
-					} else {
-						String toSend = getOutSentence(s);
-						if (toSend!=null) {
+					try {
+						if (c.isClosed()) {
+							purge.add(c);
+						} else {
 							c.pushSentence(output);
 						}
+					} catch (Exception e) {
+						getLogger().Error("Error dispatching sentence to socket!", e);
 					}
-				} catch (Exception e) {
-					getLogger().Error("Error dispatching sentence to socket!", e);
 				}
+				purgeClients(purge);
 			}
-			purgeClients(purge);
 		}
 	}
 	
