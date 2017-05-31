@@ -76,14 +76,14 @@ public class EventSocket
     	
 	    private void start() {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().Info("Start new WS session " + id);
+		    	ServerLog.getLogger().Info("Start new WS session {" + sess.getId() + "} ID {" + id + "} ");
 		    	NMEAStreamProvider.getStreamInstance().subscribe(this);
 	    	}
 	    }
 	    
 	    private void stop() {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().Info("Close WS session " + id);
+		    	ServerLog.getLogger().Info("Close WS session {" + sess.getId() + "} ID {" + id + "} ");
 		    	NMEAStreamProvider.getStreamInstance().unsubscribe(this);
 	    	}
 		}
@@ -95,7 +95,7 @@ public class EventSocket
 					try {
 						sess.getBasicRemote().sendText(obj.toString());
 					} catch (IOException e) {
-						ServerLog.getLogger().Error("Error sending json to WS", e);
+						ServerLog.getLogger().Error("Error sending json to WS {" + id + "}", e);
 						e.printStackTrace();
 					}
 				}
