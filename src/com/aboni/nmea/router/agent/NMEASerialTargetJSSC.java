@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.agent;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
@@ -14,8 +16,8 @@ public class NMEASerialTargetJSSC extends NMEAAgentImpl {
 	private String portName;
 	private int speed;
 	
-	public NMEASerialTargetJSSC(String name, String portName, int speed, QOS q) {
-		super(name, q);
+	public NMEASerialTargetJSSC(NMEACache cache, NMEAStream stream, String name, String portName, int speed, QOS q) {
+		super(cache, stream, name, q);
 		this.portName = portName;
 		this.speed = speed;
         setSourceTarget(false, true);

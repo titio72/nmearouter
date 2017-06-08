@@ -1,6 +1,8 @@
 package com.aboni.nmea.router.agent;
 
 import com.aboni.geo.NMEAMWDConverter;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;
@@ -14,12 +16,12 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 	private NMEAMWDConverter conv;
 	private long threshold;
 	
-	public NMEAMWDSentenceCalculator(String name) {
-		this(name, null);
+	public NMEAMWDSentenceCalculator(NMEACache cache, NMEAStream stream, String name) {
+		this(cache, stream, name, null);
 	}
 
-	public NMEAMWDSentenceCalculator(String name, QOS qos) {
-		super(name, qos);
+	public NMEAMWDSentenceCalculator(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+		super(cache, stream, name, qos);
 		conv = new NMEAMWDConverter(TalkerId.II);
         if (qos!=null && qos.get("longthreshold")) {
             threshold = 1000;

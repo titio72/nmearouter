@@ -11,10 +11,10 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
+import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
 

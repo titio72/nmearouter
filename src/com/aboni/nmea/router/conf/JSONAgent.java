@@ -11,24 +11,21 @@ package com.aboni.nmea.router.conf;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Log complex type.
+ * <p>Java class for JSONAgent complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Log">
+ * &lt;complexType name="JSONAgent">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="file" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *       &lt;/sequence>
- *       &lt;attribute name="level" type="{}LogLevelType" default="INFO" />
- *     &lt;/restriction>
+ *     &lt;extension base="{}AgentBase">
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="JSON" />
+ *       &lt;attribute name="port" type="{http://www.w3.org/2001/XMLSchema}int" default="1110" />
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -36,66 +33,70 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Log", propOrder = {
-    "file"
-})
-public class Log {
+@XmlType(name = "JSONAgent")
+public class JSONAgent
+    extends AgentBase
+{
 
-    @XmlElement(required = true, defaultValue = "router.log")
-    protected String file;
-    @XmlAttribute(name = "level")
-    protected LogLevelType level;
+    @XmlAttribute(name = "type")
+    protected String type;
+    @XmlAttribute(name = "port")
+    protected Integer port;
 
     /**
-     * Gets the value of the file property.
+     * Gets the value of the type property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getFile() {
-        return file;
-    }
-
-    /**
-     * Sets the value of the file property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setFile(String value) {
-        this.file = value;
-    }
-
-    /**
-     * Gets the value of the level property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LogLevelType }
-     *     
-     */
-    public LogLevelType getLevel() {
-        if (level == null) {
-            return LogLevelType.INFO;
+    public String getType() {
+        if (type == null) {
+            return "JSON";
         } else {
-            return level;
+            return type;
         }
     }
 
     /**
-     * Sets the value of the level property.
+     * Sets the value of the type property.
      * 
      * @param value
      *     allowed object is
-     *     {@link LogLevelType }
+     *     {@link String }
      *     
      */
-    public void setLevel(LogLevelType value) {
-        this.level = value;
+    public void setType(String value) {
+        this.type = value;
+    }
+
+    /**
+     * Gets the value of the port property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public int getPort() {
+        if (port == null) {
+            return  1110;
+        } else {
+            return port;
+        }
+    }
+
+    /**
+     * Sets the value of the port property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setPort(Integer value) {
+        this.port = value;
     }
 
 }

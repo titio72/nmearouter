@@ -40,7 +40,7 @@ public class ServerLog implements Log {
 	
     private Logger lg;
 	
-	public ServerLog() {
+	private ServerLog() {
         lg = Logger.getLogger("NMEARouter");
         lg.setLevel(Level.INFO);
 	    
@@ -66,10 +66,6 @@ public class ServerLog implements Log {
 	
     public static Log getLogger() {
         return logger;
-    }
-    
-    public static Logger getWebLogger() {
-        return ServerLog.getWebLogger();
     }
     
     @Override

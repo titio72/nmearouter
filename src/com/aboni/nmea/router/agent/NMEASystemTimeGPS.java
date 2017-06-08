@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -20,8 +22,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 	
 	private boolean timestampset;
 	
-	public NMEASystemTimeGPS(String name, QOS qos) {
-		super(name, qos);
+	public NMEASystemTimeGPS(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+		super(cache, stream, name, qos);
 		setSourceTarget(false, true);
 	}
 

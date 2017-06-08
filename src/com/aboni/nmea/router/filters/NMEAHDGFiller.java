@@ -3,6 +3,7 @@ package com.aboni.nmea.router.filters;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
 import com.aboni.nmea.router.NMEACache;
@@ -29,19 +30,21 @@ import net.sf.marineapi.nmea.util.Position;
 public class NMEAHDGFiller implements NMEAPostProcess {
 
     private NMEAMagnetic2TrueConverter m;
-    private boolean doHDM;
-    private boolean doHDT;
+    
+    private boolean doHDM = true;
+    private boolean doHDT = true;
     private NMEACache cache;
     
-    public NMEAHDGFiller(boolean createHDM, boolean createHDT, NMEACache cache) {
+    public NMEAHDGFiller(NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
-        doHDM = createHDM;
-        doHDT = createHDT;
         this.cache = cache;
     }
-
-    public NMEAHDGFiller(NMEACache cache) {
-        this(false, false, cache);
+    
+    public NMEAHDGFiller(NMEACache cache, boolean hdm, boolean hdt) {
+        m = new NMEAMagnetic2TrueConverter();
+        this.cache = cache;
+        this.doHDM = hdm;
+        this.doHDT = hdt;
     }
 
     @Override

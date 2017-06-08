@@ -14,7 +14,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.json.JSONObject;
 
-import com.aboni.nmea.router.NMEAStreamProvider;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.utils.ServerLog;
 
@@ -24,6 +24,12 @@ public class EventSocket
 {
 	private static Map<Session, MySession> sessions = new HashMap<>();
 
+	private static NMEAStream stream;
+	
+	public static void setNMEAStream(NMEAStream stream) {
+		EventSocket.stream = stream;
+	}
+	
 	public EventSocket() {
 		ServerLog.getLogger().Info("Init web-socket");
 	}
@@ -35,7 +41,7 @@ public class EventSocket
     		ServerLog.getLogger().Info("Started web-socket session {" + sess.getId() + "}");
 	    	MySession s = new MySession(sess);
     		sessions.put(sess,  s);
-	        s.start();
+	        s.start(stream);
     	}
     }
     
@@ -52,7 +58,7 @@ public class EventSocket
 	    	if (sessions.containsKey(sess)) {
 	    		MySession s = sessions.get(sess);
 	    		ServerLog.getLogger().Info("Stopping updates for web-socket id {" + s.id + "}");
-	    		s.stop();
+	    		s.stop(stream);
 	    		sessions.remove(sess);
 	    	}
     	}
@@ -74,17 +80,17 @@ public class EventSocket
     		id = sc++;
     	}
     	
-	    private void start() {
+	    private void start(NMEAStream stream) {
 	    	synchronized (this) {
 		    	ServerLog.getLogger().Info("Start new WS session {" + sess.getId() + "} ID {" + id + "} ");
-		    	NMEAStreamProvider.getStreamInstance().subscribe(this);
+		    	stream.subscribe(this);
 	    	}
 	    }
 	    
-	    private void stop() {
+	    private void stop(NMEAStream stream) {
 	    	synchronized (this) {
 		    	ServerLog.getLogger().Info("Close WS session {" + sess.getId() + "} ID {" + id + "} ");
-		    	NMEAStreamProvider.getStreamInstance().unsubscribe(this);
+		    	stream.unsubscribe(this);
 	    	}
 		}
 

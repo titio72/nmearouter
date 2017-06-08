@@ -15,18 +15,20 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
 import com.aboni.nmea.router.impl.NMEARouterDefaultBuilderImpl;
 import com.aboni.nmea.router.impl.NMEARouterPlayerBuilderImpl;
 import com.aboni.nmea.router.services.EventSocket;
-import com.aboni.nmea.router.services.WebInterface;
+import com.aboni.nmea.router.services.WebServiceFactory;
+import com.aboni.nmea.router.services.impl.WebInterfaceImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XXXPParser;
 import com.aboni.nmea.sentences.XXXPSentence;
 import com.aboni.sensors.DoCalibration;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -48,6 +50,8 @@ public class StartRouter {
 	}
     
 	public static void main(String[] args) {
+		Injector injector = Guice.createInjector(new NMEARouterModule());
+		
 		int ix;
         if (checkFlag(HELP, args)>=0) {
             System.out.println("-web : activate web interface\r\n" + 
@@ -55,18 +59,19 @@ public class StartRouter {
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
         } else if ((ix = checkFlag(PLAY, args))>=0) {
-        	startRouter(args, new NMEARouterPlayerBuilderImpl(args[ix + 1]));
+        	NMEARouter r = getRouter(injector, args, new NMEARouterPlayerBuilderImpl(injector, args[ix + 1]));
+        	r.start();
         } else if (checkFlag(SENSOR, args)>=0) {
-            startSensors(args);
+            startSensors(injector, args);
         } else if (checkFlag(CALIBRATION, args)>=0) {
             startCalibration(args);
 	    } else {
-            startRouter(args, new NMEARouterDefaultBuilderImpl(Constants.ROUTER_CONF));
-            startWebInterface(args);
+            getRouter(injector, args, new NMEARouterDefaultBuilderImpl(injector, Constants.ROUTER_CONF));
+    		startWebInterface(injector, args);
 	    }
 	}
 
-	private static void startWebInterface(String[] args) {
+	private static void startWebInterface(Injector injector, String[] args) {
         if (checkFlag(WEB, args)>=0) {
             try {
                 org.eclipse.jetty.util.log.Logger l;
@@ -88,10 +93,12 @@ public class StartRouter {
                 
                 
                 HandlerList handlers = new HandlerList();
-                handlers.setHandlers(new Handler[] { resource_handler, new WebInterface(), context });
+                WebServiceFactory svcFactory = injector.getInstance(WebServiceFactory.class);
+                handlers.setHandlers(new Handler[] { resource_handler, new WebInterfaceImpl(svcFactory), context });
                 server.setHandler(handlers);
 
                 ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
+                EventSocket.setNMEAStream(injector.getInstance(NMEAStream.class));
                 wscontainer.addEndpoint(EventSocket.class);
                 
                 server.start();
@@ -108,10 +115,13 @@ public class StartRouter {
         DoCalibration.main(args);
     }
 
-    private static void startSensors(String args[]) {
+    private static void startSensors(Injector injector, String args[]) {
         System.out.println("Start");
         NMEAUtils.registerExtraSentences();
-        NMEASourceSensor s = new NMEASourceSensor("test", null);
+        NMEAStream stream =  injector.getInstance(NMEAStream.class);
+        NMEACache cache = injector.getInstance(NMEACache.class);
+
+        NMEASourceSensor s = new NMEASourceSensor(cache, stream, "test", null);
         s.setSentenceListener(new NMEASentenceListener() {
             
             @Override
@@ -141,7 +151,7 @@ public class StartRouter {
         }
     }
     
-    private static void startRouter(String[] args, NMEARouterBuilder builder) {
+    private static NMEARouter getRouter(Injector injector, String[] args, NMEARouterBuilder builder) {
         System.out.println("Start");
 		Date date = new Date();
 		SimpleDateFormat f = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
@@ -151,7 +161,7 @@ public class StartRouter {
 		ServerLog.getLogger().Info("---- Start " + f.format(date) + "--------------------------------------------------");
 		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
         NMEAUtils.registerExtraSentences();
-        NMEAStreamProvider.getStreamInstance(); // be sure the stream started
+        injector.getInstance(NMEAStream.class); // be sure the stream started
     	if (builder.init()!=null) {
     		NMEARouter r = builder.getRouter();
     		switch (r.getPreferredLogLevelType()) {
@@ -166,8 +176,10 @@ public class StartRouter {
             	default:
 	            	ServerLog.getLogger().setInfo(); break;
     		}
-        	NMEARouterProvider.setRouter(r);
         	r.start();
+    		return r;
+    	} else {
+    		return null;
     	}
     }
 }

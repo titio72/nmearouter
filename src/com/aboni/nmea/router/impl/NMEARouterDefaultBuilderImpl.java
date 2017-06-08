@@ -1,7 +1,9 @@
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.DepthStatsAgent;
 import com.aboni.nmea.router.agent.FanAgent;
 import com.aboni.nmea.router.agent.NMEA2FileAgent;
@@ -19,14 +21,17 @@ import com.aboni.nmea.router.conf.Router;
 import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
+import com.google.inject.Injector;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter router;
     private String confFile;
+    private Injector injector;
     
-    public NMEARouterDefaultBuilderImpl(String confFile) {
+    public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {
     	this.confFile = confFile;
+    	this.injector = injector;
     }
     
     @Override
@@ -34,7 +39,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	Router conf;
 		try {
 			conf = parseConf(confFile);
-	        NMEAAgentBuilder builder = new NMEAAgentBuilder();
+	        NMEAAgentBuilder builder = injector.getInstance(NMEAAgentBuilder.class);
 	        router = buildRouter(conf, builder);
 	        return this;
 		} catch (MalformedConfigurationException e) {
@@ -44,13 +49,13 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     }
 
     private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
-        NMEARouterImpl r = new NMEARouterImpl();
+        NMEARouter r = injector.getInstance(NMEARouter.class);
         
-        for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
+        for (AgentBase a: conf.getSerialAgentOrJSONAgentOrTcpAgent()) {
         	NMEAAgent agent = builder.createAgent(a, r);
             if (agent!=null) {
             	r.addAgent(agent);
-            	handleActivatation(agent, a);
+            	handleActivation(agent, a);
             }
         }
         
@@ -62,7 +67,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         return r;
     }
     
-    private void handleActivatation(NMEAAgent agent, AgentBase a) {
+    private void handleActivation(NMEAAgent agent, AgentBase a) {
     	AgentStatus s = AgentStatusProvider.getAgentStatus();
     	boolean active = a.isActive();
     	if (s!=null) {
@@ -76,38 +81,53 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	if (active) agent.start();
     }
     
-    private void buildStreamDump(Router conf2, NMEARouterImpl r) {
+    private void buildStreamDump(Router conf2, NMEARouter r) {
         QOS q = createBuiltInQOS();
-        NMEA2FileAgent dumper = new NMEA2FileAgent("nmea", q);
+        NMEA2FileAgent dumper = new NMEA2FileAgent(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"nmea", q);
         r.addAgent(dumper);
 	}
 
-	private void buildDPTStats(Router conf2, NMEARouterImpl r) {
+	private void buildDPTStats(Router conf2, NMEARouter r) {
         QOS q = createBuiltInQOS();
-        DepthStatsAgent a = new DepthStatsAgent("DEPTH", q);
+        DepthStatsAgent a = new DepthStatsAgent(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"DEPTH", q);
         r.addAgent(a);
         a.start();
     }
 
-    private void buildPowerLedTarget(Router conf2, NMEARouterImpl r) {
+    private void buildPowerLedTarget(Router conf2, NMEARouter r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
 	        QOS q = createBuiltInQOS();
-	        PowerLedAgent pwrled = new PowerLedAgent("PWRLED", q);
+	        PowerLedAgent pwrled = new PowerLedAgent(
+	        		injector.getInstance(NMEACache.class), 
+	        		injector.getInstance(NMEAStream.class), 
+	        		"PWRLED", q);
 	        r.addAgent(pwrled);
 	        pwrled.start();
     	}
     }
 
-    private void buildFanTarget(Router conf2, NMEARouterImpl r) {
+    private void buildFanTarget(Router conf2, NMEARouter r) {
         QOS q = createBuiltInQOS();
-        FanAgent fan = new FanAgent("FAN", q);
+        FanAgent fan = new FanAgent(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"FAN", q);
         r.addAgent(fan);
         fan.start();
     }
 
     private void buildGPSTimeTarget(Router conf2, NMEARouter r) {
         QOS q = createBuiltInQOS();
-    	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS("gpstime", q);
+    	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"gpstime", q);
     	r.addAgent(gpstime);
     	gpstime.start();
 	}
@@ -130,13 +150,19 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	}
 
 	public NMEARouterBuilder initPlayFile(String playFile) {
-        router = new NMEARouterImpl();
+        router = injector.getInstance(NMEARouter.class);
         
-        NMEAAgent sock = new NMEASocketTarget("TCP", 1111, null);
+        NMEAAgent sock = new NMEASocketTarget(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"TCP", 1111, null);
         router.addAgent(sock);
         sock.start();
         
-        NMEAPlayer play = new NMEAPlayer("PLAYER", null);
+        NMEAPlayer play = new NMEAPlayer(
+        		injector.getInstance(NMEACache.class), 
+        		injector.getInstance(NMEAStream.class), 
+        		"PLAYER", null);
         play.setFile(playFile);
         router.addAgent(play);
         play.start();

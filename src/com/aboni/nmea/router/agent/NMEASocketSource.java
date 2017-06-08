@@ -3,6 +3,8 @@ package com.aboni.nmea.router.agent;
 import java.io.InputStream;
 import java.net.Socket;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -137,12 +139,12 @@ public class NMEASocketSource extends NMEAAgentImpl {
 	
 	private SocketReader reader;
 	
-	public NMEASocketSource(String name, String server, int port) {
-	    this(name, server, port, null);
+	public NMEASocketSource(NMEACache cache, NMEAStream stream, String name, String server, int port) {
+	    this(cache, stream, name, server, port, null);
 	}
 	
-	public NMEASocketSource(String name, String server, int port, QOS qos) {
-        super(name, qos);
+	public NMEASocketSource(NMEACache cache, NMEAStream stream, String name, String server, int port, QOS qos) {
+        super(cache, stream, name, qos);
         setSourceTarget(true, false);
 		reader = new SocketReader(server, port);
 	}

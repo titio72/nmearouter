@@ -3,6 +3,8 @@ package com.aboni.nmea.router.agent;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
@@ -18,8 +20,8 @@ public class FanAgent extends NMEAAgentImpl {
 	private static final double FAN_THRESHOLD_OFF = 52.0;
     private Fan fan;
     
-	public FanAgent(String name, QOS qos) {
-		super(name, qos);
+	public FanAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+		super(cache, stream, name, qos);
 		timer = null;
 		fan = new Fan();
 	}

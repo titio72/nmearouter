@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.ServerLog;
@@ -23,8 +25,8 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 	private long lastDump = 0;
 	private List<NMEASentenceItem> queue = new LinkedList<>();
 	
-	public NMEA2FileAgent(String n, QOS q) {
-		super(n, q);
+	public NMEA2FileAgent(NMEACache cache, NMEAStream stream, String n, QOS q) {
+		super(cache, stream, n, q);
 		setSourceTarget(false, true);
 	}
 

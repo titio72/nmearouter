@@ -3,6 +3,10 @@ package com.aboni.nmea.router.agent;
 import java.util.Calendar;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.agent.impl.TrackMediaDB;
+import com.aboni.nmea.router.agent.impl.TrackMediaFile;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
@@ -22,12 +26,12 @@ public class NMEATrackTargetDB extends NMEAAgentImpl {
 
 	private TrackManager tracker;
 	
-    public NMEATrackTargetDB(String name) {
-        this(name, SentenceId.RMC.toString());
+    public NMEATrackTargetDB(NMEACache cache, NMEAStream stream, String name) {
+        this(cache, stream, name, SentenceId.RMC.toString());
     }
 
-    public NMEATrackTargetDB(String name, String sentence) {
-        super(name);
+    public NMEATrackTargetDB(NMEACache cache, NMEAStream stream, String name, String sentence) {
+        super(cache, stream, name);
         
         setSourceTarget(false, true);
 

@@ -12,6 +12,8 @@ import com.aboni.geo.Utils;
 import com.aboni.sensors.MagnetometerToCompass;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.nmea.sentences.XXXPSentence;
@@ -50,12 +52,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	public static NMEASimulatorSource SIMULATOR;
 	
-	public NMEASimulatorSource(String name) {
-		this(name, null);
+	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name) {
+		this(cache, stream, name, null);
 	}
 	
-	public NMEASimulatorSource(String name, QOS qos) {
-		super(name, qos);
+	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+		super(cache, stream, name, qos);
         setSourceTarget(true, true);
         if (SIMULATOR!=null) throw new RuntimeException();
         else SIMULATOR = this;
@@ -309,7 +311,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             vt.setSpeedUnit(Units.KNOT);
                             vt.setAngle(Utils.normalizeDegrees0_360(trueWind.getTrueWindDeg()));
-                            vt.setSpeed(trueWind.getTrueWindSpeed() + 25.0);
+                            vt.setSpeed(trueWind.getTrueWindSpeed());
                             vt.setTrue(true);
                             NMEASimulatorSource.this.notify(vt);
 						}

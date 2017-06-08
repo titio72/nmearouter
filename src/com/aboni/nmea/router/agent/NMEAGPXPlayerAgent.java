@@ -15,6 +15,8 @@ import org.w3c.dom.NodeList;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
@@ -37,8 +39,8 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 	private String file;
 	private boolean stop;
 	
-	public NMEAGPXPlayerAgent(String name, String file, QOS q) throws Exception {
-		super(name, q);
+	public NMEAGPXPlayerAgent(NMEACache cache, NMEAStream stream, String name, String file, QOS q) throws Exception {
+		super(cache, stream, name, q);
 		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		this.file = file;
 	}

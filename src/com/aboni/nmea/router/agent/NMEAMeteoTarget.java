@@ -6,6 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.aboni.geo.Utils;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.DBHelper;
 
@@ -63,8 +65,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private DBHelper db;
     private PreparedStatement stm;
 
-    public NMEAMeteoTarget(String name, QOS qos) {
-        super(name, qos);
+    public NMEAMeteoTarget(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+        super(cache, stream, name, qos);
         setSourceTarget(false, true);
     }
 

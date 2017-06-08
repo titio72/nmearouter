@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.aboni.nmea.router.NMEARouterProvider;
+import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
@@ -12,6 +12,12 @@ import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 
 public class AgentStatusServiceJSON implements WebService {
 
+	private NMEARouter router;
+	
+	public AgentStatusServiceJSON(NMEARouter router) {
+		this.router = router;
+	}
+	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("application/json");
@@ -24,7 +30,7 @@ public class AgentStatusServiceJSON implements WebService {
             response.getWriter().println("\"agents\":[");
 
             
-            Collection<String> agentKeys = NMEARouterProvider.getRouter().getAgents();
+            Collection<String> agentKeys = router.getAgents();
             
             ServiceDumper d = new ServiceDumper(response);
             dumpServices(d, agentKeys);
@@ -72,7 +78,7 @@ public class AgentStatusServiceJSON implements WebService {
 	private void dumpServices(ServiceDumper r, Collection<String> agentKeys) throws IOException {
 		for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
 		    String agentKey = i.next();
-		    NMEAAgent ag = NMEARouterProvider.getRouter().getAgent(agentKey);
+		    NMEAAgent ag = router.getAgent(agentKey);
 	    	r.dumpServices(ag);
 		}
 	}
@@ -83,7 +89,7 @@ public class AgentStatusServiceJSON implements WebService {
 		String auto = config.getParameter("auto");
 		String active = config.getParameter("active");
 		if (agent!=null) {
-			NMEAAgent a = NMEARouterProvider.getRouter().getAgent(agent);
+			NMEAAgent a = router.getAgent(agent);
 			if (a!=null) {
 				if (active!=null) {
 					msg = startStopService(a, active);

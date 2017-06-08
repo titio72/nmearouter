@@ -60,16 +60,65 @@ public class DBHelper {
         conn.close();
     }
     
-    public synchronized Timestamp[] getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
-        PreparedStatement stm = getConnection().prepareStatement("select max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
+    public synchronized PreparedStatement getTimeSeries(String table, String[] fields, Calendar cFrom, Calendar cTo, String where) throws SQLException {
+	    String sql = "select TS ";
+	    for (String f: fields) {
+	    	sql += ", " + f;
+	    }
+    	sql += " from " + table + " where TS>=? and TS<=?";
+    	if (where!=null) {
+    		sql += " AND " + where;
+    	}
+    	PreparedStatement stm = getConnection().prepareStatement(sql);
+		stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+		stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+		return stm;
+    }    
+    
+    public class Range {
+    	private Timestamp max;
+    	private Timestamp min;
+    	private long count;
+    	
+    	public Range(Timestamp max, Timestamp min, long count) {
+    		this.max = max;
+    		this.min = min;
+    		this.count = count;
+    	}
+
+		public Timestamp getMax() {
+			return max;
+		}
+
+		public Timestamp getMin() {
+			return min;
+		}
+		
+		public long getCount() {
+			return count;
+		}
+		
+		public long getInterval() {
+			return max.getTime() - min.getTime();
+		}
+		
+		public int getSampling(int maxSamples) {
+            return (int) ((getCount()<=maxSamples)?1:(getInterval()/maxSamples));
+			
+		}
+    }
+    
+    public synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
+        PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
     	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
     	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
         ResultSet rs = stm.executeQuery();
         if (rs.next()) {
-        	Timestamp tMax = rs.getTimestamp(1);
-        	Timestamp tMin = rs.getTimestamp(2);
+        	long count = rs.getLong(1);
+        	Timestamp tMax = rs.getTimestamp(2);
+        	Timestamp tMin = rs.getTimestamp(3);
         	if (tMax!=null && tMin!=null) {
-	        	return new Timestamp[] { rs.getTimestamp(1), rs.getTimestamp(2) };
+	        	return new Range(tMax, tMin, count);
         	}
         }
         return null;

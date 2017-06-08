@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
@@ -19,8 +21,8 @@ public class NMEAUDPTarget extends NMEAAgentImpl {
 	private int portTarget;
 	private Set<InetAddress> targets;
 
-	public NMEAUDPTarget(String name, QOS qos, int portTarget) {
-		super(name, qos);
+	public NMEAUDPTarget(NMEACache cache, NMEAStream stream, String name, QOS qos, int portTarget) {
+		super(cache, stream, name, qos);
 		this.portTarget = portTarget;
         setSourceTarget(false, true);
         targets = new HashSet<InetAddress>();

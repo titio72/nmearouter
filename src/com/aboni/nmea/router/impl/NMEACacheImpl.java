@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.Startable;
 import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;
@@ -17,72 +16,45 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
-public class NMEACacheImpl implements Startable, NMEACache {
+public class NMEACacheImpl implements NMEACache {
 
 
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;
     private Map<String, DataEvent<Measurement>> sensors;
     
-    private boolean started;
-    
     public NMEACacheImpl() {
         lastHeading = new DataEvent<HeadingSentence>();
         lastPosition = new DataEvent<PositionSentence>();
         sensors = new HashMap<String, DataEvent<Measurement>>();
-        started = false;
-    }
-    
-    @Override
-    public void start() {
-        if (!started) {
-            started = true;
-        }
-    }
-    
-    @Override
-    public void stop() {
-        if (started) {
-            started = false;
-        }
-    }
-    
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#isStarted()
-	 */
-    @Override
-    public boolean isStarted() {
-        return started;
     }
     
     @Override
     public void onSentence(Sentence s, String src) {
-    	if (isStarted()) {
-	        if (s instanceof HDGSentence ||
-	        		s instanceof HDTSentence ||
-	        		s instanceof HDMSentence) {
-	            lastHeading.timestamp = System.currentTimeMillis();
-	            lastHeading.source = src;
-	            lastHeading.data = (HeadingSentence)s;
-	        }
-	        else if (s instanceof PositionSentence) {
-	            lastPosition.data = (PositionSentence)s;
-	            lastPosition.source = src;
-	            lastPosition.timestamp = System.currentTimeMillis();
-	        }
-	        else if (s instanceof XDRSentence) {
-	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
-	        		DataEvent<Measurement> x = new DataEvent<Measurement>();
-	        		x.data = m;
-	        		x.source = src;
-	        		x.timestamp = System.currentTimeMillis();
-	        		synchronized (sensors) {
-	            		sensors.put(m.getName(), x);
-					}
-	        	}
-	        		
-	        }
-    	}
+        if (s instanceof HDGSentence ||
+        		s instanceof HDTSentence ||
+        		s instanceof HDMSentence) {
+            lastHeading.timestamp = System.currentTimeMillis();
+            lastHeading.source = src;
+            lastHeading.data = (HeadingSentence)s;
+        }
+        else if (s instanceof PositionSentence) {
+            lastPosition.data = (PositionSentence)s;
+            lastPosition.source = src;
+            lastPosition.timestamp = System.currentTimeMillis();
+        }
+        else if (s instanceof XDRSentence) {
+        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
+        		DataEvent<Measurement> x = new DataEvent<Measurement>();
+        		x.data = m;
+        		x.source = src;
+        		x.timestamp = System.currentTimeMillis();
+        		synchronized (sensors) {
+            		sensors.put(m.getName(), x);
+				}
+        	}
+        		
+        }
     }
 
     /* (non-Javadoc)

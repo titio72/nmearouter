@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 
@@ -19,8 +21,8 @@ public class NMEAPlayer extends NMEAAgentImpl {
 
 	private String file;
 
-	public NMEAPlayer(String name, QOS qos) {
-		super(name, qos);
+	public NMEAPlayer(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+		super(cache, stream, name, qos);
 		setSourceTarget(true, false);
 	}
 

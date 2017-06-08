@@ -16,7 +16,8 @@ import java.util.TimerTask;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
-import com.aboni.nmea.router.NMEACacheProvider;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.XXXPSentence;
 
@@ -59,8 +60,11 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private boolean sendHDM = false;
     private boolean sendHDT = false;
     
-    public NMEASourceSensor(String name, QOS q) {
-        super(name, q);
+    private NMEACache cache;
+    
+    public NMEASourceSensor(NMEACache cache, NMEAStream stream, String name, QOS q) {
+        super(cache, stream, name, q);
+        this.cache = cache;
         setSourceTarget(true, false);
     }
     
@@ -197,8 +201,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private void sendHDx() {
     	try {
     	    if (compassSensor!=null && 
-    	    		(NMEACacheProvider.getCache().isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME)
-    	    		|| getName().equals(NMEACacheProvider.getCache().getLastHeading().source))) {
+    	    		(cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME)
+    	    		|| getName().equals(cache.getLastHeading().source))) {
 	            double b = compassSensor.getHeading();
 	            
 	            if (sendHDM) {
@@ -207,9 +211,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     	            notify(hdm);
 	            }
 	            
-	            if (NMEACacheProvider.getCache().getLastPosition().data != null) {
+	            if (cache.getLastPosition().data != null) {
 	                NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
-	                m.setPosition(NMEACacheProvider.getCache().getLastPosition().data.getPosition());
+	                m.setPosition(cache.getLastPosition().data.getPosition());
 	                
 	                if (sendHDT) {
     	                HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);

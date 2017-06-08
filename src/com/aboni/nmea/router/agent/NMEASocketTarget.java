@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
@@ -22,15 +24,15 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 
 	private static final int DEFAULT_PORT = 8888;
 	
-	public NMEASocketTarget(String name, int port, QOS q) {
-		super(name, q);
+	public NMEASocketTarget(NMEACache cache, NMEAStream stream, String name, int port, QOS q) {
+		super(cache, stream, name, q);
 		this.port = port;
         setSourceTarget(false, true);
 		clients = new HashSet<SocketClient>();
 	}
 
-	public NMEASocketTarget(String name) {
-		this(name, DEFAULT_PORT, null);
+	public NMEASocketTarget(NMEACache cache, NMEAStream stream, String name) {
+		this(cache, stream, name, DEFAULT_PORT, null);
 	}
 
 	public int getPort() {

@@ -3,7 +3,6 @@ package com.aboni.nmea.router.services;
 import java.io.PrintWriter;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEACacheProvider;
 import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.sentence.PositionSentence;
@@ -12,9 +11,12 @@ import net.sf.marineapi.nmea.util.Measurement;
 public class StatusService implements WebService {
 
 	private boolean json;
-		
-    public StatusService() {
+	private NMEACache cache;
+	
+	
+    public StatusService(NMEACache cache) {
         this(false);
+        this.cache = cache;
     }
     
     public StatusService(boolean json) {
@@ -62,17 +64,16 @@ public class StatusService implements WebService {
         
             response.getWriter().print(json?"\"sensor\":{":"<Sensor>\n");
 
-            NMEACache c = NMEACacheProvider.getCache();
             int counter = 0;
-            for (String sensor: c.getSensors()) {
+            for (String sensor: cache.getSensors()) {
             	if (counter>0) response.getWriter().print(",");
             	counter++;
-                writeAttribute(response.getWriter(), c.getSensorData(sensor), sensor);
+                writeAttribute(response.getWriter(), cache.getSensorData(sensor), sensor);
             }
             response.getWriter().print(json?"}":"</Sensor>\n");
 
-            if (c.getLastPosition()!=null) {
-            	PositionSentence lastPos = c.getLastPosition().data;
+            if (cache.getLastPosition()!=null) {
+            	PositionSentence lastPos = cache.getLastPosition().data;
             	//if (lastPos!=null && json) response.getWriter().print(",");
                 response.getWriter().print(json?
                         ",\"Position\":{" 

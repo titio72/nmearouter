@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.aboni.nmea.router.NMEACacheProvider;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEASentenceListener;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
@@ -34,7 +35,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	private boolean target;
 	private boolean source;
 	
-    public NMEAAgentImpl(String name, QOS qos) {
+    public NMEAAgentImpl(NMEACache cache, NMEAStream stream, String name, QOS qos) {
         this.name = name;
         fsetInput = null;
         fsetOutput = null;
@@ -47,7 +48,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
             }
             if (qos.get("enrich_hdg")) {
                 getLogger().Info("QoS {ENRICH_HDG}");
-                addProc(new NMEAHDGFiller(true, true, NMEACacheProvider.getCache()));
+                addProc(new NMEAHDGFiller(cache));
             }
             if (qos.get("builtin")) {
                 builtin = true;
@@ -57,8 +58,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
         source = true;
     }
     
-	public NMEAAgentImpl(String name) {
-		this(name, null);
+	public NMEAAgentImpl(NMEACache cache, NMEAStream stream, String name) {
+		this(cache, stream, name, null);
 	}
 	
 	protected void setBuiltIn() {

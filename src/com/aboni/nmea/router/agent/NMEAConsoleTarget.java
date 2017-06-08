@@ -3,15 +3,17 @@ package com.aboni.nmea.router.agent;
 import java.text.DateFormat;
 import java.util.Date;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAConsoleTarget extends NMEAAgentImpl {
 
-	public NMEAConsoleTarget(String name, QOS q) {
-		super(name, q);
-	      setSourceTarget(false, true);
+	public NMEAConsoleTarget(NMEACache cache, NMEAStream stream, String name, QOS q) {
+		super(cache, stream, name, q);
+	    setSourceTarget(false, true);
 	}
 	
 	@Override

@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.aboni.nmea.router.NMEACacheProvider;
+import javax.inject.Inject;
+
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEAStreamProvider;
+import com.aboni.nmea.router.NMEASentenceListener;
+import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
-import com.aboni.nmea.router.agent.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.utils.ServerLog;
@@ -64,12 +66,18 @@ public class NMEARouterImpl implements NMEARouter {
 	private Thread processingThread;
 	private LogLevelType logLevel = LogLevelType.INFO;
 	
-	public NMEARouterImpl() {
+	private NMEACache cache;
+	private NMEAStream stream;
+	
+	@Inject
+	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
 	    agents = new HashMap<String, NMEAAgent>();
 		agentStatusListener = new InternalAgentStatusListener();
 		sentenceListener = new InternalSentenceListener();
 		sentenceQueue = new ConcurrentLinkedQueue<NMEARouterImpl.SentenceEvent>();
 		started = false;
+		this.cache = cache;
+		this.stream = stream;
 	}
 	
 	/* (non-Javadoc)
@@ -157,8 +165,8 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private synchronized void _onSentence(Sentence s, NMEAAgent src) {
 		if (started) {
-			NMEACacheProvider.getCache().onSentence(s, src.getName());
-			NMEAStreamProvider.getStreamInstance().pushSentence(s, src);
+			cache.onSentence(s, src.getName());
+			stream.pushSentence(s, src);
 			routeToTarget(s, src);
 		}
 	}

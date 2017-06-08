@@ -3,11 +3,17 @@ package com.aboni.nmea.router.services;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.aboni.nmea.router.NMEARouterProvider;
+import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 
 public class AgentStatusService implements WebService {
 
+	private NMEARouter router;
+	
+	public AgentStatusService(NMEARouter router) {
+		this.router = router;
+	}
+	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("text/xml;charset=utf-8");
@@ -22,10 +28,10 @@ public class AgentStatusService implements WebService {
             response.getWriter().println("<Agents>");
 
             
-            Collection<String> agentKeys = NMEARouterProvider.getRouter().getAgents();
+            Collection<String> agentKeys = router.getAgents();
             for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
                 String agentKey = i.next();
-                NMEAAgent ag = NMEARouterProvider.getRouter().getAgent(agentKey);
+                NMEAAgent ag = router.getAgent(agentKey);
                 if (ag!=null) {
                     response.getWriter().println(
                             "<Agent  name=\"" + ag.getName() + "\" " + 
@@ -51,7 +57,7 @@ public class AgentStatusService implements WebService {
 		String msg = "";
 		String agent = config.getParameter("agent");
 		if (agent!=null) {
-			NMEAAgent a = NMEARouterProvider.getRouter().getAgent(agent);
+			NMEAAgent a = router.getAgent(agent);
 			if (a!=null) {
 				if (a.isBuiltIn()) {
 					msg = "Cannot change activation status for built in agents";
