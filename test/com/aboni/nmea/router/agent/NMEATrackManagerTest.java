@@ -128,16 +128,17 @@ public class NMEATrackManagerTest {
 	
 	@Test
 	public void testLeaveAnchor() throws Exception {
+		double speed = 2.0;
 		cruise(10 * 60 /* 1m */, 5.0);
 		cruise(60 * 60 /* 1h */, 0.0); // set anchor
-		List<TrackPoint> l = cruise(10 * 60 /* 1m */, 5.0);
+		List<TrackPoint> l = cruise(10 * 60 /* 10m */, speed);
 		
 		int counter = 0;
 		for (TrackPoint p: l) {
-			//System.out.println(p.period + " " + p.anchor + " " + p.averageSpeed);
+			System.out.println(p.period + " " + p.anchor + " " + p.averageSpeed);
 			assertTrue(!p.anchor);
 			if (counter>0) {
-				assertEquals(5.0, p.averageSpeed, 0.1);
+				assertEquals(speed, p.averageSpeed, 0.1);
 				assertEquals(60, p.period); // first depends on how long it has been anchored
 			}
 			counter++;
