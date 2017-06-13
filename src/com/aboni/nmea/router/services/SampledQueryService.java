@@ -28,6 +28,16 @@ abstract class SampledQueryService implements WebService {
     protected abstract void 	fillResponse(ServiceOutput response, List<Sample> samples) throws IOException;
 	protected abstract void 	onPrepare(ServiceConfig config);
     
+	private static int DEFAULT_MAX_SAMPLES = 150;
+	
+	private int getMaxSamples(ServiceConfig config) {
+        int maxSamples = DEFAULT_MAX_SAMPLES;
+        try {
+        	maxSamples = Integer.parseInt(config.getParameter("samples", "" + DEFAULT_MAX_SAMPLES));
+        } catch (Exception e) {}
+		return maxSamples;
+	}
+	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
     	
@@ -38,13 +48,15 @@ abstract class SampledQueryService implements WebService {
         Calendar cFrom = fromTo.getFrom();
         Calendar cTo = fromTo.getTo();
         
+        int maxSamples = getMaxSamples(config);
+        
         try {
             db = new DBHelper(true);
             DBHelper.Range range = db.getTimeframe("meteo", cFrom, cTo);
             List<Sample> samples = null;
             if (range!=null) {
-                int sampling = range.getSampling(150);
-                Sampler sampler = new Sampler(sampling, 150);
+                int sampling = range.getSampling(maxSamples);
+                Sampler sampler = new Sampler(sampling, maxSamples);
                 stm = db.getTimeSeries(getTable(), new String[] {getMaxField(), getAvgField(), getMinField()}, cFrom, cTo, getWhere());
 	            ResultSet rs = stm.executeQuery();
 	            while (rs.next()) {

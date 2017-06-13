@@ -71,7 +71,8 @@ public class TrackManager {
     private boolean shallReport(GeoPositionT p) {
         boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
         long dt = p.getTimestamp() - getLastTrackedTime();
-        return (!anchor || dt >= getStaticPeriod());
+        long checkperiod = anchor?getStaticPeriod():getPeriod();
+       	return dt >= checkperiod;
     }
     
     public TrackPoint processPosition(GeoPositionT p, double sog) throws Exception {
@@ -183,7 +184,7 @@ public class TrackManager {
     	
     	void updateStationaryStatus(long t, boolean stationary) {
     		if (this.stationary!=stationary) {
-    			stationarySince = stationary?t:0;
+    			this.stationarySince = stationary?t:0;
     			this.stationary = stationary;
     		}
     	}

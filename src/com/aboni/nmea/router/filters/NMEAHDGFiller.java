@@ -50,43 +50,15 @@ public class NMEAHDGFiller implements NMEAPostProcess {
     @Override
     public Sentence[] process(Sentence sentence, String src) {
         try {
-            
             if (sentence instanceof HDGSentence) {
-                Position lastPosition = null;
-                DataEvent<PositionSentence> ev = cache.getLastPosition();
-                if (ev!=null && ev.data!=null) {
-                    lastPosition = ev.data.getPosition(); 
-                }
-                
-                boolean canDoT = false;
-                List<Sentence> out = new ArrayList<Sentence>(3); 
                 HDGSentence hdg = (HDGSentence)sentence;
-                try {
-                    hdg.getVariation();
-                    canDoT = true;
-                } catch (DataNotAvailableException e) {
-                    if (lastPosition!=null) {
-                        double d = m.getDeclination(lastPosition);
-                        d = Utils.normalizeDegrees180_180(d);
-                        hdg.setVariation(d);
-                        canDoT = true;
-                    } else {
-                        //hdg.setVariation(0.0);
-                    }
-                }
+                List<Sentence> out = new ArrayList<Sentence>(2); 
+                boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDM) {
-                    HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDM);
-                    hdm.setHeading(hdg.getHeading());
-                    out.add(hdm);
+                    out.add(getHDM(hdg));
                 }
                 if (doHDT && canDoT) {
-                    HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
-                    double var = 0.0;
-                    double dev = 0.0;
-                    try { var = hdg.getVariation(); } catch (Exception e) {}
-                    try { dev = hdg.getDeviation(); } catch (Exception e) {}
-                    hdt.setHeading(hdg.getHeading() + var + dev);
-                    out.add(hdt);
+                    out.add(getHDT(hdg));
                 }
                 
                 return (Sentence[]) out.toArray(new Sentence[0]);
@@ -96,5 +68,48 @@ public class NMEAHDGFiller implements NMEAPostProcess {
         }
         return null;
     }
+
+	private boolean fillVariation(HDGSentence hdg, Position lastPosition) {
+		boolean canDoT = false;
+		try {
+		    hdg.getVariation();
+		    canDoT = true;
+		} catch (DataNotAvailableException e) {
+		    if (lastPosition!=null) {
+		        double d = m.getDeclination(lastPosition);
+		        d = Utils.normalizeDegrees180_180(d);
+		        hdg.setVariation(d);
+		        canDoT = true;
+		    } else {
+		        //hdg.setVariation(0.0);
+		    }
+		}
+		return canDoT;
+	}
+
+	private Position getLastPosition() {
+		Position lastPosition = null;
+		DataEvent<PositionSentence> ev = cache.getLastPosition();
+		if (ev!=null && ev.data!=null) {
+		    lastPosition = ev.data.getPosition(); 
+		}
+		return lastPosition;
+	}
+
+	private HDMSentence getHDM(HDGSentence hdg) {
+		HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDM);
+		hdm.setHeading(hdg.getHeading());
+		return hdm;
+	}
+
+	private HDTSentence getHDT(HDGSentence hdg) {
+		HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
+		double var = 0.0;
+		double dev = 0.0;
+		try { var = hdg.getVariation(); } catch (Exception e) {}
+		try { dev = hdg.getDeviation(); } catch (Exception e) {}
+		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
+		return hdt;
+	}
     
 }

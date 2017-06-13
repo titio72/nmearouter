@@ -19,7 +19,7 @@ public class ServerLog implements Log {
         DateFormat df;
         
         MyFormatter() {
-            df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss.SSS");
+            df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
         }
         
         @Override
