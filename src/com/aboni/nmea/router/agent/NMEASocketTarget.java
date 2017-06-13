@@ -54,30 +54,32 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	
 	@Override
 	protected boolean onActivate() {
-		try {
-			serverSocket = new ServerSocket(port);
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					while (true) {
-						Socket s = null;
-						try {
-							s = serverSocket.accept();
-							SocketClient r = new SocketClient(s);
-							addClient(r);
-							new Thread(r).start();
-						} catch (IOException e) {
-							ServerLog.getLogger().Error("Error", e);
-						}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					Socket s = null;
+					try {
+						ServerSocket server = getSocket(); 
+						s = server.accept();
+						SocketClient r = new SocketClient(s);
+						addClient(r);
+						new Thread(r).start();
+					} catch (IOException e) {
+						ServerLog.getLogger().Error("Error", e);
 					}
-				}}).start();
-			return true;
-		} catch (IOException e) {
-			ServerLog.getLogger().equals("Cannot open port " + port);
-		}
-		return false;
+				}
+			}}).start();
+		return true;
 	}
 	
+	protected ServerSocket getSocket() throws IOException {
+		if (serverSocket==null || serverSocket.isClosed()) {
+			serverSocket = new ServerSocket(port);
+		}
+		return serverSocket;
+	}
+
 	@Override
 	protected void onDeactivate() {
 		try {

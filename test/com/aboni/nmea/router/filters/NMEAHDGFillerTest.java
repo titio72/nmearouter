@@ -34,9 +34,6 @@ public class NMEAHDGFillerTest {
 		MyCache() {}
 		
 		@Override
-		public boolean isStarted() { return true; }
-
-		@Override
 		public DataEvent<HeadingSentence> getLastHeading() { return null; }
 
 		@Override
@@ -69,7 +66,7 @@ public class NMEAHDGFillerTest {
 	
 	@Test
 	public void testEnrichVariation() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(false, false, new MyCache());
+		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), false, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -79,7 +76,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testEnrichVariationFail() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(false, false, new MyCache(false));
+		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(false), false, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -89,7 +86,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testHDT() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(false, true, new MyCache());
+		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), false, true);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -101,7 +98,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testHDM() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(true, false, new MyCache());
+		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), true, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
