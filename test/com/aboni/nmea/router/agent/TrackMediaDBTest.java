@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.agent.TrackManager.TrackPoint;
+import com.aboni.nmea.router.agent.impl.TrackMediaDB;
 import com.aboni.utils.DBHelper;
 
 public class TrackMediaDBTest {

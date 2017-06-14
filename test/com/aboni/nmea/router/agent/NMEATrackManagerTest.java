@@ -1,7 +1,10 @@
 package com.aboni.nmea.router.agent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -129,13 +132,12 @@ public class NMEATrackManagerTest {
 	@Test
 	public void testLeaveAnchor() throws Exception {
 		double speed = 2.0;
-		cruise(10 * 60 /* 1m */, 5.0);
-		cruise(60 * 60 /* 1h */, 0.0); // set anchor
+		dump(cruise(10 * 60 /* 1m */, 5.0));
+		dump(cruise(47 * 60 /* 1h */, 0.0)); // set anchor
 		List<TrackPoint> l = cruise(10 * 60 /* 10m */, speed);
-		
+		dump(l);
 		int counter = 0;
 		for (TrackPoint p: l) {
-			System.out.println(p.period + " " + p.anchor + " " + p.averageSpeed);
 			assertTrue(!p.anchor);
 			if (counter>0) {
 				assertEquals(speed, p.averageSpeed, 0.1);
@@ -143,6 +145,19 @@ public class NMEATrackManagerTest {
 			}
 			counter++;
 		}
+	}
+
+	private static SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss");
+	static {
+		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
+	
+	private void dump(List<TrackPoint> l) {
+		for (TrackPoint p: l) {
+			System.out.format("%d %.2f %d %s %n", 
+					p.anchor?1:0, p.distance * 1852.0, p.period, fmt.format(new Date((p.position.getTimestamp() - t0))) );
+		}
+		
 	}
 
 	@Test

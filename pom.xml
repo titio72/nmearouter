@@ -121,7 +121,7 @@
 	<dependency>
   		<groupId>org.eclipse.jetty</groupId>
   		<artifactId>jetty-server</artifactId>
-  		<version>9.3.9.M1</version>
+  		<version>9.4.6.v20170531</version>
 	</dependency>
 	<dependency>
     	<groupId>javax.servlet</groupId>
@@ -137,13 +137,13 @@
 	<dependency>
 		<groupId>org.eclipse.jetty.websocket</groupId>
 		<artifactId>javax-websocket-server-impl</artifactId>
-  		<version>9.3.9.M1</version>
+  		<version>9.4.6.v20170531</version>
 	</dependency>
     <!-- To run javax.websocket client -->
 	<dependency>
 		<groupId>org.eclipse.jetty.websocket</groupId>
 		<artifactId>javax-websocket-client-impl</artifactId>
-  		<version>9.3.9.M1</version>
+  		<version>9.4.6.v20170531</version>
 	</dependency>
 	<dependency> 
 		<groupId>de.micromata.jak</groupId>
@@ -170,6 +170,11 @@
   		<groupId>net.sf.geographiclib</groupId>
   		<artifactId>GeographicLib-Java</artifactId>
   		<version>1.46</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.google.inject</groupId>
+	    <artifactId>guice</artifactId>
+	    <version>3.0</version>
 	</dependency>
   </dependencies>
 </project>

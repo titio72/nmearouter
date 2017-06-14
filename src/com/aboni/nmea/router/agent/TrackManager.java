@@ -82,7 +82,7 @@ public class TrackManager {
     	if (isFirstReport()) {
 	        stationaryStatus.init(true);
 	        if (lastPoint!=null) {
-	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isMotionless(lastPoint, p));
+	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(lastPoint, p));
             	double speed;
             	double dist;
             	int period;
@@ -98,7 +98,7 @@ public class TrackManager {
     	} else {
 	        long dt = p.getTimestamp() - getLastTrackedTime();
 	        if (dt >= getPeriod()) {
-	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isMotionless(getLastTrackedPosition(), p));
+	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(getLastTrackedPosition(), p));
 	            if (shallReport(p)) {
 	            	double speed;
 	            	double dist;
@@ -155,9 +155,10 @@ public class TrackManager {
         return lastTrackedPoint;
     }
  
-	private boolean isMotionless(GeoPositionT p1, GeoPositionT p2) {
-	    if (p1==null || p2==null) return false;
-	    else {
+	private boolean isStationary(GeoPositionT p1, GeoPositionT p2) {
+	    if (p1==null || p2==null) {
+	    	return false;
+	    } else {
 	    	double dist = p1.distanceTo(p2); // distance in meters
 	    	double period = Math.abs(p1.getTimestamp() - p2.getTimestamp());
 	    	double normalizedDist = (dist * ((double)getPeriod())) / period; 
