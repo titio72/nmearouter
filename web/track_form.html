@@ -54,7 +54,7 @@ html, body {
 <script src="js/bootbox.min.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/Chart.js"></script>
-<script src="js/nmearouter.js?14"></script>
+<script src="js/nmearouter.js?15"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
 
 <script type="text/javascript">
@@ -140,7 +140,7 @@ html, body {
 	  	}
 		var c1 = new Chart(ctx, {
 	    type: 'line',
-	    data: httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359"),
+	    data: httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
 	    options: {
 	        scales: {
 	        	xAxes: [{
@@ -159,7 +159,7 @@ html, body {
 	  	}
 		var c1 = new Chart(ctx, {
 	    type: 'line',
-	    data: httpLoadMeteoDateRange(type, style, dateFrom + "0000", dateTo + "2359"),
+	    data: httpLoadMeteoDateRange(type, style, dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
 	    options: {
 	        scales: {
 	        	xAxes: [{

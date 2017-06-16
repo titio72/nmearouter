@@ -19,7 +19,6 @@ import com.aboni.geo.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
-import com.aboni.nmea.sentences.XXXPSentence;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.HDGSentence;
@@ -43,8 +42,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      * This is in case the boat can provide heading values (AP, boat compass etc.).
      */
     private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
-	
-    private static boolean sendXXX = false; // disable it
 
     private boolean started;
     
@@ -114,7 +111,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         	int mtaSensor = HWSettings.getPropertyAsInteger("mta.sensor", 0);
         	int mmbSensor = HWSettings.getPropertyAsInteger("mmb.sensor", 0);
         	int mhuSensor = HWSettings.getPropertyAsInteger("mhu.sensor", 0);
-            sendXXX();
             sendMTA(mtaSensor);
             sendMMB(mmbSensor);
             sendMHU(mhuSensor);
@@ -340,39 +336,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         notify(xdr);
 	}
 	
-	private void sendXXX() {
-		if (sendXXX) {
-	        try {
-	            XXXPSentence sentence = (XXXPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, "XXP");
-	            if (compassSensor!=null) {
-	            	double[] rot = compassSensor.getRotationDegrees();
-	                double[] xyz = compassSensor.getMagReading();
-	                double b = compassSensor.getHeading();
-	                sentence.setHeading(b);
-	                sentence.setMagX(xyz[0]);
-	                sentence.setMagY(xyz[1]);
-	                sentence.setMagZ(xyz[2]);
-	                sentence.setRotationX(rot[0]);
-	                sentence.setRotationY(rot[1]);
-	                sentence.setRotationZ(rot[2]);
-	            }
-	            if (pressureTempSensor0!=null) {
-	            	double t = pressureTempSensor0.getTemperatureCelsius();
-	    	        double pr = pressureTempSensor0.getPressureMB();
-	    	        sentence.setPressure(pr);
-	    	        sentence.setTemperature(t);
-	            }
-	            if (voltageSensor!=null) {
-	                sentence.setVoltage(voltageSensor.getVoltage0());
-	                sentence.setVoltage1(voltageSensor.getVoltage1());
-	            }
-		        notify(sentence);
-			} catch (Exception e) {
-				getLogger().Error("Cannot post XXX data", e);
-			}
-		}
-	}
-
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
         // do nothing - pure source
