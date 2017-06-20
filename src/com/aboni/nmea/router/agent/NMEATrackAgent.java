@@ -18,7 +18,7 @@ import net.sf.marineapi.nmea.util.Date;
 import net.sf.marineapi.nmea.util.Position;
 import net.sf.marineapi.nmea.util.Time;
 
-public class NMEATrackTargetDB extends NMEAAgentImpl {
+public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private TrackMedia media;
 	private String mediaFile;
@@ -26,11 +26,11 @@ public class NMEATrackTargetDB extends NMEAAgentImpl {
 
 	private TrackManager tracker;
 	
-    public NMEATrackTargetDB(NMEACache cache, NMEAStream stream, String name) {
+    public NMEATrackAgent(NMEACache cache, NMEAStream stream, String name) {
         this(cache, stream, name, SentenceId.RMC.toString());
     }
 
-    public NMEATrackTargetDB(NMEACache cache, NMEAStream stream, String name, String sentence) {
+    public NMEATrackAgent(NMEACache cache, NMEAStream stream, String name, String sentence) {
         super(cache, stream, name);
         
         setSourceTarget(false, true);

@@ -25,7 +25,7 @@ public class NMEATrackManagerTest {
 	//private static final double STATIC_THRESHOLD = 15.0; // meters in the period
 	//private static final double STATIC_THRESHOLD_TIME = 15 * 60000; // if static for more than x minutes set anchor mode
 
-	
+	private int period = 30; // seocnds
 	private double lat;
 	private double lon;
 	private long t0;
@@ -35,6 +35,7 @@ public class NMEATrackManagerTest {
 	@Before
 	public void setup() {
 		m = new TrackManager(); 
+		m.setPeriod(period * 1000);
 		lat = 43.67830115349512;
 		lon = 10.266444683074951;
 		t0 = System.currentTimeMillis();
@@ -98,20 +99,20 @@ public class NMEATrackManagerTest {
 		List<TrackPoint> l = cruise(20 /* 20s */, 5.0);
 		TrackManager.TrackPoint p = l.get(0);
 		assertEquals(6.00, p.maxSpeed, 0.01);
-		assertEquals(5.18, p.averageSpeed, 0.01);
+		assertEquals((5.0*20 + 6.0*(period-20))/period, p.averageSpeed, 0.01);
 	}
 	
 	@Test
 	public void testCruiseAt5Kn() throws Exception {
 		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 5.0);
 		//System.out.println("Reported " + l.size() + "points");
-		assertEquals(60, l.size());
+		assertEquals(60/*m*/ * 60 / period, l.size());
 		int counter = 0;
 		for (TrackPoint p: l) {
 			//System.out.println(p.period + " " + p.averageSpeed);
 			assertTrue(!p.anchor);
 			assertEquals(5.0, p.averageSpeed, 0.1);
-			assertEquals((counter==0)?1:60, p.period);
+			assertEquals((counter==0)?1:period, p.period);
 			counter++;
 		}
 	}
@@ -131,20 +132,21 @@ public class NMEATrackManagerTest {
 	
 	@Test
 	public void testLeaveAnchor() throws Exception {
-		double speed = 2.0;
+		double s = 1.0;
 		dump(cruise(10 * 60 /* 1m */, 5.0));
 		dump(cruise(47 * 60 /* 1h */, 0.0)); // set anchor
-		List<TrackPoint> l = cruise(10 * 60 /* 10m */, speed);
+		List<TrackPoint> l = cruise(10 * 60 /* 10m */, s);
 		dump(l);
 		int counter = 0;
 		for (TrackPoint p: l) {
 			assertTrue(!p.anchor);
 			if (counter>0) {
-				assertEquals(speed, p.averageSpeed, 0.1);
-				assertEquals(60, p.period); // first depends on how long it has been anchored
+				assertEquals(s, p.averageSpeed, 0.1);
+				assertEquals(period, p.period); // first depends on how long it has been anchored
 			}
 			counter++;
 		}
+		assertTrue(counter>0);
 	}
 
 	private static SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss");
@@ -165,7 +167,7 @@ public class NMEATrackManagerTest {
 		cruise(10 * 60 /* 10m */, 5.0);
 		List<TrackPoint> l = cruise(10 * 60 /* 10m */, 0.0); //slow down for less than 15m
 		assertTrue(!l.get(l.size()-1).anchor);
-		assertEquals(60, l.get(l.size()-1).period);
+		assertEquals(period, l.get(l.size()-1).period);
 	}
 
 	@Test
@@ -176,7 +178,7 @@ public class NMEATrackManagerTest {
 		for (TrackPoint p: l) {
 			assertTrue(!p.anchor);
 			assertEquals(5.0, p.averageSpeed, 0.1);
-			assertEquals(60, p.period); // first depends on how long it has been anchored
+			assertEquals(period, p.period); // first depends on how long it has been anchored
 		}
 	}
 	

@@ -1,7 +1,5 @@
 package com.aboni.nmea.router.agent;
 
-import java.util.Calendar;
-
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 
@@ -16,9 +14,12 @@ public class TrackManager {
 
 	private static final long STATIC_DEFAULT_PERIOD = 30 * 60000; // 30 minutes;
 	private static final long DEFAULT_PERIOD = 60000; // 1 minute
-	private static final double STATIC_THRESHOLD = 15.0; // meters in the period
 	private static final double STATIC_THRESHOLD_TIME = 15 * 60000; // if static for more than x minutes set anchor mode
 
+	private static final double MOVE_THRESHOLD_SPEED = 3.0; // if reported is greater than X then it's moving 
+	private static final double MOVE_THRESHOLD_POS = 35.0; // if move by X meters since last reported point then it's moving
+
+	
 	public static class TrackPoint {
 		GeoPositionT position;
 		boolean anchor;
@@ -54,14 +55,6 @@ public class TrackManager {
     
     public long getStationaryTime() {
     	return stationaryStatus.stationarySince;
-    }
-    
-    public boolean isAnchored(Calendar t) {
-    	return stationaryStatus.isAnchor(t.getTimeInMillis());
-    }
-    
-    public boolean isAnchored(long t) {
-    	return stationaryStatus.isAnchor(t);
     }
     
     private boolean isFirstReport() {
@@ -160,9 +153,16 @@ public class TrackManager {
 	    	return false;
 	    } else {
 	    	double dist = p1.distanceTo(p2); // distance in meters
-	    	double period = Math.abs(p1.getTimestamp() - p2.getTimestamp());
-	    	double normalizedDist = (dist * ((double)getPeriod())) / period; 
-	    	return normalizedDist <= STATIC_THRESHOLD;
+	    	long idtime = Math.abs(p2.getTimestamp() - p1.getTimestamp());
+	    	// calc the speed but only if the two points are at least 500ms apart 
+	    	double speed = 
+	    			idtime>500 
+	    			? 
+	    			((dist / (double)idtime) * 1000.0) 
+	    			: 
+	    			0.0; // meter/second
+	    	speed *= 1.94384; // speed in knots
+	    	return speed <= MOVE_THRESHOLD_SPEED && dist < MOVE_THRESHOLD_POS;
 	    }
 	}
 	

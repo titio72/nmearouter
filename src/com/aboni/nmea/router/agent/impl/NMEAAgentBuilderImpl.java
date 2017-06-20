@@ -21,7 +21,7 @@ import com.aboni.nmea.router.agent.NMEASimulatorSource;
 import com.aboni.nmea.router.agent.NMEASocketSource;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
-import com.aboni.nmea.router.agent.NMEATrackTargetDB;
+import com.aboni.nmea.router.agent.NMEATrackAgent;
 import com.aboni.nmea.router.agent.NMEAUDPTarget;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.AgentBase;
@@ -192,7 +192,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     }
 
 	private NMEAAgent buildTrackTarget(TrackAgent c, QOS q) {
-		NMEATrackTargetDB track = new NMEATrackTargetDB(cache, stream, c.getName());
+		NMEATrackAgent track = new NMEATrackAgent(cache, stream, c.getName());
 		track.setFile(c.getFile());
 	    track.setPeriod(c.getInterval() * 1000);
 	    track.setStaticPeriod(c.getIntervalStatic() * 1000);
