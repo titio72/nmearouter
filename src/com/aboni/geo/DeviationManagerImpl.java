@@ -8,44 +8,47 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 
-public class DeviationManager {
+public class DeviationManagerImpl implements DeviationManager {
 
-    class Pair implements Comparable<Pair> {
+    static class Pair implements Comparable<Pair> {
         
         Pair() {}
         
         Pair(int r, double a) {
-            reading = r;
-            actual = a;
+            input = r;
+            output = a;
         }
         
         Pair(Pair p) {
-            this(p.reading, p.actual);
+            this(p.input, p.output);
         }
         
-        int reading;
-        double actual;
+        int input;
+        double output;
         
         @Override
         public boolean equals(Object o) {
             if (o instanceof Pair) {
-                return (reading==((Pair)o).reading);
+                return (input==((Pair)o).input);
             }
             return false;
         }
         
         @Override
         public int compareTo(Pair o) {
-            return (reading<o.reading) ? -1 : ( ((reading>o.reading)) ? 1 : 0 );  
+            return (input<o.input) ? -1 : ( ((input>o.input)) ? 1 : 0 );  
         }
     }
     
-    private ArrayList<Pair> deviationMap;
+    private List<Pair> deviationMap;
+    private List<Pair> reverseDeviationMap;
     
-    public DeviationManager() {
+    public DeviationManagerImpl() {
         deviationMap = new ArrayList<Pair>();
+        reverseDeviationMap = new ArrayList<Pair>();
     }
     
     /**
@@ -79,7 +82,7 @@ public class DeviationManager {
 	    	Pair p = null;
 	    	for (Iterator<Pair> iter = deviationMap.iterator(); iter.hasNext(); ) {
 	    	    p = iter.next();
-	    		stream.write((p.reading + "," + p.actual + "\r\n").getBytes());
+	    		stream.write((p.input + "," + p.output + "\r\n").getBytes());
 	        }
     	}
     }
@@ -90,70 +93,85 @@ public class DeviationManager {
     public void reset() {
     	synchronized (this) {
     		deviationMap.clear();
+    		reverseDeviationMap.clear();
     	}
     }
     
     /**
      * Add a sample.
      * @param reading The compass reading in decimal degrees.
-     * @param actual The magnetic reading (reading of a compensated compass).
+     * @param output The magnetic reading (reading of a compensated compass).
      */
     public void add(double reading, double magnetic) {
         synchronized (this) {
-	    	if (Math.abs(reading)>360.0 || Math.abs(magnetic)>360.0) {
-	            throw new IllegalArgumentException();
-	        } else {
-	            
-	            Pair sample = new Pair(((int)reading)%360, normalize(magnetic));
-	                    
-	            int p = Collections.binarySearch(deviationMap, sample);
-	            if (p>=0) { 
-	                deviationMap.get(p).actual = sample.actual;
-	            } else {
-	                p = -(p+1);
-	                deviationMap.add(p, sample);
-	            }
-	        }
+        	add(reading, magnetic, deviationMap);
+        	add(magnetic, reading, reverseDeviationMap);
         }
     }
-
-    /**
-     * Get the magnetic north given the compass reading by applying the deviation map.
-     * @param reading The compass reading in decimal degrees to be converted.
-     * @return The magnetic north in decimal degrees [0..360].
-     */
-    public double getMagnetic(double reading) {
+    
+    private static void add(double key, double value, List<Pair> l) {
+    	if (Math.abs(key)>360.0 || Math.abs(value)>360.0) {
+            throw new IllegalArgumentException();
+        } else {
+            Pair sample = new Pair(((int)key)%360, normalize(value));
+            int p = Collections.binarySearch(l, sample);
+            if (p>=0) { 
+                l.get(p).output = sample.output;
+            } else {
+                p = -(p+1);
+                l.add(p, sample);
+            }
+        }
+    }
+    
+    /* (non-Javadoc)
+	 * @see com.aboni.geo.DeviationManager#getCompass(double)
+	 */
+    @Override
+    public double getCompass(double magnetic) {
     	synchronized (this) {
-	    	reading = normalize(reading);
-	    	
-	        double res = reading;
-	        
-	        Pair sample = new Pair();
-	        sample.reading = (int)reading; 
-	        sample.actual = 0;
-	        
-	        //variationMap.sort(null);
-	        
-	        int p = Collections.binarySearch(deviationMap, sample);
-	        if (p>=0) {
-	            res = (reading - (int)reading) + deviationMap.get(p).actual;
-	        } else if (deviationMap.size()>1) {
-	            p = -(p+1);
-	            Pair p0 = new Pair(deviationMap.get((p-1) % deviationMap.size()));
-	            Pair p1 = new Pair(deviationMap.get(p % deviationMap.size()));
-	
-	            double[] readings = spreadThem(p0.reading, normalize(reading), p1.reading);
-	            double[] actual = spreadThem(p0.actual, p1.actual);
-	            
-	            double dSamples = readings[2] - readings[0];
-	            double dReading = readings[1] - readings[0];
-	            double dActual = actual[1] - actual[0];
-	            res = actual[0] + dActual * dReading / dSamples;
-	            if (res>360.0) res -= 360;
-	        }
-	        
-	        return res;
+    		return get(magnetic, reverseDeviationMap);
+    	}	
+    }
+
+    /* (non-Javadoc)
+	 * @see com.aboni.geo.DeviationManager#getMagnetic(double)
+	 */
+    @Override
+	public double getMagnetic(double reading) {
+    	synchronized (this) {
+    		return get(reading, deviationMap);
     	}
+    }
+    
+    private static double get(double input, List<Pair> l) {
+    	input = normalize(input);
+    	
+        double res = input;
+        
+        Pair sample = new Pair();
+        sample.input = (int)input; 
+        sample.output = 0;
+        
+        int p = Collections.binarySearch(l, sample);
+        if (p>=0) {
+            res = (input - (int)input) + l.get(p).output;
+        } else if (l.size()>1) {
+            p = -(p+1);
+            Pair p0 = new Pair(l.get((p-1) % l.size()));
+            Pair p1 = new Pair(l.get(p % l.size()));
+
+            double[] readings = spreadThem(p0.input, normalize(input), p1.input);
+            double[] actual = spreadThem(p0.output, p1.output);
+            
+            double dSamples = readings[2] - readings[0];
+            double dReading = readings[1] - readings[0];
+            double dActual = actual[1] - actual[0];
+            res = actual[0] + dActual * dReading / dSamples;
+            if (res>360.0) res -= 360;
+        }
+        
+        return res;
     }
     
     private static double[] spreadThem(double low, double mid, double high) {
