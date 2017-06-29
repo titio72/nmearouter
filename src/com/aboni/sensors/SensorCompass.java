@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import com.aboni.geo.DeviationManager;
+import com.aboni.geo.DeviationManagerImpl;
 import com.aboni.utils.Constants;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
@@ -16,7 +16,7 @@ public class SensorCompass extends I2CSensor {
 	private SensorMPU6050 gyro;
 	
 	private MagnetometerToCompass compass;
-	private DeviationManager devManager;
+	private DeviationManagerImpl devManager;
 	
 	private long lastModifiedDevTable;
 	
@@ -24,7 +24,7 @@ public class SensorCompass extends I2CSensor {
         gyro = new SensorMPU6050();
         magnetometer = new SensorHMC5883();
         compass = new MagnetometerToCompass();
-        devManager = new DeviationManager();
+        devManager = new DeviationManagerImpl();
 	}
 
 	@Override
