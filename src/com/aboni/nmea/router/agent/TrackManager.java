@@ -12,12 +12,16 @@ public class TrackManager {
 	private GeoPositionT lastTrackedPoint;
 	private StationaryManager stationaryStatus;
 
-	private static final long STATIC_DEFAULT_PERIOD = 30 * 60000; // 30 minutes;
-	private static final long DEFAULT_PERIOD = 60000; // 1 minute
-	private static final double STATIC_THRESHOLD_TIME = 15 * 60000; // if static for more than x minutes set anchor mode
+	private static int SECOND = 1000;
+	private static int MINUTE = 60 * SECOND;
+	
+	private static final long STATIC_DEFAULT_PERIOD = 30 * MINUTE;
+	private static final long DEFAULT_PERIOD = 30 * SECOND;
+	
+	private static final long STATIC_THRESHOLD_TIME = 15 * MINUTE; // if static for more than x minutes set anchor mode
 
-	private static final double MOVE_THRESHOLD_SPEED = 3.0; // if reported is greater than X then it's moving 
-	private static final double MOVE_THRESHOLD_POS = 35.0; // if move by X meters since last reported point then it's moving
+	private static final double MOVE_THRESHOLD_SPEED_KN = 3.0; // if reported is greater than X then it's moving 
+	private static final double MOVE_THRESHOLD_POS_METERS =  35.0; // if move by X meters since last reported point then it's moving
 
 	
 	public static class TrackPoint {
@@ -162,7 +166,7 @@ public class TrackManager {
 	    			: 
 	    			0.0; // meter/second
 	    	speed *= 1.94384; // speed in knots
-	    	return speed <= MOVE_THRESHOLD_SPEED && dist < MOVE_THRESHOLD_POS;
+	    	return speed <= MOVE_THRESHOLD_SPEED_KN && dist < MOVE_THRESHOLD_POS_METERS;
 	    }
 	}
 	
@@ -190,5 +194,4 @@ public class TrackManager {
     		}
     	}
     }
-
 }

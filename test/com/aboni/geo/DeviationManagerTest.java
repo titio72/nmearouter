@@ -11,11 +11,11 @@ import org.junit.Test;
 
 public class DeviationManagerTest {
 
-	private DeviationManager m;
+	private DeviationManagerImpl m;
 	
 	@Before
 	public void setUp() throws Exception {
-		m = new DeviationManager(); 
+		m = new DeviationManagerImpl(); 
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class DeviationManagerTest {
 		
 	}
 	
-	private void loadMock(DeviationManager m) {
+	private void loadMock(DeviationManagerImpl m) {
         // +5 for 0 and decreases to 0 for 180
         for (int i = 0; i<360; i+=90) {
             double r = i;
