@@ -16,6 +16,15 @@ function httpLoadMeteoByDate(tp, all, dt) {
 	return getDataset(tp, json.serie, all, 1, all);
 }*/
 
+function httpBackup() {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/backup", false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	var json = JSON.parse(xmlHttp.responseText);
+	return json;
+}
+
 function httpLoadSpeedDateRange(dt0, dt1) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?date=" + dt0 + "&dateTo=" + dt1, false);

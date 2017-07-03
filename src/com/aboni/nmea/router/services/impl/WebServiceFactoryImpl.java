@@ -12,6 +12,7 @@ import com.aboni.nmea.router.services.CruisingDaysService;
 import com.aboni.nmea.router.services.DropTrackingDayService;
 import com.aboni.nmea.router.services.MeteoService;
 import com.aboni.nmea.router.services.SImulatorService;
+import com.aboni.nmea.router.services.ServiceDBBackup;
 import com.aboni.nmea.router.services.ServiceShutdown;
 import com.aboni.nmea.router.services.SpeedService;
 import com.aboni.nmea.router.services.StatusService;
@@ -60,6 +61,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new TripInfoService();
         } else if (target.equals("/speed")) {
         	s = new SpeedService();
+        } else if (target.equals("/backup")) {
+        	s = new ServiceDBBackup();
         }
 		return s;
 	}
