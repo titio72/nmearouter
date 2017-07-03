@@ -7,10 +7,13 @@ import com.aboni.utils.DataEvent;
 import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
 public interface NMEACache {
 
+	DataEvent<TimeSentence> getLastUTCTime();
+	
 	DataEvent<HeadingSentence> getLastHeading();
 
 	DataEvent<PositionSentence> getLastPosition();
@@ -24,5 +27,9 @@ public interface NMEACache {
 	boolean isPositionOlderThan(long time, long threshold);
 	
 	void onSentence(Sentence s, String src);
+
+	boolean isTimeSynced();
+
+	void setTimeSynced();
 
 }

@@ -25,7 +25,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
         super(cache, stream, name, qos);
         gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "pwr", PinState.LOW);
-        pinGps = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, "gps", PinState.LOW);
+        pinGps = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "gps", PinState.LOW);
         pin.setShutdownOptions(true, PinState.LOW);
         pinGps.setShutdownOptions(true, PinState.LOW);
         setSourceTarget(false, true);

@@ -18,6 +18,7 @@ import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -61,6 +62,18 @@ public class NMEAHDGFillerTest {
 
 		@Override
 		public void onSentence(Sentence s, String src) {}
+
+		@Override
+		public DataEvent<TimeSentence> getLastUTCTime() { return null; }
+
+		@Override
+		public boolean isTimeSynced() {
+			return true;
+		}
+
+		@Override
+		public void setTimeSynced() {
+		}
 		
 	}
 	

@@ -13,18 +13,22 @@ import net.sf.marineapi.nmea.sentence.HDTSentence;
 import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import net.sf.marineapi.nmea.sentence.TimeSentence;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
 public class NMEACacheImpl implements NMEACache {
 
 
+    private DataEvent<TimeSentence> lastTime;
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;
     private Map<String, DataEvent<Measurement>> sensors;
+	private boolean synced;
     
     public NMEACacheImpl() {
         lastHeading = new DataEvent<HeadingSentence>();
+        lastTime = new DataEvent<TimeSentence>();
         lastPosition = new DataEvent<PositionSentence>();
         sensors = new HashMap<String, DataEvent<Measurement>>();
     }
@@ -55,8 +59,25 @@ public class NMEACacheImpl implements NMEACache {
         	}
         		
         }
-    }
+        
+        if (s instanceof TimeSentence) {
+            lastTime.data = (TimeSentence)s;
+            lastTime.source = src;
+            lastTime.timestamp = System.currentTimeMillis();
+        }
 
+    }
+    
+    @Override
+    public boolean isTimeSynced() {
+    	return synced;
+    }
+    
+    @Override
+    public void setTimeSynced() {
+    	synced = true;
+    }
+    
     /* (non-Javadoc)
 	 * @see com.aboni.nmea.router.NMEACache#getLastHeading()
 	 */
@@ -108,4 +129,10 @@ public class NMEACacheImpl implements NMEACache {
 	public boolean isPositionOlderThan(long time, long threshold) {
         return (time - lastPosition.timestamp) > threshold; 
     }
+
+	@Override
+	public DataEvent<TimeSentence> getLastUTCTime() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

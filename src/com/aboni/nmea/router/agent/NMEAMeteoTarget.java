@@ -64,9 +64,11 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     private DBHelper db;
     private PreparedStatement stm;
+    private NMEACache cache;
 
     public NMEAMeteoTarget(NMEACache cache, NMEAStream stream, String name, QOS qos) {
         super(cache, stream, name, qos);
+        this.cache = cache;
         setSourceTarget(false, true);
     }
 
@@ -120,17 +122,19 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-        if (s instanceof net.sf.marineapi.nmea.sentence.MTASentence) {
-            processTemp((MTASentence)s);
-        } else if (s instanceof MMBSentence) {
-            processPressure((MMBSentence)s);
-        } else if (s instanceof MTWSentence) {
-            processWaterTemp((MTWSentence)s);
-        } else if (s instanceof MHUSentence) {
-            processHumidity((MHUSentence)s);
-        } else if (s instanceof MWDSentence) {
-            processWind((MWDSentence)s);
-        }
+    	if (cache.isTimeSynced()) {
+	        if (s instanceof net.sf.marineapi.nmea.sentence.MTASentence) {
+	            processTemp((MTASentence)s);
+	        } else if (s instanceof MMBSentence) {
+	            processPressure((MMBSentence)s);
+	        } else if (s instanceof MTWSentence) {
+	            processWaterTemp((MTWSentence)s);
+	        } else if (s instanceof MHUSentence) {
+	            processHumidity((MHUSentence)s);
+	        } else if (s instanceof MWDSentence) {
+	            processWind((MWDSentence)s);
+	        }
+    	}
     }
 
 	private void collect(int type, double d) {

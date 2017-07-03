@@ -21,9 +21,12 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 	private static final long TOLERANCE_MS = 10000;
 	
 	private boolean timestampset;
+
+	private NMEACache cache;
 	
 	public NMEASystemTimeGPS(NMEACache cache, NMEAStream stream, String name, QOS qos) {
 		super(cache, stream, name, qos);
+		this.cache = cache;
 		setSourceTarget(false, true);
 	}
 
@@ -58,6 +61,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 	                getLogger().Info("New Time {" + c + "}");
 					doChangeTime(c);
 					timestampset = true;
+					cache.setTimeSynced();
 				}
 			}
 		}
