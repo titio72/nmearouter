@@ -34,7 +34,10 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         private double avg;
         private double max;
         private double min;
-        int samples = 0;
+        private int samples = 0;
+        
+        private double rangeMin = Double.NaN;
+        private double rangeMax = Double.NaN;
         
     	public String getTag() { return tag; }
     	public Type getType() { return type; }
@@ -43,12 +46,20 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     	public double getAvg() { return avg; }
     	public double getMin() { return min; }
     	public double getMax() { return max; }
+    	public double getRangeMin() { return rangeMin; }
+    	public double getRangeMax() { return rangeMax; }
     	
     	private Serie(int id, String tag, Type type) {
     		this.id = id;
     		this.tag = tag;
     		this.type = type;
     		reset();
+    	}
+    	
+    	private Serie(int id, String tag, Type type, double min, double max) {
+    		this(id, tag, type);
+    		this.rangeMax = max;
+    		this.rangeMin = min;
     	}
     	
     	public void reset() {
@@ -72,12 +83,15 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 	                avg = Utils.normalizeDegrees0_360(avg);
 	                max = Utils.normalizeDegrees0_360(Math.max(max,  a));
 	                min = Utils.normalizeDegrees0_360(Math.min(min,  a));
+	                samples++;
             	} else {
-	                avg = ((avg * samples) +  v) / (samples +1);
-	                max = Math.max(max,  v);
-	                min = Math.min(min,  v);
+            		if ((Double.isNaN(rangeMin) || v>=rangeMin) && (Double.isNaN(rangeMax) || v<=rangeMax)) { 
+		                avg = ((avg * samples) +  v) / (samples +1);
+		                max = Math.max(max,  v);
+		                min = Math.min(min,  v);
+		                samples++;
+            		}
             	}
-                samples++;
             }
         }
     }
@@ -90,12 +104,12 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int HUM = 5; 
 
     private Serie[] series = new Serie[] {
-    		new Serie(TEMP, "AT0", Type.Scalar),
-    		new Serie(TEMP, "WT_", Type.Scalar),
-    		new Serie(TEMP, "PR_", Type.Scalar),
-    		new Serie(TEMP, "TW_", Type.Scalar),
+    		new Serie(TEMP, "AT0", Type.Scalar, -20.0, 50.0),
+    		new Serie(TEMP, "WT_", Type.Scalar, -20.0, 50.0),
+    		new Serie(TEMP, "PR_", Type.Scalar, 800.0, 1100.0),
+    		new Serie(TEMP, "TW_", Type.Scalar, 0.0, 100.0),
     		new Serie(TEMP, "TWD", Type.Angle),
-    		new Serie(TEMP, "HUM", Type.Scalar)
+    		new Serie(TEMP, "HUM", Type.Scalar, 0.0, 150.0)
     };
     
     private DBHelper db;
