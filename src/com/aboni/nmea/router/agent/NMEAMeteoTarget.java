@@ -21,6 +21,66 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private static final long SAMPLING = 60000;
+
+	public enum Type {
+		Scalar,
+		Angle
+	}
+    
+    public class Serie {
+    	private int id;
+    	private String tag;
+    	private Type type;
+        private double avg;
+        private double max;
+        private double min;
+        int samples = 0;
+        
+    	public String getTag() { return tag; }
+    	public Type getType() { return type; }
+    	public int getId() { return id; }
+    	public int getSamples() { return samples; }
+    	public double getAvg() { return avg; }
+    	public double getMin() { return min; }
+    	public double getMax() { return max; }
+    	
+    	private Serie(int id, String tag, Type type) {
+    		this.id = id;
+    		this.tag = tag;
+    		this.type = type;
+    		reset();
+    	}
+    	
+    	public void reset() {
+            avg = Double.NaN;
+            max = Double.NaN;
+            min = Double.NaN;
+            samples = 0;
+    	}
+    	
+    	public void add(double v) {
+            if (samples == 0) {
+            	v = Utils.normalizeDegrees0_360(v);
+                avg = v;
+                max = v;
+                min = v;
+                samples = 1;
+            } else {
+            	if (Type.Angle.equals(type)) {
+					double a = Utils.getNormal(avg, v);
+	                avg = ((avg * samples) +  a) / (samples +1);
+	                avg = Utils.normalizeDegrees0_360(avg);
+	                max = Utils.normalizeDegrees0_360(Math.max(max,  a));
+	                min = Utils.normalizeDegrees0_360(Math.min(min,  a));
+            	} else {
+	                avg = ((avg * samples) +  v) / (samples +1);
+	                max = Math.max(max,  v);
+	                min = Math.min(min,  v);
+            	}
+                samples++;
+            }
+        }
+    }
     
     private static final int TEMP = 0; 
     private static final int W_TEMP = 1; 
@@ -28,39 +88,15 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int WIND = 3; 
     private static final int WIND_D = 4; 
     private static final int HUM = 5; 
-    private Sample[] samples = new Sample[6];
-    private static final String[] TYPES = new String[] 		{"AT0", "WT_", 	"PR_", 	"TW_", 	"TWD", 	"HUM"};
-    private static final String[] TYPES_D = new String[] 	{"V", 	"V", 	"V", 	"V", 	"A", 	"V"};
-    
-    private class Sample {
-        double Avg = Double.NaN;
-        double Max = Double.NaN;
-        double Min = Double.NaN;
-        int Samples = 0;
-        
-        void add(double v, String type) {
-            if (Samples == 0) {
-            	v = Utils.normalizeDegrees0_360(v);
-                Avg = v;
-                Max = v;
-                Min = v;
-                Samples = 1;
-            } else {
-            	if ("A".equals(type)) {
-					double a = Utils.getNormal(Avg, v);
-	                Avg = ((Avg * Samples) +  a) / (Samples +1);
-	                Avg = Utils.normalizeDegrees0_360(Avg);
-	                Max = Utils.normalizeDegrees0_360(Math.max(Max,  a));
-	                Min = Utils.normalizeDegrees0_360(Math.min(Min,  a));
-            	} else {
-	                Avg = ((Avg * Samples) +  v) / (Samples +1);
-	                Max = Math.max(Max,  v);
-	                Min = Math.min(Min,  v);
-            	}
-                Samples++;
-            }
-        }
-    }
+
+    private Serie[] series = new Serie[] {
+    		new Serie(TEMP, "AT0", Type.Scalar),
+    		new Serie(TEMP, "WT_", Type.Scalar),
+    		new Serie(TEMP, "PR_", Type.Scalar),
+    		new Serie(TEMP, "TW_", Type.Scalar),
+    		new Serie(TEMP, "TWD", Type.Angle),
+    		new Serie(TEMP, "HUM", Type.Scalar)
+    };
     
     private DBHelper db;
     private PreparedStatement stm;
@@ -100,13 +136,11 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
     
     protected void dumpStats() {
-        synchronized (samples) {
+        synchronized (series) {
         	long ts = System.currentTimeMillis() - SAMPLING;
-            for (int i = 0; i<samples.length; i++) {
-                if (samples[i]!=null) {
-                    write(TYPES[i], samples[i], ts);
-                    samples[i] = null;
-                }
+            for (int i = 0; i<series.length; i++) {
+                write(series[i], ts);
+                series[i].reset();
             }
         }
     }
@@ -137,26 +171,28 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     	}
     }
 
-	private void collect(int type, double d) {
-        synchronized (samples) {
-            if (samples[type]==null) samples[type] = new Sample();
-            samples[type].add(d, TYPES_D[type]);
+	private void collect(int id, double d) {
+        synchronized (series) {
+        	Serie s = series[id];
+            s.add(d);
         }
     }
 
-    private void write(String type, Sample v, long ts) {
-        try {
-            if (v.Samples>0) {
-                stm.setString(1, type);
-                stm.setDouble(2, v.Avg);
-                stm.setDouble(3, v.Max);
-                stm.setDouble(4, v.Min);
-                stm.setTimestamp(5, new Timestamp(ts));
-                stm.execute();
-            }
-        } catch (Exception e) {
-            getLogger().Error("Cannot write meteo info type {" + type + "} Value {" + v +"} Agent {" + getName() + "}", e);
-        }
+    private void write(Serie s,  long ts) {
+    	if (s!=null) {
+    		try {
+	            if (s.getSamples()>0) {
+	                stm.setString(1, s.getTag());
+	                stm.setDouble(2, s.getAvg());
+	                stm.setDouble(3, s.getMax());
+	                stm.setDouble(4, s.getMin());
+	                stm.setTimestamp(5, new Timestamp(ts));
+	                stm.execute();
+	            }
+	        } catch (Exception e) {
+	            getLogger().Error("Cannot write meteo info type {" + s.getType() + "} Value {" + s.getAvg() +"} Agent {" + getName() + "}", e);
+	        }
+    	}
     }
 
     private void processWind(MWDSentence s) {
