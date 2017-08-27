@@ -33,11 +33,11 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private Serie[] series = new Serie[] {
     		new ScalarSerie(TEMP, "AT0", -20.0, 50.0),
-    		new ScalarSerie(TEMP, "WT_", -20.0, 50.0),
-    		new ScalarSerie(TEMP, "PR_", 800.0, 1100.0),
-    		new ScalarSerie(TEMP, "TW_", 0.0, 100.0),
-    		new AngleSerie(TEMP, "TWD"),
-    		new ScalarSerie(TEMP, "HUM", 0.0, 150.0)
+    		new ScalarSerie(W_TEMP, "WT_", -20.0, 50.0),
+    		new ScalarSerie(PRESS, "PR_", 800.0, 1100.0),
+    		new ScalarSerie(WIND, "TW_", 0.0, 100.0),
+    		new AngleSerie(WIND_D, "TWD"),
+    		new ScalarSerie(HUM, "HUM", 0.0, 150.0)
     };
     
     private NMEACache cache;
