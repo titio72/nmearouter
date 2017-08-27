@@ -44,7 +44,6 @@ import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
- 
     
     private static String getType(AgentBase a) {
     	Method m;
@@ -166,7 +165,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 
 	private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
-        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, stream, a.getName(), q);
+        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, stream, a.getName(), q, new DBStatsWriter());
         return meteo;
     }
 
