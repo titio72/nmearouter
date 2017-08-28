@@ -15,12 +15,16 @@ public class AgentStatusImpl implements AgentStatus {
 	private DBHelper db;
 	
 	private Map<String, AgentStatus.STATUS> status;
+	private Map<String, String> data;
 	
 	private PreparedStatement updateStatusSt;
+	private PreparedStatement updateDataSt;
 	
 	public AgentStatusImpl() {
 		status = new HashMap<>();
+		data = new HashMap<>();
 		updateStatusSt = null;
+		updateDataSt = null;
 		try {
 			db = new DBHelper(true);
 			loadAll();
@@ -31,26 +35,39 @@ public class AgentStatusImpl implements AgentStatus {
 
 	private PreparedStatement getUpdateSt() {
 		if (updateStatusSt==null) {
-			try {
-				if (db!=null) {
-					updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?");
-				}
-				//updateStatusSt = db.getConnection().prepareStatement("update agent set status = ? where id = ?");
-			} catch (Exception e) {
-				ServerLog.getLogger().Error("Error creating statement for agent status update", e);
-			}
+			initStatements();
 		}
 		return updateStatusSt;
 	}
+
+	private PreparedStatement getUpdateDataSt() {
+		if (updateDataSt==null) {
+			initStatements();
+		}
+		return updateDataSt;
+	}
+
+	private void initStatements() {
+		try {
+			if (db!=null) {
+				updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?");
+				updateDataSt = db.getConnection().prepareStatement("insert into agent (id, agentData) values (?, ?) on duplicate key update agentData = ?");
+			}
+		} catch (Exception e) {
+			ServerLog.getLogger().Error("Error creating statement for agent status update", e);
+		}
+	}
 	
 	private void loadAll() throws SQLException {
-		String sql = "select id, autostart from agent";
+		String sql = "select id, autostart, agentData from agent";
 		Statement st = db.getConnection().createStatement();
 		ResultSet rs = st.executeQuery(sql);
 		while (rs.next()) {
 			String agId = rs.getString(1);
 			STATUS agSt = (1==rs.getInt(2))?STATUS.AUTO:STATUS.MANUAL;
+			String agData = rs.getString(3);
 			status.put(agId,  agSt);
+			data.put(agId, agData);
 		}
 		st.close();
 	}
@@ -61,6 +78,15 @@ public class AgentStatusImpl implements AgentStatus {
 			return status.get(agent);
 		} else {
 			return STATUS.UNKNOWN;
+		}
+	}
+
+	@Override
+	public synchronized String getAgentData(String agent) {
+		if (data.containsKey(agent)) {
+			return data.get(agent);
+		} else {
+			return null;
 		}
 	}
 
@@ -79,6 +105,25 @@ public class AgentStatusImpl implements AgentStatus {
 			}
 		} else {
 			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Start {" + status + "}");
+		}
+	}
+
+
+	@Override
+	public synchronized void setAgentData(String agent, String agData) {
+		data.put(agent, agData);
+		PreparedStatement p = getUpdateDataSt();
+		if (p!=null) {
+			try {
+				p.setString(1, agent);
+				p.setString(2, agData);
+				p.setString(3, agData);
+				p.executeUpdate();
+			} catch (Exception e) {
+				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}", e);
+			}
+		} else {
+			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}");
 		}
 	}
 

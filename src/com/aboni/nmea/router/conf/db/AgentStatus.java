@@ -10,4 +10,7 @@ public interface AgentStatus {
 	
 	STATUS getStartMode(String agent);
 	void setStartMode(String agent, STATUS status);
+	
+	String getAgentData(String agent);
+	void setAgentData(String agent, String data);
 }
