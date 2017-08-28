@@ -5,7 +5,7 @@ import java.util.TimerTask;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;

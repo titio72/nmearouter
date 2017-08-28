@@ -7,6 +7,9 @@ public interface NMEASource {
 
     NMEASentenceFilterSet getSourceFilter();
 
+    void setSourceFilter(NMEASentenceFilterSet s);
+
+    
     void setSentenceListener(NMEASentenceListener listener);
 
     void unsetSentenceListener();

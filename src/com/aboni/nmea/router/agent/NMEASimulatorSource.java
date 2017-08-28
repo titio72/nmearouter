@@ -14,7 +14,7 @@ import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.nmea.sentences.XXXPSentence;
 

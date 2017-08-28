@@ -5,8 +5,8 @@ import java.util.TimerTask;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.agent.impl.StatsWriter;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
 import com.aboni.utils.Serie;
 import com.aboni.utils.ScalarSerie;
 import com.aboni.utils.AngleSerie;

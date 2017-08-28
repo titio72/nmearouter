@@ -39,6 +39,8 @@ import com.aboni.nmea.router.conf.TcpAgent;
 import com.aboni.nmea.router.conf.TrackAgent;
 import com.aboni.nmea.router.conf.UdpAgent;
 import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -103,8 +105,22 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 			default: break;
 		}
         if (agent!=null) {
-        	if (agent.getSource()!=null) setFilter(a.getFilterSource(), agent.getSource().getSourceFilter());
-        	if (agent.getTarget()!=null) setFilter(a.getFilterTarget(), agent.getTarget().getTargetFilter());
+        	if (agent.getSource()!=null && a.getFilterSource()!=null) {
+        		if (agent.getSource().getSourceFilter()==null) {
+        			NMEAFilterSet ff = new NMEAFilterSet();
+        			ff.setType(a.getFilterSource().isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
+        			agent.getSource().setSourceFilter(ff);
+        		}
+        		setFilter(a.getFilterSource(), agent.getSource().getSourceFilter());
+        	}
+        	if (agent.getTarget()!=null && a.getFilterTarget()!=null) {
+        		if (agent.getTarget().getTargetFilter()==null) {
+        			NMEAFilterSet ff = new NMEAFilterSet();
+        			ff.setType(a.getFilterTarget().isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
+        			agent.getTarget().setTargetFilter(ff);
+        		}
+        		setFilter(a.getFilterTarget(), agent.getTarget().getTargetFilter());
+        	}
         }
 		return agent;
 	}
