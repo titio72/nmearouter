@@ -11,10 +11,8 @@ import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.sentence.DateSentence;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TimeSentence;
-import net.sf.marineapi.nmea.sentence.ZDASentence;
 import net.sf.marineapi.nmea.util.Date;
 import net.sf.marineapi.nmea.util.Time;
 
