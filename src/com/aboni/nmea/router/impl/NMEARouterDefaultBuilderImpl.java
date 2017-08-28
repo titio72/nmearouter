@@ -51,7 +51,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
         NMEARouter r = injector.getInstance(NMEARouter.class);
         
-        for (AgentBase a: conf.getSerialAgentOrJSONAgentOrTcpAgent()) {
+        for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
         	NMEAAgent agent = builder.createAgent(a, r);
             if (agent!=null) {
             	r.addAgent(agent);

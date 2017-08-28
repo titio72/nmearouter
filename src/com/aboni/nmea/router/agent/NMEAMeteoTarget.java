@@ -1,15 +1,15 @@
 package com.aboni.nmea.router.agent;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.aboni.geo.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
-import com.aboni.utils.DBHelper;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.StatsWriter;
+import com.aboni.utils.Serie;
+import com.aboni.utils.ScalarSerie;
+import com.aboni.utils.AngleSerie;
 
 import net.sf.marineapi.nmea.sentence.MHUSentence;
 import net.sf.marineapi.nmea.sentence.MMBSentence;
@@ -20,82 +20,10 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAMeteoTarget extends NMEAAgentImpl {
 
+	private StatsWriter writer;
+	
     private static final long SAMPLING = 60000;
 
-	public enum Type {
-		Scalar,
-		Angle
-	}
-    
-    public class Serie {
-    	private int id;
-    	private String tag;
-    	private Type type;
-        private double avg;
-        private double max;
-        private double min;
-        private int samples = 0;
-        
-        private double rangeMin = Double.NaN;
-        private double rangeMax = Double.NaN;
-        
-    	public String getTag() { return tag; }
-    	public Type getType() { return type; }
-    	public int getId() { return id; }
-    	public int getSamples() { return samples; }
-    	public double getAvg() { return avg; }
-    	public double getMin() { return min; }
-    	public double getMax() { return max; }
-    	public double getRangeMin() { return rangeMin; }
-    	public double getRangeMax() { return rangeMax; }
-    	
-    	private Serie(int id, String tag, Type type) {
-    		this.id = id;
-    		this.tag = tag;
-    		this.type = type;
-    		reset();
-    	}
-    	
-    	private Serie(int id, String tag, Type type, double min, double max) {
-    		this(id, tag, type);
-    		this.rangeMax = max;
-    		this.rangeMin = min;
-    	}
-    	
-    	public void reset() {
-            avg = Double.NaN;
-            max = Double.NaN;
-            min = Double.NaN;
-            samples = 0;
-    	}
-    	
-    	public void add(double v) {
-            if (samples == 0) {
-            	v = Utils.normalizeDegrees0_360(v);
-                avg = v;
-                max = v;
-                min = v;
-                samples = 1;
-            } else {
-            	if (Type.Angle.equals(type)) {
-					double a = Utils.getNormal(avg, v);
-	                avg = ((avg * samples) +  a) / (samples +1);
-	                avg = Utils.normalizeDegrees0_360(avg);
-	                max = Utils.normalizeDegrees0_360(Math.max(max,  a));
-	                min = Utils.normalizeDegrees0_360(Math.min(min,  a));
-	                samples++;
-            	} else {
-            		if ((Double.isNaN(rangeMin) || v>=rangeMin) && (Double.isNaN(rangeMax) || v<=rangeMax)) { 
-		                avg = ((avg * samples) +  v) / (samples +1);
-		                max = Math.max(max,  v);
-		                min = Math.min(min,  v);
-		                samples++;
-            		}
-            	}
-            }
-        }
-    }
-    
     private static final int TEMP = 0; 
     private static final int W_TEMP = 1; 
     private static final int PRESS = 2; 
@@ -104,36 +32,32 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int HUM = 5; 
 
     private Serie[] series = new Serie[] {
-    		new Serie(TEMP, "AT0", Type.Scalar, -20.0, 50.0),
-    		new Serie(TEMP, "WT_", Type.Scalar, -20.0, 50.0),
-    		new Serie(TEMP, "PR_", Type.Scalar, 800.0, 1100.0),
-    		new Serie(TEMP, "TW_", Type.Scalar, 0.0, 100.0),
-    		new Serie(TEMP, "TWD", Type.Angle),
-    		new Serie(TEMP, "HUM", Type.Scalar, 0.0, 150.0)
+    		new ScalarSerie(TEMP, "AT0", -20.0, 50.0),
+    		new ScalarSerie(W_TEMP, "WT_", -20.0, 50.0),
+    		new ScalarSerie(PRESS, "PR_", 800.0, 1100.0),
+    		new ScalarSerie(WIND, "TW_", 0.0, 100.0),
+    		new AngleSerie(WIND_D, "TWD"),
+    		new ScalarSerie(HUM, "HUM", 0.0, 150.0)
     };
     
-    private DBHelper db;
-    private PreparedStatement stm;
     private NMEACache cache;
 
-    public NMEAMeteoTarget(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+    public NMEAMeteoTarget(NMEACache cache, NMEAStream stream, String name, QOS qos, StatsWriter w) {
         super(cache, stream, name, qos);
         this.cache = cache;
         setSourceTarget(false, true);
+    	writer = w;
     }
 
     @Override
 	public String getDescription() {
 		return "";
 	}
-	
 
     @Override
     protected boolean onActivate() {
         try {
-            db = new DBHelper(true);
-            stm = db.getConnection().prepareStatement("insert into meteo (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
-            
+            if (writer!=null) writer.init();
             new Timer(true).scheduleAtFixedRate(new TimerTask() {
                 
                 @Override
@@ -161,17 +85,15 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     @Override
     protected void onDeactivate() {
-        if (isStarted()) {
-            try {
-                db.close();
-            } catch (Exception e) {}
+        if (isStarted() && writer!=null) {
+        	writer.dispose();
         }
     }    
     
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
     	if (cache.isTimeSynced()) {
-	        if (s instanceof net.sf.marineapi.nmea.sentence.MTASentence) {
+	        if (s instanceof MTASentence) {
 	            processTemp((MTASentence)s);
 	        } else if (s instanceof MMBSentence) {
 	            processPressure((MMBSentence)s);
@@ -193,19 +115,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void write(Serie s,  long ts) {
-    	if (s!=null) {
-    		try {
-	            if (s.getSamples()>0) {
-	                stm.setString(1, s.getTag());
-	                stm.setDouble(2, s.getAvg());
-	                stm.setDouble(3, s.getMax());
-	                stm.setDouble(4, s.getMin());
-	                stm.setTimestamp(5, new Timestamp(ts));
-	                stm.execute();
-	            }
-	        } catch (Exception e) {
-	            getLogger().Error("Cannot write meteo info type {" + s.getType() + "} Value {" + s.getAvg() +"} Agent {" + getName() + "}", e);
-	        }
+    	if (writer!=null && s!=null && s.getSamples()>0) {
+        	writer.write(s, ts);
     	}
     }
 

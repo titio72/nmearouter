@@ -17,7 +17,7 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;

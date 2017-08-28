@@ -16,6 +16,7 @@
 			<xs:element name="MeteoAgent" type="MeteoAgent"/>
 			<xs:element name="MWDAgent" type="MWDAgent"/>
 			<xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
+			<xs:element name="JSONAgent" type="JSONAgent"/>
 		</xs:choice>
 	</xs:sequence>
 </xs:complexType>
@@ -23,11 +24,23 @@
 <xs:complexType name="AgentBase">
 	<xs:sequence>
 		<xs:element name="qos" type="xs:string" minOccurs="0" maxOccurs="1"/>
-		<xs:element name="filterSource" type="FilterSet" minOccurs="0" maxOccurs="1"/>
-		<xs:element name="filterTarget" type="FilterSet" minOccurs="0" maxOccurs="1"/>
+		<xs:element name="FilterSource" type="FilterSource" minOccurs="0" maxOccurs="1"/>
+		<xs:element name="FilterTarget" type="FilterTarget" minOccurs="0" maxOccurs="1"/>
 	</xs:sequence>
 	<xs:attribute name="name" type="xs:string" use="required"/>
 	<xs:attribute name="active" type="xs:boolean" default="false"/>
+</xs:complexType>
+
+<xs:complexType name="FilterTarget">
+	<xs:complexContent>
+	    <xs:extension base="FilterSet"/>
+	</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="FilterSource">
+	<xs:complexContent>
+	    <xs:extension base="FilterSet"/>
+	</xs:complexContent>
 </xs:complexType>
 
 <xs:complexType name="FilterSet">
@@ -137,6 +150,15 @@
 		</xs:extension>
 	</xs:complexContent>
 </xs:complexType>
+
+ <xs:complexType name="JSONAgent">
+	<xs:complexContent>
+	    <xs:extension base="AgentBase">
+ 			<xs:attribute name="type" type="xs:string" fixed="JSON" />
+ 			<xs:attribute name="port" type="xs:int" default="1110" />
+ 		</xs:extension>
+	</xs:complexContent>
+ </xs:complexType>
 
 <xs:complexType name="Log">
 	<xs:sequence>

@@ -18,7 +18,7 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.HDGSentence;

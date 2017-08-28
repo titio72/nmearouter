@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.impl;
+package com.aboni.nmea.router.agent.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +12,6 @@ import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
 import com.aboni.nmea.router.filters.NMEAPostProcess;
 import com.aboni.nmea.router.filters.NMEARMC2VTGProcessor;
@@ -26,8 +25,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 
 	private String name;
 	private NMEAAgentStatusListener sl;
-	private NMEAFilterSet fsetInput;
-	private NMEAFilterSet fsetOutput;
+	private NMEASentenceFilterSet fsetInput;
+	private NMEASentenceFilterSet fsetOutput;
 	private List<NMEAPostProcess> proc;
 	private boolean active;
 	private NMEASentenceListener listener;
@@ -134,8 +133,18 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	}
 	
 	@Override
+	public void setTargetFilter(NMEASentenceFilterSet s) {
+		fsetInput = s;
+	}
+	
+	@Override
 	public NMEASentenceFilterSet getSourceFilter() {
 		return fsetOutput;
+	}
+	
+	@Override
+	public void setSourceFilter(NMEASentenceFilterSet s) {
+		fsetOutput = s;
 	}
 	
 	@Override

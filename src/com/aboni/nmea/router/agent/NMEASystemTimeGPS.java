@@ -8,18 +8,20 @@ import java.util.TimeZone;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 
-import net.sf.marineapi.nmea.sentence.DateSentence;
+import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TimeSentence;
+import net.sf.marineapi.nmea.sentence.ZDASentence;
 import net.sf.marineapi.nmea.util.Date;
 import net.sf.marineapi.nmea.util.Time;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
-	private static final long TOLERANCE_MS = 2000;
+	private static final long TOLERANCE_MS = 10000;
 	
+	private boolean timestampset;
+
 	private NMEACache cache;
 	
 	public NMEASystemTimeGPS(NMEACache cache, NMEAStream stream, String name, QOS qos) {
@@ -36,32 +38,35 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
-		Time t = null;
-		Date d = null;
-		if (s instanceof DateSentence && s instanceof TimeSentence && s.isValid()) {
-			d = ((DateSentence)s).getDate();
-			t = ((TimeSentence)s).getTime();
-		}
-		
-		if (d!=null && t!=null) {
-			Calendar c = getCalendar(t, d);
-			if (checkTolerance(c, Calendar.getInstance())) {
-                // time skew from GPS is too high - reset time stamp
-                //System.out.println("Setting time " + c.getTime() + " " + c.getTimeZone());
-                getLogger().Info("New Time {" + d + " " + t + "}");
-				Calendar newC = doChangeTime(c);
-				if (checkTolerance(c, newC)) {
+		if (!timestampset) {
+			Time t = null;
+			Date d = null;
+			if (s instanceof ZDASentence && s.isValid()) {
+				ZDASentence zda = (ZDASentence)s;
+				d = zda.getDate();
+				t = zda.getTime();
+			} else if (s instanceof RMCSentence && s.isValid()) {
+				RMCSentence r = (RMCSentence)s;
+				d = r.getDate();
+				t = r.getTime();
+			}
+			
+			if (d!=null && t!=null) {
+				Calendar c = getCalendar(t, d);
+				Calendar now = Calendar.getInstance();
+				long diff = Math.abs(now.getTimeInMillis() - c.getTimeInMillis());
+				if (diff > TOLERANCE_MS) {
+                    // time skew from GPS is too high - reset time stamp
+	                //System.out.println("Setting time " + c.getTime() + " " + c.getTimeZone());
+	                getLogger().Info("New Time {" + c + "}");
+					doChangeTime(c);
+					timestampset = true;
 					cache.setTimeSynced();
 				}
 			}
 		}
 	}
 
-	private boolean checkTolerance(Calendar c, Calendar c0) {
-		long diff = Math.abs(c0.getTimeInMillis() - c.getTimeInMillis());
-		return (diff > TOLERANCE_MS);
-	}
-	
 	private static DecimalFormat fh = new DecimalFormat("+00");
 	private static DecimalFormat fm = new DecimalFormat("00");
 	private static Calendar getCalendar(Time t, Date d) {
@@ -77,7 +82,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 		return c;
 	}
 
-	private Calendar doChangeTime(Calendar c) {
+	private void doChangeTime(Calendar c) {
 	    DateFormat formatter = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
 	    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 	    try {
@@ -89,7 +94,6 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
         } catch (Exception e) {
             getLogger().Error("Target {" + getName() + "} cannot set GPS time", e);
         }
-        return Calendar.getInstance();
 	}
 
 	@Override

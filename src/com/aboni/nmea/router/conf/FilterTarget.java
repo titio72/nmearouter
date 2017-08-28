@@ -8,38 +8,32 @@
 
 package com.aboni.nmea.router.conf;
 
-import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for InOut.
+ * <p>Java class for FilterTarget complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
+ * 
  * <pre>
- * &lt;simpleType name="InOut">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="IN"/>
- *     &lt;enumeration value="OUT"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;complexType name="FilterTarget">
+ *   &lt;complexContent>
+ *     &lt;extension base="{}FilterSet">
+ *     &lt;/extension>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
  * </pre>
  * 
+ * 
  */
-@XmlType(name = "InOut")
-@XmlEnum
-public enum InOut {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "FilterTarget")
+public class FilterTarget
+    extends FilterSet
+{
 
-    IN,
-    OUT;
-
-    public String value() {
-        return name();
-    }
-
-    public static InOut fromValue(String v) {
-        return valueOf(v);
-    }
 
 }
