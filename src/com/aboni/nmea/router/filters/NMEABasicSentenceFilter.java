@@ -29,6 +29,13 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 		this.source = "";
 	}
 	
+	public NMEABasicSentenceFilter(String sentenceId, String source) {
+		if (sentenceId==null) sentenceId = "";
+		this.sentenceId = sentenceId;
+		this.talkerId = null;
+		this.source = source;
+	}
+	
 	public NMEABasicSentenceFilter(String sentenceId) {
 		if (sentenceId==null) sentenceId = "";
 		this.sentenceId = sentenceId;
