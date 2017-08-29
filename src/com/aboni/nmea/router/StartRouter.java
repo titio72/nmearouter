@@ -122,7 +122,7 @@ public class StartRouter {
         NMEACache cache = injector.getInstance(NMEACache.class);
 
         NMEASourceSensor s = new NMEASourceSensor(cache, stream, "test", null);
-        s.setSentenceListener(new NMEASentenceListener() {
+        s.getSource().setSentenceListener(new NMEASentenceListener() {
             
             @Override
             public void onSentence(Sentence s, NMEAAgent src) {

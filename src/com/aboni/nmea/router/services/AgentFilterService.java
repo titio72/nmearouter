@@ -6,27 +6,44 @@ import java.util.Iterator;
 
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.conf.db.AgentStatus;
-import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
+import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
+import com.aboni.nmea.router.filters.FilterSetBuilder;
+import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 
-public class AgentStatusServiceJSON implements WebService {
+public class AgentFilterService implements WebService {
 
 	private NMEARouter router;
 	
-	public AgentStatusServiceJSON(NMEARouter router) {
+	public AgentFilterService(NMEARouter router) {
 		this.router = router;
 	}
 	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("application/json");
-
         try {
-            String msg = doActivate(config);
+        	String agentname = config.getParameter("agent"); 
+        	String[] sentences = config.getParameter("sentences").split(",");
+            String type = config.getParameter("type");
+            
+            NMEAFilterSet fs = new NMEAFilterSet("whitelist".equals(type)?TYPE.WHITELIST:TYPE.BLACKLIST);
+            for (String sentence: sentences) {
+            	NMEABasicSentenceFilter f = new NMEABasicSentenceFilter(sentence);
+            	fs.addFilter(f);
+            }
+            
+            NMEAAgent a = router.getAgent(agentname);
+            if (a!=null) {
+            	a.getTarget().setFilter(fs);
+            	String sfs = new FilterSetBuilder().exportFilter(fs);
+            	AgentStatusProvider.getAgentStatus().setFilterOutData(agentname, sfs);
+            }
             
             response.getWriter().println("{");
-            response.getWriter().println("\"message\":\"" + msg + "\",");
+            response.getWriter().println("\"message\":\"\",");
             response.getWriter().println("\"agents\":[");
 
             
@@ -36,6 +53,8 @@ public class AgentStatusServiceJSON implements WebService {
             dumpServices(d, agentKeys);
             
             response.getWriter().println("]}");
+            response.ok();
+            
         } catch (Exception e) {
             response.setContentType("text/html;charset=utf-8");
             try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
@@ -43,7 +62,7 @@ public class AgentStatusServiceJSON implements WebService {
         }
         
     }
-    
+
     private class ServiceDumper {
     	
     	boolean first = true;
@@ -86,54 +105,5 @@ public class AgentStatusServiceJSON implements WebService {
 		}
 	}
 
-    private String doActivate(ServiceConfig config) {
-		String msg = "";
-		String agent = config.getParameter("agent");
-		String auto = config.getParameter("auto");
-		String active = config.getParameter("active");
-		if (agent!=null) {
-			NMEAAgent a = router.getAgent(agent);
-			if (a!=null) {
-				if (active!=null) {
-					msg = startStopService(a, active);
-				} 
-				
-				if (auto!=null) {
-					AgentStatus as = AgentStatusProvider.getAgentStatus();
-					as.setStartMode(agent, "1".equals(auto)?STATUS.AUTO:STATUS.MANUAL);
-				}
-			} else {
-				msg = "Unknown agent '" + agent + "'";
-			}
-		}
-		return msg;
-	}
-
-	private String startStopService(NMEAAgent a, String activate) {
-		String msg;
-		if (a.isUserCanStartAndStop()) {
-			if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
-				if (a.isStarted()) {
-					msg = "Agent '" + a.getName() + "' alread started";
-				} else {
-					a.start();
-					msg = "Agent '" + a.getName() + "' started";
-				}
-			} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
-				if (a.isStarted()) {
-					a.stop();
-					msg = "Agent '" + a.getName() + "' stopped";
-				} else {
-					msg = "Agent '" + a.getName() + "' not started";
-				}
-			} else {
-				msg = "Unknown status '" + activate + "'"; 
-			}
-		} else {
-			msg = "This agent does not support starting/stopping";
-		}
-		return msg;
-	}
     
-
 }

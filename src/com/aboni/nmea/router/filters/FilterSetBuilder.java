@@ -12,9 +12,9 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 public class FilterSetBuilder {
 
 	public String exportFilter(NMEASentenceFilterSet s) {
-		JSONObject obj = new JSONObject();
-		JSONArray sentences = new JSONArray(); 
 		if (s!=null) {
+			JSONObject obj = new JSONObject();
+			JSONArray sentences = new JSONArray(); 
 			for (Iterator<NMEASentenceFilter> i = s.getFilters(); i.hasNext(); ) {
 				NMEASentenceFilter f = i.next();
 				if (f instanceof NMEABasicSentenceFilter) {
@@ -30,32 +30,36 @@ public class FilterSetBuilder {
 				}
 			}
 			obj.put("filters", sentences);
+			if (s instanceof NMEAFilterSet) {
+				obj.put("type", ((NMEAFilterSet)s).getType()==TYPE.BLACKLIST ? "blacklist":"whitelist");
+			}
+			return obj.toString();
+		} else {
+			return null;
 		}
-		if (s instanceof NMEAFilterSet) {
-			obj.put("type", ((NMEAFilterSet)s).getType()==TYPE.BLACKLIST ? "blacklist":"whitelist");
-		}
-		return obj.toString();
 	}
 	
 	public NMEASentenceFilterSet importFilter(String s) {
 		if (s!=null) {
 			JSONObject jFs = new JSONObject(s);
-			NMEAFilterSet res = new NMEAFilterSet();
-			res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
-			JSONArray jFa = jFs.getJSONArray("filters");
-			for (Object _fJ : jFa) {
-				JSONObject fJ = (JSONObject) _fJ;
-				NMEABasicSentenceFilter f = null;
-				String stid =  fJ.optString("talker");
-				if (stid==null || "".equals(stid)) {
-					f = new NMEABasicSentenceFilter(fJ.getString("sentence"), fJ.getString("source"));
-				} else {
-					TalkerId tid = TalkerId.parse(stid);
-					f = new NMEABasicSentenceFilter(fJ.getString("sentence"), tid, fJ.getString("source"));
+			if (jFs.has("filters")) {
+				NMEAFilterSet res = new NMEAFilterSet();
+				res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
+				JSONArray jFa = jFs.getJSONArray("filters");
+				for (Object _fJ : jFa) {
+					JSONObject fJ = (JSONObject) _fJ;
+					NMEABasicSentenceFilter f = null;
+					String stid =  fJ.optString("talker");
+					if (stid==null || "".equals(stid)) {
+						f = new NMEABasicSentenceFilter(fJ.getString("sentence"), fJ.getString("source"));
+					} else {
+						TalkerId tid = TalkerId.parse(stid);
+						f = new NMEABasicSentenceFilter(fJ.getString("sentence"), tid, fJ.getString("source"));
+					}
+					res.addFilter(f);
 				}
-				res.addFilter(f);
+				return res;
 			}
-			return res;
 		}
 		return null;
 	}

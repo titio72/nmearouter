@@ -51,7 +51,7 @@ public class AgentStatusImpl implements AgentStatus {
 		try {
 			if (db!=null) {
 				updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?");
-				updateDataSt = db.getConnection().prepareStatement("insert into agent (id, agentData) values (?, ?) on duplicate key update agentData = ?");
+				updateDataSt = db.getConnection().prepareStatement("insert into agent (id, filterOut) values (?, ?) on duplicate key update filterOut = ?");
 			}
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Error creating statement for agent status update", e);
@@ -59,7 +59,7 @@ public class AgentStatusImpl implements AgentStatus {
 	}
 	
 	private void loadAll() throws SQLException {
-		String sql = "select id, autostart, agentData from agent";
+		String sql = "select id, autostart, filterOut from agent";
 		Statement st = db.getConnection().createStatement();
 		ResultSet rs = st.executeQuery(sql);
 		while (rs.next()) {
@@ -82,7 +82,7 @@ public class AgentStatusImpl implements AgentStatus {
 	}
 
 	@Override
-	public synchronized String getAgentData(String agent) {
+	public synchronized String getFilterOutData(String agent) {
 		if (data.containsKey(agent)) {
 			return data.get(agent);
 		} else {
@@ -110,7 +110,7 @@ public class AgentStatusImpl implements AgentStatus {
 
 
 	@Override
-	public synchronized void setAgentData(String agent, String agData) {
+	public synchronized void setFilterOutData(String agent, String agData) {
 		data.put(agent, agData);
 		PreparedStatement p = getUpdateDataSt();
 		if (p!=null) {

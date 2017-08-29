@@ -11,6 +11,6 @@ public interface AgentStatus {
 	STATUS getStartMode(String agent);
 	void setStartMode(String agent, STATUS status);
 	
-	String getAgentData(String agent);
-	void setAgentData(String agent, String data);
+	String getFilterOutData(String agent);
+	void setFilterOutData(String agent, String data);
 }

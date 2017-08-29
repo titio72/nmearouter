@@ -4,8 +4,13 @@
 	<SimulatorAgent name="SIM" active="false">
 	    <qos>rmc2vtg;enrich_hdg</qos>
 	</SimulatorAgent>
+	<ConsoleAgent name="CONSOLE" active="false">
+		<FilterTarget whitelist="false">
+			<Filter sentence="XDP"/>
+		</FilterTarget>
+	</ConsoleAgent>
+	<!-- 
 	<MeteoAgent name="METEO" active="false"/>
-	<ConsoleAgent name="CONSOLE" active="false"/>
 	<SensorAgent name="SENSOR" active="false"/>
 	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
 		<qos>rmc2vtg;enrich_hdg</qos>
@@ -26,4 +31,5 @@
 	</MWDAgent>
 	<SerialAgent name="SOUT" device="/dev/ttyUSB1" bps="4800" inout="OUT" active="false"/>
 	<GPXPlayerAgent name="GPX" active="false" file="x.gpx"/>
+	-->
 </Router>

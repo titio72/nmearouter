@@ -21,8 +21,51 @@ import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget {
+public abstract class NMEAAgentImpl implements NMEAAgent {
 
+	private class _Source implements NMEASource {
+
+		@Override
+		public NMEASentenceFilterSet getFilter() {
+			return _getSourceFilter();
+		}
+
+		@Override
+		public void setFilter(NMEASentenceFilterSet s) {
+			_setSourceFilter(s);
+		}
+
+		@Override
+		public void setSentenceListener(NMEASentenceListener listener) {
+			_setSentenceListener(listener);
+		}
+
+		@Override
+		public void unsetSentenceListener() {
+			_unsetSentenceListener();
+		}
+		
+	}
+	
+	private class _Target implements NMEATarget {
+
+		@Override
+		public NMEASentenceFilterSet getFilter() {
+			return _getTargetFilter();
+		}
+
+		@Override
+		public void setFilter(NMEASentenceFilterSet s) {
+			_setTargetFilter(s);
+		}
+
+		@Override
+		public void pushSentence(Sentence e, NMEAAgent src) {
+			_pushSentence(e, src);
+		}
+		
+	}
+	
 	private String name;
 	private NMEAAgentStatusListener sl;
 	private NMEASentenceFilterSet fsetInput;
@@ -33,8 +76,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	private boolean builtin;
 	private boolean target;
 	private boolean source;
+	private _Target targetIf;
+	private _Source sourceIf;
 	
     public NMEAAgentImpl(NMEACache cache, NMEAStream stream, String name, QOS qos) {
+    	targetIf = new _Target();
+    	sourceIf = new _Source();
         this.name = name;
         fsetInput = null;
         fsetOutput = null;
@@ -127,23 +174,19 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
         sl = null;
     }
 	
-	@Override
-	public NMEASentenceFilterSet getTargetFilter() {
+	private NMEASentenceFilterSet _getTargetFilter() {
 		return fsetInput;
 	}
 	
-	@Override
-	public void setTargetFilter(NMEASentenceFilterSet s) {
+	private void _setTargetFilter(NMEASentenceFilterSet s) {
 		fsetInput = s;
 	}
 	
-	@Override
-	public NMEASentenceFilterSet getSourceFilter() {
+	private NMEASentenceFilterSet _getSourceFilter() {
 		return fsetOutput;
 	}
 	
-	@Override
-	public void setSourceFilter(NMEASentenceFilterSet s) {
+	private void _setSourceFilter(NMEASentenceFilterSet s) {
 		fsetOutput = s;
 	}
 	
@@ -166,7 +209,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	 */
 	protected final void notify(Sentence sentence) {
 		if (isStarted()) {
-			if (getSourceFilter()==null || getSourceFilter().match(sentence, getName())) {
+			if (_getSourceFilter()==null || _getSourceFilter().match(sentence, getName())) {
 				getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
                 for (NMEAPostProcess pp: proc) {
                     Sentence[] outSS = pp.process(sentence, this.getName());
@@ -205,31 +248,28 @@ public abstract class NMEAAgentImpl implements NMEAAgent, NMEASource, NMEATarget
 	protected abstract void doWithSentence(Sentence s, NMEAAgent source);
 
     
-    @Override
-    public final void setSentenceListener(NMEASentenceListener listener) {
+    private void _setSentenceListener(NMEASentenceListener listener) {
         this.listener = listener;
     }
     
-    @Override
-    public final void unsetSentenceListener() {
+    private void _unsetSentenceListener() {
         listener = null;
     }
     
-    @Override
-    public final void pushSentence(Sentence s, NMEAAgent source) {
-    	if (isStarted() && (getTargetFilter()==null || getTargetFilter().match(s,  source.getName()))) {
+    private void _pushSentence(Sentence s, NMEAAgent source) {
+    	if (isStarted() && _getTargetFilter()==null || _getTargetFilter().match(s,  source.getName())) {
     		doWithSentence(s, source);
     	}
     }
     
     @Override
     public final NMEASource getSource() {
-        return (source?this:null);
+        return (source?sourceIf:null);
     }
     
     @Override
     public final NMEATarget getTarget() {
-        return (target?this:null);
+        return (target?targetIf:null);
     }
 
     protected final boolean isSource() {

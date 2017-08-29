@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.services.AgentFilterService;
 import com.aboni.nmea.router.services.AgentStatusService;
 import com.aboni.nmea.router.services.AgentStatusServiceJSON;
 import com.aboni.nmea.router.services.ChangeTripDescService;
@@ -63,6 +64,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new SpeedService();
         } else if (target.equals("/backup")) {
         	s = new ServiceDBBackup();
+        } else if (target.equals("/filterout")) {
+        	s = new AgentFilterService(router);
         }
 		return s;
 	}

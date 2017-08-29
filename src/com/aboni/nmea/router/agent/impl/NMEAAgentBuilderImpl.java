@@ -12,6 +12,7 @@ import com.aboni.nmea.router.agent.NMEA2JSONSocketTarget;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAConsoleTarget;
+import com.aboni.nmea.router.agent.NMEAFilterable;
 import com.aboni.nmea.router.agent.NMEAGPXPlayerAgent;
 import com.aboni.nmea.router.agent.NMEAMWDSentenceCalculator;
 import com.aboni.nmea.router.agent.NMEAMeteoTarget;
@@ -105,26 +106,28 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 			default: break;
 		}
         if (agent!=null) {
-        	if (agent.getSource()!=null && a.getFilterSource()!=null) {
-        		if (agent.getSource().getSourceFilter()==null) {
-        			NMEAFilterSet ff = new NMEAFilterSet();
-        			ff.setType(a.getFilterSource().isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
-        			agent.getSource().setSourceFilter(ff);
-        		}
-        		setFilter(a.getFilterSource(), agent.getSource().getSourceFilter());
-        	}
-        	if (agent.getTarget()!=null && a.getFilterTarget()!=null) {
-        		if (agent.getTarget().getTargetFilter()==null) {
-        			NMEAFilterSet ff = new NMEAFilterSet();
-        			ff.setType(a.getFilterTarget().isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
-        			agent.getTarget().setTargetFilter(ff);
-        		}
-        		setFilter(a.getFilterTarget(), agent.getTarget().getTargetFilter());
-        	}
+        	NMEAFilterable src = agent.getSource();
+        	FilterSet srcFilterConf = a.getFilterSource();
+        	loadFilters(src, srcFilterConf);
+
+        	NMEAFilterable tgt = agent.getTarget();
+        	FilterSet tgtFilterConf = a.getFilterTarget();
+        	loadFilters(tgt, tgtFilterConf);
         }
 		return agent;
 	}
 
+	private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
+    	if (agentFilterable!=null && filterConf!=null) {
+    		if (agentFilterable.getFilter()==null) {
+    			NMEAFilterSet ff = new NMEAFilterSet();
+    			ff.setType(filterConf.isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
+    			agentFilterable.setFilter(ff);
+    		}
+    		setFilter(filterConf, agentFilterable.getFilter());
+    	}
+	}
+	
 	private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
     	if (conf!=null && dest!=null) {
     		for (Filter fConf: conf.getFilter()) {

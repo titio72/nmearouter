@@ -21,6 +21,7 @@ import com.aboni.nmea.router.conf.Router;
 import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
+import com.aboni.nmea.router.filters.FilterSetBuilder;
 import com.google.inject.Injector;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
@@ -55,7 +56,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         	NMEAAgent agent = builder.createAgent(a, r);
             if (agent!=null) {
             	r.addAgent(agent);
-            	handleActivation(agent, a);
+            	handlePersistentState(agent, a);
             }
         }
         
@@ -67,7 +68,25 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         return r;
     }
     
-    private void handleActivation(NMEAAgent agent, AgentBase a) {
+    private void handlePersistentState(NMEAAgent agent, AgentBase a) {
+    	boolean activate = handleActivation(agent, a);
+    	handleFilter(agent, a);
+		if (activate) agent.start();
+	}
+
+	private void handleFilter(NMEAAgent agent, AgentBase a) {
+    	AgentStatus s = AgentStatusProvider.getAgentStatus();
+    	if (s!=null) {
+    		String data = s.getFilterOutData(agent.getName());  
+    		if (data==null)  {
+    			s.setFilterOutData(agent.getName(), new FilterSetBuilder().exportFilter(agent.getTarget().getFilter()));
+    		} else {
+    			agent.getTarget().setFilter(new FilterSetBuilder().importFilter(data));
+    		}
+    	}
+	}
+
+	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
     	AgentStatus s = AgentStatusProvider.getAgentStatus();
     	boolean active = a.isActive();
     	if (s!=null) {
@@ -78,7 +97,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     			active = (requestedStatus==STATUS.AUTO);
     		}
     	}
-    	if (active) agent.start();
+    	return active;
     }
     
     private void buildStreamDump(Router conf2, NMEARouter r) {

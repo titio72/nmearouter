@@ -5,6 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Andrea Boni NMEARouter</title>
 <link href="css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+}
+
+</style>
+
 </head>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
@@ -21,11 +48,70 @@
 	setColors(agentList);
 	agentList.sort(compare);
 	
+	var filterDlg = document.getElementById('filterDialog');
+	var closeBtn = document.getElementById('closeFilterDialog');
+	
 	app.controller("myCtrl", function($scope) {
 		$scope.agents = agentList  
-		$scope.message = msg;  
+		$scope.message = msg;
 	});
    	
+	function showFilter(a) {
+		document.getElementById("filterDialogLabel").innerHTML = "Filter for " + a.name;
+		document.getElementById("agent").value = a.name;
+		
+		for (var i = 0; i<agentList.length; i++) {
+			if (a.name==agentList[i].agent) {
+				if ("true"==agentList[i].hasFilterOut) {
+					var ss = "";
+					for (var j = 0; j<agentList[i].filterOut.filters.length; j++) {
+						if (j!=0) ss += ",";
+						ss += agentList[i].filterOut.filters[j].sentence;
+					}
+					document.getElementById("sentences").value = ss;
+					document.getElementById("whitelist").checked = (agentList[i].filterOut.type=="whitelist");
+				} else {
+					document.getElementById("sentences").value = "";
+					document.getElementById("whitelist").checked = false;
+				}
+			}
+		}
+		
+	    filterDialog.style.display = "block";
+	}
+	
+	function hideFilter() {
+	    filterDialog.style.display = "none";
+	}
+	
+	function commitFilter() {
+		hideFilter();
+		updateFilter(
+				document.getElementById("agent").value,
+				document.getElementById("sentences").value,
+				document.getElementById("whitelist").checked
+		);
+		
+	}
+	
+	function updateFilter(agent, sentences, whitelist) {
+	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/filterout?agent=" + agent + "&sentences=" + sentences + 
+	    		"&type=" + (whitelist?"whitelist":"blacklist"), false);
+	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	    xmlHttp.send( null );
+	    var json = JSON.parse(xmlHttp.responseText);
+		agentList = json.agents;
+		var msg = json.message;
+		var controllerElement = document.getElementById('agentGrid');
+		var controllerScope = angular.element(controllerElement).scope();
+		setColors(agentList);
+		agentList.sort(compare);
+		controllerScope.agents = agentList;
+		controllerScope.message = msg;  
+		controllerScope.$evalAsync();
+	}
+	
 	function setColors(agentList) {
 		for (var i = 0; i<agentList.length; i++) {
 			var a = agentList[i];
@@ -109,6 +195,7 @@
 							<th>BuiltIn</th>
 							<th>Auto</th>
 							<th>Status</th>
+							<th>Filter</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -148,6 +235,18 @@
 		                        	</div>
 	                        	</div>
 	                        </td>
+	                        <td align="center">
+								<div ng-if="a.hasFilterOut=='true'">
+		                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this)'>
+		                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
+		                        	</button>
+	                        	</div>
+								<div ng-if="a.hasFilterOut=='false'">
+		                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="">
+		                        		<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
+		                        	</button>
+	                        	</div>
+	                        </td>
 						</tr>
 						<tr><td>&nbsp;</td></tr>
 						<tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='true'">
@@ -172,6 +271,7 @@
 	                        	</div>
 	                        	</div>
 	                        </td>
+							<td align="center">&nbsp;</td>
 						</tr>					
 					</tbody>
 				</table>
@@ -186,5 +286,42 @@
 	  	</div>
 		
 	</div>
+	
+	<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p>Some text in the Modal..</p>
+  </div>
+
+</div>
+	
+	<div id="filterDialog" class="modal">
+		<div class="modal-content">
+			<div class="panel panel-primary">
+	 				<div class="panel-heading">
+	   				<h3 class="panel-title" id="filterDialogLabel">Filters for xyz</h3>
+	 				</div>
+		  		<div class="panel-body">
+		  			<form>
+		  				<input type="hidden" id="agent"/>
+						<div class="form-group">
+						  <label for="sentences">Sentence list (comma separated):</label>
+						  <input type="text" class="form-control" id="sentences">
+						</div>
+						<div class="form-group">
+						  <label for="whitelist">White list:</label>
+						  <input type="checkbox" class="form-control" id="whitelist">
+						</div>
+						<button type="reset" class="btn btn-secondary" onClick="hideFilter()">Cancel</button>
+						<button type="submit" class="btn btn-primary" onClick="commitFilter()">Ok</button>
+					</form>
+				</div>
+		  	</div>
+		</div>
+	</div>
+	
 </body>
 </html>
