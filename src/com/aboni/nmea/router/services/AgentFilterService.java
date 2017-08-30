@@ -29,10 +29,16 @@ public class AgentFilterService implements WebService {
 	            NMEAFilterSet fs = null;
 	            if (sentences.length!=0) {
 		            fs = new NMEAFilterSet("whitelist".equals(type)?TYPE.WHITELIST:TYPE.BLACKLIST);
+		            boolean atLeast1 = false;
 		            for (String sentence: sentences) {
-		            	NMEABasicSentenceFilter f = new NMEABasicSentenceFilter(sentence);
-		            	fs.addFilter(f);
+		            	sentence = sentence.trim();
+		            	if (!sentence.isEmpty()) {
+			            	NMEABasicSentenceFilter f = new NMEABasicSentenceFilter(sentence);
+			            	fs.addFilter(f);
+			            	atLeast1 = true;
+		            	}
 		            }
+		            fs = (atLeast1?fs:null);
 	            }
             	a.getTarget().setFilter(fs);
             	String sfs = (fs!=null)?new FilterSetBuilder().exportFilter(fs):null;

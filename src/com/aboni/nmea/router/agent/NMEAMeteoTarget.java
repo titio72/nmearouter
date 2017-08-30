@@ -104,6 +104,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		            processHumidity((MHUSentence)s);
 		        } else if (s instanceof MWDSentence) {
 		            processWind((MWDSentence)s);
+		        } else {
+		        	//System.out.println("ss");
 		        }
 	    	}
     	} catch (Exception e) {
