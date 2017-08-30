@@ -6,13 +6,13 @@ import java.util.StringTokenizer;
 import javax.inject.Inject;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEA2JSONSocketTarget;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAConsoleTarget;
-import com.aboni.nmea.router.agent.NMEAFilterable;
 import com.aboni.nmea.router.agent.NMEAGPXPlayerAgent;
 import com.aboni.nmea.router.agent.NMEAMWDSentenceCalculator;
 import com.aboni.nmea.router.agent.NMEAMeteoTarget;

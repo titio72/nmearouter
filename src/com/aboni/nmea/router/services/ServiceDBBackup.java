@@ -1,27 +1,24 @@
 package com.aboni.nmea.router.services;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.SQLException;
 
 import org.json.JSONObject;
 
+import com.aboni.utils.DBHelper;
 import com.aboni.utils.ServerLog;
 
 public class ServiceDBBackup implements WebService {
 
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
+    	DBHelper h = null;
 	    try {
-	    	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-	        ServerLog.getLogger().Info("DB Backup");
-	        String file = df.format(new Date()) + ".sql";
-	        ProcessBuilder b = new ProcessBuilder("./dbBck.sh", "aboni", "a13928zC", file);
-            Process proc = b.start();
-            int retCode = proc.waitFor();
-            ServerLog.getLogger().Info("DB Backup Return code {" + retCode + "}");
+	    	h = new DBHelper(true);
+	    	String file = h.backup();
+            ServerLog.getLogger().Info("DB Backup Return {" + file + "}");
             response.setContentType("application/json");
             JSONObject res = new JSONObject();
-            if (retCode==0) {
+            if (file!=null) {
                 res.put("result", "Ok");
             	res.put("file", file + ".tgz");
             } else {
@@ -32,6 +29,12 @@ public class ServiceDBBackup implements WebService {
             response.ok();
         } catch (Exception e) {
             ServerLog.getLogger().Error("Error during db backup", e);
+        } finally {
+        	if (h!=null) {
+				try {
+					h.close();
+				} catch (SQLException e) {}
+        	}
         }
 	}
 }

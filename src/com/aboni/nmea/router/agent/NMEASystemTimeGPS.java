@@ -30,7 +30,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
     public String getDescription() {
-    	return "";
+    	return "Sync up system time with GPS UTC time feed";
     }
     
 

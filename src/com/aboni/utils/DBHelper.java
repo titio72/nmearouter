@@ -2,13 +2,16 @@ package com.aboni.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 
 public class DBHelper {
@@ -25,7 +28,7 @@ public class DBHelper {
 
     private Connection conn;
 
-    protected void readConf() {
+    protected final void readConf() {
         try {
             File f = new File(Constants.DB);
             FileInputStream propInput = new FileInputStream(f);
@@ -124,4 +127,17 @@ public class DBHelper {
         return null;
     }
     
+    public synchronized String backup() throws IOException, InterruptedException {
+    	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        ServerLog.getLogger().Info("DB Backup");
+        String file = df.format(new Date()) + ".sql";
+        ProcessBuilder b = new ProcessBuilder("./dbBck.sh", user, password, file);
+        Process proc = b.start();
+        int retCode = proc.waitFor();
+        if (retCode==0) {
+        	return file;
+        } else {
+        	return null;
+        }
+    }
 }

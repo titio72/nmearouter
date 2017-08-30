@@ -41,7 +41,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return "";
+		return "Calculates max and min depth over last hour period";
 	}
 
     @Override

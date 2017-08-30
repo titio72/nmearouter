@@ -22,13 +22,14 @@ public class FanAgent extends NMEAAgentImpl {
     
 	public FanAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
 		super(cache, stream, name, qos);
+		setSourceTarget(false, false);
 		timer = null;
 		fan = new Fan();
 	}
 	
 	@Override
 	public String getDescription() {
-		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "Â° Fan " + (fan.isFanOn()?"On":"Off") + 
+		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "C° Fan " + (fan.isFanOn()?"On":"Off") + 
 				" [" + getThresholdOff() + "/" + getThresholdOn() + "]";
 	}
 

@@ -69,10 +69,10 @@
 						ss += agentList[i].filterOut.filters[j].sentence;
 					}
 					document.getElementById("sentences").value = ss;
-					document.getElementById("whitelist").checked = (agentList[i].filterOut.type=="whitelist");
+					document.getElementById("filtertype").selectedIndex = (agentList[i].filterOut.type=="whitelist")?1:0;
 				} else {
 					document.getElementById("sentences").value = "";
-					document.getElementById("whitelist").checked = false;
+					document.getElementById("filtertype").selectedIndex = 0;
 				}
 			}
 		}
@@ -89,15 +89,15 @@
 		updateFilter(
 				document.getElementById("agent").value,
 				document.getElementById("sentences").value,
-				document.getElementById("whitelist").checked
+				document.getElementById("filtertype").selectedIndex==0?"blacklist":"whitelist"
 		);
 		
 	}
 	
-	function updateFilter(agent, sentences, whitelist) {
+	function updateFilter(agent, sentences, tp) {
 	    var xmlHttp = new XMLHttpRequest();
 	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/filterout?agent=" + agent + "&sentences=" + sentences + 
-	    		"&type=" + (whitelist?"whitelist":"blacklist"), false);
+	    		"&type=" + tp, false);
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	    xmlHttp.send( null );
 	    var json = JSON.parse(xmlHttp.responseText);
@@ -141,7 +141,7 @@
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	    xmlHttp.send( null );
 	    var json = JSON.parse(xmlHttp.responseText);
-		var agentList = json.agents;
+		agentList = json.agents;
 		var msg = json.message;
 		var controllerElement = document.getElementById('agentGrid');
 		var controllerScope = angular.element(controllerElement).scope();
@@ -158,7 +158,7 @@
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	    xmlHttp.send( null );
 	    var json = JSON.parse(xmlHttp.responseText);
-		var agentList = json.agents;
+		agentList = json.agents;
 		var msg = json.message;
 		var controllerElement = document.getElementById('agentGrid');
 		var controllerScope = angular.element(controllerElement).scope();
@@ -192,10 +192,8 @@
 							<th>Details</th>
 							<th>Source</th>
 							<th>Target</th>
-							<!-- th>BuiltIn</th-->
 							<th>Auto</th>
 							<th>Status</th>
-							<th>Filter</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -203,7 +201,13 @@
 							<td>{{a.agent}}</td>
 							<td>{{a.type}}</td>
 							<td>{{a.description}}</td>
-							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
+							<td align="center">
+								<div ng-if="a.source=='true'">
+		                        	<button name={{a.agent}} type="button" class="btn btn-xs">
+										<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+									</button>
+								</div>
+							</td>
 	                        <td align="center">
 		                        <div ng-if="a.target=='true'">
 									<div ng-if="a.hasFilterOut=='true'">
@@ -309,8 +313,11 @@
 						  <input type="text" class="form-control" id="sentences">
 						</div>
 						<div class="form-group">
-						  <label for="whitelist">White list:</label>
-						  <input type="checkbox" class="form-control" id="whitelist">
+						  <label for="exampleSelect2">Filter type:</label>
+						  <select class="form-control" id="filtertype">
+				      		<option>Blacklist</option>
+						    <option>Whitelist</option>
+						  </select>
 						</div>
 						<button type="reset" class="btn btn-secondary" onClick="hideFilter()">Cancel</button>
 						<button type="submit" class="btn btn-primary" onClick="commitFilter()">Ok</button>

@@ -2,6 +2,8 @@ package com.aboni.nmea.router.agent;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.Random;
@@ -198,6 +200,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		this._wDirection = wDirection;
 	}
 	
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+    
 	private void doSimulate() {
 		new Thread(new Runnable() {
 			
@@ -214,26 +224,24 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						loadConf();
 						
 						double ph = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
-						double depth = 10.0 + Math.sin(ph)*5.0;
+						double depth = round(10.0 + Math.sin(ph)*5.0, 1);
 
-						//double rh = getRec_heading();
-						//double heading = Double.isNaN(rh)?(_heading + r.nextDouble() * 3.0):rh;
 						double heading = _heading + r.nextDouble() * 3.0;
 						
-						double speed = _speed + r.nextDouble() * 0.5;
-						double wSpeed = _wSpeed + Math.sin(i/10.0 * Math.PI);
+						double speed = round(_speed + r.nextDouble() * 0.5, 1);
+						double wSpeed = round(_wSpeed + Math.sin(i/10.0 * Math.PI), 1);
 						double wDirection = _wDirection + r.nextDouble() * 3.0;
 						TrueWind trueWind = new TrueWind(speed, wDirection, wSpeed);
 						
-						double temp = _temp + (new Random().nextDouble()/10.0);
-						double press = _press + (new Random().nextDouble()/10.0);
+						double temp = round(_temp + (new Random().nextDouble()/10.0), 2);
+						double press = round(_press + (new Random().nextDouble()/10.0), 1);
 						
                         double a = i;
                         double xm = Math.cos(a) * 150 + r.nextDouble() * 5 + 75; 
                         double ym = Math.sin(a) * 150 + r.nextDouble() * 5 + 45;
                         double zm = 0;
-                        double roll = (new Random().nextDouble()*5) + 40.0*(Math.min(wSpeed, 15.0)/15.0) ;
-                        double pitch = (new Random().nextDouble()*5) + 0;
+                        double roll = round((new Random().nextDouble()*5) + 40.0*(Math.min(wSpeed, 15.0)/15.0), 2) ;
+                        double pitch = round((new Random().nextDouble()*5) + 0, 1);
 						
 						if (_vhw) {
     						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
