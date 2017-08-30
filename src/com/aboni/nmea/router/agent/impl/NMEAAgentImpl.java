@@ -257,7 +257,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
     
     private void _pushSentence(Sentence s, NMEAAgent source) {
-    	if (isStarted() && _getTargetFilter()==null || _getTargetFilter().match(s,  source.getName())) {
+    	if (isStarted() && 
+    			(_getTargetFilter()==null || _getTargetFilter().match(s,  source.getName()))) {
     		doWithSentence(s, source);
     	}
     }

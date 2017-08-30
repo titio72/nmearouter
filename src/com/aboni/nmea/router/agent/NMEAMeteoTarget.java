@@ -51,7 +51,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     @Override
 	public String getDescription() {
-		return "";
+		return "Meteo data sampling";
 	}
 
     @Override
@@ -92,18 +92,22 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-    	if (cache.isTimeSynced()) {
-	        if (s instanceof MTASentence) {
-	            processTemp((MTASentence)s);
-	        } else if (s instanceof MMBSentence) {
-	            processPressure((MMBSentence)s);
-	        } else if (s instanceof MTWSentence) {
-	            processWaterTemp((MTWSentence)s);
-	        } else if (s instanceof MHUSentence) {
-	            processHumidity((MHUSentence)s);
-	        } else if (s instanceof MWDSentence) {
-	            processWind((MWDSentence)s);
-	        }
+    	try {
+	    	if (cache.isTimeSynced()) {
+		        if (s instanceof MTASentence) {
+		            processTemp((MTASentence)s);
+		        } else if (s instanceof MMBSentence) {
+		            processPressure((MMBSentence)s);
+		        } else if (s instanceof MTWSentence) {
+		            processWaterTemp((MTWSentence)s);
+		        } else if (s instanceof MHUSentence) {
+		            processHumidity((MHUSentence)s);
+		        } else if (s instanceof MWDSentence) {
+		            processWind((MWDSentence)s);
+		        }
+	    	}
+    	} catch (Exception e) {
+    		getLogger().Error("Error processing meteo stats", e);
     	}
     }
 
