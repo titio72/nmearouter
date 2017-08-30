@@ -25,6 +25,7 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
 import net.sf.marineapi.nmea.sentence.HDTSentence;
+import net.sf.marineapi.nmea.sentence.MHUSentence;
 import net.sf.marineapi.nmea.sentence.MMBSentence;
 import net.sf.marineapi.nmea.sentence.MTASentence;
 import net.sf.marineapi.nmea.sentence.MTWSentence;
@@ -120,6 +121,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
         _mtw   = p.getProperty("simulate.mtw", "0").equals("1");  // water temp
         _mta   = p.getProperty("simulate.mta", "0").equals("1");  // air temp
         _mbb   = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
+        _mhu   = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
         _mwv_a = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
         _mwv_t = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
     	_vwr   = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
@@ -152,6 +154,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     private boolean _mtw   = true;  // water temp
     private boolean _mta   = false;  // air temp
     private boolean _mbb   = false;  // atm pressure
+    private boolean _mhu   = false;  // humidity
     private boolean _mwv_a = true;  // wind apparent
     private boolean _mwv_t = true;  // wind true
     private boolean _vwr   = true;  // relative wind speed and angle (apparent)
@@ -364,6 +367,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(id, "MMB");
                             mmb.setBars(press/1000.0);
                             NMEASimulatorSource.this.notify(mmb);
+                        }
+                        
+                        if (_mhu) {
+                            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(id, "MHU");
+                            mhu.setRelativeHumidity(_hum);
+                            NMEASimulatorSource.this.notify(mhu);
                         }
                         
                         if (_xxx) {
