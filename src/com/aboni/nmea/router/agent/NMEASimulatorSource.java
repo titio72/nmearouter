@@ -59,7 +59,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name, QOS qos) {
 		super(cache, stream, name, qos);
-        setSourceTarget(true, true);
+        setSourceTarget(true, false);
         if (SIMULATOR!=null) throw new RuntimeException();
         else SIMULATOR = this;
 	}
@@ -79,21 +79,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		return "";
 	}
 	
-/*
-    private double rec_heading = Double.NaN;
-	
-    private double getRec_heading() {
-        synchronized (this) {
-            return rec_heading;
-        }
-    }
-
-    private void setRec_heading(double rec_heading) {
-        synchronized (this) {
-            this.rec_heading = rec_heading;
-        }
-    }*/
-
     private void loadConf() {
     	try {
     		File f = new File(Constants.SIM);
@@ -112,6 +97,17 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
     }
     
+    /*	
+	------------------------------------------------------------------------------------------------------
+	Measured Value | Transducer Type | Measured Data                   | Unit of measure | Transducer Name
+	------------------------------------------------------------------------------------------------------
+	barometric     | "P" pressure    | 0.8..1.1 or 800..1100           | "B" bar         | "Barometer"
+	air temperature| "C" temperature |   2 decimals                    | "C" celsius     | "TempAir" or "ENV_OUTAIR_T"
+	pitch          | "A" angle       |-180..0 nose down 0..180 nose up | "D" degrees     | "PTCH"
+	rolling        | "A" angle       |-180..0 L         0..180 R       | "D" degrees     | "ROLL"
+	water temp     | "C" temperature |   2 decimals                    | "C" celsius     | "ENV_WATER_T"
+	-----------------------------------------------------------------------------------------------------
+     */
     private void readConf(Properties p) {
         _vhw   = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
         _gll   = p.getProperty("simulate.gll", "0").equals("1");  // gps
@@ -201,7 +197,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     public void setwDirection(double wDirection) {
 		this._wDirection = wDirection;
 	}
-
 	
 	private void doSimulate() {
 		new Thread(new Runnable() {
@@ -429,24 +424,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 			
 	}
-/*	
-	------------------------------------------------------------------------------------------------------
-	Measured Value | Transducer Type | Measured Data                   | Unit of measure | Transducer Name
-	------------------------------------------------------------------------------------------------------
-	barometric     | "P" pressure    | 0.8..1.1 or 800..1100           | "B" bar         | "Barometer"
-	air temperature| "C" temperature |   2 decimals                    | "C" celsius     | "TempAir" or "ENV_OUTAIR_T"
-	pitch          | "A" angle       |-180..0 nose down 0..180 nose up | "D" degrees     | "PTCH"
-	rolling        | "A" angle       |-180..0 L         0..180 R       | "D" degrees     | "ROLL"
-	water temp     | "C" temperature |   2 decimals                    | "C" celsius     | "ENV_WATER_T"
-	-----------------------------------------------------------------------------------------------------
-*/
-	
 
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-        /*if (s instanceof HDMSentence && source!=this) {
-            setRec_heading(((HDMSentence)s).getHeading());
-        }*/
     }
 
 	public double getSpeed() {

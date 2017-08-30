@@ -250,7 +250,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		try {
 		    if (pressureTempSensors[sensor]!=null) {
     	        MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
-    	        mhu.setAbsoluteHumidity(pressureTempSensors[sensor].getHumidity());
+    	        mhu.setRelativeHumidity(pressureTempSensors[sensor].getHumidity());
     	        notify(mhu);
 		    }
 		} catch (Exception e) {

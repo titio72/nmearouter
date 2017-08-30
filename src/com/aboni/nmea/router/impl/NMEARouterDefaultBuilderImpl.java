@@ -12,6 +12,7 @@ import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAPlayer;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
 import com.aboni.nmea.router.agent.NMEASystemTimeGPS;
+import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.PowerLedAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.AgentBase;
@@ -77,11 +78,14 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	private void handleFilter(NMEAAgent agent, AgentBase a) {
     	AgentStatus s = AgentStatusProvider.getAgentStatus();
     	if (s!=null) {
-    		String data = s.getFilterOutData(agent.getName());  
-    		if (data==null)  {
-    			s.setFilterOutData(agent.getName(), new FilterSetBuilder().exportFilter(agent.getTarget().getFilter()));
-    		} else {
-    			agent.getTarget().setFilter(new FilterSetBuilder().importFilter(data));
+    		NMEATarget tgt = agent.getTarget();
+    		if (tgt!=null) {
+	    		String data = s.getFilterOutData(agent.getName());  
+	    		if (data==null)  {
+	    			s.setFilterOutData(agent.getName(), new FilterSetBuilder().exportFilter(tgt.getFilter()));
+	    		} else {
+	    			tgt.setFilter(new FilterSetBuilder().importFilter(data));
+	    		}
     		}
     	}
 	}

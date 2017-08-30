@@ -18,10 +18,8 @@ import net.sf.marineapi.nmea.util.Time;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
-	private static final long TOLERANCE_MS = 10000;
+	private static final long TOLERANCE_MS = 5000;
 	
-	private boolean timestampset;
-
 	private NMEACache cache;
 	
 	public NMEASystemTimeGPS(NMEACache cache, NMEAStream stream, String name, QOS qos) {
@@ -38,35 +36,35 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
-		if (!timestampset) {
-			Time t = null;
-			Date d = null;
-			if (s instanceof ZDASentence && s.isValid()) {
-				ZDASentence zda = (ZDASentence)s;
-				d = zda.getDate();
-				t = zda.getTime();
-			} else if (s instanceof RMCSentence && s.isValid()) {
-				RMCSentence r = (RMCSentence)s;
-				d = r.getDate();
-				t = r.getTime();
+		Time t = null;
+		Date d = null;
+		if (s instanceof ZDASentence && s.isValid()) {
+			ZDASentence zda = (ZDASentence)s;
+			d = zda.getDate();
+			t = zda.getTime();
+		} else if (s instanceof RMCSentence && s.isValid()) {
+			RMCSentence r = (RMCSentence)s;
+			d = r.getDate();
+			t = r.getTime();
+		}
+		
+		if (d!=null && t!=null) {
+			Calendar c = getCalendar(t, d);
+			Calendar now = Calendar.getInstance();
+			if (!checkTimeSkew(now, c)) {
+                // time skew from GPS is too high - reset time stamp
+                getLogger().Info("New Time {" + c + "}");
+				doChangeTime(c);
 			}
-			
-			if (d!=null && t!=null) {
-				Calendar c = getCalendar(t, d);
-				Calendar now = Calendar.getInstance();
-				long diff = Math.abs(now.getTimeInMillis() - c.getTimeInMillis());
-				if (diff > TOLERANCE_MS) {
-                    // time skew from GPS is too high - reset time stamp
-	                //System.out.println("Setting time " + c.getTime() + " " + c.getTimeZone());
-	                getLogger().Info("New Time {" + c + "}");
-					doChangeTime(c);
-					timestampset = true;
-					cache.setTimeSynced();
-				}
-			}
+			if (checkTimeSkew(now, c)) cache.setTimeSynced();
 		}
 	}
-
+	
+	private boolean checkTimeSkew(Calendar now, Calendar gpstime) {
+		long diff = Math.abs(now.getTimeInMillis() - gpstime.getTimeInMillis());
+		return diff<TOLERANCE_MS;
+	}
+	
 	private static DecimalFormat fh = new DecimalFormat("+00");
 	private static DecimalFormat fm = new DecimalFormat("00");
 	private static Calendar getCalendar(Time t, Date d) {

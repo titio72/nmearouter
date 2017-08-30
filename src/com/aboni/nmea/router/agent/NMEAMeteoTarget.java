@@ -146,6 +146,6 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void processHumidity(MHUSentence s) {
-        collect(HUM, s.getAbsoluteHumidity());
+        collect(HUM, s.getRelativeHumidity());
     }
 }
