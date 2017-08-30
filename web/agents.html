@@ -192,7 +192,7 @@
 							<th>Details</th>
 							<th>Source</th>
 							<th>Target</th>
-							<th>BuiltIn</th>
+							<!-- th>BuiltIn</th-->
 							<th>Auto</th>
 							<th>Status</th>
 							<th>Filter</th>
@@ -204,9 +204,20 @@
 							<td>{{a.type}}</td>
 							<td>{{a.description}}</td>
 							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-							<!-- td align="center"><div ng-if="a.auto=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td-->
+	                        <td align="center">
+		                        <div ng-if="a.target=='true'">
+									<div ng-if="a.hasFilterOut=='true'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this)'>
+			                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
+									<div ng-if="a.hasFilterOut=='false'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="showFilter(this)">
+			                        		<span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
+	                        	</div>
+	                        </td>
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
 									<div ng-if="a.auto=='false'">
@@ -235,18 +246,6 @@
 		                        	</div>
 	                        	</div>
 	                        </td>
-	                        <td align="center">
-								<div ng-if="a.hasFilterOut=='true'">
-		                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this)'>
-		                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
-		                        	</button>
-	                        	</div>
-								<div ng-if="a.hasFilterOut=='false'">
-		                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="">
-		                        		<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
-		                        	</button>
-	                        	</div>
-	                        </td>
 						</tr>
 						<tr><td>&nbsp;</td></tr>
 						<tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='true'">
@@ -255,7 +254,6 @@
 							<td>{{a.description}}</td>
 							<td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-							<td align="center"><div ng-if="a.builtin=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
 							<td align="center">&nbsp;</td>
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
@@ -271,7 +269,6 @@
 	                        	</div>
 	                        	</div>
 	                        </td>
-							<td align="center">&nbsp;</td>
 						</tr>					
 					</tbody>
 				</table>
