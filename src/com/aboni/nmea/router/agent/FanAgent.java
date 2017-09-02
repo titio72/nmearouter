@@ -29,7 +29,7 @@ public class FanAgent extends NMEAAgentImpl {
 	
 	@Override
 	public String getDescription() {
-		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "C° Fan " + (fan.isFanOn()?"On":"Off") + 
+		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "CÂ° Fan " + (fan.isFanOn()?"On":"Off") + 
 				" [" + getThresholdOff() + "/" + getThresholdOn() + "]";
 	}
 

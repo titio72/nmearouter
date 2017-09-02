@@ -11,9 +11,11 @@ import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 public class AgentFilterService implements WebService {
 
 	private NMEARouter router;
+	private boolean isOut;
 	
-	public AgentFilterService(NMEARouter router) {
+	public AgentFilterService(NMEARouter router, String inOut) {
 		this.router = router;
+		isOut = "out".equals(inOut);
 	}
 	
     @Override
@@ -40,9 +42,14 @@ public class AgentFilterService implements WebService {
 		            }
 		            fs = (atLeast1?fs:null);
 	            }
-            	a.getTarget().setFilter(fs);
             	String sfs = (fs!=null)?new FilterSetBuilder().exportFilter(fs):null;
-            	AgentStatusProvider.getAgentStatus().setFilterOutData(agentname, sfs);
+	            if (isOut && a.getTarget()!=null) {
+	            	a.getTarget().setFilter(fs);
+	            	AgentStatusProvider.getAgentStatus().setFilterOutData(agentname, sfs);
+	            } else if (!isOut && a.getSource()!=null){
+	            	a.getSource().setFilter(fs);
+	            	AgentStatusProvider.getAgentStatus().setFilterInData(agentname, sfs);
+	            }
 	            msg = "Filter set for " + agentname;
             } else {
 	            msg = "Agent " + agentname + " not found";

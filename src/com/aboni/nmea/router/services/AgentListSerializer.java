@@ -33,6 +33,7 @@ public class AgentListSerializer {
 
 		boolean auto = AgentStatusProvider.getAgentStatus().getStartMode(ag.getName())==STATUS.AUTO;
 		String outFilter = AgentStatusProvider.getAgentStatus().getFilterOutData(ag.getName());
+		String inFilter = AgentStatusProvider.getAgentStatus().getFilterInData(ag.getName());
 		
 		first = false;
 		w.println(
@@ -45,6 +46,8 @@ public class AgentListSerializer {
                 "\"startStop\":\"" + ag.isUserCanStartAndStop() + "\", " + 
                 "\"builtin\":\"" + ag.isBuiltIn() + "\", " + 
                 "\"auto\":\"" + auto + "\"," +
+                "\"hasFilterIn\":\"" + (inFilter!=null) +"\"," +
+                ((inFilter!=null)?("\"filterIn\":" + inFilter + ","):"") +
                 "\"hasFilterOut\":\"" + (outFilter!=null) +"\"" +
                 ((outFilter!=null)?(",\"filterOut\":" + outFilter):"") +
                 "}");

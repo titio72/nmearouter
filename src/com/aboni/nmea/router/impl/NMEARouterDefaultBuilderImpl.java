@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.NMEAStream;
@@ -12,7 +13,6 @@ import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAPlayer;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
 import com.aboni.nmea.router.agent.NMEASystemTimeGPS;
-import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.PowerLedAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.AgentBase;
@@ -78,13 +78,22 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	private void handleFilter(NMEAAgent agent, AgentBase a) {
     	AgentStatus s = AgentStatusProvider.getAgentStatus();
     	if (s!=null) {
-    		NMEATarget tgt = agent.getTarget();
+    		NMEAFilterable tgt = agent.getTarget();
     		if (tgt!=null) {
 	    		String data = s.getFilterOutData(agent.getName());  
 	    		if (data==null)  {
 	    			s.setFilterOutData(agent.getName(), new FilterSetBuilder().exportFilter(tgt.getFilter()));
 	    		} else {
 	    			tgt.setFilter(new FilterSetBuilder().importFilter(data));
+	    		}
+    		}
+    		NMEAFilterable src = agent.getSource();
+    		if (src!=null) {
+	    		String data = s.getFilterInData(agent.getName());  
+	    		if (data==null)  {
+	    			s.setFilterInData(agent.getName(), new FilterSetBuilder().exportFilter(src.getFilter()));
+	    		} else {
+	    			src.setFilter(new FilterSetBuilder().importFilter(data));
 	    		}
     		}
     	}

@@ -67,21 +67,32 @@ public class NMEAUDPTarget extends NMEAAgentImpl {
 		}
 	}
 	
-	
+	private String sending = "";
+	private int nSentences = 0;
 	
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		String toSend = getOutSentence(s);
-		if (toSend!=null) {
+		
+		if (nSentences==3) {
 			try {
 				for (InetAddress i: targets) {
-					DatagramPacket packet = new DatagramPacket(toSend.getBytes(), toSend.length(), i, portTarget);
+					DatagramPacket packet = new DatagramPacket(sending.getBytes(), sending.length(), i, portTarget);
 					serverSocket.send(packet);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			nSentences = 0;
+			sending = "";
+		} else {
+			if (toSend!=null) {
+				if(!sending.isEmpty()) sending += "\r\n";
+				sending += toSend;
+				nSentences++;
+			}
 		}
+		
 	}
 	
 	protected String getOutSentence(Sentence s) {

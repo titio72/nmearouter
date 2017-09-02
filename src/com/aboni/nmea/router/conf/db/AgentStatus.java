@@ -13,4 +13,7 @@ public interface AgentStatus {
 	
 	String getFilterOutData(String agent);
 	void setFilterOutData(String agent, String data);
+
+	String getFilterInData(String agent);
+	void setFilterInData(String agent, String agData);
 }

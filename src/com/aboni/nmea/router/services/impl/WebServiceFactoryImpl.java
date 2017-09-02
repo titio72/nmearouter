@@ -65,7 +65,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         } else if (target.equals("/backup")) {
         	s = new ServiceDBBackup();
         } else if (target.equals("/filterout")) {
-        	s = new AgentFilterService(router);
+        	s = new AgentFilterService(router, "out");
+        } else if (target.equals("/filterin")) {
+        	s = new AgentFilterService(router, "in");
         }
 		return s;
 	}

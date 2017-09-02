@@ -56,20 +56,23 @@
 		$scope.message = msg;
 	});
    	
-	function showFilter(a) {
-		document.getElementById("filterDialogLabel").innerHTML = "Filter for " + a.name;
+	function showFilter(a, inout) {
+		document.getElementById("filterDialogLabel").innerHTML = "Filter for " + a.name + " [" + inout + "]";
 		document.getElementById("agent").value = a.name;
 		
 		for (var i = 0; i<agentList.length; i++) {
 			if (a.name==agentList[i].agent) {
-				if ("true"==agentList[i].hasFilterOut) {
+				document.getElementById("inout").value = inout;
+				if (("out"==inout && "true"==agentList[i].hasFilterOut) ||
+				("in"==inout && "true"==agentList[i].hasFilterIn)) {
+					var x = ("out"==inout)?agentList[i].filterOut:agentList[i].filterIn;
 					var ss = "";
-					for (var j = 0; j<agentList[i].filterOut.filters.length; j++) {
+					for (var j = 0; j<x.filters.length; j++) {
 						if (j!=0) ss += ",";
-						ss += agentList[i].filterOut.filters[j].sentence;
+						ss += x.filters[j].sentence;
 					}
 					document.getElementById("sentences").value = ss;
-					document.getElementById("filtertype").selectedIndex = (agentList[i].filterOut.type=="whitelist")?1:0;
+					document.getElementById("filtertype").selectedIndex = (x.type=="whitelist")?1:0;
 				} else {
 					document.getElementById("sentences").value = "";
 					document.getElementById("filtertype").selectedIndex = 0;
@@ -88,15 +91,16 @@
 		hideFilter();
 		updateFilter(
 				document.getElementById("agent").value,
+				document.getElementById("inout").value,
 				document.getElementById("sentences").value,
 				document.getElementById("filtertype").selectedIndex==0?"blacklist":"whitelist"
 		);
 		
 	}
 	
-	function updateFilter(agent, sentences, tp) {
+	function updateFilter(agent, inout, sentences, tp) {
 	    var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/filterout?agent=" + agent + "&sentences=" + sentences + 
+	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/filter" + inout +"?agent=" + agent + "&sentences=" + sentences + 
 	    		"&type=" + tp, false);
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	    xmlHttp.send( null );
@@ -203,20 +207,27 @@
 							<td>{{a.description}}</td>
 							<td align="center">
 								<div ng-if="a.source=='true'">
-		                        	<button name={{a.agent}} type="button" class="btn btn-xs">
-										<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-									</button>
+									<div ng-if="a.hasFilterIn=='true'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "in")'>
+			                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
+									<div ng-if="a.hasFilterIn=='false'">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "in")'>
+			                        		<span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
+			                        	</button>
+		                        	</div>
 								</div>
 							</td>
 	                        <td align="center">
 		                        <div ng-if="a.target=='true'">
 									<div ng-if="a.hasFilterOut=='true'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this)'>
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "out")'>
 			                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
 									<div ng-if="a.hasFilterOut=='false'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="showFilter(this)">
+			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "out")'>
 			                        		<span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
@@ -308,6 +319,7 @@
 		  		<div class="panel-body">
 		  			<form>
 		  				<input type="hidden" id="agent"/>
+		  				<input type="hidden" id="inout"/>
 						<div class="form-group">
 						  <label for="sentences">Sentence list (comma separated):</label>
 						  <input type="text" class="form-control" id="sentences">

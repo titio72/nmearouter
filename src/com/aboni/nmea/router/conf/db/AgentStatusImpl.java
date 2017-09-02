@@ -15,16 +15,20 @@ public class AgentStatusImpl implements AgentStatus {
 	private DBHelper db;
 	
 	private Map<String, AgentStatus.STATUS> status;
-	private Map<String, String> data;
+	private Map<String, String> filterOut;
+	private Map<String, String> filterIn;
 	
 	private PreparedStatement updateStatusSt;
-	private PreparedStatement updateDataSt;
+	private PreparedStatement updateFilterIn;
+	private PreparedStatement updateFilterOut;
 	
 	public AgentStatusImpl() {
 		status = new HashMap<>();
-		data = new HashMap<>();
+		filterOut = new HashMap<>();
+		filterIn = new HashMap<>();
 		updateStatusSt = null;
-		updateDataSt = null;
+		updateFilterIn = null;
+		updateFilterOut = null;
 		try {
 			db = new DBHelper(true);
 			loadAll();
@@ -40,18 +44,26 @@ public class AgentStatusImpl implements AgentStatus {
 		return updateStatusSt;
 	}
 
-	private PreparedStatement getUpdateDataSt() {
-		if (updateDataSt==null) {
+	private PreparedStatement getUpdateFilterOutSt() {
+		if (updateFilterOut==null) {
 			initStatements();
 		}
-		return updateDataSt;
+		return updateFilterOut;
+	}
+
+	private PreparedStatement getUpdateFilterInSt() {
+		if (updateFilterIn==null) {
+			initStatements();
+		}
+		return updateFilterIn;
 	}
 
 	private void initStatements() {
 		try {
 			if (db!=null) {
 				updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?");
-				updateDataSt = db.getConnection().prepareStatement("insert into agent (id, filterOut) values (?, ?) on duplicate key update filterOut = ?");
+				updateFilterOut = db.getConnection().prepareStatement("update agent set filterOut=? where id=?");
+				updateFilterIn = db.getConnection().prepareStatement("update agent set filterIn=? where id=?");
 			}
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Error creating statement for agent status update", e);
@@ -59,15 +71,17 @@ public class AgentStatusImpl implements AgentStatus {
 	}
 	
 	private void loadAll() throws SQLException {
-		String sql = "select id, autostart, filterOut from agent";
+		String sql = "select id, autostart, filterOut, filterIn from agent";
 		Statement st = db.getConnection().createStatement();
 		ResultSet rs = st.executeQuery(sql);
 		while (rs.next()) {
 			String agId = rs.getString(1);
 			STATUS agSt = (1==rs.getInt(2))?STATUS.AUTO:STATUS.MANUAL;
-			String agData = rs.getString(3);
+			String agFOut = rs.getString(3);
+			String agFIn = rs.getString(4);
 			status.put(agId,  agSt);
-			data.put(agId, agData);
+			filterOut.put(agId, agFOut);
+			filterIn.put(agId, agFIn);
 		}
 		st.close();
 	}
@@ -83,8 +97,16 @@ public class AgentStatusImpl implements AgentStatus {
 
 	@Override
 	public synchronized String getFilterOutData(String agent) {
-		if (data.containsKey(agent)) {
-			return data.get(agent);
+		if (filterOut.containsKey(agent)) {
+			return filterOut.get(agent);
+		} else {
+			return null;
+		}
+	}
+	@Override
+	public synchronized String getFilterInData(String agent) {
+		if (filterIn.containsKey(agent)) {
+			return filterIn.get(agent);
 		} else {
 			return null;
 		}
@@ -111,13 +133,29 @@ public class AgentStatusImpl implements AgentStatus {
 
 	@Override
 	public synchronized void setFilterOutData(String agent, String agData) {
-		data.put(agent, agData);
-		PreparedStatement p = getUpdateDataSt();
+		filterOut.put(agent, agData);
+		PreparedStatement p = getUpdateFilterOutSt();
 		if (p!=null) {
 			try {
-				p.setString(1, agent);
-				p.setString(2, agData);
-				p.setString(3, agData);
+				p.setString(1, agData);
+				p.setString(2, agent);
+				p.executeUpdate();
+			} catch (Exception e) {
+				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}", e);
+			}
+		} else {
+			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}");
+		}
+	}
+
+	@Override
+	public synchronized void setFilterInData(String agent, String agData) {
+		filterIn.put(agent, agData);
+		PreparedStatement p = getUpdateFilterInSt();
+		if (p!=null) {
+			try {
+				p.setString(1, agData);
+				p.setString(2, agent);
 				p.executeUpdate();
 			} catch (Exception e) {
 				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}", e);
