@@ -4,14 +4,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.json.JSONObject;
 
-import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -22,34 +19,17 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAStreamImpl implements NMEAStream {
 
-	private Set<NMEASentenceListener> listeners;
 	private Map<Object, ListenerWrapper> annotatedListeners;
 	private NMEA2JSONb jsonConv;
 	
 	public NMEAStreamImpl() {
-		listeners = new HashSet<>();
 		annotatedListeners = new HashMap<>();
 		jsonConv = new NMEA2JSONb();
 	}
 
 	@Override
-	public void addSentenceListener(NMEASentenceListener listener) {
-		synchronized (listeners) {
-			listeners.add(listener);
-		}
-	}
-
-	@Override
-	public void dropSentenceListener(NMEASentenceListener listener) {
-		synchronized (listeners) {
-			listeners.remove(listener);
-		}
-	}
-
-	@Override
 	public void pushSentence(Sentence s, NMEAAgent src) {
-		pushRegular(s, src);
-		pushJSON(s, src);
+		push(s, src);
 	}
 
 	@Override
@@ -66,19 +46,7 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	private void pushRegular(Sentence s, NMEAAgent src) {
-		synchronized (listeners) {
-			for (NMEASentenceListener i: listeners) {
-				try {
-					i.onSentence(s, src);
-				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error dispatchinc event to listener!", e);
-				}
-			}
-		}
-	}
-
-	private void pushJSON(Sentence s, NMEAAgent src) {
+	private void push(Sentence s, NMEAAgent src) {
 		synchronized (annotatedListeners) {
 			JSONObject msg = null;
 			for (ListenerWrapper i: annotatedListeners.values()) {
@@ -101,11 +69,11 @@ public class NMEAStreamImpl implements NMEAStream {
 	
 	private class ListenerWrapper {
 		
-		List<Method> listeners;
-		List<Method> listenersJSON;
-		Object o;
+		private List<Method> listeners;
+		private List<Method> listenersJSON;
+		private Object o;
 		
-		void fillMethodsAnnotatedWith() {
+		private void fillMethodsAnnotatedWith() {
 		    Class<?> klass = o.getClass();
 		    while (klass != Object.class) { // need to iterated thought hierarchy in order to retrieve methods from above the current instance
 		        // iterate though the list of methods declared in the class represented by klass variable, and add those annotated with the specified annotation
@@ -125,14 +93,14 @@ public class NMEAStreamImpl implements NMEAStream {
 		    }
 		}
 		
-		ListenerWrapper(Object l) {
+		private ListenerWrapper(Object l) {
 			o = l;
 		    listeners = new ArrayList<Method>();
 		    listenersJSON = new ArrayList<Method>();
 			fillMethodsAnnotatedWith();
 		}
 
-		void onSentence(Sentence s, NMEAAgent src) {
+		private void onSentence(Sentence s, NMEAAgent src) {
 			for (Method m: listeners) {
 				Object[] p = new Object[] {s, src};
 				try {
@@ -147,7 +115,7 @@ public class NMEAStreamImpl implements NMEAStream {
 			return !listenersJSON.isEmpty();
 		}
 		
-		void onSentence(JSONObject s) {
+		private void onSentence(JSONObject s) {
 			Object[] p = new Object[] {s};
 			for (Method m: listenersJSON) {
 				try {
