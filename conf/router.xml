@@ -9,8 +9,15 @@
 			<Filter sentence="XDP"/>
 		</FilterTarget>
 	</ConsoleAgent>
-	<!-- 
 	<MeteoAgent name="METEO" active="false"/>
+	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="false"/>
+	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
+		<to>192.168.2.255</to>
+		<to>192.168.2.130</to>
+		<to>192.168.2.151</to>
+		<to>192.168.2.103</to>
+	</UdpAgent>
+	<!-- 
 	<SensorAgent name="SENSOR" active="false"/>
 	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
 		<qos>rmc2vtg;enrich_hdg</qos>
