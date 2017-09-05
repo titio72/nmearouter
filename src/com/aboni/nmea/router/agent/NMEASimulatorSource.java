@@ -1,18 +1,14 @@
 package com.aboni.nmea.router.agent;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.Random;
 import java.util.TimeZone;
 
 import com.aboni.geo.TrueWind;
 import com.aboni.geo.Utils;
 import com.aboni.sensors.MagnetometerToCompass;
-import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
@@ -51,10 +47,9 @@ import net.sf.marineapi.nmea.util.Units;
 
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
-	private long lastConfModified = 0;
-	
 	public static NMEASimulatorSource SIMULATOR;
-	
+    private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
+
 	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name) {
 		this(cache, stream, name, null);
 	}
@@ -80,24 +75,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	public String getDescription() {
 		return "";
 	}
-	
-    private void loadConf() {
-    	try {
-    		File f = new File(Constants.SIM);
-    		if (f.exists()) {
-    			if (f.lastModified() > lastConfModified) {
-    				lastConfModified = f.lastModified();
-    				Properties p = new Properties();
-    				FileInputStream fi = new FileInputStream(f);
-    				p.load(fi);
-    				fi.close();
-    				readConf(p);
-    			}
-    		}
-    	} catch (Exception e) {
-			ServerLog.getLogger().Error("Error reading smulator conf", e);
-		}
-    }
+
     
     /*	
 	------------------------------------------------------------------------------------------------------
@@ -110,94 +88,29 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	water temp     | "C" temperature |   2 decimals                    | "C" celsius     | "ENV_WATER_T"
 	-----------------------------------------------------------------------------------------------------
      */
-    private void readConf(Properties p) {
-        _vhw   = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
-        _gll   = p.getProperty("simulate.gll", "0").equals("1");  // gps
-        _rmc   = p.getProperty("simulate.rmc", "0").equals("1");  // gps
-        _dpt   = p.getProperty("simulate.dpt", "0").equals("1");  // depth
-        _dbt   = p.getProperty("simulate.dbt", "0").equals("1");  // depth
-        _mtw   = p.getProperty("simulate.mtw", "0").equals("1");  // water temp
-        _mta   = p.getProperty("simulate.mta", "0").equals("1");  // air temp
-        _mbb   = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
-        _mhu   = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
-        _mwv_a = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
-        _mwv_t = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
-    	_vwr   = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
-        _hdm   = p.getProperty("simulate.hdm", "0").equals("1"); // magn heading
-        _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
-        _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
-        _xxx   = p.getProperty("simulate.xxx", "0").equals("1");  // sensors
-        _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
-        _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
-        _xdrMeteo 		= p.getProperty("simulate.xdr.meteo", "0").equals("1");
-        _xdrMeteoAtm 	= p.getProperty("simulate.xdr.meteo.atm", "0").equals("1");
-        _xdrMeteoHum 	= p.getProperty("simulate.xdr.meteo.hum", "0").equals("1");
-        _xdrMeteoTmp 	= p.getProperty("simulate.xdr.meteo.tmp", "0").equals("1");
-        _xdrGYR 		= p.getProperty("simulate.xdr.gyro", "0").equals("1");
-        
-        try { _speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9")); } catch (Exception e) {}
-        try { _wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1")); } catch (Exception e) {}
-        try { _wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "34")); } catch (Exception e) {}
-        try { _heading = Double.parseDouble(p.getProperty("simulate.heading", "354")); } catch (Exception e) {}
-        try { _press = Double.parseDouble(p.getProperty("simulate.pressure", "1013")); } catch (Exception e) {}
-        try { _temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception e) {}
-        try { _hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception e) {}
-    }
-    
-    private boolean _vhw   = true;  // water spead and heading
-    private boolean _gll   = false;  // gps
-    private boolean _rmc   = false;  // gps
-    private boolean _dpt   = true;  // depth
-    private boolean _dbt   = true;  // depth
-    private boolean _mtw   = true;  // water temp
-    private boolean _mta   = false;  // air temp
-    private boolean _mbb   = false;  // atm pressure
-    private boolean _mhu   = false;  // humidity
-    private boolean _mwv_a = true;  // wind apparent
-    private boolean _mwv_t = true;  // wind true
-    private boolean _vwr   = true;  // relative wind speed and angle (apparent)
-	private boolean _hdm   = true; // magn heading
-    private boolean _hdg   = true;  // magn heading + variation/deviation
-    private boolean _hdt   = true; // true heading
-    private boolean _xxx   = false;  // sensors
-    private boolean _vtg   = true;  // cog-sog
-    private boolean _xdrDiag = true;
-    private boolean _xdrMeteo = true;
-    private boolean _xdrMeteoAtm = true;
-    private boolean _xdrMeteoHum = true;
-    private boolean _xdrMeteoTmp = true;
-    private boolean _xdrGYR = true;
-    
-    private double _speed = 5.9;
-    private double _wSpeed = 11;
-    private double _wDirection = 34;
-	private double _heading = 354;
-	private double _temp = 29.5;
-    private double _press = 1030;
-    private double _hum = 48.1;
-    
-    public double getHeading() {
-		return _heading;
+   
+	public double getHeading() {
+		return data._heading;
 	}
 
     public void setHeading(double _heading) {
-		this._heading = _heading;
+		this.data._heading = _heading;
 	}
 
     public double getwSpeed() {
-		return _wSpeed;
+		return data._wSpeed;
 	}
 
     public void setwSpeed(double wSpeed) {
-		this._wSpeed = wSpeed;
+		this.data._wSpeed = wSpeed;
 	}
 
     public double getwDirection() {
-		return _wDirection;
+		return data._wDirection;
 	}
 
     public void setwDirection(double wDirection) {
-		this._wDirection = wDirection;
+		this.data._wDirection = wDirection;
 	}
 	
     private static double round(double value, int places) {
@@ -221,20 +134,20 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 					try {
 						i++;
 						Thread.sleep(1000);
-						loadConf();
+						data.loadConf();
 						
 						double ph = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
 						double depth = round(10.0 + Math.sin(ph)*5.0, 1);
 
-						double heading = _heading + r.nextDouble() * 3.0;
+						double heading = data._heading + r.nextDouble() * 3.0;
 						
-						double speed = round(_speed + r.nextDouble() * 0.5, 1);
-						double wSpeed = round(_wSpeed + Math.sin(i/10.0 * Math.PI), 1);
-						double wDirection = _wDirection + r.nextDouble() * 3.0;
+						double speed = round(data._speed + r.nextDouble() * 0.5, 1);
+						double wSpeed = round(data._wSpeed + Math.sin(i/10.0 * Math.PI), 1);
+						double wDirection = data._wDirection + r.nextDouble() * 3.0;
 						TrueWind trueWind = new TrueWind(speed, wDirection, wSpeed);
 						
-						double temp = round(_temp + (new Random().nextDouble()/10.0), 2);
-						double press = round(_press + (new Random().nextDouble()/10.0), 1);
+						double temp = round(data._temp + (new Random().nextDouble()/10.0), 2);
+						double press = round(data._press + (new Random().nextDouble()/10.0), 1);
 						
                         double a = i;
                         double xm = Math.cos(a) * 150 + r.nextDouble() * 5 + 75; 
@@ -243,7 +156,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         double roll = round((new Random().nextDouble()*5) + 40.0*(Math.min(wSpeed, 15.0)/15.0), 2) ;
                         double pitch = round((new Random().nextDouble()*5) + 0, 1);
 						
-						if (_vhw) {
+						if (data._vhw) {
     						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
                             s.setHeading(heading);
                             s.setMagneticHeading(Utils.normalizeDegrees0_360(heading + r.nextDouble() * 1.5));
@@ -252,7 +165,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						NMEASimulatorSource.this.notify(s);
 						}
 						
-						if (_gll) {
+						if (data._gll) {
     						GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(id, SentenceId.GLL);
     						s1.setPosition(new Position(43.63061, 10.29333));
     						s1.setStatus(DataStatus.ACTIVE);
@@ -260,7 +173,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						NMEASimulatorSource.this.notify(s1);
 						}
 						
-						if (_rmc) {
+						if (data._rmc) {
     						RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(id, SentenceId.RMC);
     						rmc.setCourse(heading);
     
@@ -286,25 +199,25 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						NMEASimulatorSource.this.notify(rmc);
 						}
 
-						if (_dpt) {
+						if (data._dpt) {
     						DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DPT);
     						d.setDepth(depth); 
     						NMEASimulatorSource.this.notify(d);
 						}
 						
-						if (_dbt) {
+						if (data._dbt) {
     						DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DBT);
     						d.setDepth(depth - 0.2);
     						NMEASimulatorSource.this.notify(d);
 						}
 						
-						if (_mtw) {
+						if (data._mtw) {
     						MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MTW);
     						t.setTemperature(28.5);
     						NMEASimulatorSource.this.notify(t);
 						}
 						
-						if (_mwv_a) {
+						if (data._mwv_a) {
                             MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             v.setSpeedUnit(Units.KNOT);
                             v.setAngle(wDirection);
@@ -313,7 +226,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             NMEASimulatorSource.this.notify(v);
 						}
                         
-						if (_mwv_t) {
+						if (data._mwv_t) {
                             MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             vt.setSpeedUnit(Units.KNOT);
                             vt.setAngle(Utils.normalizeDegrees0_360(trueWind.getTrueWindDeg()));
@@ -322,7 +235,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             NMEASimulatorSource.this.notify(vt);
 						}
                         
-						if (_vwr) {
+						if (data._vwr) {
                             VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(id, "VWR");
                             vwr.setAngle(wDirection);
                             vwr.setSpeed(wSpeed);
@@ -331,26 +244,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             NMEASimulatorSource.this.notify(vwr);
 						}
                         
-                        if (_hdm) {
+                        if (data._hdm) {
                             HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDM);
                             hdm.setHeading(heading);
                             NMEASimulatorSource.this.notify(hdm);
                         }
                         
-                        if (_hdt) {
+                        if (data._hdt) {
                             HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDT);
                             hdt.setHeading(heading);
                             NMEASimulatorSource.this.notify(hdt);
                         }
                         
-                        if (_hdg) {
+                        if (data._hdg) {
                             HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
                             hdg.setHeading(heading);
                             //hdg.setDeviation(0.0);
                             NMEASimulatorSource.this.notify(hdg);
                         }
                         
-                        if (_vtg) {
+                        if (data._vtg) {
                             VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VTG);
                             vtg.setMagneticCourse(heading);
                             vtg.setTrueCourse(heading);
@@ -360,25 +273,25 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             NMEASimulatorSource.this.notify(vtg);
                         }
                         
-                        if (_mta) {
+                        if (data._mta) {
                             MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(id, "MTA");
                             mta.setTemperature(temp);;
                             NMEASimulatorSource.this.notify(mta);
                         }
                         
-                        if (_mbb) {
+                        if (data._mbb) {
                             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(id, "MMB");
                             mmb.setBars(press/1000.0);
                             NMEASimulatorSource.this.notify(mmb);
                         }
                         
-                        if (_mhu) {
+                        if (data._mhu) {
                             MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(id, "MHU");
-                            mhu.setRelativeHumidity(_hum);
+                            mhu.setRelativeHumidity(data._hum);
                             NMEASimulatorSource.this.notify(mhu);
                         }
                         
-                        if (_xxx) {
+                        if (data._xxx) {
 	                        XXXPSentence xs = (XXXPSentence) SentenceFactory.getInstance().createParser(id, "XXP");
 	                        mag.getHeading(xm,  ym,  zm);
 	                        xs.setHeading(heading);
@@ -396,26 +309,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         	NMEASimulatorSource.this.notify(xs);
                         }
                         
-                        if (_xdrGYR) {
+                        if (data._xdrGYR) {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 	                        xdr.addMeasurement(new Measurement("A", heading, "D", "HEAD"));
 	                        xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
 	                        xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
                             NMEASimulatorSource.this.notify(xdr);
                         }
-                        if (_xdrMeteo) {
+                        if (data._xdrMeteo) {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 
-	                        if (_xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
-	                        if (_xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_0"));
-	                        if (_xdrMeteoHum) xdr.addMeasurement(new Measurement("C", _hum, "H", "Humidity_0"));
-	                        if (_xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_1"));
-	                        if (_xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
-	                        if (_xdrMeteoHum) xdr.addMeasurement(new Measurement("C", _hum, "H", "Humidity_1"));
+	                        if (data._xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
+	                        if (data._xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_0"));
+	                        if (data._xdrMeteoHum) xdr.addMeasurement(new Measurement("C", data._hum, "H", "Humidity_0"));
+	                        if (data._xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_1"));
+	                        if (data._xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
+	                        if (data._xdrMeteoHum) xdr.addMeasurement(new Measurement("C", data._hum, "H", "Humidity_1"));
                             NMEASimulatorSource.this.notify(xdr);
                         }
                         
-                        if (_xdrDiag) {
+                        if (data._xdrDiag) {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 	                        xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
 	                        xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));
@@ -438,12 +351,10 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     }
 
 	public double getSpeed() {
-		return _speed;
+		return data._speed;
 	}
 
 	public void setSpeed(double speed) {
-		this._speed = speed;
+		this.data._speed = speed;
 	}
-
-	
 }

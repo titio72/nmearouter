@@ -73,10 +73,13 @@ public class NMEASocketSource extends NMEAAgentImpl {
     						int ch = iStream.read();
     						if (ch>=0) {
     		                    //connected(true);
-    						    if (ch==13 || ch==10) {
+    						    if (ch==13 || ch==10 || ch=='!' || ch=='$') {
     						    	if (b.length()>0) {
     						    		processSentence(b.toString());
         						    	b.setLength(0);
+    						    	}
+    						    	if (ch=='!' || ch=='$') {
+        								b.append(new char[] {(char)ch});
     						    	}
     							} else {
     								b.append(new char[] {(char)ch});
