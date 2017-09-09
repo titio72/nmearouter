@@ -6,6 +6,7 @@
 <title>Andrea Boni NMEARouter</title>
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <style>
+@media (min-width: @screen-lg-min) { ... }
 .panelText {
 font-family: monospace; 
 font-size: 18pt;
@@ -49,6 +50,11 @@ font-size: 18pt;
 			var controllerScope = angular.element(controllerElement).scope();
 			controllerScope['vector'] = msg;
 			controllerScope.$evalAsync();
+		} else if (msg.topic=='MWD') {
+			var controllerElement = document.getElementById('sensorPanel');
+			var controllerScope = angular.element(controllerElement).scope();
+			controllerScope['wind'] = msg;
+			controllerScope.$evalAsync();
 		} else if (msg.topic=='MWV_R') {
 			var controllerElement = document.getElementById('sensorPanel');
 			var controllerScope = angular.element(controllerElement).scope();
@@ -72,10 +78,10 @@ font-size: 18pt;
 		</ol>      
 		
 		<div class="row">
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
-		   				<h2 class="panel-title">Voltage</h2>
+		   				<h2 class="panel-title">Diag</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
 						<div class="panelText">Svc {{V0.value | number:1}} V<br>
@@ -85,7 +91,7 @@ font-size: 18pt;
 			  		</div>
 			  	</div>
 			</div>
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Meteo</h2>
@@ -100,7 +106,7 @@ font-size: 18pt;
 			  		</div>
 			  	</div>
 			</div>
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Gyro</h2>
@@ -112,7 +118,7 @@ font-size: 18pt;
 			  		</div>
 			  	</div>
 			</div>
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">GPS</h2>
@@ -128,7 +134,7 @@ font-size: 18pt;
 			  		</div>
 			  	</div>
 			</div>
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
 		   				<h2 class="panel-title">Navi</h2>
@@ -144,23 +150,138 @@ font-size: 18pt;
 			  		</div>
 			  	</div>
 			</div>
-			<div class="col-lg-3">
+			<div class="col-lg-4 col-sm-6">
 				<div class="panel panel-primary">
 		 			<div class="panel-heading">
-		   				<h2 class="panel-title">Wind</h2>
+		   				<h2 class="panel-title">Abs. Wind</h2>
 		 			</div>
 			  		<div class="panel-body" style="height: 250px">
-						<div class="panelText">
-						True {{wind_t.speed | number:1}}Kn {{wind_t.angle}}°
-						</div>
-						<div class="panelText">
-						App {{wind_r.speed | number:1}}Kn {{wind_r.angle}}°
-						</div>
+			  			<table width="100%">
+			  				<tr>
+			  					<td width="50%" align="center">
+									<div class="panelText">{{wind.speed | number:1}}Kn</div>
+									<div class="panelText">{{wind.mag_angle}}°</div>
+								</td>
+			  					<td width="50%" align="center">
+									<svg width="210" height="210" style="display: block; margin: auto;">
+									    <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
+
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(45 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(135 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(225 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(315 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(0 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(90 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(180 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(270 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)" />
+
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(15 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(30 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(45 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(60 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(75 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(90 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(105 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(120 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(135 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(150 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(165 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(180 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(195 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(210 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(225 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(240 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(255 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(270 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(285 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(300 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(315 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(330 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(345 105 105)" />
+									    <path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{wind.mag_angle}} 105 105)" />
+									</svg>
+								</td>
+							</tr>
+						</table>
+			  		</div>
+			  	</div>
+			</div>
+			<div class="col-lg-4 col-sm-6">
+				<div class="panel panel-primary">
+		 			<div class="panel-heading">
+		   				<h2 class="panel-title">App. Wind</h2>
+		 			</div>
+			  		<div class="panel-body" style="height: 250px">
+			  			<table width="100%">
+			  				<tr>
+			  					<td width="50%" align="center">
+									<p><div class="panelText">A {{wind_r.speed | number:1}}Kn<br>{{wind_r.angle}}°</div></p>
+									<p><div class="panelText">T {{wind_t.speed | number:1}}Kn<br>{{wind_t.angle}}°</div></p>
+								</td>
+			  					<td width="50%" align="center">
+									<svg width="210" height="210" style="display: block; margin: auto;">
+									    <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(45 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(135 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(225 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(315 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(0 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(90 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(180 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)" />
+									    <path d="M95 95 L105 20 L105 105 Z"  fill="#C0A0A0" transform="rotate(270 105 105)" />
+									    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)" />
+									    <path d="M35 105 A70 70 00 0 1 105 35" stroke="red" fill="none" stroke-width="5"></path>
+									    <path d="M35 105 A70 70 00 0 1 105 35" stroke="green" fill="none" stroke-width="5" transform="rotate(90 105 105)"></path>
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(15 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(30 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(45 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(60 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(75 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(90 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(105 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(120 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(135 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(150 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(165 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(180 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(195 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(210 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(225 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(240 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(255 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(270 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(285 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(300 105 105)" />
+									    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(315 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(330 105 105)" />
+									    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1" transform="rotate(345 105 105)" />
+									    <path d="M95 105 L105 45 L115 105 Z" fill="lightblue" stroke="gray" stroke-width="3" transform="rotate({{wind_t.angle}} 105 105)" />
+									    <path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{wind_r.angle}} 105 105)" />
+									</svg>
+								</td>
+							</tr>
+						</table>
 			  		</div>
 			  	</div>
 			</div>
 		</div>
-		
 	</div>
 </body>
 </html>

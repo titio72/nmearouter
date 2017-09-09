@@ -26,7 +26,6 @@ public class NMEASimulatorSourceSettings {
 	public boolean _hdm = true;
 	public boolean _hdg = true;
 	public boolean _hdt = true;
-	public boolean _xxx = false;
 	public boolean _vtg = true;
 	public boolean _xdrDiag = true;
 	public boolean _xdrMeteo = true;
@@ -79,7 +78,6 @@ public class NMEASimulatorSourceSettings {
 		 _hdm   = p.getProperty("simulate.hdm", "0").equals("1"); // magn heading
 		 _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
 		 _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
-		 _xxx   = p.getProperty("simulate.xxx", "0").equals("1");  // sensors
 		 _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
 		 _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
 		 _xdrMeteo 		= p.getProperty("simulate.xdr.meteo", "0").equals("1");

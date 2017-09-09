@@ -6,15 +6,15 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
+import com.aboni.geo.ApparentWind;
+import com.aboni.geo.NavSimulator;
 import com.aboni.geo.TrueWind;
 import com.aboni.geo.Utils;
-import com.aboni.sensors.MagnetometerToCompass;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
-import com.aboni.nmea.sentences.XXXPSentence;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DBTSentence;
@@ -127,34 +127,42 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			@Override
 			public void run() {
 				TalkerId id = TalkerId.GP;
-				MagnetometerToCompass mag = new MagnetometerToCompass();
 				Random r = new Random();
+				
+				Position pos = new Position(43.9599, 09.7745);
+				long lastTS = 0;
+				
 				int i = 1;
 				while (isStarted()) {
 					try {
 						i++;
 						Thread.sleep(1000);
 						data.loadConf();
-						
-						double ph = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
-						double depth = round(10.0 + Math.sin(ph)*5.0, 1);
-
-						double heading = data._heading + r.nextDouble() * 3.0;
-						
+					
+						long newTS = System.currentTimeMillis();
+						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
+						double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
+						double depth = round(10.0 + Math.sin(ph15m)*5.0, 1);
+						double heading = Utils.normalizeDegrees0_360(data._heading * Math.cos(ph1h) + r.nextDouble() * 3.0);
 						double speed = round(data._speed + r.nextDouble() * 0.5, 1);
-						double wSpeed = round(data._wSpeed + Math.sin(i/10.0 * Math.PI), 1);
-						double wDirection = data._wDirection + r.nextDouble() * 3.0;
-						TrueWind trueWind = new TrueWind(speed, wDirection, wSpeed);
+						
+						double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
+						double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0 + Math.cos(ph1h) * 15.0; 
+						
+						double tWSpeed = 		absoluteWindSpeed;
+						double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - heading);
+
+						ApparentWind aWind = new ApparentWind(speed, tWDirection, tWSpeed);
+						double aWSpeed = 		aWind.getApparentWindSpeed();
+						double aWDirection = 	Utils.normalizeDegrees0_360(aWind.getApparentWindDeg());
 						
 						double temp = round(data._temp + (new Random().nextDouble()/10.0), 2);
 						double press = round(data._press + (new Random().nextDouble()/10.0), 1);
-						
-                        double a = i;
-                        double xm = Math.cos(a) * 150 + r.nextDouble() * 5 + 75; 
-                        double ym = Math.sin(a) * 150 + r.nextDouble() * 5 + 45;
-                        double zm = 0;
-                        double roll = round((new Random().nextDouble()*5) + 40.0*(Math.min(wSpeed, 15.0)/15.0), 2) ;
+                        double roll = round(new Random().nextDouble()*5, 1);
                         double pitch = round((new Random().nextDouble()*5) + 0, 1);
+
+                        if (lastTS!=0) pos = NavSimulator.calcNewLL(pos, heading, speed * (double)(newTS-lastTS) / 1000d / 60d / 60d);
+						lastTS = newTS;
 						
 						if (data._vhw) {
     						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
@@ -167,7 +175,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						
 						if (data._gll) {
     						GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(id, SentenceId.GLL);
-    						s1.setPosition(new Position(43.63061, 10.29333));
+    						s1.setPosition(pos);
     						s1.setStatus(DataStatus.ACTIVE);
     						s1.setTime(new Time());
     						NMEASimulatorSource.this.notify(s1);
@@ -195,7 +203,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						rmc.setMode(FaaMode.SIMULATED);
     						rmc.setDirectionOfVariation(CompassPoint.WEST);
     						rmc.setSpeed(speed);
-    						rmc.setPosition(new Position(43.63061, 10.29333));
+    						rmc.setPosition(pos);
     						NMEASimulatorSource.this.notify(rmc);
 						}
 
@@ -220,8 +228,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						if (data._mwv_a) {
                             MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             v.setSpeedUnit(Units.KNOT);
-                            v.setAngle(wDirection);
-                            v.setSpeed(wSpeed);
+                            v.setAngle(aWDirection);
+                            v.setSpeed(aWSpeed);
                             v.setTrue(false);
                             NMEASimulatorSource.this.notify(v);
 						}
@@ -229,16 +237,16 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						if (data._mwv_t) {
                             MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
                             vt.setSpeedUnit(Units.KNOT);
-                            vt.setAngle(Utils.normalizeDegrees0_360(trueWind.getTrueWindDeg()));
-                            vt.setSpeed(trueWind.getTrueWindSpeed());
+                            vt.setAngle(tWDirection);
+                            vt.setSpeed(tWSpeed);
                             vt.setTrue(true);
                             NMEASimulatorSource.this.notify(vt);
 						}
                         
 						if (data._vwr) {
                             VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(id, "VWR");
-                            vwr.setAngle(wDirection);
-                            vwr.setSpeed(wSpeed);
+                            vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
+                            vwr.setSpeed(aWSpeed);
                             vwr.setSide(Side.PORT);
                             vwr.setStatus(DataStatus.ACTIVE);
                             NMEASimulatorSource.this.notify(vwr);
@@ -289,24 +297,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(id, "MHU");
                             mhu.setRelativeHumidity(data._hum);
                             NMEASimulatorSource.this.notify(mhu);
-                        }
-                        
-                        if (data._xxx) {
-	                        XXXPSentence xs = (XXXPSentence) SentenceFactory.getInstance().createParser(id, "XXP");
-	                        mag.getHeading(xm,  ym,  zm);
-	                        xs.setHeading(heading);
-	                        xs.setMagX((int)xm);
-	                        xs.setMagY((int)ym);
-	                        xs.setMagZ((int)zm);
-	                        xs.setPressure(1030);
-	                        xs.setRotationX(roll);
-	                        xs.setRotationY(pitch);
-	                        xs.setRotationZ(0);
-	                        xs.setTemperature(29.5);
-	                        xs.setVoltage(13.56);
-	                        xs.setVoltage1(5.12);
-	                        xs.setRPM(2110);
-                        	NMEASimulatorSource.this.notify(xs);
                         }
                         
                         if (data._xdrGYR) {
