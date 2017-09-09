@@ -1,11 +1,12 @@
 package com.aboni.geo;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Date;
 
-import com.aboni.nmea.router.conf.GPXPlayerAgent;
+import com.aboni.misc.PolarTable;
 
 import net.sf.geographiclib.Geodesic;
 import net.sf.geographiclib.GeodesicData;
@@ -14,7 +15,6 @@ import net.sf.marineapi.nmea.util.Position;
 public class NavSimulator {
 
 	private long time;
-	private long prevTime;
 	
 	private Position pos;
 	private Position posTo;
@@ -25,8 +25,8 @@ public class NavSimulator {
 	private double windDir;
 	
 	private double heading;
-	private double heading1;
-	private double heading2;
+	private double headingStarboard;
+	private double headingPort;
 	
 	private double brg;
 	private double dist;
@@ -35,7 +35,18 @@ public class NavSimulator {
 	
 	private static long lastTack;
 	
+	private PolarTable polar;
+	
+	private double polarAdj = 0.9;
+	
+	private static double REACH = 55.0;
+	
 	public NavSimulator() {
+	}
+	
+	public void loadPolars(String file) throws FileNotFoundException, IOException {
+		polar = new PolarTable();
+		polar.load(new FileReader(new File(file)));
 	}
 	
 	public void setFrom(Position pos) {
@@ -73,39 +84,70 @@ public class NavSimulator {
 		return heading;
 	}
 	
+	public String getSide() {
+		return side==PORT?"P":"S";
+	}
+	
 	private void calcBrg() {
 		Course c = new Course(pos, posTo);
 		dist = c.getDistance();
 		brg = c.getCOG();
 	}
 	
+	public double getWindDir() {
+		return windDir;
+	}
+
+	public double getWindTrue() {
+		return Utils.normalizeDegrees180_180(windDir - heading);
+	}
+	
+	public double getWindApp() {
+		ApparentWind a = new ApparentWind(speed, getWindTrue(), getWindSpeed());
+		return Utils.normalizeDegrees180_180(a.getApparentWindDeg());
+	}
+	
+	private static final int PORT = 1;
+	private static final int STARBOARD = -1;
+	
 	private void calcHeadings() {
-		double trueWind = Utils.normalizeDegrees180_180(windDir - brg);
-		if (Math.abs(trueWind)<45.0) {
+		double trueWind = Utils.normalizeDegrees180_180(brg - windDir);
+		if (Math.abs(trueWind)<REACH) {
 			
-			heading1 = 45 + windDir;
-			heading2 = -45 + windDir;
-			double d1 = Math.abs(Utils.normalizeDegrees180_180(heading1 - brg)); 
-			double d2 = Math.abs(Utils.normalizeDegrees180_180(heading2 - brg));
+			headingStarboard = REACH + windDir;
+			headingPort = -REACH + windDir;
+			double d1 = Math.abs(Utils.normalizeDegrees180_180(headingStarboard - brg)); 
+			double d2 = Math.abs(Utils.normalizeDegrees180_180(headingPort - brg));
 			
-			double newHeading = d1<d2?heading1:heading2;
-			int newSide =  d1<d2?-1:1;
+			double newH = d1<d2?headingStarboard:headingPort;
+			double newTrue = Utils.normalizeDegrees180_180(newH - windDir);
+			int newSide =  newTrue>0?STARBOARD:PORT;
+			
 			if (side==0) {
-				heading = newHeading;
+				heading = newSide==PORT?headingPort:headingStarboard;
 				side = newSide;
 			} if (newSide==side) {
-				heading = newHeading;
+				heading = newSide==PORT?headingPort:headingStarboard;
 			} else {
 				if ((time - lastTack) > 60*60*1000) {
-					heading = newHeading;
+					heading = newSide==PORT?headingPort:headingStarboard;
 					side = newSide;
 					lastTack = time;
+				} else {
+					heading = side==PORT?headingPort:headingStarboard;
 				}
-			}
+			} 
 		} else {
-			heading1 = brg;
-			heading2 = brg;
+			headingStarboard = brg;
+			headingPort = brg;
 			heading = brg;
+			side = Utils.normalizeDegrees180_180(heading - windDir)>0?STARBOARD:PORT;
+		}
+	}
+	
+	private void calcSpeed() {
+		if (polar!=null) {
+			speed = polarAdj * polar.getSpeed((int)Math.abs(getWindTrue()), (float)getWindSpeed());
 		}
 	}
 		
@@ -127,6 +169,7 @@ public class NavSimulator {
 		pos = newPos;
 		calcBrg();
 		calcHeadings();
+		calcSpeed();
 	}
 	
 	public static Position calcNewLL(Position p0, double heading, double dist) {
@@ -140,28 +183,43 @@ public class NavSimulator {
 		Position marina = new Position(43.679416, 10.267679);
 		Position capraia = new Position(43.051326, 9.839279);
 		NavSimulator sim = new NavSimulator();
+		try {
+			sim.loadPolars("web/dufour35c.csv");
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		sim.setFrom(marina);
 		sim.setTo(capraia);
-		sim.setWind(11.0,  230.0);
+		sim.setWind(9.0,  230.0);
 		System.out.println("BRG  " + sim.getBRG());
 		System.out.println("Dist " + sim.getDistance());
 
-		double d = sim.getDistance();
-		
 		PositionHistory p = new PositionHistory();
 		long t0 = System.currentTimeMillis();
 		
-		while (d>0.1) {
-			sim.doCalc(sim.getTime() + 5 * 60 * 1000 /* 1 minutes*/);
-			d = sim.getDistance();
+		long dTime = 1 * 60 * 1000; /* 5 minutes*/ 
+		
+		double distThreshold = (double)dTime/60d/60d/1000d * sim.getSpeed() * 1.5;
+		
+		while (sim.getDistance()>distThreshold) {
+			sim.doCalc(sim.getTime() + dTime);
 			
-			sim.setWind(11.0, sim.getWindDir() - ((double)sim.getTime()/1000d/60d/60d) * 10.0);
+			rotateWind(sim, dTime);
 			
-			System.out.println("Head " + (int)sim.getHeading() + " dist " + d);
+			System.out.format(
+					"Head %.1f Wind %.1f %.1f %.1f Dist %.2f Speed %.2f %s%n", 
+					sim.getHeading(), 
+					sim.getWindDir(),
+					sim.getWindTrue(),
+					sim.getWindApp(),
+					sim.getDistance(), sim.getSpeed(), sim.getSide());
 			p.addPosition(new GeoPositionT(t0+sim.getTime(), sim.getPos()));
 		}
 		System.out.println(
-				(int)(sim.getTime() / 1000d / 60d / 60d) + "h " + ((int)(sim.getTime()/1000d/60d) % 60) + "m" 
+				(int)(sim.getTime() / 1000d / 60d / 60d) + "h " + ((int)(sim.getTime()/1000d/60d) % 60) + "m " +
+						p.getTotalDistance() 
 				);
 		
 		Track2GPX x = new Track2GPX();
@@ -176,79 +234,12 @@ public class NavSimulator {
 		}
 	}
 
-	private double getWindDir() {
-		return windDir;
-	}
-	
-	
-	
-	/*
-	public double heading = -150;
-	public double speed = 5;
-	public double lat = 43.67830115349512;
-	public double lon = 10.266444683074951;
-	public double sog;
-	public double cog;
-	
-	private long t = 0;
-
-	
-	public void calc(long t1) {
-
-		if (t==t1) return;
-		
-		double distance = speed *  ((double)(t1 - t)/(60.0*60.0*1000.0));
-		Position p0 = new Position(lat, lon);
-		Position p1 = calcNewLL(p0, heading, distance);
-
-		
-		heading = heading + (Math.sin(t/10) * 5.0);
-		speed = speed + (Math.cos(t) * 0.5);
-		
-		Course c = new Course(p0, p1);
-		cog = c.getCOG();
-		sog = c.getDistance() / ((double)(t1-t) / 1000.0 / 60.0 / 60.0);
-		
-		lat = p1.getLatitude();
-		lon = p1.getLongitude();
-		
-		t = t1;
-
+	private static void rotateWind(NavSimulator sim, long dTime) {
+		/*double w = sim.getWindDir();
+		w = Utils.normalizeDegrees0_360( w + (((double)dTime/1000d/60d/60d) * 5.0));
+		sim.setWind(9.0, w);*/
 	}
 
-	public static void main(String[] args) {
-		NavSimulator n = new NavSimulator();
-		double lat = n.lat;
-		double lon = n.lon;
-		
-		int interval = 500;
-
-		PositionHistory p = new PositionHistory();
-		
-		for (long t = 0; t<=(1*60*60*1000); t+=interval) {
-			n.calc(t);
-			System.out.println(DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(n.t)));
-			System.out.println(n.lat);
-			System.out.println(n.lon);
-			System.out.println(n.sog);
-			System.out.println(n.cog);
-			System.out.println("-------------------------------");
-			p.addPosition(new GeoPositionT(t * 1000, n.lat, n.lon));
-			
-		}
-		
-		Course c = new Course(new Position(lat, lon), new Position(n.lat, n.lon));
-		System.out.println(c.getDistance());
-		
-		TrackDumper gpx = new Track2GPX();
-		gpx.setTrack(p);
-		try {
-			gpx.dump(new FileWriter("x.gpx"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	*/
 }
 
 
