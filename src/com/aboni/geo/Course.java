@@ -11,12 +11,37 @@ public class Course {
 	private double distance;
 	private double speed;
 	private double cog;
+	private long interval;
 	
 	public Course(Position p0, Position p1) {
 		this.p0 = p0;
 		this.p1 = p1;
+		if (p0 instanceof GeoPositionT && p1 instanceof GeoPositionT) {
+			interval = ((GeoPositionT)p1).getTimestamp() - ((GeoPositionT)p0).getTimestamp();
+		}
 		calc();
-		calcSpeed();
+	}
+
+	public Course(Position p0, double brg, double distance) {
+		this.p0 = p0;
+		this.p1 = null;
+		this.distance = distance;
+		this.cog = brg;
+		calcPos();
+	}
+
+	public Course(Position p0, double brg, double speed, long time) {
+		this.p0 = p0;
+		this.p1 = null;
+		this.distance = ((double)time/1000d/60d/60d) * speed;
+		this.cog = brg;
+		this.interval = time;
+		calcPos();
+	}
+
+	private void calcPos() {
+		GeodesicData d = Geodesic.WGS84.Direct(p0.getLatitude(), p0.getLongitude(), cog, distance * 1852);
+		p1 = new Position(d.lat2, d.lon2);
 	}
 
 	private void calc() {
@@ -26,11 +51,12 @@ public class Course {
 		calcSpeed();
 	}
 	
+	/**
+	 * Time in milliseconds to travel from P0 to P1.
+	 * @return The time interval in milliseconds.
+	 */
 	public long getInterval() {
-		if (p0 instanceof GeoPositionT && p1 instanceof GeoPositionT)
-			return ((GeoPositionT)p1).getTimestamp() - ((GeoPositionT)p0).getTimestamp();
-		else 
-			return 0;
+		return interval;
 	}
 	
 	private void calcSpeed() {
@@ -41,6 +67,14 @@ public class Course {
 		} else {
 			speed = Double.NaN;
 		}
+	}
+	
+	public Position getP0() {
+		return p0;
+	}
+	
+	public Position getP1() {
+		return p1;
 	}
 	
 	/**

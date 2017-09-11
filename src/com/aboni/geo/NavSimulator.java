@@ -5,14 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import com.aboni.misc.PolarTable;
 
-import net.sf.geographiclib.Geodesic;
-import net.sf.geographiclib.GeodesicData;
 import net.sf.marineapi.nmea.util.Position;
 
 public class NavSimulator {
+	
+	public interface DoWithSim {
+		void doIt(NavSimulator sim, long t);
+	}
 
 	private long time;
 	
@@ -173,50 +176,48 @@ public class NavSimulator {
 	}
 	
 	public static Position calcNewLL(Position p0, double heading, double dist) {
-		
-		GeodesicData d = Geodesic.WGS84.Direct(p0.getLatitude(), p0.getLongitude(), heading, dist * 1852);
-		
-		return new Position(d.lat2, d.lon2);
+		Course c = new Course(p0, heading, dist);
+		return c.getP1();
 	}
 
+	public PositionHistory doSimulate(DoWithSim oncalc) {
+		PositionHistory p = new PositionHistory();
+		long t0 = System.currentTimeMillis();
+		long dTime = 1 * 60 * 1000; /* 5 minutes*/ 
+		double distThreshold = (double)dTime/60d/60d/1000d * getSpeed() * 1.5;
+		while (getDistance()>distThreshold) {
+			doCalc(getTime() + dTime);
+			if (oncalc!=null) oncalc.doIt(this, getTime());
+			p.addPosition(new GeoPositionT(t0 + getTime(), getPos()));
+		}
+		return p;
+	}
+	
+	
 	public static void main(String[] args) {
 		Position marina = new Position(43.679416, 10.267679);
 		Position capraia = new Position(43.051326, 9.839279);
 		NavSimulator sim = new NavSimulator();
-		try {
-			sim.loadPolars("web/dufour35c.csv");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		try { sim.loadPolars("web/dufour35c.csv"); } catch (Exception e) { e.printStackTrace(); }
 		sim.setFrom(marina);
 		sim.setTo(capraia);
-		sim.setWind(9.0,  230.0);
+		sim.setWind(9.0,  205.0);
+		
 		System.out.println("BRG  " + sim.getBRG());
 		System.out.println("Dist " + sim.getDistance());
 
-		PositionHistory p = new PositionHistory();
-		long t0 = System.currentTimeMillis();
-		
-		long dTime = 1 * 60 * 1000; /* 5 minutes*/ 
-		
-		double distThreshold = (double)dTime/60d/60d/1000d * sim.getSpeed() * 1.5;
-		
-		while (sim.getDistance()>distThreshold) {
-			sim.doCalc(sim.getTime() + dTime);
-			
-			rotateWind(sim, dTime);
-			
-			System.out.format(
+		PositionHistory p = sim.doSimulate((NavSimulator s, long t) -> 	{
+				System.out.format(
 					"Head %.1f Wind %.1f %.1f %.1f Dist %.2f Speed %.2f %s%n", 
-					sim.getHeading(), 
-					sim.getWindDir(),
-					sim.getWindTrue(),
-					sim.getWindApp(),
-					sim.getDistance(), sim.getSpeed(), sim.getSide());
-			p.addPosition(new GeoPositionT(t0+sim.getTime(), sim.getPos()));
-		}
+					s.getHeading(), 
+					s.getWindDir(),
+					s.getWindTrue(),
+					s.getWindApp(),
+					s.getDistance(), s.getSpeed(), s.getSide());
+				rotateWind(s, t);
+			}
+		);
+
 		System.out.println(
 				(int)(sim.getTime() / 1000d / 60d / 60d) + "h " + ((int)(sim.getTime()/1000d/60d) % 60) + "m " +
 						p.getTotalDistance() 
@@ -229,15 +230,14 @@ public class NavSimulator {
 			x.dump(w);
 			w.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private static void rotateWind(NavSimulator sim, long dTime) {
-		/*double w = sim.getWindDir();
-		w = Utils.normalizeDegrees0_360( w + (((double)dTime/1000d/60d/60d) * 5.0));
-		sim.setWind(9.0, w);*/
+	private static void rotateWind(NavSimulator s, long t) {
+		double w = s.getWindDir();
+		w = Utils.normalizeDegrees0_360( w + (((double)t/1000d/60d/60d) * 5.0));
+		s.setWind(9.0, w);
 	}
 
 }
