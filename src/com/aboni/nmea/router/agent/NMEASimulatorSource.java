@@ -8,7 +8,6 @@ import java.util.TimeZone;
 
 import com.aboni.geo.ApparentWind;
 import com.aboni.geo.NavSimulator;
-import com.aboni.geo.TrueWind;
 import com.aboni.geo.Utils;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
@@ -132,10 +131,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 				Position pos = new Position(43.9599, 09.7745);
 				long lastTS = 0;
 				
-				int i = 1;
 				while (isStarted()) {
 					try {
-						i++;
 						Thread.sleep(1000);
 						data.loadConf();
 					
