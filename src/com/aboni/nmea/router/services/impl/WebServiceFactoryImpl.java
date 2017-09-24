@@ -7,6 +7,7 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.services.AgentFilterService;
 import com.aboni.nmea.router.services.AgentStatusService;
 import com.aboni.nmea.router.services.AgentStatusServiceJSON;
+import com.aboni.nmea.router.services.AutoPilotService;
 import com.aboni.nmea.router.services.ChangeTripDescService;
 import com.aboni.nmea.router.services.CreateTripService;
 import com.aboni.nmea.router.services.CruisingDaysService;
@@ -68,6 +69,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new AgentFilterService(router, "out");
         } else if (target.equals("/filterin")) {
         	s = new AgentFilterService(router, "in");
+        } else if (target.equals("/auto")) {
+        	s = new AutoPilotService(router);
         }
 		return s;
 	}
