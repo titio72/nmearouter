@@ -6,13 +6,16 @@ import java.io.IOException;
 import com.aboni.geo.NavSimulator;
 import com.aboni.geo.PositionHistory;
 import com.aboni.geo.Track2GPX;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 
 import net.sf.marineapi.nmea.util.Position;
 
 public class SimulatorGoTo {
 	
 	public static void main(String[] args) {
+		
+		
+		
 		Position marina = new Position(43.679416, 10.267679);
 		Position capraia = new Position(43.051326, 9.839279);
 		NavSimulator sim = new NavSimulator();

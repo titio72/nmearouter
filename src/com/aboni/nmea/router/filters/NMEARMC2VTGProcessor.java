@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.filters;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;

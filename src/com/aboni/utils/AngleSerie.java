@@ -1,6 +1,6 @@
 package com.aboni.utils;
 
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 
 public class AngleSerie extends Serie {
 	
@@ -17,7 +17,7 @@ public class AngleSerie extends Serie {
             min = v;
             samples = 1;
          } else {
-			double a = Utils.getNormal(avg, v);
+			double a = Utils.getNormal180(avg, v);
             avg = ((avg * samples) +  a) / (samples +1);
             avg = Utils.normalizeDegrees0_360(avg);
             max = Utils.normalizeDegrees0_360(Math.max(max,  a));

@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.TrackManager.TrackPoint;
 
 import net.sf.marineapi.nmea.util.Position;
@@ -41,6 +41,19 @@ public class NMEATrackManagerTest {
 		t0 = System.currentTimeMillis();
 	}
 
+	private static SimpleDateFormat fmt = new SimpleDateFormat("dd HH:mm:ss");
+	static {
+		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+	}
+	
+	private void dump(List<TrackPoint> l) {
+		for (TrackPoint p: l) {
+			System.out.format("%d %.2f %d %s %n", 
+					p.anchor?1:0, p.distance * 1852.0, p.period, fmt.format(new Date((p.position.getTimestamp() - t0))) );
+		}
+		
+	}
+	
 	private TrackManager.TrackPoint postPosition(long ts, double speed) throws Exception {
 		Position p = new Position(lat, lon);
 		Position p1 = Utils.calcNewLL(p, -90, ((double)(ts-lastPosted)/60.0/60.0/1000.0) /*h*/ * speed /*kn*/);
@@ -51,9 +64,13 @@ public class NMEATrackManagerTest {
 	}
 	
 	private List<TrackManager.TrackPoint> cruise(int seconds, double speed) throws Exception {
+		return cruise(seconds, speed, 0);
+	}
+	
+	private List<TrackManager.TrackPoint> cruise(int seconds, double speed, int waitBeforeCruising) throws Exception {
 		int interval = 1000; // 1 second
 		List<TrackManager.TrackPoint> out = new ArrayList<TrackManager.TrackPoint>();
-		long start = lastPosted + interval;
+		long start = lastPosted + interval + waitBeforeCruising*1000;
 		for (long t = start; t<=(seconds*1000)+start; t+=interval) {
 			TrackManager.TrackPoint point = postPosition(t, speed);
 			if (point!=null) {
@@ -133,10 +150,10 @@ public class NMEATrackManagerTest {
 	@Test
 	public void testLeaveAnchor() throws Exception {
 		double s = 1.0;
-		dump(cruise(10 * 60 /* 1m */, 5.0));
-		dump(cruise(47 * 60 /* 1h */, 0.0)); // set anchor
+		cruise(10 * 60 /* 1m */, 5.0);
+		cruise(47 * 60 /* 1h */, 0.0); // set anchor
 		List<TrackPoint> l = cruise(10 * 60 /* 10m */, s);
-		dump(l);
+		//dump(l);
 		int counter = 0;
 		for (TrackPoint p: l) {
 			assertTrue(!p.anchor);
@@ -147,19 +164,6 @@ public class NMEATrackManagerTest {
 			counter++;
 		}
 		assertTrue(counter>0);
-	}
-
-	private static SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss");
-	static {
-		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
-	}
-	
-	private void dump(List<TrackPoint> l) {
-		for (TrackPoint p: l) {
-			System.out.format("%d %.2f %d %s %n", 
-					p.anchor?1:0, p.distance * 1852.0, p.period, fmt.format(new Date((p.position.getTimestamp() - t0))) );
-		}
-		
 	}
 
 	@Test
@@ -191,5 +195,41 @@ public class NMEATrackManagerTest {
 				assertTrue(p.anchor);
 			}
 		}
+	}
+	
+	/**
+	 * Test the case where the boat reaches the anchor point, set anchor then the GPS switches off for the night and resume after 8h before leaving
+	 * @throws Exception
+	 */
+	@Test
+	public void testFeedInterruption() throws Exception {
+		// first cruise and set anchor
+		cruise(10 * 60 /* 1m */, 5.0);
+		cruise(2 * 60 * 60 /* 2h */, 0.0);
+		// stop sending for 8h
+		//System.out.println("----");
+		// switch GPS on and cruise for 10minutes
+		List<TrackPoint> l = cruise(10 * 60 /* 10m */, 5.0, 8 * 3600);
+		//dump(l);
+		assertTrue(l.size()>1);
+		assertTrue(!l.get(1).anchor);
+	}
+
+	/**
+	 * Test the case where the boat reaches the anchor point, set anchor then the GPS switches off for the night and resume after 8h before leaving
+	 * @throws Exception
+	 */
+	@Test
+	public void testFeedInterruption2() throws Exception {
+		// first cruise and set anchor
+		dump(cruise(10 * 60 /* 1m */, 5.0));
+		dump(cruise(2 * 60 * 60 /* 2h */, 0.0));
+		// stop sending for 8h
+		System.out.println("----");
+		// switch on GPS and remain at anchor
+		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 0.0, 8 * 3600);
+		dump(l);
+		assertTrue(l.size()>1);
+		assertTrue(l.get(1).anchor);
 	}
 }

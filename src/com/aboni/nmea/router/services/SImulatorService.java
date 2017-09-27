@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.NMEASimulatorSource;
 
 public class SImulatorService implements WebService {

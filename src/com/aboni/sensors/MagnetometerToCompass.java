@@ -1,6 +1,6 @@
 package com.aboni.sensors;
 
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 
 public class MagnetometerToCompass {
 

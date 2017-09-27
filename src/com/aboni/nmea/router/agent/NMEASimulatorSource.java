@@ -8,7 +8,7 @@ import java.util.TimeZone;
 
 import com.aboni.geo.ApparentWind;
 import com.aboni.geo.NavSimulator;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;

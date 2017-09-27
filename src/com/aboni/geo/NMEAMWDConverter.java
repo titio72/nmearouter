@@ -1,5 +1,7 @@
 package com.aboni.geo;
 
+import com.aboni.misc.Utils;
+
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.MWDSentence;

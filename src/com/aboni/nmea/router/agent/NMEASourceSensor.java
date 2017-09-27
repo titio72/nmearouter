@@ -15,7 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;

@@ -1,6 +1,6 @@
 package com.aboni.utils;
 
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 
 public class ScalarSerie extends Serie {
 	

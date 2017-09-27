@@ -5,7 +5,7 @@ import java.util.List;
 
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.geo.Utils;
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.ServerLog;
