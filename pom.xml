@@ -172,4 +172,9 @@
 	    <version>3.0</version>
 	</dependency>
   </dependencies>
+  <scm>
+  	<url>git@github.com:titio72/mmearouter.git</url>
+  	<connection>scm:git:git@github.com:titio72/mmearouter.git</connection>
+  	<developerConnection>scm:git:git@github.com:titio72/mmearouter.git</developerConnection>
+  </scm>
 </project>
