@@ -60,12 +60,7 @@
     </plugins>
 
   </build>
-  <scm>
-  	<url>svn://192.168.2.99/NMEARouter</url>
-  	<connection>svn://192.168.2.99//NMEARouter</connection>
-  	<developerConnection>svn://192.168.2.99//NMEARouter</developerConnection>
-  </scm>
-  
+ 
   <distributionManagement>
     <repository>
       <uniqueVersion>false</uniqueVersion>
@@ -93,7 +88,7 @@
 	    <artifactId>pi4j-device</artifactId>
 	   <version>1.1</version>
 	</dependency>
-	<dependency>
+	<dependency> 
   		<groupId>net.sf.marineapi</groupId>
   		<artifactId>marineapi</artifactId>
   		<version>0.11.0-SNAPSHOT</version>
