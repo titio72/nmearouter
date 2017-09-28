@@ -86,35 +86,27 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 	protected void doWithSentence(Sentence s, NMEAAgent source) {
 	}
 	
-
-	private STALKSentence getCommandSentence() {
-		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
-		s.setCommand("86");
-		s.addParameter("21");
-		return s;
-	}
-	
 	@Override
 	public void enable() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("01");
-		s.addParameter("FE");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "01", "FE");
 		this.notify(s);
 	}
 
 	@Override
 	public void standBy() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("02");
-		s.addParameter("FD");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "02", "FD");
 		this.notify(s);
 	}
 
 	@Override
 	public void windVane() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("23");
-		s.addParameter("DC");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "23", "DC");
 		this.notify(s);
 	}
 
@@ -125,38 +117,34 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 	
 	@Override
 	public void port1() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("05");
-		s.addParameter("FA");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "05", "FA");
 		this.notify(s);
 	}
 
 	
 	@Override
 	public void port10() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("06");
-		s.addParameter("F9");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "06", "F9");
 		this.notify(s);
 	}
 
 	@Override
 	public void starboard1() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("07");
-		s.addParameter("F9");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "07", "F9");
 		this.notify(s);
 	}
 
 	@Override
 	public void starboard10() {
-		STALKSentence s = getCommandSentence();
-		s.addParameter("08");
-		s.addParameter("F7");
+		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
+		s.setCommand("86");
+		s.setParameters("21", "28", "F7");
 		this.notify(s);
 	}
-
-	
-	
-	
 }
