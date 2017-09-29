@@ -26,8 +26,18 @@ public class DBHelper {
     private String user = USER;
     private String password = PASS;
 
+    private boolean autocommit;
     private Connection conn;
-
+    
+    public DBHelper(boolean autocommit) throws ClassNotFoundException, SQLException {
+    	readConf();
+        this.autocommit = autocommit;
+    	
+        Class.forName(jdbc);
+        conn = DriverManager.getConnection(dburl, user, password);
+        conn.setAutoCommit(autocommit);
+    }
+    
     protected final void readConf() {
         try {
             File f = new File(Constants.DB);
@@ -46,21 +56,18 @@ public class DBHelper {
         }
     }
     
-    
-    public DBHelper(boolean autocommit) throws ClassNotFoundException, SQLException {
-    	readConf();
-    	
-        Class.forName(jdbc);
-        conn = DriverManager.getConnection(dburl, user, password);
-        conn.setAutoCommit(autocommit);
-    }
-    
     public Connection getConnection() {
         return conn;
     }
     
     public void close() throws SQLException {
-        conn.close();
+        if (conn!=null) conn.close();
+    }
+    
+    public void reconnect() throws SQLException {
+    	close();
+        conn = DriverManager.getConnection(dburl, user, password);
+        conn.setAutoCommit(autocommit);
     }
     
     public synchronized PreparedStatement getTimeSeries(String table, String[] fields, Calendar cFrom, Calendar cTo, String where) throws SQLException {

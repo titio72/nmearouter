@@ -15,6 +15,17 @@ public class DBStatsWriter implements StatsWriter {
     public DBStatsWriter() {
     }
     
+    private void resetConnection() {
+    	try {
+    		if (db!=null) {
+    			db.close();
+    		}
+    		init();
+    	} catch (Exception e) {
+            ServerLog.getLogger().Error("Error resetting connection!", e);
+    	}
+    }
+    
     @Override
 	public void init() {
     	if (db==null) {
@@ -29,6 +40,11 @@ public class DBStatsWriter implements StatsWriter {
     
     @Override
     public void write(Serie s, long ts) {
+    	write(s, ts, 0);
+    }
+    
+    public void write(Serie s, long ts, int count) {
+    	boolean retry = false;
     	if (stm!=null) {
             try {
 				stm.setString(1, s.getTag());
@@ -38,9 +54,17 @@ public class DBStatsWriter implements StatsWriter {
 	            stm.setTimestamp(5, new Timestamp(ts));
 	            stm.execute();
 	        } catch (Exception e) {
-	        	ServerLog.getLogger().Error("Cannot write meteo info type {" + s.getType() + "} Value {" + s.getAvg() +"}", e);
+	        	ServerLog.getLogger().Error("Cannot write meteo info type {" + s.getType() + "} Value {" + s.getAvg() +"} (" + count + ")", e);
+	        	retry = true;
 	        }
     	}
+    	if (retry) {
+	    	count++;
+	    	if (count<3) {
+	    		resetConnection();
+	    		write(s, ts, count);
+	    	}
+    	}    	
     }
     
     @Override

@@ -15,7 +15,12 @@ public class TrackMediaDB implements TrackMedia {
     
     @Override
     public void writePoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
-        if (stm!=null) {
+    	writePoint(p, anchor, dist, speed, maxSpeed, interval, 0);
+    }
+
+    public void writePoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval, int count) {
+    	boolean retry = false;
+    	if (stm!=null) {
             try {
                 stm.setDouble(1, p.getLatitude());
                 stm.setDouble(2, p.getLongitude());
@@ -28,11 +33,31 @@ public class TrackMediaDB implements TrackMedia {
                 stm.setDouble(8, dist);
                 stm.execute();
             } catch (Exception e) {
-                ServerLog.getLogger().Error("Cannot write down position!", e);
+            	retry = true;
+                ServerLog.getLogger().Error("Cannot write down position (" + count + ")!", e);
             }
         }
+    	if (retry) {
+	    	count++;
+	    	if (count<3) {
+	    		resetConnection();
+	    		writePoint(p, anchor, dist, speed, maxSpeed, interval, count);
+	    	}
+    	}
     }
 
+
+    private void resetConnection() {
+    	try {
+    		if (db!=null) {
+    			db.close();
+    		}
+    		init();
+    	} catch (Exception e) {
+            ServerLog.getLogger().Error("Error resetting connection!", e);
+    	}
+    }
+    
     @Override
     public boolean init() {
         try {
