@@ -9,10 +9,10 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.agent.TrackMedia;
+import com.aboni.nmea.router.agent.TrackWriter;
 import com.aboni.utils.ServerLog;
 
-public class TrackMediaFile implements TrackMedia {
+public class TrackMediaFile implements TrackWriter {
 
     private DecimalFormat myFormatter = new DecimalFormat("#.0000000");
     private SimpleDateFormat tsFormatter;
@@ -26,7 +26,7 @@ public class TrackMediaFile implements TrackMedia {
     }
     
     @Override
-    public void writePoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
+    public void write(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
         String msg = getPositionString(p, anchor);
         if (msg!=null) {
             writeLine(msg);

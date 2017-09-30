@@ -27,15 +27,17 @@ public class DBStatsWriter implements StatsWriter {
     }
     
     @Override
-	public void init() {
+	public boolean init() {
     	if (db==null) {
             try {
 				db = new DBHelper(true);
 	            stm = db.getConnection().prepareStatement("insert into meteo (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
 	        } catch (Exception e) {
 	            ServerLog.getLogger().Error("Cannot initialize meteo stats writer!", e);
+	            return false;
 	        }
     	}
+    	return true;
     }
     
     @Override

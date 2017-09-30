@@ -4,17 +4,17 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.agent.TrackMedia;
+import com.aboni.nmea.router.agent.TrackWriter;
 import com.aboni.utils.DBHelper;
 import com.aboni.utils.ServerLog;
 
-public class TrackMediaDB implements TrackMedia {
+public class DBTrackWriter implements TrackWriter {
 
     private DBHelper db;
     private PreparedStatement stm;
     
     @Override
-    public void writePoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
+    public void write(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
     	writePoint(p, anchor, dist, speed, maxSpeed, interval, 0);
     }
 
@@ -78,5 +78,4 @@ public class TrackMediaDB implements TrackMedia {
             stm = null;
         } catch (Exception e) {}
     }
-
 }

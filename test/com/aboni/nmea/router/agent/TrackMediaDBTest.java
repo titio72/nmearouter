@@ -12,14 +12,14 @@ import org.junit.Test;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.agent.TrackManager.TrackPoint;
-import com.aboni.nmea.router.agent.impl.TrackMediaDB;
+import com.aboni.nmea.router.agent.impl.DBTrackWriter;
 import com.aboni.utils.DBHelper;
 
 public class TrackMediaDBTest {
 
 	@Test
 	public void testInit() {
-		TrackMediaDB trackDb = new TrackMediaDB();
+		DBTrackWriter trackDb = new DBTrackWriter();
 		assertTrue(trackDb.init());
 		trackDb.dispose();
 	}
@@ -60,10 +60,10 @@ public class TrackMediaDBTest {
 	
 	@Test
 	public void testWritePointNoAnchor() throws Exception {
-		TrackMediaDB trackDb = new TrackMediaDB();
+		DBTrackWriter trackDb = new DBTrackWriter();
 		trackDb.init();
 		long t = getNow();
-		trackDb.writePoint(new GeoPositionT(t, 43.23, 10.54), false, 0.12, 6.2, 7.4, 60);
+		trackDb.write(new GeoPositionT(t, 43.23, 10.54), false, 0.12, 6.2, 7.4, 60);
 		List<TrackPoint> res = get(t);
 		cleanUp(t);
 
@@ -82,10 +82,10 @@ public class TrackMediaDBTest {
 
 	@Test
 	public void testWritePointAnchor() throws Exception {
-		TrackMediaDB trackDb = new TrackMediaDB();
+		DBTrackWriter trackDb = new DBTrackWriter();
 		trackDb.init();
 		long t = getNow();
-		trackDb.writePoint(new GeoPositionT(t, 43.23, 10.54), true, 0.12, 6.2, 7.4, 60);
+		trackDb.write(new GeoPositionT(t, 43.23, 10.54), true, 0.12, 6.2, 7.4, 60);
 		List<TrackPoint> res = get(t);
 		cleanUp(t);
 

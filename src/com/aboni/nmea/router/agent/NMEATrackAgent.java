@@ -6,7 +6,7 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.agent.impl.TrackMediaDB;
+import com.aboni.nmea.router.agent.impl.DBTrackWriter;
 import com.aboni.nmea.router.agent.impl.TrackMediaFile;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
@@ -20,7 +20,7 @@ import net.sf.marineapi.nmea.util.Time;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
-	private TrackMedia media;
+	private TrackWriter media;
 	private String mediaFile;
 	private String listenSentence;
 
@@ -43,7 +43,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         media = null;
     }
 
-    public void setMedia(TrackMedia m) {
+    public void setMedia(TrackWriter m) {
     	media = m;
     }
     
@@ -72,7 +72,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     protected boolean onActivate() {
     	if (media==null) {
 	    	if ("".equals(mediaFile) || mediaFile==null) { 
-	    		media = new TrackMediaDB();
+	    		media = new DBTrackWriter();
 	    	} else {
 	    		media = new TrackMediaFile(mediaFile);
 	    	}
@@ -141,7 +141,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	TrackManager.TrackPoint point = tracker.processPosition(
     			new GeoPositionT(timestamp.getTimeInMillis(), pos), sog);
     	if (point!=null && media!=null) {
-            media.writePoint(point.position, 
+            media.write(point.position, 
             		point.anchor, 
             		point.distance,  
             		point.averageSpeed, 
