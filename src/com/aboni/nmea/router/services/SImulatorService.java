@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.services;
 
+import org.json.JSONObject;
+
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.NMEASimulatorSource;
 
@@ -42,7 +44,14 @@ public class SImulatorService implements WebService {
 	        		} catch (Exception e) {}
 	        	}
         	}
-            response.getWriter().println("Ok");
+        	response.setContentType("application/json");
+        	JSONObject res = new JSONObject();
+        	res.put("speed", NMEASimulatorSource.SIMULATOR.getSpeed());
+        	res.put("wspeed", NMEASimulatorSource.SIMULATOR.getwSpeed());
+        	res.put("wdir", NMEASimulatorSource.SIMULATOR.getwDirection());
+        	res.put("heading", NMEASimulatorSource.SIMULATOR.getHeading());
+            response.getWriter().println(res.toString());
+            response.ok();
         } catch (Exception e) {
             response.setContentType("text/html;charset=utf-8");
             try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}

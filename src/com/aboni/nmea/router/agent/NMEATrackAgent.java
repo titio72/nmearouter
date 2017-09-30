@@ -7,7 +7,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.agent.impl.DBTrackWriter;
-import com.aboni.nmea.router.agent.impl.TrackMediaFile;
+import com.aboni.nmea.router.agent.impl.FileTrackWriter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
 
@@ -74,7 +74,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	    	if ("".equals(mediaFile) || mediaFile==null) { 
 	    		media = new DBTrackWriter();
 	    	} else {
-	    		media = new TrackMediaFile(mediaFile);
+	    		media = new FileTrackWriter(mediaFile);
 	    	}
     	}
         return media.init();

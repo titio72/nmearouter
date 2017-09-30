@@ -2,7 +2,8 @@ package com.aboni.nmea.router.services;
 
 import java.util.Calendar;
 
-import com.aboni.utils.DBHelper;
+import com.aboni.utils.db.DBHelper;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

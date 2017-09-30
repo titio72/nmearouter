@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent;
+package com.aboni.utils.db;
 
 public interface Event {
 	long getTime();

@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.utils.DBHelper;
+import com.aboni.utils.db.DBHelper;
 
 public class UpdateDistanceAndSpeed {
 

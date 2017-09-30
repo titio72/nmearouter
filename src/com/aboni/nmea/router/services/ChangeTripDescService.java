@@ -1,8 +1,9 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.DBHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
+import com.aboni.utils.db.DBHelper;
 
 public class ChangeTripDescService implements WebService {
 

@@ -7,10 +7,10 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 
-import com.aboni.utils.DBHelper;
 import com.aboni.utils.Sample;
 import com.aboni.utils.Sampler;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
 
 abstract class SampledQueryService implements WebService {
 

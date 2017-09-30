@@ -1,4 +1,4 @@
-package com.aboni.utils;
+package com.aboni.utils.db;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+
+import com.aboni.utils.Constants;
+import com.aboni.utils.ServerLog;
 
 public class DBHelper {
 	
@@ -32,10 +35,8 @@ public class DBHelper {
     public DBHelper(boolean autocommit) throws ClassNotFoundException, SQLException {
     	readConf();
         this.autocommit = autocommit;
-    	
         Class.forName(jdbc);
-        conn = DriverManager.getConnection(dburl, user, password);
-        conn.setAutoCommit(autocommit);
+        reconnect();
     }
     
     protected final void readConf() {
@@ -60,29 +61,45 @@ public class DBHelper {
         return conn;
     }
     
-    public void close() throws SQLException {
-        if (conn!=null) conn.close();
+    public void close() {
+        if (conn!=null)
+			try {
+				conn.close();
+			} catch (SQLException e) {
+			}
     }
     
-    public void reconnect() throws SQLException {
-    	close();
-        conn = DriverManager.getConnection(dburl, user, password);
-        conn.setAutoCommit(autocommit);
+    public boolean reconnect() {
+    	try {
+    		close();
+    		conn = DriverManager.getConnection(dburl, user, password);
+    		conn.setAutoCommit(autocommit);
+    		return true;
+    	} catch (Exception e) {
+    		conn = null;
+            ServerLog.getLogger().Error("Cannot reset onnection!", e);
+            return false;
+    	}
     }
     
     public synchronized PreparedStatement getTimeSeries(String table, String[] fields, Calendar cFrom, Calendar cTo, String where) throws SQLException {
-	    String sql = "select TS ";
-	    for (String f: fields) {
-	    	sql += ", " + f;
-	    }
-    	sql += " from " + table + " where TS>=? and TS<=?";
-    	if (where!=null) {
-    		sql += " AND " + where;
+    	if (getConnection()!=null) {
+	    	String sql = "select TS ";
+		    for (String f: fields) {
+		    	sql += ", " + f;
+		    }
+	    	sql += " from " + table + " where TS>=? and TS<=?";
+	    	if (where!=null) {
+	    		sql += " AND " + where;
+	    	}
+	    	PreparedStatement stm = getConnection().prepareStatement(sql);
+			stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+			return stm;
+    	} else {
+    		ServerLog.getLogger().Warning("Cannot create statement for {" + table + "} because connection is not established!");
+    		return null;
     	}
-    	PreparedStatement stm = getConnection().prepareStatement(sql);
-		stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-		stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-		return stm;
     }    
     
     public class Range {
@@ -119,18 +136,22 @@ public class DBHelper {
     }
     
     public synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
-        PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
-    	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-    	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-        ResultSet rs = stm.executeQuery();
-        if (rs.next()) {
-        	long count = rs.getLong(1);
-        	Timestamp tMax = rs.getTimestamp(2);
-        	Timestamp tMin = rs.getTimestamp(3);
-        	if (tMax!=null && tMin!=null) {
-	        	return new Range(tMax, tMin, count);
-        	}
-        }
+    	if (getConnection()!=null) {
+	        PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
+	    	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+	    	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+	        ResultSet rs = stm.executeQuery();
+	        if (rs.next()) {
+	        	long count = rs.getLong(1);
+	        	Timestamp tMax = rs.getTimestamp(2);
+	        	Timestamp tMin = rs.getTimestamp(3);
+	        	if (tMax!=null && tMin!=null) {
+		        	return new Range(tMax, tMin, count);
+	        	}
+	        }
+    	} else {
+    		ServerLog.getLogger().Warning("Cannot create time range for {" + table + "} because connection is not established!");
+    	}
         return null;
     }
     
@@ -146,5 +167,29 @@ public class DBHelper {
         } else {
         	return null;
         }
+    }
+    
+    public void write(EventWriter writer, Event e) {
+    	write(writer, e, 0);
+    }
+
+    private void write(EventWriter writer, Event e, int count) {
+    	boolean retry = false;
+    	if (writer!=null && e!=null) {
+            try {
+                writer.write(e, getConnection());
+            } catch (Exception ex) {
+            	retry = true;
+                ServerLog.getLogger().Error("Cannot write {" + e + "} (" + count + ")!", ex);
+            }
+        }
+    	if (retry) {
+	    	count++;
+	    	if (count<3) {
+				if (reconnect()) {
+		    		write(writer, e, count);
+				}
+	    	}
+    	}
     }
 }

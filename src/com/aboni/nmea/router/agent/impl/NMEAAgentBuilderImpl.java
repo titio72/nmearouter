@@ -184,7 +184,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 
 	private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
-        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, stream, a.getName(), q, new DBStatsWriter());
+        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, stream, a.getName(), q, new DBMeteoWriter());
         return meteo;
     }
 

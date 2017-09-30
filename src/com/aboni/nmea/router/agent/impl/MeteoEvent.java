@@ -1,6 +1,7 @@
-package com.aboni.nmea.router.agent;
+package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.utils.Serie;
+import com.aboni.utils.db.Event;
 
 public class MeteoEvent implements Event {
 

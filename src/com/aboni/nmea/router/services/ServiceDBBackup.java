@@ -1,11 +1,9 @@
 package com.aboni.nmea.router.services;
 
-import java.sql.SQLException;
-
 import org.json.JSONObject;
 
-import com.aboni.utils.DBHelper;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
 
 public class ServiceDBBackup implements WebService {
 
@@ -31,9 +29,7 @@ public class ServiceDBBackup implements WebService {
             ServerLog.getLogger().Error("Error during db backup", e);
         } finally {
         	if (h!=null) {
-				try {
-					h.close();
-				} catch (SQLException e) {}
+				h.close();
         	}
         }
 	}

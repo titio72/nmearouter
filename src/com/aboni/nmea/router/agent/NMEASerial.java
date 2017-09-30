@@ -35,7 +35,7 @@ public class NMEASerial extends NMEAAgentImpl {
                         }
                     	if (buffer[i]==13) {
                 		    String s = new String(internalBuffer, 0, write);
-                    	    processSentence(s);
+                    	    processLine(s);
                     	    write = 0;
                         }
                     }
@@ -115,7 +115,7 @@ public class NMEASerial extends NMEAAgentImpl {
 		notify(e);
 	}
 
-	private void processSentence(String s) {
+	private void processLine(String s) {
 	    try {
             if (s.length()>0) {
                 Sentence sentence = SentenceFactory.getInstance().createParser(s);

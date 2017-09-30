@@ -15,7 +15,7 @@ public class TrackManager {
 	private static int SECOND = 1000;
 	private static int MINUTE = 60 * SECOND;
 	
-	private static final long STATIC_DEFAULT_PERIOD = 30 * MINUTE;
+	private static final long STATIC_DEFAULT_PERIOD = 10 * MINUTE;
 	private static final long DEFAULT_PERIOD = 30 * SECOND;
 	
 	private static final long STATIC_THRESHOLD_TIME = 15 * MINUTE; // if static for more than x minutes set anchor mode

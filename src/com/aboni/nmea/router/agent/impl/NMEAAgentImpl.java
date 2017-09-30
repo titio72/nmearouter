@@ -89,14 +89,15 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         active = false;
         if (qos!=null) { 
             if (qos.get("rmc2vtg")) {
-                getLogger().Info("QoS {RMC2VTG}");
+                getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
                 addProc(new NMEARMC2VTGProcessor());
             }
             if (qos.get("enrich_hdg")) {
-                getLogger().Info("QoS {ENRICH_HDG}");
+                getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");
                 addProc(new NMEAHDGFiller(cache));
             }
             if (qos.get("builtin")) {
+                getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
                 builtin = true;
             }
         }
@@ -140,12 +141,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	@Override
 	public void start() {
 		if (!active) {
-			getLogger().Info("Activating");
+			getLogger().Info("Activating agent {" + getName() + "}");
 			if (onActivate()) {
 				active = true;
 				notifyStatus();
 			} else {
-				getLogger().Error("Cannot activate agent");
+				getLogger().Error("Cannot activate agent {" + getName() + "}");
 			}
 		}
 	}
@@ -157,7 +158,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	@Override
 	public void stop() {
 		if (active) {
-			getLogger().Info("Active {no}");
+			getLogger().Info("Deactivating {" + getName() + "}");
 			onDeactivate();
 			active = false;
 			notifyStatus();

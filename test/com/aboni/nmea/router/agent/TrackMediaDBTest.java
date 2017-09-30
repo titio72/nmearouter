@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.agent.TrackManager.TrackPoint;
 import com.aboni.nmea.router.agent.impl.DBTrackWriter;
-import com.aboni.utils.DBHelper;
+import com.aboni.utils.db.DBHelper;
 
 public class TrackMediaDBTest {
 

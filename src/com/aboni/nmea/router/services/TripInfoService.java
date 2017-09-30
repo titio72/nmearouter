@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 
-import com.aboni.utils.DBHelper;
+import com.aboni.utils.db.DBHelper;
 
 public class TripInfoService implements WebService {
 

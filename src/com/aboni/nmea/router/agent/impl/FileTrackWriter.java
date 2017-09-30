@@ -12,14 +12,14 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.agent.TrackWriter;
 import com.aboni.utils.ServerLog;
 
-public class TrackMediaFile implements TrackWriter {
+public class FileTrackWriter implements TrackWriter {
 
     private DecimalFormat myFormatter = new DecimalFormat("#.0000000");
     private SimpleDateFormat tsFormatter;
     
     private String fileName;
     
-    public TrackMediaFile(String file) {
+    public FileTrackWriter(String file) {
         tsFormatter = new SimpleDateFormat("ddMMyy HHmmss.SSS");
         tsFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         fileName = file;
