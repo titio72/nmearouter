@@ -1,0 +1,199 @@
+package com.aboni.nmea.router.agent;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.utils.ServerLog;
+
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
+public class NMEASocketTargetNIO extends NMEAAgentImpl {
+
+	private int port;
+	private Selector selector;
+	private ServerSocketChannel serverSocket;
+	private boolean stopme;
+	private static final int DEFAULT_PORT = 8888;
+	private ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
+	private ByteBuffer readBuffer = ByteBuffer.allocate(16384);
+	private Set<SocketChannel> clients;
+	
+	public NMEASocketTargetNIO(NMEACache cache, NMEAStream stream, String name, int port, QOS q) {
+		super(cache, stream, name, q);
+		this.port = port;
+        setSourceTarget(true, true);
+        
+        clients = new HashSet<SocketChannel>();
+	}
+
+	public NMEASocketTargetNIO(NMEACache cache, NMEAStream stream, String name) {
+		this(cache, stream, name, DEFAULT_PORT, null);
+	}
+
+	public int getPort() {
+		return port;
+	}
+	
+	@Override
+	public String getDescription() {
+		return "TCP Port " + getPort();
+	}
+
+	private boolean isStopme() {
+		synchronized  (this) {
+			return stopme;
+		}
+	}
+	
+	private void setStopme(boolean b) {
+		synchronized (this) {
+			stopme = b;
+		}
+	}
+	
+	@Override
+	protected boolean onActivate() {
+		setStopme(false);
+		createServerSocket();
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+		        if (selector!=null && serverSocket!=null) {
+		        	while (!isStopme()) {
+		        		try {
+							selector.select();
+						} catch (IOException e) {
+	                		getLogger().Error("Unexpected exception", e);
+						}
+		        		if (selector.isOpen()) {
+				            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+				            while (iter.hasNext()) {
+				                SelectionKey ky = iter.next();
+				                if (ky.isAcceptable()) {
+				                	handleConnection();
+				                }
+				                if (ky.isReadable()) {
+				                	handleRead(ky);
+				                }
+				                iter.remove();
+				            }
+		        		}
+		        	}
+		        }
+			}
+
+			private void handleRead(SelectionKey ky) {
+				try {
+					SocketChannel client = (SocketChannel) ky.channel();
+					readBuffer.clear();
+					try {
+						int readBytes = client.read(readBuffer);
+						if (readBytes>2) {
+							String sentence = new String(readBuffer.array(), 0, readBytes).trim();
+							NMEASocketTargetNIO.this.notify(SentenceFactory.getInstance().createParser(sentence));
+						} else if (readBytes==0) {
+				    		handleDisconnection(client);
+						}
+					} catch (IOException e) {
+						handleDisconnection(client);
+					}
+				} catch (Exception ee) {
+					getLogger().Error("Error reading socket", ee);
+				}
+			}
+
+			private void handleDisconnection(SocketChannel client) {
+				try {
+					getLogger().Info("Disconnection {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
+					clients.remove(client);
+					client.close();
+				} catch (Exception e) {}
+			}
+
+			private void handleConnection() {
+				try {
+				    SocketChannel client = serverSocket.accept();
+				    client.configureBlocking(false);
+				    client.register(selector, SelectionKey.OP_READ);
+				    clients.add(client);
+					getLogger().Info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
+
+				} catch (Exception ee) {
+					getLogger().Error("Error accepting connection", ee);
+				}
+			}
+		});
+		t.setDaemon(true);
+		t.start();
+		return true;
+	}
+
+	@Override
+	protected void onDeactivate() {
+		setStopme(true);
+		try {
+			serverSocket.close();
+			selector.close();
+		} catch (IOException e) {
+			ServerLog.getLogger().Error("Cannot open port " + port +" Agent {" + getName() + "}");
+		}
+	}
+	
+	@Override
+	protected void doWithSentence(Sentence s, NMEAAgent src) {
+		synchronized (clients) {
+			if (!clients.isEmpty()) {
+				String output = getOutSentence(s);
+				writeBuffer.clear();
+				writeBuffer.put(output.getBytes());
+				writeBuffer.put("\r\n".getBytes());
+				int p = writeBuffer.position();
+				Iterator<SocketChannel> iter = clients.iterator();
+				while (iter.hasNext()) {
+					writeBuffer.position(0);
+					writeBuffer.limit(p);
+					try {
+						SocketChannel sc = iter.next();
+						int written = sc.write(writeBuffer);
+						if (written==0) {
+							ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "}" );
+						}
+					} catch (Exception e) {
+						ServerLog.getLogger().Error("Error sending {" + output + "} to client", e);
+					}
+				}
+			}
+		}
+	}
+	
+	protected String getOutSentence(Sentence s) {
+		return s.toSentence();
+	}
+	
+	private void createServerSocket() {
+		try {
+		    selector = Selector.open();
+		    getLogger().Info("Selector Open {" + selector.isOpen() + "} Agent {" + getName() + "}");
+		    serverSocket = ServerSocketChannel.open();
+		    InetSocketAddress hostAddress = new InetSocketAddress("localhost", getPort());
+		    serverSocket.bind(hostAddress);
+		    serverSocket.configureBlocking(false);
+		    int ops = serverSocket.validOps();
+		    serverSocket.register(selector, ops, null);
+		} catch (Exception e) {
+			getLogger().Error("Cannot open server socket", e);
+		}
+	}
+}

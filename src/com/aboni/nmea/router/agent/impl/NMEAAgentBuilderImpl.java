@@ -20,6 +20,7 @@ import com.aboni.nmea.router.agent.NMEASerial;
 import com.aboni.nmea.router.agent.NMEASimulatorSource;
 import com.aboni.nmea.router.agent.NMEASocketSource;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
+import com.aboni.nmea.router.agent.NMEASocketTargetNIO;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
 import com.aboni.nmea.router.agent.NMEATrackAgent;
 import com.aboni.nmea.router.agent.NMEAUDPTarget;
@@ -205,7 +206,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         if (s.getInout().equals(InOut.IN))
 			sock = new NMEASocketSource(cache, stream, name, server, port, q);
         else
-			sock = new NMEASocketTarget(cache, stream, name, port, q);
+			sock = new NMEASocketTargetNIO(cache, stream, name, port, q);
         
         return sock;
     }
