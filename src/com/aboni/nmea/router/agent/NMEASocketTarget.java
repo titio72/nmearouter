@@ -91,7 +91,7 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 				purgeClients(new ArrayList<SocketClient>(clients));
 			}
 		} catch (IOException e) {
-			ServerLog.getLogger().equals("Cannot open port " + port);
+			ServerLog.getLogger().Error("Cannot open port " + port);
 		}
 	}
 	
@@ -119,9 +119,7 @@ public class NMEASocketTarget extends NMEAAgentImpl {
 	}
 	
 	protected String getOutSentence(Sentence s) {
-		String s1 = s.toSentence();
-		return s1;
-		//return s1.substring(0, s1.length()-2);
+		return s.toSentence();
 	}
 	
 	private void purgeClients(Collection<SocketClient> purge) {

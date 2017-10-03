@@ -171,6 +171,7 @@
 	<xs:restriction base="xs:string">
 		<xs:enumeration value="IN" />
 		<xs:enumeration value="OUT" />
+		<xs:enumeration value="INOUT" />
 	</xs:restriction>
 </xs:simpleType>
 

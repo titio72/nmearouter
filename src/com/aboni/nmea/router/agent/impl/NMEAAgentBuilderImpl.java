@@ -16,8 +16,7 @@ import com.aboni.nmea.router.agent.NMEAConsoleTarget;
 import com.aboni.nmea.router.agent.NMEAGPXPlayerAgent;
 import com.aboni.nmea.router.agent.NMEAMWDSentenceCalculator;
 import com.aboni.nmea.router.agent.NMEAMeteoTarget;
-import com.aboni.nmea.router.agent.NMEASerialSourceJSSC;
-import com.aboni.nmea.router.agent.NMEASerialTargetJSSC;
+import com.aboni.nmea.router.agent.NMEASerial;
 import com.aboni.nmea.router.agent.NMEASimulatorSource;
 import com.aboni.nmea.router.agent.NMEASocketSource;
 import com.aboni.nmea.router.agent.NMEASocketTarget;
@@ -161,13 +160,15 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		String name = s.getName();
 		String portName = s.getDevice();
 		int speed = s.getBps();
-		NMEAAgent ser = null;
-		if (s.getInout().equals(InOut.IN))
-			ser = new NMEASerialSourceJSSC(cache, stream, name, portName, speed, q);
-		else 
-			ser = new NMEASerialTargetJSSC(cache, stream, name, portName, speed, q);
-
-		return ser;
+		boolean t, r;
+		switch (s.getInout()) {
+		case IN: r = true; t = false; break;
+		case OUT: r = false; t = true; break;
+		case INOUT: r = true; t = true; break;
+		default: r = false; t = false; break;
+		}
+		
+		return new NMEASerial(cache, stream, name, portName, speed, r, t, q);
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
@@ -218,7 +219,6 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		return track; 
 	}
     
-	
 	private NMEAAgent buildSimulator(SimulatorAgent s, QOS q) {
     	NMEAAgent sim = new NMEASimulatorSource(cache, stream, s.getName(), q);
     	return sim;

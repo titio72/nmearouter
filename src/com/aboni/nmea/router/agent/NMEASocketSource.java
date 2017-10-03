@@ -102,29 +102,6 @@ public class NMEASocketSource extends NMEAAgentImpl {
 		@Override
 		public void run() {
 			doRead();
-			/*while (!stop) {
-			    if (openSocket()) {
-                    String temp = "";
-    				while (!stop && iStream!=null) {
-    					try {
-    						int ch = iStream.read();
-    						if (ch>=0) {
-    						    if (ch==13 || ch==10) {
-    							    processSentence(temp);
-                                    temp = "";
-    							} else {
-    								temp += new String(new byte[] {(byte)ch});
-    							}
-    						} else {
-    		                    getLogger().Debug("Socket likely closed");
-    						}
-    					} catch (Exception e) {
-                            getLogger().Debug("Socket likely closed");
-    					}
-    				}
-    				closeIt();
-			    }
-			}*/
 		}
 	}
 	
@@ -181,6 +158,13 @@ public class NMEASocketSource extends NMEAAgentImpl {
 
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-        // do nothing - pure source
+    	try {
+    		synchronized (reader) {
+		    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
+		    	reader.socket.getOutputStream().write("\r".getBytes());
+    		}
+    	} catch (Exception e) {
+            getLogger().Info("Error sending data {" + e.getMessage() + "}");
+    	}
     }
 }

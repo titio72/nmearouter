@@ -32,7 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 public enum InOut {
 
     IN,
-    OUT;
+    OUT,
+	INOUT;
 
     public String value() {
         return name();

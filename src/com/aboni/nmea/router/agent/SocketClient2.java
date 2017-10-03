@@ -1,34 +1,28 @@
 package com.aboni.nmea.router.agent;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.aboni.utils.ServerLog;
 
-public class SocketClient implements Runnable {
+public class SocketClient2 implements Runnable {
 	
-	private Socket clientSocket;
-	private PrintWriter out;
+	private SocketChannel clientSocket;
 	private List<String> queue;
 	private boolean closed;
 	private static long counter;
 	private long id;
 	
-	public SocketClient(Socket socket) {
+	public SocketClient2(SocketChannel socket) throws IOException {
 		closed = false;
 		counter++;
 		id = counter;
-		ServerLog.getLogger().Info("New Client attached {" + id + "} {" + socket.getRemoteSocketAddress().toString() + "}");
+		ServerLog.getLogger().Info("New Client attached {" + id + "} {" + socket.getRemoteAddress().toString() + "}");
 		clientSocket = socket;
 		queue = new LinkedList<String>();
-	    try {
-			out = new PrintWriter(clientSocket.getOutputStream(), true);
-		} catch (IOException e) {
-			ServerLog.getLogger().Error("Error", e);
-		}
 	}
 	
 	
@@ -72,8 +66,12 @@ public class SocketClient implements Runnable {
 	}
 
 	private void doSentence(String sentence) {
-		out.println(sentence);
-		if (out.checkError()) {
+		try {
+			int written = clientSocket.write(ByteBuffer.wrap((sentence + "\r\n").getBytes()));
+			if (written==0) {
+				ServerLog.getLogger().Warning("Couldn't write {" + sentence + "} to {" + id + "}" );
+			}
+		} catch (Exception e) {
 			doClose();
 		}
 	}

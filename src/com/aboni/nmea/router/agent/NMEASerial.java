@@ -49,41 +49,49 @@ public class NMEASerial extends NMEAAgentImpl {
 	private String portName;
 	private int speed;
 	private SerialPort port;
+	private boolean receive;
+	private boolean trasmit;
 	
-	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed) {
-		this(cache, stream, name, portName, speed, null);
+	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed, boolean rec, boolean tran) {
+		this(cache, stream, name, portName, speed, rec, tran, null);
 	}
 	
-	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed, QOS qos) {
+	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed, boolean rec, boolean tran, QOS qos) {
         super(cache, stream, name, qos);
         this.portName = portName;
         this.speed = speed;
-        setSourceTarget(true, true);
+        this.receive = rec;
+        this.trasmit = tran;
+        setSourceTarget(rec, tran);
 	}
 	
 	@Override
 	public String getDescription() {
-		return "Serial " + portName + " " + speed;
+		return "Serial " + portName + " " + speed + " (" + 
+					(receive?"R":"") + (trasmit?"T":"") + ")";
 	}
 	
 	@Override
 	public String toString() {
-		return super.toString() + " {Serial port " + portName + " " + speed + "}";
+		return super.toString() + " {Serial port " + portName + " " + speed + " " + (receive?"R":"") + (trasmit?"T":"") + "}";
 	}
 	
 	@Override
 	protected boolean onActivate() {
 		if (port==null) {
 			try {
-				getLogger().Info("Creating Port {" + portName + "} Speed {" + speed + "}");
+				getLogger().Info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive?"R":"") + (trasmit?"T":"") + "}");
 				port = new SerialPort(portName);
 				if (port.openPort()) {
 
 					port.setParams(speed, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-					int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
-					port.setEventsMask(mask);
-					SerialListener l = new SerialListener();
-			        port.addEventListener(l);//Add SerialPortEventListener
+					
+					if (receive) {
+						int mask = SerialPort.MASK_RXCHAR;//Prepare mask
+						port.setEventsMask(mask);
+						SerialListener l = new SerialListener();
+				        port.addEventListener(l);//Add SerialPortEventListener
+					}
 					getLogger().Info("Port Opened");
 					return true;
 				} else {
@@ -129,10 +137,10 @@ public class NMEASerial extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
-		if (isStarted()) {
+		if (isStarted() && trasmit) {
 			try {
-				String toSend = s.toSentence() + "\r\n";
-				port.writeBytes(toSend.getBytes());
+				port.writeBytes(s.toSentence().getBytes());
+				port.writeBytes("\r\n".getBytes());
 			} catch (SerialPortException e) {
 				getLogger().Error("ERROR: cannot write on port " + portName, e);
 				stop();
