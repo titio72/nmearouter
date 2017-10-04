@@ -3,7 +3,6 @@ package com.aboni.nmea.router.agent;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -25,11 +24,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private int port;
 	private Selector selector;
 	private ServerSocketChannel serverSocket;
-	private boolean stopme;
 	private static final int DEFAULT_PORT = 8888;
-	private ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
-	private ByteBuffer readBuffer = ByteBuffer.allocate(16384);
-	private Set<SocketChannel> clients;
+	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
+	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
+	private final Set<SocketChannel> clients;
 	
 	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, boolean allowReceive, QOS q) {
 		super(cache, stream, name, q);
@@ -55,34 +53,21 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	public String getDescription() {
 		return "TCP Port " + getPort();
 	}
-
-	private boolean isStopme() {
-		synchronized  (this) {
-			return stopme;
-		}
-	}
-	
-	private void setStopme(boolean b) {
-		synchronized (this) {
-			stopme = b;
-		}
-	}
 	
 	@Override
 	protected boolean onActivate() {
-		setStopme(false);
 		createServerSocket();
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 		        if (selector!=null && serverSocket!=null) {
-		        	while (!isStopme()) {
-		        		try {
-							selector.select();
-						} catch (IOException e) {
-	                		getLogger().Error("Unexpected exception", e);
-						}
+		        	synchronized (clients) {
 		        		if (selector.isOpen()) {
+			        		try {
+								selector.select();
+							} catch (IOException e) {
+		                		getLogger().Error("Unexpected exception", e);
+							}
 				            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
 				            while (iter.hasNext()) {
 				                SelectionKey ky = iter.next();
@@ -94,7 +79,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				                }
 				                iter.remove();
 				            }
-		        		}
+			        	}
 		        	}
 		        }
 			}
@@ -147,12 +132,14 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
 	@Override
 	protected void onDeactivate() {
-		setStopme(true);
-		for (SocketChannel c: clients) {
-			try {c.close();} catch (Exception e) {}
+		synchronized (clients) {
+			for (SocketChannel c: clients) {
+				try {c.close();} catch (Exception e) {}
+			}
+			try {serverSocket.close();} catch (Exception e) {}
+			try {selector.close();} catch (Exception e) {}
+			clients.clear();
 		}
-		try {serverSocket.close();} catch (Exception e) {}
-		try {selector.close();} catch (Exception e) {}
 	}
 	
 	@Override
@@ -174,9 +161,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
 						if (written==0) {
 							ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "}" );
 						}
-					} catch (ClosedChannelException e) {
+					} catch (IOException e) {
 						try { 
-							getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} Agent {" + getName() + "}");
+							getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "
+									+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
 							sc.close(); 
 						} catch (IOException e1) {
 						}finally {
