@@ -7,7 +7,7 @@ import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAConsoleTarget;
 import com.aboni.nmea.router.agent.NMEAPlayer;
-import com.aboni.nmea.router.agent.NMEASocketTarget;
+import com.aboni.nmea.router.agent.NMEASocketServer;
 import com.google.inject.Injector;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
@@ -31,7 +31,7 @@ public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
 	public NMEARouterBuilder init() {
         router = injector.getInstance(NMEARouter.class);
         
-        NMEAAgent sock = new NMEASocketTarget(
+        NMEAAgent sock = new NMEASocketServer(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
         		"TCP", 1111, null);

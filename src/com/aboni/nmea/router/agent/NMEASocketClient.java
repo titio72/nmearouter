@@ -1,6 +1,8 @@
 package com.aboni.nmea.router.agent;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 import com.aboni.nmea.router.NMEACache;
@@ -10,7 +12,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public class NMEASocketSource extends NMEAAgentImpl {
+public class NMEASocketClient extends NMEAAgentImpl {
 	
 	private class SocketReader implements Runnable {
 
@@ -63,27 +65,16 @@ public class NMEASocketSource extends NMEAAgentImpl {
 		
 		private void doRead() {
 	    	StringBuffer b = new StringBuffer();
-
+	    	BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
 			while (!stop) {
 			    if (openSocket()) {
 			    	b.setLength(0);
                     boolean reset = false;
     				while (!stop && !reset) {
     					try {
-    						int ch = iStream.read();
-    						if (ch>=0) {
-    		                    //connected(true);
-    						    if (ch==13 || ch==10 || ch=='!' || ch=='$') {
-    						    	if (b.length()>0) {
-    						    		processSentence(b.toString());
-        						    	b.setLength(0);
-    						    	}
-    						    	if (ch=='!' || ch=='$') {
-        								b.append(new char[] {(char)ch});
-    						    	}
-    							} else {
-    								b.append(new char[] {(char)ch});
-    							}
+    						String line = reader.readLine();
+    						if (line!=null) {
+					    		processSentence(line);
     						} else {
     		                    getLogger().Debug("Socket likely closed");
     						    reset = true;
@@ -119,11 +110,11 @@ public class NMEASocketSource extends NMEAAgentImpl {
 	
 	private SocketReader reader;
 	
-	public NMEASocketSource(NMEACache cache, NMEAStream stream, String name, String server, int port) {
+	public NMEASocketClient(NMEACache cache, NMEAStream stream, String name, String server, int port) {
 	    this(cache, stream, name, server, port, null);
 	}
 	
-	public NMEASocketSource(NMEACache cache, NMEAStream stream, String name, String server, int port, QOS qos) {
+	public NMEASocketClient(NMEACache cache, NMEAStream stream, String name, String server, int port, QOS qos) {
         super(cache, stream, name, qos);
         setSourceTarget(true, false);
 		reader = new SocketReader(server, port);

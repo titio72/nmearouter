@@ -18,9 +18,8 @@ import com.aboni.nmea.router.agent.NMEAMWDSentenceCalculator;
 import com.aboni.nmea.router.agent.NMEAMeteoTarget;
 import com.aboni.nmea.router.agent.NMEASerial;
 import com.aboni.nmea.router.agent.NMEASimulatorSource;
-import com.aboni.nmea.router.agent.NMEASocketSource;
-import com.aboni.nmea.router.agent.NMEASocketTarget;
-import com.aboni.nmea.router.agent.NMEASocketTargetNIO;
+import com.aboni.nmea.router.agent.NMEASocketClient;
+import com.aboni.nmea.router.agent.NMEASocketServer;
 import com.aboni.nmea.router.agent.NMEASourceSensor;
 import com.aboni.nmea.router.agent.NMEATrackAgent;
 import com.aboni.nmea.router.agent.NMEAUDPTarget;
@@ -29,7 +28,6 @@ import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
 import com.aboni.nmea.router.conf.FilterSet;
-import com.aboni.nmea.router.conf.InOut;
 import com.aboni.nmea.router.conf.JSONAgent;
 import com.aboni.nmea.router.conf.MWDAgent;
 import com.aboni.nmea.router.conf.MeteoAgent;
@@ -202,12 +200,16 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         String name = s.getName();
         String server = s.getHost();
         int port = s.getPort();
-		NMEAAgent sock = null;
-        if (s.getInout().equals(InOut.IN))
-			sock = new NMEASocketSource(cache, stream, name, server, port, q);
-        else
-			sock = new NMEASocketTargetNIO(cache, stream, name, port, q);
-        
+		NMEAAgent sock;
+		switch (s.getInout()) {
+		case IN:
+			sock = new NMEASocketClient(cache, stream, name, server, port, q); break;
+		case OUT:
+			sock = new NMEASocketServer(cache, stream, name, port, false, q); break;
+		case INOUT:
+			sock = new NMEASocketServer(cache, stream, name, port, true, q); break;
+		default: sock = null; break;
+		}
         return sock;
     }
 
