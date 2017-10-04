@@ -9,21 +9,13 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.agent.NMEA2JSONSocketTarget;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
-import com.aboni.nmea.router.agent.NMEAConsoleTarget;
-import com.aboni.nmea.router.agent.NMEAGPXPlayerAgent;
-import com.aboni.nmea.router.agent.NMEAMWDSentenceCalculator;
-import com.aboni.nmea.router.agent.NMEAMeteoTarget;
-import com.aboni.nmea.router.agent.NMEASerial;
-import com.aboni.nmea.router.agent.NMEASimulatorSource;
-import com.aboni.nmea.router.agent.NMEASocketClient;
-import com.aboni.nmea.router.agent.NMEASocketServer;
-import com.aboni.nmea.router.agent.NMEASourceSensor;
-import com.aboni.nmea.router.agent.NMEATrackAgent;
-import com.aboni.nmea.router.agent.NMEAUDPTarget;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.agent.impl.meteo.DBMeteoWriter;
+import com.aboni.nmea.router.agent.impl.meteo.NMEAMeteoTarget;
+import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
+import com.aboni.nmea.router.agent.impl.track.NMEATrackAgent;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
@@ -171,7 +163,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
-        NMEAUDPTarget a = new NMEAUDPTarget(cache, stream, conf.getName(), q, 1111);
+        NMEAUDPServer a = new NMEAUDPServer(cache, stream, conf.getName(), q, 1111);
         for (String s: conf.getTo()) {
         	a.addTarget(s);
         }
@@ -192,7 +184,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         String name = s.getName();
         int port = s.getPort();
 		NMEAAgent sock = null;
-		sock = new NMEA2JSONSocketTarget(cache, stream, name, port, q);
+		sock = new NMEASocketServerJSON(cache, stream, name, port, q);
         return sock;
 	}
 

@@ -3,7 +3,7 @@ package com.aboni.nmea.router.services;
 import org.json.JSONObject;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.agent.NMEASimulatorSource;
+import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
 
 public class SImulatorService implements WebService {
 

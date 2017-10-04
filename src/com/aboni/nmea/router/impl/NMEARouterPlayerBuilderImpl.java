@@ -5,9 +5,9 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEAConsoleTarget;
-import com.aboni.nmea.router.agent.NMEAPlayer;
-import com.aboni.nmea.router.agent.NMEASocketServer;
+import com.aboni.nmea.router.agent.impl.NMEAConsoleTarget;
+import com.aboni.nmea.router.agent.impl.NMEAPlayer;
+import com.aboni.nmea.router.agent.impl.NMEASocketServer;
 import com.google.inject.Injector;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
