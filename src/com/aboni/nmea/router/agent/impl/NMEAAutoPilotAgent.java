@@ -89,6 +89,12 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 	}
 	
 	@Override
+	protected boolean onActivate() {
+		return true;
+	}
+	
+	
+	@Override
 	public void enable() {
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");

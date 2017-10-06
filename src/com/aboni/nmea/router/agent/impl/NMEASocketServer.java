@@ -62,26 +62,24 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			@Override
 			public void run() {
 		        if (selector!=null && serverSocket!=null) {
-		        	synchronized (clients) {
-		        		if (selector.isOpen()) {
-			        		try {
-								selector.select();
-							} catch (IOException e) {
-		                		getLogger().Error("Unexpected exception", e);
-							}
-				            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
-				            while (iter.hasNext()) {
-				                SelectionKey ky = iter.next();
-				                if (ky.isAcceptable()) {
-				                	handleConnection();
-				                }
-				                if (ky.isReadable()) {
-				                	handleRead(ky);
-				                }
-				                iter.remove();
-				            }
-			        	}
-		        	}
+		        	while (selector.isOpen()) {
+		        		try {
+							selector.select();
+						} catch (IOException e) {
+	                		getLogger().Error("Unexpected exception", e);
+						}
+			            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+			            while (iter.hasNext()) {
+			                SelectionKey ky = iter.next();
+			                if (ky.isAcceptable()) {
+			                	handleConnection();
+			                }
+			                if (ky.isReadable()) {
+			                	handleRead(ky);
+			                }
+			                iter.remove();
+			            }
+	        		}
 		        }
 			}
 		});
@@ -113,9 +111,13 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private void handleDisconnection(SocketChannel client) {
 		try {
 			getLogger().Info("Disconnection {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
-			clients.remove(client);
+			synchronized (clients) {
+				clients.remove(client);
+			}
 			client.close();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void handleConnection() {
@@ -123,7 +125,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    SocketChannel client = serverSocket.accept();
 		    client.configureBlocking(false);
 		    client.register(selector, SelectionKey.OP_READ);
-		    clients.add(client);
+		    synchronized (clients) {
+			    clients.add(client);
+			}
 			getLogger().Info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
 
 		} catch (Exception ee) {
@@ -188,7 +192,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    selector = Selector.open();
 		    getLogger().Info("Selector Open {" + selector.isOpen() + "} Agent {" + getName() + "}");
 		    serverSocket = ServerSocketChannel.open();
-		    InetSocketAddress hostAddress = new InetSocketAddress("localhost", getPort());
+		    InetSocketAddress hostAddress = new InetSocketAddress(getPort());
 		    serverSocket.bind(hostAddress);
 		    serverSocket.configureBlocking(false);
 		    int ops = serverSocket.validOps();

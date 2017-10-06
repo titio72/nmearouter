@@ -30,6 +30,7 @@ import net.sf.marineapi.nmea.sentence.MTASentence;
 import net.sf.marineapi.nmea.sentence.MTWSentence;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
+import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -322,6 +323,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	                        xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
 	                        xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));
                             NMEASimulatorSource.this.notify(xdr);
+                        }
+                        
+                        if (data._autoPilot) {
+                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser("$STALK,84,06,03,06,42,00,02,02,06*62");
+                        	NMEASimulatorSource.this.notify(stalk);
+
                         }
 					} catch (InterruptedException e) {
 						ServerLog.getLogger().Error("Error simulating", e);

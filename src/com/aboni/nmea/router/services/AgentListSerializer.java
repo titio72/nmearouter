@@ -20,7 +20,8 @@ public class AgentListSerializer {
 	public synchronized void dump(PrintWriter w, String message) throws IOException {
         w.println("{");
         w.println("\"message\":\""+ message + "\",");
-        w.println("\"agents\":[");        Collection<String> agentKeys = router.getAgents();
+        w.println("\"agents\":[");        
+        Collection<String> agentKeys = router.getAgents();
         dumpServices(agentKeys, w);
         w.println("]}");
 	}

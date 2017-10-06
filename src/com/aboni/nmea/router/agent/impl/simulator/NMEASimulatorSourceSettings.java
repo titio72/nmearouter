@@ -33,6 +33,7 @@ public class NMEASimulatorSourceSettings {
 	public boolean _xdrMeteoHum = true;
 	public boolean _xdrMeteoTmp = true;
 	public boolean _xdrGYR = true;
+	public boolean _autoPilot = false;
 	public double _speed = 5.7;
 	public double _wSpeed = 9.6;
 	public double _wDirection = 270;
@@ -79,6 +80,7 @@ public class NMEASimulatorSourceSettings {
 		 _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
 		 _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
 		 _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
+		 _autoPilot	= p.getProperty("simulate.autopilot", "0").equals("1");
 		 _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
 		 _xdrMeteo 		= p.getProperty("simulate.xdr.meteo", "0").equals("1");
 		 _xdrMeteoAtm 	= p.getProperty("simulate.xdr.meteo.atm", "0").equals("1");
