@@ -58,6 +58,11 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	@Override
 	protected boolean onActivate() {
 		createServerSocket();
+		startServer();
+		return true;
+	}
+
+	private void startServer() {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -73,8 +78,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			                SelectionKey ky = iter.next();
 			                if (ky.isAcceptable()) {
 			                	handleConnection();
-			                }
-			                if (ky.isReadable()) {
+			                } else if (ky.isReadable()) {
 			                	handleRead(ky);
 			                }
 			                iter.remove();
@@ -85,7 +89,6 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		});
 		t.setDaemon(true);
 		t.start();
-		return true;
 	}
 
 	private void handleRead(SelectionKey ky) {
@@ -141,9 +144,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			for (SocketChannel c: clients) {
 				try {c.close();} catch (Exception e) {}
 			}
+			clients.clear();
 			try {serverSocket.close();} catch (Exception e) {}
 			try {selector.close();} catch (Exception e) {}
-			clients.clear();
 		}
 	}
 	
@@ -158,29 +161,34 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				int p = writeBuffer.position();
 				Iterator<SocketChannel> iter = clients.iterator();
 				while (iter.hasNext()) {
-					writeBuffer.position(0);
-					writeBuffer.limit(p);
 					SocketChannel sc = iter.next();
-					try {
-						int written = sc.write(writeBuffer);
-						if (written==0) {
-							ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "}" );
-						}
-					} catch (IOException e) {
-						try { 
-							getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "
-									+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
-							sc.close(); 
-						} catch (IOException e1) {
-						}finally {
-							iter.remove();
-						}
-					} catch (Exception e) {
-						ServerLog.getLogger().Error("Error sending {" + output + "} to client", e);
+					if (!sendMessageToClient(output, p, sc)) {
+						iter.remove();
 					}
 				}
 			}
 		}
+	}
+
+	private boolean sendMessageToClient(String output, int p, SocketChannel sc) {
+		writeBuffer.position(0);
+		writeBuffer.limit(p);
+		try {
+			int written = sc.write(writeBuffer);
+			if (written==0) {
+				ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "}" );
+			}
+			return true;
+		} catch (IOException e) {
+			try { 
+				getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "
+						+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
+				sc.close(); 
+			} catch (IOException e1) {}
+		} catch (Exception e) {
+			ServerLog.getLogger().Error("Error sending {" + output + "} to client", e);
+		}
+		return false;
 	}
 	
 	protected String getOutSentence(Sentence s) {
