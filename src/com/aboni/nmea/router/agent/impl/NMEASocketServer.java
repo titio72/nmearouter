@@ -25,7 +25,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private int port;
 	private Selector selector;
 	private ServerSocketChannel serverSocket;
-	private static final int DEFAULT_PORT = 8888;
+	private static final int DEFAULT_PORT = 1111;
 	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
 	private final Set<SocketChannel> clients;
@@ -62,12 +62,18 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		return true;
 	}
 
+	private boolean isSelectorOpen() {
+		synchronized (selector) {
+			return selector.isOpen();
+		}
+	}
+	
 	private void startServer() {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 		        if (selector!=null && serverSocket!=null) {
-		        	while (selector.isOpen()) {
+		        	while (isSelectorOpen()) {
 		        		try {
 							selector.select();
 						} catch (IOException e) {
@@ -146,7 +152,11 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			}
 			clients.clear();
 			try {serverSocket.close();} catch (Exception e) {}
-			try {selector.close();} catch (Exception e) {}
+			try {
+				synchronized (selector) {
+					selector.close();
+				}
+			} catch (Exception e) {}
 		}
 	}
 	
