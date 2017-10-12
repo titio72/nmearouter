@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.aboni</groupId>
   <artifactId>NMEARouter</artifactId>
-  <version>0.1.5-SNAPSHOT</version>
+  <version>0.1.6-SNAPSHOT</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>

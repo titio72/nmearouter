@@ -8,15 +8,19 @@ import com.aboni.utils.db.EventWriter;
 public class DBTrackWriter implements TrackWriter {
 
     private DBHelper db;
-    private EventWriter ee;
+    private EventWriter primary;
+    private FileTrackWriter fallbackWriter;
     
     public DBTrackWriter() {
-    	ee = new DBTrackEventWriter();
+    	primary = new DBTrackEventWriter();
+    	fallbackWriter = new FileTrackWriter("track.err");
     }
     
     @Override
     public void write(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
-    	db.write(ee, new TrackEvent(p, anchor, dist, speed, maxSpeed, interval));
+    	if (!db.write(primary, new TrackEvent(p, anchor, dist, speed, maxSpeed, interval))) {
+    		fallbackWriter.write(p, anchor, dist, speed, maxSpeed, interval);
+    	}
     }
     
     @Override

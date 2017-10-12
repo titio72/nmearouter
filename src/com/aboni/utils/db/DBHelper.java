@@ -169,15 +169,16 @@ public class DBHelper {
         }
     }
     
-    public void write(EventWriter writer, Event e) {
-    	write(writer, e, 0);
+    public boolean write(EventWriter writer, Event e) {
+    	return write(writer, e, 0);
     }
 
-    private void write(EventWriter writer, Event e, int count) {
+    private boolean write(EventWriter writer, Event e, int count) {
     	boolean retry = false;
     	if (writer!=null && e!=null) {
             try {
                 writer.write(e, getConnection());
+                return true;
             } catch (Exception ex) {
             	retry = true;
                 ServerLog.getLogger().Error("Cannot write {" + e + "} (" + count + ")!", ex);
@@ -191,5 +192,6 @@ public class DBHelper {
 				}
 	    	}
     	}
+    	return false;
     }
 }
