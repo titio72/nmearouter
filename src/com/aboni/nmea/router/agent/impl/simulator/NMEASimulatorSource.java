@@ -326,7 +326,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         }
                         
                         if (data._autoPilot) {
-                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser("$STALK,84,06,03,06,42,00,02,02,06*62");
+                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser("$STALK,84,06,C4,B0,42,00,F5,02,06*13");
                         	NMEASimulatorSource.this.notify(stalk);
 
                         }
