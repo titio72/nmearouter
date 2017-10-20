@@ -16,6 +16,7 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
+import com.aboni.seatalk.Stalk84;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DBTSentence;
@@ -49,6 +50,8 @@ import net.sf.marineapi.nmea.util.Units;
 
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
+	private int headingAuto = Integer.MIN_VALUE;
+	
 	public static NMEASimulatorSource SIMULATOR;
     private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
 
@@ -326,9 +329,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         }
                         
                         if (data._autoPilot) {
-                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser("$STALK,84,06,C4,B0,42,00,F5,02,06*13");
+                        	Stalk84 s84 = new Stalk84(
+                        			(int)heading, 0, 
+                        			(headingAuto==Integer.MIN_VALUE)?0:headingAuto,
+                        			(headingAuto==Integer.MIN_VALUE)?Stalk84.STATUS.STATUS_STANDBY:Stalk84.STATUS.STATUS_STANDBY,
+                        			Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);				
+                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
                         	NMEASimulatorSource.this.notify(stalk);
-
                         }
 					} catch (InterruptedException e) {
 						ServerLog.getLogger().Error("Error simulating", e);
