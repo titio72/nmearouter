@@ -51,6 +51,7 @@ import net.sf.marineapi.nmea.util.Units;
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
 	private int headingAuto = Integer.MIN_VALUE;
+	private double heading;
 	
 	public static NMEASimulatorSource SIMULATOR;
     private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
@@ -61,7 +62,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name, QOS qos) {
 		super(cache, stream, name, qos);
-        setSourceTarget(true, false);
+        setSourceTarget(true, true);
         if (SIMULATOR!=null) throw new RuntimeException();
         else SIMULATOR = this;
 	}
@@ -146,7 +147,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
 						double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
 						double depth = round(10.0 + Math.sin(ph15m)*5.0, 1);
-						double heading = Utils.normalizeDegrees0_360(data._heading * Math.cos(ph1h) + r.nextDouble() * 3.0);
+						heading = Utils.normalizeDegrees0_360(data._heading + r.nextDouble() * 3.0);
 						double speed = round(data._speed * (1.0 + r.nextDouble()/10.0), 1);
 						
 						double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
@@ -329,13 +330,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         }
                         
                         if (data._autoPilot) {
-                        	Stalk84 s84 = new Stalk84(
-                        			(int)heading, 0, 
-                        			(headingAuto==Integer.MIN_VALUE)?0:headingAuto,
-                        			(headingAuto==Integer.MIN_VALUE)?Stalk84.STATUS.STATUS_STANDBY:Stalk84.STATUS.STATUS_STANDBY,
-                        			Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);				
-                        	STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
-                        	NMEASimulatorSource.this.notify(stalk);
+                        	sendAutopilotStatus();
                         }
 					} catch (InterruptedException e) {
 						ServerLog.getLogger().Error("Error simulating", e);
@@ -344,13 +339,74 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 				}
 				
 			}
+
+
 		}).start();
 
 			
 	}
-
+	
+	private void sendAutopilotStatus() {
+		Stalk84 s84 = new Stalk84(
+				(int)heading, (headingAuto==Integer.MIN_VALUE)?0:headingAuto, 0,
+				(headingAuto==Integer.MIN_VALUE)?Stalk84.STATUS.STATUS_STANDBY:Stalk84.STATUS.STATUS_AUTO,
+				Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);				
+		STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
+		NMEASimulatorSource.this.notify(stalk);
+	}
+	
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
+    	if (!source.equals(this) && s instanceof STALKSentence) {
+    		STALKSentence t = (STALKSentence)s;
+    		if (t.getCommand().equals("86")) {
+    			String[] p = t.getParameters();
+    			if (p[0].equals("21")) {
+    				if (p[1].equals("01") && p[2].equals("FE")) {
+    					if (headingAuto==Integer.MIN_VALUE) {
+    						headingAuto = (int)heading;
+    						sendAutopilotStatus();
+    					}
+    				} else if (p[1].equals("02") && p[2].equals("FD")) {
+    					if (headingAuto!=Integer.MIN_VALUE) {
+    						headingAuto = Integer.MIN_VALUE;
+    						sendAutopilotStatus();
+    					}
+    				}
+    			} else if (p[0].equals("11")) {
+    				if (p[1].equals("05") && p[2].equals("FA")) {
+    					if (headingAuto!=Integer.MIN_VALUE) {
+    						headingAuto -= 1;
+    						sendAutopilotStatus();
+    					}
+						data._heading -= 1;
+    				}
+    				else if (p[1].equals("06") && p[2].equals("F9")) {
+    					if (headingAuto!=Integer.MIN_VALUE) {
+    						headingAuto -= 10;
+    						sendAutopilotStatus();
+    					}
+						data._heading -= 10;
+    				}
+    				else if (p[1].equals("07") && p[2].equals("F8")) {
+    					if (headingAuto!=Integer.MIN_VALUE) {
+    						headingAuto += 1;
+    						sendAutopilotStatus();
+    					}
+						data._heading += 1;
+    				}
+    				else if (p[1].equals("08") && p[2].equals("F7")) {
+    					if (headingAuto!=Integer.MIN_VALUE) {
+    						headingAuto += 10;
+    						sendAutopilotStatus();
+    					}
+						data._heading += 10;
+    				}
+    			}
+    		}
+    			
+    	}
+    		
     }
 
 	public double getSpeed() {
