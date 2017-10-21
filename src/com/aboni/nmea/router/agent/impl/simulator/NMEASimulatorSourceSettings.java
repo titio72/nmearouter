@@ -41,7 +41,11 @@ public class NMEASimulatorSourceSettings {
 	public double _temp = 21.5;
 	public double _press = 1013;
 	public double _hum = 58;
-
+	public double _polarCoeff = 0.85;
+	public String _polars = "dufour35c.csv";
+	
+	public boolean _usePolars;
+	
 	public NMEASimulatorSourceSettings() {
 	}
 	
@@ -80,6 +84,7 @@ public class NMEASimulatorSourceSettings {
 		 _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
 		 _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
 		 _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
+		 _usePolars = p.getProperty("simulate.use.polars", "0").equals("1");  // use polars to calculate the speed
 		 _autoPilot	= p.getProperty("simulate.autopilot", "0").equals("1");
 		 _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
 		 _xdrMeteo 		= p.getProperty("simulate.xdr.meteo", "0").equals("1");
@@ -87,14 +92,17 @@ public class NMEASimulatorSourceSettings {
 		 _xdrMeteoHum 	= p.getProperty("simulate.xdr.meteo.hum", "0").equals("1");
 		 _xdrMeteoTmp 	= p.getProperty("simulate.xdr.meteo.tmp", "0").equals("1");
 		 _xdrGYR 		= p.getProperty("simulate.xdr.gyro", "0").equals("1");
-		
-		try { _speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9")); } catch (Exception e) {}
-		try { _wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1")); } catch (Exception e) {}
-		try { _wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "270")); } catch (Exception e) {}
-		try { _heading = Double.parseDouble(p.getProperty("simulate.heading", "354")); } catch (Exception e) {}
-		try { _press = Double.parseDouble(p.getProperty("simulate.pressure", "1013")); } catch (Exception e) {}
-		try { _temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception e) {}
-		try { _hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception e) {}
+
+		 _polars = p.getProperty("simulate.polars.file", "dufour35c.csv");
+		 
+		 try { _polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85")); } catch (Exception e) {}
+		 try { _speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9")); } catch (Exception e) {}
+		 try { _wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1")); } catch (Exception e) {}
+		 try { _wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "270")); } catch (Exception e) {}
+		 try { _heading = Double.parseDouble(p.getProperty("simulate.heading", "354")); } catch (Exception e) {}
+		 try { _press = Double.parseDouble(p.getProperty("simulate.pressure", "1013")); } catch (Exception e) {}
+		 try { _temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception e) {}
+		 try { _hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception e) {}
 	}
 	    
 }

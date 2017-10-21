@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
+import java.io.File;
+import java.io.FileReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Calendar;
@@ -8,7 +10,9 @@ import java.util.TimeZone;
 
 import com.aboni.geo.ApparentWind;
 import com.aboni.geo.NavSimulator;
+import com.aboni.misc.PolarTable;
 import com.aboni.misc.Utils;
+import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
@@ -51,7 +55,8 @@ import net.sf.marineapi.nmea.util.Units;
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
 	private int headingAuto = Integer.MIN_VALUE;
-	private double heading;
+	private double refHeading = Double.NaN;
+	private PolarTable polars;
 	
 	public static NMEASimulatorSource SIMULATOR;
     private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
@@ -65,6 +70,27 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
         setSourceTarget(true, true);
         if (SIMULATOR!=null) throw new RuntimeException();
         else SIMULATOR = this;
+        
+        polars = null;
+	}
+	
+	private String lastPolarFile;
+	
+	private void loadPolars() {
+		if (polars == null) {
+			polars = new PolarTable();
+		}
+        try {
+        	if (data._polars!=null) {
+        		if (!data._polars.equals(lastPolarFile)) {
+	        		File f = new File(Constants.CONF_DIR, data._polars);
+	        		polars.load(new FileReader(f));
+	        		lastPolarFile = data._polars;
+        		}
+        	}
+		} catch (Exception e) {
+			getLogger().Error("Cannot load polars", e);
+		}		
 	}
 	
 	@Override
@@ -96,11 +122,11 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
      */
    
 	public double getHeading() {
-		return data._heading;
+		return refHeading;
 	}
 
     public void setHeading(double _heading) {
-		this.data._heading = _heading;
+		this.refHeading = _heading;
 	}
 
     public double getwSpeed() {
@@ -142,19 +168,28 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 					try {
 						Thread.sleep(1000);
 						data.loadConf();
+						loadPolars();
 					
+						if (Double.isNaN(refHeading)) refHeading = data._heading;
+						
 						long newTS = System.currentTimeMillis();
 						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
 						double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
 						double depth = round(10.0 + Math.sin(ph15m)*5.0, 1);
-						heading = Utils.normalizeDegrees0_360(data._heading + r.nextDouble() * 3.0);
-						double speed = round(data._speed * (1.0 + r.nextDouble()/10.0), 1);
+						double hdg = Utils.normalizeDegrees0_360(refHeading + r.nextDouble() * 3.0);
 						
 						double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
 						double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0 + Math.cos(ph1h) * 15.0; 
-						
+
 						double tWSpeed = 		absoluteWindSpeed;
-						double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - heading);
+						double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - hdg);
+
+						double speed;
+						if (data._usePolars) {
+							speed = polars.getSpeed((int)tWDirection, (float)tWSpeed) * data._polarCoeff;
+						} else {
+							speed = round(data._speed * (1.0 + r.nextDouble()/10.0), 1);
+						}
 
 						ApparentWind aWind = new ApparentWind(speed, tWDirection, tWSpeed);
 						double aWSpeed = 		aWind.getApparentWindSpeed();
@@ -165,13 +200,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         double roll = round(new Random().nextDouble()*5, 1);
                         double pitch = round((new Random().nextDouble()*5) + 0, 1);
 
-                        if (lastTS!=0) pos = NavSimulator.calcNewLL(pos, heading, speed * (double)(newTS-lastTS) / 1000d / 60d / 60d);
+                        if (lastTS!=0) pos = NavSimulator.calcNewLL(pos, hdg, speed * (double)(newTS-lastTS) / 1000d / 60d / 60d);
 						lastTS = newTS;
 						
 						if (data._vhw) {
     						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
-                            s.setHeading(heading);
-                            s.setMagneticHeading(Utils.normalizeDegrees0_360(heading + r.nextDouble() * 1.5));
+                            s.setHeading(hdg);
+                            s.setMagneticHeading(hdg);
     						s.setSpeedKnots(speed);
     						s.setSpeedKmh(speed * 1.852);
     						NMEASimulatorSource.this.notify(s);
@@ -187,7 +222,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						
 						if (data._rmc) {
     						RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(id, SentenceId.RMC);
-    						rmc.setCourse(heading);
+    						rmc.setCourse(hdg);
     
     						rmc.setStatus(DataStatus.ACTIVE);
     
@@ -258,27 +293,27 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         
                         if (data._hdm) {
                             HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDM);
-                            hdm.setHeading(heading);
+                            hdm.setHeading(hdg);
                             NMEASimulatorSource.this.notify(hdm);
                         }
                         
                         if (data._hdt) {
                             HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDT);
-                            hdt.setHeading(heading);
+                            hdt.setHeading(hdg);
                             NMEASimulatorSource.this.notify(hdt);
                         }
                         
                         if (data._hdg) {
-                            HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
-                            hdg.setHeading(heading);
+                            HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
+                            hdgS.setHeading(hdg);
                             //hdg.setDeviation(0.0);
-                            NMEASimulatorSource.this.notify(hdg);
+                            NMEASimulatorSource.this.notify(hdgS);
                         }
                         
                         if (data._vtg) {
                             VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VTG);
-                            vtg.setMagneticCourse(heading);
-                            vtg.setTrueCourse(heading);
+                            vtg.setMagneticCourse(hdg);
+                            vtg.setTrueCourse(hdg);
                             vtg.setMode(FaaMode.AUTOMATIC);
                             vtg.setSpeedKnots(speed);
                             vtg.setSpeedKmh(speed * 1.852);
@@ -305,7 +340,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         
                         if (data._xdrGYR) {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	                        xdr.addMeasurement(new Measurement("A", heading, "D", "HEAD"));
+	                        xdr.addMeasurement(new Measurement("A", hdg, "D", "HEAD"));
 	                        xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
 	                        xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
                             NMEASimulatorSource.this.notify(xdr);
@@ -348,7 +383,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	private void sendAutopilotStatus() {
 		Stalk84 s84 = new Stalk84(
-				(int)heading, (headingAuto==Integer.MIN_VALUE)?0:headingAuto, 0,
+				(int)refHeading, (headingAuto==Integer.MIN_VALUE)?0:headingAuto, 0,
 				(headingAuto==Integer.MIN_VALUE)?Stalk84.STATUS.STATUS_STANDBY:Stalk84.STATUS.STATUS_AUTO,
 				Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);				
 		STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
@@ -364,7 +399,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     			if (p[0].equals("21")) {
     				if (p[1].equals("01") && p[2].equals("FE")) {
     					if (headingAuto==Integer.MIN_VALUE) {
-    						headingAuto = (int)heading;
+    						headingAuto = (int)refHeading;
     						sendAutopilotStatus();
     					}
     				} else if (p[1].equals("02") && p[2].equals("FD")) {
@@ -379,28 +414,28 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						headingAuto -= 1;
     						sendAutopilotStatus();
     					}
-						data._heading -= 1;
+						refHeading -= 1;
     				}
     				else if (p[1].equals("06") && p[2].equals("F9")) {
     					if (headingAuto!=Integer.MIN_VALUE) {
     						headingAuto -= 10;
     						sendAutopilotStatus();
     					}
-						data._heading -= 10;
+						refHeading -= 10;
     				}
     				else if (p[1].equals("07") && p[2].equals("F8")) {
     					if (headingAuto!=Integer.MIN_VALUE) {
     						headingAuto += 1;
     						sendAutopilotStatus();
     					}
-						data._heading += 1;
+						refHeading += 1;
     				}
     				else if (p[1].equals("08") && p[2].equals("F7")) {
     					if (headingAuto!=Integer.MIN_VALUE) {
     						headingAuto += 10;
     						sendAutopilotStatus();
     					}
-						data._heading += 10;
+						refHeading += 10;
     				}
     			}
     		}
