@@ -7,9 +7,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
@@ -28,14 +28,14 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private static final int DEFAULT_PORT = 1111;
 	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
-	private final Set<SocketChannel> clients;
+	private final Map<SocketChannel, String> clients;
 	
 	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, boolean allowReceive, QOS q) {
 		super(cache, stream, name, q);
 		this.port = port;
         setSourceTarget(allowReceive, true);
         
-        clients = new HashSet<SocketChannel>();
+        clients = new HashMap<>();
 	}
 	
 	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, QOS q) {
@@ -82,10 +82,12 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
 			            while (iter.hasNext()) {
 			                SelectionKey ky = iter.next();
-			                if (ky.isAcceptable()) {
-			                	handleConnection();
-			                } else if (ky.isReadable()) {
-			                	handleRead(ky);
+			                if (ky.isValid()) {
+				                if (ky.isAcceptable()) {
+				                	handleConnection();
+				                } else if (ky.isReadable()) {
+				                	handleRead(ky);
+				                }
 			                }
 			                iter.remove();
 			            }
@@ -119,7 +121,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
 	private void handleDisconnection(SocketChannel client) {
 		try {
-			getLogger().Info("Disconnection {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
+			getLogger().Info("Disconnection {" + clients.getOrDefault(client, "unknown") + "} Agent {" + getName() + "}");
 			synchronized (clients) {
 				clients.remove(client);
 			}
@@ -132,10 +134,11 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private void handleConnection() {
 		try {
 		    SocketChannel client = serverSocket.accept();
+		    	
 		    client.configureBlocking(false);
 		    client.register(selector, SelectionKey.OP_READ);
 		    synchronized (clients) {
-			    clients.add(client);
+			    clients.put(client, client.getRemoteAddress().toString());
 			}
 			getLogger().Info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
 
@@ -147,7 +150,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	@Override
 	protected void onDeactivate() {
 		synchronized (clients) {
-			for (SocketChannel c: clients) {
+			for (SocketChannel c: clients.keySet()) {
 				try {c.close();} catch (Exception e) {}
 			}
 			clients.clear();
@@ -169,7 +172,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				writeBuffer.put(output.getBytes());
 				writeBuffer.put("\r\n".getBytes());
 				int p = writeBuffer.position();
-				Iterator<SocketChannel> iter = clients.iterator();
+				Iterator<SocketChannel> iter = clients.keySet().iterator();
 				while (iter.hasNext()) {
 					SocketChannel sc = iter.next();
 					if (!sendMessageToClient(output, p, sc)) {
