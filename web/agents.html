@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Andrea Boni NMEARouter</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap.min.css?1" rel="stylesheet">
 <style>
 /* The Modal (background) */
 .modal {
@@ -19,6 +19,10 @@
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.darkb {
+	background-color: darkgray;
 }
 
 /* Modal Content */
@@ -123,8 +127,8 @@
 			else if (a.builtin=='false' && a.started=='true') a.color = "lightgreen";
 			else if (a.builtin=='true' && a.started=='false') a.color = "lightblue";
 			else a.color = "lightyellow";*/
-			if (a.started=='false') a.color = "#EEEEEE";
-			else a.color = "#CCCCFF";
+			if (a.started=='false') a.color = "#222222";
+			else a.color = "#114411";
 
 		}		
 	}
@@ -208,12 +212,12 @@
 							<td align="center">
 								<div ng-if="a.source=='true'">
 									<div ng-if="a.hasFilterIn=='true'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "in")'>
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
 			                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
 									<div ng-if="a.hasFilterIn=='false'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "in")'>
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
 			                        		<span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
@@ -222,12 +226,12 @@
 	                        <td align="center">
 		                        <div ng-if="a.target=='true'">
 									<div ng-if="a.hasFilterOut=='true'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "out")'>
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
 			                        		<span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
 									<div ng-if="a.hasFilterOut=='false'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick='showFilter(this, "out")'>
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
 			                        		<span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
@@ -236,12 +240,12 @@
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
 									<div ng-if="a.auto=='false'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSynAuto(this, 1)">
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 1)">
 			                        		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
 									<div ng-if="a.auto=='true'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSynAuto(this, 0)">
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 0)">
 			                        		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
@@ -250,12 +254,12 @@
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
 									<div ng-if="a.started=='false'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 1)">
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
 			                        		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
 									<div ng-if="a.started=='true'">
-			                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 0)">
+			                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
 			                        		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 			                        	</button>
 		                        	</div>
@@ -273,12 +277,12 @@
 							<td align="center">
 								<div ng-if="a.startStop=='true'">
 								<div ng-if="a.started=='false'">
-	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 1)">
+	                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
 	                        		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 	                        	</button>
 	                        	</div>
 								<div ng-if="a.started=='true'">
-	                        	<button name={{a.agent}} type="button" class="btn btn-xs" onclick="httpGetSyn(this, 0)">
+	                        	<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
 	                        		<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 	                        	</button>
 	                        	</div>
@@ -331,8 +335,8 @@
 						    <option>Whitelist</option>
 						  </select>
 						</div>
-						<button type="reset" class="btn btn-secondary" onClick="hideFilter()">Cancel</button>
-						<button type="submit" class="btn btn-primary" onClick="commitFilter()">Ok</button>
+						<button type="reset" class="btn darkb btn-secondary" onClick="hideFilter()">Cancel</button>
+						<button type="submit" class="btn darkb btn-primary" onClick="commitFilter()">Ok</button>
 					</form>
 				</div>
 		  	</div>
