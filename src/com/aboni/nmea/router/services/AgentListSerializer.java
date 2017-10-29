@@ -35,6 +35,8 @@ public class AgentListSerializer {
 		boolean auto = AgentStatusProvider.getAgentStatus().getStartMode(ag.getName())==STATUS.AUTO;
 		String outFilter = AgentStatusProvider.getAgentStatus().getFilterOutData(ag.getName());
 		String inFilter = AgentStatusProvider.getAgentStatus().getFilterInData(ag.getName());
+		outFilter = (outFilter!=null && outFilter.isEmpty())?null:outFilter;
+		inFilter = (inFilter!=null && inFilter.isEmpty())?null:inFilter;
 		
 		first = false;
 		w.println(

@@ -68,6 +68,24 @@ function fillDataset(caption, sr, attr, color, borderColor) {
 	return dataset;
 }
 
+function info() {
+	bootbox.alert({
+		message: 
+		"<p>NMEA Router v1.0</p>" +			
+		"<p>Andrea Boni</p>"
+	});
+}
+
+function backup() {
+	
+	var res = httpBackup();
+	if (res.result=="Ok") {
+		window.open("http://" + window.location.hostname + ":1112/" + res.file);
+	} else {
+		
+	}
+}
+
 function tripInfo(trip) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + 

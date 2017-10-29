@@ -20,6 +20,7 @@ import com.aboni.nmea.router.services.SpeedService;
 import com.aboni.nmea.router.services.StatusService;
 import com.aboni.nmea.router.services.TrackService;
 import com.aboni.nmea.router.services.TripInfoService;
+import com.aboni.nmea.router.services.TripStatService;
 import com.aboni.nmea.router.services.WebService;
 import com.aboni.nmea.router.services.WebServiceFactory;
 
@@ -61,6 +62,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new ChangeTripDescService();
         } else if (target.equals("/tripinfo")) {
         	s = new TripInfoService();
+        } else if (target.equals("/trips")) {
+        	s = new TripStatService();
         } else if (target.equals("/speed")) {
         	s = new SpeedService();
         } else if (target.equals("/backup")) {

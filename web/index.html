@@ -6,6 +6,11 @@
     <title>Andrea Boni NMEARouter</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
 	<style>
+
+	.panelTrip {
+		background-color: lightgray;
+		margin:20px 20px 20px 20px;
+	}
 	
 	.tile {
 		width:100%;
@@ -16,22 +21,32 @@
 	}
 	</style>
 </head>
-<body>
+<body ng-app="nmearouter">
 	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/angular.min.js"></script>
+	<script src="js/bootbox.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
-	<script src="js/nmearouter.js?1"></script>
+	<script src="js/nmearouter.js?3"></script>
 	<script>
-		function backup() {
 		
-			var res = httpBackup();
-			if (res.result=="Ok") {
-				window.open("http://" + window.location.hostname + ":1112/" + res.file);
-			} else {
-				
-			}
-		}
+	    var app = angular.module("nmearouter", []);
+
+	    var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/trips" , false);
+	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	    xmlHttp.send( null );
+	    var tripList = JSON.parse(xmlHttp.responseText).trips;
+	    var total = JSON.parse(xmlHttp.responseText).total;
+
+	    app.controller("myCtrl", function($scope) {
+			$scope.trips = tripList  
+			$scope.total = total;
+		});
+	   	
+
+		
 	</script>
-    <div id="nmearouter" class="container-fluid">
+    <div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
         <div class="row">
             <div class="col-lg-2 col-md-4 col-sm-6">
             	<button type="button" class="btn tile" 
@@ -51,10 +66,6 @@
 					<span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span><br>
 					Track</button>						
             </div>
-            <!-- div class="col-lg-2 col-md-4 col-sm-6">
-            	<button type="button" class="btn tile" 
-					onclick="window.open('meteo.html', '_self');">Meteo</button>			
-            </div-->
             <div class="col-lg-2 col-md-4 col-sm-6">
             	<button type="button" class="btn tile" 
 					onclick="backup();">
@@ -67,7 +78,53 @@
 					<span class="glyphicon glyphicon glyphicon-stop" aria-hidden="true"></span><br>
 					Shutdown</button>						
             </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+            	<button type="button" class="btn tile" 
+					onclick="info();">
+					<span class="glyphicon glyphicon glyphicon-info-sign" aria-hidden="true"></span><br>
+				Info</button>						
+            </div>
         </div>
+		<div class="row">
+            <div class="col-lg-12">
+           		<div class="panel" >
+           			<div class="panel-body">
+			            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+							<b>{{total.end}}</b>
+						</div>
+			            <div class="col-lg-5 col-md-5 col-sm-4 col-xs-12">
+						 	<b>Total</b>
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" style="text-align: right">
+							 <b>{{total.duration}}</b> 
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" style="text-align: right">
+							<b>{{total.distance}}NM</b>
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>
+		<div class="row" ng-repeat="t in trips">
+            <div class="col-lg-12">
+           		<div class="panel" >
+           			<div class="panel-body">
+			            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+							{{t.start}}
+						</div>
+			            <div class="col-lg-5 col-md-5 col-sm-4 col-xs-12">
+						 	{{t.description}}
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" style="text-align: right">
+							 {{t.duration}} 
+						</div>
+						<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" style="text-align: right">
+							{{t.distance}}NM
+						</div>
+					</div>
+				</div>
+			</div>			
+		</div>
 	</div>
 </body>
 </html>
