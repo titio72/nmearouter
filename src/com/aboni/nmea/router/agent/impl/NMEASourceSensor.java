@@ -286,7 +286,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	    XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 	    if (compassSensor!=null) {
 	        try {
-                double[] rot = compassSensor.getRotationDegrees();
+	        	double[] rot = compassSensor.getRotationDegrees();
+	        	double hd = compassSensor.getHeading();
+                xdr.addMeasurement(new Measurement("A", Math.round(hd), "D", "HEAD"));
                 xdr.addMeasurement(new Measurement("A", Math.round(rot[0]), "D", "ROLL"));
                 xdr.addMeasurement(new Measurement("A", Math.round(rot[1]), "D", "PITCH"));
 	        } catch (Exception e) {

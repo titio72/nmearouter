@@ -175,8 +175,9 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			for (Iterator<NMEAAgent> i = agents.values().iterator(); i.hasNext(); ) {
 				try {
-				    NMEATarget target = i.next().getTarget();        
-				    if (src.equals(target)) {
+				    NMEAAgent tgt = i.next();
+				    NMEATarget target = tgt.getTarget();        
+				    if (src.getName().equals(tgt.getName())) {
 				        // do nothing, skip routing messages to the originator
 				    } else if (target!=null) {
 				        target.pushSentence(s, src);

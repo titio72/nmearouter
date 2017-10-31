@@ -32,7 +32,7 @@ public class ServletResponseOutput implements ServiceOutput {
 	public void error(String msg) {
         r.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         try {
-			r.getWriter().write(msg);
+        	if (r.getWriter()!=null) r.getWriter().write(msg);
 		} catch (IOException e) {}
 	}
 
