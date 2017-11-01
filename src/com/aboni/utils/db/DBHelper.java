@@ -72,7 +72,8 @@ public class DBHelper {
     public boolean reconnect() {
     	try {
     		close();
-    		conn = DriverManager.getConnection(dburl, user, password);
+    		ServerLog.getLogger().Info("Establishing connection to DB {" + dburl + "}!");
+            conn = DriverManager.getConnection(dburl, user, password);
     		conn.setAutoCommit(autocommit);
     		return true;
     	} catch (Exception e) {
@@ -180,6 +181,7 @@ public class DBHelper {
                 writer.write(e, getConnection());
                 return true;
             } catch (Exception ex) {
+            	writer.reset();
             	retry = true;
                 ServerLog.getLogger().Error("Cannot write {" + e + "} (" + count + ")!", ex);
             }
