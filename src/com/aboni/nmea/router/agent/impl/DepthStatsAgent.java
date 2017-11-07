@@ -129,7 +129,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     
     @Override
     public boolean isUserCanStartAndStop() {
-    	return false;
+    	return true;
     }
     
 }

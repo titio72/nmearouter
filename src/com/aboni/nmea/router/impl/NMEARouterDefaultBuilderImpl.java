@@ -120,7 +120,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         NMEA2FileAgent dumper = new NMEA2FileAgent(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
-        		"nmea", q);
+        		"NMEALog", q);
         r.addAgent(dumper);
 	}
 
@@ -129,7 +129,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         DepthStatsAgent a = new DepthStatsAgent(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
-        		"DEPTH", q);
+        		"Depth", q);
         r.addAgent(a);
         a.start();
     }
@@ -140,7 +140,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	        PowerLedAgent pwrled = new PowerLedAgent(
 	        		injector.getInstance(NMEACache.class), 
 	        		injector.getInstance(NMEAStream.class), 
-	        		"PWRLED", q);
+	        		"PowerLed", q);
 	        r.addAgent(pwrled);
 	        pwrled.start();
     	}
@@ -161,7 +161,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         FanAgent fan = new FanAgent(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
-        		"FAN", q);
+        		"FanManager", q);
         r.addAgent(fan);
         fan.start();
     }
@@ -171,7 +171,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
-        		"gpstime", q);
+        		"GPSTime", q);
     	r.addAgent(gpstime);
     	gpstime.start();
 	}
