@@ -260,14 +260,11 @@ html, body {
 												aria-hidden="true"></span>
 										</button>
 									</td>
-									<td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}"
-										onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
+									<td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}" onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
 									<td>
-										<div style="float: left; white-space: nowrap;"
-											ng-repeat="d in t.dates">
-											<button name="{{d.ref}}" type="button" class="btn darkb btn-xs"
-												onclick="showDay(this)">{{d.day}}</button>
-											<button name="{{d.ref}}" type="button" class="btn darkb btn-xs"
+										<div style="float:left;" ng-repeat="d in t.dates">
+											<button name="{{d.ref}}" type="button" class="btn darkb btn-xs" style="width:65px; margin:3px;" onclick="showDay(this)">{{d.day}}</button>
+											<button ng-if="t.tripLabel==''" name="{{d.ref}}" type="button" class="btn darkb btn-xs"
 												onclick="askDeleteDay(this)">
 												<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 											</button>

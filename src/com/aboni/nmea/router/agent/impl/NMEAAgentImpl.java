@@ -290,4 +290,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     public boolean isUserCanStartAndStop() {
     	return true;
     }
+    
+    @Override
+    public String getType() { 
+    	return getClass().getSimpleName();
+    }
 }

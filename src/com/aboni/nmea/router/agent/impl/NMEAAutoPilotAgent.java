@@ -79,7 +79,12 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		super(cache, stream, name, qos);
 	}
 
-	@Override
+    @Override
+    public String getType() {
+    	return "SmartPilot";
+    }
+
+    @Override
 	public String getDescription() {
 		return "Raymarine SeaTalk autopilot driver";
 	}

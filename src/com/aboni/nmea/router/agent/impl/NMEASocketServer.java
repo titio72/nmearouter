@@ -50,9 +50,16 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		return port;
 	}
 	
+
+    @Override
+    public String getType() {
+    	return "TCP Server";
+    }
+
+	
 	@Override
 	public String getDescription() {
-		return "TCP Port " + getPort();
+		return "Port " + getPort();
 	}
 	
 	@Override

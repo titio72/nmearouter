@@ -42,7 +42,7 @@ public class AgentListSerializer {
 		w.println(
                 "{\"agent\":\"" + ag.getName() + "\", " + 
                 "\"description\":\"" + ag.getDescription() + "\", " + 
-                "\"type\":\"" + ag.getClass().getSimpleName() + "\", " + 
+                "\"type\":\"" + ag.getType() + "\", " + 
                 "\"started\":\"" + ag.isStarted() + "\", " + 
                 "\"source\":\"" + (ag.getSource()!=null) + "\", " + 
                 "\"target\":\"" + (ag.getTarget()!=null) + "\", " + 

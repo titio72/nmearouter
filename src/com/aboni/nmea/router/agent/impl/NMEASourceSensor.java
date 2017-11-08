@@ -67,6 +67,11 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     }
     
     @Override
+    public String getType() {
+    	return "Onboard Sensor";
+    }
+    
+    @Override
     public String getDescription() {
     	return 
     			"Temp(" + (tempSensor==null?"-":"*") + ") " + 

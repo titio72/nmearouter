@@ -120,7 +120,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         NMEA2FileAgent dumper = new NMEA2FileAgent(
         		injector.getInstance(NMEACache.class), 
         		injector.getInstance(NMEAStream.class), 
-        		"NMEALog", q);
+        		"Log", q);
         r.addAgent(dumper);
 	}
 

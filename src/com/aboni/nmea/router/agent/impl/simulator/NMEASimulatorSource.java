@@ -76,6 +76,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	private String lastPolarFile;
 	
+
+    @Override
+    public String getType() {
+    	return "Simulator";
+    }
+
 	private void loadPolars() {
 		if (polars == null) {
 			polars = new PolarTable();

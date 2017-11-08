@@ -65,7 +65,12 @@ public class NMEASerial extends NMEAAgentImpl {
         this.trasmit = tran;
         setSourceTarget(rec, tran);
 	}
-	
+
+    @Override
+    public String getType() {
+    	return "Serial in/out";
+    }
+
 	@Override
 	public String getDescription() {
 		return "Serial " + portName + " " + speed + " (" + 

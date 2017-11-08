@@ -4,6 +4,7 @@ import com.aboni.nmea.router.Startable;
 
 public interface NMEAAgent extends Startable {
 	
+	String getType();
 	String getName();
 	String getDescription();
 	

@@ -34,6 +34,31 @@
     width: 50%;
 }
 
+td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 5px
+}
+
+    $grid-breakpoints: (
+      // Extra small screen / phone
+      xs: 0,
+      // Small screen / phone
+      sm: 576px,
+      // Medium screen / tablet
+      md: 768px,
+      // Large screen / desktop
+      lg: 992px,
+      // Extra large screen / wide desktop
+      xl: 1200px
+    );
+    
+    $container-max-widths: (
+      sm: 540px,
+      md: 800px,
+      lg: 960px,
+      xl: 1140px
+    );  
 </style>
 
 </head>
@@ -41,7 +66,10 @@
 <script src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/angular.min.js"></script>
 <script type="text/javascript">
-    var app = angular.module("nmearouter", []);
+
+
+	
+	var app = angular.module("nmearouter", []);
 
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/agentsj" , false);
@@ -181,9 +209,20 @@
           <li class="breadcrumb-item"><a href="index.html">Home</a></li>
           <li class="breadcrumb-item active">Agents</li>
         </ol>
+
+        <div class="row"> 
+            <div class="col-lg-12"> 
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Message</h3>
+                    </div>
+                    <div class="panel-body"><em>{{message}}</em></div>
+                </div>
+            </div>
+        </div>
         
         <div class="row">
-            <div class="col-lg-3 col-sm-4" ng-repeat="a in agents" ng-if="a.builtin=='false'">
+            <div class="col-xl-2 col-lg-3 col-sm-4 col-xs-12" ng-repeat="a in agents" ng-if="a.builtin=='false'">
                 <div class="panel panel-primary">
                     <div class="panel-heading" style="background: {{a.color}}" >
                         <h2 class="panel-title">{{a.agent}}</h2>
@@ -191,10 +230,10 @@
                     <div class="panel-body" style="height: 200px">
                         <table width="100%">
                             <tr>
-                                <td style="padding: 5px" colspan="4"><b>{{a.type}}</b></td>
+                                <td colspan="4"><b>{{a.type}}</b></td>
                             </tr>
                             <tr>
-                                <td style="padding: 5px" align="center">
+                                <td align="center">
                                     <div ng-if="a.source=='true'">
                                        <div ng-if="a.hasFilterIn=='true'">
                                            <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
@@ -213,7 +252,7 @@
                                           </button>
                                     </div>
                                 </td>
-                                <td style="padding: 5px" align="center">
+                                <td align="center">
                                     <div ng-if="a.target=='true'">
                                         <div ng-if="a.hasFilterOut=='true'">
                                             <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
@@ -232,21 +271,21 @@
                                           </button>
                                     </div>                                    
                                 </td>
-                                <td style="padding: 5px" align="center">
+                                <td align="center">
                                     <div ng-if="a.startStop=='true'">
                                         <div ng-if="a.auto=='false'">
                                             <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 1)">
-                                                <span class="glyphicon glyphicon-remove" aria-hidden="true"> Auto</span>
+                                                <span class="glyphicon glyphicon-pushpin" aria-hidden="true" />
                                             </button>
                                         </div>
                                         <div ng-if="a.auto=='true'">
                                             <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 0)">
-                                                <span class="glyphicon glyphicon-ok" aria-hidden="true">Auto </span>
+                                                <span class="glyphicon glyphicon-pushpin" style="color:blue" aria-hidden="true"/>
                                             </button>
                                         </div>
                                     </div>
                                 </td>
-                                <td style="padding: 5px" align="center">
+                                <td align="center">
                                     <div ng-if="a.startStop=='true'">
                                         <div ng-if="a.started=='false'">
                                             <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
@@ -255,14 +294,14 @@
                                         </div>
                                         <div ng-if="a.started=='true'">
                                             <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
-                                                <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+                                                <span class="glyphicon glyphicon-stop" style="color:blue" aria-hidden="true"></span>
                                             </button>
                                         </div>
                                     </div>
                                 </td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px" colspan="4">{{a.description}}</td>
+                            <td colspan="4">{{a.description}}</td>
                           </tr>
                        </table>
                     </div>
@@ -271,21 +310,21 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-3 col-sm-4" ng-repeat="a in agents" ng-if="a.builtin=='true'">
+            <div class="col-lg-3 col-sm-6 col-xs-12" ng-repeat="a in agents" ng-if="a.builtin=='true'">
                 <div class="panel panel-primary">
                     <div class="panel-heading" style="background: {{a.color}}" >
-                        <h2 class="panel-title"><span class="glyphicon glyphicon-wrench"></span> {{a.agent}}</h2>
+                        <h2 class="panel-title"><span class="glyphicon glyphicon-cog"></span> <i>{{a.agent}}</i></h2>
                     </div>
                     <div class="panel-body" style="height: 100px">
                         <table width="100%">
                             <tr>
-                                <td style="padding: 5px" colspan="4"><b>{{a.type}}</b></td>
+                                <td colspan="4"><b>{{a.type}}</b></td>
                             </tr>
                             <tr>
-                                <td style="padding: 5px" width="25%" align="center">&nbsp;</td>
-                                <td style="padding: 5px" width="25%" align="center">&nbsp;</td>
-                                <td style="padding: 5px" width="25%" align="center">&nbsp;</td>
-                                <td style="padding: 5px" width="25%" align="center">
+                                <td width="25%" align="center">&nbsp;</td>
+                                <td width="25%" align="center">&nbsp;</td>
+                                <td width="25%" align="center">&nbsp;</td>
+                                <td width="25%" align="center">
 	                                <div ng-if="a.startStop=='true'">
 	                                <div ng-if="a.started=='false'">
 	                                <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
@@ -300,130 +339,11 @@
 	                                </div>
 	                            </td>
                             </tr>
-                            
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- div class="row">      
-        <div class="table-responsive" >
-
-            <div class="panel panel-primary">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Agents</h3>
-                  </div>
-                <table id="agentGrid" class="table table-hover table-bordered">
-                    <thead class="thead-inverse">
-                        <tr>
-                            <th>Agent</th>
-                            <th>Type</th>
-                            <th>Details</th>
-                            <th>Source</th>
-                            <th>Target</th>
-                            <th>Auto</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='false'">
-                            <td>{{a.agent}}</td>
-                            <td>{{a.type}}</td>
-                            <td>{{a.description}}</td>
-                            <td align="center">
-                                <div ng-if="a.source=='true'">
-                                    <div ng-if="a.hasFilterIn=='true'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-                                            <span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                    <div ng-if="a.hasFilterIn=='false'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-                                            <span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                            <td align="center">
-                                <div ng-if="a.target=='true'">
-                                    <div ng-if="a.hasFilterOut=='true'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-                                            <span class="glyphicon glyphicon glyphicon-filter" style="color:blue" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                    <div ng-if="a.hasFilterOut=='false'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-                                            <span class="glyphicon glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                            <td align="center">
-                                <div ng-if="a.startStop=='true'">
-                                    <div ng-if="a.auto=='false'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 1)">
-                                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                    <div ng-if="a.auto=='true'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 0)">
-                                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                            <td align="center">
-                                <div ng-if="a.startStop=='true'">
-                                    <div ng-if="a.started=='false'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
-                                            <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                    <div ng-if="a.started=='true'">
-                                        <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
-                                            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr><td>&nbsp;</td></tr>
-                        <tr ng-repeat="a in agents" style="background: {{a.color}}" ng-if="a.builtin=='true'">
-                            <td>{{a.agent}}</td>
-                            <td>{{a.type}}</td>
-                            <td>{{a.description}}</td>
-                            <td align="center"><div ng-if="a.source=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-                            <td align="center"><div ng-if="a.target=='true'"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></div></td>
-                            <td align="center">&nbsp;</td>
-                            <td align="center">
-                                <div ng-if="a.startStop=='true'">
-                                <div ng-if="a.started=='false'">
-                                <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
-                                    <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-                                </button>
-                                </div>
-                                <div ng-if="a.started=='true'">
-                                <button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
-                                    <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
-                                </button>
-                                </div>
-                                </div>
-                            </td>
-                        </tr>                    
-                    </tbody>
-                </table>
-            </div>
-        </div-->
-        
-     <div class="row"> 
-        <div class="panel panel-primary">
-                 <div class="panel-heading">
-                   <h3 class="panel-title">Message</h3>
-                 </div>
-              <div class="panel-body"><em>{{message}}</em></div>
-          </div>
-        
-    </div>
     </div>
 
     <!-- The Modal -->

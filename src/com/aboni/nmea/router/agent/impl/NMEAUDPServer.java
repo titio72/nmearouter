@@ -30,9 +30,15 @@ public class NMEAUDPServer extends NMEAAgentImpl {
 	}
 
     @Override
+    public String getType() {
+    	return "UDP Server";
+    }
+	
+    @Override
     public String getDescription() {
-    	String res = "Port " + getPort() + " ";
+    	String res = "Port " + getPort() + "\\n[";
     	for (InetAddress a: targets) res += " " + a.getHostName();
+    	res += "]";
     	return res;
     }
     

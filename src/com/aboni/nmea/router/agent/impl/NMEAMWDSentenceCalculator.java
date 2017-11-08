@@ -49,8 +49,12 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return "";
+		return "Calculate the absolute wind direction from the true wind and the heading.";
 	}
 	
+	@Override
+	public String getType() {
+		return "MWD Calculator";
+	}
 
 }

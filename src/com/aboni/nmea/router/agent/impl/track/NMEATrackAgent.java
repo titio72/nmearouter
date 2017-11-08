@@ -150,9 +150,13 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     }
     
     @Override
+    public String getType() {
+    	return "Tracker";
+    }
+    
+    @Override
     public String getDescription() {
-    	String res = "Tracking " + listenSentence;
-    	return res;
+    	return "Tracking position from " + listenSentence;
     }
     
 

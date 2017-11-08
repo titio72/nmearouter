@@ -26,7 +26,12 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 	
 	@Override
 	public String getDescription() {
-		return "";
+		return "Console monitor";
 	}
+
+    @Override
+    public String getType() {
+    	return "Console";
+    }
 
 }
