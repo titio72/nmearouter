@@ -156,7 +156,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     
     @Override
     public String getDescription() {
-    	return "Tracking position from " + listenSentence;
+    	GeoPositionT pos = tracker.getLastTrackedPosition();
+    	return "Tracking position from " + listenSentence + ((pos==null)?"":(" " + pos));
     }
     
 
