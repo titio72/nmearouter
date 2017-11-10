@@ -34,14 +34,19 @@
 	width: 50%;
 }
 
+.agentPanel {
+    padding: 10px;
+}
+
 </style>
 
 </head>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/angular-sanitize.min.js"></script>
 <script type="text/javascript">
-	var app = angular.module("nmearouter", []);
+	var app = angular.module("nmearouter", ['ngSanitize']);
 
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/agentsj",
@@ -56,9 +61,12 @@
 	var filterDlg = document.getElementById('filterDialog');
 	var closeBtn = document.getElementById('closeFilterDialog');
 
-	app.controller("myCtrl", function($scope) {
+	app.controller("myCtrl", function($scope, $sce) {
 		$scope.agents = agentList
 		$scope.message = msg;
+		$scope.to_trusted = function(html_code) {
+		    return $sce.trustAsHtml(html_code);
+		}
 	});
 
 	function showFilter(a, inout) {
@@ -195,7 +203,7 @@
 			<li class="breadcrumb-item active">Agents</li>
 		</ol>
 
-		<div class="row">
+		<!-- div class="row">
 			<div class="col-lg-12">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
@@ -206,7 +214,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div -->
 
 		<div class="row">
 			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" ng-repeat="a in agents" ng-if="a.builtin=='false'">
@@ -221,7 +229,7 @@
 									<b>{{a.type}}</b>
 								</div>
 							</div>
-							<div class="row">
+							<div class="row agentPanel">
 								<div class="col-md-12">
 									<table style="width: 100%">
 										<tr>
@@ -302,7 +310,7 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-md-12">{{a.description}}</div>
+								<div class="col-md-12"><div ng-bind-html="to_trusted(a.description)"></div></div>
 							</div>
 						</div>
 					</div>

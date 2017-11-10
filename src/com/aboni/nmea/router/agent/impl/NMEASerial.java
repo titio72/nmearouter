@@ -73,7 +73,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return "Serial " + portName + " " + speed + " (" + 
+		return "Device " + portName + " " + speed + " (" + 
 					(receive?"R":"") + (trasmit?"T":"") + ")";
 	}
 	

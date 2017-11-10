@@ -11,6 +11,11 @@ public class NMEASocketServerJSON extends NMEASocketServer {
 
 	private NMEA2JSONb js;
 	
+	@Override
+	public String getType() {
+		return "TCP Json Server";
+	}
+	
 	public NMEASocketServerJSON(NMEACache cache, NMEAStream stream, String name, int port, QOS q) {
 		super(cache, stream, name, port, q);
 		setSourceTarget(true, true);

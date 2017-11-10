@@ -36,9 +36,8 @@ public class NMEAUDPServer extends NMEAAgentImpl {
 	
     @Override
     public String getDescription() {
-    	String res = "Port " + getPort() + "\\n[";
-    	for (InetAddress a: targets) res += " " + a.getHostName();
-    	res += "]";
+    	String res = "Port " + getPort() + "<br>";
+    	for (InetAddress a: targets) res += a.getHostName() + " ";
     	return res;
     }
     

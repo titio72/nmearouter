@@ -53,7 +53,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-    	return "TCP Server";
+    	return "TCP NMEA Server";
     }
 
 	
