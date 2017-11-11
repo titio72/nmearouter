@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.services;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.conf.db.AgentStatus;
+import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
+import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 
 public class AgentStatusService implements WebService {
 
@@ -16,74 +16,64 @@ public class AgentStatusService implements WebService {
 	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
-        response.setContentType("text/xml;charset=utf-8");
+        response.setContentType("application/json");
 
         try {
-            response.getWriter().println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-
             String msg = doActivate(config);
-            
-            response.getWriter().println("<RouterAgentStatus>");
-            response.getWriter().println("<Message>" + msg + "</Message>");
-            response.getWriter().println("<Agents>");
-
-            
-            Collection<String> agentKeys = router.getAgents();
-            for (Iterator<String> i = agentKeys.iterator(); i.hasNext(); ) {
-                String agentKey = i.next();
-                NMEAAgent ag = router.getAgent(agentKey);
-                if (ag!=null) {
-                    response.getWriter().println(
-                            "<Agent  name=\"" + ag.getName() + "\" " + 
-                                    "started=\"" + ag.isStarted() + "\" " + 
-                                    "source=\"" + (ag.getSource()!=null) + "\" " + 
-                                    "target=\"" + (ag.getTarget()!=null) + "\" " + 
-                                    "startStop=\"" + ag.isUserCanStartAndStop() + "\" " + 
-                                    "builtin=\"" + ag.isBuiltIn() + "\"/>");
-                }
-            }
-            
-            response.getWriter().println("</Agents>");
-            response.getWriter().println("</RouterAgentStatus>");
+            new AgentListSerializer(router).dump(response.getWriter(), msg);
+            response.ok();
         } catch (Exception e) {
-            response.setContentType("text/html;charset=utf-8");
             try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
-            response.error(e.getMessage());
+            response.ok();
         }
         
     }
-    
-	private String doActivate(ServiceConfig config) {
+
+    private String doActivate(ServiceConfig config) {
 		String msg = "";
 		String agent = config.getParameter("agent");
+		String auto = config.getParameter("auto");
+		String active = config.getParameter("active");
 		if (agent!=null) {
 			NMEAAgent a = router.getAgent(agent);
 			if (a!=null) {
-				if (a.isBuiltIn()) {
-					msg = "Cannot change activation status for built in agents";
-				} else {
-		        	String activate = config.getParameter("active");
-		        	if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
-		        		if (a.isStarted()) {
-		        			msg = "Agent '" + agent + "' alread started";
-		        		} else {
-		        			a.start();
-		        			msg = "Agent '" + agent + "' started";
-		        		}
-		        	} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
-		        		if (a.isStarted()) {
-		        			a.stop();
-		        			msg = "Agent '" + agent + "' stopped";
-		        		} else {
-		        			msg = "Agent '" + agent + "' not started";
-		        		}
-		        	} else {
-		        		msg = "Unknown status '" + activate + "'"; 
-		        	}
+				if (active!=null) {
+					msg = startStopService(a, active);
+				} 
+				
+				if (auto!=null) {
+					AgentStatus as = AgentStatusProvider.getAgentStatus();
+					as.setStartMode(agent, "1".equals(auto)?STATUS.AUTO:STATUS.MANUAL);
 				}
 			} else {
 				msg = "Unknown agent '" + agent + "'";
 			}
+		}
+		return msg;
+	}
+
+	private String startStopService(NMEAAgent a, String activate) {
+		String msg;
+		if (a.isUserCanStartAndStop()) {
+			if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
+				if (a.isStarted()) {
+					msg = "Agent '" + a.getName() + "' alread started";
+				} else {
+					a.start();
+					msg = "Agent '" + a.getName() + "' started";
+				}
+			} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
+				if (a.isStarted()) {
+					a.stop();
+					msg = "Agent '" + a.getName() + "' stopped";
+				} else {
+					msg = "Agent '" + a.getName() + "' not started";
+				}
+			} else {
+				msg = "Unknown status '" + activate + "'"; 
+			}
+		} else {
+			msg = "This agent does not support starting/stopping";
 		}
 		return msg;
 	}

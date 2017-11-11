@@ -162,11 +162,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			}
 			clients.clear();
 			try {serverSocket.close();} catch (Exception e) {}
-			try {
-				synchronized (selector) {
-					selector.close();
-				}
-			} catch (Exception e) {}
+			try {selector.close();} catch (Exception e) {}
 		}
 	}
 	

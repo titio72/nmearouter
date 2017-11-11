@@ -6,7 +6,6 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.services.AgentFilterService;
 import com.aboni.nmea.router.services.AgentStatusService;
-import com.aboni.nmea.router.services.AgentStatusServiceJSON;
 import com.aboni.nmea.router.services.AutoPilotService;
 import com.aboni.nmea.router.services.ChangeTripDescService;
 import com.aboni.nmea.router.services.CreateTripService;
@@ -40,10 +39,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
 		WebService s = null;
         if (target.equals("/track")) {
             s = new TrackService();
-        } else if (target.equals("/agents")) {
-            s = new AgentStatusService(router);
         } else if (target.equals("/agentsj")) {
-            s = new AgentStatusServiceJSON(router);
+            s = new AgentStatusService(router);
         } else if (target.equals("/sensor")) {
         	s = new StatusService(cache);
         } else if (target.equals("/shutdown")) {

@@ -118,19 +118,23 @@
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", "http://" + window.location.hostname
 				+ ":1112/filter" + inout + "?agent=" + agent + "&sentences="
-				+ sentences + "&type=" + tp, false);
+				+ sentences + "&type=" + tp, true);
 		xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+		xmlHttp.onreadystatechange = function() {
+		    if (xmlHttp.readyState == XMLHttpRequest.DONE) {
+		        var json = JSON.parse(xmlHttp.responseText);
+		        agentList = json.agents;
+		        var msg = json.message;
+		        var controllerElement = document.getElementById('nmearouter');
+		        var controllerScope = angular.element(controllerElement).scope();
+		        setColors(agentList);
+		        agentList.sort(compare);
+		        controllerScope.agents = agentList;
+		        controllerScope.message = msg;
+		        controllerScope.$evalAsync();
+		    }
+		}
 		xmlHttp.send(null);
-		var json = JSON.parse(xmlHttp.responseText);
-		agentList = json.agents;
-		var msg = json.message;
-		var controllerElement = document.getElementById('nmearouter');
-		var controllerScope = angular.element(controllerElement).scope();
-		setColors(agentList);
-		agentList.sort(compare);
-		controllerScope.agents = agentList;
-		controllerScope.message = msg;
-		controllerScope.$evalAsync();
 	}
 
 	function setColors(agentList) {
@@ -161,37 +165,46 @@
 	function httpGetSyn(a, active) {
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", "http://" + window.location.hostname
-				+ ":1112/agentsj?agent=" + a.name + "&active=" + active, false);
+				+ ":1112/agentsj?agent=" + a.name + "&active=" + active, true);
 		xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == XMLHttpRequest.DONE) {
+                var json = JSON.parse(xmlHttp.responseText);
+                agentList = json.agents;
+                var msg = json.message;
+                var controllerElement = document.getElementById('nmearouter');
+                var controllerScope = angular.element(controllerElement).scope();
+                setColors(agentList);
+                agentList.sort(compare);
+                controllerScope.agents = agentList;
+                controllerScope.message = msg;
+                controllerScope.$evalAsync();
+            }
+        }
+		
 		xmlHttp.send(null);
-		var json = JSON.parse(xmlHttp.responseText);
-		agentList = json.agents;
-		var msg = json.message;
-		var controllerElement = document.getElementById('nmearouter');
-		var controllerScope = angular.element(controllerElement).scope();
-		setColors(agentList);
-		agentList.sort(compare);
-		controllerScope.agents = agentList;
-		controllerScope.message = msg;
-		controllerScope.$evalAsync();
 	}
 
 	function httpGetSynAuto(a, auto) {
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", "http://" + window.location.hostname
-				+ ":1112/agentsj?agent=" + a.name + "&auto=" + auto, false);
+				+ ":1112/agentsj?agent=" + a.name + "&auto=" + auto, true);
 		xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == XMLHttpRequest.DONE) {
+                var json = JSON.parse(xmlHttp.responseText);
+                agentList = json.agents;
+                var msg = json.message;
+                var controllerElement = document.getElementById('nmearouter');
+                var controllerScope = angular.element(controllerElement).scope();
+                setColors(agentList);
+                agentList.sort(compare);
+                controllerScope.agents = agentList;
+                controllerScope.message = msg;
+                controllerScope.$evalAsync();
+            }
+        }
 		xmlHttp.send(null);
-		var json = JSON.parse(xmlHttp.responseText);
-		agentList = json.agents;
-		var msg = json.message;
-		var controllerElement = document.getElementById('nmearouter');
-		var controllerScope = angular.element(controllerElement).scope();
-		setColors(agentList);
-		agentList.sort(compare);
-		controllerScope.agents = agentList;
-		controllerScope.message = msg;
-		controllerScope.$evalAsync();
 	}
 </script>
 
