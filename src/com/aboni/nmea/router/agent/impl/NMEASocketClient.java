@@ -63,7 +63,6 @@ public class NMEASocketClient extends NMEAAgentImpl {
             }
 		}
 		
-		
 		private void doRead() {
 	    	StringBuffer b = new StringBuffer();
 	    	BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));

@@ -1,9 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.misc.MovingAverage;
+import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.utils.Sampler;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -29,6 +32,9 @@ public class NMEASerial extends NMEAAgentImpl {
 			if(event.isRXCHAR()){//If data is available
                 try {
                     byte buffer[] = port.readBytes();
+                    synchronized (avg) {
+                    	avg.setSample(System.currentTimeMillis(), buffer.length);
+                    }
                     for (int i = 0; i<buffer.length; i++) {
                         if (buffer[i]!=13 && buffer[i]!=10) {
                         	internalBuffer[write] = buffer[i];
@@ -52,6 +58,7 @@ public class NMEASerial extends NMEAAgentImpl {
 	private SerialPort port;
 	private boolean receive;
 	private boolean trasmit;
+	private MovingAverage avg = new SpeedMovingAverage(1000);
 	
 	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed, boolean rec, boolean tran) {
 		this(cache, stream, name, portName, speed, rec, tran, null);
@@ -66,6 +73,12 @@ public class NMEASerial extends NMEAAgentImpl {
         setSourceTarget(rec, tran);
 	}
 
+	private double getRate() {
+		synchronized (avg) {
+			return avg.getAvg();
+		}
+	}
+	
     @Override
     public String getType() {
     	return "Serial in/out";
@@ -73,8 +86,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return "Device " + portName + " " + speed + " (" + 
-					(receive?"R":"") + (trasmit?"T":"") + ")";
+		return String.format("Device %s %dbps (%s) %dbps", portName, speed, (receive?"R":"") + (trasmit?"X":""), getRate());
 	}
 	
 	@Override
