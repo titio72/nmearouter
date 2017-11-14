@@ -76,7 +76,7 @@ public class StartRouter {
              
                 ResourceHandler resource_handler = new ResourceHandler();
                 resource_handler.setWelcomeFiles(new String[]{ "index.html" });
-                resource_handler.setResourceBase("./web1");
+                resource_handler.setResourceBase("./web");
 
                 // Setup the basic application "context" for this application at "/"
                 // This is also known as the handler tree (in jetty speak)
