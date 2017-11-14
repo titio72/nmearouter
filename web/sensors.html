@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Andrea Boni NMEARouter</title>
-<link href="css/bootstrap.min.css?1" rel="stylesheet">
-<style>
-@media (min-width: @screen-lg-min) { ... }
-.panelText {
-font-family: monospace; 
-font-size: 18pt;
-}
-</style>
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+	<script src="js/nmearouter.js?f"></script>
+	<style>
+	@media (min-width: @screen-lg-min) { ... }
+	.panelText {
+	font-family: monospace; 
+	font-size: 18pt;
+	}
+	</style>
 </head>
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/angular.min.js"></script>
 <script type="text/javascript">
-    var app = angular.module("nmearouter", []);
+
     app.controller("myCtrl", function($scope) {
         $scope.V0 = { value: 0.0 };
         $scope.V1 = { value: 0.0 };
@@ -91,8 +88,8 @@ font-size: 18pt;
                     <div class="panel-body" style="height: 250px">
                         <div class="panelText">Svc {{V0.value | number:1}} V<br>
                         Eng {{V1.value | number:1}} V<br>
-                        <br>CPU {{CPUTemp.value | number:1}} Â°C
-                        <br>Eng {{EngineTemp.value | number:1}} Â°C</div>
+                        <br>CPU {{CPUTemp.value | number:1}} °C
+                        <br>Eng {{EngineTemp.value | number:1}} °C</div>
                     </div>
                 </div>
             </div>
@@ -103,9 +100,9 @@ font-size: 18pt;
                     </div>
                     <div class="panel-body" style="height: 250px">
                         <div class="panelText">
-                        Cab {{AirTemp_0.value | number:1}}Â°C {{Barometer_0.value | number:0}}<br>
-                        Eqp {{AirTemp_1.value | number:1}}Â°C {{Barometer_1.value | number:0}}<br>
-                        Ext {{ExtAirTemp.value | number:1}}Â°C<br>
+                        Cab {{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:0}}<br>
+                        Eqp {{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:0}}<br>
+                        Ext {{ExtAirTemp.value | number:1}}°C<br>
                         Hum {{Humidity_1.value | number:1}}%<br>
                         </div>
                     </div>
@@ -117,9 +114,9 @@ font-size: 18pt;
                         <h2 class="panel-title">Gyro</h2>
                     </div>
                     <div class="panel-body" style="height: 250px">
-                        <div class="panelText">Head: {{HEAD.value | number:1}}Â°</div>
-                        <div class="panelText">Roll: {{ROLL.value | number:1}}Â°</div>
-                        <div class="panelText">Pitch: {{PITCH.value | number:1}}Â°</div>
+                        <div class="panelText">Head: {{HEAD.value | number:1}}°</div>
+                        <div class="panelText">Roll: {{ROLL.value | number:1}}°</div>
+                        <div class="panelText">Pitch: {{PITCH.value | number:1}}°</div>
                     </div>
                 </div>
             </div>
@@ -134,7 +131,7 @@ font-size: 18pt;
                         </div>
                         <div class="panelText">
                         SOG {{rmc.SOG | number:1}}Kn<br>
-                        COG {{rmc.COG | number:1}}Â°
+                        COG {{rmc.COG | number:1}}°
                         </div>
                     </div>
                 </div>
@@ -147,7 +144,7 @@ font-size: 18pt;
                     <div class="panel-body" style="height: 250px">
                         <div class="panelText">
                         Speed {{vector.speed | number:1}}Kn<br>
-                        Head {{vector.true_angle | number:1}}Â°
+                        Head {{vector.true_angle | number:1}}°
                         </div>
                         <div class="panelText">
                         Depth {{depth.depth | number:1}}m<br>
@@ -164,7 +161,7 @@ font-size: 18pt;
                         <table width="100%">
                             <tr>
                                 <td width="50%" align="center">
-                                    <div class="panelText">{{hdg.angle}}Â°</div>
+                                    <div class="panelText">{{hdg.angle}}°</div>
                                 </td>
                                 <td width="50%" align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">
@@ -229,7 +226,7 @@ font-size: 18pt;
                             <tr>
                                 <td width="50%" align="center">
                                     <div class="panelText">{{wind.speed | number:1}}Kn</div>
-                                    <div class="panelText">{{wind.mag_angle}}Â°</div>
+                                    <div class="panelText">{{wind.mag_angle}}°</div>
                                 </td>
                                 <td width="50%" align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">
@@ -293,8 +290,8 @@ font-size: 18pt;
                         <table width="100%">
                             <tr>
                                 <td width="50%" align="center">
-                                    <p><div class="panelText">A {{wind_r.speed | number:1}}Kn<br>{{wind_r.angle}}Â°</div></p>
-                                    <p><div class="panelText">T {{wind_t.speed | number:1}}Kn<br>{{wind_t.angle}}Â°</div></p>
+                                    <p><div class="panelText">A {{wind_r.speed | number:1}}Kn<br>{{wind_r.angle}}°</div></p>
+                                    <p><div class="panelText">T {{wind_t.speed | number:1}}Kn<br>{{wind_t.angle}}°</div></p>
                                 </td>
                                 <td width="50%" align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">

@@ -1,67 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="ISO-8859-1">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Andrea Boni NMEARouter</title>
-<link href="css/bootstrap.min.css?1" rel="stylesheet">
-<link href="css/bootstrap-datepicker.min.css" rel="stylesheet">
-
-<style>
-/* Always set the map height explicitly to define the size of the div
-	   * element that contains the map. */
-#map {
-	height: 100%;
-}
-/* Optional: Makes the sample page fill the window. */
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-}
-.darkb {
-	background-color: darkgray;
-}
-
-.fill {
-	min-height: 100%
-}
-
-.DocumentList {
-	overflow-y: scroll;
-	height: 200px;
-	width: 100%;
-	padding: 0 15px;
-}
-
-.tripBack {
-	background: #eeeeee;
-	border-radius: 5px;
-	padding: 5px;
-}
-
-#mapToolbar {
-    position:absolute;
-    bottom:30px;
-    left:20px;
-    
-}
-
-</style>
-
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+    <link href="node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet">
+	<script src="js/nmearouter.js?f"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
+	
+	<style>
+	/* Always set the map height explicitly to define the size of the div
+		   * element that contains the map. */
+	#map {
+		height: 100%;
+	}
+	/* Optional: Makes the sample page fill the window. */
+	html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	.darkb {
+		background-color: darkgray;
+	}
+	
+	.fill {
+		min-height: 100%
+	}
+	
+	.DocumentList {
+		overflow-y: scroll;
+		height: 200px;
+		width: 100%;
+		padding: 0 15px;
+	}
+	
+	.tripBack {
+		background: #eeeeee;
+		border-radius: 5px;
+		padding: 5px;
+	}
+	
+	#mapToolbar {
+	    position:absolute;
+	    bottom:30px;
+	    left:20px;
+	    
+	}
+	
+	</style>
+	
 </head>
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/angular.min.js"></script>
-<script src="js/bootstrap-datepicker.min.js"></script>
-<script src="js/bootbox.min.js"></script>
-<script src="js/moment.min.js"></script>
-<script src="js/Chart.min.js"></script>
-<script src="js/nmearouter.js?15"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
 
 <script type="text/javascript">
-	var app = angular.module("nmearouter", []);
 
 	var tempChart = null;
 	var windChart = null;

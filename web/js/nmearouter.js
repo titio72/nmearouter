@@ -1,3 +1,17 @@
+loadJavascript("js/jquery.min.js");
+loadJavascript("js/angular.min.js");
+loadJavascript("js/angular-sanitize.min.js");
+loadJavascript("js/bootbox.min.js");
+loadJavascript("js/bootstrap.min.js");
+loadJavascript("js/moment.min.js");
+loadJavascript("js/Chart.min.js");
+
+loadStylesheet("css/bootstrap.min.css");
+loadStylesheet("css/bootstrap-datepicker.min.css");
+
+var app = angular.module("nmearouter", ['ngSanitize']);
+
+
 /*function httpLoadMeteo(tp, all) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?type=" + tp, false);
@@ -15,8 +29,6 @@ function httpLoadMeteoByDate(tp, all, dt) {
 	var json = JSON.parse(xmlHttp.responseText);
 	return getDataset(tp, json.serie, all, 1, all);
 }*/
-
-var app = angular.module("nmearouter", ['ngSanitize']);
 
 function httpGetAgents() {
 	var xmlHttp = new XMLHttpRequest();
@@ -57,9 +69,9 @@ function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 function getDataset(caption, sr, min, avg, max) {
 	var data = new Object();
 	data.datasets = [];
-	if (min>0) data.datasets.push(fillDataset(caption + "Min", sr, "vMin", "#00FF00", "#22FF22"));
-	if (avg>0) data.datasets.push(fillDataset(caption, 		sr, "v", 	"#555555", "#222222"));
-	if (max>0) data.datasets.push(fillDataset(caption + "Max", sr, "vMax", "#FF0000", "#FF2222"));
+	if (min>0) data.datasets.push(fillDataset(caption + "Min", 	sr, "vMin", "#00FF00", "#22FF22"));
+	if (avg>0) data.datasets.push(fillDataset(caption, 			sr, "v", 	"#555555", "#222222"));
+	if (max>0) data.datasets.push(fillDataset(caption + "Max", 	sr, "vMax", "#FF0000", "#FF2222"));
 	return data;
 }
 
@@ -88,7 +100,6 @@ function info() {
 }
 
 function backup() {
-	
 	var res = httpBackup();
 	if (res.result=="Ok") {
 		window.open("http://" + window.location.hostname + ":1112/" + res.file);
@@ -180,7 +191,7 @@ function httpGetTrack(dtF, dtT) {
 	return json.track.path;
 }
 
-function myRequire( url ) {
+function loadJavascript( url ) {
     var ajax = new XMLHttpRequest();
     ajax.open( 'GET', url, false ); // <-- the 'false' makes it synchronous
     ajax.onreadystatechange = function () {
@@ -197,4 +208,13 @@ function myRequire( url ) {
         }
     };
     ajax.send(null);
+}
+
+function loadStylesheet( url ) {
+	var link = document.createElement( "link" );
+	link.href = url;
+	link.type = "text/css";
+	link.rel = "stylesheet";
+	link.media = "screen,print";
+	document.getElementsByTagName( "head" )[0].appendChild( link );
 }

@@ -57,6 +57,27 @@
           </execution>
         </executions>
       </plugin>
+      
+      <plugin>
+	    <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>exec-maven-plugin</artifactId>
+	    <executions>
+	        <execution>
+	            <id>webdeps</id>
+	            <phase>package</phase>
+	            <goals>
+	                <goal>exec</goal>
+	            </goals>
+	            <configuration>
+	                <executable>${basedir}/copydeps.sh</executable>
+	            </configuration>
+	        </execution>
+	    </executions>
+	</plugin>
+      
+      
+      
+      
     </plugins>
 
   </build>

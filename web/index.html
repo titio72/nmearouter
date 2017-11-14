@@ -4,7 +4,8 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-    <link href="css/bootstrap.min.css?1" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<script src="js/nmearouter.js?f"></script>
 	<style>
 
 	.panelTrip {
@@ -23,15 +24,8 @@
 	</style>
 </head>
 <body ng-app="nmearouter">
-	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-	<script src="js/angular.min.js"></script>
-	<script src="js/bootbox.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="js/nmearouter.js?3"></script>
 	<script>
 		
-	    var app = angular.module("nmearouter", []);
-
 	    var xmlHttp = new XMLHttpRequest();
 	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/trips" , false);
 	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
