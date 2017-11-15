@@ -9,7 +9,23 @@ loadJavascript("js/Chart.min.js");
 loadStylesheet("css/bootstrap.min.css");
 loadStylesheet("css/bootstrap-datepicker.min.css");
 
-var app = angular.module("nmearouter", ['ngSanitize']);
+var app = angular.module("nmearouter", ['ngSanitize'])
+.filter('numberFixedLen', function () {
+    return function (n, zeroes, digits) {
+        var num = parseFloat(n, 10);
+        dig = parseInt(digits, 10);
+        zeroes = parseInt(zeroes, 10);
+        if (isNaN(num) || isNaN(digits) || isNaN(zeroes)) {
+            return n;
+        }
+        num = num.toFixed(digits);
+        num = ''+num;
+        while (num.length < zeroes) {
+            num = '0'+num;
+        }
+        return num;
+    };
+});
 
 function httpGetShutdown() {
 	bootbox.confirm({

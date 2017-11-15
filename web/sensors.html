@@ -4,7 +4,7 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?f"></script>
+	<script src="js/nmearouter.js?h"></script>
 	<style>
 	@media (min-width: @screen-lg-min) { ... }
 	
@@ -66,10 +66,22 @@
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             controllerScope['wind_r'] = msg;
+            if (msg.angle>180) {
+            	msg.angle = 360 - msg.angle;
+            	msg.tack = "Port"
+            } else {
+            	msg.tack = "Starboard"
+            }
             controllerScope.$evalAsync();
         } else if (msg.topic=='MWV_T') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
+            if (msg.angle>180) {
+            	msg.angle = 360 - msg.angle;
+            	msg.tack = "Port"
+            } else {
+            	msg.tack = "Starboard"
+            }
             controllerScope['wind_t'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='HDG') {
@@ -100,7 +112,7 @@
                         Eng {{V1.value | number:1}} V<br>
                         <br>CPU {{CPUTemp.value | number:1}} °C
                         <br>Eng {{EngineTemp.value | number:1}} °C
-                        <br>Rate {{TTY1_bps.value | number:0}} bps</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -172,7 +184,7 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextSmall">{{hdg.angle}}°</div>
+                                    <div class="panelTextSmall">{{hdg.angle|numberFixedLen:3:0}}°</div>
                                 </td>
                             </tr>
                             <tr>
@@ -238,7 +250,7 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle}}°</div>
+                                    <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}°</div>
                                 </td>
                             </tr>
                             <tr>
@@ -298,13 +310,15 @@
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        <h2 class="panel-title">App. Wind</h2>
+                        <h2 class="panel-title">Rel. Wind</h2>
                     </div>
                     <div class="panel-body panelRouter">
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.angle}}°<br>T {{wind_t.speed | number:1}}Kn {{wind_t.angle}}°</div>
+                                    <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.angle | numberFixedLen:3:0}}° {{wind_r.tack}}<br>
+                                    T {{wind_t.speed | number:1}}Kn {{wind_t.angle|numberFixedLen:3:0}}°<br>
+                                     </div>
                                 </td>
                             </tr>
                             <tr>
