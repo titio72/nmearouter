@@ -21,8 +21,13 @@
 	<MWDAgent name="MWD" active="false">
 		<qos>longthreshold</qos>
 	</MWDAgent>
-	<SerialAgent name="TTY1" device="/dev/ttyUSB1" bps="4800" inout="IN" active="false"/>
-	<SerialAgent name="TTY0" device="/dev/ttyUSB0" bps="4800" inout="OUT" active="false"/>
+	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
+		<qos>rmc2vtg;enrich_hdg</qos>
+	</SerialAgent>
+	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="OUT" active="false">
+		<qos>rmc2vtg;enrich_hdg</qos>
+	</SerialAgent>
+
 
 	<!-- 
 	<SensorAgent name="SENSOR" active="false"/>

@@ -11,24 +11,29 @@ loadStylesheet("css/bootstrap-datepicker.min.css");
 
 var app = angular.module("nmearouter", ['ngSanitize']);
 
-
-/*function httpLoadMeteo(tp, all) {
-	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?type=" + tp, false);
-	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	xmlHttp.send(null);
-	var json = JSON.parse(xmlHttp.responseText);
-	return getDataset(tp, json.serie, all, 1, all);
+function httpGetShutdown() {
+	bootbox.confirm({
+		message: "Do you really want to shutdown?",
+		buttons: {
+			confirm: {
+				label: 'Yes',
+				className: 'btn-success'
+			},
+			cancel: {
+				label: 'No',
+				className: 'btn-danger'
+			}
+		},
+		callback: function (result) {
+			if (result) {
+			    var xmlHttp = new XMLHttpRequest();
+			    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/shutdown", false);
+			    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+			    xmlHttp.send( null );
+			}
+		}
+	});
 }
-
-function httpLoadMeteoByDate(tp, all, dt) {
-	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt + "&type=" + tp, false);
-	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	xmlHttp.send(null);
-	var json = JSON.parse(xmlHttp.responseText);
-	return getDataset(tp, json.serie, all, 1, all);
-}*/
 
 function httpGetAgents() {
 	var xmlHttp = new XMLHttpRequest();

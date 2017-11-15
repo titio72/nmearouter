@@ -7,9 +7,19 @@
 	<script src="js/nmearouter.js?f"></script>
 	<style>
 	@media (min-width: @screen-lg-min) { ... }
-	.panelText {
-	font-family: monospace; 
-	font-size: 18pt;
+	
+    .panelText {
+    font-family: monospace; 
+    font-size: 18pt;
+    }
+    
+    .panelTextSmall {
+    font-family: monospace; 
+    font-size: 12pt;
+    }
+    
+	.panelRouter {
+	   height: 300px;
 	}
 	</style>
 </head>
@@ -80,26 +90,26 @@
         </ol>      
         
         <div class="row">
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Diag</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <div class="panelText">Svc {{V0.value | number:1}} V<br>
                         Eng {{V1.value | number:1}} V<br>
                         <br>CPU {{CPUTemp.value | number:1}} °C
-                        <br>Eng {{EngineTemp.value | number:1}} °C</div>
+                        <br>Eng {{EngineTemp.value | number:1}} °C
                         <br>Rate {{TTY1_bps.value | number:0}} bps</div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Meteo</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <div class="panelText">
                         Cab {{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:0}}<br>
                         Eqp {{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:0}}<br>
@@ -109,24 +119,24 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Gyro</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <div class="panelText">Head: {{HEAD.value | number:1}}°</div>
                         <div class="panelText">Roll: {{ROLL.value | number:1}}°</div>
                         <div class="panelText">Pitch: {{PITCH.value | number:1}}°</div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">GPS</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <div class="panelText">Lat {{rmc.latitude}}<br>
                         Lon {{rmc.longitude}}
                         </div>
@@ -137,12 +147,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Navi</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <div class="panelText">
                         Speed {{vector.speed | number:1}}Kn<br>
                         Head {{vector.true_angle | number:1}}°
@@ -153,18 +163,20 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Heading</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <table width="100%">
                             <tr>
-                                <td width="50%" align="center">
-                                    <div class="panelText">{{hdg.angle}}°</div>
+                                <td>
+                                    <div class="panelTextSmall">{{hdg.angle}}°</div>
                                 </td>
-                                <td width="50%" align="center">
+                            </tr>
+                            <tr>
+                                <td align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">
                                         <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
 
@@ -217,19 +229,20 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">Abs. Wind</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <table width="100%">
                             <tr>
-                                <td width="50%" align="center">
-                                    <div class="panelText">{{wind.speed | number:1}}Kn</div>
-                                    <div class="panelText">{{wind.mag_angle}}°</div>
+                                <td>
+                                    <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle}}°</div>
                                 </td>
-                                <td width="50%" align="center">
+                            </tr>
+                            <tr>
+                                <td align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">
                                         <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
 
@@ -282,19 +295,20 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-6">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h2 class="panel-title">App. Wind</h2>
                     </div>
-                    <div class="panel-body" style="height: 250px">
+                    <div class="panel-body panelRouter">
                         <table width="100%">
                             <tr>
-                                <td width="50%" align="center">
-                                    <p><div class="panelText">A {{wind_r.speed | number:1}}Kn<br>{{wind_r.angle}}°</div></p>
-                                    <p><div class="panelText">T {{wind_t.speed | number:1}}Kn<br>{{wind_t.angle}}°</div></p>
+                                <td>
+                                    <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.angle}}°<br>T {{wind_t.speed | number:1}}Kn {{wind_t.angle}}°</div>
                                 </td>
-                                <td width="50%" align="center">
+                            </tr>
+                            <tr>
+                                <td align="center">
                                     <svg width="210" height="210" style="display: block; margin: auto;">
                                         <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
                                         <path d="M95 95 L105 20 L105 105 Z"  fill="#A0A0A0" transform="rotate(45 105 105)" />

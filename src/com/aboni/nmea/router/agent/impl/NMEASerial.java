@@ -1,5 +1,8 @@
 package com.aboni.nmea.router.agent.impl;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -11,10 +14,6 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
-import net.sf.marineapi.nmea.util.Measurement;
 
 public class NMEASerial extends NMEAAgentImpl {
 	
@@ -56,13 +55,18 @@ public class NMEASerial extends NMEAAgentImpl {
 	
 	private long bps = 0;
 	private long bytes = 0;
+	private long bpsOut = 0;
+	private long bytesOut = 0;
 	private long resetTime = 0;
+
 	
 	private String portName;
 	private int speed;
 	private SerialPort port;
 	private boolean receive;
 	private boolean trasmit;
+	
+	private Executor sender;
 	
 	public NMEASerial(NMEACache cache, NMEAStream stream, String name, String portName, int speed, boolean rec, boolean tran) {
 		this(cache, stream, name, portName, speed, rec, tran, null);
@@ -75,6 +79,7 @@ public class NMEASerial extends NMEAAgentImpl {
         this.receive = rec;
         this.trasmit = tran;
         setSourceTarget(rec, tran);
+        sender = Executors.newSingleThreadExecutor();
 	}
 
     @Override
@@ -84,7 +89,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return String.format("Device %s %dbps (%s) %dbps", portName, speed, (receive?"R":"") + (trasmit?"X":""), bps * 8);
+		return String.format("Device %s %dbps (%s) In %dbps Out %dbps", portName, speed, (receive?"R":"") + (trasmit?"X":""), bps * 8, bpsOut * 8);
 	}
 	
 	@Override
@@ -96,7 +101,7 @@ public class NMEASerial extends NMEAAgentImpl {
 	protected boolean onActivate() {
 		if (port==null) {
 			try {
-				getLogger().Info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive?"R":"") + (trasmit?"T":"") + "}");
+				getLogger().Info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive?"R":"") + (trasmit?"X":"") + "}");
 				port = new SerialPort(portName);
 				if (port.openPort()) {
 
@@ -154,13 +159,24 @@ public class NMEASerial extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		if (isStarted() && trasmit) {
-			try {
-				port.writeBytes(s.toSentence().getBytes());
-				port.writeBytes("\r\n".getBytes());
-			} catch (SerialPortException e) {
-				getLogger().Error("ERROR: cannot write on port " + portName, e);
-				stop();
-			}
+			sender.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						String _s = s.toSentence() + "\n";
+						byte[] b = _s.getBytes();
+						port.writeBytes(b);
+						synchronized (NMEASerial.this) {
+							bytesOut += b.length;
+						}
+					} catch (SerialPortException e) {
+						getLogger().Error("ERROR: cannot write on port " + portName, e);
+						stop();
+					}
+				}
+				
+			});
 		}
 	}
 	
@@ -173,6 +189,8 @@ public class NMEASerial extends NMEAAgentImpl {
 			synchronized (this) {
 				bps = (long)(bytes / ((t-resetTime) / 1000.0));
 				bytes = 0;
+				bpsOut = (long)(bytesOut / ((t-resetTime) / 1000.0));
+				bytesOut = 0;
 			}
 			resetTime = t;
 		}
