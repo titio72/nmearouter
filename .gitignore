@@ -19,3 +19,4 @@
 /db_dumps/
 /deploy
 /deployProd
+/node_modules/

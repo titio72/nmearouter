@@ -33,7 +33,12 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
 	@Override
 	public String getDescription() {
-		return "";
+		return "Dump the NMEA stream to file";
+	}
+
+	@Override
+	public String getType() {
+		return "StreamDump";
 	}
 
 	@Override
@@ -60,6 +65,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 			BufferedWriter bw = new BufferedWriter(w);
 			for (NMEASentenceItem e: queue) {
 				bw.write(e.toString());
+				bw.write("\n");
 			}
 			queue.clear();
 			bw.flush();

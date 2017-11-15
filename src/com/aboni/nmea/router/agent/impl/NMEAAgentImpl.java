@@ -295,4 +295,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     public String getType() { 
     	return getClass().getSimpleName();
     }
+    
+    @Override
+    public void onTimer() {} 
 }

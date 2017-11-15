@@ -19,7 +19,9 @@ public class CPUTemp {
 	private static CPUTemp instance = new CPUTemp();
 	
 	private CPUTemp() {
-    	arm = (System.getProperty("os.arch").startsWith("arm"));
+		String name = System.getProperty("os.name");
+		String arch = System.getProperty("os.arch");
+    	arm = (arch.startsWith("arm") || name.contains("inux"));
 	}
 	
 	public static CPUTemp getInstance() {

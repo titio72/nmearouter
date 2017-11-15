@@ -1,8 +1,5 @@
 package com.aboni.nmea.router.agent.impl.system;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -16,8 +13,6 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class FanAgent extends NMEAAgentImpl {
 
-	private Timer timer;
-	private static final int TIMER = 1000;
 	private static final double FAN_THRESHOLD_ON = 55.0;
 	private static final double FAN_THRESHOLD_OFF = 52.0;
     private Fan fan;
@@ -25,7 +20,6 @@ public class FanAgent extends NMEAAgentImpl {
 	public FanAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
 		super(cache, stream, name, qos);
 		setSourceTarget(false, false);
-		timer = null;
 		fan = new Fan();
 	}
 	
@@ -41,24 +35,15 @@ public class FanAgent extends NMEAAgentImpl {
 
 	@Override
 	protected boolean onActivate() {
-		if (timer==null) {
-			timer = new Timer(true);
-			timer.scheduleAtFixedRate(new TimerTask() {
-				
-				@Override
-				public void run() {
-					onTimer();
-				}
-			}, 0, TIMER);
-		}
 		return true;
 	}
 
-	protected void onTimer() {
-		double temp = CPUTemp.getInstance().getTemp();
-		if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
-		else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
-
+	protected void onTimer1() {
+		if (isStarted()) {
+			double temp = CPUTemp.getInstance().getTemp();
+			if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
+			else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
+		}
 	}
 	
 	private double getThresholdOff() {
@@ -71,12 +56,6 @@ public class FanAgent extends NMEAAgentImpl {
 
 	@Override
 	protected void onDeactivate() {
-		if (timer!=null) {
-			fan(false);
-			timer.cancel();
-			timer.purge();
-		}
-		timer = null;
 	}
 	
 	private void fan(boolean on) {

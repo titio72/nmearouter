@@ -31,6 +31,11 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 	}
 
 	@Override
+	public String getType() {
+		return "GPSTime";
+	}
+	
+	@Override
     public String getDescription() {
     	return "Sync up system time with GPS UTC time feed";
     }

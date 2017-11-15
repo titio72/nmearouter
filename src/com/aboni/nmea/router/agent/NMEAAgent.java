@@ -16,6 +16,6 @@ public interface NMEAAgent extends Startable {
     
 	NMEASource getSource();
 	NMEATarget getTarget();
-
 	
+	void onTimer();
 }

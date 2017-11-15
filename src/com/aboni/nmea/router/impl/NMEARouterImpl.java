@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
@@ -25,6 +27,8 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private NMEAAgentStatusListener agentStatusListener;
 	private NMEASentenceListener sentenceListener;
+	
+	private Timer timer;
 	
 	private boolean started;
 	
@@ -68,6 +72,8 @@ public class NMEARouterImpl implements NMEARouter {
 	
 	private NMEACache cache;
 	private NMEAStream stream;
+
+	private static final int TIMER = 1000;
 	
 	@Inject
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
@@ -78,6 +84,19 @@ public class NMEARouterImpl implements NMEARouter {
 		started = false;
 		this.cache = cache;
 		this.stream = stream;
+		timer = null;
+	}
+
+	private void onTimer() {
+		synchronized (agents) {
+			for (Iterator<NMEAAgent> i = agents.values().iterator(); i.hasNext(); ) {
+				try {
+					i.next().onTimer();
+				} catch (Exception e) {
+					ServerLog.getLogger().Error("Error dispatching timer!", e);
+				}
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -88,6 +107,17 @@ public class NMEARouterImpl implements NMEARouter {
 		if (!started) {
 			started = true;
 			initProcessingThread();
+			
+			if (timer==null) {
+				timer = new Timer(true);
+				timer.scheduleAtFixedRate(new TimerTask() {
+					
+					@Override
+					public void run() {
+						onTimer();
+					}
+				}, 0, TIMER);
+			}
 		}
 	}
 
@@ -96,6 +126,10 @@ public class NMEARouterImpl implements NMEARouter {
 	 */
 	@Override
 	public synchronized void stop() {
+		
+		timer.cancel();
+		timer.purge();
+		
 		started = false;
 		if (processingThread!=null) {
 			processingThread = null;
