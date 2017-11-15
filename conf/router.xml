@@ -10,13 +10,18 @@
 		</FilterTarget>
 	</ConsoleAgent>
 	<MeteoAgent name="METEO" active="false"/>
-	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="false"/>
+	<TcpAgent name="TCPOUT" port="1111" inout="INOUT" active="false"/>
 	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
 		<to>192.168.2.255</to>
-		<to>192.168.2.130</to>
-		<to>192.168.2.151</to>
-		<to>192.168.2.103</to>
 	</UdpAgent>
+	<MWDAgent name="MWD" active="false">
+		<qos>longthreshold</qos>
+	</MWDAgent>
+    <SerialAgent name="T122" device="/dev/ttyUSB0" bps="4800" inout="INOUT" active="false">
+        <qos>rmc2vtg;enrich_hdg</qos>
+    </SerialAgent>
+    <TrackAgent name="TRACK" active="false"/>
+	
 	<!-- 
 	<SensorAgent name="SENSOR" active="false"/>
 	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
