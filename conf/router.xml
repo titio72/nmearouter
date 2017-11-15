@@ -10,13 +10,20 @@
 		</FilterTarget>
 	</ConsoleAgent>
 	<MeteoAgent name="METEO" active="false"/>
-	<TcpAgent name="TCPOUT" port="1111" inout="OUT" active="false"/>
+	<TcpAgent name="TCPOUT" port="1111" inout="INOUT" active="false"/>
 	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
 		<to>192.168.2.255</to>
 		<to>192.168.2.130</to>
 		<to>192.168.2.151</to>
 		<to>192.168.2.103</to>
 	</UdpAgent>
+	<TrackAgent name="TRACK" active="false"/>
+	<MWDAgent name="MWD" active="false">
+		<qos>longthreshold</qos>
+	</MWDAgent>
+	<SerialAgent name="TTY1" device="/dev/ttyUSB1" bps="4800" inout="IN" active="false"/>
+	<SerialAgent name="TTY0" device="/dev/ttyUSB0" bps="4800" inout="OUT" active="false"/>
+
 	<!-- 
 	<SensorAgent name="SENSOR" active="false"/>
 	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
@@ -33,9 +40,6 @@
 		<to>192.168.2.151</to>
 	</UdpAgent>
 	<JSONAgent name="JSON" port="1113" active="false"/>
-	<MWDAgent name="MWD" active="false">
-		<qos>longthreshold</qos>
-	</MWDAgent>
 	<SerialAgent name="SOUT" device="/dev/ttyUSB1" bps="4800" inout="OUT" active="false"/>
 	<GPXPlayerAgent name="GPX" active="false" file="x.gpx"/>
 	-->
