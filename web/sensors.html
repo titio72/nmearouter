@@ -4,10 +4,16 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?h"></script>
+	<script src="js/nmearouter.js?l"></script>
 	<style>
 	@media (min-width: @screen-lg-min) { ... }
 	
+    .panelTable {
+    width: 100%;
+    font-family: monospace; 
+    font-size: 17pt;
+    }
+    
     .panelText {
     font-family: monospace; 
     font-size: 18pt;
@@ -45,6 +51,7 @@
         } else if (msg.topic=='RMC') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
+            msg.s_dir = direction(msg.COG);
             controllerScope['rmc'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='DPT') {
@@ -55,11 +62,13 @@
         } else if (msg.topic=='VHW') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
+            msg.s_dir = direction(msg.mag_angle);
             controllerScope['vector'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='MWD') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
+            msg.s_dir = direction(msg.mag_angle);
             controllerScope['wind'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='MWV_R') {
@@ -87,6 +96,7 @@
         } else if (msg.topic=='HDG') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
+            msg.s_dir = direction(msg.angle);
             controllerScope['hdg'] = msg;
             controllerScope.$evalAsync();
         }
@@ -108,11 +118,14 @@
                         <h2 class="panel-title">Diag</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                        <div class="panelText">Svc {{V0.value | number:1}} V<br>
-                        Eng {{V1.value | number:1}} V<br>
-                        <br>CPU {{CPUTemp.value | number:1}} °C
-                        <br>Eng {{EngineTemp.value | number:1}} °C
-                        </div>
+                    	<table class="panelTable">
+                    		<tr><td>Battery Svc</td><td style="text-align: right">{{V0.value | number:1}} V</td></tr>
+                    		<tr><td>Battery Eng</td><td style="text-align: right">{{V1.value | number:1}} V</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+	                        <tr><td>CPU</td><td style="text-align: right">{{CPUTemp.value | number:1}} °C</td></tr>
+	                        <tr><td>Equipment</td><td style="text-align: right">{{AirTemp_1.value | number:1}}°C</td></tr>
+	                        <tr><td>Engine</td><td style="text-align: right">{{EngineTemp.value | number:1}} °C</td></tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -122,12 +135,13 @@
                         <h2 class="panel-title">Meteo</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                        <div class="panelText">
-                        Cab {{AirTemp_0.value | number:1}}°C {{Barometer_0.value | number:0}}<br>
-                        Eqp {{AirTemp_1.value | number:1}}°C {{Barometer_1.value | number:0}}<br>
-                        Ext {{ExtAirTemp.value | number:1}}°C<br>
-                        Hum {{Humidity_1.value | number:1}}%<br>
-                        </div>
+                        <table class="panelTable">
+	                        <tr><td>Cab Temp</td><td style="text-align: right">{{AirTemp_0.value | number:1}}°C</td></tr>
+	                        <tr><td>Ext Temp</td><td style="text-align: right">{{ExtAirTemp.value | number:1}}°C</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+	                        <tr><td>Press.</td><td style="text-align: right">{{Barometer_0.value | number:0}} MB</td></tr>
+	                        <tr><td>Humidity</td><td style="text-align: right">{{Humidity_1.value | number:1}}%</td></tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -137,9 +151,13 @@
                         <h2 class="panel-title">Gyro</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                        <div class="panelText">Head: {{HEAD.value | number:1}}°</div>
-                        <div class="panelText">Roll: {{ROLL.value | number:1}}°</div>
-                        <div class="panelText">Pitch: {{PITCH.value | number:1}}°</div>
+				       	<table class="panelTable">
+                    		<tr><td>Head</td><td style="text-align: right">{{HEAD.value | number:1}}°</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                        	<tr><td>Roll</td><td style="text-align: right">{{ROLL.value | number:1}}°</td></tr>
+                        	<tr><td>Pitch</td><td style="text-align: right">{{PITCH.value | number:1}}°</td></tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -149,13 +167,13 @@
                         <h2 class="panel-title">GPS</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                        <div class="panelText">Lat {{rmc.latitude}}<br>
-                        Lon {{rmc.longitude}}
-                        </div>
-                        <div class="panelText">
-                        SOG {{rmc.SOG | number:1}}Kn<br>
-                        COG {{rmc.COG | number:1}}°
-                        </div>
+                    	<table class="panelTable">
+                    		<tr><td>Lat</td><td style="text-align: right">{{rmc.latitude}}</td></tr>
+                    		<tr><td>Lon</td><td style="text-align: right">{{rmc.longitude}}</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                    		<tr><td>SOG</td><td style="text-align: right">{{rmc.SOG | number:1}} Kn</td></tr>
+                        	<tr><td>COG</td><td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}°</td></tr>
+                    	</table>
                     </div>
                 </div>
             </div>
@@ -165,13 +183,12 @@
                         <h2 class="panel-title">Navi</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                        <div class="panelText">
-                        Speed {{vector.speed | number:1}}Kn<br>
-                        Head {{vector.true_angle | number:1}}°
-                        </div>
-                        <div class="panelText">
-                        Depth {{depth.depth | number:1}}m<br>
-                        </div>
+                        <table class="panelTable">
+                        	<tr><td>Speed</td><td style="text-align: right">{{vector.speed | number:1}} Kn</td></tr>
+                        	<tr><td>Head</td><td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}°</td></tr>
+                        	<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                        	<tr><td>Depth</td><td style="text-align: right">{{depth.depth | number:1}} m</td></tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -184,7 +201,7 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextSmall">{{hdg.angle|numberFixedLen:3:0}}°</div>
+                                    <div class="panelTextSmall">{{hdg.angle|numberFixedLen:3:0}}° {{hdg.s_dir}}</div>
                                 </td>
                             </tr>
                             <tr>
@@ -250,7 +267,7 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}°</div>
+                                    <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}° {{wind.s_dir}}</div>
                                 </td>
                             </tr>
                             <tr>
