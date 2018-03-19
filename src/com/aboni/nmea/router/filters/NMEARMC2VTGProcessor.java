@@ -41,18 +41,16 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
     private NMEAMagnetic2TrueConverter m;
     
 	public NMEARMC2VTGProcessor() {
-	    m = new NMEAMagnetic2TrueConverter();
 	}
 
 	public NMEARMC2VTGProcessor(double year) {
-	    m = new NMEAMagnetic2TrueConverter(year);
 	}
 
 	@Override
 	public Sentence[] process(Sentence sentence, String src) {
 		try {
 			
-			if (sentence.getSentenceId().equals(SentenceId.RMC.toString())) {
+			if (sentence instanceof RMCSentence) {
 				RMCSentence rmc = (RMCSentence)sentence;
 				VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(sentence.getTalkerId(), SentenceId.VTG);
 				vtg.setMode(FaaMode.AUTOMATIC);

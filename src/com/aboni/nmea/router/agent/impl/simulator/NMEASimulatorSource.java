@@ -181,7 +181,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						long newTS = System.currentTimeMillis();
 						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
 						double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
-						double depth = round(10.0 + Math.sin(ph15m)*5.0, 1);
+						double depth = round(data._depth + Math.sin(ph15m) * data._depthRange, 1);
 						double hdg = Utils.normalizeDegrees0_360(refHeading + r.nextDouble() * 3.0);
 						
 						double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
@@ -206,7 +206,10 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         double roll = round(new Random().nextDouble()*5, 1);
                         double pitch = round((new Random().nextDouble()*5) + 0, 1);
 
-                        if (lastTS!=0) pos = NavSimulator.calcNewLL(pos, hdg, speed * (double)(newTS-lastTS) / 1000d / 60d / 60d);
+                        if (lastTS!=0) {
+                        	double dTime = (double)(newTS-lastTS) / 1000d / 60d / 60d;
+                        	pos = NavSimulator.calcNewLL(pos, hdg, speed * dTime);
+                        }
 						lastTS = newTS;
 						
 						if (data._vhw) {
@@ -255,6 +258,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						if (data._dpt) {
     						DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DPT);
     						d.setDepth(depth); 
+    						d.setOffset(data._depthOffset); 
     						NMEASimulatorSource.this.notify(d);
 						}
 						

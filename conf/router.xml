@@ -2,7 +2,7 @@
 <Router>
 	<Log level="INFO"/>
 	<SimulatorAgent name="SIM" active="false">
-	    <qos>rmc2vtg;enrich_hdg</qos>
+	    <qos>kalman;enrich_hdg</qos>
 	</SimulatorAgent>
 	<ConsoleAgent name="CONSOLE" active="false">
 		<FilterTarget whitelist="false">
@@ -21,11 +21,8 @@
 	<MWDAgent name="MWD" active="false">
 		<qos>longthreshold</qos>
 	</MWDAgent>
-	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="IN" active="false">
-		<qos>rmc2vtg;enrich_hdg</qos>
-	</SerialAgent>
-	<SerialAgent name="WIND" device="/dev/ttyUSB0" bps="4800" inout="OUT" active="false">
-		<qos>rmc2vtg;enrich_hdg</qos>
+	<SerialAgent name="TTYin" device="/dev/ttyUSB0" bps="38400" inout="IN" active="false">
+		<qos>kalman</qos>
 	</SerialAgent>
 
 

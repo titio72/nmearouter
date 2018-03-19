@@ -42,6 +42,9 @@ public class NMEASimulatorSourceSettings {
 	public double _press = 1013;
 	public double _hum = 58;
 	public double _polarCoeff = 0.85;
+	public double _depth = 8.0;
+	public double _depthOffset = 0.0;
+	public double _depthRange = 2.0;
 	public String _polars = "dufour35c.csv";
 	
 	public boolean _usePolars;
@@ -103,6 +106,12 @@ public class NMEASimulatorSourceSettings {
 		 try { _press = Double.parseDouble(p.getProperty("simulate.pressure", "1013")); } catch (Exception e) {}
 		 try { _temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception e) {}
 		 try { _hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception e) {}
+
+		 try { _depth = Double.parseDouble(p.getProperty("simulate.dpt.depth", "8.0")); } catch (Exception e) {}
+		 try { _depthOffset = Double.parseDouble(p.getProperty("simulate.dpt.offset", "0.0")); } catch (Exception e) {}
+		 try { _depthRange = Double.parseDouble(p.getProperty("simulate.dpt.range", "2.0")); } catch (Exception e) {}
+		 
+		 
 	}
 	    
 }

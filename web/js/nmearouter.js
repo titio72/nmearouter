@@ -3,7 +3,7 @@ loadJavascript("js/angular.min.js");
 loadJavascript("js/angular-sanitize.min.js");
 loadJavascript("js/bootbox.min.js");
 loadJavascript("js/bootstrap.min.js");
-loadJavascript("js/moment.min.js");
+loadJavascript("js/moment.js");
 loadJavascript("js/Chart.min.js");
 
 loadStylesheet("css/bootstrap.min.css");

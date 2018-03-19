@@ -13,6 +13,7 @@ import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
+import com.aboni.nmea.router.filters.NMEAKalmanFilter;
 import com.aboni.nmea.router.filters.NMEAPostProcess;
 import com.aboni.nmea.router.filters.NMEARMC2VTGProcessor;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
@@ -88,6 +89,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         proc = new ArrayList<NMEAPostProcess>();
         active = false;
         if (qos!=null) { 
+            if (qos.get("kalman")) {
+                getLogger().Info("QoS {Kalman} Agent {" + name + "}");
+                addProc(new NMEAKalmanFilter());
+            }
             if (qos.get("rmc2vtg")) {
                 getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
                 addProc(new NMEARMC2VTGProcessor());
