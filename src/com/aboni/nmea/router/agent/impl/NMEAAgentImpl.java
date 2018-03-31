@@ -14,6 +14,7 @@ import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
 import com.aboni.nmea.router.filters.NMEAKalmanFilter;
+import com.aboni.nmea.router.filters.NMEAMWVTrue;
 import com.aboni.nmea.router.filters.NMEAPostProcess;
 import com.aboni.nmea.router.filters.NMEARMC2VTGProcessor;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
@@ -96,6 +97,14 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             if (qos.get("rmc2vtg")) {
                 getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
                 addProc(new NMEARMC2VTGProcessor());
+            }
+            if (qos.get("truewind_sog")) {
+                getLogger().Info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
+                addProc(new NMEAMWVTrue(true));
+            }
+            if (qos.get("truewind")) {
+                getLogger().Info("QoS {TRUEWIND} Agent {" + name + "}");
+                addProc(new NMEAMWVTrue(false));
             }
             if (qos.get("enrich_hdg")) {
                 getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");

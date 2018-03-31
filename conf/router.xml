@@ -2,7 +2,7 @@
 <Router>
 	<Log level="INFO"/>
 	<SimulatorAgent name="SIM" active="false">
-	    <qos>kalman;enrich_hdg</qos>
+	    <qos>enrich_hdg;truewind</qos>
 	</SimulatorAgent>
 	<ConsoleAgent name="CONSOLE" active="false">
 		<FilterTarget whitelist="false">
