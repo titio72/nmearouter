@@ -36,8 +36,36 @@
         $scope.V1 = { value: 0.0 };
     });
    
-    var socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
-    socket.onmessage = function (event) {
+    var socket = null;
+    $(document).ready(function() {
+        window.setInterval(checkConnection, 1000);
+    });
+
+    function checkConnection() {
+    	if (!socket) {
+            resetConnection();
+    	} else if (socket.readyState>=2) {
+            resetConnection();
+    	} 
+    }
+    
+    function resetConnection() {
+    	if (socket && socket.readyState<2 /*OPEN or OPENING*/) {
+    		socket.close();
+    	}
+    	socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
+        socket.onmessage = function (event) {
+            processEvent(event);
+        }
+        socket.onclose = function (event) {
+        	socketClosed(event);
+        }
+    }
+    
+    function socketClosed( event ) {
+    } 
+    
+    function processEvent( event ) {
         var msg = JSON.parse(event.data);
         if (msg.topic=='XDR') {
             for (var prop in msg) {
@@ -76,20 +104,20 @@
             var controllerScope = angular.element(controllerElement).scope();
             controllerScope['wind_r'] = msg;
             if (msg.angle>180) {
-            	msg.angle = 360 - msg.angle;
-            	msg.tack = "Port"
+                msg.angle = 360 - msg.angle;
+                msg.tack = "Port"
             } else {
-            	msg.tack = "Starboard"
+                msg.tack = "Starboard"
             }
             controllerScope.$evalAsync();
         } else if (msg.topic=='MWV_T') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             if (msg.angle>180) {
-            	msg.angle = 360 - msg.angle;
-            	msg.tack = "Port"
+                msg.angle = 360 - msg.angle;
+                msg.tack = "Port"
             } else {
-            	msg.tack = "Starboard"
+                msg.tack = "Starboard"
             }
             controllerScope['wind_t'] = msg;
             controllerScope.$evalAsync();
@@ -100,6 +128,7 @@
             controllerScope['hdg'] = msg;
             controllerScope.$evalAsync();
         }
+
     }
 </script>
 
