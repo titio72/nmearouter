@@ -20,5 +20,16 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andrea Boni",
-  "license": "ISC"
+  "license": "ISC",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/titio72/nmearouter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/titio72/nmearouter/issues"
+  },
+  "homepage": "https://github.com/titio72/nmearouter#readme"
 }

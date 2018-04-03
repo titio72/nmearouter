@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
 
 import com.aboni.misc.PolarTable;
 import com.aboni.misc.Utils;
@@ -191,6 +192,17 @@ public class NavSimulator {
 	
 	public static Position calcNewLL(Position p0, double heading, double dist) {
 		Course c = new Course(p0, heading, dist);
+		return c.getP1();
+	}
+
+	private static Random r = new Random();
+
+	public static Position calcNewLL(Position p0, double heading, double dist, double noiseRadiusMeters) {
+		Course c = new Course(p0, heading, dist);
+		Position p1 = c.getP1();
+		double dNoise = (r.nextDouble() * noiseRadiusMeters / 1852.0);
+		double hNoise = (r.nextDouble() * 360.0);
+		c = new Course(p1, hNoise, dNoise);
 		return c.getP1();
 	}
 
