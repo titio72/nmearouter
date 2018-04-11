@@ -51,6 +51,7 @@
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             msg.s_dir = direction(msg.COG);
+            msg.s_time = new Date(Date.parse(msg.UTC)).toLocaleTimeString();
             controllerScope['rmc'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='DPT') {
@@ -172,6 +173,8 @@
                     		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
                     		<tr><td>SOG</td><td style="text-align: right">{{rmc.SOG | number:1}} Kn</td></tr>
                         	<tr><td>COG</td><td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}°</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td colspan="2" style="text-align: right">{{rmc.s_time}}</td></tr>
                     	</table>
                     </div>
                 </div>

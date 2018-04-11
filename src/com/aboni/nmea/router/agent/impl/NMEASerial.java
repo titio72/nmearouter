@@ -164,7 +164,7 @@ public class NMEASerial extends NMEAAgentImpl {
 				@Override
 				public void run() {
 					try {
-						String _s = s.toSentence() + "\n";
+						String _s = s.toSentence() + "\r\n";
 						byte[] b = _s.getBytes();
 						port.writeBytes(b);
 						synchronized (NMEASerial.this) {

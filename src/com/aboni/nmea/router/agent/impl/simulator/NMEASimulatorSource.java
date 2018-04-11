@@ -29,6 +29,7 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
 import net.sf.marineapi.nmea.sentence.HDTSentence;
+import net.sf.marineapi.nmea.sentence.MDASentence;
 import net.sf.marineapi.nmea.sentence.MHUSentence;
 import net.sf.marineapi.nmea.sentence.MMBSentence;
 import net.sf.marineapi.nmea.sentence.MTASentence;
@@ -346,6 +347,19 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(id, "MHU");
                             mhu.setRelativeHumidity(data._hum);
                             NMEASimulatorSource.this.notify(mhu);
+                        }
+                        
+                        if (data._mda) {
+                            MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(id, "MDA");
+                            mda.setRelativeHumidity(data._hum);
+                            mda.setAirTemperature(temp);
+                            mda.setPrimaryBarometricPressure(press/1000.0);
+                            mda.setPrimaryBarometricPressureUnit('B');
+                            mda.setWaterTemperature(28.5);
+                            mda.setMagneticWindDirection(tWDirection + hdg);
+                            mda.setTrueWindDirection(tWDirection + hdg);
+                            mda.setWindSpeedKnots(tWSpeed);
+                            NMEASimulatorSource.this.notify(mda);
                         }
                         
                         if (data._xdrGYR) {
