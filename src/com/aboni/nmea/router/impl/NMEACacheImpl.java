@@ -35,37 +35,40 @@ public class NMEACacheImpl implements NMEACache {
     
     @Override
     public void onSentence(Sentence s, String src) {
-        if (s instanceof HDGSentence ||
-        		s instanceof HDTSentence ||
-        		s instanceof HDMSentence) {
-            lastHeading.timestamp = System.currentTimeMillis();
-            lastHeading.source = src;
-            lastHeading.data = (HeadingSentence)s;
-        }
-        else if (s instanceof PositionSentence) {
-            lastPosition.data = (PositionSentence)s;
-            lastPosition.source = src;
-            lastPosition.timestamp = System.currentTimeMillis();
-        }
-        else if (s instanceof XDRSentence) {
-        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
-        		DataEvent<Measurement> x = new DataEvent<Measurement>();
-        		x.data = m;
-        		x.source = src;
-        		x.timestamp = System.currentTimeMillis();
-        		synchronized (sensors) {
-            		sensors.put(m.getName(), x);
-				}
-        	}
-        		
-        }
-        
-        if (s instanceof TimeSentence) {
-            lastTime.data = (TimeSentence)s;
-            lastTime.source = src;
-            lastTime.timestamp = System.currentTimeMillis();
-        }
-
+    	try {
+	        if (s instanceof HDGSentence ||
+	        		s instanceof HDTSentence ||
+	        		s instanceof HDMSentence) {
+	            lastHeading.timestamp = System.currentTimeMillis();
+	            lastHeading.source = src;
+	            lastHeading.data = (HeadingSentence)s;
+	        }
+	        else if (s instanceof PositionSentence) {
+	            lastPosition.data = (PositionSentence)s;
+	            lastPosition.source = src;
+	            lastPosition.timestamp = System.currentTimeMillis();
+	        }
+	        else if (s instanceof XDRSentence) {
+	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
+	        		DataEvent<Measurement> x = new DataEvent<Measurement>();
+	        		x.data = m;
+	        		x.source = src;
+	        		x.timestamp = System.currentTimeMillis();
+	        		synchronized (sensors) {
+	            		sensors.put(m.getName(), x);
+					}
+	        	}
+	        		
+	        }
+	        
+	        if (s instanceof TimeSentence) {
+	            lastTime.data = (TimeSentence)s;
+	            lastTime.source = src;
+	            lastTime.timestamp = System.currentTimeMillis();
+	        }
+    	} catch (Exception e) {
+    		// why would that be??????
+    	}
     }
     
     @Override

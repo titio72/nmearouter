@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.aboni.sensors.hw.ADS1115;
 import com.aboni.utils.DataFilter;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorVoltage extends I2CSensor {
@@ -14,7 +15,7 @@ public class SensorVoltage extends I2CSensor {
     private ADS1115 ads;
     private double[] v = new double[4];
     private int address;
-
+    private double smoothing = 0.75; 
     private double[] adj = new double[] { 1, 1, 1, 1 };
     
     public SensorVoltage(int address) {
@@ -29,6 +30,17 @@ public class SensorVoltage extends I2CSensor {
         this.address = ADS1115.ADS1115_ADDRESS_0x48;
         
         String s_address = HWSettings.getProperty("analog.voltage", "0x48");
+        
+    	smoothing = getDefaultSmootingAlpha();
+        String s_smoothing = HWSettings.getProperty("analog.voltage.smoothing", "");
+        if (s_smoothing!=null && !s_smoothing.isEmpty()) {
+        	try {
+        		smoothing = Double.parseDouble(s_smoothing);
+        	} catch (Exception e) {
+        		ServerLog.getLogger().Error("Cannot parse voltage smoothing factor " + s_smoothing, e);
+        	}
+        }
+        
         loadAdjustment();
         
         if (s_address.startsWith("0x")) {
@@ -36,6 +48,8 @@ public class SensorVoltage extends I2CSensor {
         } else {
             this.address = Integer.parseInt(s_address);
         }
+        
+        
     }
 
 	private void loadAdjustment() {
@@ -75,7 +89,7 @@ public class SensorVoltage extends I2CSensor {
     	loadAdjustment();
         for (int i = 0; i<4; i++) {
             double _v = ads.getVoltage(i);
-        	v[i] = DataFilter.getLPFReading(getDefaultSmootingAlpha(), v[i], _v);
+        	v[i] = DataFilter.getLPFReading(smoothing, v[i], _v);
         }
     }
 }
