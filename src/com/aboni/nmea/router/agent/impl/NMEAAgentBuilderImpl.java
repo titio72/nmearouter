@@ -159,7 +159,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		default: r = false; t = false; break;
 		}
 		
-		return new NMEASerial(cache, stream, name, portName, speed, r, t, q);
+		return new NMEASerial2(cache, stream, name, portName, speed, r, t, q);
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {

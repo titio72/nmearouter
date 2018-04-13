@@ -20,6 +20,7 @@ public class NMEASimulatorSourceSettings {
 	public boolean _mta = true;
 	public boolean _mbb = true;
 	public boolean _mhu = true;
+	public boolean _mda = true;
 	public boolean _mwv_a = true;
 	public boolean _mwv_t = true;
 	public boolean _vwr = true;
@@ -80,6 +81,7 @@ public class NMEASimulatorSourceSettings {
 		 _mta   = p.getProperty("simulate.mta", "0").equals("1");  // air temp
 		 _mbb   = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
 		 _mhu   = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
+		 _mda   = p.getProperty("simulate.mda", "0").equals("1");  // aggregated meteo
 		 _mwv_a = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
 		 _mwv_t = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
 		 _vwr   = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
