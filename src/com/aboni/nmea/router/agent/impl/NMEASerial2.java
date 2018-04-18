@@ -18,7 +18,7 @@ public class NMEASerial2 extends NMEAAgentImpl {
 
 		private byte[] internalBuffer;
 		private int write = 0;
-		private static final int SIZE = 1024;
+		private static final int SIZE = 4 * 1024;
 
 		public SerialListener() {
 			internalBuffer = new byte[SIZE];
@@ -36,7 +36,7 @@ public class NMEASerial2 extends NMEAAgentImpl {
                     }
                 	if (buffer[i]==13) {
             		    String s = new String(internalBuffer, 0, write);
-                	    processLine(s);
+                	    processLine(s.trim());
                 	    write = 0;
                     }
                 }
@@ -117,16 +117,19 @@ public class NMEASerial2 extends NMEAAgentImpl {
 			@Override
 			public void run() {
 				try {
-				      byte[] readBuffer = new byte[1024];
-					   while (true)
-					   {
-					      int numRead = port.readBytes(readBuffer, readBuffer.length);
-					      if (numRead>0) {
-					    	  l.read(readBuffer, numRead);
-					    	  
-					      }
-					   }
-					} catch (Exception e) { e.printStackTrace(); }
+			      byte[] readBuffer = new byte[1024];
+				   while (true)
+				   {
+				      int numRead = port.readBytes(readBuffer, readBuffer.length);
+				      if (numRead>0) {
+				    	  l.read(readBuffer, numRead);
+				    	  
+				      }
+				   }
+				} catch (Exception e) { 
+					getLogger().Error("Error reading serial {" + getName() + "}", e);
+				}
+				stop();
 			}
 		});
 		t.setDaemon(true);
@@ -202,62 +205,3 @@ public class NMEASerial2 extends NMEAAgentImpl {
 		}
 	}
 }
-
-/*
-
-XDR - Transducer Measurements
-
-Measurement data from transducers that measure physical quantities
-such as temperature, force, pressure, frequency, angular or linear
-displacement, etc. Data from a variable number transducers measuring
-the same or different quantities can be mixed in the same sentence.
-This sentence is designed for use by integrated systems as well as
-transducers that may be connected in a 'chain' where each transducer
-receives the sentence as an input and adds its own data fields on
-before retransmitting the sentence.
-
-$--XDR,a,x.x,a,c--c, ________ ...
-       | | | | |
-       | | | | +---------Data for variable # of transducers
-       | | | +----------------\Transducer #1 ID
-       | | +-------------------|Units of measure, Transducer #1 [2]
-       | +----------------------|Measurement data, Transducer #1
-       +-------------------------/Transducer type, Transducer #1 [2]
-
-
-a,x.x,a,c--c*hh<CR><LF>
-| | | |
-| | | +--------------------\
-| | +-----------------------|
-| +--------------------------|
-+-----------------------------/Transducer 'n' [1]
-
-
-Notes:
-
-[1] Sets of the four fields 'Type-Data-Units-ID' are allowed for an unde-
-fined number of transducers. Up to 'n' transducers may be included
-within the limits of allowed sentence length, null fields are not re-
-quired except where portions of the 'Type-Data-Units-ID' combination are
-not available.
-
-[2] Allowed transducer types and their units of measure are:
-
-Transducer				Type	Field Units 			Field Comments
-
-temperature				C 		C = degrees Celsius
-angular displacement 	A 		D = degrees 			"-" = anticlockwise
-linear displacement 	D 		M = meters 				"-" = compression
-frequency 				F 		H = Hertz
-force 					N 		N = Newtons 			"-" = compression
-pressure 				P 		B = Bars 				"-" = vacuum
-flow rate 				R 		l = liters/second
-tachometer 				T 		R = RPM
-humidity 				H 		P = Percent
-volume 					V 		M = cubic meters
-
-Custom (ABONI)			V		V = Volts					
-Custom (ABONI)			F		B = bps
-
-
-*/
