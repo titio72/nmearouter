@@ -1,18 +1,11 @@
 package com.aboni.nmea.router.filters;
 
-import com.aboni.geo.GeoPositionT;
-import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 
 import br.uel.cross.filter.GpsKalmanFilter;
-import net.sf.marineapi.nmea.parser.DataNotAvailableException;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.VTGSentence;
-import net.sf.marineapi.nmea.util.FaaMode;
 import net.sf.marineapi.nmea.util.Position;
 
 /**
@@ -42,19 +35,11 @@ public class NMEAKalmanFilter implements NMEAPostProcess {
 	
 	private GpsKalmanFilter filter;
 
-    private NMEAMagnetic2TrueConverter m;
-
-    private void initFilter() {
-    	
-    }
-    
 	public NMEAKalmanFilter() {
-	    m = new NMEAMagnetic2TrueConverter();
 	    filter = new GpsKalmanFilter(1.0);
 	}
 
 	public NMEAKalmanFilter(double year) {
-	    m = new NMEAMagnetic2TrueConverter(year);
 	    filter = new GpsKalmanFilter(1.0);
 	}
 
@@ -73,10 +58,6 @@ public class NMEAKalmanFilter implements NMEAPostProcess {
 				rmc.setPosition(filteredP);
 				
 				if (lastPosition!=null) {
-					GeoPositionT p0 = new GeoPositionT(lastTimeStamp, lastPosition);
-					GeoPositionT p1 = new GeoPositionT(now, filteredP);
-					double d = p1.distanceTo(p0);
-					double sog = d / ((now - lastTimeStamp) / 1000.0 / 60.0 / 60.0);
 					rmc.setSpeed(filter.getKmh() / 1.852);
 				} else {
 					// do nothing

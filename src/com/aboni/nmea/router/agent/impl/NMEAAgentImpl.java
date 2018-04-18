@@ -13,6 +13,7 @@ import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
+import com.aboni.nmea.router.filters.NMEAHeadingEnricher;
 import com.aboni.nmea.router.filters.NMEAKalmanFilter;
 import com.aboni.nmea.router.filters.NMEAMWVTrue;
 import com.aboni.nmea.router.filters.NMEAPostProcess;
@@ -109,6 +110,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             if (qos.get("enrich_hdg")) {
                 getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");
                 addProc(new NMEAHDGFiller(cache));
+            }
+            if (qos.get("enrich_hdm")) {
+                getLogger().Info("QoS {ENRICH_HDM} Agent {" + name + "}");
+                addProc(new NMEAHeadingEnricher(cache));
             }
             if (qos.get("builtin")) {
                 getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
