@@ -2,13 +2,9 @@
 <Router>
 	<Log level="INFO"/>
 	<SimulatorAgent name="SIM" active="false">
-	    <qos>enrich_hdg;truewind</qos>
+	    <qos>enrich_hdm;truewind</qos>
 	</SimulatorAgent>
-	<ConsoleAgent name="CONSOLE" active="false">
-		<FilterTarget whitelist="false">
-			<Filter sentence="XDP"/>
-		</FilterTarget>
-	</ConsoleAgent>
+	<ConsoleAgent name="CONSOLE" active="false"/>
 	<MeteoAgent name="METEO" active="false"/>
 	<TcpAgent name="TCPOUT" port="1111" inout="INOUT" active="false"/>
 	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
@@ -21,9 +17,7 @@
 	<MWDAgent name="MWD" active="false">
 		<qos>longthreshold</qos>
 	</MWDAgent>
-	<SerialAgent name="TTYin" device="/dev/ttyUSB0" bps="38400" inout="IN" active="false">
-		<qos>kalman</qos>
-	</SerialAgent>
+    <SerialAgent name="TTYOut" device="/dev/ttyUSB0" bps="38400" inout="INOUT" active="false"/>
 
 
 	<!-- 
