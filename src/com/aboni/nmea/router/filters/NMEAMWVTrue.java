@@ -61,7 +61,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 				lastSpeed = ((RMCSentence)sentence).getSpeed();
 				lastSpeedTime = System.currentTimeMillis();
 			}
-			return new Sentence[] {sentence};
+			return null;
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Cannot process message!", e);
 		}

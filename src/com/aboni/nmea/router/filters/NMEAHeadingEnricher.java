@@ -1,9 +1,5 @@
 package com.aboni.nmea.router.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
@@ -51,14 +47,12 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
             if (sentence instanceof HDMSentence) {
                 HDMSentence hdm = (HDMSentence)sentence;
                 HDGSentence hdg = getHDG(hdm);
-                List<Sentence> out = new ArrayList<Sentence>(3); 
-                out.add(hdg);
                 boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDT && canDoT) {
-                    out.add(getHDT(hdg));
+                	return new Sentence[] {hdg, getHDT(hdg)};
+                } else {
+                	return new Sentence[] {hdg};
                 }
-                
-                return (Sentence[]) out.toArray(new Sentence[0]);
             }
         } catch (Exception e) {
             ServerLog.getLogger().Error("Cannot process message!", e);

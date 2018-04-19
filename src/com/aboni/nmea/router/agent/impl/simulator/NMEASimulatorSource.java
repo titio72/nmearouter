@@ -265,7 +265,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						
 						if (data._dbt) {
     						DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DBT);
-    						d.setDepth(depth - 0.2);
+    						d.setDepth(depth);
     						NMEASimulatorSource.this.notify(d);
 						}
 						

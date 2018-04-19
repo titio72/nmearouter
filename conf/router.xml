@@ -2,7 +2,7 @@
 <Router>
 	<Log level="INFO"/>
 	<SimulatorAgent name="SIM" active="false">
-	    <qos>enrich_hdm;truewind</qos>
+	    <qos>enrich_hdm;truewind;dpt</qos>
 	</SimulatorAgent>
 	<ConsoleAgent name="CONSOLE" active="false"/>
 	<MeteoAgent name="METEO" active="false"/>

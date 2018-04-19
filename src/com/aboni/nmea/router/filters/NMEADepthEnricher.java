@@ -1,9 +1,7 @@
 package com.aboni.nmea.router.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -28,15 +26,12 @@ public class NMEADepthEnricher implements NMEAPostProcess {
     public Sentence[] process(Sentence sentence, String src) {
         try {
             if (sentence instanceof DBTSentence) {
+            	double offset = HWSettings.getPropertyAsDouble("depth.offset", 0.0);
             	DBTSentence dbt = (DBTSentence)sentence;
             	DPTSentence dpt = (DPTSentence)SentenceFactory.getInstance().createParser(dbt.getTalkerId(), SentenceId.DPT);
             	dpt.setDepth(dbt.getDepth());
-            	dpt.setOffset(0.3);
-            	
-            	List<Sentence> out = new ArrayList<>(2);
-            	out.add(dpt);
-                
-                return (Sentence[]) out.toArray(new Sentence[0]);
+            	dpt.setOffset(offset);
+                return new Sentence[] {dpt};
             }
         } catch (Exception e) {
             ServerLog.getLogger().Error("Cannot process message!", e);
