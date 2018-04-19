@@ -12,6 +12,7 @@ import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.filters.NMEADepthEnricher;
 import com.aboni.nmea.router.filters.NMEAHDGFiller;
 import com.aboni.nmea.router.filters.NMEAHeadingEnricher;
 import com.aboni.nmea.router.filters.NMEAKalmanFilter;
@@ -91,6 +92,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         proc = new ArrayList<NMEAPostProcess>();
         active = false;
         if (qos!=null) { 
+            if (qos.get("dpt")) {
+                getLogger().Info("QoS {DPT} Agent {" + name + "}");
+                addProc(new NMEADepthEnricher(cache));
+            }
             if (qos.get("kalman")) {
                 getLogger().Info("QoS {Kalman} Agent {" + name + "}");
                 addProc(new NMEAKalmanFilter());
