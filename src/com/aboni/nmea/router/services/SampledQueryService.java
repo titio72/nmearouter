@@ -52,7 +52,7 @@ abstract class SampledQueryService implements WebService {
         
         try {
             db = new DBHelper(true);
-            DBHelper.Range range = db.getTimeframe("meteo", cFrom, cTo);
+            DBHelper.Range range = db.getTimeframe(getTable(), cFrom, cTo);
             List<Sample> samples = null;
             if (range!=null) {
                 int sampling = range.getSampling(maxSamples);
