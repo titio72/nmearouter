@@ -42,10 +42,12 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
+import net.sf.marineapi.nmea.sentence.VWTSentence;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.CompassPoint;
 import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Date;
+import net.sf.marineapi.nmea.util.Direction;
 import net.sf.marineapi.nmea.util.FaaMode;
 import net.sf.marineapi.nmea.util.Measurement;
 import net.sf.marineapi.nmea.util.Position;
@@ -249,7 +251,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     						rmc.setTime(ttt);
     
     						rmc.setVariation(0.0); 
-    						rmc.setMode(FaaMode.SIMULATED);
+    						rmc.setMode(FaaMode.AUTOMATIC);
     						rmc.setDirectionOfVariation(CompassPoint.WEST);
     						rmc.setSpeed(speed);
     						rmc.setPosition(pos);
@@ -300,6 +302,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             vwr.setSide(Side.PORT);
                             vwr.setStatus(DataStatus.ACTIVE);
                             NMEASimulatorSource.this.notify(vwr);
+						}
+                        
+						if (data._vwr) {
+                            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(id, "VWT");
+                            vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
+                            vwt.setSpeedKnots(tWSpeed);
+                            vwt.setDirectionLeftRight(tWDirection>180?Direction.LEFT:Direction.RIGHT);
+                            NMEASimulatorSource.this.notify(vwt);
 						}
                         
                         if (data._hdm) {
