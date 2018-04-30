@@ -183,12 +183,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						
 						long newTS = System.currentTimeMillis();
 						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
-						double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
+						//double ph1h = System.currentTimeMillis() / (1000d*60d*60d*1d) * 2 * Math.PI; // 1h phase
 						double depth = round(data._depth + Math.sin(ph15m) * data._depthRange, 1);
 						double hdg = Utils.normalizeDegrees0_360(refHeading + r.nextDouble() * 3.0);
 						
 						double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
-						double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0 + Math.cos(ph1h) * 15.0; 
+						double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0; 
 
 						double tWSpeed = 		absoluteWindSpeed;
 						double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - hdg);
