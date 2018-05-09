@@ -17,6 +17,8 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 	private long base;
 	
 	private long overrideNow;
+	private static TimeZone tzUTC = TimeZone.getTimeZone("UTC"); 
+	
 	
 	public void setOverrideTime(long l) {
 		overrideNow = l;
@@ -43,7 +45,7 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 				previousTimeStamp = t;
 				if (base!=0) {
 					long newTimestamp = Math.round((getNow() - base)/1000.0)*1000 + c.getTimeInMillis();
-					Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+					Calendar c1 = Calendar.getInstance(tzUTC);
 					c1.setTimeInMillis(newTimestamp);
 					Time newTime = new Time(c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND), 0, 0);
 					Date newDate = new Date(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1, c1.get(Calendar.DAY_OF_MONTH));
