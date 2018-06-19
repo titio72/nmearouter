@@ -41,6 +41,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
+import net.sf.marineapi.nmea.sentence.VLWSentence;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.sentence.VWTSentence;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
@@ -169,6 +170,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			public void run() {
 				TalkerId id = TalkerId.GP;
 				Random r = new Random();
+
+				double distance = 0;
+				double trip = 0;
 				
 				Position pos = new Position(43.9599, 09.7745);
 				long lastTS = 0;
@@ -178,8 +182,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						Thread.sleep(1000);
 						data.loadConf();
 						loadPolars();
-					
-						if (Double.isNaN(refHeading)) refHeading = data._heading;
+						
+						refHeading = data._heading;
 						
 						long newTS = System.currentTimeMillis();
 						double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
@@ -200,6 +204,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 							speed = round(data._speed * (1.0 + r.nextDouble()/10.0), 1);
 						}
 
+						distance += speed * (1000.0 / 1000.0 / 60.0 / 60.0);
+						trip += speed * (1000.0 / 1000.0 / 60.0 / 60.0);
+						
 						ApparentWind aWind = new ApparentWind(speed, tWDirection, tWSpeed);
 						double aWSpeed = 		aWind.getApparentWindSpeed();
 						double aWDirection = 	Utils.normalizeDegrees0_360(aWind.getApparentWindDeg());
@@ -221,6 +228,15 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             s.setMagneticHeading(hdg);
     						s.setSpeedKnots(speed);
     						s.setSpeedKmh(speed * 1.852);
+    						NMEASimulatorSource.this.notify(s);
+						}
+						
+						if (data._vlw) {
+    						VLWSentence s = (VLWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VLW);
+                            s.setTotal(distance);
+                            s.setTotalUnits('N');
+    						s.setTrip(trip);
+    						s.setTripUnits('N');
     						NMEASimulatorSource.this.notify(s);
 						}
 						
@@ -283,6 +299,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             v.setAngle(aWDirection);
                             v.setSpeed(aWSpeed);
                             v.setTrue(false);
+                            v.setStatus(DataStatus.ACTIVE);
                             NMEASimulatorSource.this.notify(v);
 						}
                         
@@ -292,6 +309,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                             vt.setAngle(tWDirection);
                             vt.setSpeed(tWSpeed);
                             vt.setTrue(true);
+                            vt.setStatus(DataStatus.ACTIVE);
                             NMEASimulatorSource.this.notify(vt);
 						}
                         
@@ -362,9 +380,11 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         if (data._mda) {
                             MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(id, "MDA");
                             mda.setRelativeHumidity(data._hum);
-                            mda.setAirTemperature(temp);
-                            mda.setPrimaryBarometricPressure(press/1000.0);
-                            mda.setPrimaryBarometricPressureUnit('B');
+                            mda.setAirTemperature(temp + 10);
+                            mda.setPrimaryBarometricPressure(press * 750.06375541921);
+                            mda.setPrimaryBarometricPressureUnit('I');
+                            mda.setSecondaryBarometricPressure(press/1000.0);
+                            mda.setSecondaryBarometricPressureUnit('B');
                             mda.setWaterTemperature(28.5);
                             mda.setMagneticWindDirection(tWDirection + hdg);
                             mda.setTrueWindDirection(tWDirection + hdg);
@@ -383,9 +403,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 
 	                        if (data._xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
-	                        if (data._xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_0"));
+	                        if (data._xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp + 5, "C", "AirTemp_0"));
 	                        if (data._xdrMeteoHum) xdr.addMeasurement(new Measurement("C", data._hum, "H", "Humidity_0"));
-	                        if (data._xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_1"));
+	                        if (data._xdrMeteoAtm) xdr.addMeasurement(new Measurement("P", press + 150, "B", "Barometer_1"));
 	                        if (data._xdrMeteoTmp) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
 	                        if (data._xdrMeteoHum) xdr.addMeasurement(new Measurement("C", data._hum, "H", "Humidity_1"));
                             NMEASimulatorSource.this.notify(xdr);

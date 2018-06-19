@@ -12,6 +12,7 @@ public class NMEASimulatorSourceSettings {
 	public long lastConfModified = 0;
 	
 	public boolean _vhw = true;
+	public boolean _vlw = true;
 	public boolean _gll = true;
 	public boolean _rmc = true;
 	public boolean _dpt = true;
@@ -73,6 +74,7 @@ public class NMEASimulatorSourceSettings {
     
 	private void readConf(Properties p) {
 		 _vhw   = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
+		 _vhw   = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
 		 _gll   = p.getProperty("simulate.gll", "0").equals("1");  // gps
 		 _rmc   = p.getProperty("simulate.rmc", "0").equals("1");  // gps
 		 _dpt   = p.getProperty("simulate.dpt", "0").equals("1");  // depth
