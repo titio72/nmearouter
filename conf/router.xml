@@ -2,11 +2,14 @@
 <Router>
 	<Log level="INFO"/>
 	<SimulatorAgent name="SIM" active="false">
-	    <qos>enrich_hdm;truewind;dpt</qos>
+	    <qos>enrich_hdm;dpt</qos>
 	</SimulatorAgent>
 	<ConsoleAgent name="CONSOLE" active="false"/>
 	<MeteoAgent name="METEO" active="false"/>
-	<TcpAgent name="TCPOUT" port="1111" inout="INOUT" active="false"/>
+    <TcpAgent name="TCPIN" host="192.168.3.1" port="1111" inout="IN" active="false">
+        <qos>rs120;enrich_hdm;truewind;dpt</qos>
+    </TcpAgent>
+    <TcpAgent name="TCPOUT" port="1111" inout="INOUT" active="false"/>
 	<UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
 		<to>192.168.2.255</to>
 		<to>192.168.2.130</to>

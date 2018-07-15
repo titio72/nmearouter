@@ -9,6 +9,7 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.ZDASentence;
+import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Date;
 import net.sf.marineapi.nmea.util.Time;
 
@@ -32,8 +33,10 @@ public class NMEATimestampExtractor {
 				t = zda.getTime();
 			} else if (s instanceof RMCSentence && s.isValid()) {
 				RMCSentence r = (RMCSentence)s;
-				d = r.getDate();
-				t = r.getTime();
+				if (r.getStatus()==DataStatus.ACTIVE) {
+					d = r.getDate();
+					t = r.getTime();
+				}
 			}
 		} catch (Exception e) {
             ServerLog.getLogger().Error("Error extracting GPS time", e);

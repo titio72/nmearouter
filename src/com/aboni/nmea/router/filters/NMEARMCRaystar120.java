@@ -17,6 +17,7 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 	private long base;
 	
 	private long overrideNow;
+	private int count;
 	private static TimeZone tzUTC = TimeZone.getTimeZone("UTC"); 
 	
 	
@@ -38,19 +39,25 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 			if (c!=null) {
 				long t = c.getTimeInMillis();
 				if (previousTimeStamp!=0) {
-					if ((t-previousTimeStamp)>9500 && (t-previousTimeStamp)<15000) {
-						base = getNow();
+					if ((t-previousTimeStamp)>9500 && (t-previousTimeStamp)<=11000) {
+						base = t;
+						count = 0;
+					} else if ((t-previousTimeStamp)>11000) {
+						base = 0;
+						count = 0;
 					}
 				}
 				previousTimeStamp = t;
-				if (base!=0) {
-					long newTimestamp = Math.round((getNow() - base)/1000.0)*1000 + c.getTimeInMillis();
+				if (base!=0 && base==t) {
+					long newTimestamp = count * 1000 + c.getTimeInMillis();
+					//long newTimestamp = Math.round((getNow() - base)/1000.0)*1000 + c.getTimeInMillis();
 					Calendar c1 = Calendar.getInstance(tzUTC);
 					c1.setTimeInMillis(newTimestamp);
 					Time newTime = new Time(c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND), 0, 0);
 					Date newDate = new Date(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH) + 1, c1.get(Calendar.DAY_OF_MONTH));
 					rmc.setTime(newTime);
 					rmc.setDate(newDate);
+					count++;
 				} else {
 					rmc.setStatus(DataStatus.VOID);
 				}
