@@ -15,6 +15,7 @@ import com.aboni.nmea.router.services.MeteoService;
 import com.aboni.nmea.router.services.SImulatorService;
 import com.aboni.nmea.router.services.ServiceDBBackup;
 import com.aboni.nmea.router.services.ServiceShutdown;
+import com.aboni.nmea.router.services.SpeedAnalyticsService;
 import com.aboni.nmea.router.services.SpeedService;
 import com.aboni.nmea.router.services.StatusService;
 import com.aboni.nmea.router.services.TrackService;
@@ -71,6 +72,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new AgentFilterService(router, "in");
         } else if (target.equals("/auto")) {
         	s = new AutoPilotService(router);
+        } else if (target.equals("/tripspeedstat")) {
+        	s = new SpeedAnalyticsService();
         }
 		return s;
 	}
