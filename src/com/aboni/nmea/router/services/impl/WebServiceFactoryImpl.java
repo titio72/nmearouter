@@ -72,7 +72,7 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         	s = new AgentFilterService(router, "in");
         } else if (target.equals("/auto")) {
         	s = new AutoPilotService(router);
-        } else if (target.equals("/tripspeedstat")) {
+        } else if (target.equals("/speedanalysis")) {
         	s = new SpeedAnalyticsService();
         }
 		return s;

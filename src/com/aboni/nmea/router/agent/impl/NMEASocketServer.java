@@ -18,6 +18,7 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketServer extends NMEAAgentImpl {
@@ -208,7 +209,15 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	}
 	
 	protected String getOutSentence(Sentence s) {
-		return s.toSentence();
+		/*if (s instanceof MWVSentence) {
+			MWVSentence mwv = (MWVSentence)s;
+			// $--MWV,x.x,a,x.x,a*hh<CR><LF>
+			String ss = String.format("$IIMWV,%d,%s,%-4.1f,N", (int)mwv.getAngle(), mwv.isTrue()?"T":"R", mwv.getSpeed());
+			MWVSentence m = (MWVSentence)SentenceFactory.getInstance().createParser(ss);
+			return m.toString();
+		} else*/ {
+			return s.toSentence();
+		}
 	}
 	
 	private void createServerSocket() {

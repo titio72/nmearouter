@@ -4,7 +4,7 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?k"></script>
+	<script src="js/nmearouter.js?o"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap" async defer></script>
 	
 	<style>
@@ -124,7 +124,7 @@
 		pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
 		humChart = refreshChart(humChart, "humChart", "HUM", 0);
         speedChart = refreshSpeedChart(speedChart, "speedChart");
-        speedChart = refreshSpeedAnalysisChart(speedAnalysisChart, "speedAnalysisChart");
+        speedAnalysisChart = refreshSpeedAnalysisChart(speedAnalysisChart, "speedAnalysisChart");
 		loadMap(dateFrom, dateTo);	  		
 	}
 
@@ -146,22 +146,20 @@
 		});
 		return c1;
   	}
-
+//httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth)
     function refreshSpeedAnalysisChart(c, chart) {
         var ctx = document.getElementById(chart);
         if (c!=null) {
             c.destroy();
         }
         var c1 = new Chart(ctx, {
-        type: 'line',
-        data: httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
-        options: {
-            scales: {
-                xAxes: [{
-                    type: 'time',
-                }]
-            }
-        }
+	        type: 'bar',
+	        data: {
+	        	labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
+	        		'6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
+	        	datasets: [httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth)]
+	        },
+	        options: {}	        
         });
         return c1;
     }

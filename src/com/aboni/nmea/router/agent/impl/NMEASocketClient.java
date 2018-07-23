@@ -11,6 +11,7 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketClient extends NMEAAgentImpl {
@@ -65,9 +66,12 @@ public class NMEASocketClient extends NMEAAgentImpl {
 		
 		private void doRead() {
 	    	StringBuffer b = new StringBuffer();
-	    	BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+	    	BufferedReader reader = null;
 			while (!stop) {
 			    if (openSocket()) {
+			    	reader = new BufferedReader(new InputStreamReader(iStream));
+
+			    	
 			    	b.setLength(0);
                     boolean reset = false;
     				while (!stop && !reset) {
@@ -151,8 +155,18 @@ public class NMEASocketClient extends NMEAAgentImpl {
     protected void doWithSentence(Sentence s, NMEAAgent source) {
     	try {
     		synchronized (reader) {
-		    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
-		    	reader.socket.getOutputStream().write("\r".getBytes());
+    			/*if (s instanceof MWVSentence) {
+    				MWVSentence mwv = (MWVSentence)s;
+    				// $--MWV,x.x,a,x.x,a*hh<CR><LF>
+    				String ss = String.format("$IIMWV,%d,%s,%-4.1f,N", (int)mwv.getAngle(), mwv.isTrue()?"T":"R", mwv.getSpeed());
+    				MWVSentence m = (MWVSentence)SentenceFactory.getInstance().createParser(ss);
+			    	reader.socket.getOutputStream().write(s.toString().getBytes());
+			    	reader.socket.getOutputStream().write("\r".getBytes());
+    				
+    			} else*/ {
+			    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
+			    	reader.socket.getOutputStream().write("\r".getBytes());
+    			}
     		}
     	} catch (Exception e) {
             getLogger().Info("Error sending data {" + e.getMessage() + "}");

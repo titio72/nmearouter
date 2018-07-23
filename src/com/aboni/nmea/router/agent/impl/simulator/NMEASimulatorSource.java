@@ -223,7 +223,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						lastTS = newTS;
 						
 						if (data._vhw) {
-    						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
+    						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
                             s.setHeading(hdg);
                             s.setMagneticHeading(hdg);
     						s.setSpeedKnots(speed);
@@ -241,7 +241,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
 						
 						if (data._gll) {
-    						GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(id, SentenceId.GLL);
+    						GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
     						s1.setPosition(pos);
     						s1.setStatus(DataStatus.ACTIVE);
     						s1.setTime(new Time());
@@ -249,7 +249,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
 						
 						if (data._rmc) {
-    						RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(id, SentenceId.RMC);
+    						RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
     						rmc.setCourse(hdg);
     
     						rmc.setStatus(DataStatus.ACTIVE);
@@ -275,26 +275,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
 
 						if (data._dpt) {
-    						DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DPT);
+    						DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
     						d.setDepth(depth); 
     						d.setOffset(data._depthOffset); 
     						NMEASimulatorSource.this.notify(d);
 						}
 						
 						if (data._dbt) {
-    						DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.DBT);
+    						DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DBT);
     						d.setDepth(depth);
     						NMEASimulatorSource.this.notify(d);
 						}
 						
 						if (data._mtw) {
-    						MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MTW);
+    						MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
     						t.setTemperature(28.5);
     						NMEASimulatorSource.this.notify(t);
 						}
 						
 						if (data._mwv_a) {
-                            MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
+                            MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
                             v.setSpeedUnit(Units.KNOT);
                             v.setAngle(aWDirection);
                             v.setSpeed(aWSpeed);
@@ -304,7 +304,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
                         
 						if (data._mwv_t) {
-                            MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
+                            MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
                             vt.setSpeedUnit(Units.KNOT);
                             vt.setAngle(tWDirection);
                             vt.setSpeed(tWSpeed);
@@ -314,7 +314,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
                         
 						if (data._vwr) {
-                            VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(id, "VWR");
+                            VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWR");
                             vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
                             vwr.setSpeed(aWSpeed);
                             vwr.setSide(Side.PORT);
@@ -323,7 +323,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
                         
 						if (data._vwr) {
-                            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(id, "VWT");
+                            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
                             vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
                             vwt.setSpeedKnots(tWSpeed);
                             vwt.setDirectionLeftRight(tWDirection>180?Direction.LEFT:Direction.RIGHT);
@@ -331,26 +331,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 						}
                         
                         if (data._hdm) {
-                            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDM);
+                            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
                             hdm.setHeading(hdg);
                             NMEASimulatorSource.this.notify(hdm);
                         }
                         
                         if (data._hdt) {
-                            HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDT);
+                            HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
                             hdt.setHeading(hdg);
                             NMEASimulatorSource.this.notify(hdt);
                         }
                         
                         if (data._hdg) {
-                            HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
+                            HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
                             hdgS.setHeading(hdg);
                             //hdg.setDeviation(0.0);
                             NMEASimulatorSource.this.notify(hdgS);
                         }
                         
                         if (data._vtg) {
-                            VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VTG);
+                            VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
                             vtg.setMagneticCourse(hdg);
                             vtg.setTrueCourse(hdg);
                             vtg.setMode(FaaMode.AUTOMATIC);
@@ -360,25 +360,25 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         }
                         
                         if (data._mta) {
-                            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(id, "MTA");
+                            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
                             mta.setTemperature(temp);;
                             NMEASimulatorSource.this.notify(mta);
                         }
                         
                         if (data._mbb) {
-                            MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(id, "MMB");
+                            MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
                             mmb.setBars(press/1000.0);
                             NMEASimulatorSource.this.notify(mmb);
                         }
                         
                         if (data._mhu) {
-                            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(id, "MHU");
+                            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
                             mhu.setRelativeHumidity(data._hum);
                             NMEASimulatorSource.this.notify(mhu);
                         }
                         
                         if (data._mda) {
-                            MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(id, "MDA");
+                            MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
                             mda.setRelativeHumidity(data._hum);
                             mda.setAirTemperature(temp + 10);
                             mda.setPrimaryBarometricPressure(press * 750.06375541921);

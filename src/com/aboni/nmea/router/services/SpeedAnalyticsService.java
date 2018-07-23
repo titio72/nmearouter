@@ -2,6 +2,7 @@ package com.aboni.nmea.router.services;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -29,19 +30,23 @@ public class SpeedAnalyticsService implements WebService {
 	public void doIt(ServiceConfig config, ServiceOutput response) {
 
 		Map<Double, Stat> distr = new TreeMap<>();
-		String sql = "select sum(dTime), sum(dist) from track where tripid=? and speed>=? and speed<?";
+		String sql = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
         try {
 			response.setContentType(APPLICATION_JSON);
 
 			db = new DBHelper(true);
             
-            int trip = Integer.parseInt(config.getParameter("trip"));
+	        DateRangeParameter fromTo = new DateRangeParameter(config);
+	        Calendar cFrom = fromTo.getFrom();
+	        Calendar cTo = fromTo.getTo();
             
             PreparedStatement stm = db.getConnection().prepareStatement(sql);
-            stm.setInt(1, trip);
+            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+			
 			for (double speed=SPEED_MIN; (speed+SPEED_BUCKET/10.0)<SPEED_MAX; speed+=SPEED_BUCKET) {
-	            stm.setDouble(2, speed);
-	            stm.setDouble(3, speed + SPEED_BUCKET);
+	            stm.setDouble(3, speed);
+	            stm.setDouble(4, speed + SPEED_BUCKET);
 				ResultSet rs = stm.executeQuery();
 				Stat s = new Stat();
 				if (rs.next()) {
