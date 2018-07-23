@@ -21,7 +21,7 @@ import net.sf.marineapi.nmea.util.Time;
 
 public class NMEARMCRaystar120Test {
 
-	@Before
+/*	@Before
 	public void setUp() throws Exception {
 	}
 	
@@ -71,5 +71,5 @@ public class NMEARMCRaystar120Test {
 
 	
 	}
-
+*/
 }

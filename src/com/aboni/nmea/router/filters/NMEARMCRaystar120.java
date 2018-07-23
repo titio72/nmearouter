@@ -16,19 +16,19 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 	private long previousTimeStamp;
 	private long base;
 	
-	private long overrideNow;
+	//private long overrideNow;
 	private int count;
 	private static TimeZone tzUTC = TimeZone.getTimeZone("UTC"); 
 	
-	
+	/*
 	public void setOverrideTime(long l) {
 		overrideNow = l;
 	}
-	
+
 	private long getNow() {
 		return (overrideNow>0?overrideNow:System.currentTimeMillis());
 	}
-	
+	*/
 	
 	@Override
 	public Sentence[] process(Sentence sentence, String src) {

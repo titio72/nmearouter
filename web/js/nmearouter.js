@@ -78,6 +78,29 @@ function httpLoadSpeedDateRange(dt0, dt1) {
 	return getDataset("Speed", json.serie, 1, 1, 1);
 }
 
+function httpLoadSpeedAnalysisDateRange(dt0, dt1) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speedanalysis?date=" + dt0 + "&dateTo=" + dt1, false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	var json = JSON.parse(xmlHttp.responseText);
+	
+	var dataset = new Object();
+	
+	dataset.label = "Distance";
+	dataset.backgroundColor = "#FF0000";
+	dataset.data = [];
+	
+	sr = json.serie;
+	for (i = 0; i<sr.length; i++) {
+		var item = sr[i];
+		dataset.data.push(item.distance);
+	}
+	
+	return dataset;
+
+}
+
 function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, false);
