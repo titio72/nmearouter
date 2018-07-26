@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl.track;
 
 import java.util.Calendar;
 
+import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
@@ -19,6 +20,7 @@ import net.sf.marineapi.nmea.util.Time;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
+	private static final long CALC_SPEED_THRESHOLD = 5*60*1000; // 5 minutes
 	private TrackWriter media;
 	private String mediaFile;
 	private String listenSentence;
@@ -110,6 +112,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     public void setStaticPeriod(long period) {
         tracker.setStaticPeriod(period);
     }
+    
+    private GeoPositionT last;
 	
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
@@ -122,9 +126,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                    if (time!=null) {
 	                        Date date = NMEAUtils.getDate(s);
 	                        if (date!=null) {
-	                        	double speed = 0.0;
-	                        	if (s instanceof RMCSentence) speed = ((RMCSentence)s).getSpeed();
-	                            processPosition(pos, time, date, speed);
+	                        	Calendar timestamp = NMEAUtils.getTimestamp(time, date);
+	                        	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
+	                        	double speed = calcSpeed(s, pos_t);
+	                        	last = pos_t;
+	                            processPosition(pos_t, speed);
 	                        }
 	                    }
 	                }
@@ -135,10 +141,22 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 		}
 	}
 
-    private void processPosition(Position pos, Time time, Date date, double sog) throws Exception {
-        Calendar timestamp = NMEAUtils.getTimestamp(time, date);
-    	TrackManager.TrackPoint point = tracker.processPosition(
-    			new GeoPositionT(timestamp.getTimeInMillis(), pos), sog);
+	private double calcSpeed(Sentence s, GeoPositionT pos_t) {
+    	double speed = 0.0;
+    	if (s instanceof RMCSentence) {
+    		speed = ((RMCSentence)s).getSpeed();
+    	}
+    	else {
+    		if (last!=null && (pos_t.getTimestamp()-last.getTimestamp())<CALC_SPEED_THRESHOLD) {
+    			Course c = new Course(pos_t, last);
+    			speed = c.getSpeed();
+    		}
+    	}
+    	return speed;
+	}
+	
+    private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
+        TrackManager.TrackPoint point = tracker.processPosition(pos_t, sog);
     	if (point!=null && media!=null) {
             media.write(point.position, 
             		point.anchor, 

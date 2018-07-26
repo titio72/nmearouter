@@ -113,8 +113,8 @@ function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 function getDataset(caption, sr, min, avg, max) {
 	var data = new Object();
 	data.datasets = [];
-	if (min>0) data.datasets.push(fillDataset(caption + "Min", 	sr, "vMin", "#00FF00", "#22FF22"));
-	if (avg>0) data.datasets.push(fillDataset(caption, 			sr, "v", 	"#555555", "#222222"));
+	if (min>0) data.datasets.push(fillDataset(caption + "Min", 	sr, "vMin", "#555555", "#777777"));
+	if (avg>0) data.datasets.push(fillDataset(caption, 			sr, "v", 	"#555555", "#22FF22"));
 	if (max>0) data.datasets.push(fillDataset(caption + "Max", 	sr, "vMax", "#FF0000", "#FF2222"));
 	return data;
 }

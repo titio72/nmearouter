@@ -102,12 +102,12 @@
 	<dependency>
 	    <groupId>com.pi4j</groupId>
 	    <artifactId>pi4j-core</artifactId>
-	   <version>1.2-snapshot</version>
+	   <version>1.2-SNAPSHOT</version>
 	</dependency>
 	<dependency>
 	    <groupId>com.pi4j</groupId>
 	    <artifactId>pi4j-device</artifactId>
-	   <version>1.2-snapshot</version>
+	   <version>1.2-SNAPSHOT</version>
 	</dependency>
 	<dependency> 
   		<groupId>net.sf.marineapi</groupId>

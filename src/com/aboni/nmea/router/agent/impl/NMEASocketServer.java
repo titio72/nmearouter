@@ -18,7 +18,6 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketServer extends NMEAAgentImpl {

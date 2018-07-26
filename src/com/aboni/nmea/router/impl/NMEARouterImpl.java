@@ -164,7 +164,7 @@ public class NMEARouterImpl implements NMEARouter {
 				}
 			}
 		});
-		processingThread.setDaemon(true);
+		//processingThread.setDaemon(true);
 		processingThread.start();
 	}
 
