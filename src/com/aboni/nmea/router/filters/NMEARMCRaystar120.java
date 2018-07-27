@@ -36,9 +36,9 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 		double lat = 0.0;
 		double lon = 0.0;
 		int cc = 0;
-		for (int i = 0; i<10 && positions[(pp - i) % 10] != null; i++) {
-			lat += positions[(pp - i) % 10].getLatitude();
-			lon += positions[(pp - i) % 10].getLongitude();
+		for (int i = 0; i<10 && positions[(pp - i + 10) % 10] != null; i++) {
+			lat += positions[(pp - i + 10) % 10].getLatitude();
+			lon += positions[(pp - i + 10) % 10].getLongitude();
 			cc++;
 		}
 		if (cc==10) {

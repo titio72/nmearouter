@@ -139,12 +139,12 @@ public class NMEATrackManagerTest {
 	public void testSetAnchor() throws Exception {
 		cruise(10 * 60 /* 1m */, 5.0);
 		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 0.0);
-		/*for (TrackPoint p: l) {
+		for (TrackPoint p: l) {
 			System.out.println(p.period + " " + p.anchor + " " + p.averageSpeed);
-		}*/
+		}
 		assertTrue(l.get(l.size()-1).anchor);
 		assertEquals(0.0, l.get(l.size()-1).averageSpeed, 0.1);
-		assertEquals(30 * 60, l.get(l.size()-1).period);
+		assertEquals(m.getStaticPeriod() / 1000, l.get(l.size()-1).period);
 	}
 	
 	
