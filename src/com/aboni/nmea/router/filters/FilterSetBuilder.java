@@ -27,6 +27,14 @@ public class FilterSetBuilder {
 					fJ.put("sentence", ((NMEABasicSentenceFilter)f).getSentenceId());
 					fJ.put("source", ((NMEABasicSentenceFilter)f).getSource());
 					sentences.put(fJ);
+				} else if (f instanceof STalkFilter) {					
+					JSONObject fJ = new JSONObject();
+					if (((STalkFilter)f).isNegate()) {
+						fJ.put("sentence", "STALK:!" + ((STalkFilter)f).getCOmmand());
+					} else {
+						fJ.put("sentence", "STALK:" + ((STalkFilter)f).getCOmmand());
+					}
+					sentences.put(fJ);
 				}
 			}
 			obj.put("filters", sentences);
@@ -48,13 +56,22 @@ public class FilterSetBuilder {
 				JSONArray jFa = jFs.getJSONArray("filters");
 				for (Object _fJ : jFa) {
 					JSONObject fJ = (JSONObject) _fJ;
-					NMEABasicSentenceFilter f = null;
-					String stid =  fJ.optString("talker");
-					if (stid==null || "".equals(stid)) {
-						f = new NMEABasicSentenceFilter(fJ.getString("sentence"), fJ.getString("source"));
+					NMEASentenceFilter f = null;
+					String sentence = fJ.optString("sentence");
+					if (sentence.startsWith("STALK:")) {
+						String cmd = sentence.substring("STALK:".length());
+						f = new STalkFilter(cmd, false);
+					} else if (sentence.startsWith("STALK:!")) {
+							String cmd = sentence.substring("STALK:!".length());
+							f = new STalkFilter(cmd, true);
 					} else {
-						TalkerId tid = TalkerId.parse(stid);
-						f = new NMEABasicSentenceFilter(fJ.getString("sentence"), tid, fJ.getString("source"));
+						String stid =  fJ.optString("talker");
+						if (stid==null || "".equals(stid)) {
+							f = new NMEABasicSentenceFilter(fJ.getString("sentence"), fJ.getString("source"));
+						} else {
+							TalkerId tid = TalkerId.parse(stid);
+							f = new NMEABasicSentenceFilter(fJ.getString("sentence"), tid, fJ.getString("source"));
+						}
 					}
 					res.addFilter(f);
 				}
