@@ -184,7 +184,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             pressureTempSensor1 = (SensorPressureTemp)readSensor(pressureTempSensor1);
             if (compassSensor!=null) {
                 compassSensor.loadConfiguration();
-                compassSensor = (SensorCompass)readSensor(compassSensor);
+                compassSensor = (ASensorCompass)readSensor(compassSensor);
             }
         } catch (Exception e) {
             getLogger().Error("Error reading sensor data", e);
