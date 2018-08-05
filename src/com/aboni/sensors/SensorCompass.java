@@ -1,30 +1,23 @@
 package com.aboni.sensors;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import com.aboni.geo.DeviationManagerImpl;
-import com.aboni.utils.Constants;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-public class SensorCompass extends I2CSensor {
+public class SensorCompass extends ASensorCompass {
 
 	private SensorHMC5883 magnetometer;
 	private SensorMPU6050 gyro;
 	
 	private MagnetometerToCompass compass;
-	private DeviationManagerImpl devManager;
-	
-	private long lastModifiedDevTable;
 	
 	public SensorCompass() {
+		super();
         gyro = new SensorMPU6050();
         magnetometer = new SensorHMC5883();
         compass = new MagnetometerToCompass();
-        devManager = new DeviationManagerImpl();
 	}
 
 	@Override
@@ -52,7 +45,7 @@ public class SensorCompass extends I2CSensor {
      * Get the reading without adjustment (tilt and deviation)
      * @return The reading in degrees.
      */
-    public double getSensorHeading() {
+    public double getSensorHeadingNotCompensated() {
     	double[] d = getMagReading();
         return compass.getHeadingDegrees(d[0], d[1], d[2]);
     }	
@@ -61,11 +54,11 @@ public class SensorCompass extends I2CSensor {
 	 * Get the bearing compensated with the tilt data and deviation.
 	 * @return
 	 */
-	public double getHeading() throws SensorNotInititalizedException {
+    @Override
+	public double getUnfilteredSensorHeading() throws SensorNotInititalizedException {
 	    double[] mag_raw = magnetometer.getMagVector();
 	    double[] acc_raw = gyro.readRawAccel();
-	    double compassAngle = compass.getTiltCompensatedHeading(mag_raw, acc_raw); 
-	    return devManager.getMagnetic(compassAngle);
+	    return compass.getTiltCompensatedHeading(mag_raw, acc_raw); 
 	}
     
 	public double[] getRotationDegrees() throws SensorNotInititalizedException {
@@ -82,9 +75,10 @@ public class SensorCompass extends I2CSensor {
         return magnetometer.getMagVector();
     }
 
-    public void loadConfiguration() {
+    @Override
+    protected void _onLoadConfiguration() {
+    	super._onLoadConfiguration();
     	updateCalibration();
-        updateDeviationTable();
     }
 
     private void updateCalibration() {
@@ -98,30 +92,21 @@ public class SensorCompass extends I2CSensor {
         }
     }
 
-    private void updateDeviationTable() {
-        try {
-        	File f = new File(Constants.DEVIATION);
-        	if (f.exists() && f.lastModified()>lastModifiedDevTable) {
-        		ServerLog.getLogger().Info("Reloading deviation table.");
-        		lastModifiedDevTable = f.lastModified();
-	        	FileInputStream s = new FileInputStream(f); 
-				devManager.reset();
-	        	devManager.load(s);
-				s.close();
-        	}
-		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot load deviation table!", e);
-		}
-    }
-
     @Override
-    public String getSensorName() {
-        return "COMPASS";
-    }
-
-    @Override
-    protected void _read() throws Exception {
+    protected void _onRead() throws Exception {
         gyro.read();
         magnetometer.read();
     }
+
+	@Override
+	public double getUnfilteredPitch() throws SensorNotInititalizedException {
+		double[] rot = getRotationDegrees();
+		return rot[1];
+	}
+
+	@Override
+	public double getUnfilteredRoll() throws SensorNotInititalizedException {
+		double[] rot = getRotationDegrees();
+		return rot[0];
+	}
 }

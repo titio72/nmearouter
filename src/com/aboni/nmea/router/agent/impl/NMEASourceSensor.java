@@ -2,7 +2,9 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.sensors.SensorPressureTemp;
 import com.aboni.sensors.SensorTemp;
+import com.aboni.sensors.ASensorCompass;
 import com.aboni.sensors.Sensor;
+import com.aboni.sensors.SensorCMPS11;
 import com.aboni.sensors.SensorCompass;
 import com.aboni.sensors.SensorNotInititalizedException;
 import com.aboni.sensors.SensorVoltage;
@@ -44,12 +46,14 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      */
     private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
 
+    private static final boolean USE_CMPS11 = true;
+    
     private boolean started;
     
     private Timer timer;
     
     private SensorVoltage voltageSensor;
-    private SensorCompass compassSensor;
+    private ASensorCompass compassSensor;
     private SensorPressureTemp pressureTempSensor0;
     private SensorPressureTemp pressureTempSensor1;
     private SensorPressureTemp[] pressureTempSensors;
@@ -161,9 +165,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		}
 	}
     
-	private SensorCompass createCompass() {
+	private ASensorCompass createCompass() {
 		try {
-			SensorCompass r = new SensorCompass();
+			ASensorCompass r = USE_CMPS11? new SensorCMPS11() : new SensorCompass();
 			r.init();
 			return r;
 		} catch (Exception e) {
@@ -291,11 +295,12 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	    XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 	    if (compassSensor!=null) {
 	        try {
-	        	double[] rot = compassSensor.getRotationDegrees();
+	        	double roll = compassSensor.getUnfilteredRoll();
+	        	double pitch = compassSensor.getUnfilteredPitch();
 	        	double hd = compassSensor.getHeading();
                 xdr.addMeasurement(new Measurement("A", Math.round(hd), "D", "HEAD"));
-                xdr.addMeasurement(new Measurement("A", Math.round(rot[0]), "D", "ROLL"));
-                xdr.addMeasurement(new Measurement("A", Math.round(rot[1]), "D", "PITCH"));
+                xdr.addMeasurement(new Measurement("A", Math.round(roll), "D", "ROLL"));
+                xdr.addMeasurement(new Measurement("A", Math.round(pitch), "D", "PITCH"));
 	        } catch (Exception e) {
 	            getLogger().Error("Cannot post XDR data", e);
 	        }
