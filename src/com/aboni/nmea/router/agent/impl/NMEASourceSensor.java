@@ -11,6 +11,9 @@ import com.aboni.sensors.SensorVoltage;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Timer;
@@ -44,7 +47,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
      * After 1m no HDx sentence appear on the stream the sensor start providing its own.
      * This is in case the boat can provide heading values (AP, boat compass etc.).
      */
-    private static final long SEND_HDx_IDLE_TIME = 15*1000; //ms
+    private static final long SEND_HDx_IDLE_TIME = 15 * 1000; //ms
 
     private static final boolean USE_CMPS11 = true;
     
@@ -351,6 +354,24 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
-        // do nothing - pure source
+        if (HWSettings.getPropertyAsInteger("compass.dump", 0)>0 && s instanceof HDMSentence && compassSensor!=null) {
+        	try {
+        		double headingBoat = ((HDMSentence)s).getHeading();
+        		double headingSens = compassSensor.getHeading();
+        		dump(headingSens, headingBoat);
+        	} catch (Exception e) {}
+        }
     }
+
+	private void dump(double headingSens, double headingBoat) {
+		int hdg = (int)headingSens;
+		try {
+			FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true);
+			stream.write(String.format("%d%n", (int)headingBoat).getBytes());
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }

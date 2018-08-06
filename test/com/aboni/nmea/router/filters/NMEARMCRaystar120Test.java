@@ -47,7 +47,6 @@ public class NMEARMCRaystar120Test {
 		return r;
 	}
 	
-
 	@Test
 	public void testSyncTime() {
 		NMEARMCRaystar120 r120 = new NMEARMCRaystar120();
@@ -78,36 +77,12 @@ public class NMEARMCRaystar120Test {
 		
 		// run for a few seconds regularly
 		for (int i = 0; i<_N; i++) {
-			RMCSentence r = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-			r.setCourse(180.0);
-			r.setMode(FaaMode.AUTOMATIC);
-			r.setSpeed(5.6);
-			r.setStatus(DataStatus.ACTIVE);
-			r.setPosition(new Position(43.3780717, 10.1760560));
-			Calendar c = (Calendar)start.clone();
-			int _r120_offset = (i / 10) * 10;
-			c.setTimeInMillis(_start + _r120_offset * 1000);
-			Time newTime = new Time(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), 0, 0);
-			Date newDate = new Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
-			r.setTime(newTime);
-			r.setDate(newDate);
+			RMCSentence r = getRMC(_start,  i, 43.3780717, 10.1760560);
 			r120.process(r, "X");
 		}
 		
 		// send down a "wrong" position
-		RMCSentence r = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-		r.setCourse(180.0);
-		r.setMode(FaaMode.AUTOMATIC);
-		r.setSpeed(5.6);
-		r.setStatus(DataStatus.ACTIVE);
-		r.setPosition(new Position(43.3780717, -10.1760560));
-		Calendar c = (Calendar)start.clone();
-		int _r120_offset = (_N / 10) * 10;
-		c.setTimeInMillis(_start + _r120_offset * 1000);
-		Time newTime = new Time(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), 0, 0);
-		Date newDate = new Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
-		r.setTime(newTime);
-		r.setDate(newDate);
+		RMCSentence r = getRMC(_start,  _N, 43.3780717, -10.1760560 /* way off */);
 		r120.process(r, "X");
 
 		assertEquals(DataStatus.VOID, r.getStatus());
@@ -123,36 +98,12 @@ public class NMEARMCRaystar120Test {
 		
 		// run for a few seconds regularly
 		for (int i = 0; i<_N; i++) {
-			RMCSentence r = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-			r.setCourse(180.0);
-			r.setMode(FaaMode.AUTOMATIC);
-			r.setSpeed(5.6);
-			r.setStatus(DataStatus.ACTIVE);
-			r.setPosition(new Position(43.3780717, 10.1760560));
-			Calendar c = (Calendar)start.clone();
-			int _r120_offset = (i / 10) * 10;
-			c.setTimeInMillis(_start + _r120_offset * 1000);
-			Time newTime = new Time(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), 0, 0);
-			Date newDate = new Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
-			r.setTime(newTime);
-			r.setDate(newDate);
+			RMCSentence r = getRMC(_start,  i, 43.3780717, 10.1760560);
 			r120.process(r, "X");
 		}
 		
 		// send down a "wrong" position
-		RMCSentence r = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-		r.setCourse(180.0);
-		r.setMode(FaaMode.AUTOMATIC);
-		r.setSpeed(5.6);
-		r.setStatus(DataStatus.ACTIVE);
-		r.setPosition(new Position(43.3780717, 10.1760560));
-		Calendar c = (Calendar)start.clone();
-		int _r120_offset = (_N / 10) * 10;
-		c.setTimeInMillis(_start + _r120_offset * 1000);
-		Time newTime = new Time(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND), 0, 0);
-		Date newDate = new Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
-		r.setTime(newTime);
-		r.setDate(newDate);
+		RMCSentence r = getRMC(_start,  _N, 43.3780717, 10.1760560);
 		r120.process(r, "X");
 
 		assertEquals(DataStatus.ACTIVE, r.getStatus());

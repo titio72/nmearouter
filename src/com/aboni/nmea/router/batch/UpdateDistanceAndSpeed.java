@@ -22,7 +22,7 @@ public class UpdateDistanceAndSpeed {
 	        PreparedStatement stUpd = db.getConnection().prepareStatement(
 	        		"update track set dTime=?, dist=?, speed=? where id=?");
     	    PreparedStatement st = db.getConnection().prepareStatement(
-    	            "select lat, lon, TS, id from track where id>156694 order by TS");
+    	            "select lat, lon, TS, id from track where tripid=? order by TS");
     	    
     	    if (st.execute()) {
     	        ResultSet rs = st.getResultSet();

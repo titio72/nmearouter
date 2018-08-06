@@ -42,6 +42,7 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 			cc++;
 		}
 		if (cc==10) {
+			// we want all the the 10 samples to be available before considering the reference reliable
 			reference = new Position(lat / 10.0, lon / 10.0);
 		} else {
 			reference = null;
