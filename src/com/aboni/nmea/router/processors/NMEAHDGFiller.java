@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.processors;
 
 import java.util.ArrayList;
 import java.util.List;

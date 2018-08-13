@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.HWSettings;

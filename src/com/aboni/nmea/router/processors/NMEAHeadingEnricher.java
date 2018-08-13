@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;

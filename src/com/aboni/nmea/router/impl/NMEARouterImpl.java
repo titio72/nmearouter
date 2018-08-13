@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
@@ -44,12 +45,7 @@ public class NMEARouterImpl implements NMEARouter {
 
 		@Override
 		public void onSentence(Sentence s, NMEAAgent src) {
-			SentenceEvent e = new SentenceEvent(s, src);
-			synchronized (sentenceQueue) { 
-				sentenceQueue.add(e);
-				sentenceQueue.notifyAll();
-			}
-			
+		    _onSentenceFromSource(s, src);
 		}
 	}
 	
@@ -59,19 +55,19 @@ public class NMEARouterImpl implements NMEARouter {
 			this.src = src;
 		}
 		
-		Sentence s;
-		NMEAAgent src;
+		final Sentence s;
+		final NMEAAgent src;
 	}
 	
-	private Map<String, NMEAAgent> agents;
+	private final Map<String, NMEAAgent> agents;
 	
-	private Queue<SentenceEvent> sentenceQueue;
+	private final Queue<SentenceEvent> sentenceQueue;
 	
 	private Thread processingThread;
 	private LogLevelType logLevel = LogLevelType.INFO;
 	
-	private NMEACache cache;
-	private NMEAStream stream;
+	private final NMEACache cache;
+	private final NMEAStream stream;
 
 	private static final int TIMER = 1000;
 	
@@ -190,14 +186,22 @@ public class NMEARouterImpl implements NMEARouter {
 	@Override
 	public Collection<String> getAgents() {
 		synchronized (agents) {
-			return agents.keySet();
+			return new TreeSet<String>(agents.keySet());
 		}
 	}
 	
-	private synchronized void _onStatusChange(NMEAAgent src) {
+	private void _onStatusChange(NMEAAgent src) {
 	}
 
-	private synchronized void _onSentence(Sentence s, NMEAAgent src) {
+    private void _onSentenceFromSource(Sentence s, NMEAAgent src) {
+        SentenceEvent e = new SentenceEvent(s, src);
+        synchronized (sentenceQueue) { 
+            sentenceQueue.add(e);
+            sentenceQueue.notifyAll();
+        }
+    }
+	
+	private void _onSentence(Sentence s, NMEAAgent src) {
 		if (started) {
 			cache.onSentence(s, src.getName());
 			stream.pushSentence(s, src);
@@ -212,7 +216,7 @@ public class NMEARouterImpl implements NMEARouter {
 				    NMEAAgent tgt = i.next();
 				    NMEATarget target = tgt.getTarget();        
 				    if (src.getName().equals(tgt.getName())) {
-				        // do nothing, skip routing messages to the originator
+				        // do nothing, do not route messages back to the originator
 				    } else if (target!=null) {
 				        target.pushSentence(s, src);
 				    }

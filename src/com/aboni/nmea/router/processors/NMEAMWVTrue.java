@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
@@ -44,7 +44,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					// skip it (filter out true wind)
 					return new Sentence[] {};
 				} else if ((System.currentTimeMillis()-lastSpeedTime)<AGE_THRESHOLD) {
-					// calculate true wind and propagate apparent and true together
+					// calculate true wind
 					TrueWind t = new TrueWind(lastSpeed, mwv.getAngle(), mwv.getSpeed());
 					MWVSentence mwv_t = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
 					mwv_t.setAngle(Utils.normalizeDegrees0_360(t.getTrueWindDeg()));
@@ -52,7 +52,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					mwv_t.setSpeed(t.getTrueWindSpeed());
 					mwv_t.setSpeedUnit(Units.KNOT);
 					mwv_t.setStatus(DataStatus.ACTIVE);
-					return new Sentence[] {mwv, mwv_t};
+					return new Sentence[] {mwv_t};
 				}
 			} else if (!useRMC && sentence instanceof VHWSentence) {
 				lastSpeed = ((VHWSentence)sentence).getSpeedKnots();

@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.processors.NMEARMCRaystar120;
 import com.aboni.nmea.sentences.NMEAUtils;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;

@@ -12,14 +12,14 @@ import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.filters.NMEADepthEnricher;
-import com.aboni.nmea.router.filters.NMEAHDGFiller;
-import com.aboni.nmea.router.filters.NMEAHeadingEnricher;
-import com.aboni.nmea.router.filters.NMEAMWVTrue;
-import com.aboni.nmea.router.filters.NMEAPostProcess;
-import com.aboni.nmea.router.filters.NMEARMC2VTGProcessor;
-import com.aboni.nmea.router.filters.NMEARMCRaystar120;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.nmea.router.processors.NMEADepthEnricher;
+import com.aboni.nmea.router.processors.NMEAHDGFiller;
+import com.aboni.nmea.router.processors.NMEAHeadingEnricher;
+import com.aboni.nmea.router.processors.NMEAMWVTrue;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEARMC2VTGProcessor;
+import com.aboni.nmea.router.processors.NMEARMCRaystar120;
 import com.aboni.utils.Log;
 import com.aboni.utils.ServerLog;
 
@@ -70,11 +70,11 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		
 	}
 	
-	private String name;
+	private final String name;
 	private NMEAAgentStatusListener sl;
 	private NMEASentenceFilterSet fsetInput;
 	private NMEASentenceFilterSet fsetOutput;
-	private List<NMEAPostProcess> proc;
+	private final List<NMEAPostProcess> proc;
 	private boolean active;
 	private NMEASentenceListener listener;
 	private boolean builtin;
@@ -89,8 +89,14 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         this.name = name;
         fsetInput = null;
         fsetOutput = null;
-        proc = new ArrayList<NMEAPostProcess>();
         active = false;
+        proc = new ArrayList<NMEAPostProcess>();
+        handleQos(cache, name, qos);
+        target = true;
+        source = true;
+    }
+
+    private void handleQos(NMEACache cache, String name, QOS qos) {
         if (qos!=null) { 
             if (qos.get("dpt")) {
                 getLogger().Info("QoS {DPT} Agent {" + name + "}");
@@ -125,8 +131,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                 builtin = true;
             }
         }
-        target = true;
-        source = true;
     }
     
 	public NMEAAgentImpl(NMEACache cache, NMEAStream stream, String name) {
@@ -307,7 +311,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
 
     protected final boolean isTarget() {
-    	return getSource()!=null;
+    	return getTarget()!=null;
     }
     
     @Override

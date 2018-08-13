@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.processors;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 

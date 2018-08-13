@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.processors.NMEAHDGFiller;
 import com.aboni.utils.DataEvent;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
