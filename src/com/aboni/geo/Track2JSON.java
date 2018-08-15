@@ -89,7 +89,8 @@ public class Track2JSON implements TrackDumper {
     private void writePoint(GeoPositionT p) {
     	JSONObject pt = new JSONObject();
     	pt.put("lat", p.getLatitude());
-    	pt.put("lng", p.getLongitude());
+        pt.put("lng", p.getLongitude());
+        pt.put("time", p.getTimestamp());
     	getPath().add(pt);
     }
 
