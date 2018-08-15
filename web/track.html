@@ -141,6 +141,25 @@
 	        	xAxes: [{
 	                type: 'time',
 	            }]
+	        },
+	        tooltips: {
+	            callbacks: {
+	                label: function(tooltipItem, data) {
+                        ix = tooltipItem.index;
+                        _minSpeed = data.datasets[0].data[ix].y;
+                        _avgSpeed = data.datasets[1].data[ix].y;
+                        _maxSpeed = data.datasets[2].data[ix].y;
+                        return _minSpeed.toFixed(2) + " - " +_avgSpeed.toFixed(2) + " - " +_maxSpeed.toFixed(2);
+                    },
+	            	title: function(tooltipItem, data) {
+	                	ix = tooltipItem[0].index;
+	                	_time = new Date(data.datasets[0].data[ix].x);
+                        _minSpeed = data.datasets[0].data[ix].y;
+                        _avgSpeed = data.datasets[1].data[ix].y;
+                        _maxSpeed = data.datasets[2].data[ix].y;
+	                    return _time.toLocaleTimeString();
+	                }
+	            }	        	
 	        }
 	    }
 		});
