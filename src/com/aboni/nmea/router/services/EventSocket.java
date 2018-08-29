@@ -102,7 +102,6 @@ public class EventSocket
 						sess.getBasicRemote().sendText(obj.toString());
 					} catch (IOException e) {
 						ServerLog.getLogger().Error("Error sending json to WS {" + id + "}", e);
-						e.printStackTrace();
 					}
 				}
 			}

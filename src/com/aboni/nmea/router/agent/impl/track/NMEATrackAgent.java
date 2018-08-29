@@ -21,6 +21,7 @@ import net.sf.marineapi.nmea.util.Time;
 public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private static final long CALC_SPEED_THRESHOLD = 5*60*1000; // 5 minutes
+	private static final double SPEED_THRESHOLD = 40; //kn - anything faster than 40 knots is a mistake
 	private TrackWriter media;
 	private String mediaFile;
 	private String listenSentence;
@@ -129,14 +130,16 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                        	Calendar timestamp = NMEAUtils.getTimestamp(time, date);
 	                        	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
 	                        	double speed = calcSpeed(s, pos_t);
-	                        	last = pos_t;
-	                            processPosition(pos_t, speed);
+	                        	if (speed < SPEED_THRESHOLD) {
+		                        	last = pos_t;
+		                            processPosition(pos_t, speed);
+	                        	}
 	                        }
 	                    }
 	                }
 	            }
 			} catch (Exception e) {
-				ServerLog.getLogger().Error("Cannot write down position!", e);
+				ServerLog.getLogger().Error("Error processing position {" + s + "}", e);
 			}
 		}
 	}

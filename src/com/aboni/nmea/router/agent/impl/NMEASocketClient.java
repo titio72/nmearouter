@@ -38,8 +38,10 @@ public class NMEASocketClient extends NMEAAgentImpl {
         }
 		
 		public void stopMe() {
-			stop = true;
-			closeIt();
+			synchronized (this) {
+				stop = true;
+			}
+			//closeIt();
 		}
 		
 		private void closeIt() {
@@ -63,10 +65,17 @@ public class NMEASocketClient extends NMEAAgentImpl {
             }
 		}
 		
+		private boolean isStopping() {
+			synchronized (this) {
+				return stop;
+			}
+		}
+		
+		
 		private void doRead() {
 	    	StringBuffer b = new StringBuffer();
 	    	BufferedReader reader = null;
-			while (!stop) {
+			while (!isStopping()) {
 			    if (openSocket()) {
 			    	reader = new BufferedReader(new InputStreamReader(iStream));
 
@@ -77,7 +86,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
     					try {
     						String line = reader.readLine();
     						if (line!=null) {
-					    		processSentence(line);
+					    		if (!isStopping()) {
+					    			processSentence(line);
+					    		}
     						} else {
     		                    getLogger().Debug("Socket likely closed");
     						    reset = true;
@@ -95,6 +106,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
 		
 		@Override
 		public void run() {
+			synchronized (this) {
+				stop = false;
+			}
 			doRead();
 		}
 	}

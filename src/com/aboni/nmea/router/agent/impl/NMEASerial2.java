@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -13,6 +15,57 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASerial2 extends NMEAAgentImpl {
+	
+	private static class Selector {
+		
+		private boolean started;
+		
+		private Set<NMEASerial2> readers = new HashSet<>();
+		
+		synchronized void addReader(NMEASerial2 reader) {
+			readers.add(reader);
+		}
+		
+		synchronized void removeReader(NMEASerial2 reader) {
+			readers.remove(reader);
+		}
+		
+		synchronized void start() {
+			synchronized (this) {
+				if (!started) {
+					started = true;
+					Thread t = new Thread(new Runnable() {
+	
+						@Override
+						public void run() {
+		                    byte[] readBuffer = new byte[4096];
+		                    int totRead = 0;
+							while (started) {
+								for (NMEASerial2 reader: readers) {
+			                        int numRead = reader.port.readBytes(readBuffer, readBuffer.length);
+			                        if (numRead > 0) {
+			                        	totRead += numRead;
+			                            reader.l.read(readBuffer, numRead);
+			                        }
+								}
+								if (totRead==0) {
+									try {
+										Thread.sleep(100);
+									} catch (Exception e) {}
+								}
+								totRead = 0;
+							}
+						}}
+					);
+					t.setDaemon(true);
+					t.start();
+				}
+			}
+		}
+	}
+	
+	
+	static Selector selector = new Selector();
 
     private class SerialListener {
 
@@ -36,7 +89,7 @@ public class NMEASerial2 extends NMEAAgentImpl {
                         if (write>=SIZE) {
                             getLogger().Error("Buffer exceeded");
                         }
-                        write %= write;
+                        write %= SIZE;
                     }
                     if (buffer[i] == 13) {
                         String s = new String(internalBuffer, 0, write).trim();
@@ -61,6 +114,7 @@ public class NMEASerial2 extends NMEAAgentImpl {
     private SerialPort port;
     private boolean receive;
     private boolean trasmit;
+    private SerialListener l = new SerialListener();
 
     private Executor sender;
 
@@ -106,10 +160,12 @@ public class NMEASerial2 extends NMEAAgentImpl {
                 port = SerialPort.getCommPort(portName);
                 port.setComPortParameters(speed, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 port.openPort();
-                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+                port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
                 getLogger().Info("Port Opened");
-                if (receive)
-                    startReceive();
+                if (receive) {
+                	selector.addReader(this);
+                	selector.start();
+                }
                 return true;
             } catch (Exception e) {
                 getLogger().Error("Error initializing serial {" + portName + "}", e);
@@ -119,33 +175,10 @@ public class NMEASerial2 extends NMEAAgentImpl {
         return false;
     }
 
-    private void startReceive() {
-        SerialListener l = new SerialListener();
-        Thread t = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    byte[] readBuffer = new byte[1024];
-                    while (true) {
-                        int numRead = port.readBytes(readBuffer, readBuffer.length);
-                        if (numRead > 0) {
-                            l.read(readBuffer, numRead);
-                        }
-                    }
-                } catch (Exception e) {
-                    getLogger().Error("Error reading serial {" + getName() + "}", e);
-                }
-                stop();
-            }
-        });
-        t.setDaemon(true);
-        t.start();
-    }
-
     @Override
     protected void onDeactivate() {
         if (port != null) {
+        	selector.removeReader(this);
             try {
                 port.closePort();
             } catch (Exception e) {

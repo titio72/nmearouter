@@ -118,7 +118,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         timer = null;
     }
 
-    private void doLF() {
+    private synchronized void doLF() {
         if (started) {
         	readSensors();
         	int mtaSensor = HWSettings.getPropertyAsInteger("mta.sensor", 0);
@@ -284,6 +284,23 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		}
 	}
 	
+	/**
+	private String getXDR(String sentence, String type, double value, int precision, String unit, String name) {
+		String fmt = ",%s,%." + precision + "f,%s,%s";
+		String s = String.format(fmt, type, value, unit, name);
+		if (sentence==null || sentence.isEmpty()) {
+			s = "$IIXDR" + s;
+		} else {
+			s = sentence + s;
+		}
+		return  s;
+	}
+
+	private String getFullXDR(String s) {
+		
+	}
+	**/
+	
 	private void sendCPUTemp() {
 		try {
 			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
@@ -308,7 +325,10 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	            getLogger().Error("Cannot post XDR data", e);
 	        }
         }
-	    for (int i = 0; i<pressureTempSensors.length; i++) {
+        notify(xdr);
+
+        xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+        for (int i = 0; i<pressureTempSensors.length; i++) {
 	        if (pressureTempSensors[i]!=null) {
 	            try {
 	                double t = pressureTempSensors[i].getTemperatureCelsius();
@@ -322,6 +342,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	            }
 	        }
 	    }
+        notify(xdr);
+
+        xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
         if (tempSensor!=null) {
             try {
             	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
@@ -339,6 +362,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 getLogger().Error("Cannot post XDR data", e);
             }
         }
+        notify(xdr);
+
+        xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
         if (voltageSensor!=null) {
             try {
 				xdr.addMeasurement(new Measurement("V", Math.round(voltageSensor.getVoltage0()*1000d)/1000d, "V", "V0"));
