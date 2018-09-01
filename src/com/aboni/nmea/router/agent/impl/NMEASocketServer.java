@@ -10,6 +10,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
@@ -28,7 +29,23 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private static final int DEFAULT_PORT = 1111;
 	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
-	private final Map<SocketChannel, String> clients;
+	private final Map<SocketChannel, ClientDescriptor> clients;
+	
+	private class ClientDescriptor {
+		
+		ClientDescriptor(String ip) {
+			this.ip = ip;
+		}
+		
+		final String ip;
+		
+		int errors = 0;
+		
+		@Override
+		public String toString() {
+			return ip;
+		}
+	}
 	
 	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, boolean allowReceive, QOS q) {
 		super(cache, stream, name, q);
@@ -128,7 +145,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
 	private void handleDisconnection(SocketChannel client) {
 		try {
-			getLogger().Info("Disconnection {" + clients.getOrDefault(client, "unknown") + "} Agent {" + getName() + "}");
+			getLogger().Info("Disconnection {" + clients.getOrDefault(client, null) + "} Agent {" + getName() + "}");
 			synchronized (clients) {
 				clients.remove(client);
 			}
@@ -145,7 +162,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    client.configureBlocking(false);
 		    client.register(selector, SelectionKey.OP_READ);
 		    synchronized (clients) {
-			    clients.put(client, client.getRemoteAddress().toString());
+			    clients.put(client, new ClientDescriptor(client.getRemoteAddress().toString()));
 			}
 			getLogger().Info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
 
@@ -175,10 +192,12 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				writeBuffer.put(output.getBytes());
 				writeBuffer.put("\r\n".getBytes());
 				int p = writeBuffer.position();
-				Iterator<SocketChannel> iter = clients.keySet().iterator();
+				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
 				while (iter.hasNext()) {
-					SocketChannel sc = iter.next();
-					if (!sendMessageToClient(output, p, sc)) {
+					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
+					SocketChannel sc = itm.getKey();
+					ClientDescriptor cd = itm.getValue();
+					if (!sendMessageToClient(output, p, sc, cd)) {
 						iter.remove();
 					}
 				}
@@ -186,15 +205,18 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		}
 	}
 
-	private boolean sendMessageToClient(String output, int p, SocketChannel sc) {
+	private boolean sendMessageToClient(String output, int p, SocketChannel sc, ClientDescriptor cd) {
 		writeBuffer.position(0);
 		writeBuffer.limit(p);
 		try {
 			int written = sc.write(writeBuffer);
 			if (written==0) {
-				ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "}" );
+				cd.errors++;
+				ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
+			} else {
+				cd.errors = 0;
 			}
-			return true;
+			return cd.errors < 10 /* allow a max of 10 failure, then close the channel */;
 		} catch (IOException e) {
 			try { 
 				getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "

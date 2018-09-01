@@ -7,6 +7,7 @@ import java.util.TimeZone;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor.GPSTimeException;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -21,15 +22,21 @@ public class SystemTimeChecker {
 		this.cache = cache;
 	}
 	public void checkAndSetTime(Sentence s, NMEAAgent src) {
-		Calendar c = NMEATimestampExtractor.getTimestamp(s);
-		if (c!=null) {
-			Calendar now = Calendar.getInstance();
-			if (!checkTimeSkew(now, c)) {
-                // time skew from GPS is too high - reset time stamp
-                ServerLog.getLogger().Info("Changing system time to {" + c + "}");
-				doChangeTime(c);
+		if (!cache.isTimeSynced()) {
+			try {
+				Calendar c = NMEATimestampExtractor.getTimestamp(s);
+				if (c!=null) {
+					Calendar now = Calendar.getInstance();
+					if (!checkTimeSkew(now, c)) {
+		                // time skew from GPS is too high - reset time stamp
+		                ServerLog.getLogger().Info("Changing system time to {" + c + "}");
+						doChangeTime(c);
+					}
+					if (checkTimeSkew(now, c)) cache.setTimeSynced();
+				}
+			} catch (GPSTimeException e) {
+				ServerLog.getLogger().Warning("Caught invalid GPS time: " + e.getMessage());
 			}
-			if (checkTimeSkew(now, c)) cache.setTimeSynced();
 		}
 	}
 	

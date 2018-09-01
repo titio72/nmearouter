@@ -4,8 +4,6 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.ZDASentence;
@@ -23,7 +21,20 @@ public class NMEATimestampExtractor {
 		Date d = null;
 	}
 	
-	private static DateAndTime extractTimestamp(Sentence s) {
+	public static class GPSTimeException extends Exception {
+
+		public GPSTimeException(String msg) {
+			super(msg);
+		}
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+	}
+	
+	private static DateAndTime extractTimestamp(Sentence s) throws GPSTimeException {
 		Date d = null;
 		Time t = null;
 		try {
@@ -39,7 +50,7 @@ public class NMEATimestampExtractor {
 				}
 			}
 		} catch (Exception e) {
-            ServerLog.getLogger().Error("Error extracting GPS time", e);
+            throw new GPSTimeException("Error extracting GPS time {" + s + "} e {" + e + "}");
 		}
 		if (d!=null && t!=null) {
 			DateAndTime tStamp = new DateAndTime();
@@ -64,7 +75,7 @@ public class NMEATimestampExtractor {
 		return c;
 	}
 
-	public static Calendar getTimestamp(Sentence s) {
+	public static Calendar getTimestamp(Sentence s) throws GPSTimeException {
 		DateAndTime dt = extractTimestamp(s);
 		if (dt!=null) {
 			return getCalendar(dt);

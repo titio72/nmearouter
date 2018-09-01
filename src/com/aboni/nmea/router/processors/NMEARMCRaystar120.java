@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor;
+import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor.GPSTimeException;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -65,7 +66,11 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 			
 			updateReference(rmc.getPosition());
 			
-			Calendar c = NMEATimestampExtractor.getTimestamp(rmc);
+			Calendar c = null;
+			try {
+				c = NMEATimestampExtractor.getTimestamp(rmc);
+			} catch (GPSTimeException e) {
+			}
 			if (c!=null) {
 				long t = c.getTimeInMillis();
 				if (previousTimeStamp!=0) {
