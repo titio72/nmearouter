@@ -63,7 +63,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 			}
 			return null;
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot process message!", e);
+            ServerLog.getLogger().Warning("Cannot enrich wind message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
 		}
 		return null;
 	}

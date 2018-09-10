@@ -55,7 +55,7 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
                 }
             }
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Cannot process message!", e);
+            ServerLog.getLogger().Warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
         return null;
     }

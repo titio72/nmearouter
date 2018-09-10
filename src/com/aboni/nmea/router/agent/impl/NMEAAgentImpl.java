@@ -292,7 +292,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 				doWithSentence(s, source);
 			}
 		} catch (Throwable t) {
-			getLogger().Error("Error delivering sentence to agent", t);
+			getLogger().Warning("Error delivering sentence to agent {" + s + "} error {" + t.getMessage() + "}");
     	}
     }
     

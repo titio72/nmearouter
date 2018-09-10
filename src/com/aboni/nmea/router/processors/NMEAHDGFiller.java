@@ -64,7 +64,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                 return (Sentence[]) out.toArray(new Sentence[0]);
             }
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Cannot process message!", e);
+            ServerLog.getLogger().Warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
         return null;
     }

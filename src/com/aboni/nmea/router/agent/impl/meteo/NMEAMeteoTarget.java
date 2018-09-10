@@ -109,7 +109,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		        }
 	    	}
     	} catch (Exception e) {
-    		getLogger().Error("Error processing meteo stats", e);
+    		getLogger().Warning("Error processing meteo stats {" + s + "} erro {" + e + "}");
     	}
     }
 

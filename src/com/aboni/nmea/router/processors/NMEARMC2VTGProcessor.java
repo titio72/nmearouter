@@ -70,7 +70,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 				return new Sentence[] {vtg};
 			}
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot process message!", e);
+            ServerLog.getLogger().Warning("Cannot convert message to vtg {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
 		}
 		return null;
 	}
