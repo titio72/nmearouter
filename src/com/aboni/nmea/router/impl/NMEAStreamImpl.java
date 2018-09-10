@@ -61,7 +61,7 @@ public class NMEAStreamImpl implements NMEAStream {
 						}
 					}
 				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error dispatchinc event to listener {" + s.toSentence() + "}!", e);
+					ServerLog.getLogger().Warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
 				}
 			}
 		}

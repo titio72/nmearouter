@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
+import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
@@ -44,9 +45,11 @@ public class NMEACacheImpl implements NMEACache {
 	            lastHeading.data = (HeadingSentence)s;
 	        }
 	        else if (s instanceof PositionSentence) {
-	            lastPosition.data = (PositionSentence)s;
-	            lastPosition.source = src;
-	            lastPosition.timestamp = System.currentTimeMillis();
+	            if (s.isValid()) {
+		            lastPosition.data = (PositionSentence)s;
+		            lastPosition.source = src;
+		            lastPosition.timestamp = System.currentTimeMillis();
+	            }
 	        }
 	        else if (s instanceof XDRSentence) {
 	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
@@ -67,7 +70,7 @@ public class NMEACacheImpl implements NMEACache {
 	            lastTime.timestamp = System.currentTimeMillis();
 	        }
     	} catch (Exception e) {
-    		// why would that be??????
+    		ServerLog.getLogger().Warning("Cannot cache message {" + s + "} error {" + e.getMessage() + "}");
     	}
     }
     
