@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
@@ -65,13 +64,11 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		return q;
 	}
     
-	private NMEAStream stream;
 	private NMEACache cache;
 	
 	@Inject
-	public NMEAAgentBuilderImpl(NMEACache cache, NMEAStream stream) {
+	public NMEAAgentBuilderImpl(NMEACache cache) {
 		this.cache = cache;
-		this.stream = stream;
 	}
 	
 	/* (non-Javadoc)
@@ -135,7 +132,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     	String file = g.getGpxFile();
     	NMEAGPXPlayerAgent gpx = null;
 		try {
-			gpx = new NMEAGPXPlayerAgent(cache, stream, g.getName(), file, q);
+			gpx = new NMEAGPXPlayerAgent(cache, g.getName(), file, q);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -143,7 +140,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
     
 	private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
-    	NMEAAgent console = new NMEAConsoleTarget(cache, stream, c.getName(), q);
+    	NMEAAgent console = new NMEAConsoleTarget(cache, c.getName(), q);
     	return console;
 	}
 
@@ -159,11 +156,11 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		default: r = false; t = false; break;
 		}
 		
-		return new NMEASerial2(cache, stream, name, portName, speed, r, t, q);
+		return new NMEASerial2(cache, name, portName, speed, r, t, q);
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
-        NMEAUDPServer a = new NMEAUDPServer(cache, stream, conf.getName(), q, 1111);
+        NMEAUDPServer a = new NMEAUDPServer(cache, conf.getName(), q, 1111);
         for (String s: conf.getTo()) {
         	a.addTarget(s);
         }
@@ -171,12 +168,12 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 	
 	private NMEAAgent buildMWDSynt(MWDAgent a, QOS q) {
-    	NMEAMWDSentenceCalculator c = new NMEAMWDSentenceCalculator(cache, stream, "MWD", q);
+    	NMEAMWDSentenceCalculator c = new NMEAMWDSentenceCalculator(cache, "MWD", q);
     	return c;
 	}
 
 	private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
-        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, stream, a.getName(), q, new DBMeteoWriter());
+        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, a.getName(), q, new DBMeteoWriter());
         return meteo;
     }
 
@@ -184,7 +181,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         String name = s.getName();
         int port = s.getPort();
 		NMEAAgent sock = null;
-		sock = new NMEASocketServerJSON(cache, stream, name, port, q);
+		sock = new NMEASocketServerJSON(cache, name, port, q);
         return sock;
 	}
 
@@ -195,18 +192,18 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		NMEAAgent sock;
 		switch (s.getInout()) {
 		case IN:
-			sock = new NMEASocketClient(cache, stream, name, server, port, q); break;
+			sock = new NMEASocketClient(cache, name, server, port, q); break;
 		case OUT:
-			sock = new NMEASocketServer(cache, stream, name, port, false, q); break;
+			sock = new NMEASocketServer(cache, name, port, false, q); break;
 		case INOUT:
-			sock = new NMEASocketServer(cache, stream, name, port, true, q); break;
+			sock = new NMEASocketServer(cache, name, port, true, q); break;
 		default: sock = null; break;
 		}
         return sock;
     }
 
 	private NMEAAgent buildTrackTarget(TrackAgent c, QOS q) {
-		NMEATrackAgent track = new NMEATrackAgent(cache, stream, c.getName());
+		NMEATrackAgent track = new NMEATrackAgent(cache, c.getName());
 		track.setFile(c.getFile());
 	    track.setPeriod(c.getInterval() * 1000);
 	    track.setStaticPeriod(c.getIntervalStatic() * 1000);
@@ -215,12 +212,12 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
     
 	private NMEAAgent buildSimulator(SimulatorAgent s, QOS q) {
-    	NMEAAgent sim = new NMEASimulatorSource(cache, stream, s.getName(), q);
+    	NMEAAgent sim = new NMEASimulatorSource(cache, s.getName(), q);
     	return sim;
     }
 
 	private NMEAAgent buildSensor(SensorAgent s, QOS q) {
-        NMEAAgent se = new NMEASourceSensor(cache, stream, s.getName(), q);
+        NMEAAgent se = new NMEASourceSensor(cache, s.getName(), q);
         return se;
     }
 }

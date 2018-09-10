@@ -5,7 +5,6 @@ import java.util.Calendar;
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
@@ -28,12 +27,12 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private TrackManager tracker;
 	
-    public NMEATrackAgent(NMEACache cache, NMEAStream stream, String name) {
-        this(cache, stream, name, SentenceId.RMC.toString());
+    public NMEATrackAgent(NMEACache cache, String name) {
+        this(cache, name, SentenceId.RMC.toString());
     }
 
-    public NMEATrackAgent(NMEACache cache, NMEAStream stream, String name, String sentence) {
-        super(cache, stream, name);
+    public NMEATrackAgent(NMEACache cache, String name, String sentence) {
+        super(cache, name);
         
         setSourceTarget(false, true);
 

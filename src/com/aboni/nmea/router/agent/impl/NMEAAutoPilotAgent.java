@@ -2,7 +2,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
+//import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
@@ -48,7 +48,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
      X1  08  F7    +10 (in auto mode) 
      X1  09  F6     -1 (in resp or rudder gain mode) 
      X1  0A  F5     +1 (in resp or rudder gain mode) 
-     X1  21  DE     -1 & -10 (port tack, doesn´t work on ST600R?) 
+     X1  21  DE     -1 & -10 (port tack, doesnï¿½t work on ST600R?) 
      X1  22  DD     +1 & +10 (stb tack) 
      X1  23  DC    Standby & Auto (wind mode) 
      X1  28  D7    +10 & -10 (in auto mode) 
@@ -75,8 +75,8 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver {
 
-	public NMEAAutoPilotAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-		super(cache, stream, name, qos);
+	public NMEAAutoPilotAgent(NMEACache cache, /*NMEAStream stream, */String name, QOS qos) {
+		super(cache, /*stream, */name, qos);
 	}
 
     @Override

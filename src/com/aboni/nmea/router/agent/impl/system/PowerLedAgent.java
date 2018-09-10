@@ -4,7 +4,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -23,8 +22,8 @@ public class PowerLedAgent extends NMEAAgentImpl {
     private final GpioPinDigitalOutput pin, pinGps;
     private long lastGps;
 
-    public PowerLedAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-        super(cache, stream, name, qos);
+    public PowerLedAgent(NMEACache cache, String name, QOS qos) {
+        super(cache, name, qos);
         gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "pwr", PinState.LOW);
         pinGps = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "gps", PinState.LOW);

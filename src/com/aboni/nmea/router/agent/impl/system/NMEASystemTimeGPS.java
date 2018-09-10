@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -11,8 +10,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	private SystemTimeChecker systemTimeCHecker;
 	
-	public NMEASystemTimeGPS(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-		super(cache, stream, name, qos);
+	public NMEASystemTimeGPS(NMEACache cache, String name, QOS qos) {
+		super(cache, name, qos);
 		setSourceTarget(false, true);
 		systemTimeCHecker = new SystemTimeChecker(cache);
 	}

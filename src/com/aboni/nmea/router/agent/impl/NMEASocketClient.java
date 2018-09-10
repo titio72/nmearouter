@@ -128,11 +128,11 @@ public class NMEASocketClient extends NMEAAgentImpl {
 	private SocketReader reader;
 	
 	public NMEASocketClient(NMEACache cache, NMEAStream stream, String name, String server, int port) {
-	    this(cache, stream, name, server, port, null);
+	    this(cache, /*stream, */name, server, port, null);
 	}
 	
-	public NMEASocketClient(NMEACache cache, NMEAStream stream, String name, String server, int port, QOS qos) {
-        super(cache, stream, name, qos);
+	public NMEASocketClient(NMEACache cache, /*NMEAStream stream, */String name, String server, int port, QOS qos) {
+        super(cache, /*stream, */name, qos);
         setSourceTarget(true, false);
 		reader = new SocketReader(server, port);
 	}

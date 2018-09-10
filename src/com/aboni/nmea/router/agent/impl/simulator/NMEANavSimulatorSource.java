@@ -10,7 +10,6 @@ import com.aboni.geo.NavSimulator;
 import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -45,12 +44,12 @@ public class NMEANavSimulatorSource extends NMEAAgentImpl {
 	
 	private NavSimulator sim = new NavSimulator();
 
-	public NMEANavSimulatorSource(NMEACache cache, NMEAStream stream, String name) {
-		this(cache, stream, name, null);
+	public NMEANavSimulatorSource(NMEACache cache, String name) {
+		this(cache, name, null);
 	}
 	
-	public NMEANavSimulatorSource(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-		super(cache, stream, name, qos);
+	public NMEANavSimulatorSource(NMEACache cache, String name, QOS qos) {
+		super(cache, name, qos);
         setSourceTarget(true, false);
         
 		Position marina = new Position(43.679416, 10.267679);

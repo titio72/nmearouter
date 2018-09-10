@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
+//import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.sentences.XDPParser;
@@ -30,12 +30,12 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     
     private static long DEFAULT_WINDOW = 60 * 60 * 1000; // 1 hour
     
-    public DepthStatsAgent(NMEACache cache, NMEAStream stream, String name) {
-        this(cache, stream, name, null);
+    public DepthStatsAgent(NMEACache cache, /*NMEAStream stream, */String name) {
+        this(cache, /*stream, */name, null);
     }
 
-    public DepthStatsAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-        super(cache, stream, name, qos);
+    public DepthStatsAgent(NMEACache cache, /*NMEAStream stream, */String name, QOS qos) {
+        super(cache, /*stream, */name, qos);
         setSourceTarget(true, true);
         queue = new LinkedList<DepthStatsAgent.DepthT>();
     }

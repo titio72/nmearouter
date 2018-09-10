@@ -4,7 +4,6 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
@@ -119,7 +118,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         QOS q = createBuiltInQOS();
         NMEA2FileAgent dumper = new NMEA2FileAgent(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"Log", q);
         r.addAgent(dumper);
 	}
@@ -128,7 +126,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         QOS q = createBuiltInQOS();
         DepthStatsAgent a = new DepthStatsAgent(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"Depth", q);
         r.addAgent(a);
         a.start();
@@ -139,7 +136,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	        QOS q = createBuiltInQOS();
 	        PowerLedAgent pwrled = new PowerLedAgent(
 	        		injector.getInstance(NMEACache.class), 
-	        		injector.getInstance(NMEAStream.class), 
 	        		"PowerLed", q);
 	        r.addAgent(pwrled);
 	        pwrled.start();
@@ -150,7 +146,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         QOS q = createBuiltInQOS();
         NMEAAutoPilotAgent ap = new NMEAAutoPilotAgent(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"SmartPilot", q);
         r.addAgent(ap);
         ap.start();
@@ -160,7 +155,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         QOS q = createBuiltInQOS();
         FanAgent fan = new FanAgent(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"FanManager", q);
         r.addAgent(fan);
         fan.start();
@@ -170,7 +164,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         QOS q = createBuiltInQOS();
     	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"GPSTime", q);
     	r.addAgent(gpstime);
     	gpstime.start();
@@ -198,14 +191,12 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         
         NMEAAgent sock = new NMEASocketServer(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"TCP", 1111, null);
         router.addAgent(sock);
         sock.start();
         
         NMEAPlayer play = new NMEAPlayer(
         		injector.getInstance(NMEACache.class), 
-        		injector.getInstance(NMEAStream.class), 
         		"PLAYER", null);
         play.setFile(playFile);
         router.addAgent(play);

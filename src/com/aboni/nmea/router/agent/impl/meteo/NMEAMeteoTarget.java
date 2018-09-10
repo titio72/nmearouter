@@ -4,7 +4,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -43,8 +42,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     private NMEACache cache;
 
-    public NMEAMeteoTarget(NMEACache cache, NMEAStream stream, String name, QOS qos, StatsWriter w) {
-        super(cache, stream, name, qos);
+    public NMEAMeteoTarget(NMEACache cache, String name, QOS qos, StatsWriter w) {
+        super(cache, name, qos);
         this.cache = cache;
         setSourceTarget(false, true);
     	writer = w;

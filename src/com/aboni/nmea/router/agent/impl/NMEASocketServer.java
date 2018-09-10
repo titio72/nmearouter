@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
+//import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
@@ -47,20 +47,20 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		}
 	}
 	
-	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, boolean allowReceive, QOS q) {
-		super(cache, stream, name, q);
+	public NMEASocketServer(NMEACache cache, /*NMEAStream stream, */String name, int port, boolean allowReceive, QOS q) {
+		super(cache, /*stream, */name, q);
 		this.port = port;
         setSourceTarget(allowReceive, true);
         
         clients = new HashMap<>();
 	}
 	
-	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name, int port, QOS q) {
-		this(cache, stream, name, port, false, q);
+	public NMEASocketServer(NMEACache cache, /*NMEAStream stream, */String name, int port, QOS q) {
+		this(cache, /*stream, */name, port, false, q);
 	}
 
-	public NMEASocketServer(NMEACache cache, NMEAStream stream, String name) {
-		this(cache, stream, name, DEFAULT_PORT, null);
+	public NMEASocketServer(NMEACache cache, /*NMEAStream stream, */String name) {
+		this(cache, /*stream, */name, DEFAULT_PORT, null);
 	}
 
 	public int getPort() {

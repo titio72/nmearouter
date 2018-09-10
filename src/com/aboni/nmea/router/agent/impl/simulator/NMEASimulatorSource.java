@@ -15,7 +15,6 @@ import com.aboni.misc.Utils;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -65,12 +64,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	public static NMEASimulatorSource SIMULATOR;
     private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
 
-	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name) {
-		this(cache, stream, name, null);
+	public NMEASimulatorSource(NMEACache cache, String name) {
+		this(cache, name, null);
 	}
 	
-	public NMEASimulatorSource(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-		super(cache, stream, name, qos);
+	public NMEASimulatorSource(NMEACache cache, String name, QOS qos) {
+		super(cache, name, qos);
         setSourceTarget(true, true);
         if (SIMULATOR!=null) throw new RuntimeException();
         else SIMULATOR = this;

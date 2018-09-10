@@ -3,12 +3,12 @@ package com.aboni.nmea.router.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
 
@@ -45,7 +45,7 @@ public class NMEARouterImpl implements NMEARouter {
 
 		@Override
 		public void onSentence(Sentence s, NMEAAgent src) {
-		    _onSentenceFromSource(s, src);
+		    _queueUpSentence(s, src);
 		}
 	}
 	
@@ -67,7 +67,7 @@ public class NMEARouterImpl implements NMEARouter {
 	private LogLevelType logLevel = LogLevelType.INFO;
 	
 	private final NMEACache cache;
-	private final NMEAStream stream;
+	//private final NMEAStream stream;
 
 	private static final int TIMER = 1000;
 	
@@ -76,10 +76,10 @@ public class NMEARouterImpl implements NMEARouter {
 	    agents = new HashMap<String, NMEAAgent>();
 		agentStatusListener = new InternalAgentStatusListener();
 		sentenceListener = new InternalSentenceListener();
-		sentenceQueue = new ConcurrentLinkedQueue<NMEARouterImpl.SentenceEvent>();
+		sentenceQueue = new LinkedList<NMEARouterImpl.SentenceEvent>();
 		started = false;
 		this.cache = cache;
-		this.stream = stream;
+		//this.stream = stream;
 		timer = null;
 	}
 
@@ -151,7 +151,7 @@ public class NMEARouterImpl implements NMEARouter {
 							e = sentenceQueue.poll();
 						}
 						if (e!=null) {
-							_onSentence(e.s, e.src);
+							_routeSentence(e.s, e.src);
 						}
 					} while (e!=null);
 					synchronized (sentenceQueue) {
@@ -193,7 +193,7 @@ public class NMEARouterImpl implements NMEARouter {
 	private void _onStatusChange(NMEAAgent src) {
 	}
 
-    private void _onSentenceFromSource(Sentence s, NMEAAgent src) {
+    private void _queueUpSentence(Sentence s, NMEAAgent src) {
         SentenceEvent e = new SentenceEvent(s, src);
         synchronized (sentenceQueue) { 
             sentenceQueue.add(e);
@@ -201,10 +201,10 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 	
-	private void _onSentence(Sentence s, NMEAAgent src) {
+	private void _routeSentence(Sentence s, NMEAAgent src) {
 		if (started) {
 			cache.onSentence(s, src.getName());
-			stream.pushSentence(s, src);
+			//stream.pushSentence(s, src);
 			routeToTarget(s, src);
 		}
 	}

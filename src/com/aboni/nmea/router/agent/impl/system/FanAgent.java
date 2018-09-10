@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
@@ -17,8 +16,8 @@ public class FanAgent extends NMEAAgentImpl {
 	private static final double FAN_THRESHOLD_OFF = 52.0;
     private Fan fan;
     
-	public FanAgent(NMEACache cache, NMEAStream stream, String name, QOS qos) {
-		super(cache, stream, name, qos);
+	public FanAgent(NMEACache cache, String name, QOS qos) {
+		super(cache, name, qos);
 		setSourceTarget(false, false);
 		fan = new Fan();
 	}
