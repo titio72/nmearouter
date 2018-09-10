@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEACache;
-//import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
@@ -75,8 +74,8 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver {
 
-	public NMEAAutoPilotAgent(NMEACache cache, /*NMEAStream stream, */String name, QOS qos) {
-		super(cache, /*stream, */name, qos);
+	public NMEAAutoPilotAgent(NMEACache cache, String name, QOS qos) {
+		super(cache, name, qos);
 	}
 
     @Override

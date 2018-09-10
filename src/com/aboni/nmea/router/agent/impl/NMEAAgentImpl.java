@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
-//import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
@@ -83,7 +82,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	private _Target targetIf;
 	private _Source sourceIf;
 	
-    public NMEAAgentImpl(NMEACache cache, /*NMEAStream stream, */String name, QOS qos) {
+    public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
     	targetIf = new _Target();
     	sourceIf = new _Source();
         this.name = name;
@@ -133,8 +132,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         }
     }
     
-	public NMEAAgentImpl(NMEACache cache, /*NMEAStream stream, */String name) {
-		this(cache, /*stream, */name, null);
+	public NMEAAgentImpl(NMEACache cache, String name) {
+		this(cache, name, null);
 	}
 	
 	protected void setBuiltIn() {
