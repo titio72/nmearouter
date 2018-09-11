@@ -115,7 +115,10 @@ public class ServerLog implements Log {
 	 */
 	@Override
 	public void Error(String msg, Throwable t) {
-		lg.log(Level.SEVERE, msg, t);
+		if (debug)
+			lg.log(Level.SEVERE, msg, t);
+		else
+			lg.log(Level.SEVERE, msg + " error {" + t.getMessage() + "}");
 	}
 
 	/* (non-Javadoc)
