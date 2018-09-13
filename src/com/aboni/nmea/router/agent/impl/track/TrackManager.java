@@ -42,7 +42,6 @@ public class TrackManager {
 			this.averageSpeed = speed;
 			this.maxSpeed = maxSpeed;
 			this.period = period;
-
 		}
 	}
 	
@@ -84,11 +83,12 @@ public class TrackManager {
     private boolean shallReport(GeoPositionT p) {
         boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
         long dt = p.getTimestamp() - getLastTrackedTime();
-        long checkperiod = anchor?getStaticPeriod():getPeriod();
+        long checkperiod = (anchor?getStaticPeriod():getPeriod());
        	return dt >= checkperiod;
     }
     
     public TrackPoint processPosition(GeoPositionT p, double sog) throws Exception {
+        
         maxSpeed = Math.max(maxSpeed, sog);
     	TrackPoint res = null;
 
@@ -96,34 +96,18 @@ public class TrackManager {
 	        stationaryStatus.init(true);
 	        if (lastPoint!=null) {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(lastPoint, p));
-            	double speed;
-            	double dist;
-            	int period;
-	            boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
-                Course c = new Course(lastPoint, p);
-            	speed = c.getSpeed(); speed = Double.isNaN(speed)?0.0:speed;
-                dist = c.getDistance(); dist = Double.isNaN(speed)?0.0:dist;
-                period = (int) (c.getInterval()/1000);
                 setLastTrackedPosition(p);
                 maxSpeed = sog;
-            	res = new TrackPoint(p, anchor, dist,  speed, maxSpeed, period);
+            	res = fillPoint(lastPoint, p);
 	        }
     	} else {
 	        long dt = p.getTimestamp() - getLastTrackedTime();
 	        if (dt >= getPeriod()) {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(getLastTrackedPosition(), p));
 	            if (shallReport(p)) {
-	            	double speed;
-	            	double dist;
-	            	int period;
-		            boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
-	                Course c = new Course(getLastTrackedPosition(), p);
-	            	speed = c.getSpeed(); speed = Double.isNaN(speed)?0.0:speed;
-	                dist = c.getDistance(); dist = Double.isNaN(speed)?0.0:dist;
-	                period = (int) (c.getInterval()/1000);
-	                setLastTrackedPosition(p);
-	            	res = new TrackPoint(p, anchor, dist,  speed, maxSpeed, period);
-	                maxSpeed = 0.0;
+	            	res = fillPoint(getLastTrackedPosition(), p);
+                    setLastTrackedPosition(p);
+	                maxSpeed = 0.0; // reset maxSpeed for the new sampling period
 	        	}
 	        }
     	}
@@ -132,6 +116,18 @@ public class TrackManager {
         return res;
     }
 
+    private TrackPoint fillPoint(GeoPositionT prevPos, GeoPositionT p) {
+        boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
+        Course c = new Course(prevPos, p);
+        double speed = c.getSpeed(); 
+        speed = Double.isNaN(speed)?0.0:speed;
+        double dist = c.getDistance(); 
+        dist = Double.isNaN(speed)?0.0:dist;
+        int period = (int) (c.getInterval()/1000);
+        setLastTrackedPosition(p);
+        return new TrackPoint(p, anchor, dist,  speed, maxSpeed, period);
+    }
+    
     /**
      * Set the sampling time in ms.
      * @param period
