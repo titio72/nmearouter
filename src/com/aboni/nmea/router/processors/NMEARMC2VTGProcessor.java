@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.processors;
 
+import java.util.Calendar;
+
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
@@ -41,9 +43,11 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
     private NMEAMagnetic2TrueConverter m;
     
 	public NMEARMC2VTGProcessor() {
+	    this(Calendar.getInstance().get(Calendar.YEAR));
 	}
 
 	public NMEARMC2VTGProcessor(double year) {
+	    m = new NMEAMagnetic2TrueConverter(year);
 	}
 
 	@Override
@@ -70,7 +74,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 				return new Sentence[] {vtg};
 			}
 		} catch (Exception e) {
-            ServerLog.getLogger().Warning("Cannot convert message to vtg {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().Warning("Cannot convert message to vtg {" + sentence + "} error {" + e.getMessage() + "}");
 		}
 		return null;
 	}

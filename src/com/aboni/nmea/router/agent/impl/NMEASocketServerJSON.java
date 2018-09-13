@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-//import com.aboni.nmea.router.NMEAStream;
+
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 
@@ -16,8 +16,8 @@ public class NMEASocketServerJSON extends NMEASocketServer {
 		return "TCP Json Server";
 	}
 	
-	public NMEASocketServerJSON(NMEACache cache, /*NMEAStream stream, */String name, int port, QOS q) {
-		super(cache, /*stream, */name, port, q);
+	public NMEASocketServerJSON(NMEACache cache, String name, int port, QOS q) {
+		super(cache, name, port, q);
 		setSourceTarget(true, true);
 		js = new NMEA2JSONb();
 	}

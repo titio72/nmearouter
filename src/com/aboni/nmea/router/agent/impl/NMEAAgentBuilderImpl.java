@@ -207,7 +207,6 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		track.setFile(c.getFile());
 	    track.setPeriod(c.getInterval() * 1000);
 	    track.setStaticPeriod(c.getIntervalStatic() * 1000);
-		track.setListenSentence(c.getSentence());
 		return track; 
 	}
     

@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl.track;
 
 import java.util.Calendar;
 
-import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -12,48 +11,27 @@ import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.util.Date;
 import net.sf.marineapi.nmea.util.Position;
-import net.sf.marineapi.nmea.util.Time;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
-	private static final long CALC_SPEED_THRESHOLD = 5*60*1000; // 5 minutes
 	private static final double SPEED_THRESHOLD = 40; //kn - anything faster than 40 knots is a mistake
 	private TrackWriter media;
 	private String mediaFile;
-	private String listenSentence;
-
 	private TrackManager tracker;
 	
     public NMEATrackAgent(NMEACache cache, String name) {
-        this(cache, name, SentenceId.RMC.toString());
-    }
-
-    public NMEATrackAgent(NMEACache cache, String name, String sentence) {
         super(cache, name);
         
         setSourceTarget(false, true);
 
         tracker = new TrackManager();
         
-        // alternatives supported are GGA, RMC
-        listenSentence = sentence;
-        
         media = null;
     }
 
     public void setMedia(TrackWriter m) {
     	media = m;
-    }
-    
-    /**
-     * Set the sentence type to listen to (RMC & GLL are supported).
-     * @param sentence
-     */
-    public void setListenSentence(String sentence) {
-        listenSentence = sentence;
     }
     
     /**
@@ -113,27 +91,23 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         tracker.setStaticPeriod(period);
     }
     
-    private GeoPositionT last;
-	
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		if (isStarted()) {
 			try {
-	            if (s.getSentenceId().equals(listenSentence)) {
-	                Position pos = NMEAUtils.getPosition(s);
+	            if (s instanceof RMCSentence) {
+	                RMCSentence rmc = (RMCSentence)s;
+	                Position pos = NMEAUtils.getPosition(rmc);
 	                if (pos!=null) {
-	                    Time time = NMEAUtils.getTime(s);
-	                    if (time!=null) {
-	                        Date date = NMEAUtils.getDate(s);
-	                        if (date!=null) {
-	                        	Calendar timestamp = NMEAUtils.getTimestamp(time, date);
-	                        	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
-	                        	double speed = calcSpeed(s, pos_t);
-	                        	if (speed < SPEED_THRESHOLD) {
-		                        	last = pos_t;
-		                            processPosition(pos_t, speed);
-	                        	}
-	                        }
+	                    Calendar timestamp = NMEAUtils.getTimestamp(rmc);
+	                    if (timestamp!=null) {
+                        	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
+                        	double speed = rmc.getSpeed();
+                        	if (speed < SPEED_THRESHOLD) {
+                                processPosition(pos_t, speed);
+                        	} else {
+                                ServerLog.getLogger().Info("Skipping {" + s + "} reason {speed>threshold}");
+                        	}
 	                    }
 	                }
 	            }
@@ -141,20 +115,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 				ServerLog.getLogger().Error("Error processing position {" + s + "}", e);
 			}
 		}
-	}
-
-	private double calcSpeed(Sentence s, GeoPositionT pos_t) {
-    	double speed = 0.0;
-    	if (s instanceof RMCSentence) {
-    		speed = ((RMCSentence)s).getSpeed();
-    	}
-    	else {
-    		if (last!=null && (pos_t.getTimestamp()-last.getTimestamp())<CALC_SPEED_THRESHOLD) {
-    			Course c = new Course(pos_t, last);
-    			speed = c.getSpeed();
-    		}
-    	}
-    	return speed;
 	}
 	
     private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
@@ -177,7 +137,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     @Override
     public String getDescription() {
     	GeoPositionT pos = tracker.getLastTrackedPosition();
-    	return "Tracking position from " + listenSentence + ((pos==null)?"":("<br>" + pos));
+    	return "Tracking position " + ((pos==null)?"":("<br>" + pos));
     }
     
 

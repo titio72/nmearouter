@@ -22,7 +22,7 @@ import java.util.TimerTask;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-//import com.aboni.nmea.router.NMEAStream;
+
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 
@@ -67,8 +67,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     
     private NMEACache cache;
     
-    public NMEASourceSensor(NMEACache cache, /*NMEAStream stream, */String name, QOS q) {
-        super(cache, /*stream, */name, q);
+    public NMEASourceSensor(NMEACache cache, String name, QOS q) {
+        super(cache, name, q);
         this.cache = cache;
         setSourceTarget(true, false);
     }

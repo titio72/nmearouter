@@ -169,7 +169,7 @@ public class TrackManager {
 	    	return false;
 	    } else {
 	    	double dist = p1.distanceTo(p2); // distance in meters
-	    	long idtime = Math.abs(p2.getTimestamp() - p1.getTimestamp());
+	    	long idtime = Math.abs(p2.getTimestamp() - p1.getTimestamp()); // d-time in mseconds
 	    	// calc the speed but only if the two points are at least 500ms apart 
 	    	double speed = 
 	    			idtime>500 

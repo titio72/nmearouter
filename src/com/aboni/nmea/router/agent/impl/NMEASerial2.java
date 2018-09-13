@@ -6,7 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import com.aboni.nmea.router.NMEACache;
-//import com.aboni.nmea.router.NMEAStream;
+
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
@@ -118,14 +118,14 @@ public class NMEASerial2 extends NMEAAgentImpl {
 
     private Executor sender;
 
-    public NMEASerial2(NMEACache cache, /*NMEAStream stream, */String name, String portName, int speed, boolean rec,
+    public NMEASerial2(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran) {
-        this(cache, /*stream, */name, portName, speed, rec, tran, null);
+        this(cache, name, portName, speed, rec, tran, null);
     }
 
-    public NMEASerial2(NMEACache cache, /*NMEAStream stream, */String name, String portName, int speed, boolean rec,
+    public NMEASerial2(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran, QOS qos) {
-        super(cache, /*stream, */name, qos);
+        super(cache, name, qos);
         this.portName = portName;
         this.speed = speed;
         this.receive = rec;
