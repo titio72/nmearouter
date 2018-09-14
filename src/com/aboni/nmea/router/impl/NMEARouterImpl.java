@@ -67,7 +67,7 @@ public class NMEARouterImpl implements NMEARouter {
 	private LogLevelType logLevel = LogLevelType.INFO;
 	
 	private final NMEACache cache;
-	//private final NMEAStream stream;
+	private final NMEAStream stream;
 
 	private static final int TIMER = 1000;
 	
@@ -79,7 +79,7 @@ public class NMEARouterImpl implements NMEARouter {
 		sentenceQueue = new LinkedList<NMEARouterImpl.SentenceEvent>();
 		started = false;
 		this.cache = cache;
-		//this.stream = stream;
+		this.stream = stream;
 		timer = null;
 	}
 
@@ -204,8 +204,8 @@ public class NMEARouterImpl implements NMEARouter {
 	private void _routeSentence(Sentence s, NMEAAgent src) {
 		if (started) {
 			cache.onSentence(s, src.getName());
-			//stream.pushSentence(s, src);
 			routeToTarget(s, src);
+			stream.pushSentence(s, src);
 		}
 	}
 

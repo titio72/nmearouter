@@ -33,21 +33,17 @@ public class DBTrackEventWriter implements EventWriter {
 	public void write(Event e, Connection conn) throws SQLException{
 		if (conn!=null && e instanceof TrackEvent) {
 			prepareStatement(conn);
-			try {
-	        	TrackEvent t = (TrackEvent)e;
-	            stm.setDouble(1, t.getP().getLatitude());
-	            stm.setDouble(2, t.getP().getLongitude());
-	            Timestamp x = new Timestamp(t.getTime());
-	            stm.setTimestamp(3, x);
-	            stm.setInt(4, t.isAnchor()?1:0);
-	            stm.setInt(5, t.getInterval());
-	            stm.setDouble(6, t.getSpeed());
-	            stm.setDouble(7, Math.max(t.getMaxSpeed(), t.getSpeed()));
-	            stm.setDouble(8, t.getDist());
-	            stm.execute();
-			} catch (SQLException ee) {
-				throw ee;
-			}
+        	TrackEvent t = (TrackEvent)e;
+            stm.setDouble(1, t.getP().getLatitude());
+            stm.setDouble(2, t.getP().getLongitude());
+            Timestamp x = new Timestamp(t.getTime());
+            stm.setTimestamp(3, x);
+            stm.setInt(4, t.isAnchor()?1:0);
+            stm.setInt(5, t.getInterval());
+            stm.setDouble(6, t.getSpeed());
+            stm.setDouble(7, Math.max(t.getMaxSpeed(), t.getSpeed()));
+            stm.setDouble(8, t.getDist());
+            stm.execute();
 	    }
 	}
 }
