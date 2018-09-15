@@ -49,6 +49,7 @@ import javax.xml.bind.annotation.XmlType;
     SimulatorAgent.class,
     GPXPlayerAgent.class,
     SensorAgent.class,
+    GyroAgent.class,
     JSONAgent.class,
     TcpAgent.class,
     MWDAgent.class,

@@ -89,6 +89,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link GyroAgent }
+     * 
+     */
+    public GyroAgent createGyroAgent() {
+        return new GyroAgent();
+    }
+
+    /**
      * Create an instance of {@link Log }
      * 
      */
