@@ -65,6 +65,7 @@ public class Router {
         @XmlElement(name = "ConsoleAgent", type = ConsoleAgent.class),
         @XmlElement(name = "TrackAgent", type = TrackAgent.class),
         @XmlElement(name = "SensorAgent", type = SensorAgent.class),
+        @XmlElement(name = "GyroAgent", type = GyroAgent.class),
         @XmlElement(name = "SimulatorAgent", type = SimulatorAgent.class),
         @XmlElement(name = "MeteoAgent", type = MeteoAgent.class),
         @XmlElement(name = "MWDAgent", type = MWDAgent.class),
@@ -121,6 +122,7 @@ public class Router {
      * {@link ConsoleAgent }
      * {@link TrackAgent }
      * {@link SensorAgent }
+     * {@link GyroAgent }
      * {@link SimulatorAgent }
      * {@link MeteoAgent }
      * {@link MWDAgent }

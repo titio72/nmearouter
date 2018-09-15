@@ -19,6 +19,7 @@ import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
 import com.aboni.nmea.router.conf.FilterSet;
+import com.aboni.nmea.router.conf.GyroAgent;
 import com.aboni.nmea.router.conf.JSONAgent;
 import com.aboni.nmea.router.conf.MWDAgent;
 import com.aboni.nmea.router.conf.MeteoAgent;
@@ -80,7 +81,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		QOS q = getQos(a.getQos());
 		switch (getType(a)) {
 			case "Simulator": agent = buildSimulator((SimulatorAgent)a, q); break;
-			case "Sensor": agent = buildSensor((SensorAgent)a, q); break;
+            case "Sensor": agent = buildSensor((SensorAgent)a, q); break;
+            case "Gyro": agent = buildGyro((GyroAgent)a, q); break;
 			case "Serial": agent = buildSerial((SerialAgent)a, q); break;
 			case "TCP": agent = buildSocket((TcpAgent)a, q); break;
 			case "JSON": agent = buildSocketJSON((JSONAgent)a, q); break;
@@ -156,7 +158,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		default: r = false; t = false; break;
 		}
 		
-		return new NMEASerial2(cache, name, portName, speed, r, t, q);
+        return new NMEASerial3(cache, name, portName, speed, r, t, q);
+        //return new NMEASerial2(cache, name, portName, speed, r, t, q);
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
@@ -215,8 +218,13 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     	return sim;
     }
 
-	private NMEAAgent buildSensor(SensorAgent s, QOS q) {
+    private NMEAAgent buildSensor(SensorAgent s, QOS q) {
         NMEAAgent se = new NMEASourceSensor(cache, s.getName(), q);
+        return se;
+    }
+
+    private NMEAAgent buildGyro(GyroAgent s, QOS q) {
+        NMEAAgent se = new NMEASourceGyro(cache, s.getName(), q);
         return se;
     }
 }

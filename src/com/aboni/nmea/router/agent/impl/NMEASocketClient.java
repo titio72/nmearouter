@@ -167,18 +167,8 @@ public class NMEASocketClient extends NMEAAgentImpl {
     protected void doWithSentence(Sentence s, NMEAAgent source) {
     	try {
     		synchronized (reader) {
-    			/*if (s instanceof MWVSentence) {
-    				MWVSentence mwv = (MWVSentence)s;
-    				// $--MWV,x.x,a,x.x,a*hh<CR><LF>
-    				String ss = String.format("$IIMWV,%d,%s,%-4.1f,N", (int)mwv.getAngle(), mwv.isTrue()?"T":"R", mwv.getSpeed());
-    				MWVSentence m = (MWVSentence)SentenceFactory.getInstance().createParser(ss);
-			    	reader.socket.getOutputStream().write(s.toString().getBytes());
-			    	reader.socket.getOutputStream().write("\r".getBytes());
-    				
-    			} else*/ {
-			    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
-			    	reader.socket.getOutputStream().write("\r".getBytes());
-    			}
+		    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
+		    	reader.socket.getOutputStream().write("\r".getBytes());
     		}
     	} catch (Exception e) {
             getLogger().Info("Error sending data {" + e.getMessage() + "}");
