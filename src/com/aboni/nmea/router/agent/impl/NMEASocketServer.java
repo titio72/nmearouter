@@ -47,16 +47,16 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		}
 	}
 	
-	public NMEASocketServer(NMEACache cache, String name, int port, boolean allowReceive, QOS q) {
+	public NMEASocketServer(NMEACache cache, String name, int port, boolean allowReceive, boolean allowTransmit, QOS q) {
 		super(cache, name, q);
 		this.port = port;
-        setSourceTarget(allowReceive, true);
+        setSourceTarget(allowReceive, allowTransmit);
         
         clients = new HashMap<>();
 	}
 	
 	public NMEASocketServer(NMEACache cache, String name, int port, QOS q) {
-		this(cache, name, port, false, q);
+		this(cache, name, port, false, true, q);
 	}
 
 	public NMEASocketServer(NMEACache cache, String name) {
@@ -186,22 +186,24 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		synchronized (clients) {
-			if (!clients.isEmpty()) {
-				String output = getOutSentence(s);
-				writeBuffer.clear();
-				writeBuffer.put(output.getBytes());
-				writeBuffer.put("\r\n".getBytes());
-				int p = writeBuffer.position();
-				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
-				while (iter.hasNext()) {
-					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
-					SocketChannel sc = itm.getKey();
-					ClientDescriptor cd = itm.getValue();
-					if (!sendMessageToClient(output, p, sc, cd)) {
-						iter.remove();
-					}
-				}
-			}
+		    if (isTarget()) {
+    			if (!clients.isEmpty()) {
+    				String output = getOutSentence(s);
+    				writeBuffer.clear();
+    				writeBuffer.put(output.getBytes());
+    				writeBuffer.put("\r\n".getBytes());
+    				int p = writeBuffer.position();
+    				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
+    				while (iter.hasNext()) {
+    					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
+    					SocketChannel sc = itm.getKey();
+    					ClientDescriptor cd = itm.getValue();
+    					if (!sendMessageToClient(output, p, sc, cd)) {
+    						iter.remove();
+    					}
+    				}
+    			}
+		    }
 		}
 	}
 
@@ -230,15 +232,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	}
 	
 	protected String getOutSentence(Sentence s) {
-		/*if (s instanceof MWVSentence) {
-			MWVSentence mwv = (MWVSentence)s;
-			// $--MWV,x.x,a,x.x,a*hh<CR><LF>
-			String ss = String.format("$IIMWV,%d,%s,%-4.1f,N", (int)mwv.getAngle(), mwv.isTrue()?"T":"R", mwv.getSpeed());
-			MWVSentence m = (MWVSentence)SentenceFactory.getInstance().createParser(ss);
-			return m.toString();
-		} else*/ {
-			return s.toSentence();
-		}
+		return s.toSentence();
 	}
 	
 	private void createServerSocket() {
@@ -255,4 +249,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			getLogger().Error("Cannot open server socket", e);
 		}
 	}
+    
+    @Override
+    public String toString() {
+        return "{TCP " + port+ " " + (isSource() ? "R" : "")
+                + (isTarget() ? "X" : "") + "}";
+    }
 }

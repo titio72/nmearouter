@@ -41,6 +41,11 @@ public class NMEAUDPServer extends NMEAAgentImpl {
     	return res;
     }
     
+    @Override
+    public String toString() {
+        return "{UDP " + getPort() + "}";
+    }
+    
 	public int getPort() {
 		return portTarget;
 	}

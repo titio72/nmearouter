@@ -167,7 +167,7 @@ public class NMEARouterImpl implements NMEARouter {
 	@Override
 	public void addAgent(NMEAAgent agent) {
 		synchronized (agents) {
-			ServerLog.getLogger().Info("Adding Agent {" + agent.toString() + "}");
+			ServerLog.getLogger().Info("Adding Agent {" + agent.getName() + "}");
 			agents.put(agent.getName(), agent);
 			agent.setStatusListener(agentStatusListener);
 			if (agent.getSource()!=null) {

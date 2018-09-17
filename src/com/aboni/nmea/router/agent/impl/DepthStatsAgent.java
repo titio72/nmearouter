@@ -40,12 +40,12 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         queue = new LinkedList<DepthStatsAgent.DepthT>();
     }
 
-	@Override
-	public String getType() {
-		return "DepthStats";
-	}
+    @Override
+    public String getType() {
+        return "DepthStats";
+    }
 
-	@Override
+    @Override
 	public String getDescription() {
 		return "Calculates max and min depth over last hour period";
 	}

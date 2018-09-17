@@ -1,175 +1,116 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.event.SentenceEvent;
+import net.sf.marineapi.nmea.event.SentenceListener;
+import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketClient extends NMEAAgentImpl {
-	
-	private class SocketReader implements Runnable {
 
-	    private Socket socket;
-	    private InputStream iStream;
-	    private String server;
-        private int port;
-        private boolean stop;
-        
-        public SocketReader(String s, int p) {
-            server = s;
-            port = p;
-            stop = false;
-        }
-
-	    public String getServer() {
-            return server;
-        }
-
-        public int getPort() {
-            return port;
-        }
-		
-		public void stopMe() {
-			synchronized (this) {
-				stop = true;
-			}
-			//closeIt();
-		}
-		
-		private void closeIt() {
-			try {
-				iStream = null;
-				socket.close();
-			} catch (Exception e) {}
-		}
-		
-		private boolean openSocket() {
-            try {
-                getLogger().Info("Creating Socket {" + server + "} Speed {" + port + "}");
-                iStream = null;
-                socket = new Socket(server, port);
-                iStream = socket.getInputStream();
-                return true;
-            } catch (Exception e1) {
-                getLogger().Info("Error creting socket {" + e1.getMessage() + "}");
-                try {Thread.sleep(5000);} catch (Exception e) {}
-                return false;
-            }
-		}
-		
-		private boolean isStopping() {
-			synchronized (this) {
-				return stop;
-			}
-		}
-		
-		
-		private void doRead() {
-	    	StringBuffer b = new StringBuffer();
-	    	BufferedReader reader = null;
-			while (!isStopping()) {
-			    if (openSocket()) {
-			    	reader = new BufferedReader(new InputStreamReader(iStream));
-
-			    	
-			    	b.setLength(0);
-                    boolean reset = false;
-    				while (!stop && !reset) {
-    					try {
-    						String line = reader.readLine();
-    						if (line!=null) {
-					    		if (!isStopping()) {
-					    			processSentence(line);
-					    		}
-    						} else {
-    		                    getLogger().Debug("Socket likely closed");
-    						    reset = true;
-    						}
-    					} catch (Exception e) {
-		                    getLogger().Debug("Socket likely closed");
-		                    reset = true;
-    					}
-    				}
-    				closeIt();
-			    }
-			}
-		}
-		
-		
-		@Override
-		public void run() {
-			synchronized (this) {
-				stop = false;
-			}
-			doRead();
-		}
-	}
-	
-	private void processSentence(String s) {
-	    try {
-            if (s.length()>0) {
-                Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                sentenceRead(sentence);
-            }
-	    } catch (Exception e) {
-	        if (s!=null && s.length()>256) s = s.substring(0, 255);
-            getLogger().Debug("Cannot process sentence {" + s + "} msg {" + e.getMessage() + "}");
-	    }
-	}
-	
-	private SocketReader reader;
+	private Socket socket;
+	private String server;
+	private int port;
+	private SentenceReader reader;
+    private boolean receive;
+    private boolean transmit;
 	
 	public NMEASocketClient(NMEACache cache, String name, String server, int port) {
-	    this(cache, name, server, port, null);
+	    this(cache, name, server, port, true, false, null);
 	}
 	
-	public NMEASocketClient(NMEACache cache, String name, String server, int port, QOS qos) {
+	public NMEASocketClient(NMEACache cache, String name, String server, int port, boolean rec, boolean trans, QOS qos) {
         super(cache, name, qos);
         setSourceTarget(true, false);
-		reader = new SocketReader(server, port);
+        this.server = server;
+        this.port = port;
+        this.receive = rec;
+        this.transmit = trans;        
 	}
 	
 	@Override
 	public String getDescription() {
-		return "TCP " + reader.getServer() + ":" + reader.getPort();
+		return "TCP " + server + ":" + port;
 	}
 	
 	@Override
 	protected boolean onActivate() {
-        Thread t = new Thread(reader);
-        t.setDaemon(true);
-        t.start();
-        return true;
+
+	    synchronized (this) {
+	        if (socket == null) {
+    	        try {
+                    getLogger().Info("Creating Socket {" + server + ":" + port + "}");
+                    socket = new Socket(server, port);
+                    InputStream iStream = socket.getInputStream();
+                    getLogger().Info("Opened Socket {" + server + ":" + port + "}");
+    
+                    if (receive) {
+                        reader = new SentenceReader(iStream);
+                        reader.addSentenceListener(new SentenceListener() {
+        
+                            @Override
+                            public void readingPaused() {}
+        
+                            @Override
+                            public void readingStarted() {}
+        
+                            @Override
+                            public void readingStopped() {}
+        
+                            @Override
+                            public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
+                            
+                        });
+                        reader.start();
+                    }
+                    
+                    return true;
+                } catch (Exception e) {
+                    getLogger().Error("Error initializing socket {" + server + ":" + port + "} ", e);
+                    socket = null;
+                }
+            }
+	    }
+        return false;
 	}
 	
 	@Override
 	protected void onDeactivate() {
-		reader.stopMe();
+	    synchronized (this) {
+    	    if (socket!=null) {
+    	        reader.stop();
+    	        try {
+                    socket.close();
+                } catch (IOException e) {} finally {
+                    socket = null;
+                }
+    	    }
+	    }
 	}
 
-	private void sentenceRead(Sentence e) {
+	private void onSentenceRead(Sentence e) {
 		notify(e);
 	}
 	
     @Override
     public String toString() {
-        return super.toString() + " {Socket " + reader.getServer() + ":" + reader.getPort() + "}";
+        return " {TCP " + server + ":" + port+ " " + (receive ? "R" : "")
+                + (transmit ? "X" : "") + "}";
     }
 
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent source) {
     	try {
-    		synchronized (reader) {
-		    	reader.socket.getOutputStream().write(s.toSentence().getBytes());
-		    	reader.socket.getOutputStream().write("\r".getBytes());
-    		}
+    	    if (socket!=null && transmit) {
+    	        socket.getOutputStream().write(s.toSentence().getBytes());
+    	        socket.getOutputStream().write("\r".getBytes());
+    	    }
     	} catch (Exception e) {
             getLogger().Info("Error sending data {" + e.getMessage() + "}");
     	}

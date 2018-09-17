@@ -3,6 +3,7 @@ package com.aboni.nmea.router.agent.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
@@ -145,9 +146,65 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	    source = isSource;
 	}
 	
+	protected class _Log implements Log {
+
+	    private Log log;
+	    
+	    private _Log() {
+	        log = ServerLog.getLogger();
+	    }
+	    
+        @Override
+        public void setError() {}
+
+        @Override
+        public void setWarning() {}
+
+        @Override
+        public void setInfo() {}
+
+        @Override
+        public void setDebug() {}
+
+        @Override
+        public void setNone() {}
+
+        @Override
+        public void Error(String msg) {
+            log.Error("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + msg);
+        }
+
+        @Override
+        public void Error(String msg, Throwable t) {
+            log.Error("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg, t);
+        }
+
+        @Override
+        public void Warning(String msg) {
+            log.Warning("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
+        }
+
+        @Override
+        public void Info(String msg) {
+            log.Info("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
+        }
+
+        @Override
+        public void Debug(String msg) {
+            log.Debug("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
+        }
+
+        @Override
+        public Logger getBaseLogger() {
+            return log.getBaseLogger();
+        }
+	}
+	
+	private Log _log;
 	
 	protected Log getLogger() {
-		return ServerLog.getLogger();
+	    if (_log==null) _log = new _Log();
+		return _log;
 	}
 
 	@Override
@@ -220,7 +277,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	
 	@Override
 	public String toString() {
-		return getName();
+		return "{" + getType() + "}";
 	}
 	
 	protected boolean onActivate() {

@@ -189,20 +189,39 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 
 	private NMEAAgent buildSocket(TcpAgent s, QOS q) {
+	    if (s.getHost()==null || s.getHost().isEmpty()) {
+	        return buildServerSocket(s, q);
+	    } else {
+	        return buildClientSocket(s, q);
+	    }
+	}
+	
+    private NMEAAgent buildClientSocket(TcpAgent s, QOS q) {
         String name = s.getName();
         String server = s.getHost();
         int port = s.getPort();
-		NMEAAgent sock;
-		switch (s.getInout()) {
-		case IN:
-			sock = new NMEASocketClient(cache, name, server, port, q); break;
-		case OUT:
-			sock = new NMEASocketServer(cache, name, port, false, q); break;
-		case INOUT:
-			sock = new NMEASocketServer(cache, name, port, true, q); break;
-		default: sock = null; break;
-		}
-        return sock;
+        boolean t, r;
+        switch (s.getInout()) {
+        case IN: r = true; t = false; break;
+        case OUT: r = false; t = true; break;
+        case INOUT: r = true; t = true; break;
+        default: r = false; t = false; break;
+        }
+        
+        return new NMEASocketClient(cache, name, server, port, r, t, q);
+    }
+
+    private NMEAAgent buildServerSocket(TcpAgent s, QOS q) {
+        String name = s.getName();
+        int port = s.getPort();
+        boolean t, r;
+        switch (s.getInout()) {
+        case IN: r = true; t = false; break;
+        case OUT: r = false; t = true; break;
+        case INOUT: r = true; t = true; break;
+        default: r = false; t = false; break;
+        }
+        return new NMEASocketServer(cache, name, port, r, t, q);
     }
 
 	private NMEAAgent buildTrackTarget(TrackAgent c, QOS q) {

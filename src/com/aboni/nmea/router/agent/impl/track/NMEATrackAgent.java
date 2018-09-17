@@ -131,7 +131,12 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     
     @Override
     public String getType() {
-    	return "Tracker";
+        return "Tracker";
+    }
+    
+    @Override
+    public String toString() {
+        return "{Tracker}";
     }
     
     @Override

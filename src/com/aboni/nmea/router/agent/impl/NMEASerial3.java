@@ -30,21 +30,6 @@ public class NMEASerial3 extends NMEAAgentImpl {
 
     private Executor sender;
     private SentenceReader reader;
-    private SentenceListener listener = new SentenceListener() {
-
-        @Override
-        public void readingPaused() {}
-
-        @Override
-        public void readingStarted() {}
-
-        @Override
-        public void readingStopped() {}
-
-        @Override
-        public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
-        
-    };
             
     public NMEASerial3(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran) {
@@ -75,7 +60,7 @@ public class NMEASerial3 extends NMEAAgentImpl {
 
     @Override
     public String toString() {
-        return super.toString() + " {Serial port " + portName + " " + speed + " " + (receive ? "R" : "")
+        return "{Serial port " + portName + " " + speed + " " + (receive ? "R" : "")
                 + (trasmit ? "X" : "") + "}";
     }
 
@@ -92,7 +77,21 @@ public class NMEASerial3 extends NMEAAgentImpl {
                 getLogger().Info("Port Opened");
 
                 reader = new SentenceReader(port.getInputStream());
-                reader.addSentenceListener(listener);
+                reader.addSentenceListener(new SentenceListener() {
+
+                    @Override
+                    public void readingPaused() {}
+
+                    @Override
+                    public void readingStarted() {}
+
+                    @Override
+                    public void readingStopped() {}
+
+                    @Override
+                    public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
+                    
+                });
                 reader.start();
                 
                 return true;
