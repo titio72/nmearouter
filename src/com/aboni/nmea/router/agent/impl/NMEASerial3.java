@@ -1,7 +1,9 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.aboni.nmea.router.NMEACache;
 
@@ -9,9 +11,7 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
 
-import net.sf.marineapi.nmea.event.SentenceEvent;
-import net.sf.marineapi.nmea.event.SentenceListener;
-import net.sf.marineapi.nmea.io.SentenceReader;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASerial3 extends NMEAAgentImpl {
@@ -22,15 +22,14 @@ public class NMEASerial3 extends NMEAAgentImpl {
     private long bytesOut = 0;
     private long resetTime = 0;
 
+    private AtomicBoolean run = new AtomicBoolean(false);
+    
     private String portName;
     private int speed;
     private SerialPort port;
     private boolean receive;
     private boolean trasmit;
 
-    private Executor sender;
-    private SentenceReader reader;
-            
     public NMEASerial3(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran) {
         this(cache, name, portName, speed, rec, tran, null);
@@ -44,7 +43,6 @@ public class NMEASerial3 extends NMEAAgentImpl {
         this.receive = rec;
         this.trasmit = tran;
         setSourceTarget(rec, tran);
-        sender = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -75,25 +73,35 @@ public class NMEASerial3 extends NMEAAgentImpl {
                 port.openPort();
                 port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
                 getLogger().Info("Port Opened");
-
-                reader = new SentenceReader(port.getInputStream());
-                reader.addSentenceListener(new SentenceListener() {
-
-                    @Override
-                    public void readingPaused() {}
-
-                    @Override
-                    public void readingStarted() {}
-
-                    @Override
-                    public void readingStopped() {}
-
-                    @Override
-                    public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
+                thread = new Thread(new Runnable() {
                     
+                    @Override
+                    public void run() {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+                        while (run.get()) {
+                            String s;
+                            try {
+                                s = reader.readLine();
+                                if (s==null) {
+                                    Thread.sleep(100);
+                                } else {
+                                    bytes += s.length();
+                                    Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                                    onSentenceRead(sentence);
+                                }
+                            } catch (Exception e) {
+                                getLogger().Warning("Error reading from serial " + e.getMessage());
+                            }
+                        }
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            getLogger().Warning("Error serial reader " + e.getMessage());
+                        }
+                    }
                 });
-                reader.start();
-                
+                run.set(true);
+                thread.start();
                 return true;
             } catch (Exception e) {
                 getLogger().Error("Error initializing serial {" + portName + "}", e);
@@ -103,10 +111,12 @@ public class NMEASerial3 extends NMEAAgentImpl {
         return false;
     }
 
+    private Thread thread;
+    
     @Override
     protected void onDeactivate() {
         if (port != null) {
-            reader.stop();
+            run.set(false);
             try {
                 port.closePort();
             } catch (Exception e) {
@@ -124,24 +134,18 @@ public class NMEASerial3 extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, NMEAAgent src) {
         if (isStarted() && trasmit) {
-            sender.execute(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        String _s = s.toSentence() + "\r\n";
-                        byte[] b = _s.getBytes();
-                        port.writeBytes(b, b.length);
-                        synchronized (NMEASerial3.this) {
-                            bytesOut += b.length;
-                        }
-                    } catch (Exception e) {
-                        getLogger().Error("ERROR: cannot write on port " + portName, e);
-                        stop();
-                    }
+            try {
+                String _s = s.toSentence() + "\r\n";
+                byte[] b = _s.getBytes();
+                port.writeBytes(b, b.length);
+                port.writeBytes("\r\n".getBytes(), 2);
+                synchronized (NMEASerial3.this) {
+                    bytesOut += b.length;
                 }
-
-            });
+            } catch (Exception e) {
+                getLogger().Error("ERROR: cannot write on port " + portName, e);
+                stop();
+            }
         }
     }
 
