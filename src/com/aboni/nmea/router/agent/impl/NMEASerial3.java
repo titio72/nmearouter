@@ -71,7 +71,7 @@ public class NMEASerial3 extends NMEAAgentImpl {
                 port = SerialPort.getCommPort(portName);
                 port.setComPortParameters(speed, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 port.openPort();
-                port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
+                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 500, 0);
                 getLogger().Info("Port Opened");
                 thread = new Thread(new Runnable() {
                     
