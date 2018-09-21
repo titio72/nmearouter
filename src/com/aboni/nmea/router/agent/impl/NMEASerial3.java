@@ -79,18 +79,18 @@ public class NMEASerial3 extends NMEAAgentImpl {
                     public void run() {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
                         while (run.get()) {
-                            String s;
+                            String s = "";
                             try {
                                 s = reader.readLine();
-                                if (s==null) {
-                                    Thread.sleep(100);
-                                } else {
+                                if (s!=null) {
                                     bytes += s.length();
                                     Sentence sentence = SentenceFactory.getInstance().createParser(s);
                                     onSentenceRead(sentence);
                                 }
+                            } catch (IOException e) {
+                                try { Thread.sleep(100); } catch (InterruptedException e1) {}
                             } catch (Exception e) {
-                                getLogger().Warning("Error reading from serial " + e.getMessage());
+                                getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}") ;
                             }
                         }
                         try {
@@ -101,7 +101,9 @@ public class NMEASerial3 extends NMEAAgentImpl {
                     }
                 });
                 run.set(true);
-                thread.start();
+                if (receive) {
+                	thread.start();
+                }
                 return true;
             } catch (Exception e) {
                 getLogger().Error("Error initializing serial {" + portName + "}", e);
@@ -138,7 +140,6 @@ public class NMEASerial3 extends NMEAAgentImpl {
                 String _s = s.toSentence() + "\r\n";
                 byte[] b = _s.getBytes();
                 port.writeBytes(b, b.length);
-                port.writeBytes("\r\n".getBytes(), 2);
                 synchronized (NMEASerial3.this) {
                     bytesOut += b.length;
                 }
