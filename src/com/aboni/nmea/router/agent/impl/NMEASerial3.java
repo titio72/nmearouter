@@ -16,7 +16,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASerial3 extends NMEAAgentImpl {
     
-    private long bps = 0;
+    private static final int STATS_PERIOD = 1000;
+	private long bps = 0;
     private long bytes = 0;
     private long bpsOut = 0;
     private long bytesOut = 0;
@@ -73,35 +74,35 @@ public class NMEASerial3 extends NMEAAgentImpl {
                 port.openPort();
                 port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 500, 0);
                 getLogger().Info("Port Opened");
-                thread = new Thread(new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
-                        while (run.get()) {
-                            String s = "";
-                            try {
-                                s = reader.readLine();
-                                if (s!=null) {
-                                    bytes += s.length();
-                                    Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                                    onSentenceRead(sentence);
-                                }
-                            } catch (IOException e) {
-                                try { Thread.sleep(100); } catch (InterruptedException e1) {}
-                            } catch (Exception e) {
-                                getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}") ;
-                            }
-                        }
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            getLogger().Warning("Error serial reader " + e.getMessage());
-                        }
-                    }
-                });
                 run.set(true);
                 if (receive) {
+                    thread = new Thread(new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+                            while (run.get()) {
+                                String s = "";
+                                try {
+                                    s = reader.readLine();
+                                    if (s!=null) {
+                                        bytes += s.length();
+                                        Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                                        onSentenceRead(sentence);
+                                    }
+                                } catch (IOException e) {
+                                    try { Thread.sleep(100); } catch (InterruptedException e1) {}
+                                } catch (Exception e) {
+                                    getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}") ;
+                                }
+                            }
+                            try {
+                                reader.close();
+                            } catch (IOException e) {
+                                getLogger().Warning("Error serial reader " + e.getMessage());
+                            }
+                        }
+                    });
                 	thread.start();
                 }
                 return true;
@@ -155,7 +156,7 @@ public class NMEASerial3 extends NMEAAgentImpl {
         long t = System.currentTimeMillis();
         if (resetTime == 0) {
             resetTime = t;
-        } else if ((t - resetTime) > 1000) {
+        } else if ((t - resetTime) > STATS_PERIOD) {
             synchronized (this) {
                 bps = (long) (bytes / ((t - resetTime) / 1000.0));
                 bytes = 0;

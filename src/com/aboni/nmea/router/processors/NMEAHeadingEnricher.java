@@ -4,6 +4,7 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -42,16 +43,16 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
     }
 
     @Override
-    public Sentence[] process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
             if (sentence instanceof HDMSentence) {
                 HDMSentence hdm = (HDMSentence)sentence;
                 HDGSentence hdg = getHDG(hdm);
                 boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDT && canDoT) {
-                	return new Sentence[] {hdg, getHDT(hdg)};
+                	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg, getHDT(hdg)});
                 } else {
-                	return new Sentence[] {hdg};
+                	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg});
                 }
             }
         } catch (Exception e) {

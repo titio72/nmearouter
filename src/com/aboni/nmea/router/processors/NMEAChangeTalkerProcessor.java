@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.processors;
 
+import com.aboni.utils.Pair;
+
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
@@ -18,11 +20,11 @@ public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
 	}
 
 	@Override
-	public Sentence[] process(Sentence s, String src) {
+	public Pair<Boolean, Sentence[]> process(Sentence s, String src) {
 		if (fromTalker==null|| fromTalker.equals(s.getTalkerId())) {
 			s.setTalkerId(toTalker);
 		}
-		return new Sentence[] {s};
+		return new Pair<>(Boolean.TRUE, new Sentence[] {s});
 	}
 
 }

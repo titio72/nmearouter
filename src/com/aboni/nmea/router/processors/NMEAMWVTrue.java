@@ -2,6 +2,7 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -35,14 +36,14 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 	private boolean useRMC;
 	
 	@Override
-	public Sentence[] process(Sentence sentence, String src) {
+	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		try {
 			
 			if (sentence instanceof MWVSentence) {
 				MWVSentence mwv = (MWVSentence)sentence;
 				if (mwv.isTrue()) {
 					// skip it (filter out true wind)
-					return new Sentence[] {};
+					return new Pair<>(Boolean.FALSE, new Sentence[] {});
 				} else if ((System.currentTimeMillis()-lastSpeedTime)<AGE_THRESHOLD) {
 					// calculate true wind
 					TrueWind t = new TrueWind(lastSpeed, mwv.getAngle(), mwv.getSpeed());
@@ -52,7 +53,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					mwv_t.setSpeed(t.getTrueWindSpeed());
 					mwv_t.setSpeedUnit(Units.KNOT);
 					mwv_t.setStatus(DataStatus.ACTIVE);
-					return new Sentence[] {mwv_t};
+					return new Pair<>(Boolean.TRUE, new Sentence[] {mwv_t});
 				}
 			} else if (!useRMC && sentence instanceof VHWSentence) {
 				lastSpeed = ((VHWSentence)sentence).getSpeedKnots();
@@ -65,7 +66,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 		} catch (Exception e) {
             ServerLog.getLogger().Warning("Cannot enrich wind message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
 		}
-		return null;
+		return new Pair<>(Boolean.TRUE, null);
 	}
 	
 }

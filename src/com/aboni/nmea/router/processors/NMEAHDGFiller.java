@@ -8,6 +8,7 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -48,7 +49,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
     }
 
     @Override
-    public Sentence[] process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
             if (sentence instanceof HDGSentence) {
                 HDGSentence hdg = (HDGSentence)sentence;
@@ -61,12 +62,12 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                     out.add(getHDT(hdg));
                 }
                 
-                return (Sentence[]) out.toArray(new Sentence[0]);
+                return new Pair<>(Boolean.TRUE, (Sentence[]) out.toArray(new Sentence[0]));
             }
         } catch (Exception e) {
             ServerLog.getLogger().Warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
-        return null;
+        return new Pair<>(Boolean.TRUE, null);
     }
 
 	private boolean fillVariation(HDGSentence hdg, Position lastPosition) {

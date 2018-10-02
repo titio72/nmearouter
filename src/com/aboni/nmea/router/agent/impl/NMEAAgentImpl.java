@@ -21,6 +21,7 @@ import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEARMC2VTGProcessor;
 import com.aboni.nmea.router.processors.NMEARMCRaystar120;
 import com.aboni.utils.Log;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -296,15 +297,19 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		if (isStarted()) {
 			if (_getSourceFilter()==null || _getSourceFilter().match(sentence, getName())) {
 				getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
-                for (NMEAPostProcess pp: proc) {
-                    Sentence[] outSS = pp.process(sentence, this.getName());
-					if (outSS!=null) {
-						for (Sentence outS: outSS) {
-							listener.onSentence(outS, this);
-						}
-					}
+                List<Sentence> toSend = new ArrayList<>();
+				for (NMEAPostProcess pp: proc) {
+                    Pair<Boolean, Sentence[]> res = pp.process(sentence, this.getName());
+                    if (res!=null) {
+                    	if (!res.first) {
+                    		return; // skip the sentence
+                    	} else if (res.second!=null) {
+							for (Sentence outS: res.second) toSend.add(outS);
+                    	}
+                    }
                 }
                 listener.onSentence(sentence, this);
+                for (Sentence s: toSend) listener.onSentence(s, this);
 			}
 		}
 	}

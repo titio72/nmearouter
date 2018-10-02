@@ -2,6 +2,7 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -23,7 +24,7 @@ public class NMEADepthEnricher implements NMEAPostProcess {
     }
 
     @Override
-    public Sentence[] process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
             if (sentence instanceof DBTSentence) {
             	double offset = HWSettings.getPropertyAsDouble("depth.offset", 0.0);
@@ -31,11 +32,11 @@ public class NMEADepthEnricher implements NMEAPostProcess {
             	DPTSentence dpt = (DPTSentence)SentenceFactory.getInstance().createParser(dbt.getTalkerId(), SentenceId.DPT);
             	dpt.setDepth(dbt.getDepth());
             	dpt.setOffset(offset);
-                return new Sentence[] {dpt};
+                return new Pair<>(Boolean.TRUE, new Sentence[] {dpt});
             }
         } catch (Exception e) {
             ServerLog.getLogger().Warning("Cannot enrich depth process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
-        return null;
+        return new Pair<>(Boolean.TRUE, null);
     }    
 }

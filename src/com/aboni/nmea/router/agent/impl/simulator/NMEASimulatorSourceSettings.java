@@ -29,6 +29,7 @@ public class NMEASimulatorSourceSettings {
 	public boolean _hdg = true;
 	public boolean _hdt = true;
 	public boolean _vtg = true;
+	public boolean _rsa = true;
 	public boolean _xdrDiag = true;
 	public boolean _xdrMeteo = true;
 	public boolean _xdrMeteoAtm = true;
@@ -36,6 +37,7 @@ public class NMEASimulatorSourceSettings {
 	public boolean _xdrMeteoTmp = true;
 	public boolean _xdrGYR = true;
 	public boolean _autoPilot = false;
+	public double _rudder = 6.0;
 	public double _speed = 5.7;
 	public double _wSpeed = 9.6;
 	public double _wDirection = 270;
@@ -74,7 +76,7 @@ public class NMEASimulatorSourceSettings {
     
 	private void readConf(Properties p) {
 		 _vhw   = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
-		 _vhw   = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
+		 _vlw   = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
 		 _gll   = p.getProperty("simulate.gll", "0").equals("1");  // gps
 		 _rmc   = p.getProperty("simulate.rmc", "0").equals("1");  // gps
 		 _dpt   = p.getProperty("simulate.dpt", "0").equals("1");  // depth
@@ -91,6 +93,7 @@ public class NMEASimulatorSourceSettings {
 		 _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
 		 _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
 		 _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
+		 _rsa   = p.getProperty("simulate.rsa", "0").equals("1");  // rudder angle
 		 _usePolars = p.getProperty("simulate.use.polars", "0").equals("1");  // use polars to calculate the speed
 		 _autoPilot	= p.getProperty("simulate.autopilot", "0").equals("1");
 		 _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
@@ -104,6 +107,7 @@ public class NMEASimulatorSourceSettings {
 		 
 		 try { _polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85")); } catch (Exception e) {}
 		 try { _speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9")); } catch (Exception e) {}
+		 try { _rudder = Double.parseDouble(p.getProperty("simulate.rudder", "6.0")); } catch (Exception e) {}
 		 try { _wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1")); } catch (Exception e) {}
 		 try { _wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "270")); } catch (Exception e) {}
 		 try { _heading = Double.parseDouble(p.getProperty("simulate.heading", "354")); } catch (Exception e) {}

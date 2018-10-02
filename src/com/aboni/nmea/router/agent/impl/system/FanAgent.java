@@ -37,7 +37,8 @@ public class FanAgent extends NMEAAgentImpl {
 		return true;
 	}
 
-	protected void onTimer1() {
+	@Override
+	public void onTimer() {
 		if (isStarted()) {
 			double temp = CPUTemp.getInstance().getTemp();
 			if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
@@ -58,6 +59,7 @@ public class FanAgent extends NMEAAgentImpl {
 	}
 	
 	private void fan(boolean on) {
+		getLogger().Info("Switch fan {" + on + "} RPi {" + fan.isRaspberry() + "}");
 		fan.switchFan(on);
 	}
 	

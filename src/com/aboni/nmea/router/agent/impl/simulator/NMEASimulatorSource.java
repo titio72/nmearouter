@@ -35,6 +35,7 @@ import net.sf.marineapi.nmea.sentence.MTASentence;
 import net.sf.marineapi.nmea.sentence.MTWSentence;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
+import net.sf.marineapi.nmea.sentence.RSASentence;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
@@ -419,6 +420,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
                         
                         if (data._autoPilot) {
                         	sendAutopilotStatus();
+                        }
+                        
+                        if (data._rsa){
+                        	RSASentence rsa = (RSASentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
+                        	rsa.setRudderAngle(Side.STARBOARD, data._rudder);
+                        	NMEASimulatorSource.this.notify(rsa);
                         }
 					} catch (InterruptedException e) {
 						ServerLog.getLogger().Error("Error simulating", e);

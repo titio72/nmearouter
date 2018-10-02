@@ -11,6 +11,10 @@ public class Fan {
     private boolean arm;
 	private boolean fanOn;
     
+	public boolean isRaspberry() {
+		return arm;
+	}
+	
     public Fan() {
     	arm = (System.getProperty("os.arch").startsWith("arm"));
     	if (arm) {

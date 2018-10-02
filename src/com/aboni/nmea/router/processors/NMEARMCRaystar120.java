@@ -5,6 +5,7 @@ import java.util.TimeZone;
 
 import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor;
 import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor.GPSTimeException;
+import com.aboni.utils.Pair;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -59,7 +60,7 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 	}
 	
 	@Override
-	public Sentence[] process(Sentence sentence, String src) {
+	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		
 		if (sentence instanceof RMCSentence) {
 			RMCSentence rmc = (RMCSentence)sentence;
@@ -97,7 +98,7 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 				}
 			}
 		}
-		return null;
+		return new Pair<>(Boolean.TRUE, null);
 	}
 
 }

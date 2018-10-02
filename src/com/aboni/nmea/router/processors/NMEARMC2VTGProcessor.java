@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -51,7 +52,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 	}
 
 	@Override
-	public Sentence[] process(Sentence sentence, String src) {
+	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		try {
 			
 			if (sentence instanceof RMCSentence) {
@@ -71,12 +72,12 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 	                vtg.setMagneticCourse(0.0);
 	                vtg.setTrueCourse(0.0);
 				}
-				return new Sentence[] {vtg};
+				return new Pair<>(Boolean.TRUE, new Sentence[] {vtg});
 			}
 		} catch (Exception e) {
             ServerLog.getLogger().Warning("Cannot convert message to vtg {" + sentence + "} error {" + e.getMessage() + "}");
 		}
-		return null;
+		return new Pair<>(Boolean.TRUE, null);
 	}
 	
 }
