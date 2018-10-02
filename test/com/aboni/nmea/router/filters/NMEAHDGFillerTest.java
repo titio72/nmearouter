@@ -104,7 +104,7 @@ public class NMEAHDGFillerTest {
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
-		Sentence[] res = filler.process(hdg, "SRC");
+		Sentence[] res = filler.process(hdg, "SRC").second;
 		assertEquals(1, res.length);
 		HDTSentence hdt = (HDTSentence)res[0];
 		assertEquals(322.5, hdt.getHeading(), 0.1);
@@ -116,7 +116,7 @@ public class NMEAHDGFillerTest {
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
-		Sentence[] res = filler.process(hdg, "SRC");
+		Sentence[] res = filler.process(hdg, "SRC").second;
 		assertEquals(1, res.length);
 		HDMSentence hdm = (HDMSentence)res[0];
 		assertEquals(320.0, hdm.getHeading(), 0.1);
