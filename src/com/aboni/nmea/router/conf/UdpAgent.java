@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;/sequence>
  *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="UDP" />
  *       &lt;attribute name="port" type="{http://www.w3.org/2001/XMLSchema}int" default="4800" />
+ *       &lt;attribute name="inout" use="required" type="{}InOut" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -52,6 +53,8 @@ public class UdpAgent
     protected String type;
     @XmlAttribute(name = "port")
     protected Integer port;
+    @XmlAttribute(name = "inout", required = true)
+    protected InOut inout;
 
     /**
      * Gets the value of the to property.
@@ -138,4 +141,27 @@ public class UdpAgent
         this.port = value;
     }
 
+    /**
+     * Gets the value of the inout property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link InOut }
+     *     
+     */
+    public InOut getInout() {
+        return inout;
+    }
+
+    /**
+     * Sets the value of the inout property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link InOut }
+     *     
+     */
+    public void setInout(InOut value) {
+        this.inout = value;
+    }
 }

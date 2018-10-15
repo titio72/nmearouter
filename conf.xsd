@@ -82,7 +82,7 @@
 	    <xs:extension base="AgentBase">
 			<xs:attribute name="type" type="xs:string" fixed="TCP"/>
 			<xs:attribute name="host" type="xs:string" default="localhost"/>
-			<xs:attribute name="port" type="xs:int" default="4800"/>
+			<xs:attribute name="port" type="xs:int" default="1111"/>
 			<xs:attribute name="inout" type="InOut" use="required"/>
 		</xs:extension>
 	</xs:complexContent>
@@ -95,7 +95,8 @@
 				<xs:element name="to" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
 			</xs:sequence>		
 			<xs:attribute name="type" type="xs:string" fixed="UDP"/>
-			<xs:attribute name="port" type="xs:int" default="4800"/>
+			<xs:attribute name="port" type="xs:int" default="1515"/>
+			<xs:attribute name="inout" type="InOut" use="required"/>
 		</xs:extension>
 	</xs:complexContent>
 </xs:complexType>

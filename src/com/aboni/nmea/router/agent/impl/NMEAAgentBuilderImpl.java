@@ -20,6 +20,7 @@ import com.aboni.nmea.router.conf.ConsoleAgent;
 import com.aboni.nmea.router.conf.Filter;
 import com.aboni.nmea.router.conf.FilterSet;
 import com.aboni.nmea.router.conf.GyroAgent;
+import com.aboni.nmea.router.conf.InOut;
 import com.aboni.nmea.router.conf.JSONAgent;
 import com.aboni.nmea.router.conf.MWDAgent;
 import com.aboni.nmea.router.conf.MeteoAgent;
@@ -163,11 +164,16 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
-        NMEAUDPServer a = new NMEAUDPServer(cache, conf.getName(), q, 1111);
-        for (String s: conf.getTo()) {
-        	a.addTarget(s);
-        }
-        return a;
+		if (conf.getInout()==InOut.OUT) {
+	        NMEAUDPSender a = new NMEAUDPSender(cache, conf.getName(), q, conf.getPort());
+	        for (String s: conf.getTo()) {
+	        	a.addTarget(s);
+	        }
+	        return a;
+		} else {
+	        NMEAUDPReceiver a = new NMEAUDPReceiver(cache, conf.getName(), conf.getPort(), q);
+	        return a;
+		}
 	}
 	
 	private NMEAAgent buildMWDSynt(MWDAgent a, QOS q) {

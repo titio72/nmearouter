@@ -16,13 +16,13 @@ import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public class NMEAUDPServer extends NMEAAgentImpl {
+public class NMEAUDPSender extends NMEAAgentImpl {
 
 	private DatagramSocket serverSocket;
 	private int portTarget;
 	private Set<InetAddress> targets;
 
-	public NMEAUDPServer(NMEACache cache, String name, QOS qos, int portTarget) {
+	public NMEAUDPSender(NMEACache cache, String name, QOS qos, int portTarget) {
 		super(cache, name, qos);
 		this.portTarget = portTarget;
         setSourceTarget(false, true);
@@ -36,14 +36,14 @@ public class NMEAUDPServer extends NMEAAgentImpl {
 	
     @Override
     public String getDescription() {
-    	String res = "Port " + getPort() + "<br>";
+    	String res = "UDP Sender Port " + getPort() + "<br>";
     	for (InetAddress a: targets) res += a.getHostName() + " ";
     	return res;
     }
     
     @Override
     public String toString() {
-        return "{UDP " + getPort() + "}";
+        return "{UDP " + getPort() + " T}";
     }
     
 	public int getPort() {

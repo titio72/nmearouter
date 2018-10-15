@@ -118,7 +118,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	}
 	
     private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
-        TrackManager.TrackPoint point = tracker.processPosition(pos_t, sog);
+        TrackPoint point = tracker.processPosition(pos_t, sog);
     	if (point!=null && media!=null) {
             media.write(point.position, 
             		point.anchor, 

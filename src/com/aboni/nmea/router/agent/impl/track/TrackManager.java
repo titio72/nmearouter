@@ -23,28 +23,6 @@ public class TrackManager {
 	private static final double MOVE_THRESHOLD_SPEED_KN = 3.0; // if reported is greater than X then it's moving 
 	private static final double MOVE_THRESHOLD_POS_METERS =  35.0; // if move by X meters since last reported point then it's moving
 
-	
-	public static class TrackPoint {
-		GeoPositionT position;
-		boolean anchor;
-		double distance;
-		double averageSpeed;
-		double maxSpeed;
-		int period;
-		
-		public TrackPoint() {
-		}
-
-		public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
-			this.position = p;
-			this.anchor = anchor;
-			this.distance = dist;
-			this.averageSpeed = speed;
-			this.maxSpeed = maxSpeed;
-			this.period = period;
-		}
-	}
-	
     public TrackManager() {
         period = DEFAULT_PERIOD;
         staticPeriod = STATIC_DEFAULT_PERIOD;
