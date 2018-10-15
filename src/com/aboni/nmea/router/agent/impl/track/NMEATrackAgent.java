@@ -99,7 +99,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                RMCSentence rmc = (RMCSentence)s;
 	                Position pos = NMEAUtils.getPosition(rmc);
 	                if (pos!=null) {
-	                    Calendar timestamp = NMEAUtils.getTimestamp(rmc);
+	                    Calendar timestamp = NMEAUtils.getTimestampOptimistic(rmc);
 	                    if (timestamp!=null) {
                         	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
                         	double speed = rmc.getSpeed();

@@ -16,7 +16,7 @@ public class NMEAChangeTalkerProcessorTest {
 	public void testNoChange() {
 		NMEAChangeTalkerProcessor p = new NMEAChangeTalkerProcessor(TalkerId.GP, TalkerId.II);
 		Sentence s = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-		Sentence[] s1 = p.process(s, "SRC");
+		Sentence[] s1 = p.process(s, "SRC").second;
 		assertEquals(1, s1.length);
 		assertEquals(TalkerId.II, s1[0].getTalkerId());
 	}
@@ -25,7 +25,7 @@ public class NMEAChangeTalkerProcessorTest {
 	public void testNoChange1() {
 		NMEAChangeTalkerProcessor p = new NMEAChangeTalkerProcessor(TalkerId.GP, TalkerId.II);
 		Sentence s = SentenceFactory.getInstance().createParser(TalkerId.AB, "GLL");
-		Sentence[] s1 = p.process(s, "SRC");
+		Sentence[] s1 = p.process(s, "SRC").second;
 		assertEquals(1, s1.length);
 		assertEquals(TalkerId.AB, s1[0].getTalkerId());
 	}
@@ -34,7 +34,7 @@ public class NMEAChangeTalkerProcessorTest {
 	public void testChange() {
 		NMEAChangeTalkerProcessor p = new NMEAChangeTalkerProcessor(TalkerId.GP, TalkerId.II);
 		Sentence s = SentenceFactory.getInstance().createParser(TalkerId.GP, "GLL");
-		Sentence[] s1 = p.process(s, "SRC");
+		Sentence[] s1 = p.process(s, "SRC").second;
 		assertEquals(1, s1.length);
 		assertEquals(TalkerId.II, s1[0].getTalkerId());
 	}
