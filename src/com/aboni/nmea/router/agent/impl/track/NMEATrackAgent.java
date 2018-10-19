@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.agent.impl.track;
 
-import java.util.Calendar;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEACache;
@@ -11,11 +10,10 @@ import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.util.Position;
+import net.sf.marineapi.nmea.util.DataStatus;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
-	private static final double SPEED_THRESHOLD = 40; //kn - anything faster than 40 knots is a mistake
 	private TrackWriter media;
 	private String mediaFile;
 	private TrackManager tracker;
@@ -97,18 +95,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 			try {
 	            if (s instanceof RMCSentence) {
 	                RMCSentence rmc = (RMCSentence)s;
-	                Position pos = NMEAUtils.getPosition(rmc);
-	                if (pos!=null) {
-	                    Calendar timestamp = NMEAUtils.getTimestampOptimistic(rmc);
-	                    if (timestamp!=null) {
-                        	GeoPositionT pos_t = new GeoPositionT(timestamp.getTimeInMillis(), pos);
-                        	double speed = rmc.getSpeed();
-                        	if (speed < SPEED_THRESHOLD) {
-                                processPosition(pos_t, speed);
-                        	} else {
-                                ServerLog.getLogger().Info("Skipping {" + s + "} reason {speed>threshold}");
-                        	}
-	                    }
+	                if (rmc.isValid() && rmc.getStatus()==DataStatus.ACTIVE) {
+		                GeoPositionT pos_t = new GeoPositionT(
+		                		NMEAUtils.getTimestampOptimistic(rmc).getTimeInMillis(), 
+		                		NMEAUtils.getPosition(rmc)); 
+                        processPosition(pos_t, rmc.getSpeed());
 	                }
 	            }
 			} catch (Exception e) {

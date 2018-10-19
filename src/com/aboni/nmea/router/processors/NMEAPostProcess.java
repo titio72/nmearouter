@@ -17,4 +17,9 @@ public interface NMEAPostProcess {
 	 */
 	Pair<Boolean, Sentence[]> process(Sentence sentence, String src);
 	
+	/**
+	 * supposed to be called every 1 seconds
+	 */
+	void onTimer();
+	
 }

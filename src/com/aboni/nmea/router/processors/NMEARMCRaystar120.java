@@ -101,4 +101,10 @@ public class NMEARMCRaystar120 implements NMEAPostProcess {
 		return new Pair<>(Boolean.TRUE, null);
 	}
 
+	@Override
+	public void onTimer() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

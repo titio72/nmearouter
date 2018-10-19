@@ -79,5 +79,9 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 		}
 		return new Pair<>(Boolean.TRUE, null);
 	}
+
+	@Override
+	public void onTimer() {
+	}
 	
 }

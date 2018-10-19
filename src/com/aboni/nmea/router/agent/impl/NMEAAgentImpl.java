@@ -19,6 +19,7 @@ import com.aboni.nmea.router.processors.NMEAHeadingEnricher;
 import com.aboni.nmea.router.processors.NMEAMWVTrue;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEARMC2VTGProcessor;
+import com.aboni.nmea.router.processors.NMEARMCFilter;
 import com.aboni.nmea.router.processors.NMEARMCRaystar120;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
@@ -69,6 +70,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 			_pushSentence(e, src);
 		}
 		
+		@Override
+		public void pushData(Object e, NMEAAgent src) {
+			_pushData(e, src);
+		}
 	}
 	
 	private final String name;
@@ -126,6 +131,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             if (qos.get("rs120")) {
                 getLogger().Info("QoS {RS120} Agent {" + name + "}");
                 addProc(new NMEARMCRaystar120());
+            }
+            if (qos.get("rmc_filter")) {
+                getLogger().Info("QoS {RMC filter} Agent {" + name + "}");
+                addProc(new NMEARMCFilter());
             }
             if (qos.get("builtin")) {
                 getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
@@ -357,6 +366,20 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     	}
     }
     
+    private void _pushData(Object s, NMEAAgent source) {
+		try {
+			if (isStarted()) {
+				doWithData(s, source);
+			}
+		} catch (Throwable t) {
+			getLogger().Warning("Error delivering data to agent {" + s + "} error {" + t.getMessage() + "}");
+    	}
+    }
+    
+    protected void doWithData(Object s, NMEAAgent src) {
+    	
+    }
+    
     @Override
     public final NMEASource getSource() {
         return (source?sourceIf:null);
@@ -386,5 +409,11 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
     
     @Override
-    public void onTimer() {} 
+    public void onTimer() {
+    	synchronized (proc) {
+	    	for (NMEAPostProcess p: proc) {
+	    		p.onTimer();
+	    	}
+    	}
+    } 
 }

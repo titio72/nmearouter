@@ -26,5 +26,8 @@ public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
 		}
 		return new Pair<>(Boolean.TRUE, new Sentence[] {s});
 	}
+	@Override
+	public void onTimer() {
+	}
 
 }

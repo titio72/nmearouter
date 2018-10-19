@@ -85,12 +85,8 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private void onTimer() {
 		synchronized (agents) {
-			for (Iterator<NMEAAgent> i = agents.values().iterator(); i.hasNext(); ) {
-				try {
-					i.next().onTimer();
-				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error dispatching timer!", e);
-				}
+			for (NMEAAgent a: agents.values()) {
+				a.onTimer();
 			}
 		}
 	}

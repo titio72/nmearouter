@@ -103,5 +103,9 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
 		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
 		return hdt;
 	}
+
+	@Override
+	public void onTimer() {
+	}
     
 }

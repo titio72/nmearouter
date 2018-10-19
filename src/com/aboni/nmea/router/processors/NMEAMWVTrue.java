@@ -68,5 +68,9 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 		}
 		return new Pair<>(Boolean.TRUE, null);
 	}
+
+	@Override
+	public void onTimer() {
+	}
 	
 }

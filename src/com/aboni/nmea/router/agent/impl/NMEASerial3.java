@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.aboni.nmea.router.NMEACache;
-
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
@@ -131,6 +130,12 @@ public class NMEASerial3 extends NMEAAgentImpl {
     }
 
     private void onSentenceRead(Sentence e) {
+    	/*if (e instanceof RMCSentence) {
+    		if (System.currentTimeMillis() % 11 == 0) {
+    			RMCSentence s = (RMCSentence)e;
+    			s.setPosition(new Position(-s.getPosition().getLatitude(), s.getPosition().getLongitude()));
+    		}
+    	}*/
         notify(e);
     }
 
@@ -165,5 +170,6 @@ public class NMEASerial3 extends NMEAAgentImpl {
             }
             resetTime = t;
         }
+        super.onTimer();
     }
 }
