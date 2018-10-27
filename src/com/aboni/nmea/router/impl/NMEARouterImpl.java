@@ -69,7 +69,8 @@ public class NMEARouterImpl implements NMEARouter {
 	private final NMEACache cache;
 	private final NMEAStream stream;
 
-	private static final int TIMER = 1000;
+	private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
+	private static final int TIMER_HR		= 250;
 	
 	@Inject
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
@@ -83,10 +84,14 @@ public class NMEARouterImpl implements NMEARouter {
 		timer = null;
 	}
 
-	private void onTimer() {
+	private int timer_count = 0;
+	
+	private void onTimerHR() {
 		synchronized (agents) {
+			timer_count = (timer_count+1) % TIMER_FACTOR;
 			for (NMEAAgent a: agents.values()) {
-				a.onTimer();
+				a.onTimerHR();
+				if (timer_count==0) a.onTimer();
 			}
 		}
 	}
@@ -106,9 +111,10 @@ public class NMEARouterImpl implements NMEARouter {
 					
 					@Override
 					public void run() {
-						onTimer();
+						onTimerHR();
 					}
-				}, 0, TIMER);
+				}, 0, TIMER_HR);
+				
 			}
 		}
 	}

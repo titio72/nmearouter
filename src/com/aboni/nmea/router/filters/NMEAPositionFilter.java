@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.filters;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,19 +10,22 @@ import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
+import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 
-public class PositionFilter {
+public class NMEAPositionFilter implements NMEASentenceFilter {
 	
-	private static final int RESET_TIMEOUT = 5*60000; 	// 5 minutes
-	private static final int SPEED_GATE = 25; 			// 25Kn - if faster reject
-	private static final int MAGIC_DISTANCE = 15; 		// 15NM
-	private static final int SMALL_MAGIC_DISTANCE = 2; 	// 2NM
-	private static final int SIZE = 30; 				// ~30s of samples
+	private static final int 	RESET_TIMEOUT = 5*60000; 	// 5 minutes
+	private static final int 	SPEED_GATE = 35; 			// Kn - if faster reject
+	private static final int 	MAGIC_DISTANCE = 15; 		// Points farther from the median of samples will be discarded
+	private static final double SMALL_MAGIC_DISTANCE = 0.5; // Points farther from the last valid point will be discarded
+	private static final int 	SIZE = 30; 					// ~30s of samples
+	
 	private List<Position> positions = new LinkedList<>();
 	private Position lastValid;
 	private long lastTime = 0; 
-	private FilterStats stats = new FilterStats();
+	
+	private final FilterStats stats;
 
 	private class FilterStats {
 		int totProcessed;
@@ -31,6 +34,7 @@ public class PositionFilter {
 		int totSkippedExceedSpeed;
 		int totInvalid;
 		int medianRecalc;
+		int q;
 		
 		void reset() {
 			totInvalid = 0;
@@ -43,13 +47,16 @@ public class PositionFilter {
 		
 		@Override
 		public String toString() {
-			return String.format("T {%d} Invalid {%d} RevTime {%d} Xd {%d} Xs {%d} M {%d}", 
-					totProcessed, totInvalid, totSkippedReverseTime, 
+			return String.format("Ok {%d} Q {%d} XInv {%d} Xtime {%d} Xdist {%d} Xspeed {%d} MCalc {%d}", 
+					totProcessed, q, totInvalid, totSkippedReverseTime, 
 					totSkippedExceedDistance, totSkippedExceedSpeed,
 					medianRecalc);
 		}
 	}
 	
+	public NMEAPositionFilter() {
+		stats = new FilterStats();
+	}
 	
 	private boolean ready() {
 		return positions.size()==SIZE;
@@ -69,6 +76,7 @@ public class PositionFilter {
 			    	        if (ready()) {
 			    	        	if (checkDistance(rmc.getPosition())) {
 			    	        		stats.totProcessed++;
+			    	        		stats.q = positions.size();
 			    	        		return true; 
 			    	        	} else {
 			    	        		stats.totSkippedExceedDistance++;
@@ -86,6 +94,7 @@ public class PositionFilter {
 	        } else {
 	        	stats.totInvalid++;
 	        }
+			stats.q = positions.size();
 	    	return false;
 		}
 	}
@@ -95,17 +104,17 @@ public class PositionFilter {
 		if (lastValid==null) {
 			Position pMedian = getMedian();
 			if (pMedian!=null) {
-				if (pMedian.distanceTo(p)<MAGIC_DISTANCE) {
+				double d = pMedian.distanceTo(p) / 1852; 
+				if (d<MAGIC_DISTANCE) {
 					lastValid = p;
 					valid = true;
 				}
 			}
 		} else {
-			if (lastValid.distanceTo(p)<SMALL_MAGIC_DISTANCE) {
+			double d = lastValid.distanceTo(p) / 1852; 
+			if (d<SMALL_MAGIC_DISTANCE) {
 				lastValid = p;
 				valid = true;
-			} else {
-				lastValid = null;
 			}
 		}
 		return valid;
@@ -148,9 +157,17 @@ public class PositionFilter {
 	
 	public void dumpStats() {
 		synchronized (stats) {
-			ServerLog.getLogger().Info("RMCFilter" + stats);
-			System.out.println(stats);
+			ServerLog.getLogger().Info("RMCFilter " + stats);
 			stats.reset();
+		}
+	}
+
+	@Override
+	public boolean match(Sentence s, String src) {
+		if (s instanceof RMCSentence) {
+			return acceptPoint((RMCSentence)s);
+		} else {
+			return true;
 		}
 	}
 }

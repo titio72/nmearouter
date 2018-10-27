@@ -159,7 +159,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		default: r = false; t = false; break;
 		}
 		
-        return new NMEASerial3(cache, name, portName, speed, r, t, q);
+        return new NMEASerial(cache, name, portName, speed, r, t, q);
         //return new NMEASerial2(cache, name, portName, speed, r, t, q);
 	}
 	

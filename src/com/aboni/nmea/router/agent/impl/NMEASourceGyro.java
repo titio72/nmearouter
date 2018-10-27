@@ -10,9 +10,6 @@ import com.aboni.utils.HWSettings;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
@@ -32,8 +29,6 @@ import net.sf.marineapi.nmea.util.Measurement;
 
 public class NMEASourceGyro extends NMEAAgentImpl {
 
-    private static final int PERIOD = 500; //ms
-    
     /**
      * After 1m no HDx sentence appear on the stream the sensor start providing its own.
      * This is in case the boat can provide heading values (AP, boat compass etc.).
@@ -41,10 +36,6 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final long SEND_HDx_IDLE_TIME = 15 * 1000; //ms
 
     private static final boolean USE_CMPS11 = true;
-    
-    private boolean started;
-    
-    private Timer timer;
     
     private ASensorCompass compassSensor;
     
@@ -71,35 +62,22 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     
     @Override
     protected boolean onActivate() {
-        started = true;
-    
-        compassSensor = createCompass();
-        
-        TimerTask t = new TimerTask() {
-            
-            @Override
-            public void run() {
-                doLF();
-            }
-        };
-        timer = new Timer(getName(), true);
-        timer.scheduleAtFixedRate(t, 1000 /* wait 1s before starting reading*/, PERIOD);
-        return true;
-    }
-    
-    @Override
-    protected synchronized void onDeactivate() {
-        started = false;
-        timer.cancel();
-        timer = null;
+    	synchronized (this) {
+    		if (!isStarted()) {
+		        compassSensor = createCompass();
+    		}
+	        return true;
+    	}
     }
 
-    private synchronized void doLF() {
-        if (started) {
-        	readSensors();
-            sendHDx();
-            sendXDR();
-        }            
+    private void doLF() {
+    	synchronized (this) {
+	        if (isStarted()) {
+	        	readSensors();
+	            sendHDx();
+	            sendXDR();
+	        }
+	    }
     }
     
 	private ASensorCompass createCompass() {
@@ -219,6 +197,15 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	static final int TIMER_FACTOR = 2;
+	private int timerCount = 0;
+	
+	@Override
+	public void onTimerHR() {
+		timerCount = (timerCount + 1) % TIMER_FACTOR;
+		if (timerCount==0) doLF();
+		super.onTimer();
 	}
 }

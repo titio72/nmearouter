@@ -18,4 +18,5 @@ public interface NMEAAgent extends Startable {
 	NMEATarget getTarget();
 	
 	void onTimer();
+	void onTimerHR();
 }

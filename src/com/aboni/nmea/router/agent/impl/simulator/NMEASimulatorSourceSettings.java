@@ -15,6 +15,7 @@ public class NMEASimulatorSourceSettings {
 	public boolean _vlw = true;
 	public boolean _gll = true;
 	public boolean _rmc = true;
+	public boolean _gpsOut = false;
 	public boolean _dpt = true;
 	public boolean _dbt = true;
 	public boolean _mtw = true;
@@ -52,6 +53,7 @@ public class NMEASimulatorSourceSettings {
 	public String _polars = "dufour35c.csv";
 	
 	public boolean _usePolars;
+
 	
 	public NMEASimulatorSourceSettings() {
 	}
@@ -75,25 +77,26 @@ public class NMEASimulatorSourceSettings {
     }
     
 	private void readConf(Properties p) {
-		 _vhw   = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
-		 _vlw   = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
-		 _gll   = p.getProperty("simulate.gll", "0").equals("1");  // gps
-		 _rmc   = p.getProperty("simulate.rmc", "0").equals("1");  // gps
-		 _dpt   = p.getProperty("simulate.dpt", "0").equals("1");  // depth
-		 _dbt   = p.getProperty("simulate.dbt", "0").equals("1");  // depth
-		 _mtw   = p.getProperty("simulate.mtw", "0").equals("1");  // water temp
-		 _mta   = p.getProperty("simulate.mta", "0").equals("1");  // air temp
-		 _mbb   = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
-		 _mhu   = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
-		 _mda   = p.getProperty("simulate.mda", "0").equals("1");  // aggregated meteo
-		 _mwv_a = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
-		 _mwv_t = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
-		 _vwr   = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
-		 _hdm   = p.getProperty("simulate.hdm", "0").equals("1"); // magn heading
-		 _hdg   = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
-		 _hdt   = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
-		 _vtg   = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
-		 _rsa   = p.getProperty("simulate.rsa", "0").equals("1");  // rudder angle
+		 _vhw    = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
+		 _vlw    = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
+		 _gll    = p.getProperty("simulate.gll", "0").equals("1");  // gps
+		 _rmc    = p.getProperty("simulate.rmc", "0").equals("1");  // gps
+		 _gpsOut = p.getProperty("simulate.gps.outlier", "0").equals("1"); // simulate GPS going nuts
+		 _dpt    = p.getProperty("simulate.dpt", "0").equals("1");  // depth
+		 _dbt    = p.getProperty("simulate.dbt", "0").equals("1");  // depth
+		 _mtw    = p.getProperty("simulate.mtw", "0").equals("1");  // water temp
+		 _mta    = p.getProperty("simulate.mta", "0").equals("1");  // air temp
+		 _mbb    = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
+		 _mhu    = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
+		 _mda    = p.getProperty("simulate.mda", "0").equals("1");  // aggregated meteo
+		 _mwv_a  = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
+		 _mwv_t  = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
+		 _vwr    = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
+		 _hdm    = p.getProperty("simulate.hdm", "0").equals("1"); // magn heading
+		 _hdg    = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
+		 _hdt    = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
+		 _vtg    = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
+		 _rsa    = p.getProperty("simulate.rsa", "0").equals("1");  // rudder angle
 		 _usePolars = p.getProperty("simulate.use.polars", "0").equals("1");  // use polars to calculate the speed
 		 _autoPilot	= p.getProperty("simulate.autopilot", "0").equals("1");
 		 _xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");

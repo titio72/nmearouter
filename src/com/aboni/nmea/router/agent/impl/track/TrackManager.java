@@ -3,6 +3,8 @@ package com.aboni.nmea.router.agent.impl.track;
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 
+import net.sf.marineapi.nmea.util.Position;
+
 public class TrackManager {
 	
     private double maxSpeed;
@@ -10,8 +12,10 @@ public class TrackManager {
     private long period;
 	private GeoPositionT lastPoint;
 	private GeoPositionT lastTrackedPoint;
-	private StationaryManager stationaryStatus;
-
+	private final StationaryManager stationaryStatus;
+	private final PositionStats stats;
+	private static boolean STATS = true;
+	
 	private static int SECOND = 1000;
 	private static int MINUTE = 60 * SECOND;
 	
@@ -28,6 +32,7 @@ public class TrackManager {
         staticPeriod = STATIC_DEFAULT_PERIOD;
         maxSpeed = 0.0;
         stationaryStatus = new StationaryManager();
+        stats = new PositionStats();
     }
 
     /**
@@ -66,7 +71,9 @@ public class TrackManager {
     }
     
     public TrackPoint processPosition(GeoPositionT p, double sog) throws Exception {
-        
+
+    	if (STATS) stats.addPosition(p);
+    	
         maxSpeed = Math.max(maxSpeed, sog);
     	TrackPoint res = null;
 
@@ -76,14 +83,16 @@ public class TrackManager {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(lastPoint, p));
                 setLastTrackedPosition(p);
                 maxSpeed = sog;
-            	res = fillPoint(lastPoint, p);
+            	res = fillPoint(stationaryStatus.isAnchor(p.getTimestamp()), lastPoint, p);
 	        }
     	} else {
 	        long dt = p.getTimestamp() - getLastTrackedTime();
 	        if (dt >= getPeriod()) {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(getLastTrackedPosition(), p));
 	            if (shallReport(p)) {
-	            	res = fillPoint(getLastTrackedPosition(), p);
+	            	boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
+	            	GeoPositionT posToTrack = anchor ? new GeoPositionT(p.getTimestamp(), stats.getAveragePosition()) : p;
+                	res = fillPoint(anchor, getLastTrackedPosition(), posToTrack);
                     setLastTrackedPosition(p);
 	                maxSpeed = 0.0; // reset maxSpeed for the new sampling period
 	        	}
@@ -94,15 +103,13 @@ public class TrackManager {
         return res;
     }
 
-    private TrackPoint fillPoint(GeoPositionT prevPos, GeoPositionT p) {
-        boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
+    private TrackPoint fillPoint(boolean anchor, GeoPositionT prevPos, GeoPositionT p) {
         Course c = new Course(prevPos, p);
         double speed = c.getSpeed(); 
         speed = Double.isNaN(speed)?0.0:speed;
         double dist = c.getDistance(); 
         dist = Double.isNaN(speed)?0.0:dist;
         int period = (int) (c.getInterval()/1000);
-        setLastTrackedPosition(p);
         return new TrackPoint(p, anchor, dist,  speed, maxSpeed, period);
     }
     
@@ -154,6 +161,10 @@ public class TrackManager {
 	    	speed *= 1.94384; // speed in knots
 	    	return speed <= MOVE_THRESHOLD_SPEED_KN && dist < MOVE_THRESHOLD_POS_METERS;
 	    }
+	}
+	
+	public Position getAverage() {
+		return stats.getAveragePosition();
 	}
 	
     private class StationaryManager {

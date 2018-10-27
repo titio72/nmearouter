@@ -229,20 +229,24 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 	@Override
 	public boolean isStarted() {
-		return active;
+		synchronized (this) {
+			return active;
+		}
 	}
 
 	@Override
 	public void start() {
-		if (!active) {
-			getLogger().Info("Activating agent {" + getName() + "}");
-			if (onActivate()) {
-				active = true;
-				notifyStatus();
-			} else {
-				getLogger().Error("Cannot activate agent {" + getName() + "}");
+		synchronized (this) {
+			if (!active) {
+				getLogger().Info("Activating agent {" + getName() + "}");
+				if (onActivate()) {
+					active = true;
+					notifyStatus();
+				} else {
+					getLogger().Error("Cannot activate agent {" + getName() + "}");
+				}
 			}
-		}
+		}	
 	}
 	
 	private void notifyStatus() {
@@ -251,11 +255,13 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 	@Override
 	public void stop() {
-		if (active) {
-			getLogger().Info("Deactivating {" + getName() + "}");
-			onDeactivate();
-			active = false;
-			notifyStatus();
+		synchronized (this) {
+			if (active) {
+				getLogger().Info("Deactivating {" + getName() + "}");
+				onDeactivate();
+				active = false;
+				notifyStatus();
+			}
 		}
 	}
 
@@ -409,11 +415,17 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
     
     @Override
+    public void onTimerHR() {
+    } 
+    
+    @Override
     public void onTimer() {
-    	synchronized (proc) {
-	    	for (NMEAPostProcess p: proc) {
-	    		p.onTimer();
-	    	}
+		if (isStarted()) {
+			synchronized (proc) {
+		    	for (NMEAPostProcess p: proc) {
+		    		p.onTimer();
+		    	}
+    		}
     	}
     } 
 }

@@ -1,8 +1,5 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
@@ -22,7 +19,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
 	private StatsWriter writer;
 	
-    private static final long SAMPLING = 60000;
+    private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
+    private int timerCount;
 
     private static final int TEMP = 0; 
     private static final int W_TEMP = 1; 
@@ -58,14 +56,6 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     protected boolean onActivate() {
         try {
             if (writer!=null) writer.init();
-            new Timer(true).scheduleAtFixedRate(new TimerTask() {
-                
-                @Override
-                public void run() {
-                    dumpStats();
-                }
-            }, 0, SAMPLING);
-            
             return true;
         } catch (Exception e) {
             getLogger().Error("Error connecting db Agent {Meteo}", e);
@@ -73,9 +63,19 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         }
     }
     
+    
+    
+    @Override
+    public void onTimer() {
+    	timerCount = (timerCount+1) % SAMPLING_FACTOR;
+    	if (timerCount==0) dumpStats();
+    	super.onTimer();
+    }
+    
+    
     protected void dumpStats() {
         synchronized (series) {
-        	long ts = System.currentTimeMillis() - SAMPLING;
+        	long ts = System.currentTimeMillis();
             for (int i = 0; i<series.length; i++) {
                 write(series[i], ts);
                 series[i].reset();

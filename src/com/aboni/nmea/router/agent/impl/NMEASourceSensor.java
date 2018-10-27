@@ -10,8 +10,6 @@ import com.aboni.utils.HWSettings;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.aboni.nmea.router.NMEACache;
 
@@ -30,11 +28,7 @@ import net.sf.marineapi.nmea.util.Measurement;
 
 public class NMEASourceSensor extends NMEAAgentImpl {
 
-    private static final int PERIOD = 1000; //ms
-    
     private boolean started;
-    
-    private Timer timer;
     
     private SensorVoltage voltageSensor;
     private SensorPressureTemp pressureTempSensor0;
@@ -71,23 +65,18 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         pressureTempSensors = new SensorPressureTemp[] {pressureTempSensor0, pressureTempSensor1};
         voltageSensor = createVoltage();
         
-        TimerTask t = new TimerTask() {
-            
-            @Override
-            public void run() {
-                doLF();
-            }
-        };
-        timer = new Timer(getName(), true);
-        timer.scheduleAtFixedRate(t, 1000 /* wait 1s before starting reading*/, PERIOD);
         return true;
+    }
+
+    @Override
+    public void onTimer() {
+    	doLF();
+    	super.onTimer();
     }
     
     @Override
     protected synchronized void onDeactivate() {
         started = false;
-        timer.cancel();
-        timer = null;
     }
 
     private synchronized void doLF() {
