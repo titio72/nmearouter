@@ -24,7 +24,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
         
-        setSourceTarget(false, true);
+        setSourceTarget(true, true);
 
         tracker = new TrackManager();
         
@@ -107,6 +107,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	            }
 			} catch (Exception e) {
 				ServerLog.getLogger().Error("Error processing position {" + s + "}", e);
+				e.printStackTrace();
 			}
 		}
 	}
@@ -116,11 +117,13 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         
         Position avgPos = tracker.getAverage();
         boolean anchor = tracker.isStationary();
-        
-        XMCParser s = new XMCParser(TalkerId.II);
-        s.setAveragePosition(avgPos);
-        s.setAnchor(anchor);
-        notify(s);
+
+        if (avgPos!=null) {
+	        XMCParser s = new XMCParser(TalkerId.II);
+	        s.setAveragePosition(avgPos);
+	        s.setAnchor(anchor);
+	        notify(s);
+        }
         
     	if (point!=null && media!=null) {
             media.write(point.position, 

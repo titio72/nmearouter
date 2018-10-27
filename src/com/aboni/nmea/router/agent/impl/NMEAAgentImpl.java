@@ -323,8 +323,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                     	}
                     }
                 }
-                listener.onSentence(sentence, this);
-                for (Sentence s: toSend) listener.onSentence(s, this);
+				if (listener!=null) {
+	                listener.onSentence(sentence, this);
+	                for (Sentence s: toSend) listener.onSentence(s, this);
+				}
 			}
 		}
 	}

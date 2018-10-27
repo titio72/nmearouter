@@ -3,6 +3,7 @@ package com.aboni.nmea.router.filters;
 import java.util.Iterator;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
@@ -49,8 +50,13 @@ public class FilterSetBuilder {
 	
 	public NMEASentenceFilterSet importFilter(String s) {
 		if (s!=null) {
-			JSONObject jFs = new JSONObject(s);
-			if (jFs.has("filters")) {
+			JSONObject jFs = null;
+			try {
+				jFs = new JSONObject(s);
+			} catch (JSONException e) {
+				
+			}
+			if (jFs!=null && jFs.has("filters")) {
 				NMEAFilterSet res = new NMEAFilterSet();
 				res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
 				JSONArray jFa = jFs.getJSONArray("filters");
