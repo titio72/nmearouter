@@ -6,11 +6,14 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
+import com.aboni.nmea.sentences.XMCParser;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.util.DataStatus;
+import net.sf.marineapi.nmea.util.Position;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
@@ -110,6 +113,15 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	
     private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
         TrackPoint point = tracker.processPosition(pos_t, sog);
+        
+        Position avgPos = tracker.getAverage();
+        boolean anchor = tracker.isStationary();
+        
+        XMCParser s = new XMCParser(TalkerId.II);
+        s.setAveragePosition(avgPos);
+        s.setAnchor(anchor);
+        notify(s);
+        
     	if (point!=null && media!=null) {
             media.write(point.position, 
             		point.anchor, 
