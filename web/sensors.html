@@ -34,7 +34,10 @@
         $scope.V0 = { value: 0.0 };
         $scope.V1 = { value: 0.0 };
     });
-   
+  
+    var heading = 0.0;
+    var speed = 0.0;
+ 
     var socket = null;
     $(document).ready(function() {
         window.setInterval(checkConnection, 1000);
@@ -75,6 +78,18 @@
                     controllerScope.$evalAsync();
                 }
             }
+	} else if (msg.topic=="XMC") {
+            var controllerElement = document.getElementById('sensorPanel');
+            var controllerScope = angular.element(controllerElement).scope();
+	    if (msg.anchor) {
+		    msg.anchor_lat = msg.avg_lat;
+		    msg.anchor_lon = msg.avg_lon;
+	    } else {
+		    msg.anchor_lat = "";
+		    msg.anchor_lon = "";
+	    }
+            controllerScope['xmc'] = msg;
+            controllerScope.$evalAsync();
         } else if (msg.topic=='RMC') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
@@ -82,7 +97,7 @@
             msg.s_time = new Date(Date.parse(msg.UTC)).toLocaleTimeString();
             controllerScope['rmc'] = msg;
             controllerScope.$evalAsync();
-        } else if (msg.topic=='DPT') {
+        } else if (msg.topic=='DBT') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             controllerScope['depth'] = msg;
@@ -91,13 +106,8 @@
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             msg.s_dir = direction(msg.mag_angle);
+            speed = msg.speed;
             controllerScope['vector'] = msg;
-            controllerScope.$evalAsync();
-        } else if (msg.topic=='MWD') {
-            var controllerElement = document.getElementById('sensorPanel');
-            var controllerScope = angular.element(controllerElement).scope();
-            msg.s_dir = direction(msg.mag_angle);
-            controllerScope['wind'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='MWV_R') {
             var controllerElement = document.getElementById('sensorPanel');
@@ -109,27 +119,44 @@
             } else {
                 msg.tack = "Starboard"
             }
-            controllerScope.$evalAsync();
-        } else if (msg.topic=='MWV_T') {
-            var controllerElement = document.getElementById('sensorPanel');
-            var controllerScope = angular.element(controllerElement).scope();
-            if (msg.angle>180) {
-                msg.angle = 360 - msg.angle;
-                msg.tack = "Port"
-            } else {
-                msg.tack = "Starboard"
-            }
-            controllerScope['wind_t'] = msg;
+            rr = trueWind(speed, msg.angle, msg.speed);
+            controllerScope['wind_t'] = rr;
+            controllerScope['wind'] = {
+                mag_angle: rr.angle + heading,
+                speed: rr.speed 
+            };
             controllerScope.$evalAsync();
         } else if (msg.topic=='HDG') {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
             msg.s_dir = direction(msg.angle);
+            heading = msg.angle;
             controllerScope['hdg'] = msg;
             controllerScope.$evalAsync();
         }
 
     }
+
+
+    function trueWind(speed, appWindDeg, appWindSpeed) {
+        v = speed;
+        w = appWindSpeed;
+        wA =  appWindDeg / 180.0 * Math.PI;
+        
+        wAx = w * Math.sin(wA);
+        wAy = w * Math.cos(wA);
+        
+        wTx = wAx;
+        wTy = wAy - v;
+        
+        var r = {
+        angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
+        speed: Math.sqrt(wTx*wTx + wTy*wTy)
+	}
+	return r;	
+    }
+
+
 </script>
 
 
@@ -168,7 +195,7 @@
 	                        <tr><td>Cab Temp</td><td style="text-align: right">{{AirTemp_0.value | number:1}}°C</td></tr>
 	                        <tr><td>Ext Temp</td><td style="text-align: right">{{ExtAirTemp.value | number:1}}°C</td></tr>
                     		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-	                        <tr><td>Press.</td><td style="text-align: right">{{Barometer_0.value | number:0}} MB</td></tr>
+	                        <tr><td>Press.</td><td style="text-align: right">{{Barometer_1.value | number:3}} MB</td></tr>
 	                        <tr><td>Humidity</td><td style="text-align: right">{{Humidity_1.value | number:1}}%</td></tr>
                         </table>
                     </div>
@@ -197,13 +224,13 @@
                     </div>
                     <div class="panel-body panelRouter">
                     	<table class="panelTable">
-                    		<tr><td>Lat</td><td style="text-align: right">{{rmc.latitude}}</td></tr>
-                    		<tr><td>Lon</td><td style="text-align: right">{{rmc.longitude}}</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                    		<tr><td>Position</td><td style="text-align: right">{{rmc.latitude}}</td></tr>
+                    		<tr><td>&nbsp;</td><td style="text-align: right">{{rmc.longitude}}</td></tr>
+				<tr><td>Anchor</td><td style="text-align: right">{{xmc.anchor_lat}}</td></tr>
+				<tr><td>&nbsp;</td><td style="text-align: right">{{xmc.anchor_lon}}</td></tr>
                     		<tr><td>SOG</td><td style="text-align: right">{{rmc.SOG | number:1}} Kn</td></tr>
                         	<tr><td>COG</td><td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}°</td></tr>
-                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-                            <tr><td colspan="2" style="text-align: right">{{rmc.s_time}}</td></tr>
+                                <tr><td colspan="2" style="text-align: right">{{rmc.s_time}}</td></tr>
                     	</table>
                     </div>
                 </div>
