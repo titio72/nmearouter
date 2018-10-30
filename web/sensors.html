@@ -4,9 +4,9 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?l"></script>
-	<style>
-	
+    <script src="js/nmearouter.js?l"></script>
+    <style>
+    
     .panelTable {
     width: 100%;
     font-family: monospace; 
@@ -23,10 +23,10 @@
     font-size: 12pt;
     }
     
-	.panelRouter {
-	   height: 300px;
-	}
-	</style>
+    .panelRouter {
+       height: 300px;
+    }
+    </style>
 </head>
 <script type="text/javascript">
 
@@ -44,23 +44,23 @@
     });
 
     function checkConnection() {
-    	if (!socket) {
+        if (!socket) {
             resetConnection();
-    	} else if (socket.readyState>=2) {
+        } else if (socket.readyState>=2) {
             resetConnection();
-    	} 
+        } 
     }
     
     function resetConnection() {
-    	if (socket && socket.readyState<2 /*OPEN or OPENING*/) {
-    		socket.close();
-    	}
-    	socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
+        if (socket && socket.readyState<2 /*OPEN or OPENING*/) {
+            socket.close();
+        }
+        socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
         socket.onmessage = function (event) {
             processEvent(event);
         }
         socket.onclose = function (event) {
-        	socketClosed(event);
+            socketClosed(event);
         }
     }
     
@@ -78,16 +78,16 @@
                     controllerScope.$evalAsync();
                 }
             }
-	} else if (msg.topic=="XMC") {
+    } else if (msg.topic=="XMC") {
             var controllerElement = document.getElementById('sensorPanel');
             var controllerScope = angular.element(controllerElement).scope();
-	    if (msg.anchor) {
-		    msg.anchor_lat = msg.avg_lat;
-		    msg.anchor_lon = msg.avg_lon;
-	    } else {
-		    msg.anchor_lat = "";
-		    msg.anchor_lon = "";
-	    }
+        if (msg.anchor) {
+            msg.anchor_lat = msg.avg_lat;
+            msg.anchor_lon = msg.avg_lon;
+        } else {
+            msg.anchor_lat = "";
+            msg.anchor_lon = "";
+        }
             controllerScope['xmc'] = msg;
             controllerScope.$evalAsync();
         } else if (msg.topic=='RMC') {
@@ -152,8 +152,8 @@
         var r = {
         angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
         speed: Math.sqrt(wTx*wTx + wTy*wTy)
-	}
-	return r;	
+    }
+    return r;    
     }
 
 
@@ -174,13 +174,13 @@
                         <h2 class="panel-title">Diag</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                    	<table class="panelTable">
-                    		<tr><td>Battery Svc</td><td style="text-align: right">{{V0.value | number:1}} V</td></tr>
-                    		<tr><td>Battery Eng</td><td style="text-align: right">{{V1.value | number:1}} V</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-	                        <tr><td>CPU</td><td style="text-align: right">{{CPUTemp.value | number:1}} °C</td></tr>
-	                        <tr><td>Equipment</td><td style="text-align: right">{{AirTemp_1.value | number:1}}°C</td></tr>
-	                        <tr><td>Engine</td><td style="text-align: right">{{EngineTemp.value | number:1}} °C</td></tr>
+                        <table class="panelTable">
+                            <tr><td>Battery Svc</td><td style="text-align: right">{{V0.value | number:1}} V</td></tr>
+                            <tr><td>Battery Eng</td><td style="text-align: right">{{V1.value | number:1}} V</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td>CPU</td><td style="text-align: right">{{CPUTemp.value | number:1}} °C</td></tr>
+                            <tr><td>Equipment</td><td style="text-align: right">{{AirTemp_1.value | number:1}}°C</td></tr>
+                            <tr><td>Engine</td><td style="text-align: right">{{EngineTemp.value | number:1}} °C</td></tr>
                         </table>
                     </div>
                 </div>
@@ -192,11 +192,11 @@
                     </div>
                     <div class="panel-body panelRouter">
                         <table class="panelTable">
-	                        <tr><td>Cab Temp</td><td style="text-align: right">{{AirTemp_0.value | number:1}}°C</td></tr>
-	                        <tr><td>Ext Temp</td><td style="text-align: right">{{ExtAirTemp.value | number:1}}°C</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-	                        <tr><td>Press.</td><td style="text-align: right">{{Barometer_1.value | number:3}} MB</td></tr>
-	                        <tr><td>Humidity</td><td style="text-align: right">{{Humidity_1.value | number:1}}%</td></tr>
+                            <tr><td>Cab Temp</td><td style="text-align: right">{{AirTemp_0.value | number:1}}°C</td></tr>
+                            <tr><td>Ext Temp</td><td style="text-align: right">{{ExtAirTemp.value | number:1}}°C</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td>Press.</td><td style="text-align: right">{{Barometer_1.value | number:3}} MB</td></tr>
+                            <tr><td>Humidity</td><td style="text-align: right">{{Humidity_1.value | number:1}}%</td></tr>
                         </table>
                     </div>
                 </div>
@@ -207,12 +207,12 @@
                         <h2 class="panel-title">Gyro</h2>
                     </div>
                     <div class="panel-body panelRouter">
-				       	<table class="panelTable">
-                    		<tr><td>Head</td><td style="text-align: right">{{HEAD.value | number:1}}°</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-                        	<tr><td>Roll</td><td style="text-align: right">{{ROLL.value | number:1}}°</td></tr>
-                        	<tr><td>Pitch</td><td style="text-align: right">{{PITCH.value | number:1}}°</td></tr>
+                           <table class="panelTable">
+                            <tr><td>Head</td><td style="text-align: right">{{HEAD.value | number:1}}°</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td>Roll</td><td style="text-align: right">{{ROLL.value | number:1}}°</td></tr>
+                            <tr><td>Pitch</td><td style="text-align: right">{{PITCH.value | number:1}}°</td></tr>
                         </table>
                     </div>
                 </div>
@@ -223,15 +223,15 @@
                         <h2 class="panel-title">GPS</h2>
                     </div>
                     <div class="panel-body panelRouter">
-                    	<table class="panelTable">
-                    		<tr><td>Position</td><td style="text-align: right">{{rmc.latitude}}</td></tr>
-                    		<tr><td>&nbsp;</td><td style="text-align: right">{{rmc.longitude}}</td></tr>
-				<tr><td>Anchor</td><td style="text-align: right">{{xmc.anchor_lat}}</td></tr>
-				<tr><td>&nbsp;</td><td style="text-align: right">{{xmc.anchor_lon}}</td></tr>
-                    		<tr><td>SOG</td><td style="text-align: right">{{rmc.SOG | number:1}} Kn</td></tr>
-                        	<tr><td>COG</td><td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}°</td></tr>
+                        <table class="panelTable">
+                            <tr><td>Position</td><td style="text-align: right">{{rmc.latitude}}</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">{{rmc.longitude}}</td></tr>
+                			<tr><td>Anchor</td><td style="text-align: right">{{xmc.anchor_lat}}</td></tr>
+                			<tr><td>&nbsp;</td><td style="text-align: right">{{xmc.anchor_lon}}</td></tr>
+                            <tr><td>SOG</td><td style="text-align: right">{{rmc.SOG | number:1}} Kn</td></tr>
+                            <tr><td>COG</td><td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}°</td></tr>
                                 <tr><td colspan="2" style="text-align: right">{{rmc.s_time}}</td></tr>
-                    	</table>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -242,10 +242,10 @@
                     </div>
                     <div class="panel-body panelRouter">
                         <table class="panelTable">
-                        	<tr><td>Speed</td><td style="text-align: right">{{vector.speed | number:1}} Kn</td></tr>
-                        	<tr><td>Head</td><td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}°</td></tr>
-                        	<tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
-                        	<tr><td>Depth</td><td style="text-align: right">{{depth.depth | number:1}} m</td></tr>
+                            <tr><td>Speed</td><td style="text-align: right">{{vector.speed | number:1}} Kn</td></tr>
+                            <tr><td>Head</td><td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}°</td></tr>
+                            <tr><td>&nbsp;</td><td style="text-align: right">&nbsp;</td></tr>
+                            <tr><td>Depth</td><td style="text-align: right">{{depth.depth | number:1}} m</td></tr>
                         </table>
                     </div>
                 </div>
