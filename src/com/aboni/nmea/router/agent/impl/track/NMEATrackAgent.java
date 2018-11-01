@@ -126,14 +126,35 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         }
         
     	if (point!=null && media!=null) {
+    		long t0 = System.currentTimeMillis();
             media.write(point.position, 
             		point.anchor, 
             		point.distance,  
             		point.averageSpeed, 
             		point.maxSpeed, 
             		point.period);
+            long t = System.currentTimeMillis() - t0;
+            synchronized (this) {
+            	avgTime = ((avgTime * samples) + t) / (samples + 1);
+                samples++;
+            }
         }
     }
+    
+    private long lastStats = 0;
+    
+    @Override
+    public void onTimer() {
+    	if (System.currentTimeMillis() - lastStats > 30000) {
+    		lastStats = System.currentTimeMillis();
+    		synchronized (this) {
+    			getLogger().Info("AvgWriteTime {" + avgTime + "} Samples {" + samples + "}");
+    		}
+    	}
+    }
+    
+    private double avgTime = 0;
+    private int samples = 0;
     
     @Override
     public String getType() {
