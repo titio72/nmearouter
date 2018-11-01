@@ -29,7 +29,16 @@ public class NMEAStreamImpl implements NMEAStream {
 
 	@Override
 	public void pushSentence(Sentence s, NMEAAgent src) {
-		push(s, src);
+		synchronized (this) {
+			push(s, src);
+		}
+	}
+
+	@Override
+	public void pushData(JSONObject s, NMEAAgent src) {
+		synchronized (this) {
+			push(s, src);
+		}
 	}
 
 	@Override
@@ -59,6 +68,20 @@ public class NMEAStreamImpl implements NMEAStream {
 						if (msg!=null) {
 							i.onSentence(msg);
 						}
+					}
+				} catch (Exception e) {
+					ServerLog.getLogger().Warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
+				}
+			}
+		}
+	}
+
+	private void push(JSONObject s, NMEAAgent src) {
+		synchronized (annotatedListeners) {
+			for (ListenerWrapper i: annotatedListeners.values()) {
+				try {
+					if (i.isJSON()) {
+						i.onSentence(s);
 					}
 				} catch (Exception e) {
 					ServerLog.getLogger().Warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");

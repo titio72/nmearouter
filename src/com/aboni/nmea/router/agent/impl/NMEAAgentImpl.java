@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.json.JSONObject;
+
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -68,11 +70,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		@Override
 		public void pushSentence(Sentence e, NMEAAgent src) {
 			_pushSentence(e, src);
-		}
-		
-		@Override
-		public void pushData(Object e, NMEAAgent src) {
-			_pushData(e, src);
 		}
 	}
 	
@@ -303,6 +300,20 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	protected void onDeactivate() {
 	    
 	}
+
+	/**
+	 * Used by sources to notify data back to the router.
+	 * No specific purpose.
+	 * Ex: Notify diagnostic info that the router will make available to the admin UI.
+	 * @param data
+	 */
+	protected final void notify(JSONObject data) {
+		if (isStarted()) {
+			if (sl!=null) {
+                sl.onData(data, this);
+			}
+		}
+	}
 	
 	/**
 	 * Used by "sources" to push sentences into the stream
@@ -372,20 +383,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		} catch (Throwable t) {
 			getLogger().Warning("Error delivering sentence to agent {" + s + "} error {" + t.getMessage() + "}");
     	}
-    }
-    
-    private void _pushData(Object s, NMEAAgent source) {
-		try {
-			if (isStarted()) {
-				doWithData(s, source);
-			}
-		} catch (Throwable t) {
-			getLogger().Warning("Error delivering data to agent {" + s + "} error {" + t.getMessage() + "}");
-    	}
-    }
-    
-    protected void doWithData(Object s, NMEAAgent src) {
-    	
     }
     
     @Override

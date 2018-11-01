@@ -12,6 +12,8 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.json.JSONObject;
+
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEASentenceListener;
@@ -38,6 +40,11 @@ public class NMEARouterImpl implements NMEARouter {
 		@Override
 		public void onStatusChange(NMEAAgent agent) {
 			_onStatusChange(agent);
+		}
+
+		@Override
+		public void onData(JSONObject s, NMEAAgent src) {
+		    _queueUpData(s, src);
 		}
 	}
 
@@ -202,12 +209,20 @@ public class NMEARouterImpl implements NMEARouter {
             sentenceQueue.notifyAll();
         }
     }
+
+    private void _queueUpData(JSONObject s, NMEAAgent src) {
+    	synchronized (stream) {
+    		stream.pushData(s, src);
+    	}
+    }
 	
 	private void _routeSentence(Sentence s, NMEAAgent src) {
 		if (started) {
 			cache.onSentence(s, src.getName());
 			routeToTarget(s, src);
-			stream.pushSentence(s, src);
+			synchronized (stream) {
+				stream.pushSentence(s, src);
+			}
 		}
 	}
 

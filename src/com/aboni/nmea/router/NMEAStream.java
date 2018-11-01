@@ -1,5 +1,7 @@
 package com.aboni.nmea.router;
 
+import org.json.JSONObject;
+
 import com.aboni.nmea.router.agent.NMEAAgent;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -13,6 +15,14 @@ public interface NMEAStream {
 	 * @see com.aboni.nmea.router.agent.NMEASource 
 	 */
 	void pushSentence(Sentence s, NMEAAgent src);
+
+	/**
+	 * Push a sentence into the stream.
+	 * @param s	The sentence to be distributed.
+	 * @param src The source that generated the sentence.
+	 * @see com.aboni.nmea.router.agent.NMEASource 
+	 */
+	void pushData(JSONObject s, NMEAAgent src);
 
 	/**
 	 * Subscribe to NMEA stream.
