@@ -113,6 +113,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	}
 	
     private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
+		long t0 = System.currentTimeMillis();
         TrackPoint point = tracker.processPosition(pos_t, sog);
         
         Position avgPos = tracker.getAverage();
@@ -126,18 +127,20 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         }
         
     	if (point!=null && media!=null) {
-    		long t0 = System.currentTimeMillis();
             media.write(point.position, 
             		point.anchor, 
             		point.distance,  
             		point.averageSpeed, 
             		point.maxSpeed, 
             		point.period);
-            long t = System.currentTimeMillis() - t0;
-            synchronized (this) {
-            	avgTime = ((avgTime * samples) + t) / (samples + 1);
-                samples++;
-            }
+        }
+        synchronized (this) {
+            writes++;
+        }
+        long t = System.currentTimeMillis() - t0;
+        synchronized (this) {
+        	avgTime = ((avgTime * samples) + t) / (samples + 1);
+            samples++;
         }
     }
     
@@ -148,13 +151,17 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
-    			getLogger().Info("AvgWriteTime {" + avgTime + "} Samples {" + samples + "}");
+    			getLogger().Info("AvgWriteTime {" + avgTime + "} Samples {" + samples + "} Writes {" + writes + "}");
+    			avgTime = 0;
+    			samples = 0;
+    			writes = 0;
     		}
     	}
     }
     
     private double avgTime = 0;
     private int samples = 0;
+    private int writes = 0;
     
     @Override
     public String getType() {
