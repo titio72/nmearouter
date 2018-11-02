@@ -12,7 +12,6 @@ import org.junit.Test;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.impl.track.TrackManager;
-import com.aboni.nmea.router.agent.impl.track.TrackManager.TrackPoint;
 
 import net.sf.marineapi.nmea.util.Position;
 
@@ -55,7 +54,7 @@ public class NMEATrackManagerTest {
 		
 	}
 	
-	private TrackManager.TrackPoint postPosition(long ts, double speed) throws Exception {
+	private TrackPoint postPosition(long ts, double speed) throws Exception {
 		Position p = new Position(lat, lon);
 		Position p1 = Utils.calcNewLL(p, -90, ((double)(ts-lastPosted)/60.0/60.0/1000.0) /*h*/ * speed /*kn*/);
 		lat = p1.getLatitude();
@@ -64,16 +63,16 @@ public class NMEATrackManagerTest {
 		return m.processPosition(new GeoPositionT(ts + t0, lat, lon), speed);
 	}
 	
-	private List<TrackManager.TrackPoint> cruise(int seconds, double speed) throws Exception {
+	private List<TrackPoint> cruise(int seconds, double speed) throws Exception {
 		return cruise(seconds, speed, 0);
 	}
 	
-	private List<TrackManager.TrackPoint> cruise(int seconds, double speed, int waitBeforeCruising) throws Exception {
+	private List<TrackPoint> cruise(int seconds, double speed, int waitBeforeCruising) throws Exception {
 		int interval = 1000; // 1 second
-		List<TrackManager.TrackPoint> out = new ArrayList<TrackManager.TrackPoint>();
+		List<TrackPoint> out = new ArrayList<TrackPoint>();
 		long start = lastPosted + interval + waitBeforeCruising*1000;
 		for (long t = start; t<=(seconds*1000)+start; t+=interval) {
-			TrackManager.TrackPoint point = postPosition(t, speed);
+			TrackPoint point = postPosition(t, speed);
 			if (point!=null) {
 				out.add(point);
 			}
@@ -84,14 +83,14 @@ public class NMEATrackManagerTest {
 	
 	@Test
 	public void testFirstPoint() throws Exception {
-		TrackManager.TrackPoint p = postPosition(1000, 0.0);
+		TrackPoint p = postPosition(1000, 0.0);
 		assertTrue(p==null); // first point is null because it is figuring out if it's anchored or not
 	}
 	
 	@Test
 	public void testSecondPointStationary() throws Exception {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
-		TrackManager.TrackPoint p = postPosition(2000, 0.0);
+		TrackPoint p = postPosition(2000, 0.0);
 		assertTrue(p!=null);
 		assertTrue(p.anchor);
 	}
@@ -99,7 +98,7 @@ public class NMEATrackManagerTest {
 	@Test
 	public void testSecondPointMoving() throws Exception {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
-		TrackManager.TrackPoint p = postPosition(2000, 5.0);
+		TrackPoint p = postPosition(2000, 5.0);
 		assertTrue(p!=null);
 		assertTrue(!p.anchor);
 		assertEquals(5.0, p.averageSpeed, 0.1);
@@ -115,7 +114,7 @@ public class NMEATrackManagerTest {
 		cruise(30 /* 30s */, 5.0);
 		cruise(10 /* 10s */, 6.0);
 		List<TrackPoint> l = cruise(20 /* 20s */, 5.0);
-		TrackManager.TrackPoint p = l.get(0);
+		TrackPoint p = l.get(0);
 		assertEquals(6.00, p.maxSpeed, 0.01);
 		assertEquals((5.0*20 + 6.0*(period-20))/period, p.averageSpeed, 0.01);
 	}

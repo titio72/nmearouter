@@ -133,10 +133,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             		point.averageSpeed, 
             		point.maxSpeed, 
             		point.period);
+            synchronized (this) {
+                writes++;
+            }
         }
-        synchronized (this) {
-            writes++;
-        }
+
         long t = System.currentTimeMillis() - t0;
         synchronized (this) {
         	avgTime = ((avgTime * samples) + t) / (samples + 1);
@@ -151,7 +152,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
-    			getLogger().Info("AvgWriteTime {" + avgTime + "} Samples {" + samples + "} Writes {" + writes + "}");
+    			getLogger().Info(String.format("AvgWriteTime {%f.1} Samples {%d} Writes {%d}", avgTime, samples, writes));
     			avgTime = 0;
     			samples = 0;
     			writes = 0;

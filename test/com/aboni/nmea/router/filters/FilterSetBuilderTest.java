@@ -59,4 +59,19 @@ public class FilterSetBuilderTest {
 			
 	}
 
+	@Test
+	public void testImportFilter1() {
+		String s = 	"{\"filters\":[{\"sentence\":\"STALK:!84\",\"source\":\"\"}],\"type\":\"blacklist\"}";
+		NMEASentenceFilterSet fs = new FilterSetBuilder().importFilter(s);
+		assertNotNull(fs);
+		assertEquals(TYPE.BLACKLIST, ((NMEAFilterSet)fs).getType());
+		Iterator<NMEASentenceFilter> i = fs.getFilters();
+		assert(i.hasNext());
+		STalkFilter f = (STalkFilter)i.next();
+		assertTrue(f.isNegate());
+		assertEquals("84", f.getCOmmand());
+		
+		assert(!i.hasNext());
+	}		
+	
 }

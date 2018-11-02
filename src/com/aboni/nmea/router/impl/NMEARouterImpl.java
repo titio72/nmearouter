@@ -3,12 +3,12 @@ package com.aboni.nmea.router.impl;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.inject.Inject;
 
@@ -68,7 +68,7 @@ public class NMEARouterImpl implements NMEARouter {
 	
 	private final Map<String, NMEAAgent> agents;
 	
-	private final Queue<SentenceEvent> sentenceQueue;
+	private final BlockingQueue<SentenceEvent> sentenceQueue;
 	
 	private Thread processingThread;
 	private LogLevelType logLevel = LogLevelType.INFO;
@@ -84,7 +84,7 @@ public class NMEARouterImpl implements NMEARouter {
 	    agents = new HashMap<String, NMEAAgent>();
 		agentStatusListener = new InternalAgentStatusListener();
 		sentenceListener = new InternalSentenceListener();
-		sentenceQueue = new LinkedList<NMEARouterImpl.SentenceEvent>();
+		sentenceQueue = new LinkedBlockingQueue<NMEARouterImpl.SentenceEvent>();
 		started = false;
 		this.cache = cache;
 		this.stream = stream;
@@ -155,16 +155,13 @@ public class NMEARouterImpl implements NMEARouter {
 			public void run() {
 				while (started) {
 					SentenceEvent e = null;
-					do  { 
-						synchronized (sentenceQueue) {
-							e = sentenceQueue.poll();
-						}
-						if (e!=null) {
-							_routeSentence(e.s, e.src);
-						}
-					} while (e!=null);
-					synchronized (sentenceQueue) {
-						try { sentenceQueue.wait(); } catch (InterruptedException e1) { e1.printStackTrace(); }
+					try {
+						e = sentenceQueue.take();
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					if (e!=null) {
+						_routeSentence(e.s, e.src);
 					}
 				}
 			}
@@ -204,10 +201,11 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void _queueUpSentence(Sentence s, NMEAAgent src) {
         SentenceEvent e = new SentenceEvent(s, src);
-        synchronized (sentenceQueue) { 
-            sentenceQueue.add(e);
-            sentenceQueue.notifyAll();
-        }
+        try {
+			sentenceQueue.put(e);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
     }
 
     private void _queueUpData(JSONObject s, NMEAAgent src) {

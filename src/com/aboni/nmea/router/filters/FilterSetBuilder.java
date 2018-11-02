@@ -64,12 +64,12 @@ public class FilterSetBuilder {
 					JSONObject fJ = (JSONObject) _fJ;
 					NMEASentenceFilter f = null;
 					String sentence = fJ.optString("sentence");
-					if (sentence.startsWith("STALK:")) {
-						String cmd = sentence.substring("STALK:".length());
-						f = new STalkFilter(cmd, false);
-					} else if (sentence.startsWith("STALK:!")) {
-							String cmd = sentence.substring("STALK:!".length());
-							f = new STalkFilter(cmd, true);
+					if (sentence.startsWith("STALK:!")) {
+						String cmd = sentence.substring("STALK:!".length());
+						f = new STalkFilter(cmd, true);
+					} else if (sentence.startsWith("STALK:")) {
+							String cmd = sentence.substring("STALK:".length());
+							f = new STalkFilter(cmd, false);
 					} else {
 						String stid =  fJ.optString("talker");
 						if (stid==null || "".equals(stid)) {
