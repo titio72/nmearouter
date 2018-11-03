@@ -6,7 +6,6 @@ import com.aboni.sensors.SensorCMPS11;
 import com.aboni.sensors.SensorCompass;
 import com.aboni.sensors.SensorNotInititalizedException;
 import com.aboni.utils.HWSettings;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -114,13 +113,20 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         return s;
     }
     
+    private boolean headingNotPresentOnStream() {
+    	return (
+    			/* another source may have provided a heading but it's too old, presumably the source is down*/ 
+    			cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME) || 
+	    		
+	    		/* there is a heading but it's mine (so no other sources are providing a heading  */
+	    		getName().equals(cache.getLastHeading().source));
+    }
     
     private void sendHDx() {
     	try {
-    	    if (compassSensor!=null && 
-    	    		(cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME)
-    	    		|| getName().equals(cache.getLastHeading().source))) {
-	            double b = compassSensor.getHeading();
+    	    if (compassSensor!=null && headingNotPresentOnStream()) {
+
+    	    	double b = compassSensor.getHeading();
 	            
 	            if (sendHDM) {
     	            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
@@ -182,7 +188,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         if (HWSettings.getPropertyAsInteger("compass.dump", 0)>0 && s instanceof HDMSentence && compassSensor!=null) {
         	try {
         		double headingBoat = ((HDMSentence)s).getHeading();
-        		double headingSens = compassSensor.getHeading();
+        		double headingSens = compassSensor.getUnfilteredSensorHeading();
         		dump(headingSens, headingBoat);
         	} catch (Exception e) {}
         }

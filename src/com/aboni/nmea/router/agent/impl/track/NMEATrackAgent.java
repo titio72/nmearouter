@@ -152,7 +152,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
-    			getLogger().Info(String.format("AvgWriteTime {%f.1} Samples {%d} Writes {%d}", avgTime, samples, writes));
+    			getLogger().Info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
     			avgTime = 0;
     			samples = 0;
     			writes = 0;
