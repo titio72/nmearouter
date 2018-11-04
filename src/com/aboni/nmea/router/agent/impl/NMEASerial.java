@@ -17,15 +17,50 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASerial extends NMEAAgentImpl {
     
-    private static final int STATS_PERIOD = 1000;
-	private long bps = 0;
-    private long bytes = 0;
-    private long bpsOut = 0;
-    private long bytesOut = 0;
-    private long resetTime = 0;
+    private static final int FAST_STATS_PERIOD = 1000;
+    private static final int STATS_PERIOD = 60000;
 
-    private AtomicBoolean run = new AtomicBoolean(false);
+    private long bps;
+    private long bpsOut;
     
+    private class StatsSpeed {
+        long bytes = 0;
+        long bytesOut = 0;
+        long resetTime = 0;
+        
+        long getBps(long time) {
+        	return (bytes * 1000) / (time - resetTime);
+        }
+        
+        long getBpsOut(long time) {
+        	return (bytesOut * 1000) / (time - resetTime);
+        }
+        
+        void reset(long time) {
+        	bytes = 0;
+        	bytesOut = 0;
+        	resetTime = time;
+        }
+    }
+    
+    private class Stats extends StatsSpeed {
+        long sentences = 0;
+        long sentenceErrs = 0;
+        
+        void reset(long time) {
+        	super.reset(time);
+        	sentenceErrs = 0;
+        	sentences = 0;
+        }
+    }
+    
+    private StatsSpeed fastStats = 	new StatsSpeed();
+    private Stats      stats = 		new Stats();
+    
+    private AtomicBoolean run = new AtomicBoolean(false);
+
+    private Thread thread;
+
     private String portName;
     private int speed;
     private SerialPort port;
@@ -44,6 +79,8 @@ public class NMEASerial extends NMEAAgentImpl {
         this.speed = speed;
         this.receive = rec;
         this.trasmit = tran;
+        fastStats = new StatsSpeed();
+        stats = new Stats();
         setSourceTarget(rec, tran);
     }
 
@@ -106,7 +143,11 @@ public class NMEASerial extends NMEAAgentImpl {
                                 try {
                                     s = reader.readLine();
                                     if (s!=null) {
-                                        bytes += s.length();
+                                    	synchronized (stats) {
+	                                        fastStats.bytes += (s.length() + 2);
+                                    	    stats.bytes += (s.length() + 2);
+	                                        stats.sentences++;
+                                    	}
                                         Sentence sentence = SentenceFactory.getInstance().createParser(s);
                                         onSentenceRead(sentence);
                                     }
@@ -133,8 +174,6 @@ public class NMEASerial extends NMEAAgentImpl {
         }
         return false;
     }
-
-    private Thread thread;
     
     @Override
     protected void onDeactivate() {
@@ -151,12 +190,6 @@ public class NMEASerial extends NMEAAgentImpl {
     }
 
     private void onSentenceRead(Sentence e) {
-    	/*if (e instanceof RMCSentence) {
-    		if (System.currentTimeMillis() % 11 == 0) {
-    			RMCSentence s = (RMCSentence)e;
-    			s.setPosition(new Position(-s.getPosition().getLatitude(), s.getPosition().getLongitude()));
-    		}
-    	}*/
         notify(e);
     }
 
@@ -167,8 +200,9 @@ public class NMEASerial extends NMEAAgentImpl {
                 String _s = s.toSentence() + "\r\n";
                 byte[] b = _s.getBytes();
                 port.writeBytes(b, b.length);
-                synchronized (NMEASerial.this) {
-                    bytesOut += b.length;
+                synchronized (stats) {
+                    fastStats.bytesOut += (b.length + 2);
+                    stats.bytesOut += (b.length + 2);
                 }
             } catch (Exception e) {
                 getLogger().Error("ERROR: cannot write on port " + portName, e);
@@ -180,16 +214,24 @@ public class NMEASerial extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         long t = System.currentTimeMillis();
-        if (resetTime == 0) {
-            resetTime = t;
-        } else if ((t - resetTime) > STATS_PERIOD) {
-            synchronized (this) {
-                bps = (long) (bytes / ((t - resetTime) / 1000.0));
-                bytes = 0;
-                bpsOut = (long) (bytesOut / ((t - resetTime) / 1000.0));
-                bytesOut = 0;
-            }
-            resetTime = t;
+        synchronized (stats) {
+	        if (fastStats.resetTime == 0) {
+	            fastStats.reset(t);
+	            stats.reset(t); 
+	        } else {
+		        if ((t - fastStats.resetTime) > FAST_STATS_PERIOD) {
+	                bps = fastStats.getBps(t);
+	                bpsOut = fastStats.getBpsOut(t);
+	                fastStats.reset(t);
+		        } 
+		        if ((t - stats.resetTime) > STATS_PERIOD) {
+	            	getLogger().Info(String.format("BIn {%d} bpsIn {%d} bpsOut {%d} BOut {%d} Msg {%d} Err {%d}", 
+	            			stats.bytes, (stats.bytes*8*1000)/(t - stats.resetTime), 
+	            			stats.bytesOut, (stats.bytesOut*8*1000)/(t - stats.resetTime), 
+	            			stats.sentences, stats.sentenceErrs));
+	                stats.reset(t);
+		        }
+	        }
         }
         super.onTimer();
     }

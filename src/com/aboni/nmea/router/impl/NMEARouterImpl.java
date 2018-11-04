@@ -78,6 +78,11 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
 	private static final int TIMER_HR		= 250;
+
+	private int timer_count = 0;
+	
+	private long lastStatsTime;
+	private static final long STATS_PERIOD = 60; // seconds
 	
 	@Inject
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
@@ -91,18 +96,27 @@ public class NMEARouterImpl implements NMEARouter {
 		timer = null;
 	}
 
-	private int timer_count = 0;
-	
 	private void onTimerHR() {
 		synchronized (agents) {
 			timer_count = (timer_count+1) % TIMER_FACTOR;
 			for (NMEAAgent a: agents.values()) {
 				a.onTimerHR();
-				if (timer_count==0) a.onTimer();
+				if (timer_count==0) {
+					a.onTimer();
+					dumpStats();
+				}
 			}
 		}
 	}
 	
+	private void dumpStats() {
+		long t = System.currentTimeMillis();
+		if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
+			lastStatsTime = t;
+			ServerLog.getLogger().Info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see com.aboni.nmea.router.INMEARouter#start()
 	 */
@@ -155,11 +169,7 @@ public class NMEARouterImpl implements NMEARouter {
 			public void run() {
 				while (started) {
 					SentenceEvent e = null;
-					try {
-						e = sentenceQueue.take();
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
+					try { e = sentenceQueue.take(); } catch (InterruptedException e1) { e1.printStackTrace(); }
 					if (e!=null) {
 						_routeSentence(e.s, e.src);
 					}
@@ -230,9 +240,7 @@ public class NMEARouterImpl implements NMEARouter {
 				try {
 				    NMEAAgent tgt = i.next();
 				    NMEATarget target = tgt.getTarget();        
-				    if (src.getName().equals(tgt.getName())) {
-				        // do nothing, do not route messages back to the originator
-				    } else if (target!=null) {
+				    if (target!=null && !src.getName().equals(tgt.getName())) {
 				        target.pushSentence(s, src);
 				    }
 				} catch (Exception e) {

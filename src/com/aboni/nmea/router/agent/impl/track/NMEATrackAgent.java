@@ -120,7 +120,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         boolean anchor = tracker.isStationary();
 
         if (avgPos!=null) {
-	        XMCParser s = new XMCParser(TalkerId.II);
+	        XMCParser s = new XMCParser(TalkerId.P);
 	        s.setAveragePosition(avgPos);
 	        s.setAnchor(anchor);
 	        notify(s);
