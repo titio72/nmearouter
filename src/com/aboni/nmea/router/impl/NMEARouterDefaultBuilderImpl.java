@@ -23,6 +23,7 @@ import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.filters.FilterSetBuilder;
+import com.aboni.utils.ServerLog;
 import com.google.inject.Injector;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
@@ -52,6 +53,19 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
         NMEARouter r = injector.getInstance(NMEARouter.class);
+        
+		switch (conf.getLog().getLevel()) {
+			case DEBUG: 
+	        	ServerLog.getLogger().setDebug(); break;
+			case WARNING: 
+	        	ServerLog.getLogger().setWarning(); break;
+			case ERROR: 
+	        	ServerLog.getLogger().setError(); break;
+			case NONE: 
+	        	ServerLog.getLogger().setNone(); break;
+	    	default:
+	        	ServerLog.getLogger().setInfo(); break;
+		}
         
         for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
         	NMEAAgent agent = builder.createAgent(a, r);

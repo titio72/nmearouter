@@ -71,7 +71,6 @@ public class NMEARouterImpl implements NMEARouter {
 	private final BlockingQueue<SentenceEvent> sentenceQueue;
 	
 	private Thread processingThread;
-	private LogLevelType logLevel = LogLevelType.INFO;
 	
 	private final NMEACache cache;
 	private final NMEAStream stream;
@@ -248,14 +247,5 @@ public class NMEARouterImpl implements NMEARouter {
 				}
 			}
 		}
-	}
-
-    public void setPreferedLogLevel(LogLevelType level) {
-    	logLevel = level;
-    }
-
-	@Override
-	public LogLevelType getPreferredLogLevelType() {
-    	return logLevel ;
 	}
 }

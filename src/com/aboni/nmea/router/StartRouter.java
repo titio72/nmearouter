@@ -120,18 +120,6 @@ public class StartRouter {
         injector.getInstance(NMEAStream.class); // be sure the stream started
     	if (builder.init()!=null) {
     		NMEARouter r = builder.getRouter();
-    		switch (r.getPreferredLogLevelType()) {
-	    		case DEBUG: 
-	            	ServerLog.getLogger().setDebug(); break;
-	    		case WARNING: 
-	            	ServerLog.getLogger().setWarning(); break;
-	    		case ERROR: 
-	            	ServerLog.getLogger().setError(); break;
-	    		case NONE: 
-	            	ServerLog.getLogger().setNone(); break;
-            	default:
-	            	ServerLog.getLogger().setInfo(); break;
-    		}
         	r.start();
     		return r;
     	} else {
