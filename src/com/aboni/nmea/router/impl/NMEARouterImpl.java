@@ -8,7 +8,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
@@ -16,45 +19,19 @@ import org.json.JSONObject;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEARouterImpl implements NMEARouter {
 
-	private NMEAAgentStatusListener agentStatusListener;
-	private NMEASentenceListener sentenceListener;
-	
 	private Timer timer;
-	
-	private boolean started;
-	
-	private class InternalAgentStatusListener implements NMEAAgentStatusListener {
-		
-		@Override
-		public void onStatusChange(NMEAAgent agent) {
-			_onStatusChange(agent);
-		}
-
-		@Override
-		public void onData(JSONObject s, NMEAAgent src) {
-		    _queueUpData(s, src);
-		}
-	}
-
-	private class InternalSentenceListener implements NMEASentenceListener {
-
-		@Override
-		public void onSentence(Sentence s, NMEAAgent src) {
-		    _queueUpSentence(s, src);
-		}
-	}
+	private AtomicBoolean started;
+	private ExecutorService exec;
 	
 	private class SentenceEvent {
 		SentenceEvent(Sentence s, NMEAAgent src) {
@@ -67,17 +44,12 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 	
 	private final Map<String, NMEAAgent> agents;
-	
 	private final BlockingQueue<SentenceEvent> sentenceQueue;
-	
-	private Thread processingThread;
-	
 	private final NMEACache cache;
 	private final NMEAStream stream;
 
 	private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
 	private static final int TIMER_HR		= 250;
-
 	private int timer_count = 0;
 	
 	private long lastStatsTime;
@@ -86,12 +58,11 @@ public class NMEARouterImpl implements NMEARouter {
 	@Inject
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
 	    agents = new HashMap<String, NMEAAgent>();
-		agentStatusListener = new InternalAgentStatusListener();
-		sentenceListener = new InternalSentenceListener();
 		sentenceQueue = new LinkedBlockingQueue<NMEARouterImpl.SentenceEvent>();
-		started = false;
+		started  = new AtomicBoolean(false);
 		this.cache = cache;
 		this.stream = stream;
+		exec = Executors.newFixedThreadPool(4);
 		timer = null;
 	}
 
@@ -99,9 +70,9 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			timer_count = (timer_count+1) % TIMER_FACTOR;
 			for (NMEAAgent a: agents.values()) {
-				a.onTimerHR();
+				exec.execute(()->a.onTimerHR());
 				if (timer_count==0) {
-					a.onTimer();
+					exec.execute(()->a.onTimer());
 					dumpStats();
 				}
 			}
@@ -116,67 +87,51 @@ public class NMEARouterImpl implements NMEARouter {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.nmea.router.INMEARouter#start()
-	 */
 	@Override
-	public synchronized void start() {
-		if (!started) {
-			started = true;
-			initProcessingThread();
-			
-			if (timer==null) {
-				timer = new Timer(true);
-				timer.scheduleAtFixedRate(new TimerTask() {
-					
-					@Override
-					public void run() {
-						onTimerHR();
-					}
-				}, 0, TIMER_HR);
+	public void start() {
+		synchronized (this) {
+			if (!started.get()) {
+				started.set(true);
+				initProcessingThread();
 				
+				if (timer==null) {
+					timer = new Timer(true);
+					timer.scheduleAtFixedRate(new TimerTask() {
+						
+						@Override
+						public void run() {
+							onTimerHR();
+						}
+					}, 0, TIMER_HR);
+					
+				}
 			}
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.nmea.router.INMEARouter#stop()
-	 */
 	@Override
-	public synchronized void stop() {
-		
-		timer.cancel();
-		timer.purge();
-		
-		started = false;
-		if (processingThread!=null) {
-			processingThread = null;
+	public void stop() {
+		synchronized (this) {
+			timer.cancel();
+			timer.purge();
+			started.set(false);
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.aboni.nmea.router.INMEARouter#isStarted()
-	 */
 	@Override
 	public boolean isStarted() {
-		return started;
+		return started.get();
 	}
 	
 	private void initProcessingThread() {
-		processingThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (started) {
-					SentenceEvent e = null;
-					try { e = sentenceQueue.take(); } catch (InterruptedException e1) { e1.printStackTrace(); }
-					if (e!=null) {
+		exec.execute(()->{
+				while (started.get()) {
+					try { 
+						SentenceEvent e = sentenceQueue.take(); 
 						_routeSentence(e.s, e.src);
-					}
+					} catch (InterruptedException e1) { e1.printStackTrace(); }
 				}
-			}
-		});
-		//processingThread.setDaemon(true);
-		processingThread.start();
+			});
 	}
 
 	@Override
@@ -184,9 +139,16 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			ServerLog.getLogger().Info("Adding Agent {" + agent.getName() + "}");
 			agents.put(agent.getName(), agent);
-			agent.setStatusListener(agentStatusListener);
+			agent.setStatusListener(new NMEAAgentStatusListener() {
+				
+				@Override
+				public void onStatusChange(NMEAAgent agent) { _onStatusChange(agent); }
+
+				@Override
+				public void onData(JSONObject s, NMEAAgent src) { _queueUpData(s, src); }
+			});
 			if (agent.getSource()!=null) {
-			    agent.getSource().setSentenceListener(sentenceListener);
+			    agent.getSource().setSentenceListener((Sentence s, NMEAAgent src)->_queueUpSentence(s, src));
 			}
 		}
 	}
@@ -218,18 +180,14 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     private void _queueUpData(JSONObject s, NMEAAgent src) {
-    	synchronized (stream) {
-    		stream.pushData(s, src);
-    	}
+		stream.pushData(s, src);
     }
 	
 	private void _routeSentence(Sentence s, NMEAAgent src) {
-		if (started) {
+		if (started.get()) {
 			cache.onSentence(s, src.getName());
 			routeToTarget(s, src);
-			synchronized (stream) {
-				stream.pushSentence(s, src);
-			}
+			stream.pushSentence(s, src);
 		}
 	}
 
@@ -240,7 +198,7 @@ public class NMEARouterImpl implements NMEARouter {
 				    NMEAAgent tgt = i.next();
 				    NMEATarget target = tgt.getTarget();        
 				    if (target!=null && !src.getName().equals(tgt.getName())) {
-				        target.pushSentence(s, src);
+				    	exec.execute(()->target.pushSentence(s, src));
 				    }
 				} catch (Exception e) {
 					ServerLog.getLogger().Error("Error dispatching to target!", e);

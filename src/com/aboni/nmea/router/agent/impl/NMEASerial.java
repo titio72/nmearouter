@@ -143,11 +143,7 @@ public class NMEASerial extends NMEAAgentImpl {
                                 try {
                                     s = reader.readLine();
                                     if (s!=null) {
-                                    	synchronized (stats) {
-	                                        fastStats.bytes += (s.length() + 2);
-                                    	    stats.bytes += (s.length() + 2);
-	                                        stats.sentences++;
-                                    	}
+                                    	updateReadStats(s);
                                         Sentence sentence = SentenceFactory.getInstance().createParser(s);
                                         onSentenceRead(sentence);
                                     }
@@ -163,6 +159,8 @@ public class NMEASerial extends NMEAAgentImpl {
                                 getLogger().Warning("Error serial reader " + e.getMessage());
                             }
                         }
+
+
                     });
                 	thread.start();
                 }
@@ -175,6 +173,22 @@ public class NMEASerial extends NMEAAgentImpl {
         return false;
     }
     
+	private void updateReadStats(String s) {
+		synchronized (stats) {
+			int l = s.length() + 2;
+		    fastStats.bytes += l;
+		    stats.bytes += l;
+		    stats.sentences++;
+		}
+	}
+	
+	private void updateWriteStats(byte[] b) {
+		synchronized (stats) {
+		    fastStats.bytesOut += (b.length + 2);
+		    stats.bytesOut += (b.length + 2);
+		}
+	}
+	
     @Override
     protected void onDeactivate() {
         if (port != null) {
@@ -200,10 +214,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 String _s = s.toSentence() + "\r\n";
                 byte[] b = _s.getBytes();
                 port.writeBytes(b, b.length);
-                synchronized (stats) {
-                    fastStats.bytesOut += (b.length + 2);
-                    stats.bytesOut += (b.length + 2);
-                }
+                updateWriteStats(b);
             } catch (Exception e) {
                 getLogger().Error("ERROR: cannot write on port " + portName, e);
                 stop();
