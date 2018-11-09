@@ -13,7 +13,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
 import com.aboni.nmea.router.agent.impl.NMEAPlayer;
 import com.aboni.nmea.router.agent.impl.NMEASocketServer;
 import com.aboni.nmea.router.agent.impl.system.FanAgent;
-import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
+//import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
 import com.aboni.nmea.router.agent.impl.system.PowerLedAgent;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConfParser;
@@ -76,7 +76,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
         
         buildStreamDump(conf, r);
-        buildGPSTimeTarget(conf, r);
+        //buildGPSTimeTarget(conf, r);
         buildPowerLedTarget(conf, r);
         buildFanTarget(conf, r);
         buildDPTStats(conf, r);
@@ -174,14 +174,14 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         fan.start();
     }
 
-    private void buildGPSTimeTarget(Router conf2, NMEARouter r) {
+    /*private void buildGPSTimeTarget(Router conf2, NMEARouter r) {
         QOS q = createBuiltInQOS();
     	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
         		injector.getInstance(NMEACache.class), 
         		"GPSTime", q);
     	r.addAgent(gpstime);
     	gpstime.start();
-	}
+	}*/
 
     private Router parseConf(String file) throws MalformedConfigurationException {
         ConfParser parser = new ConfParser();
