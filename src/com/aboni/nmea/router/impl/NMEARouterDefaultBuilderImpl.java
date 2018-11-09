@@ -31,6 +31,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private NMEARouter router;
     private String confFile;
     private Injector injector;
+    private static final boolean ENABLE_GPS_TIME = false;
     
     public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {
     	this.confFile = confFile;
@@ -75,8 +76,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
             }
         }
         
+        if (ENABLE_GPS_TIME) buildGPSTimeTarget(conf, r);
         buildStreamDump(conf, r);
-        buildGPSTimeTarget(conf, r);
         buildPowerLedTarget(conf, r);
         buildFanTarget(conf, r);
         buildDPTStats(conf, r);
