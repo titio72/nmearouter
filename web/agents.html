@@ -107,10 +107,12 @@
 						if (j != 0)
 							ss += ",";
 						ss += x.filters[j].sentence;
+						if (x.filters[j].source!=null && x.filters[j].source!="") {
+						  ss += "@" + x.filters[j].source;
+						}
 					}
 					document.getElementById("sentences").value = ss;
-					document.getElementById("filtertype").selectedIndex = (x.type == "whitelist") ? 1
-							: 0;
+					document.getElementById("filtertype").selectedIndex = (x.type == "whitelist") ? 1: 0;
 				} else {
 					document.getElementById("sentences").value = "";
 					document.getElementById("filtertype").selectedIndex = 0;
