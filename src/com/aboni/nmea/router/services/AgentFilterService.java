@@ -18,6 +18,21 @@ public class AgentFilterService implements WebService {
 		isOut = "out".equals(inOut);
 	}
 	
+	private class FltSentence {
+		String sentence = "";
+		String source = "";
+		
+		public FltSentence(String s) {
+			String[] _s = s.split("@");
+			sentence = _s[0];
+			if (_s.length==2) source = _s[1];
+		}
+		
+		NMEABasicSentenceFilter getFilter() {
+			return new NMEABasicSentenceFilter(sentence, source);
+		}
+	}
+	
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
         response.setContentType("application/json");
@@ -32,10 +47,11 @@ public class AgentFilterService implements WebService {
 	            if (sentences.length!=0) {
 		            fs = new NMEAFilterSet("whitelist".equals(type)?TYPE.WHITELIST:TYPE.BLACKLIST);
 		            boolean atLeast1 = false;
-		            for (String sentence: sentences) {
-		            	sentence = sentence.trim();
-		            	if (!sentence.isEmpty()) {
-			            	NMEABasicSentenceFilter f = new NMEABasicSentenceFilter(sentence);
+		            for (String str: sentences) {
+		            	str = str.trim();
+		            	FltSentence fltSentence = new FltSentence(str.trim());
+		            	if (!fltSentence.sentence.isEmpty()) {
+			            	NMEABasicSentenceFilter f = fltSentence.getFilter();
 			            	fs.addFilter(f);
 			            	atLeast1 = true;
 		            	}
@@ -61,9 +77,5 @@ public class AgentFilterService implements WebService {
             try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
             response.ok();
         }
-        
     }
-
-
-    
 }

@@ -62,8 +62,8 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					
 					if ((time-lastHeadingTime)<AGE_THRESHOLD) {
 						MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
-						mwd.setMagneticWindDirection(lastMagHeading + mwv_t.getAngle());
-						mwd.setTrueWindDirection(lastTrueHeading + mwv_t.getAngle());
+						mwd.setMagneticWindDirection(Utils.normalizeDegrees0_360(lastMagHeading + mwv_t.getAngle()));
+						mwd.setTrueWindDirection(Utils.normalizeDegrees0_360(lastTrueHeading + mwv_t.getAngle()));
 						mwd.setWindSpeed(Math.round(mwv_t.getSpeed() * 51.4444) / 100.0);
 						mwd.setWindSpeedKnots(mwv_t.getSpeed());
 						return new Pair<>(Boolean.TRUE, new Sentence[] {mwv_t, mwd});

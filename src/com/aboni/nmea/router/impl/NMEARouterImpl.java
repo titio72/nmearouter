@@ -103,7 +103,6 @@ public class NMEARouterImpl implements NMEARouter {
 							onTimerHR();
 						}
 					}, 0, TIMER_HR);
-					
 				}
 			}
 		}

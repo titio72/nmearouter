@@ -10,6 +10,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
@@ -18,6 +19,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class PowerLedAgent extends NMEAAgentImpl {
 
+	private final Pin GPS = RaspiPin.GPIO_23;
+	private final Pin PWR = RaspiPin.GPIO_02;
     private final GpioController gpio;
     private final GpioPinDigitalOutput pin, pinGps;
     private long lastGps;
@@ -25,8 +28,8 @@ public class PowerLedAgent extends NMEAAgentImpl {
     public PowerLedAgent(NMEACache cache, String name, QOS qos) {
         super(cache, name, qos);
         gpio = GpioFactory.getInstance();
-        pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "pwr", PinState.LOW);
-        pinGps = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "gps", PinState.LOW);
+        pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
+        pinGps = gpio.provisionDigitalOutputPin(GPS, "gps", PinState.LOW);
         pin.setShutdownOptions(true, PinState.LOW);
         pinGps.setShutdownOptions(true, PinState.LOW);
         setSourceTarget(false, true);

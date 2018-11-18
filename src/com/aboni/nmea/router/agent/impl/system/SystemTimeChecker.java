@@ -7,7 +7,8 @@ import java.util.TimeZone;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.impl.system.NMEATimestampExtractor.GPSTimeException;
+import com.aboni.nmea.sentences.NMEATimestampExtractor;
+import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.sentence.Sentence;

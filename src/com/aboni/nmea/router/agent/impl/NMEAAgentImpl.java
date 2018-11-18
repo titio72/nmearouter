@@ -22,7 +22,6 @@ import com.aboni.nmea.router.processors.NMEAMWVTrue;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEARMC2VTGProcessor;
 import com.aboni.nmea.router.processors.NMEARMCFilter;
-import com.aboni.nmea.router.processors.NMEARMCRaystar120;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
@@ -124,10 +123,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             if (qos.get("enrich_hdm")) {
                 getLogger().Info("QoS {ENRICH_HDM} Agent {" + name + "}");
                 addProc(new NMEAHeadingEnricher(cache));
-            }
-            if (qos.get("rs120")) {
-                getLogger().Info("QoS {RS120} Agent {" + name + "}");
-                addProc(new NMEARMCRaystar120());
             }
             if (qos.get("rmc_filter")) {
                 getLogger().Info("QoS {RMC filter} Agent {" + name + "}");
