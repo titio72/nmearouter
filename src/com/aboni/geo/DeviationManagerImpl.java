@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -39,16 +38,16 @@ public class DeviationManagerImpl implements DeviationManager {
         
         @Override
         public int compareTo(Pair o) {
-            return (input<o.input) ? -1 : ( ((input>o.input)) ? 1 : 0 );  
+            return Integer.compare(input, o.input);
         }
     }
     
-    private List<Pair> deviationMap;
-    private List<Pair> reverseDeviationMap;
+    private final List<Pair> deviationMap;
+    private final List<Pair> reverseDeviationMap;
     
     public DeviationManagerImpl() {
-        deviationMap = new ArrayList<Pair>();
-        reverseDeviationMap = new ArrayList<Pair>();
+        deviationMap = new ArrayList<>();
+        reverseDeviationMap = new ArrayList<>();
     }
     
     /**
@@ -79,11 +78,11 @@ public class DeviationManagerImpl implements DeviationManager {
      */
     public void dump(OutputStream stream) throws IOException {
     	synchronized (this) {
-	    	Pair p = null;
-	    	for (Iterator<Pair> iter = deviationMap.iterator(); iter.hasNext(); ) {
-	    	    p = iter.next();
-	    		stream.write((p.input + "," + p.output + "\r\n").getBytes());
-	        }
+	    	Pair p;
+            for (Pair pair : deviationMap) {
+                p = pair;
+                stream.write((p.input + "," + p.output + "\r\n").getBytes());
+            }
     	}
     }
 
@@ -100,7 +99,7 @@ public class DeviationManagerImpl implements DeviationManager {
     /**
      * Add a sample.
      * @param reading The compass reading in decimal degrees.
-     * @param output The magnetic reading (reading of a compensated compass).
+     * @param magnetic The magnetic reading (reading of a compensated compass).
      */
     public void add(double reading, double magnetic) {
         synchronized (this) {

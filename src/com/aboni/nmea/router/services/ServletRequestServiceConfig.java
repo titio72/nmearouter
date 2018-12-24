@@ -9,7 +9,7 @@ import javax.servlet.ServletRequest;
 
 public class ServletRequestServiceConfig implements ServiceConfig {
 
-	private ServletRequest r;
+	private final ServletRequest r;
 	
 	public ServletRequestServiceConfig(ServletRequest r) {
 		this.r = r;
@@ -26,7 +26,20 @@ public class ServletRequestServiceConfig implements ServiceConfig {
         return (res==null)?d:res;
     }
 
-    
+    @Override
+    public int getInteger(String pname, int defaultValue) {
+        String p = getParameter(pname);
+        if (p!=null) {
+            try {
+                return Integer.parseInt(p);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        } else {
+            return defaultValue;
+        }
+    }
+
     @Override
     public Calendar getParamAsCalendar(ServiceConfig request, String param, Calendar def, String format) {
         SimpleDateFormat df = new SimpleDateFormat(format);

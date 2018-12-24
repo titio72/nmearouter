@@ -7,9 +7,10 @@ import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
+@SuppressWarnings({"ResultOfMethodCallIgnored", "InfiniteLoopStatement"})
 public class TestLed {
 
-	private static GpioPinDigitalOutput pins[] = new GpioPinDigitalOutput[30];
+    private static final GpioPinDigitalOutput[] pins = new GpioPinDigitalOutput[30];
 	
 	private static GpioPinDigitalOutput getPin(int i) {
 		if (pins[i]!=null) return pins[i];

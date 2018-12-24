@@ -17,7 +17,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAMeteoTarget extends NMEAAgentImpl {
 
-	private StatsWriter writer;
+	private final StatsWriter writer;
 	
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
     private int timerCount;
@@ -29,16 +29,16 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int WIND_D = 4; 
     private static final int HUM = 5; 
 
-    private Serie[] series = new Serie[] {
-    		new ScalarSerie(TEMP, "AT0", -20.0, 50.0),
-    		new ScalarSerie(W_TEMP, "WT_", -20.0, 50.0),
-    		new ScalarSerie(PRESS, "PR_", 800.0, 1100.0),
-    		new ScalarSerie(WIND, "TW_", 0.0, 100.0),
-    		new AngleSerie(WIND_D, "TWD"),
-    		new ScalarSerie(HUM, "HUM", 0.0, 150.0)
+    private final Serie[] series = new Serie[] {
+    		new ScalarSerie("AT0", -20.0, 50.0),
+    		new ScalarSerie("WT_", -20.0, 50.0),
+    		new ScalarSerie("PR_", 800.0, 1100.0),
+    		new ScalarSerie("TW_", 0.0, 100.0),
+    		new AngleSerie("TWD"),
+    		new ScalarSerie("HUM", 0.0, 150.0)
     };
     
-    private NMEACache cache;
+    private final NMEACache cache;
 
     public NMEAMeteoTarget(NMEACache cache, String name, QOS qos, StatsWriter w) {
         super(cache, name, qos);
@@ -76,9 +76,9 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     protected void dumpStats() {
         synchronized (series) {
         	long ts = System.currentTimeMillis();
-            for (int i = 0; i<series.length; i++) {
-                write(series[i], ts);
-                series[i].reset();
+            for (Serie series1 : series) {
+                write(series1, ts);
+                series1.reset();
             }
         }
     }
@@ -104,8 +104,6 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		            processHumidity((MHUSentence)s);
 		        } else if (s instanceof MWDSentence) {
 		            processWind((MWDSentence)s);
-		        } else {
-		        	//System.out.println("ss");
 		        }
 	    	}
     	} catch (Exception e) {

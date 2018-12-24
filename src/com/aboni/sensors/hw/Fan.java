@@ -8,7 +8,7 @@ import com.pi4j.io.gpio.RaspiPin;
 
 public class Fan {
     private GpioPinDigitalOutput pin;
-    private boolean arm;
+    private final boolean arm;
 	private boolean fanOn;
     
 	public boolean isRaspberry() {

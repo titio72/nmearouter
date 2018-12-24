@@ -19,7 +19,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private TrackWriter media;
 	private String mediaFile;
-	private TrackManager tracker;
+	private final TrackManager tracker;
 	
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
@@ -112,7 +112,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 		}
 	}
 	
-    private void processPosition(GeoPositionT pos_t, double sog) throws Exception {
+    private void processPosition(GeoPositionT pos_t, double sog) {
 		long t0 = System.currentTimeMillis();
         TrackPoint point = tracker.processPosition(pos_t, sog);
         

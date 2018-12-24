@@ -5,10 +5,10 @@ import com.aboni.misc.Utils;
 public class MagnetometerToCompass {
 
    public static class Calibration {
-        int x;
-        int y;
-        int z;
-        double variation;
+        final int x;
+        final int y;
+        final int z;
+        final double variation;
         
         Calibration(int x, int y, int z) {
             this.x = x;
@@ -81,8 +81,8 @@ public class MagnetometerToCompass {
            return 0.0;
        } else {
            double res = 0.0;
-           for (int i = 0; i<vector.length; i++) {
-               res += vector[i] * vector[i];
+           for (double v : vector) {
+               res += v * v;
            }
            return Math.sqrt(res);
        }
@@ -96,11 +96,9 @@ public class MagnetometerToCompass {
     */
    public double getTiltCompensatedHeading(double[] mag_raw, double[] acc_raw) {
        double[] mag = getCalibratedMag(mag_raw);
-       
-       double[] acc = acc_raw;
-       
-       double accX = acc[0] / normOf(acc);
-       double accY = acc[1] / normOf(acc);
+
+       double accX = acc_raw[0] / normOf(acc_raw);
+       double accY = acc_raw[1] / normOf(acc_raw);
 
        double pitch = Math.asin(accX);
        //double roll = -Math.asin(accYnorm / Math.cos(pitch));

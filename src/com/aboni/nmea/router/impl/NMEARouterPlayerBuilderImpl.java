@@ -12,8 +12,8 @@ import com.google.inject.Injector;
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter router;
-    private String playFile;
-    private Injector injector;
+    private final String playFile;
+    private final Injector injector;
     
     public NMEARouterPlayerBuilderImpl(Injector injector, String playFile) {
     	this.playFile = playFile;

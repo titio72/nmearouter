@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
 
+@SuppressWarnings("CatchMayIgnoreException")
 public class SImulatorService implements WebService {
 
 	@Override
@@ -54,8 +55,10 @@ public class SImulatorService implements WebService {
             response.ok();
         } catch (Exception e) {
             response.setContentType("text/html;charset=utf-8");
-            try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
-            response.error(e.getMessage());
+            try {
+				response.error(e.getMessage());
+            	e.printStackTrace(response.getWriter());
+            } catch (Exception ee) {}
         }
 
 	}

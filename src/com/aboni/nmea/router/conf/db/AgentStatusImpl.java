@@ -14,9 +14,9 @@ public class AgentStatusImpl implements AgentStatus {
 
 	private DBHelper db;
 	
-	private Map<String, AgentStatus.STATUS> status;
-	private Map<String, String> filterOut;
-	private Map<String, String> filterIn;
+	private final Map<String, AgentStatus.STATUS> status;
+	private final Map<String, String> filterOut;
+	private final Map<String, String> filterIn;
 	
 	private PreparedStatement updateStatusSt;
 	private PreparedStatement updateFilterIn;
@@ -88,28 +88,16 @@ public class AgentStatusImpl implements AgentStatus {
 
 	@Override
 	public synchronized STATUS getStartMode(String agent) {
-		if (status.containsKey(agent)) {
-			return status.get(agent);
-		} else {
-			return STATUS.UNKNOWN;
-		}
+		return status.getOrDefault(agent, STATUS.UNKNOWN);
 	}
 
 	@Override
 	public synchronized String getFilterOutData(String agent) {
-		if (filterOut.containsKey(agent)) {
-			return filterOut.get(agent);
-		} else {
-			return null;
-		}
+		return filterOut.getOrDefault(agent, null);
 	}
 	@Override
 	public synchronized String getFilterInData(String agent) {
-		if (filterIn.containsKey(agent)) {
-			return filterIn.get(agent);
-		} else {
-			return null;
-		}
+		return filterIn.getOrDefault(agent, null);
 	}
 
 	@Override

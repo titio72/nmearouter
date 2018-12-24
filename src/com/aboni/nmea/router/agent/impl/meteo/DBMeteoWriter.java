@@ -8,23 +8,21 @@ import com.aboni.utils.db.EventWriter;
 public class DBMeteoWriter implements StatsWriter {
 	
     private DBHelper db;
-    private EventWriter ee;
+    private final EventWriter ee;
 
     public DBMeteoWriter() {
     	ee = new DBMeteoEventWriter();
     }
     
     @Override
-	public boolean init() {
+	public void init() {
     	if (db==null) {
             try {
 				db = new DBHelper(true);
 	        } catch (Exception e) {
 	            ServerLog.getLogger().Error("Cannot initialize meteo stats writer!", e);
-	            return false;
-	        }
+            }
     	}
-    	return true;
     }
     
     @Override

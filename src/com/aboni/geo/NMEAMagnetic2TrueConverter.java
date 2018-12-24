@@ -16,9 +16,9 @@ import net.sf.marineapi.nmea.util.Position;
 
 public class NMEAMagnetic2TrueConverter {
 
-	private TSAGeoMag geo;
+	private final TSAGeoMag geo;
 	private Position pos;
-	private double year;
+	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
 		geo = new TSAGeoMag(ServerLog.getLogger().getBaseLogger());
@@ -59,8 +59,7 @@ public class NMEAMagnetic2TrueConverter {
 	}
 
     public void setPosition(PositionSentence s) {
-        PositionSentence gll = (PositionSentence)s;
-        setPosition(gll.getPosition());
+        setPosition(s.getPosition());
     }
 
     public void setPosition(Position s) {
@@ -71,9 +70,8 @@ public class NMEAMagnetic2TrueConverter {
 		return getTrueSentence(magSentence.getTalkerId(), magSentence.getHeading());
 	}
 	
-	public HDTSentence getTrueSentence(TalkerId tid, double bearing) {
-		double m_heading = bearing;
-		double t_heading = getTrue(m_heading, getPosition());
+	public HDTSentence getTrueSentence(TalkerId tid, double mag_bearing) {
+		double t_heading = getTrue(mag_bearing, getPosition());
 		HDTSentence s = (HDTSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
 		s.setHeading(t_heading);
 		return s;

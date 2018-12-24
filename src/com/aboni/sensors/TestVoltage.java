@@ -1,5 +1,6 @@
 package com.aboni.sensors;
 
+@SuppressWarnings("InfiniteLoopStatement")
 public class TestVoltage {
 	public static void main(String[] args) {
 		SensorVoltage v = new SensorVoltage(0x48);

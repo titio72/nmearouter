@@ -13,13 +13,13 @@ import com.pi4j.io.w1.W1Master;
 
 public class DS18B20 {
 
-	private Map<String, Double> values;
-	private Map<String, Double> _values;
+	private final Map<String, Double> values;
+	private final Map<String, Double> _values;
 	private boolean reading;
 	
 	public DS18B20() {
-		values = new HashMap<String, Double>();
-		_values = new HashMap<String, Double>();
+		values = new HashMap<>();
+		_values = new HashMap<>();
 		start();
 	}
 	
@@ -38,7 +38,9 @@ public class DS18B20 {
 	public void finalize() {
 	}
 
-	public void read() {}
+	public void read() {
+
+	}
 	
 	private void _read() {
 		synchronized (_values) {
@@ -62,7 +64,7 @@ public class DS18B20 {
 	public double getTemp(String id) {
 		synchronized (values) {
 			try {
-				return values.get(id).doubleValue();
+				return values.get(id);
 			} catch (Exception e) {
 				return Double.NaN;
 			}
@@ -71,7 +73,7 @@ public class DS18B20 {
 	
 	public Map<String, Double> getValues() {
 		synchronized (values) {
-			return new HashMap<String, Double>(values);
+			return new HashMap<>(values);
 		}
 	}
 }

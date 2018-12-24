@@ -6,14 +6,6 @@ public class DataFilter {
 	}
 
     public static double getLPFReading(double alpha, double prevOutput, double input) {
-        double newOutput = prevOutput + alpha * (input - prevOutput);
-        return newOutput;
+        return prevOutput + alpha * (input - prevOutput);
     }
-
-    public static double getLPFReading(double alpha, double prevOutput, long tsPrev, double input, long ts) {
-        double newOutput = prevOutput + alpha * (input - prevOutput) * ((double)(ts-tsPrev)/1000.0);
-        return newOutput;
-    }
-    
-
 }

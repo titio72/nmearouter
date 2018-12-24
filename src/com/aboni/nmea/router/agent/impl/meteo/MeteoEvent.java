@@ -5,8 +5,8 @@ import com.aboni.utils.db.Event;
 
 public class MeteoEvent implements Event {
 
-	private Serie serie;
-	private long ts;
+	private final Serie serie;
+	private final long ts;
 	
 	public MeteoEvent(Serie s, long ts) {
 		this.serie = s;

@@ -41,7 +41,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 	*/
 	
 	
-    private NMEAMagnetic2TrueConverter m;
+    private final NMEAMagnetic2TrueConverter m;
     
 	public NMEARMC2VTGProcessor() {
 	    this(Calendar.getInstance().get(Calendar.YEAR));

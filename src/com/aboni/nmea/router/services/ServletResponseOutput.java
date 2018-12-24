@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ServletResponseOutput implements ServiceOutput {
 
-	private HttpServletResponse r;
+	private final HttpServletResponse r;
 	
 	public ServletResponseOutput(HttpServletResponse r) {
 		this.r = r;
@@ -29,17 +29,13 @@ public class ServletResponseOutput implements ServiceOutput {
 	}
 
 	@Override
-	public void error(String msg) {
+	public void error(String msg) throws IOException {
         r.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        try {
-        	if (r.getWriter()!=null) r.getWriter().write(msg);
-		} catch (IOException e) {}
+        r.getWriter().write(msg);
 	}
 
     @Override
     public void setHeader(String string, String string2) {
         r.setHeader(string, string2);
-        
     }
-
 }

@@ -39,7 +39,8 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 	private long lastHeadingTime;
 	private double lastSpeed;
 	private long lastSpeedTime;
-	private boolean useRMC;
+
+	private final boolean useRMC;
 	
 	@Override
 	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {

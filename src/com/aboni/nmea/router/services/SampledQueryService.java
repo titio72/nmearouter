@@ -14,9 +14,6 @@ import com.aboni.utils.db.DBHelper;
 
 abstract class SampledQueryService implements WebService {
 
-	private DBHelper db;
-    private PreparedStatement stm;
-    
     public SampledQueryService() {
     }
     
@@ -28,14 +25,10 @@ abstract class SampledQueryService implements WebService {
     protected abstract void 	fillResponse(ServiceOutput response, List<Sample> samples) throws IOException;
 	protected abstract void 	onPrepare(ServiceConfig config);
     
-	private static int DEFAULT_MAX_SAMPLES = 150;
+	private static final int DEFAULT_MAX_SAMPLES = 150;
 	
 	private int getMaxSamples(ServiceConfig config) {
-        int maxSamples = DEFAULT_MAX_SAMPLES;
-        try {
-        	maxSamples = Integer.parseInt(config.getParameter("samples", "" + DEFAULT_MAX_SAMPLES));
-        } catch (Exception e) {}
-		return maxSamples;
+        return config.getInteger("samples", DEFAULT_MAX_SAMPLES);
 	}
 	
     @Override
@@ -50,14 +43,13 @@ abstract class SampledQueryService implements WebService {
         
         int maxSamples = getMaxSamples(config);
         
-        try {
-            db = new DBHelper(true);
+        try (DBHelper db = new DBHelper(true)) {
             DBHelper.Range range = db.getTimeframe(getTable(), cFrom, cTo);
             List<Sample> samples = null;
             if (range!=null) {
                 int sampling = range.getSampling(maxSamples);
                 Sampler sampler = new Sampler(sampling, maxSamples);
-                stm = db.getTimeSeries(getTable(), new String[] {getMaxField(), getAvgField(), getMinField()}, cFrom, cTo, getWhere());
+                PreparedStatement stm = db.getTimeSeries(getTable(), new String[]{getMaxField(), getAvgField(), getMinField()}, cFrom, cTo, getWhere());
 	            ResultSet rs = stm.executeQuery();
 	            while (rs.next()) {
 	                Timestamp ts = rs.getTimestamp(1);
@@ -70,12 +62,7 @@ abstract class SampledQueryService implements WebService {
             }
         	fillResponse(response, samples);
         } catch (Exception e) {
-        	e.printStackTrace();
             ServerLog.getLogger().Error("Error writing sample", e);
-        } finally {
-        	try {
-				db.close();
-			} catch (Exception e2) {}
         }
     }
 }

@@ -14,7 +14,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 public class NMEAMWDConverterTest {
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	private HDGSentence getHeading(double heading, double variation, double deviation) {

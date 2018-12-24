@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
@@ -54,23 +55,16 @@ public class NMEASerial extends NMEAAgentImpl {
         }
     }
     
-    private StatsSpeed fastStats = 	new StatsSpeed();
-    private Stats      stats = 		new Stats();
+    private final StatsSpeed fastStats;
+    private final Stats      stats;
     
-    private AtomicBoolean run = new AtomicBoolean(false);
+    private final AtomicBoolean run = new AtomicBoolean(false);
 
-    private Thread thread;
-
-    private String portName;
-    private int speed;
+    private final String portName;
+    private final int speed;
     private SerialPort port;
-    private boolean receive;
-    private boolean trasmit;
-
-    public NMEASerial(NMEACache cache, String name, String portName, int speed, boolean rec,
-            boolean tran) {
-        this(cache, name, portName, speed, rec, tran, null);
-    }
+    private final boolean receive;
+    private final boolean trasmit;
 
     public NMEASerial(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran, QOS qos) {
@@ -118,10 +112,6 @@ public class NMEASerial extends NMEAAgentImpl {
 						
 						@Override
 						public void serialEvent(SerialPortEvent event) {
-							if (event.getEventType()==SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
-								
-							}
-							
 						}
 						
 						@Override
@@ -131,36 +121,30 @@ public class NMEASerial extends NMEAAgentImpl {
 									SerialPort.LISTENING_EVENT_DATA_WRITTEN;
 						}
 					});
-                	
-                	
-                    thread = new Thread(new Runnable() {
-                        
-                        @Override
-                        public void run() {
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
-                            while (run.get()) {
-                                String s = "";
-                                try {
-                                    s = reader.readLine();
-                                    if (s!=null) {
-                                    	updateReadStats(s);
-                                        Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                                        onSentenceRead(sentence);
-                                    }
-                                } catch (IOException e) {
-                                    try { Thread.sleep(100); } catch (InterruptedException e1) {}
-                                } catch (Exception e) {
-                                    getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}") ;
-                                }
-                            }
+
+
+                    Thread thread = new Thread(() -> {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+                        while (run.get()) {
+                            String s = "";
                             try {
-                                reader.close();
+                                s = reader.readLine();
+                                if (s != null) {
+                                    updateReadStats(s);
+                                    Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                                    onSentenceRead(sentence);
+                                }
                             } catch (IOException e) {
-                                getLogger().Warning("Error serial reader " + e.getMessage());
+                                Utils.pause(100);
+                            } catch (Exception e) {
+                                getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
                             }
                         }
-
-
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            getLogger().Warning("Error serial reader " + e.getMessage());
+                        }
                     });
                 	thread.start();
                 }

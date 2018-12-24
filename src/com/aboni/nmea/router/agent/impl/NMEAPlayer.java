@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -47,21 +48,14 @@ public class NMEAPlayer extends NMEAAgentImpl {
 	
 	@Override 
 	public void onDeactivate() {
-		if (isStarted() && stop==false)
+		if (isStarted() && !stop)
 			stop = true;
 	}
 	
 	@Override
 	public boolean onActivate() {
 		if (file!=null) {
-			Thread t = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					go();
-					
-				}
-			});
+			Thread t = new Thread(this::go);
 			t.setDaemon(true);
 			t.start();
 			return true;
@@ -77,7 +71,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 			try {
 				FileReader fr = new FileReader(getFile());
 				BufferedReader r = new BufferedReader(fr);
-				String line = null;
+				String line;
 				long log_t0 = 0;
 				long t0 = 0;
 				while ((line=r.readLine())!=null) {
@@ -89,7 +83,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 							long dt = t-t0;
 							long dLog_t = log_t - log_t0;
 							if (dLog_t>dt) {
-								try { Thread.sleep(dLog_t-dt); } catch (Exception pp) {}
+								Utils.pause((int)(dLog_t-dt));
 							}
 							notify(itm.getSentence());
 							t0 = System.currentTimeMillis();
@@ -111,16 +105,14 @@ public class NMEAPlayer extends NMEAAgentImpl {
 				fr.close();
 			} catch (Exception e) {
 				getLogger().Error("Error playing file", e);
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e1) {}
+				Utils.pause(10000);
 			}
 		} 
 		stop = false;
 	}
 	
 	private static ServerSocket serverSocket;
-	private static Set<Socket> clients = new HashSet<Socket>();
+	private static final Set<Socket> clients = new HashSet<>();
 	
 	
 	private static void send(String s) {
@@ -136,7 +128,9 @@ public class NMEAPlayer extends NMEAAgentImpl {
 						} catch (Exception e) {
 							try {
 								c.close();
-							} catch (Exception ee) {}
+							} catch (Exception ee) {
+								ee.printStackTrace();
+							}
 							i.remove();
 						}
 					}
@@ -150,21 +144,18 @@ public class NMEAPlayer extends NMEAAgentImpl {
 	private static void startServer() {
 			try {
 				serverSocket = new ServerSocket(1111);
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						while (true) {
-							Socket s = null;
-							try {
-								s = serverSocket.accept();
-								synchronized (clients) {
-									clients.add(s);
-								}
-							} catch (IOException e) {
-								e.printStackTrace();
+				new Thread(() -> {
+					while (true) {
+						try {
+							Socket s = serverSocket.accept();
+							synchronized (clients) {
+								clients.add(s);
 							}
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-					}}).start();
+					}
+				}).start();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -172,11 +163,12 @@ public class NMEAPlayer extends NMEAAgentImpl {
 	
 	public static void main(String[] args) {
 		startServer();
+		//noinspection InfiniteLoopStatement
 		while (true) {
 			try {
 				FileReader fr = new FileReader(args[0]);
 				BufferedReader r = new BufferedReader(fr);
-				String line = null;
+				String line;
 				long t0 = System.currentTimeMillis();
 				long log_t0 = 0;
 				while ((line=r.readLine())!=null) {
@@ -189,7 +181,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 								long dt = t-t0;
 								long dLog_t = log_t - log_t0;
 								if (dLog_t>dt && log_t0!=0) {
-									try { Thread.sleep(dLog_t-dt); } catch (Exception pp) {}
+									Utils.pause((int)(dLog_t-dt));
 								}
 								send(itm.getString());
 								t0 = System.currentTimeMillis();
@@ -216,9 +208,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 				fr.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e1) {}
+				Utils.pause(10000);
 			}
 		} 
 	}

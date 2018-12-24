@@ -21,7 +21,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	private static final double SMALL_MAGIC_DISTANCE = 0.5; // Points farther from the last valid point will be discarded
 	private static final int 	SIZE = 30; 					// ~30s of samples
 	
-	private List<Position> positions = new LinkedList<>();
+	private final List<Position> positions = new LinkedList<>();
 	private Position lastValid;
 	private long lastTime = 0; 
 	
@@ -139,8 +139,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 		List<Double> lat = new ArrayList<>(SIZE);
 		for (Position p: positions) lat.add(isLat?p.getLatitude():p.getLongitude());
 		Collections.sort(lat);
-		double medianL = lat.get(SIZE/2);
-		return medianL;
+		return lat.get(SIZE/2);
 	}
 	
 	private Position getMedian() {
@@ -148,8 +147,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 			stats.medianRecalc++;
 	 		double median_lat = getMedian(true);
 			double median_lon = getMedian(false);
-			Position p = new Position(median_lat, median_lon);
-			return p;
+			return new Position(median_lat, median_lon);
 		} else {
 			return null;
 		}

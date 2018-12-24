@@ -5,9 +5,9 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 
-	private String sentenceId;
-	private TalkerId talkerId;
-	private String source;
+	private final String sentenceId;
+	private final TalkerId talkerId;
+	private final String source;
 	
 	public NMEABasicSentenceFilter() {
 		sentenceId = "";
@@ -71,9 +71,7 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 	public boolean match(Sentence s, String src) {
 		if (isAllSources() || getSource().equals(src)) {
 			if (isAllSentences() || getSentenceId().equals(s.getSentenceId())) {
-				if (isAllTalkers() || getTalkerId().equals(s.getTalkerId())) {
-					return true;
-				}
+				return isAllTalkers() || getTalkerId().equals(s.getTalkerId());
 			}
 		}
 		return false;

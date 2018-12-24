@@ -12,6 +12,7 @@ import java.util.TimeZone;
 
 import com.aboni.utils.db.DBHelper;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class TrackToDB2 {
 	
 	class PPP {
@@ -22,7 +23,7 @@ public class TrackToDB2 {
 
 	DBHelper db;
  
-    private SimpleDateFormat dfParser;
+    private final SimpleDateFormat dfParser;
 	
 	public TrackToDB2() {
 	    dfParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,10 +40,9 @@ public class TrackToDB2 {
 	    FileReader f = new FileReader(file);
 		BufferedReader r = new BufferedReader(f);
 		String pos;
-		boolean exit = false;
 		String lastPos = null;
 		PPP last = null;
-		while ((pos = r.readLine())!=null && !exit) {
+		while ((pos = r.readLine())!=null) {
 		    System.out.println(pos);
 			PPP p;
 			try {
@@ -52,7 +52,7 @@ public class TrackToDB2 {
 					    if (p.timestamp.before(last.timestamp)) {
 	                        System.out.println(lastPos);
 	                        System.out.println(pos);
-	                        System.out.println("");
+	                        System.out.println();
 					    }
 					}
 	

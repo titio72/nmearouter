@@ -48,21 +48,16 @@ public class FilterSetBuilder {
 		}
 	}
 	
-	public NMEASentenceFilterSet importFilter(String s) {
-		if (s!=null) {
-			JSONObject jFs = null;
-			try {
-				jFs = new JSONObject(s);
-			} catch (JSONException e) {
-				
-			}
-			if (jFs!=null && jFs.has("filters")) {
+	public NMEASentenceFilterSet importFilter(String jsonFilter) throws JSONException {
+		if (jsonFilter!=null) {
+			JSONObject jFs = new JSONObject(jsonFilter);
+			if (jFs.has("filters")) {
 				NMEAFilterSet res = new NMEAFilterSet();
 				res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
 				JSONArray jFa = jFs.getJSONArray("filters");
 				for (Object _fJ : jFa) {
 					JSONObject fJ = (JSONObject) _fJ;
-					NMEASentenceFilter f = null;
+					NMEASentenceFilter f;
 					String sentence = fJ.optString("sentence");
 					if (sentence.startsWith("STALK:!")) {
 						String cmd = sentence.substring("STALK:!".length());

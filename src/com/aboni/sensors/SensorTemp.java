@@ -1,15 +1,12 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.aboni.sensors.hw.DS18B20;
 import com.aboni.utils.ServerLog;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorTemp implements Sensor {
 
@@ -19,19 +16,19 @@ public class SensorTemp implements Sensor {
 		public double v;
 	}
 	
-	private Map<String, Reading> readings;
+	private final Map<String, Reading> readings;
 	
 	private long lastRead;
 	private DS18B20 sensor;
 	
 	public SensorTemp() {
-		readings = new HashMap<String, Reading>();
+		readings = new HashMap<>();
 		lastRead = 0;
 		sensor = null;
 	}
 	
 	@Override
-	public void init() throws IOException, UnsupportedBusNumberException {
+	public void init() {
 		try {
 			sensor = new DS18B20();
 		} catch (Exception e) {
@@ -57,8 +54,7 @@ public class SensorTemp implements Sensor {
 			sensor.read();
 			synchronized (readings) {
 				Map<String, Double> m = sensor.getValues();
-				for (Iterator<String> i = m.keySet().iterator(); i.hasNext(); ) {
-					String k = i.next(); 
+				for (String k : m.keySet()) {
 					Reading r = new Reading();
 					r.k = k;
 					r.ts = lastRead;
@@ -66,6 +62,8 @@ public class SensorTemp implements Sensor {
 					readings.put(k, r);
 				}
 			}
+		} else {
+			throw new SensorNotInititalizedException("Temp sensor notr initialized!");
 		}
 	}
 
@@ -78,7 +76,7 @@ public class SensorTemp implements Sensor {
 
 	public Collection<Reading> getReadings() {
 		synchronized (readings) {
-			return new ArrayList<Reading>(readings.values());
+			return new ArrayList<>(readings.values());
 		}
 	}
 }

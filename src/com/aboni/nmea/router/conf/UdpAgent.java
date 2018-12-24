@@ -80,7 +80,7 @@ public class UdpAgent
      */
     public List<String> getTo() {
         if (to == null) {
-            to = new ArrayList<String>();
+            to = new ArrayList<>();
         }
         return this.to;
     }

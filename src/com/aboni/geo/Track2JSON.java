@@ -1,6 +1,5 @@
 package com.aboni.geo;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +17,18 @@ public class Track2JSON implements TrackDumper {
 		
 		@Override
 		public void doWithPoint(GeoPositionT p) {
-			try {
-				handlePoint(p);
-			} catch (IOException e) {
-				// ??????
-			}
+			handlePoint(p);
 		}
 
 	}
 
 	private PositionHistory track;
-	private JSONObject jsonTrack;
+	private final JSONObject jsonTrack;
 	private List<JSONObject> innerPath;
     private GeoPositionT previous;
 	private String trackName;
-  	private static boolean TRACK_THEM_ALL = true;
-	public static String DEFAULT_TRACK_NAME = "track";
+  	private static final boolean TRACK_THEM_ALL = true;
+	public static final String DEFAULT_TRACK_NAME = "track";
 	
 	public Track2JSON() {
 		jsonTrack = new JSONObject();
@@ -44,11 +39,7 @@ public class Track2JSON implements TrackDumper {
   		this.trackName = trackName;
   	}
   	
-  	public String getTrackName() {
-  		return trackName;
-  	}
-	
-	public void dump(Writer w) throws IOException {
+	public void dump(Writer w) {
 		if (track!=null) {
 			createPath();
 			writePoints();
@@ -56,7 +47,7 @@ public class Track2JSON implements TrackDumper {
 		}
 	}
 
-	private void writeIt(Writer w) throws IOException {
+	private void writeIt(Writer w) {
 		jsonTrack.write(w);
 	}
 
@@ -75,7 +66,7 @@ public class Track2JSON implements TrackDumper {
         return trackIt;
 	}
 	
-	private void handlePoint(GeoPositionT p) throws IOException {
+	private void handlePoint(GeoPositionT p) {
 		if (TRACK_THEM_ALL ) {
     	    writePoint(p);
 		} else {
@@ -97,7 +88,7 @@ public class Track2JSON implements TrackDumper {
 	private void createPath() {
 		jsonTrack.put("track", new JSONObject());
 		((JSONObject)jsonTrack.get("track")).put("name", trackName);
-		innerPath = new ArrayList<JSONObject>();
+		innerPath = new ArrayList<>();
 	}
 	
 	private List<JSONObject> getPath() {

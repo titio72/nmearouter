@@ -7,8 +7,8 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 
 public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
 
-	private TalkerId fromTalker;
-	private TalkerId toTalker;
+	private final TalkerId fromTalker;
+	private final TalkerId toTalker;
 	
 	public NMEAChangeTalkerProcessor(TalkerId fromTalker, TalkerId toTalker) {
 		this.fromTalker = fromTalker;

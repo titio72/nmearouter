@@ -12,7 +12,7 @@ public class SensorCMPS11 extends ASensorCompass {
 		super();
 	}
 	
-	private final int ADDR = 0x60;
+	private static final int ADDR = 0x60;
 	private int h255;
 	private double heading;
 	private double pitch;
@@ -28,17 +28,17 @@ public class SensorCMPS11 extends ASensorCompass {
 	}
 	
 	@Override
-	public double getUnfilteredSensorHeading() throws SensorNotInititalizedException {
+	public double getUnfilteredSensorHeading() {
 		return heading;
 	}
 
 	@Override
-	public double getUnfilteredPitch() throws SensorNotInititalizedException {
+	public double getUnfilteredPitch() {
 		return pitch;
 	}
 
 	@Override
-	public double getUnfilteredRoll() throws SensorNotInititalizedException {
+	public double getUnfilteredRoll() {
 		return roll;
 	}
 

@@ -16,7 +16,7 @@ public class ServerLog implements Log {
 
     private class MyFormatter extends Formatter {
 
-        DateFormat df;
+        final DateFormat df;
         
         MyFormatter() {
             df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
@@ -38,7 +38,7 @@ public class ServerLog implements Log {
     
 	private boolean debug = false;
 	
-    private Logger lg;
+    private final Logger lg;
 	
 	private ServerLog() {
         lg = Logger.getLogger("NMEARouter");
@@ -54,15 +54,14 @@ public class ServerLog implements Log {
             //Formatter formatter = new SimpleFormatter();  
             Formatter formatter = new MyFormatter();  
 	        fh.setFormatter(formatter);  
-	    } catch (SecurityException e) {  
+	    } catch (SecurityException | IOException e) {
 	        e.printStackTrace();  
-	    } catch (IOException e) {  
-	        e.printStackTrace();  
-	    } 
-	    
+	    }
+
 	}
 	
-	private static ServerLog logger = new ServerLog();
+	@SuppressWarnings("CanBeFinal")
+	private static final ServerLog logger = new ServerLog();
 	
     public static Log getLogger() {
         return logger;
@@ -97,11 +96,7 @@ public class ServerLog implements Log {
         lg.setLevel(Level.INFO);
         debug = false;
     }
-    
-	public boolean isDebug() {
-		return debug;
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.aboni.utils.Log#Error(java.lang.String)
 	 */

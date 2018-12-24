@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl;
 
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import com.aboni.nmea.router.NMEACache;
@@ -23,21 +22,17 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         long TS;
     }
     
-    private Deque<DepthT> queue;
+    private final Deque<DepthT> queue;
 
     private int max = Integer.MIN_VALUE;
     private int min = Integer.MAX_VALUE;    
     
-    private static long DEFAULT_WINDOW = 60 * 60 * 1000; // 1 hour
-    
-    public DepthStatsAgent(NMEACache cache, String name) {
-        this(cache, name, null);
-    }
+    private static final long DEFAULT_WINDOW = 60 * 60 * 1000; // 1 hour
 
     public DepthStatsAgent(NMEACache cache, String name, QOS qos) {
         super(cache, name, qos);
         setSourceTarget(true, true);
-        queue = new LinkedList<DepthStatsAgent.DepthT>();
+        queue = new LinkedList<>();
     }
 
     @Override
@@ -68,6 +63,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
      * @param d
      * @param ts
      */
+    @SuppressWarnings("unused")
     public void _pushDepth(double d, long ts) {
         handleDepth(d, ts);
     }
@@ -105,33 +101,17 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         return d;
     }
     
-    private boolean calcMinMax() {
+    private void calcMinMax() {
         synchronized (this) { 
-            int oldMax = max;
-            int oldMin = min;
             max = Integer.MIN_VALUE;
             min = Integer.MAX_VALUE;
-            for (Iterator<DepthT> i = queue.iterator(); i.hasNext(); ) {
-                DepthT d = i.next(); 
+            for (DepthT d : queue) {
                 max = Math.max(d.depth, max);
                 min = Math.min(d.depth, min);
             }
-            return (oldMin!=min || oldMax!=max);
-        }
-    }
-    
-    public float getMaxDepth() {
-        synchronized (this) {
-            return (float)max/10f;
         }
     }
 
-    public float getMinDepth() {
-        synchronized (this) {
-            return (float)min/10f;
-        }
-    }
-    
     @Override
     public boolean isUserCanStartAndStop() {
     	return true;

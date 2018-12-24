@@ -20,7 +20,7 @@ public class Sample {
 	
 	public static void doSampling(List<Sample> samples, 
 			long ts, double vMax, double v, double vMin, long sampling) {
-		Sample s = null;
+		Sample s;
 		if (samples.isEmpty()) {
 			s = new Sample();
 			samples.add(s);

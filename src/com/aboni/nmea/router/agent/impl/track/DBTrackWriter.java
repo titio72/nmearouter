@@ -8,8 +8,8 @@ import com.aboni.utils.db.EventWriter;
 public class DBTrackWriter implements TrackWriter {
 
     private DBHelper db;
-    private EventWriter primary;
-    private FileTrackWriter fallbackWriter;
+    private final EventWriter primary;
+    private final FileTrackWriter fallbackWriter;
     
     public DBTrackWriter() {
     	primary = new DBTrackEventWriter();

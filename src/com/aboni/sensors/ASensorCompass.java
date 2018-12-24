@@ -11,7 +11,7 @@ import com.aboni.utils.ServerLog;
 
 public abstract class ASensorCompass extends I2CSensor {
 
-	private DeviationManagerImpl devManager;
+	private final DeviationManagerImpl devManager;
 	
 	private double compassSmoothing = 0.75;
 	private double attitudeSmoothing = 0.75;
@@ -43,25 +43,26 @@ public abstract class ASensorCompass extends I2CSensor {
 	 * @throws SensorNotInititalizedException
 	 */
 	public abstract double getUnfilteredSensorHeading() throws SensorNotInititalizedException;
-	
-	public double getPitch() throws SensorNotInititalizedException {
+
+	@SuppressWarnings("unused")
+	public double getPitch() {
 		return pitch;
 	}
-	
-	public double getRoll() throws SensorNotInititalizedException {
+
+	@SuppressWarnings("unused")
+	public double getRoll() {
 		return roll;
 	}
 	
-	public double getSensorHeading() throws SensorNotInititalizedException {
+	public double getSensorHeading() {
 		return head;
 	}
 	
 	/**
 	 * Get the the heading in degrees compensated with the deviation table[0..360].
-	 * @return
-	 * @throws SensorNotInititalizedException
+	 * @return the heading in dgrees
 	 */
-	public double getHeading() throws SensorNotInititalizedException {
+	public double getHeading() {
 	    return devManager.getMagnetic(getSensorHeading());
 	}
 	

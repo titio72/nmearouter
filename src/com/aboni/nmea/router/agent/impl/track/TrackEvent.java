@@ -5,12 +5,12 @@ import com.aboni.utils.db.Event;
 
 public class TrackEvent implements Event {
 
-	private GeoPositionT p;
-	private boolean anchor;
-	private double dist;
-	private double speed;
-	private double maxSpeed;
-	private int interval;
+	private final GeoPositionT p;
+	private final boolean anchor;
+	private final double dist;
+	private final double speed;
+	private final double maxSpeed;
+	private final int interval;
 	
 	public TrackEvent (GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
 		this.p = p;

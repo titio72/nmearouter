@@ -9,7 +9,6 @@ import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.aboni.nmea.router.NMEACache;
 
@@ -222,17 +221,16 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 boolean empty = true;
                 XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
-            	for (Iterator<SensorTemp.Reading> i = r.iterator(); i.hasNext(); ) {
-    				SensorTemp.Reading tr = i.next();
-    				if ((System.currentTimeMillis() - tr.ts) < 1000) {
-    					String name = tr.k.substring(tr.k.length()-4, tr.k.length()-1);
-    					String mappedName = HWSettings.getProperty("temp.map." + name);
-    					if (mappedName==null) mappedName = name;
-    					xdr.addMeasurement(
-            				new Measurement("C", Math.round(tr.v*10d)/10d, "C", mappedName));
-    					empty = false;
-    				}
-            	}
+                for (SensorTemp.Reading tr : r) {
+                    if ((System.currentTimeMillis() - tr.ts) < 1000) {
+                        String name = tr.k.substring(tr.k.length() - 4, tr.k.length() - 1);
+                        String mappedName = HWSettings.getProperty("temp.map." + name);
+                        if (mappedName == null) mappedName = name;
+                        xdr.addMeasurement(
+                                new Measurement("C", Math.round(tr.v * 10d) / 10d, "C", mappedName));
+                        empty = false;
+                    }
+                }
                 if (!empty) notify(xdr);
             } catch (Exception e) {
                 getLogger().Error("Cannot post XDR data", e);
@@ -254,8 +252,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	}
 	
 	private double round(double d, int precision) {
-	    double r = Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
-	    return r;
+        return Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
 	}
 
     @Override

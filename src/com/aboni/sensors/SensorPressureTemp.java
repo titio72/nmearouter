@@ -19,13 +19,8 @@ public class SensorPressureTemp extends I2CSensor {
 	private double temperatureC;
 	private double humidity;
 	private Atmo atmo;
-	private Sensor sensor;
-	
-	public SensorPressureTemp() {
-		super();
-		sensor = Sensor.BMP180;
-	}
-	
+	private final Sensor sensor;
+
 	public SensorPressureTemp(Sensor s) {
 		super();
 		sensor = s;
@@ -51,37 +46,33 @@ public class SensorPressureTemp extends I2CSensor {
         return pressurePA * 0.01;
     }
 	
-	public double getPressurePA() {
-        return pressurePA;
-    }
-	
 	public double getHumidity() {
 		return humidity;
 	}
     
 	@Override
-	protected void _read() throws Exception {
+	protected void _read() {
 	    _readPressurePA();
 	    _readTemperatureCelsius();
 	    _readHumidity();
 	}
 	
-	private void _readPressurePA() throws Exception {
+	private void _readPressurePA() {
     	double p = atmo.readPressure();
 		pressurePA = DataFilter.getLPFReading(getDefaultSmootingAlpha(), pressurePA, p);
 	}
 	
-	private void _readHumidity() throws Exception {
+	private void _readHumidity() {
     	double h = atmo.readHumidity();
 		humidity = DataFilter.getLPFReading(getDefaultSmootingAlpha(), humidity, h);
 	}
 
+	@SuppressWarnings("unused")
 	public double getAltitude(double sealevelPressure) {
-		float altitude = (float) (44330.0 * (1.0 - Math.pow(pressurePA / sealevelPressure, 0.1903)));
-		return altitude;
+		return (float) (44330.0 * (1.0 - Math.pow(pressurePA / sealevelPressure, 0.1903)));
 	}
 
-	private void _readTemperatureCelsius() throws Exception {
+	private void _readTemperatureCelsius() {
         temperatureC = DataFilter.getLPFReading(getDefaultSmootingAlpha(), temperatureC, atmo.readTemperature());
     }
 

@@ -66,7 +66,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		return q;
 	}
     
-	private NMEACache cache;
+	private final NMEACache cache;
 	
 	@Inject
 	public NMEAAgentBuilderImpl(NMEACache cache) {
@@ -143,8 +143,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
     
 	private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
-    	NMEAAgent console = new NMEAConsoleTarget(cache, c.getName(), q);
-    	return console;
+		return new NMEAConsoleTarget(cache, c.getName(), q);
 	}
 
 	private NMEAAgent buildSerial(SerialAgent s, QOS q) {
@@ -171,27 +170,22 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	        }
 	        return a;
 		} else {
-	        NMEAUDPReceiver a = new NMEAUDPReceiver(cache, conf.getName(), conf.getPort(), q);
-	        return a;
+			return new NMEAUDPReceiver(cache, conf.getName(), conf.getPort(), q);
 		}
 	}
 	
 	private NMEAAgent buildMWDSynt(MWDAgent a, QOS q) {
-    	NMEAMWDSentenceCalculator c = new NMEAMWDSentenceCalculator(cache, "MWD", q);
-    	return c;
+		return new NMEAMWDSentenceCalculator(cache, "MWD", q);
 	}
 
 	private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
-        NMEAMeteoTarget meteo = new NMEAMeteoTarget(cache, a.getName(), q, new DBMeteoWriter());
-        return meteo;
+		return new NMEAMeteoTarget(cache, a.getName(), q, new DBMeteoWriter());
     }
 
 	private NMEAAgent buildSocketJSON(JSONAgent s, QOS q) {
         String name = s.getName();
         int port = s.getPort();
-		NMEAAgent sock = null;
-		sock = new NMEASocketServerJSON(cache, name, port, q);
-        return sock;
+		return new NMEASocketServerJSON(cache, name, port, q);
 	}
 
 	private NMEAAgent buildSocket(TcpAgent s, QOS q) {
@@ -239,17 +233,14 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
     
 	private NMEAAgent buildSimulator(SimulatorAgent s, QOS q) {
-    	NMEAAgent sim = new NMEASimulatorSource(cache, s.getName(), q);
-    	return sim;
+		return new NMEASimulatorSource(cache, s.getName(), q);
     }
 
     private NMEAAgent buildSensor(SensorAgent s, QOS q) {
-        NMEAAgent se = new NMEASourceSensor(cache, s.getName(), q);
-        return se;
+		return new NMEASourceSensor(cache, s.getName(), q);
     }
 
     private NMEAAgent buildGyro(GyroAgent s, QOS q) {
-        NMEAAgent se = new NMEASourceGyro(cache, s.getName(), q);
-        return se;
+		return new NMEASourceGyro(cache, s.getName(), q);
     }
 }

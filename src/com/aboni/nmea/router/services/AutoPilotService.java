@@ -2,10 +2,11 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEARouter;
+import com.aboni.utils.ServerLog;
 
 public class AutoPilotService  implements WebService {
 
-	private AutoPilotDriver auto;
+	private final AutoPilotDriver auto;
 	
 	public AutoPilotService(NMEARouter router) {
 		this.auto = (AutoPilotDriver)router.getAgent("SmartPilot");
@@ -51,7 +52,11 @@ public class AutoPilotService  implements WebService {
 	        response.ok();
 		} catch (Exception e) {
 	        response.setContentType("application/json");
-	        try { response.getWriter().println("{\"error\", \"" + e.getMessage() + "\"}"); } catch (Exception ee) {}
+	        try {
+	        	response.getWriter().println("{\"error\", \"" + e.getMessage() + "\"}");
+	        } catch (Exception ee) {
+				ServerLog.getLogger().Error("Error sending response to web client", ee);
+			}
 	        response.ok();
 		}
 	}

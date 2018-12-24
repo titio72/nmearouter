@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -82,8 +83,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	private boolean builtin;
 	private boolean target;
 	private boolean source;
-	private _Target targetIf;
-	private _Source sourceIf;
+	private final _Target targetIf;
+	private final _Source sourceIf;
 	
     public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
     	targetIf = new _Target();
@@ -92,7 +93,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         fsetInput = null;
         fsetOutput = null;
         active = false;
-        proc = new ArrayList<NMEAPostProcess>();
+        proc = new ArrayList<>();
         handleQos(cache, name, qos);
         target = true;
         source = true;
@@ -150,7 +151,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	
 	protected class _Log implements Log {
 
-	    private Log log;
+	    private final Log log;
 	    
 	    private _Log() {
 	        log = ServerLog.getLogger();
@@ -325,7 +326,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                     	if (!res.first) {
                     		return; // skip the sentence
                     	} else if (res.second!=null) {
-							for (Sentence outS: res.second) toSend.add(outS);
+							Collections.addAll(toSend, res.second);
                     	}
                     }
                 }
@@ -347,7 +348,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 	/**
 	 * Sources can use post-proc delegates to add additional elaboration to the sentences they pushes into the stream.
-	 * @param f
 	 */
 	protected final Collection<NMEAPostProcess> getProc() {
 		return proc;

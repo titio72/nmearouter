@@ -198,7 +198,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "Router")
     public JAXBElement<Router> createRouter(Router value) {
-        return new JAXBElement<Router>(_Router_QNAME, Router.class, null, value);
+        return new JAXBElement<>(_Router_QNAME, Router.class, null, value);
     }
 
 }

@@ -26,10 +26,10 @@ import net.sf.marineapi.nmea.util.Position;
  */
 public class NMEAHeadingEnricher implements NMEAPostProcess {
 
-    private NMEAMagnetic2TrueConverter m;
+    private final NMEAMagnetic2TrueConverter m;
     
     private boolean doHDT = true;
-    private NMEACache cache;
+    private final NMEACache cache;
     
     public NMEAHeadingEnricher(NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
@@ -72,8 +72,6 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
 		        d = Utils.normalizeDegrees180_180(d);
 		        hdg.setVariation(d);
 		        canDoT = true;
-		    } else {
-		        //hdg.setVariation(0.0);
 		    }
 		}
 		return canDoT;
@@ -98,8 +96,10 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
 		HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
 		double var = 0.0;
 		double dev = 0.0;
-		try { var = hdg.getVariation(); } catch (Exception e) {}
-		try { dev = hdg.getDeviation(); } catch (Exception e) {}
+		//noinspection CatchMayIgnoreException
+		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) {}
+		//noinspection CatchMayIgnoreException
+		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) {}
 		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
 		return hdt;
 	}

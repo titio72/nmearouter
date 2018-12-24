@@ -21,17 +21,17 @@ import net.sf.marineapi.nmea.util.Measurement;
 public class NMEACacheImpl implements NMEACache {
 
 
-    private DataEvent<TimeSentence> lastTime;
-    private DataEvent<HeadingSentence> lastHeading;
-    private DataEvent<PositionSentence> lastPosition;
-    private Map<String, DataEvent<Measurement>> sensors;
+    private final DataEvent<TimeSentence> lastTime;
+    private final DataEvent<HeadingSentence> lastHeading;
+    private final DataEvent<PositionSentence> lastPosition;
+    private final Map<String, DataEvent<Measurement>> sensors;
 	private boolean synced;
     
     public NMEACacheImpl() {
-        lastHeading = new DataEvent<HeadingSentence>();
-        lastTime = new DataEvent<TimeSentence>();
-        lastPosition = new DataEvent<PositionSentence>();
-        sensors = new HashMap<String, DataEvent<Measurement>>();
+        lastHeading = new DataEvent<>();
+        lastTime = new DataEvent<>();
+        lastPosition = new DataEvent<>();
+        sensors = new HashMap<>();
     }
     
     @Override
@@ -53,7 +53,7 @@ public class NMEACacheImpl implements NMEACache {
 	        }
 	        else if (s instanceof XDRSentence) {
 	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
-	        		DataEvent<Measurement> x = new DataEvent<Measurement>();
+	        		DataEvent<Measurement> x = new DataEvent<>();
 	        		x.data = m;
 	        		x.source = src;
 	        		x.timestamp = System.currentTimeMillis();
@@ -128,17 +128,4 @@ public class NMEACacheImpl implements NMEACache {
         return (time - lastHeading.timestamp) > threshold; 
     }
     
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#isPositionOlderThan(long, long)
-	 */
-    @Override
-	public boolean isPositionOlderThan(long time, long threshold) {
-        return (time - lastPosition.timestamp) > threshold; 
-    }
-
-	@Override
-	public DataEvent<TimeSentence> getLastUTCTime() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

@@ -8,7 +8,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
-	private SystemTimeChecker systemTimeCHecker;
+	private final SystemTimeChecker systemTimeCHecker;
 	
 	public NMEASystemTimeGPS(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);

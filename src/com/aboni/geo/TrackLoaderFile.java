@@ -23,9 +23,9 @@ public class TrackLoaderFile implements TrackLoader {
 
 	}
 
-	private PositionHistory h;
-	private SimpleDateFormat dfParser;
-	private String file;
+	private final PositionHistory h;
+	private final SimpleDateFormat dfParser;
+	private final String file;
 	
 	public TrackLoaderFile(String file) {
 	    dfParser = new SimpleDateFormat("ddMMyy HHmmss.SSS");
@@ -59,7 +59,6 @@ public class TrackLoaderFile implements TrackLoader {
 			res = true;
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Error loading track", e);
-			res = false;
 		}
 		return res;
 	}
@@ -79,13 +78,12 @@ public class TrackLoaderFile implements TrackLoader {
 			
 			Calendar t = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 			t.setTime(ts);
-			
-			GeoPositionT p = new GeoPositionT(t.getTimeInMillis(), 
+
+			return new GeoPositionT(t.getTimeInMillis(),
 					new Position(
 							Double.parseDouble(lat) * ("N".equals(latNS)?1.0:-1.0),
 							Double.parseDouble(lon) * ("E".equals(lonEW)?1.0:-1.0)
 							));
-			return p;
 		} catch (Exception e) {
 			throw new MalformedPointLineException("Malformed line " + pos, e);
 		}

@@ -15,11 +15,11 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEASocketClient extends NMEAAgentImpl {
 
 	private Socket socket;
-	private String server;
-	private int port;
+	private final String server;
+	private final int port;
 	private SentenceReader reader;
-    private boolean receive;
-    private boolean transmit;
+    private final boolean receive;
+    private final boolean transmit;
 	
 	public NMEASocketClient(NMEACache cache, String name, String server, int port) {
 	    this(cache, name, server, port, true, false, null);
@@ -87,7 +87,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
     	        reader.stop();
     	        try {
                     socket.close();
-                } catch (IOException e) {} finally {
+                } catch (IOException e) {
+    	            getLogger().Error("Error trying to close socket", e);
+                } finally {
                     socket = null;
                 }
     	    }

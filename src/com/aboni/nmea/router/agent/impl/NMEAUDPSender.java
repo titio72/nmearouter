@@ -19,14 +19,14 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEAUDPSender extends NMEAAgentImpl {
 
 	private DatagramSocket serverSocket;
-	private int portTarget;
-	private Set<InetAddress> targets;
+	private final int portTarget;
+	private final Set<InetAddress> targets;
 
 	public NMEAUDPSender(NMEACache cache, String name, QOS qos, int portTarget) {
 		super(cache, name, qos);
 		this.portTarget = portTarget;
         setSourceTarget(false, true);
-        targets = new HashSet<InetAddress>();
+        targets = new HashSet<>();
 	}
 
     @Override
@@ -36,9 +36,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 	
     @Override
     public String getDescription() {
-    	String res = "UDP Sender Port " + getPort() + "<br>";
-    	for (InetAddress a: targets) res += a.getHostName() + " ";
-    	return res;
+    	StringBuilder res = new StringBuilder("UDP Sender Port " + getPort() + "<br>");
+    	for (InetAddress a: targets) res.append(a.getHostName()).append(" ");
+    	return res.toString();
     }
     
     @Override
@@ -107,7 +107,6 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 	}
 	
 	protected String getOutSentence(Sentence s) {
-		String s1 = s.toSentence();
-		return s1;
+		return s.toSentence();
 	}
 }

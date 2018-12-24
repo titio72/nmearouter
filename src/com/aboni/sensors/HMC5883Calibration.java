@@ -1,5 +1,7 @@
 package com.aboni.sensors;
 
+import com.aboni.misc.Utils;
+
 import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -7,10 +9,10 @@ import java.util.List;
 
 public class HMC5883Calibration {
 
-    private SensorHMC5883 sensor;
-    private long timeThreshold;
+    private final SensorHMC5883 sensor;
+    private final long timeThreshold;
     private double avgRadius;
-    private static final long INTERVAL = 100;
+    private static final int INTERVAL = 100;
     
     public HMC5883Calibration(SensorHMC5883 sensor, long timeout) {
         this.sensor = sensor;
@@ -63,8 +65,8 @@ public class HMC5883Calibration {
         }
         
         double r_sdev = 0.0;
-        for (int i = 0; i<r2s.length; i++) {
-            r_sdev += Math.pow(r2s[i] - r_avg, 2);
+        for (double r2 : r2s) {
+            r_sdev += Math.pow(r2 - r_avg, 2);
         }
         r_sdev = Math.sqrt(r_sdev / r2s.length);
         
@@ -101,7 +103,7 @@ public class HMC5883Calibration {
 
     private List<double[]> collect() throws SensorNotInititalizedException {
         if (sensor.isInitialized()) {
-            List<double[]> samples = new LinkedList<double[]>();
+            List<double[]> samples = new LinkedList<>();
             long t0 = System.currentTimeMillis();
             while ((System.currentTimeMillis() - t0) < timeThreshold) {
                 try {
@@ -111,7 +113,7 @@ public class HMC5883Calibration {
                 }
                 double[] d = sensor.getMagVector();
                 samples.add(d);
-                try { Thread.sleep(INTERVAL); } catch (InterruptedException e) {}
+                Utils.pause(INTERVAL);
             }
             return samples;
         } else {

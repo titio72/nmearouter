@@ -2,7 +2,6 @@ package com.aboni.nmea.router.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,8 +29,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEARouterImpl implements NMEARouter {
 
 	private Timer timer;
-	private AtomicBoolean started;
-	private ExecutorService exec;
+	private final AtomicBoolean started;
+	private final ExecutorService exec;
 	
 	private class SentenceEvent {
 		SentenceEvent(Sentence s, NMEAAgent src) {
@@ -57,8 +56,8 @@ public class NMEARouterImpl implements NMEARouter {
 	
 	@Inject
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
-	    agents = new HashMap<String, NMEAAgent>();
-		sentenceQueue = new LinkedBlockingQueue<NMEARouterImpl.SentenceEvent>();
+	    agents = new HashMap<>();
+		sentenceQueue = new LinkedBlockingQueue<>();
 		started  = new AtomicBoolean(false);
 		this.cache = cache;
 		this.stream = stream;
@@ -70,9 +69,9 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			timer_count = (timer_count+1) % TIMER_FACTOR;
 			for (NMEAAgent a: agents.values()) {
-				exec.execute(()->a.onTimerHR());
+				exec.execute(a::onTimerHR);
 				if (timer_count==0) {
-					exec.execute(()->a.onTimer());
+					exec.execute(a::onTimer);
 					dumpStats();
 				}
 			}
@@ -147,7 +146,7 @@ public class NMEARouterImpl implements NMEARouter {
 				public void onData(JSONObject s, NMEAAgent src) { _queueUpData(s, src); }
 			});
 			if (agent.getSource()!=null) {
-			    agent.getSource().setSentenceListener((Sentence s, NMEAAgent src)->_queueUpSentence(s, src));
+			    agent.getSource().setSentenceListener(this::_queueUpSentence);
 			}
 		}
 	}
@@ -162,7 +161,7 @@ public class NMEARouterImpl implements NMEARouter {
 	@Override
 	public Collection<String> getAgents() {
 		synchronized (agents) {
-			return new TreeSet<String>(agents.keySet());
+			return new TreeSet<>(agents.keySet());
 		}
 	}
 	
@@ -192,13 +191,12 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private void routeToTarget(Sentence s, NMEAAgent src) {
 		synchronized (agents) {
-			for (Iterator<NMEAAgent> i = agents.values().iterator(); i.hasNext(); ) {
+			for (NMEAAgent nmeaAgent : agents.values()) {
 				try {
-				    NMEAAgent tgt = i.next();
-				    NMEATarget target = tgt.getTarget();        
-				    if (target!=null && !src.getName().equals(tgt.getName())) {
-				    	exec.execute(()->target.pushSentence(s, src));
-				    }
+					NMEATarget target = nmeaAgent.getTarget();
+					if (target != null && !src.getName().equals(nmeaAgent.getName())) {
+						exec.execute(() -> target.pushSentence(s, src));
+					}
 				} catch (Exception e) {
 					ServerLog.getLogger().Error("Error dispatching to target!", e);
 				}

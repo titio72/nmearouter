@@ -18,7 +18,7 @@ public class NMEAMagnetic2TrueConverterTest {
     private NMEAMagnetic2TrueConverter conv;
     
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         conv = new NMEAMagnetic2TrueConverter(2016);
     }
 

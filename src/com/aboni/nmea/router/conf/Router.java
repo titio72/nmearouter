@@ -133,7 +133,7 @@ public class Router {
      */
     public List<AgentBase> getSerialAgentOrTcpAgentOrUdpAgent() {
         if (serialAgentOrTcpAgentOrUdpAgent == null) {
-            serialAgentOrTcpAgentOrUdpAgent = new ArrayList<AgentBase>();
+            serialAgentOrTcpAgentOrUdpAgent = new ArrayList<>();
         }
         return this.serialAgentOrTcpAgentOrUdpAgent;
     }

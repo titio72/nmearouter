@@ -12,12 +12,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEAUDPReceiver extends NMEAAgentImpl {
 
 	private DatagramSocket socket;
-	private int port;
-	boolean stop;
-	
-	public NMEAUDPReceiver(NMEACache cache, String name, int port) {
-	    this(cache, name, port, null);
-	}
+	private final int port;
+	private boolean stop;
 	
 	public NMEAUDPReceiver(NMEACache cache, String name, int port, QOS qos) {
         super(cache, name, qos);
@@ -41,23 +37,21 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                     
                     //$GPRMC,054922.00,A,4337.80466,N,01017.61149,E,0.767,,051018,,*1D
                     
-                    Thread t = new Thread(new Runnable() {
-                		@Override
-                		public void run() {
-			                byte[] buffer = new byte[256];
-			                while (!stop) {
-			                	try {
-				                	DatagramPacket p = new DatagramPacket(buffer, 256);
-				                	socket.receive(p);
-				                	String s_sentence = new String(p.getData(), 0, p.getLength());
-				                	Sentence s = SentenceFactory.getInstance().createParser(s_sentence);
-				                	onSentenceRead(s);
-			                	} catch (Exception e) {
-			                		getLogger().Warning("Error receiveing sentence {" + e.getMessage() + "}");
-			                	}
-			                }
-			                socket.close();
-                		}});
+                    Thread t = new Thread(() -> {
+						byte[] buffer = new byte[256];
+						while (!stop) {
+							try {
+								DatagramPacket p = new DatagramPacket(buffer, 256);
+								socket.receive(p);
+								String s_sentence = new String(p.getData(), 0, p.getLength());
+								Sentence s = SentenceFactory.getInstance().createParser(s_sentence);
+								onSentenceRead(s);
+							} catch (Exception e) {
+								getLogger().Warning("Error receiveing sentence {" + e.getMessage() + "}");
+							}
+						}
+						socket.close();
+					});
                     t.start();
                     
                     return true;

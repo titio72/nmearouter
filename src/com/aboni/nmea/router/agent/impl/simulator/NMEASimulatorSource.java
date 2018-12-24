@@ -62,18 +62,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	private PolarTable polars;
 	
 	public static NMEASimulatorSource SIMULATOR;
-    private NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
+    private final NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
     
-    private TalkerId id = TalkerId.GP;
-    private Random r = new Random();
+    private final TalkerId id = TalkerId.GP;
+    private final Random r = new Random();
 	private Position pos = new Position(43.9599, 09.7745);
 	private double distance = 0;
 	private double trip = 0;
 	private long lastTS = 0;
-	
-	public NMEASimulatorSource(NMEACache cache, String name) {
-		this(cache, name, null);
-	}
 	
 	public NMEASimulatorSource(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);
@@ -190,14 +186,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			double hdg = Utils.normalizeDegrees0_360(refHeading + r.nextDouble() * 3.0);
 			
 			double absoluteWindSpeed = data._wSpeed + r.nextDouble() * 1.0; 
-			double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0; 
-	
-			double tWSpeed = 		absoluteWindSpeed;
+			double absoluteWindDir = data._wDirection + r.nextDouble() * 2.0;
+
 			double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - hdg);
 	
 			double speed;
 			if (data._usePolars) {
-				speed = polars.getSpeed((int)tWDirection, (float)tWSpeed) * data._polarCoeff;
+				speed = polars.getSpeed((int)tWDirection, (float) absoluteWindSpeed) * data._polarCoeff;
 			} else {
 				speed = round(data._speed * (1.0 + r.nextDouble()/10.0), 1);
 			}
@@ -205,7 +200,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			distance += speed * (1000.0 / 1000.0 / 60.0 / 60.0);
 			trip += speed * (1000.0 / 1000.0 / 60.0 / 60.0);
 			
-			ApparentWind aWind = new ApparentWind(speed, tWDirection, tWSpeed);
+			ApparentWind aWind = new ApparentWind(speed, tWDirection, absoluteWindSpeed);
 			double aWSpeed = 		aWind.getApparentWindSpeed();
 			double aWDirection = 	Utils.normalizeDegrees0_360(aWind.getApparentWindDeg());
 			
@@ -315,7 +310,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	            MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
 	            vt.setSpeedUnit(Units.KNOT);
 	            vt.setAngle(tWDirection);
-	            vt.setSpeed(tWSpeed);
+	            vt.setSpeed(absoluteWindSpeed);
 	            vt.setTrue(true);
 	            vt.setStatus(DataStatus.ACTIVE);
 	            NMEASimulatorSource.this.notify(vt);
@@ -333,7 +328,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			if (data._vwr) {
 	            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
 	            vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
-	            vwt.setSpeedKnots(tWSpeed);
+	            vwt.setSpeedKnots(absoluteWindSpeed);
 	            vwt.setDirectionLeftRight(tWDirection>180?Direction.LEFT:Direction.RIGHT);
 	            NMEASimulatorSource.this.notify(vwt);
 			}
@@ -369,8 +364,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	        
 	        if (data._mta) {
 	            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
-	            mta.setTemperature(temp);;
-	            NMEASimulatorSource.this.notify(mta);
+	            mta.setTemperature(temp);
+				NMEASimulatorSource.this.notify(mta);
 	        }
 	        
 	        if (data._mbb) {
@@ -396,7 +391,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	            mda.setWaterTemperature(28.5);
 	            mda.setMagneticWindDirection(tWDirection + hdg);
 	            mda.setTrueWindDirection(tWDirection + hdg);
-	            mda.setWindSpeedKnots(tWSpeed);
+	            mda.setWindSpeedKnots(absoluteWindSpeed);
 	            NMEASimulatorSource.this.notify(mda);
 	        }
 	        

@@ -4,15 +4,11 @@ import com.aboni.misc.Utils;
 
 public class ScalarSerie extends Serie {
 	
-	private double rangeMin;
-    private double rangeMax;
+	private final double rangeMin;
+    private final double rangeMax;
 
-	public ScalarSerie(int id, String tag) {
-		this(id, tag, Double.NaN, Double.NaN);
-	}
-	
-    public ScalarSerie(int id, String tag, double min, double max) {
-		super(id, tag);
+    public ScalarSerie(String tag, double min, double max) {
+		super(tag);
 		this.rangeMax = max;
 		this.rangeMin = min;
 	}
@@ -38,9 +34,4 @@ public class ScalarSerie extends Serie {
          	}
          }
      }    
-
-	@Override
-	public String getType() {
-		return "Scalar[" + rangeMin + ", " + rangeMax + "]";
-	}
 }

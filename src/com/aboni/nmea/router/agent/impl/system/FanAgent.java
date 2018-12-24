@@ -14,7 +14,7 @@ public class FanAgent extends NMEAAgentImpl {
 
 	private static final double FAN_THRESHOLD_ON = 55.0;
 	private static final double FAN_THRESHOLD_OFF = 52.0;
-    private Fan fan;
+    private final Fan fan;
     
 	public FanAgent(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);

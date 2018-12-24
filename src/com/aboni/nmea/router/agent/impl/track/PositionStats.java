@@ -9,13 +9,13 @@ import net.sf.marineapi.nmea.util.Position;
 
 public class PositionStats {
 	
-	private List<GeoPositionT> positions = new LinkedList<>();
+	private final List<GeoPositionT> positions = new LinkedList<>();
 	
 	private int samples;
 	private double avgLat;
 	private double avgLon;
 	
-	private long period = 5 * 60000; //5 minutes
+	private static final long period = 5 * 60000; //5 minutes
 	
 	public PositionStats() {}
 	

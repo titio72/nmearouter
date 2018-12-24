@@ -45,14 +45,14 @@ public class BMP180 implements Atmo {
 	private int cal_AC6 = 0;
 	private int cal_B1  = 0;
 	private int cal_B2  = 0;
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "FieldCanBeLocal"})
 	private int cal_MB  = 0;
 	private int cal_MC  = 0;
 	private int cal_MD  = 0;
 
-	private int mode = BMP180_STANDARD;
+	private final int mode = BMP180_STANDARD;
 	
-	private I2CInterface i2cdevice;
+	private final I2CInterface i2cdevice;
 
 	public BMP180(I2CInterface i2cdevice) throws IOException {
 		this.i2cdevice = i2cdevice;
@@ -90,37 +90,44 @@ public class BMP180 implements Atmo {
 		// Reads the raw (uncompensated) temperature from the sensor
 		getI2CBus().write(BMP180_CONTROL, (byte)BMP180_READTEMPCMD);
 		waitfor(5);  // Wait 5ms
-		int raw = readU16(BMP180_TEMPDATA);
-		return raw;
+		return readU16(BMP180_TEMPDATA);
+	}
+
+	private int getMode() {
+		return mode;
 	}
 
 	private int readRawPressure() throws Exception
 	{
 		// Reads the raw (uncompensated) pressure level from the sensor
 		getI2CBus().write(BMP180_CONTROL, (byte)(BMP180_READPRESSURECMD + (this.mode << 6)));
-		if (this.mode == BMP180_ULTRALOWPOWER)
-			waitfor(5);
-		else if (this.mode == BMP180_HIGHRES)
-			waitfor(14);
-		else if (this.mode == BMP180_ULTRAHIGHRES)
-			waitfor(26);
-		else
-			waitfor(8);
+
+		switch (getMode()) {
+			case BMP180_ULTRALOWPOWER:
+				waitfor(5);
+				break;
+			case BMP180_HIGHRES:
+				waitfor(14);
+				break;
+			case BMP180_ULTRAHIGHRES:
+				waitfor(26); break;
+			default:
+				waitfor(8); break;
+		}
 		int msb  = getI2CBus().readU8(BMP180_PRESSUREDATA);
 		int lsb  = getI2CBus().readU8(BMP180_PRESSUREDATA + 1);
 		int xlsb = getI2CBus().readU8(BMP180_PRESSUREDATA + 2);
-		int raw = ((msb << 16) + (lsb << 8) + xlsb) >> (8 - this.mode);
-		return raw;
+		return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - this.mode);
 	}
 
 	public float readTemperature() {
 		try {
 			// Gets the compensated temperature in degrees celsius
-			int UT = 0;
-			int X1 = 0;
-			int X2 = 0;
-			int B5 = 0;
-			float temp = 0.0f;
+			int UT;
+			int X1;
+			int X2;
+			int B5;
+			float temp;
 	
 			// Read raw temp before aligning it with the calibration values
 			UT = readRawTemp();
@@ -137,44 +144,23 @@ public class BMP180 implements Atmo {
 	public float readPressure() {
 		try {
 			// Gets the compensated pressure in pascal
-			int UT = 0;
-			int UP = 0;
-			int B3 = 0;
-			int B5 = 0;
-			int B6 = 0;
-			int X1 = 0;
-			int X2 = 0;
-			int X3 = 0;
-			int p =  0;
-			int B4 = 0;
-			int B7 = 0;
+			int UT;
+			int UP;
+			int B3;
+			int B5;
+			int B6;
+			int X1;
+			int X2;
+			int X3;
+			int p;
+			int B4;
+			int B7;
 	
 			UT = this.readRawTemp();
 			UP = this.readRawPressure();
 	
-			// You can use the datasheet values to test the conversion results
-			// boolean dsValues = true;
-			boolean dsValues = false;
-	
-			if (dsValues)
-			{
-				UT = 27898;
-				UP = 23843;
-				this.cal_AC6 = 23153;
-				this.cal_AC5 = 32757;
-				this.cal_MB = -32768;
-				this.cal_MC = -8711;
-				this.cal_MD = 2868;
-				this.cal_B1 = 6190;
-				this.cal_B2 = 4;
-				this.cal_AC3 = -14383;
-				this.cal_AC2 = -72;
-				this.cal_AC1 = 408;
-				this.cal_AC4 = 32741;
-				this.mode = BMP180_ULTRALOWPOWER;
-			}
 			// True Temperature Calculations
-			X1 = (int)((UT - this.cal_AC6) * this.cal_AC5) >> 15;
+			X1 = ((UT - this.cal_AC6) * this.cal_AC5) >> 15;
 			X2 = (this.cal_MC << 11) / (X1 + this.cal_MD);
 			B5 = X1 + X2;
 			// Pressure Calculations
@@ -188,10 +174,7 @@ public class BMP180 implements Atmo {
 			X3 = ((X1 + X2) + 2) >> 2;
 			B4 = (this.cal_AC4 * (X3 + 32768)) >> 15;
 			B7 = (UP - B3) * (50000 >> this.mode);
-			if (B7 < 0x80000000)
-				p = (B7 * 2) / B4;
-			else
-				p = (B7 / B4) * 2;
+			p = (B7 / B4) * 2;
 	
 			X1 = (p >> 8) * (p >> 8);
 			X1 = (X1 * 3038) >> 16;
@@ -231,7 +214,7 @@ public class BMP180 implements Atmo {
 	public double readAltitude()
 	{
 		// "Calculates the altitude in meters"
-		double altitude = 0.0;
+		double altitude;
 		float pressure = readPressure();
 		altitude = 44330.0 * (1.0 - Math.pow(pressure / standardSeaLevelPressure, 0.1903));
 		return altitude;

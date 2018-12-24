@@ -3,11 +3,10 @@ package com.aboni.sensors.hw;
 import java.io.IOException;
 
 import com.aboni.sensors.I2CInterface;
-import com.aboni.sensors.SensorNotInititalizedException;
 
 public class HMC5883L {
 
-	private I2CInterface device;
+	private final I2CInterface device;
 	
 	public HMC5883L(I2CInterface device) {
 		this.device = device;
@@ -17,8 +16,8 @@ public class HMC5883L {
     public static final int  HMC5883_I2CADDR = 0x1e;
 
     public static class Scale {
-        private double scale;
-        private int reg;
+        private final double scale;
+        private final int reg;
 
         private Scale(double s, int reg) { 
             this.scale = s;
@@ -57,23 +56,23 @@ public class HMC5883L {
         public static final int SAMPLES_AVERAGE_4 = 2;
         public static final int SAMPLES_AVERAGE_8 = 3;
         
-        public static int ConfigurationRegisterA = 0x00;
-    	public static int ConfigurationRegisterB = 0x01;
-    	public static int ModeRegister = 0x02;
-    	public static int AxisXDataRegisterMSB = 0x03;
-		public static int AxisXDataRegisterLSB = 0x04;
-    	public static int AxisZDataRegisterMSB = 0x05;
-		public static int AxisZDataRegisterLSB = 0x06;
-    	public static int AxisYDataRegisterMSB = 0x07;
-		public static int AxisYDataRegisterLSB = 0x08;
-		public static int StatusRegister = 0x09;
-		public static int IdentificationRegisterA = 0x10;
-		public static int IdentificationRegisterB = 0x11;
-		public static int IdentificationRegisterC = 0x12;
+        public static final int ConfigurationRegisterA = 0x00;
+    	public static final int ConfigurationRegisterB = 0x01;
+    	public static final int ModeRegister = 0x02;
+    	public static final int AxisXDataRegisterMSB = 0x03;
+		public static final int AxisXDataRegisterLSB = 0x04;
+    	public static final int AxisZDataRegisterMSB = 0x05;
+		public static final int AxisZDataRegisterLSB = 0x06;
+    	public static final int AxisYDataRegisterMSB = 0x07;
+		public static final int AxisYDataRegisterLSB = 0x08;
+		public static final int StatusRegister = 0x09;
+		public static final int IdentificationRegisterA = 0x10;
+		public static final int IdentificationRegisterB = 0x11;
+		public static final int IdentificationRegisterC = 0x12;
 	
-    	public static int MeasurementContinuous = 0x00;
-		public static int MeasurementSingleShot = 0x01;
-		public static int MeasurementIdle = 0x03;
+    	public static final int MeasurementContinuous = 0x00;
+		public static final int MeasurementSingleShot = 0x01;
+		public static final int MeasurementIdle = 0x03;
 
     	public static final int X = 0;
     	public static final int Y = 1;
@@ -82,13 +81,13 @@ public class HMC5883L {
     
     private Scale scale;
 
-    public void setContinuousMode() throws IOException, SensorNotInititalizedException {
+    public void setContinuousMode() throws IOException {
     	synchronized (this) {
     		device.write(Constants.ModeRegister, (byte)Constants.MeasurementContinuous);
     	}
     }
     
-    public void enable() throws IOException, SensorNotInititalizedException {
+    public void enable() throws IOException {
         synchronized (this) {
             // set high freq 
             device.write(2, (byte)0);
@@ -98,7 +97,7 @@ public class HMC5883L {
         }
     }
 
-    public void setScale(Scale s) throws IOException, SensorNotInititalizedException {
+    public void setScale(Scale s) throws IOException {
     	synchronized (this) {
 	        if (s==null) scale = Scale.Gauss_1_30;
 	        else scale = s;
@@ -119,18 +118,16 @@ public class HMC5883L {
     	}
     }
     
+    @SuppressWarnings("PointlessArithmeticExpression")
     private short getWord(byte[] b, int i) {
-        short w = 0;
+        short w;
 
         byte high = (byte)(b[i + 0] & 0xFF);
         byte low  = (byte)(b[i + 1] & 0xFF);
 
         w = (short)(((high << 8) + low) & 0xFFFF); // Little endian
 
-        if (w >= 0x8000)
-            w = (short) -((0xFFFF - w) + 1);
-
-        return w;        
+        return w;
     }
     
     public double[] getScaledMag() throws IOException {

@@ -9,7 +9,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketServerJSON extends NMEASocketServer {
 
-	private NMEA2JSONb js;
+	private final NMEA2JSONb js;
 	
 	@Override
 	public String getType() {

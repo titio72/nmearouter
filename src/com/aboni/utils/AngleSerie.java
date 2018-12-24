@@ -4,8 +4,8 @@ import com.aboni.misc.Utils;
 
 public class AngleSerie extends Serie {
 	
-	public AngleSerie(int id, String tag) {
-		super(id, tag);
+	public AngleSerie(String tag) {
+		super(tag);
 	}
 	
 	@Override
@@ -24,10 +24,5 @@ public class AngleSerie extends Serie {
             min = Utils.normalizeDegrees0_360(Math.min(min,  a));
             samples++;
          }
-	}
-
-	@Override
-	public String getType() {
-		return "Angle";
 	}
 }

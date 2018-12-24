@@ -5,18 +5,18 @@ import java.util.Map;
 
 public class QOS {
 
-	private Map<String, Object> qos;
+	private final Map<String, Object> qos;
 	
 	public QOS() {
-		qos = new HashMap<String, Object>();
+		qos = new HashMap<>();
 	}
 
 	public QOS(QOS q) {
-		qos = new HashMap<String, Object>(q.qos);
+		qos = new HashMap<>(q.qos);
 	}
 
 	public void addProp(String propName) {
-		qos.put(propName, new Integer(1));
+		qos.put(propName, 1);
 	}
 
 	public void addProp(String propName, String v) {

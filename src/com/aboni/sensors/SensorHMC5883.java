@@ -2,6 +2,7 @@ package com.aboni.sensors;
 
 import java.io.IOException;
 
+import com.aboni.misc.Utils;
 import com.aboni.sensors.hw.HMC5883L;
 import com.aboni.utils.DataFilter;
 import com.aboni.utils.ServerLog;
@@ -14,8 +15,7 @@ public class SensorHMC5883 extends I2CSensor {
     private static final int Z = 2; 
     
     private HMC5883L hmc5883l;
-    private double[] mag; 
-    private int[] rmag; 
+    private double[] mag;
 
     public SensorHMC5883() {
         super();
@@ -28,9 +28,7 @@ public class SensorHMC5883 extends I2CSensor {
     	int i = 0;
     	while (i<3 && !doInit()) { 
     	    i++;
-    	    try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {}
+            Utils.pause(5000);
     	}
     }
 
@@ -53,15 +51,9 @@ public class SensorHMC5883 extends I2CSensor {
     protected void _read() throws Exception {
     	synchronized (this) {
     	    if (hmc5883l != null) {
-    	        setRMagReading(hmc5883l.readMagnetometer());
     	        setMagReading(hmc5883l.getScaledMag());
     	    }
     	}
-    }
-
-	private void setRMagReading(int[] readMagnetometer) {
-	    rmag = readMagnetometer;
-        
     }
 
     private void setMagReading(double[] m) {
@@ -78,10 +70,6 @@ public class SensorHMC5883 extends I2CSensor {
 
     public double[] getMagVector() {
         return mag;
-    }
-
-    public int[] getRawMagVector() {
-        return rmag;
     }
 
     @Override

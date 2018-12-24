@@ -19,15 +19,14 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class PowerLedAgent extends NMEAAgentImpl {
 
-	private final Pin GPS = RaspiPin.GPIO_23;
-	private final Pin PWR = RaspiPin.GPIO_02;
-    private final GpioController gpio;
+	private static final Pin GPS = RaspiPin.GPIO_23;
+	private static final Pin PWR = RaspiPin.GPIO_02;
     private final GpioPinDigitalOutput pin, pinGps;
     private long lastGps;
 
     public PowerLedAgent(NMEACache cache, String name, QOS qos) {
         super(cache, name, qos);
-        gpio = GpioFactory.getInstance();
+        GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
         pinGps = gpio.provisionDigitalOutputPin(GPS, "gps", PinState.LOW);
         pin.setShutdownOptions(true, PinState.LOW);
@@ -49,8 +48,6 @@ public class PowerLedAgent extends NMEAAgentImpl {
             public void run() {
                 if ((System.currentTimeMillis()-lastGps) > 2000) {
                     powerGPSDown();
-                } else {
-                    //blinkGPS();
                 }
             }
         }, 0, 2000);

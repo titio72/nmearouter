@@ -45,14 +45,14 @@ public abstract class I2CSensor implements Sensor {
     private static final double LPF_ALPHA = 0.75;
     
     private static int instanceCounter;
-    private int instance; 
+    private final int instance;
     
     private long readTs;
 
     private double smootingAlpha;
 
     private static final int MAX_FAILURES = 5;
-    private int maxFailures;
+    private final int maxFailures;
     private int failures;
     
     private boolean initialized;
@@ -73,15 +73,15 @@ public abstract class I2CSensor implements Sensor {
     @Override
 	public final void init() throws IOException, UnsupportedBusNumberException {
         init(getBus());
-    };
-    
+    }
+
     public final void init(int bus) throws IOException, UnsupportedBusNumberException {
         log("Initializing bus {" + bus + "}");
         _init(bus);
         log("Initialized!");
         initialized = true;
-    };
-    
+    }
+
     protected abstract void _init(int bus) throws IOException, UnsupportedBusNumberException;
 
     /* (non-Javadoc)
@@ -90,10 +90,6 @@ public abstract class I2CSensor implements Sensor {
     @Override
 	public abstract String getSensorName();
 
-	public void resetFailures() {
-    	failures = 0;
-    }
-    
     protected final boolean isInitialized() {
         return initialized;
     }

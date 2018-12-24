@@ -5,7 +5,7 @@ import com.pi4j.wiringpi.GpioUtil;
 
 public class DHT11 {
     private static final int MAXTIMINGS = 85;
-    private int[] dht11_dat = { 0, 0, 0, 0, 0 };
+    private final int[] dht11_dat = { 0, 0, 0, 0, 0 };
     
     public DHT11() {
     
@@ -88,7 +88,7 @@ public class DHT11 {
     
     
     
-    public static void main (String ars[]) throws Exception {
+    public static void main (String[] ars) throws Exception {
     
         DHT11 dht = new DHT11();
     

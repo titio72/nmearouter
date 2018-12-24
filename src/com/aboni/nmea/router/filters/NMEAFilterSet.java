@@ -10,8 +10,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAFilterSet implements NMEASentenceFilterSet {
 	
-	private List<NMEASentenceFilter> filters;
-	private Set<NMEASentenceFilter> filters_s;
+	private final List<NMEASentenceFilter> filters;
+	private final Set<NMEASentenceFilter> filters_s;
 	
 	private boolean blackList;
 	
@@ -21,8 +21,8 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 	}
 	
 	public NMEAFilterSet(TYPE type) {
-		filters = new ArrayList<NMEASentenceFilter>();
-		filters_s = new HashSet<NMEASentenceFilter>();
+		filters = new ArrayList<>();
+		filters_s = new HashSet<>();
 		blackList = type==TYPE.BLACKLIST;
 	}
 	
@@ -39,9 +39,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 	}
 	
 	public void addFilter(NMEASentenceFilter f) {
-		if (filters_s.contains(f)) {
-			// do nothing... exists already
-		} else {
+		if (!filters_s.contains(f)) {
 			filters.add(f);
 			filters_s.add(f);
 		}
@@ -51,9 +49,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 		if (filters_s.contains(f)) {
 			filters.remove(f);
 			filters_s.remove(f);
-		} else {
-			// do nothing... does not exist
-		}		
+		}
 	}
 	
 	public Iterator<NMEASentenceFilter> getFilters() {

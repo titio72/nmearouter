@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.aboni.sensors.I2CInterface;
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 
+@SuppressWarnings("unused")
 public class ADS1115 {
 
     
@@ -100,7 +101,8 @@ public class ADS1115 {
             ADS1x15_REG_CONFIG_MUX_SINGLE_3
     };
 
-    protected static enum ProgrammableGainAmplifierValue{
+    @SuppressWarnings("unused")
+    protected enum ProgrammableGainAmplifierValue{
         PGA_6_144V(6.144,ADS1x15_REG_CONFIG_PGA_6_144V),  // +/-6.144V range
         PGA_4_096V(4.096,ADS1x15_REG_CONFIG_PGA_4_096V),  // +/-4.096V range
         PGA_2_048V(2.048,ADS1x15_REG_CONFIG_PGA_2_048V),  // +/-2.048V range
@@ -108,10 +110,10 @@ public class ADS1115 {
         PGA_0_512V(0.512,ADS1x15_REG_CONFIG_PGA_0_512V),  // +/-0.512V range
         PGA_0_256V(0.256,ADS1x15_REG_CONFIG_PGA_0_256V);   // +/-0.256V range     
         
-        private double voltage = 6.144;
-        private int configValue = ADS1x15_REG_CONFIG_PGA_6_144V;
+        private final double voltage;
+        private final int configValue;
         
-        private ProgrammableGainAmplifierValue(double voltage, int configValue){
+        ProgrammableGainAmplifierValue(double voltage, int configValue){
           this.voltage = voltage;
           this.configValue = configValue;
         }       
@@ -125,9 +127,9 @@ public class ADS1115 {
         }
     }
 
-    private ProgrammableGainAmplifierValue pga;
-    private double multiplier;
-    private I2CInterface device;
+    private final ProgrammableGainAmplifierValue pga;
+    private final double multiplier;
+    private final I2CInterface device;
     
     public ADS1115(I2CInterface device) {
         this(device, 1.0);
@@ -163,15 +165,14 @@ public class ADS1115 {
         writeRegister(device, ADS1x15_REG_POINTER_CONFIG, config);
 
         // Wait for the conversion to complete
-        try{ if(ADS1115_CONVERSIONDELAY > 0){ Thread.sleep(ADS1115_CONVERSIONDELAY); }
-        } catch (InterruptedException e) {}
-
-        // read the conversion results
-        int value = readRegister(device, ADS1x15_REG_POINTER_CONVERT);
-        
-        return value;
-        
-    };
+        try{ if(ADS1115_CONVERSIONDELAY > 0){
+            Thread.sleep(ADS1115_CONVERSIONDELAY); }
+            // read the conversion results
+            return readRegister(device, ADS1x15_REG_POINTER_CONVERT);
+        } catch (InterruptedException e) {
+            return Double.NaN;
+        }
+    }
 
     public double getVoltage0() throws IOException {
         return getVoltage(0);
@@ -192,8 +193,7 @@ public class ADS1115 {
     public double getVoltage(int pin) throws IOException {
         double v = getImmediateValue(pin);
         double p =  ((v * 100) / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE);
-        double volt = ProgrammableGainAmplifierValue.PGA_4_096V.getVoltage() * (p/100) * multiplier;
-        return volt;
+        return ProgrammableGainAmplifierValue.PGA_4_096V.getVoltage() * (p/100) * multiplier;
     }
 
     /**
@@ -206,7 +206,7 @@ public class ADS1115 {
     static void writeRegister(I2CInterface device, int register, int value) throws IOException {
       
         // create packet in data buffer
-        byte packet[] = new byte[3];
+        byte[] packet = new byte[3];
         packet[0] = (byte)(register);     // register byte
         packet[1] = (byte)(value>>8);     // value MSB 
         packet[2] = (byte)(value & 0xFF); // value LSB 
@@ -218,15 +218,13 @@ public class ADS1115 {
     static int readRegister(I2CInterface device, int register) throws IOException {
         device.write((byte)register);
         // create data buffer for receive data
-        byte buffer[] = new byte[2];  // receive 16 bits (2 bytes)
-        int byteCount = 0;
-        byteCount = device.read(buffer, 0, 2);
+        byte[] buffer = new byte[2];  // receive 16 bits (2 bytes)
+        int byteCount = device.read(buffer, 0, 2);
         if(byteCount == 2){
             //System.out.println("-----------------------------------------------");
             //System.out.println("[RX] " + bytesToHex(buffer));
             //System.out.println("-----------------------------------------------");            
-            short value = getShort(buffer, 0);
-            return value;  
+            return getShort(buffer, 0);
         }
         else{
             return 0;

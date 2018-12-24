@@ -12,14 +12,14 @@ import net.sf.marineapi.nmea.sentence.Sentence;
  */
 public class NMEARMCFilter implements NMEAPostProcess {
 	
-    private NMEAPositionFilter filter;
+    private final NMEAPositionFilter filter;
     
 	public NMEARMCFilter() {
 		filter = new NMEAPositionFilter();
 	}
 
-	private static Pair<Boolean, Sentence[]> OK = new Pair<>(true, null);
-	private static Pair<Boolean, Sentence[]> KO = new Pair<>(false, null);
+	private static final Pair<Boolean, Sentence[]> OK = new Pair<>(true, null);
+	private static final Pair<Boolean, Sentence[]> KO = new Pair<>(false, null);
 	
 	@Override
 	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {

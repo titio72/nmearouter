@@ -2,6 +2,7 @@ package com.aboni.geo;
 
 import com.aboni.misc.Utils;
 
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.MWDSentence;
@@ -14,7 +15,7 @@ public class NMEAMWDConverter {
 	private HDGSentence heading;
 	private MWVSentence trueWind;
 	long tsHeading, tsWind;
-	private TalkerId id;
+	private final TalkerId id;
 	private static final int THRESHOLD = 300 /*ms*/;
 	
 	public NMEAMWDConverter(TalkerId id) {
@@ -27,14 +28,17 @@ public class NMEAMWDConverter {
 	
     private static double getTrueHeading(HDGSentence h) {
 		double dev = 0.0, var = 0.0;
-		try { dev = h.getDeviation(); } catch (Exception e) {}
-		try { var = h.getVariation(); } catch (Exception e) {}
+		//noinspection CatchMayIgnoreException
+		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) {}
+		//noinspection CatchMayIgnoreException
+		try { var = h.getVariation(); } catch (DataNotAvailableException e) {}
 		return h.getHeading() + var + dev;
     }
 	
     private static double getMagHeading(HDGSentence h) {
 		double dev = 0.0;
-		try { dev = h.getDeviation(); } catch (Exception e) {}
+		//noinspection CatchMayIgnoreException
+		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) {}
 		return h.getHeading() + dev;
     }
     

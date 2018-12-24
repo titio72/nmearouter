@@ -1,6 +1,5 @@
 package com.aboni.geo;
 
-import java.io.IOException;
 import java.io.Writer;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
@@ -12,7 +11,7 @@ public class Track2KML implements TrackDumper {
 
 	public class PointWriter implements DoWithPoint {
 
-		LineString theWriter;
+		final LineString theWriter;
 		
 		PointWriter(LineString w) {
 			theWriter = w;
@@ -20,17 +19,13 @@ public class Track2KML implements TrackDumper {
 		
 		@Override
 		public void doWithPoint(GeoPositionT p) {
-			try {
-				handlePoint(p, theWriter);
-			} catch (IOException e) {
-				// ??????
-			}
+			handlePoint(p, theWriter);
 		}
 
 	}
 
 	private PositionHistory track;
-	private Kml kml;
+	private final Kml kml;
 	
 	public Track2KML() {
 	    kml = new Kml();
@@ -45,7 +40,7 @@ public class Track2KML implements TrackDumper {
 		this.track = track;
 	}
 
-	public void dump(Writer w) throws IOException {
+	public void dump(Writer w) {
 		if (track!=null) {
 		    LineString s = createString();
 			writePoints(s);
@@ -58,21 +53,20 @@ public class Track2KML implements TrackDumper {
 		
 	}
 	
-	private static boolean TRACK_THEM_ALL = true;
+	private static final boolean TRACK_THEM_ALL = true;
 	
-	private void handlePoint(GeoPositionT p, LineString pk) throws IOException {
+	private void handlePoint(GeoPositionT p, LineString pk) {
 		if (TRACK_THEM_ALL ) {
     	    writePoint(p, pk);
 		}
 	}
 
-    private void writePoint(GeoPositionT p, LineString pk) throws IOException {
+    private void writePoint(GeoPositionT p, LineString pk) {
         pk.addToCoordinates(p.getLatitude(), p.getLongitude());
     }
 
-	private LineString createString() throws IOException {
-	    LineString pmk = kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();
-	    return pmk;
+	private LineString createString() {
+		return kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();
 	}
 
 	@Override

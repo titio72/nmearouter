@@ -1,9 +1,6 @@
 package com.aboni.nmea.router.services.impl;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,7 +15,7 @@ import com.aboni.nmea.router.services.WebServiceFactory;
 public class WebInterfaceImpl extends AbstractHandler
 {
     
-	private WebServiceFactory factory;
+	private final WebServiceFactory factory;
 	
 	@Inject
     public WebInterfaceImpl(WebServiceFactory factory) {
@@ -32,9 +29,7 @@ public class WebInterfaceImpl extends AbstractHandler
     public void handle(String target,
                        Request baseRequest,
                        HttpServletRequest request,
-                       HttpServletResponse response) 
-        throws IOException, ServletException
-    {
+                       HttpServletResponse response) {
     	WebService s = getService(target);
     	if (s!=null) {
         	s.doIt(new ServletRequestServiceConfig(request), 

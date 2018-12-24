@@ -8,6 +8,7 @@ import java.util.TimeZone;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.aboni.misc.Utils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,15 +33,15 @@ import net.sf.marineapi.nmea.util.FaaMode;
 
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
-	private SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private Document d;
 	private GeoPositionT prevPos;
 	private long t0Play;
 	private long t0;
-	private String file;
+	private final String file;
 	private boolean stop;
 	
-	public NMEAGPXPlayerAgent(NMEACache cache, String name, String file, QOS q) throws Exception {
+	public NMEAGPXPlayerAgent(NMEACache cache, String name, String file, QOS q) {
 		super(cache, name, q);
 		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 		this.file = file;
@@ -78,32 +79,30 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 			return false;
 		}
 	
-		Thread t = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Element gpx = d.getDocumentElement();
-				NodeList tracks = gpx.getElementsByTagName("trk");
-				Element track = (Element)tracks.item(0);
-				NodeList segments = track.getElementsByTagName("trkseg");
-				for (int i = 0; i<segments.getLength(); i++) {
-					if (isStop()) break;
-					Element segment = (Element)segments.item(i);
-					NodeList points = segment.getElementsByTagName("trkpt");
-					for (int j = 1; j<points.getLength(); j++) {
-						try {
-							Element p = (Element)points.item(j);
-							Node t = p.getElementsByTagName("time").item(0);
-							String sTime = t.getTextContent();
-							Date d = fmt.parse(sTime);
-							GeoPositionT pos = new GeoPositionT(d.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
-							doIt(pos);
-						} catch (Exception e) {}
+		Thread t = new Thread(() -> {
+			Element gpx = d.getDocumentElement();
+			NodeList tracks = gpx.getElementsByTagName("trk");
+			Element track = (Element)tracks.item(0);
+			NodeList segments = track.getElementsByTagName("trkseg");
+			for (int i = 0; i<segments.getLength(); i++) {
+				if (isStop()) break;
+				Element segment = (Element)segments.item(i);
+				NodeList points = segment.getElementsByTagName("trkpt");
+				for (int j = 1; j<points.getLength(); j++) {
+					try {
+						Element p = (Element)points.item(j);
+						Node t1 = p.getElementsByTagName("time").item(0);
+						String sTime = t1.getTextContent();
+						Date d = fmt.parse(sTime);
+						GeoPositionT pos = new GeoPositionT(d.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
+						doIt(pos);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
-				if (!isStop()) {
-					stop();
-				}
+			}
+			if (!isStop()) {
+				stop();
 			}
 		});
 		t.setDaemon(true);
@@ -127,7 +126,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 		if (prevPos!=null) {
 			long dt = pos.getTimestamp() - t0Play;
 			long elapsed = System.currentTimeMillis() - t0;
-			try { Thread.sleep(dt - elapsed); } catch (Exception e) {}
+			Utils.pause((int)(dt - elapsed));
 			Course c = new Course(prevPos, pos);
 			RMCSentence s = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
 			s.setCourse(c.getCOG());

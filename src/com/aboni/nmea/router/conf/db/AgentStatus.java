@@ -2,7 +2,7 @@ package com.aboni.nmea.router.conf.db;
 
 public interface AgentStatus {
 
-	public enum STATUS {
+	enum STATUS {
 		AUTO,
 		MANUAL,
 		UNKNOWN

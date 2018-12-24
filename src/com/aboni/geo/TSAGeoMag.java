@@ -222,6 +222,7 @@ import com.aboni.utils.Constants;
  *                              FAX: (303) 273-8600<br>
  *                     EMAIL:   quinn@ghtmail.cr.usgs.gov<br>
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class TSAGeoMag
 {
     
@@ -236,7 +237,7 @@ public class TSAGeoMag
      *   In the TSAGeoMag Class, the columns in this file are as follows:
      *   n, m,      gnm,      hnm,       dgnm,      dhnm
      */
-    private String [] input = 
+    private final String [] input =
     {       "    2015.0            WMM-2015        12/15/2014",
 	    "  1  0  -29438.5       0.0       10.7        0.0",
 	    "  1  1   -1501.1    4796.2       17.9      -26.8",
@@ -371,15 +372,9 @@ public class TSAGeoMag
     private double ti = 0;
     
     /**
-     *	Geomagnetic grid variation, referenced to
-     *	grid North.  Not calculated or output in version 5.0.
-     */
-    //private double gv = 0;
-    
-    /**
      *	The maximum number of degrees of the spherical harmonic model.
      */
-    private int maxdeg = 12;
+    private final int maxdeg = 12;
     
     /**
      *	The maximum order of spherical harmonic model.
@@ -397,50 +392,50 @@ public class TSAGeoMag
      * 	altitude is used by default.
      */
     private final double defaultAltitude = 0;
-    
+
     /**
-     *	The Gauss coefficients of main geomagnetic model (nt).
+     * The Gauss coefficients of main geomagnetic model (nt).
      */
-    private double c[][] = new double[13][13];
-    
+    private final double[][] c = new double[13][13];
+
     /**
-     *	The Gauss coefficients of secular geomagnetic model (nt/yr).
+     * The Gauss coefficients of secular geomagnetic model (nt/yr).
      */
-    private double cd[][] = new double[13][13];
-    
+    private final double[][] cd = new double[13][13];
+
     /**
-     *	The time adjusted geomagnetic gauss coefficients (nt).
+     * The time adjusted geomagnetic gauss coefficients (nt).
      */
-    private double tc[][] = new double[13][13];
-    
+    private final double[][] tc = new double[13][13];
+
     /**
-     *	The theta derivative of p(n,m) (unnormalized).
+     * The theta derivative of p(n,m) (unnormalized).
      */
-    private double dp[][] = new double[13][13];
-    
+    private final double[][] dp = new double[13][13];
+
     /**
-     *	The Schmidt normalization factors.
+     * The Schmidt normalization factors.
      */
-    private double snorm[] = new double[169];
-    
+    private final double[] snorm = new double[169];
+
     /**
-     *	The sine of (m*spherical coord. longitude).
+     * The sine of (m*spherical coord. longitude).
      */
-    private double sp[] = new double[13];
-    
+    private final double[] sp = new double[13];
+
     /**
-     *	The cosine of (m*spherical coord. longitude).
+     * The cosine of (m*spherical coord. longitude).
      */
-    private double cp[] = new double[13];
-    private double fn[] = new double[13];
-    private double fm[] = new double[13];
-    
+    private final double[] cp = new double[13];
+    private final double[] fn = new double[13];
+    private final double[] fm = new double[13];
+
     /**
-     *	The associated Legendre polynomials for m=1 (unnormalized).
+     * The associated Legendre polynomials for m=1 (unnormalized).
      */
-    private double pp[] = new double[13];
-    
-    private double k[][] = new double[13][13];
+    private final double[] pp = new double[13];
+
+    private final double[][] k = new double[13][13];
     
     /**
      * The variables otime (old time), oalt (old altitude),
@@ -467,7 +462,7 @@ public class TSAGeoMag
     //
     ////////////////////////////////////////////////////////////////////////////
     
-    private Logger logger;
+    private final Logger logger;
     
     /**
      *	Instantiates object by calling initModel().
@@ -512,15 +507,15 @@ public class TSAGeoMag
         sp[0] = 0.0;
         cp[0] = snorm[0] = pp[0] = 1.0;
         dp[0][0] = 0.0;
-        /**
+        /*
          *	Semi-major axis of WGS-84 ellipsoid, in km.
          */
         double a = 6378.137;
-        /**
+        /*
          *	Semi-minor axis of WGS-84 ellipsoid, in km.
          */
         double b = 6356.7523142;
-        /**
+        /*
          *	Mean radius of IAU-66 ellipsoid, in km.
          */
         re = 6371.2;
@@ -757,7 +752,7 @@ public class TSAGeoMag
         glat =  fLat;
         glon =  fLon;
         alt = altitude;
-        /**
+        /*
          *	The date in decimal years for calculating the magnetic field components.
          */
         time = year;

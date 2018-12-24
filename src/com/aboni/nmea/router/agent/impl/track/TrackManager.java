@@ -14,10 +14,10 @@ public class TrackManager {
 	private GeoPositionT lastTrackedPoint;
 	private final StationaryManager stationaryStatus;
 	private final PositionStats stats;
-	private static boolean STATS = true;
+	private static final boolean STATS = true;
 	
-	private static int SECOND = 1000;
-	private static int MINUTE = 60 * SECOND;
+	private static final int SECOND = 1000;
+	private static final int MINUTE = 60 * SECOND;
 	
 	public static final long STATIC_DEFAULT_PERIOD = 10 * MINUTE;
 	public static final long DEFAULT_PERIOD = 30 * SECOND;
@@ -70,7 +70,7 @@ public class TrackManager {
        	return dt >= checkperiod;
     }
     
-    public TrackPoint processPosition(GeoPositionT p, double sog) throws Exception {
+    public TrackPoint processPosition(GeoPositionT p, double sog) {
 
     	if (STATS) stats.addPosition(p);
     	

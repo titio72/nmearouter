@@ -13,10 +13,10 @@ public class SensorVoltage extends I2CSensor {
     private static final double MULTIPLIER = 5.0;
 
     private ADS1115 ads;
-    private double[] v = new double[4];
+    private final double[] v = new double[4];
     private int address;
     private double smoothing = 0.75; 
-    private double[] adj = new double[] { 1, 1, 1, 1 };
+    private final double[] adj = new double[] { 1, 1, 1, 1 };
     
     public SensorVoltage(int address) {
         ads = null;

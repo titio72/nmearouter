@@ -23,7 +23,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEASocketServer extends NMEAAgentImpl {
 
-	private int port;
+	private final int port;
 	private Selector selector;
 	private ServerSocketChannel serverSocket;
 	private static final int DEFAULT_PORT = 1111;
@@ -87,36 +87,31 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	}
 
 	private boolean isSelectorOpen() {
-		synchronized (selector) {
-			return selector.isOpen();
-		}
+		return selector.isOpen();
 	}
 	
 	private void startServer() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-		        if (selector!=null && serverSocket!=null) {
-		        	while (isSelectorOpen()) {
-		        		try {
-							selector.select();
-						} catch (IOException e) {
-	                		getLogger().Error("Unexpected exception", e);
+		Thread t = new Thread(() -> {
+			if (selector!=null && serverSocket!=null) {
+				while (isSelectorOpen()) {
+					try {
+						selector.select();
+					} catch (IOException e) {
+						getLogger().Error("Unexpected exception", e);
+					}
+					Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+					while (iter.hasNext()) {
+						SelectionKey ky = iter.next();
+						if (ky.isValid()) {
+							if (ky.isAcceptable()) {
+								handleConnection();
+							} else if (ky.isReadable()) {
+								handleRead(ky);
+							}
 						}
-			            Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
-			            while (iter.hasNext()) {
-			                SelectionKey ky = iter.next();
-			                if (ky.isValid()) {
-				                if (ky.isAcceptable()) {
-				                	handleConnection();
-				                } else if (ky.isReadable()) {
-				                	handleRead(ky);
-				                }
-			                }
-			                iter.remove();
-			            }
-	        		}
-		        }
+						iter.remove();
+					}
+				}
 			}
 		});
 		t.setDaemon(true);
@@ -175,11 +170,24 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	protected void onDeactivate() {
 		synchronized (clients) {
 			for (SocketChannel c: clients.keySet()) {
-				try {c.close();} catch (Exception e) {}
+				try {
+					c.close();
+				} catch (Exception e) {
+					getLogger().Error("Error trying to close socket with client", e);
+				}
 			}
 			clients.clear();
-			try {serverSocket.close();} catch (Exception e) {}
-			try {selector.close();} catch (Exception e) {}
+			try {
+				serverSocket.close();
+			} catch (Exception e) {
+				getLogger().Error("Error trying to close server socket", e);
+			}
+			try {
+				selector.close();
+			} catch (Exception e)
+			{
+				getLogger().Error("Error trying to close selector", e);
+			}
 		}
 	}
 	
@@ -224,7 +232,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "
 						+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
 				sc.close(); 
-			} catch (IOException e1) {}
+			} catch (IOException e1) {
+				ServerLog.getLogger().Error("Error closing socket with client", e1);
+			}
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Error sending {" + output + "} to client", e);
 		}

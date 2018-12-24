@@ -2,40 +2,36 @@ package com.aboni.nmea.router.services;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class SpeedAnalyticsService implements WebService {
+public class SpeedAnalyticsService extends JSONWebService {
 
-	private static final String APPLICATION_JSON = "application/json";
-	private DBHelper db;
-	
-	public SpeedAnalyticsService() {
-	}
+	private static final String sql = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
+	private static final double SPEED_BUCKET = 0.5;
+	private static final double SPEED_MIN =  0.0;
+	private static final double SPEED_MAX = 12.0;
 
-	private double SPEED_BUCKET = 0.5;
-	private double SPEED_MIN =  0.0;
-	private double SPEED_MAX = 12.0;
-	
 	private class Stat {
 		long time = 0L;
 		double distance = 0.0;
 	}
-	
+
+	public SpeedAnalyticsService() {
+	}
+
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
-
-		Map<Double, Stat> distr = new TreeMap<>();
-		String sql = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
+	public JSONObject getResult(ServiceConfig config, final DBHelper db) {
         try {
-			response.setContentType(APPLICATION_JSON);
+			Map<Double, Stat> distr = new TreeMap<>();
 
-			db = new DBHelper(true);
-            
 	        DateRangeParameter fromTo = new DateRangeParameter(config);
 	        Calendar cFrom = fromTo.getFrom();
 	        Calendar cTo = fromTo.getTo();
@@ -51,40 +47,28 @@ public class SpeedAnalyticsService implements WebService {
 				Stat s = new Stat();
 				if (rs.next()) {
 					long t = rs.getLong(1);
-					double d = rs.getDouble(2);
-					s.distance = d;
+					s.distance = rs.getDouble(2);
 					s.time = t;
 				}
 				distr.put(speed, s);
 			}
-
-			Iterator<Map.Entry<Double, Stat>> i = distr.entrySet().iterator();
-
-            boolean first = true;
-            response.getWriter().write("{\"serie\":[");
-	        while (i.hasNext()) {
-		        if (!first) {
-	                response.getWriter().write(",");
-	        	}
-				Map.Entry<Double, Stat> e = i.next();
-	            response.getWriter().write("{\"speed\":" + e.getKey() + ",");
-	            response.getWriter().write("\"time\":" + e.getValue().time + ",");
-	            response.getWriter().write("\"distance\":" + e.getValue().distance + "}");
-	            first = false;
-	        }
-            response.getWriter().write("]}");
-           
-            
-		} catch (Exception e) {
-            response.setContentType("text/html;charset=utf-8");
-            try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
-            response.error(e.getMessage());			
-		} finally {
-			try {
-				db.close();
-			} catch (Exception e2) {}
-		}
-		
+			JSONObject res = new JSONObject();
+			JSONArray serie = new JSONArray();
+			for (Map.Entry<Double, Stat> entry: distr.entrySet()) {
+				JSONObject e = new JSONObject();
+				e.put("speed", entry.getKey());
+				e.put("time", entry.getValue().time);
+				e.put("distance", entry.getValue().distance);
+				serie.put(e);
+			}
+			res.put("serie", serie);
+			return res;
+		} catch (SQLException e) {
+			ServerLog.getLogger().Error("Error reading speeds serie", e);
+			JSONObject res = new JSONObject();
+			res.put("error", "Error reading speed serie. Check the logs.");
+			return res;
+        }
 	}
 
 	

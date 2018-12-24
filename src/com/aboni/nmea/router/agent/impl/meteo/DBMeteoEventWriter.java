@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.Event;
 import com.aboni.utils.db.EventWriter;
 
@@ -25,7 +26,9 @@ public class DBMeteoEventWriter implements EventWriter {
 	public void reset() {
 		try {
 			stm.close();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			ServerLog.getLogger().Error("Error closing statement in " + getClass().getSimpleName(), e);
+		}
 		stm = null;
 	}
 	

@@ -6,19 +6,21 @@ import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorMPU6050 extends I2CSensor {
-    
+
+    @SuppressWarnings("unused")
     public static class AccelScale {
-        public static double ACCEL_SCALE_2g  = 16384.0;
-        public static double ACCEL_SCALE_4g  =  8092.0;
-        public static double ACCEL_SCALE_8g  =  4096.0;
-        public static double ACCEL_SCALE_16g =  2048.0;
+        public static final double ACCEL_SCALE_2g  = 16384.0;
+        public static final double ACCEL_SCALE_4g  =  8092.0;
+        public static final double ACCEL_SCALE_8g  =  4096.0;
+        public static final double ACCEL_SCALE_16g =  2048.0;
     }
-    
+
+    @SuppressWarnings("unused")
     public static class GyroScale {
-        public static double GYRO_SCALE_250  = 131.0;
-        public static double GYRO_SCALE_500  =  65.5;
-        public static double GYRO_SCALE_1000 =  32.8;
-        public static double GYRO_SCALE_2000 =  16.4;
+        public static final double GYRO_SCALE_250  = 131.0;
+        public static final double GYRO_SCALE_500  =  65.5;
+        public static final double GYRO_SCALE_1000 =  32.8;
+        public static final double GYRO_SCALE_2000 =  16.4;
     }
    
     private static final int  MPU6050_I2CADDR = 0x68;
@@ -38,8 +40,8 @@ public class SensorMPU6050 extends I2CSensor {
     private static final int Y = 1;
     private static final int Z = 2;
     
-    private double gyroScale = GyroScale.GYRO_SCALE_250;
-    private double accellScale = AccelScale.ACCEL_SCALE_2g;
+    private static final double gyroScale = GyroScale.GYRO_SCALE_250;
+    private static final double accellScale = AccelScale.ACCEL_SCALE_2g;
     
     private double[] scaledAccel;
     private double[] scaledGyro;
@@ -59,49 +61,49 @@ public class SensorMPU6050 extends I2CSensor {
 
     }
    
-    void _readA() throws IOException {
+    private void _readA() throws IOException {
         int a_x = device.readWord(0x3b);
         int a_y = device.readWord(0x3d);
         int a_z = device.readWord(0x3f);
-        double[] scaledAccel1 = new double[] {
+        double[] scaledAccel_1 = new double[] {
                 (double)a_x / accellScale,
                 (double)a_y / accellScale,
                 (double)a_z / accellScale
         };
 
         if (scaledAccel==null) {
-            scaledAccel = scaledAccel1;
+            scaledAccel = scaledAccel_1;
         } else {
             scaledAccel = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[X], scaledAccel1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Z], scaledAccel1[Z])
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[X], scaledAccel_1[X]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Y], scaledAccel_1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Z], scaledAccel_1[Z])
             };
         }
     }
 
-    void _readG() throws IOException {
+    private void _readG() throws IOException {
         int g_x = device.readWord(0x43);
         int g_y = device.readWord(0x45);
         int g_z = device.readWord(0x47);
-        double[] scaledGyro1 = new double[] {
+        double[] scaledGyro_1 = new double[] {
                 (double)g_x / gyroScale,
                 (double)g_y / gyroScale,
                 (double)g_z / gyroScale
         };
         if (scaledGyro==null) {
-            scaledGyro = scaledGyro1;
+            scaledGyro = scaledGyro_1;
         } else {
             scaledGyro = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[X], scaledGyro1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Z], scaledGyro1[Z])
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[X], scaledGyro_1[X]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Y], scaledGyro_1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Z], scaledGyro_1[Z])
             };
         }
     }
     
     @Override
-    protected void _read() throws Exception {
+    protected void _read() throws IOException {
         _readA();
         _readG();
     }
@@ -123,10 +125,12 @@ public class SensorMPU6050 extends I2CSensor {
         }
     }
     
+    @SuppressWarnings("unused")
     public double[] readRawGyro() {
         return scaledGyro;
     }
-    
+
+    @SuppressWarnings("unused")
     public double[] readGyro() throws SensorNotInititalizedException {
         if (isInitialized()) {
             double g_x_scaled = scaledGyro[X];
@@ -139,7 +143,8 @@ public class SensorMPU6050 extends I2CSensor {
             throw new SensorNotInititalizedException("Error reading gyro: sensor not initialized");
         }
     }
-    
+
+    @SuppressWarnings("unused")
     public double[] readAccelDegrees() throws SensorNotInititalizedException {
         double[] r = readAccel();
         return new double[] {
@@ -148,19 +153,23 @@ public class SensorMPU6050 extends I2CSensor {
                 Math.toDegrees(r[Z])
         };
     }
-    
+
+    @SuppressWarnings("unused")
     public double getPitch() throws SensorNotInititalizedException {
         return readAccel()[X];
     }
-    
+
+    @SuppressWarnings("unused")
     public double getRoll() throws SensorNotInititalizedException {
         return readAccel()[Y];
     }
 
+    @SuppressWarnings("unused")
     public double getPitchDegrees() throws SensorNotInititalizedException {
         return Math.toDegrees(readAccel()[X]);
     }
-    
+
+    @SuppressWarnings("unused")
     public double getRollDegrees() throws SensorNotInititalizedException {
         return Math.toDegrees(readAccel()[Y]);
     }

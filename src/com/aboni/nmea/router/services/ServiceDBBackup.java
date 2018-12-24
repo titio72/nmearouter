@@ -9,28 +9,22 @@ public class ServiceDBBackup implements WebService {
 
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
-    	DBHelper h = null;
-	    try {
-	    	h = new DBHelper(true);
-	    	String file = h.backup();
+        try (DBHelper h = new DBHelper(true)) {
+            String file = h.backup();
             ServerLog.getLogger().Info("DB Backup Return {" + file + "}");
             response.setContentType("application/json");
             JSONObject res = new JSONObject();
-            if (file!=null) {
+            if (file != null) {
                 res.put("result", "Ok");
-            	res.put("file", file + ".tgz");
+                res.put("file", file + ".tgz");
             } else {
                 res.put("result", "Ko");
-            	res.put("error", "");
+                res.put("error", "");
             }
             response.getWriter().print(res.toString());
             response.ok();
         } catch (Exception e) {
             ServerLog.getLogger().Error("Error during db backup", e);
-        } finally {
-        	if (h!=null) {
-				h.close();
-        	}
         }
 	}
 }

@@ -1,15 +1,17 @@
 package com.aboni.sensors;
 
+import com.aboni.misc.Utils;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class CompassCalibration {
 
-    private SensorHMC5883 sensor;
-    private long timeThreshold;
+    private final SensorHMC5883 sensor;
+    private final long timeThreshold;
     private double avgRadius;
-    private static final long INTERVAL = 50;
+    private static final int INTERVAL = 50;
     
     public CompassCalibration(SensorHMC5883 sensor, long timeout) {
         this.sensor = sensor;
@@ -61,8 +63,8 @@ public class CompassCalibration {
         }
         
         double r_sdev = 0.0;
-        for (int i = 0; i<r2s.length; i++) {
-            r_sdev += Math.pow(r2s[i] - r_avg, 2);
+        for (double r2 : r2s) {
+            r_sdev += Math.pow(r2 - r_avg, 2);
         }
         r_sdev = Math.sqrt(r_sdev / r2s.length);
         
@@ -88,7 +90,7 @@ public class CompassCalibration {
 
     private List<double[]> collect() throws SensorNotInititalizedException {
         if (sensor.isInitialized()) {
-            List<double[]> samples = new LinkedList<double[]>();
+            List<double[]> samples = new LinkedList<>();
             long t0 = System.currentTimeMillis();
             while ((System.currentTimeMillis() - t0) < timeThreshold) {
                 try {
@@ -98,7 +100,7 @@ public class CompassCalibration {
                 }
                 double[] d = sensor.getMagVector();
                 samples.add(d);
-                try { Thread.sleep(INTERVAL); } catch (InterruptedException e) {}
+                Utils.pause(INTERVAL);
             }
             return samples;
         } else {

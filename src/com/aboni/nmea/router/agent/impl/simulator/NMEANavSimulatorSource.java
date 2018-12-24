@@ -42,7 +42,7 @@ public class NMEANavSimulatorSource extends NMEAAgentImpl {
 
 	public static NMEANavSimulatorSource SIMULATOR;
 	
-	private NavSimulator sim = new NavSimulator();
+	private final NavSimulator sim = new NavSimulator();
 
 	public NMEANavSimulatorSource(NMEACache cache, String name) {
 		this(cache, name, null);
@@ -110,126 +110,122 @@ public class NMEANavSimulatorSource extends NMEAAgentImpl {
     }
     
 	private void doSimulate() {
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				TalkerId id = TalkerId.GP;
-				Random r = new Random();
-				
-				Position pos = new Position(43.9599, 09.7745);
-				
-				while (isStarted()) {
-					try {
-						Thread.sleep(1000);
-						
-						sim.doCalc(System.currentTimeMillis());
-						
-						double heading = sim.getHeading();
-						double speed = sim.getSpeed();
+		new Thread(() -> {
+			TalkerId id = TalkerId.GP;
+			Random r = new Random();
 
-						//double absoluteWindSpeed = sim.getWindSpeed(); 
-						//double absoluteWindDir = sim.getWindDir(); 
-						
-						double tWSpeed = 		sim.getWindTrueSpeed();
-						double tWDirection = 	sim.getWindTrue();
+			Position pos = new Position(43.9599, 09.7745);
 
-						double aWSpeed = 		sim.getWindAppSpeed();
-						double aWDirection = 	sim.getWindApp();
-						
-                        double roll = round(new Random().nextDouble()*5, 1);
-                        double pitch = round((new Random().nextDouble()*5) + 0, 1);
+			while (isStarted()) {
+				try {
+					Thread.sleep(1000);
 
-						VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
-                        s.setHeading(heading);
-                        s.setMagneticHeading(Utils.normalizeDegrees0_360(heading + r.nextDouble() * 1.5));
-						s.setSpeedKnots(speed);
-						s.setSpeedKmh(speed * 1.852);
-						NMEANavSimulatorSource.this.notify(s);
-						
-						GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(id, SentenceId.GLL);
-						s1.setPosition(pos);
-						s1.setStatus(DataStatus.ACTIVE);
-						s1.setTime(new Time());
-						NMEANavSimulatorSource.this.notify(s1);
-						
-						RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(id, SentenceId.RMC);
-						rmc.setCourse(heading);
+					sim.doCalc(System.currentTimeMillis());
 
-						rmc.setStatus(DataStatus.ACTIVE);
+					double heading = sim.getHeading();
+					double speed = sim.getSpeed();
 
-						Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-						Date ddd = new Date();
-						ddd.setDay(c.get(Calendar.DAY_OF_MONTH));
-                        ddd.setMonth(c.get(Calendar.MONTH)+1);
-                        ddd.setYear(c.get(Calendar.YEAR));
-                        rmc.setDate(ddd);
-						Time ttt = new Time();
-                        ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
-                        ttt.setMinutes(c.get(Calendar.MINUTE));
-                        ttt.setSeconds(c.get(Calendar.SECOND));
-						rmc.setTime(ttt);
+					//double absoluteWindSpeed = sim.getWindSpeed();
+					//double absoluteWindDir = sim.getWindDir();
 
-						rmc.setVariation(0.0); 
-						rmc.setMode(FaaMode.SIMULATED);
-						rmc.setDirectionOfVariation(CompassPoint.WEST);
-						rmc.setSpeed(speed);
-						rmc.setPosition(pos);
-						NMEANavSimulatorSource.this.notify(rmc);
+					double tWSpeed = 		sim.getWindTrueSpeed();
+					double tWDirection = 	sim.getWindTrue();
 
-                        MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
-                        v.setSpeedUnit(Units.KNOT);
-                        v.setAngle(aWDirection);
-                        v.setSpeed(aWSpeed);
-                        v.setTrue(false);
-                        NMEANavSimulatorSource.this.notify(v);
-                        
-                        MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
-                        vt.setSpeedUnit(Units.KNOT);
-                        vt.setAngle(tWDirection);
-                        vt.setSpeed(tWSpeed);
-                        vt.setTrue(true);
-                        NMEANavSimulatorSource.this.notify(vt);
-                        
-                        VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(id, "VWR");
-                        vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
-                        vwr.setSpeed(aWSpeed);
-                        vwr.setSide(Side.PORT);
-                        vwr.setStatus(DataStatus.ACTIVE);
-                        NMEANavSimulatorSource.this.notify(vwr);
-                        
-                        HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDM);
-                        hdm.setHeading(heading);
-                        NMEANavSimulatorSource.this.notify(hdm);
-                        
-                        HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDT);
-                        hdt.setHeading(heading);
-                        NMEANavSimulatorSource.this.notify(hdt);
-                        
-                        HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
-                        hdg.setHeading(heading);
-                        //hdg.setDeviation(0.0);
-                        NMEANavSimulatorSource.this.notify(hdg);
-                        
-                        VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VTG);
-                        vtg.setMagneticCourse(heading);
-                        vtg.setTrueCourse(heading);
-                        vtg.setMode(FaaMode.AUTOMATIC);
-                        vtg.setSpeedKnots(speed);
-                        vtg.setSpeedKmh(speed * 1.852);
-                        NMEANavSimulatorSource.this.notify(vtg);
-                        
-                        XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());                        xdr.addMeasurement(new Measurement("A", heading, "D", "HEAD"));
-                        xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
-                        xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
-                        NMEANavSimulatorSource.this.notify(xdr);
-					} catch (InterruptedException e) {
-						ServerLog.getLogger().Error("Error simulating", e);
-						e.printStackTrace();
-					}
+					double aWSpeed = 		sim.getWindAppSpeed();
+					double aWDirection = 	sim.getWindApp();
+
+double roll = round(new Random().nextDouble()*5, 1);
+double pitch = round((new Random().nextDouble()*5) + 0, 1);
+
+					VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VHW);
+s.setHeading(heading);
+s.setMagneticHeading(Utils.normalizeDegrees0_360(heading + r.nextDouble() * 1.5));
+					s.setSpeedKnots(speed);
+					s.setSpeedKmh(speed * 1.852);
+					NMEANavSimulatorSource.this.notify(s);
+
+					GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(id, SentenceId.GLL);
+					s1.setPosition(pos);
+					s1.setStatus(DataStatus.ACTIVE);
+					s1.setTime(new Time());
+					NMEANavSimulatorSource.this.notify(s1);
+
+					RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(id, SentenceId.RMC);
+					rmc.setCourse(heading);
+
+					rmc.setStatus(DataStatus.ACTIVE);
+
+					Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+					Date ddd = new Date();
+					ddd.setDay(c.get(Calendar.DAY_OF_MONTH));
+ddd.setMonth(c.get(Calendar.MONTH)+1);
+ddd.setYear(c.get(Calendar.YEAR));
+rmc.setDate(ddd);
+					Time ttt = new Time();
+ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
+ttt.setMinutes(c.get(Calendar.MINUTE));
+ttt.setSeconds(c.get(Calendar.SECOND));
+					rmc.setTime(ttt);
+
+					rmc.setVariation(0.0);
+					rmc.setMode(FaaMode.SIMULATED);
+					rmc.setDirectionOfVariation(CompassPoint.WEST);
+					rmc.setSpeed(speed);
+					rmc.setPosition(pos);
+					NMEANavSimulatorSource.this.notify(rmc);
+
+MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
+v.setSpeedUnit(Units.KNOT);
+v.setAngle(aWDirection);
+v.setSpeed(aWSpeed);
+v.setTrue(false);
+NMEANavSimulatorSource.this.notify(v);
+
+MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWV);
+vt.setSpeedUnit(Units.KNOT);
+vt.setAngle(tWDirection);
+vt.setSpeed(tWSpeed);
+vt.setTrue(true);
+NMEANavSimulatorSource.this.notify(vt);
+
+VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(id, "VWR");
+vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
+vwr.setSpeed(aWSpeed);
+vwr.setSide(Side.PORT);
+vwr.setStatus(DataStatus.ACTIVE);
+NMEANavSimulatorSource.this.notify(vwr);
+
+HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDM);
+hdm.setHeading(heading);
+NMEANavSimulatorSource.this.notify(hdm);
+
+HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDT);
+hdt.setHeading(heading);
+NMEANavSimulatorSource.this.notify(hdt);
+
+HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.HDG);
+hdg.setHeading(heading);
+//hdg.setDeviation(0.0);
+NMEANavSimulatorSource.this.notify(hdg);
+
+VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VTG);
+vtg.setMagneticCourse(heading);
+vtg.setTrueCourse(heading);
+vtg.setMode(FaaMode.AUTOMATIC);
+vtg.setSpeedKnots(speed);
+vtg.setSpeedKmh(speed * 1.852);
+NMEANavSimulatorSource.this.notify(vtg);
+
+XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());                        xdr.addMeasurement(new Measurement("A", heading, "D", "HEAD"));
+xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
+xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
+NMEANavSimulatorSource.this.notify(xdr);
+				} catch (InterruptedException e) {
+					ServerLog.getLogger().Error("Error simulating", e);
+					e.printStackTrace();
 				}
-				
 			}
+
 		}).start();
 
 			

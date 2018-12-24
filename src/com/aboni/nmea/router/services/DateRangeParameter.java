@@ -4,8 +4,8 @@ import java.util.Calendar;
 
 public class DateRangeParameter {
 
-	private Calendar cFrom;
-	private Calendar cTo;
+	private final Calendar cFrom;
+	private final Calendar cTo;
 	
 	
 	public DateRangeParameter(ServiceConfig config) {

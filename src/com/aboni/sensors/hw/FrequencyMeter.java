@@ -8,7 +8,7 @@ public class FrequencyMeter {
 	private long period;
 	private double freq;
 
-	private static int BUF_SIZE = 16384;
+	private static final int BUF_SIZE = 16384;
 	
     /**
      * Samples are collected and counted over a moving window of "sensitivity" milliseconds.
@@ -16,7 +16,7 @@ public class FrequencyMeter {
      */
 	private long sensitivity;   
     
-    private long times[];
+    private final long[] times;
     
 	public FrequencyMeter() {
         times = new long[BUF_SIZE];

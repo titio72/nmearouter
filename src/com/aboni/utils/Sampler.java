@@ -8,16 +8,16 @@ import java.util.List;
 
 public class Sampler {
 
-	private List<Sample> samples;
-	private long sampling;
+	private final List<Sample> samples;
+	private final long sampling;
 	
 	public Sampler(long sampling, int initialCapacity) {
 		this.sampling = sampling;
-		samples = new ArrayList<Sample>(initialCapacity);
+		samples = new ArrayList<>(initialCapacity);
 	}
 	
 	public void doSampling(long time, double vMax, double v, double vMin) {
-		Sample s = null;
+		Sample s;
 		if (samples.isEmpty()) {
 			s = new Sample();
 			samples.add(s);

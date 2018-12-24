@@ -21,10 +21,10 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEA2FileAgent extends NMEAAgentImpl {
 
 	private static final long DUMP_PERIOD = 10*1000;
-	private SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 	
 	private long lastDump = 0;
-	private List<NMEASentenceItem> queue = new LinkedList<>();
+	private final List<NMEASentenceItem> queue = new LinkedList<>();
 	
 	public NMEA2FileAgent(NMEACache cache, String n, QOS q) {
 		super(cache, n, q);

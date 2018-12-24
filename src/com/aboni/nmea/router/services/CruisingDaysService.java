@@ -2,13 +2,11 @@ package com.aboni.nmea.router.services;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,156 +15,101 @@ import java.util.TreeSet;
 
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class CruisingDaysService implements WebService {
+public class CruisingDaysService extends JSONWebService {
 	
 	class Trip {
-		int tripId;
-		Set<Date> dates = new TreeSet<Date>();
-		
-		Trip(int id) {
-			tripId = id; 
+		final int tripId;
+		final Set<Date> dates = new TreeSet<>();
+		final String desc;
+		Date min;
+		Date max;
+
+		Trip(int id, String desc) {
+			this.desc = desc;
+			this.tripId = id;
 		}
-		
-		Date getMinDate() {
-			if (dates.isEmpty()) return null;
-			else return dates.iterator().next();
+
+		void addDate(Date d) {
+			if (max==null || max.compareTo(d)<0) max = d;
+			if (min==null || min.compareTo(d)>0) min = d;
+			dates.add(d);
 		}
 	}
 	
-	private Map<Integer, Trip> trips = new TreeMap<Integer, Trip>();
-	private Map<Integer, String> tripDescs = new HashMap<Integer, String>();
-	
-	private int counter = 0;
+	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd");
 
-	
 	public CruisingDaysService() {
-		loadTrips();
 	}
-	
-	private void loadTrips() {
-		DBHelper db = null;
-		try {
-            db = new DBHelper(true);
-            Statement stm = db.getConnection().createStatement();
-            ResultSet rs = stm.executeQuery("select id, description from trip");
-            while (rs.next()) {
-            	tripDescs.put(rs.getInt(1), rs.getString(2));
-            }
-		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error loading trips", e);
-		} finally {
-			try {
-				db.close();
-			} catch (Exception e2) {}
+
+	private void addToTrip(Map<Integer, Trip> trips, Date d, Integer id, String desc) {
+		Trip t = trips.getOrDefault(id, null);
+		if (t==null) {
+			t = new Trip(id, desc);
+			trips.put(id, t);
 		}
+		t.addDate(d);
 	}
 
-	private void addToTrip(Date d, Integer i) {
-		if (i==null) {
-			i = new Integer(--counter);
-			Trip t = new Trip(i);
-			t.dates.add(d);
-			trips.put(i, t);
-		} else {
-			Trip t = trips.getOrDefault(i, null);
-			if (t==null) {
-				t = new Trip(i);
-				trips.put(i, t);
-			}
-			t.dates.add(d);
-		}
-	}
-
-	private String getTripLabel(int i) {
-		return tripDescs.getOrDefault(i, "Trip " + i);
-	}
-	
-	private List<Trip> sortIt() {
-		List<Trip> triplist = new ArrayList<Trip>(trips.values());
-		triplist.sort(new Comparator<Trip>() {
-
-			@Override
-			public int compare(Trip o1, Trip o2) {
-				return -o1.getMinDate().compareTo(o2.getMinDate());
-			}
-		});
+	private List<Trip> sortIt(Map<Integer, Trip> trips) {
+		List<Trip> triplist = new ArrayList<>(trips.values());
+		triplist.sort((o1, o2) -> -o1.min.compareTo(o2.min));
 		return triplist;
 	}
 	
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
-		DBHelper db = null;
+	public JSONObject getResult(ServiceConfig config, DBHelper db) {
 		try {
-			DateFormat df = new SimpleDateFormat("yyyyMMdd");
-			
-	        response.setContentType("application/json");
-
-            db = new DBHelper(true);
-            PreparedStatement stm = db.getConnection().prepareStatement("select tripid, Date(TS) from track group by tripid, Date(TS)");
-            ResultSet rs = stm.executeQuery();
-
-            while (rs.next()) {
-            	Date d = rs.getDate(2);
-            	Integer i = rs.getInt(1);
-            	addToTrip(d, (i==0)?null:i);
-            }            
-            List<Trip> triplist = sortIt(); 
-            
-            
-        	response.getWriter().append("{\"trips\":[");
-        	boolean firsttrip = true;
-        	for (Trip t: triplist) {
-        		if (firsttrip) {
-        			firsttrip = false;
-        		} else {
-                	response.getWriter().append(",");
-        		}
-            	response.getWriter().append("{\"trip\":\"" + t.tripId + "\", ");
-            	response.getWriter().append("\"tripLabel\":\"" + (t.tripId>0?getTripLabel(t.tripId):"") + "\", ");
-            	response.getWriter().append("\"firstDate\":\"" + "\", ");
-            	response.getWriter().append("\"lastDate\":\"" + "\", ");
-            	
-            	
-            	response.getWriter().append("\"dates\":[");
-            	boolean first = true;
-            	Date fD = null;
-            	Date lD = null;
-            	for (Date d: t.dates) {
-            		if (first) {
-            			first = false;
-            			fD = d;
-            			lD = d;
-            		} else {
-                    	response.getWriter().append(",");
-                    	lD = d;
-            		}
-                	response.getWriter().append("{\"day\":");
-                	response.getWriter().append("\"" + DateFormat.getDateInstance(DateFormat.SHORT).format(d) + "\"");
-                	response.getWriter().append(",\"ref\":");
-                	response.getWriter().append("\"" + df.format(d) + "\"");
-                	response.getWriter().append("}");
-            	}
-            	response.getWriter().append("], ");
-            	response.getWriter().append("\"firstDay\":");
-            	response.getWriter().append("\"" + df.format(fD) + "\"");
-            	response.getWriter().append(",\"lastDay\":");
-            	response.getWriter().append("\"" + df.format(lD) + "\"");
-            	response.getWriter().append("}");
-
-        	}
-        	response.getWriter().append("]}");
-        	
-            response.ok();
-
-		} catch (Exception e) {
-            response.setContentType("text/html;charset=utf-8");
-            try { e.printStackTrace(response.getWriter()); } catch (Exception ee) {}
-            response.error(e.getMessage());
-		} finally {
-			try {
-				db.close();
-			} catch (Exception e2) {}
+			return getJsonObject(getTrips(db));
+		} catch (SQLException e) {
+			ServerLog.getLogger().Error("Error reading trip list", e);
+			JSONObject res = new JSONObject();
+			res.put("error", "Error reading trip list. Check the logs.");
+			return res;
 		}
+	}
+
+	private List<Trip> getTrips(DBHelper db) throws SQLException {
+		int counter = 0;
+		Map<Integer, Trip> tripsDates = new TreeMap<>();
+		PreparedStatement stm = db.getConnection().prepareStatement("select track.tripid, Date(track.TS), (select trip.description from trip where trip.id=track.tripid) as description from track group by track.tripid, Date(track.TS)");
+		ResultSet rs = stm.executeQuery();
+		while (rs.next()) {
+			Date d = rs.getDate(2);
+			int i = rs.getInt(1);
+			String desc = rs.getString(3);
+			if (i==0) {
+				counter--;
+			}
+			addToTrip(tripsDates, d, (i==0)?counter:i, desc==null?"":desc);
+		}
+		rs.close();
+		stm.close();
+		return sortIt(tripsDates);
+	}
+
+	private JSONObject getJsonObject(List<Trip> triplist) {
+		JSONObject res = new JSONObject();
+		JSONArray trips = new JSONArray();
+		for (Trip t: triplist) {
+			JSONObject trip = new JSONObject();
+			trip.put("trip", t.tripId);
+			trip.put("tripLabel", t.desc);
+			trip.put("firstDay", df.format(t.min));
+			trip.put("lastDay", df.format(t.max));
+			JSONArray dates = new JSONArray();
+			for (Date d: t.dates) {
+				JSONObject dt = new JSONObject();
+				dt.put("day", DateFormat.getDateInstance(DateFormat.SHORT).format(d));
+				dt.put("ref", df.format(d));
+				dates.put(dt);
+			}
+			trip.put("dates", dates);
+			trips.put(trip);
+		}
+		res.put("trips", trips);
+		return res;
 	}
 }

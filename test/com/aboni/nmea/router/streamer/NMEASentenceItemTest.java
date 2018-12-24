@@ -12,7 +12,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 public class NMEASentenceItemTest {
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 	}
 
 	@Test

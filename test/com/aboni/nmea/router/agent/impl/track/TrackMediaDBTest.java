@@ -24,7 +24,7 @@ public class TrackMediaDBTest {
 	}
 	
 	private List<TrackPoint> get(long t) throws Exception {
-		List<TrackPoint> res = new LinkedList<TrackPoint>();
+		List<TrackPoint> res = new LinkedList<>();
 		DBHelper db = new DBHelper(true);
 		PreparedStatement st = db.getConnection().prepareStatement("select * from track where TS=?");
 		st.setTimestamp(1, new Timestamp(t));
@@ -75,7 +75,7 @@ public class TrackMediaDBTest {
 		assertEquals(7.4, p.maxSpeed, 0.000001);
 		assertEquals(0.12, p.distance, 0.000001);
 		assertEquals(60, p.period);
-		assertEquals(false, p.anchor);
+        assertFalse(p.anchor);
 		trackDb.dispose();
 	}
 
@@ -97,7 +97,7 @@ public class TrackMediaDBTest {
 		assertEquals(7.4, p.maxSpeed, 0.000001);
 		assertEquals(0.12, p.distance, 0.000001);
 		assertEquals(60, p.period);
-		assertEquals(true, p.anchor);
+		assertTrue(p.anchor);
 	}
 
 }

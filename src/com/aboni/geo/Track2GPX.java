@@ -12,7 +12,7 @@ public class Track2GPX implements TrackDumper {
 
 	public class PointWriter implements DoWithPoint {
 
-		Writer theWriter;
+		final Writer theWriter;
 		
 		PointWriter(Writer w) {
 			theWriter = w;
@@ -70,10 +70,10 @@ public class Track2GPX implements TrackDumper {
 		
 	}
 	
-	private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     private GeoPositionT previous;
     private GeoPositionT lastTrack;
-	private static boolean TRACK_THEM_ALL = true;
+	private static final boolean TRACK_THEM_ALL = true;
 	
 	private boolean trackIt(GeoPositionT p, GeoPositionT pr) {
         boolean trackIt = true;
@@ -84,6 +84,7 @@ public class Track2GPX implements TrackDumper {
         return trackIt;
 	}
 	
+	@SuppressWarnings("PointlessArithmeticExpression")
 	private void handlePoint(GeoPositionT p, Writer w) throws IOException {
 		if (TRACK_THEM_ALL ) {
     	    writePoint(p, w);

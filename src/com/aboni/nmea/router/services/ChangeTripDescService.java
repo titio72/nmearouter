@@ -3,33 +3,35 @@ package com.aboni.nmea.router.services;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
+import org.json.JSONObject;
 
-public class ChangeTripDescService implements WebService {
+public class ChangeTripDescService extends JSONWebService {
 
 	public ChangeTripDescService() {
 	}
 	
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
-		String strip = config.getParameter("trip");
-		String desc = config.getParameter("desc");
-		if (strip!=null && desc!=null) {
-			int trip;
+	public JSONObject getResult(ServiceConfig config, DBHelper db) {
+		int trip = config.getInteger("trip", -1);
+		JSONObject res = new JSONObject();
+		if (trip!=-1) {
+			String desc = config.getParameter("desc", "Unknown");
 			try {
-				trip = Integer.parseInt(strip);
-				setTripName(trip, desc);
-			} catch (ClassNotFoundException | SQLException e) {
-				// TODO
+				PreparedStatement st1 = db.getConnection().prepareStatement("update trip set description=? where id=?");
+				st1.setString(1, desc);
+				st1.setInt(2, trip);
+				st1.executeUpdate();
+				res.put("message", "Trip description succesfully changed!");
+			} catch (SQLException e) {
+				ServerLog.getLogger().Error("Error changing trip description!", e);
+				res.put("error", "Error changing trip description! Check log files.");
 			}
+		} else {
+			res.put("error", "Error changing trip description! Unknown trip " + trip);
 		}
+		return res;
 	}
-	
-	private void setTripName(int trip, String desc) throws SQLException, ClassNotFoundException {
-		DBHelper h = new DBHelper(true);
-		PreparedStatement st1 = h.getConnection().prepareStatement("update trip set description=? where id=?");
-		st1.setString(1, desc);
-		st1.setInt(2, trip);
-		st1.executeUpdate();
-	}
+
 }

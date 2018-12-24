@@ -14,7 +14,7 @@ public class DeviationManagerTest {
 	private DeviationManagerImpl m;
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		m = new DeviationManagerImpl(); 
 	}
 
@@ -91,8 +91,7 @@ public class DeviationManagerTest {
 	private void loadMock(DeviationManagerImpl m) {
         // +5 for 0 and decreases to 0 for 180
         for (int i = 0; i<360; i+=90) {
-            double r = i;
-            double a = r + (180.0 - (i<180 ? r : (360-r)))/180.0 * 5.0;
+			double a = (double) i + (180.0 - (i<180 ? (double) i : (360- (double) i)))/180.0 * 5.0;
             m.add(i,  a);
         }
     }

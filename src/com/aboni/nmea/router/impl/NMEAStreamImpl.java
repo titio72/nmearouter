@@ -19,8 +19,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAStreamImpl implements NMEAStream {
 
-	private Map<Object, ListenerWrapper> annotatedListeners;
-	private NMEA2JSONb jsonConv;
+	private final Map<Object, ListenerWrapper> annotatedListeners;
+	private final NMEA2JSONb jsonConv;
 	
 	public NMEAStreamImpl() {
 		annotatedListeners = new HashMap<>();
@@ -92,15 +92,15 @@ public class NMEAStreamImpl implements NMEAStream {
 	
 	private class ListenerWrapper {
 		
-		private List<Method> listeners;
-		private List<Method> listenersJSON;
-		private Object o;
+		private final List<Method> listeners;
+		private final List<Method> listenersJSON;
+		private final Object o;
 		
 		private void fillMethodsAnnotatedWith() {
 		    Class<?> klass = o.getClass();
 		    while (klass != Object.class) { // need to iterated thought hierarchy in order to retrieve methods from above the current instance
 		        // iterate though the list of methods declared in the class represented by klass variable, and add those annotated with the specified annotation
-		        final List<Method> allMethods = new ArrayList<Method>(Arrays.asList(klass.getDeclaredMethods()));       
+		        final List<Method> allMethods = new ArrayList<>(Arrays.asList(klass.getDeclaredMethods()));
 		        for (final Method method : allMethods) {
 		            if (method.isAnnotationPresent(OnSentence.class)) {
 		            	Class<?>[] params = method.getParameterTypes();
@@ -118,8 +118,8 @@ public class NMEAStreamImpl implements NMEAStream {
 		
 		private ListenerWrapper(Object l) {
 			o = l;
-		    listeners = new ArrayList<Method>();
-		    listenersJSON = new ArrayList<Method>();
+		    listeners = new ArrayList<>();
+		    listenersJSON = new ArrayList<>();
 			fillMethodsAnnotatedWith();
 		}
 

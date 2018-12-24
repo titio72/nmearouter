@@ -4,24 +4,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.utils.ServerLog;
 
 public class FileTrackWriter implements TrackWriter {
 
-    private DecimalFormat myPosFormatter = new DecimalFormat("000.0000000");
-    private DecimalFormat mySpeedFormatter = new DecimalFormat("#0.0");
-    private DecimalFormat myDistFormatter = new DecimalFormat("#0.00000");
-    private SimpleDateFormat tsFormatter;
-    
-    private String fileName;
+    private final DecimalFormat myPosFormatter = new DecimalFormat("000.0000000");
+    private final DecimalFormat mySpeedFormatter = new DecimalFormat("#0.0");
+    private final DecimalFormat myDistFormatter = new DecimalFormat("#0.00000");
+
+    private final String fileName;
     
     public FileTrackWriter(String file) {
-        tsFormatter = new SimpleDateFormat("ddMMyy HHmmss.SSS");
-        tsFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         fileName = file;
     }
     
@@ -45,17 +40,15 @@ public class FileTrackWriter implements TrackWriter {
 
     private String getPositionString(GeoPositionT pos, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
     	if (pos!=null) {
-	        String msg = 
-	        		pos.getTimestamp() +
-	        		" " + myPosFormatter.format(Math.abs(pos.getLatitude())) + ((pos.getLatitude()>0)?"N":"S") + 
-	                " " + myPosFormatter.format(Math.abs(pos.getLongitude())) + ((pos.getLongitude()>0)?"E":"W") +
-	                " " + (anchor?"A":"T") + 
-	                " " + myDistFormatter.format(dist) + 
-	                " " + mySpeedFormatter.format(speed) + 
-	                " " + mySpeedFormatter.format(maxSpeed) +
-	                " " + interval +
-	                "\r\n"; 
-	        return msg;
+            return pos.getTimestamp() +
+            " " + myPosFormatter.format(Math.abs(pos.getLatitude())) + ((pos.getLatitude()>0)?"N":"S") +
+            " " + myPosFormatter.format(Math.abs(pos.getLongitude())) + ((pos.getLongitude()>0)?"E":"W") +
+            " " + (anchor?"A":"T") +
+            " " + myDistFormatter.format(dist) +
+            " " + mySpeedFormatter.format(speed) +
+            " " + mySpeedFormatter.format(maxSpeed) +
+            " " + interval +
+            "\r\n";
     	} else {
     		return null;
     	}

@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class HWSettings {
 
-	private static Properties prop = new Properties();
+	private final static Properties prop = new Properties();
 	private static long lastProp;
 	
 	private HWSettings() {}
@@ -47,7 +47,11 @@ public class HWSettings {
 			if (s!=null) {
 				try {
 					return Double.parseDouble(s);
-				} catch (Exception e) {}
+				} catch (NumberFormatException e) {
+					String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
+					ServerLog.getLogger().Error(msg);
+					throw new NumberFormatException(msg);
+				}
 			}
 			return defValue;
 		}
@@ -59,7 +63,11 @@ public class HWSettings {
 			if (s!=null) {
 				try {
 					return Integer.parseInt(s);
-				} catch (Exception e) {}
+				} catch (NumberFormatException e) {
+					String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
+					ServerLog.getLogger().Error(msg);
+					throw new NumberFormatException(msg);
+				}
 			}
 			return defValue;
 		}

@@ -2,16 +2,17 @@ package com.aboni.sensors;
 
 import java.io.IOException;
 
+import com.aboni.misc.Utils;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 public class SensorCompass extends ASensorCompass {
 
-	private SensorHMC5883 magnetometer;
-	private SensorMPU6050 gyro;
+	private final SensorHMC5883 magnetometer;
+	private final SensorMPU6050 gyro;
 	
-	private MagnetometerToCompass compass;
+	private final MagnetometerToCompass compass;
 	
 	public SensorCompass() {
 		super();
@@ -26,36 +27,18 @@ public class SensorCompass extends ASensorCompass {
 		    // initialize gyro first
 			gyro.init(bus);
 			// not clear if it's necessary
-			try { Thread.sleep(500); } catch (InterruptedException e) {}
+			Utils.pause(500);
 			// if the gyro hasn't started the magnetometer will fail to initialize 
             magnetometer.init(bus);
 		}
 	}
-	
-	/**
-	 * Get the rotation of the sensor for the 3 axis (used to calculate pitch and roll).
-	 * @return The rotation as a vector of double respectively for x, y & z axis 
-	 * @throws SensorNotInititalizedException
-	 */
-	public double[] getRotation() throws SensorNotInititalizedException {
-	    return gyro.readAccelDegrees();
-	}
-    
-    /**
-     * Get the reading without adjustment (tilt and deviation)
-     * @return The reading in degrees.
-     */
-    public double getSensorHeadingNotCompensated() {
-    	double[] d = getMagReading();
-        return compass.getHeadingDegrees(d[0], d[1], d[2]);
-    }	
-    
+
     /**
 	 * Get the bearing compensated with the tilt data and deviation.
 	 * @return
 	 */
     @Override
-	public double getUnfilteredSensorHeading() throws SensorNotInititalizedException {
+	public double getUnfilteredSensorHeading() {
 	    double[] mag_raw = magnetometer.getMagVector();
 	    double[] acc_raw = gyro.readRawAccel();
 	    return compass.getTiltCompensatedHeading(mag_raw, acc_raw); 
@@ -66,14 +49,6 @@ public class SensorCompass extends ASensorCompass {
 		return new double[] {Math.toDegrees(r[0]), 
 				Math.toDegrees(r[1]), Math.toDegrees(r[2])};
 	}
-
-	/**
-	 * Raw magnetic readings on the 3 axis.
-	 * @return A vector of doubles for the x,y & z readings. 
-	 */
-    public double[] getMagReading() {
-        return magnetometer.getMagVector();
-    }
 
     @Override
     protected void _onLoadConfiguration() {

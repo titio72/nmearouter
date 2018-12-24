@@ -11,6 +11,7 @@ import java.text.NumberFormat;
  * Pressure, Altitude, Temperature, Humidity
  * Adapted from https://github.com/adafruit/Adafruit_Python_BME280
  */
+@SuppressWarnings("unused")
 public class BME280 implements Atmo
 {
 	// This next addresses is returned by "sudo i2cdetect -y 1", see above.
@@ -78,13 +79,14 @@ public class BME280 implements Atmo
 	private int dig_H5 = 0;
 	private int dig_H6 = 0;
 
-	private float tFine = 0F;
+	private float tFine;
 
-	private int mode = BME280_OSAMPLE_8;
+	@SuppressWarnings("FieldCanBeLocal")
+	private final int mode = BME280_OSAMPLE_8;
 
-	private I2CInterface i2cdevice;
+	private final I2CInterface i2cdevice;
 
-	public BME280(I2CInterface i2cdevice) throws UnsupportedBusNumberException, IOException
+	public BME280(I2CInterface i2cdevice) throws IOException
 	{
 		this.i2cdevice = i2cdevice;
 		try { this.readCalibrationData(); }
@@ -160,8 +162,7 @@ public class BME280 implements Atmo
 		int msb  = readU8(BME280_REGISTER_TEMP_DATA);
 		int lsb  = readU8(BME280_REGISTER_TEMP_DATA + 1);
 		int xlsb = readU8(BME280_REGISTER_TEMP_DATA + 2);
-		int raw  = ((msb << 16) | (lsb << 8) | xlsb) >> 4;
-		return raw;
+		return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
 	}
 
 	private int readRawPressure() throws Exception
@@ -170,16 +171,14 @@ public class BME280 implements Atmo
 		int msb  = readU8(BME280_REGISTER_PRESSURE_DATA);
 		int lsb  = readU8(BME280_REGISTER_PRESSURE_DATA + 1);
 		int xlsb = readU8(BME280_REGISTER_PRESSURE_DATA + 2);
-		int raw = ((msb << 16) | (lsb << 8) | xlsb) >> 4;
-		return raw;
+		return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
 	}
 
 	private int readRawHumidity() throws Exception
 	{
 		int msb = readU8(BME280_REGISTER_HUMIDITY_DATA);
 		int lsb = readU8(BME280_REGISTER_HUMIDITY_DATA + 1);
-		int raw = (msb << 8) | lsb;
-		return raw;
+		return (msb << 8) | lsb;
 	}
 
 	/* (non-Javadoc)
@@ -191,9 +190,9 @@ public class BME280 implements Atmo
 		try {
 			// Gets the compensated temperature in degrees celcius
 			float UT = readRawTemp();
-			float var1 = 0;
-			float var2 = 0;
-			float temp = 0.0f;
+			float var1;
+			float var2;
+			float temp;
 	
 			// Read raw temp before aligning it with the calibration values
 			var1 = (UT / 16384.0f - dig_T1 / 1024.0f) * (float)dig_T2;
@@ -274,7 +273,7 @@ public class BME280 implements Atmo
 	public double readAltitude() 
 	{
 		// "Calculates the altitude in meters"
-		double altitude = 0.0;
+		double altitude;
 		float pressure = readPressure();
 		altitude = 44330.0 * (1.0 - Math.pow(pressure / standardSeaLevelPressure, 0.1903));
 		return altitude;

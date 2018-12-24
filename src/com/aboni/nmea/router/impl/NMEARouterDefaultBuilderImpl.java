@@ -29,8 +29,8 @@ import com.google.inject.Injector;
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter router;
-    private String confFile;
-    private Injector injector;
+    private final String confFile;
+    private final Injector injector;
     private static final boolean ENABLE_GPS_TIME = false;
     
     public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {
@@ -186,8 +186,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private Router parseConf(String file) throws MalformedConfigurationException {
         ConfParser parser = new ConfParser();
-        Router conf = parser.init(file).getConf();
-        return conf;
+		return parser.init(file).getConf();
     }
 
 	private QOS createBuiltInQOS() {

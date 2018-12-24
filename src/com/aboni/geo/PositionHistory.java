@@ -1,6 +1,5 @@
 package com.aboni.geo;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -16,12 +15,12 @@ public class PositionHistory {
 			c = new Course(previous, t);
 		}
 		
-		GeoPositionT p;
+		final GeoPositionT p;
 		Course c;
 	}
 	
-	private LinkedList<PosAndCourse> positions;
-	private int max;
+	private final LinkedList<PosAndCourse> positions;
+	private final int max;
 	private long totalTime;
 	private double totalDistance;
 	
@@ -30,7 +29,7 @@ public class PositionHistory {
 	}
 	
 	public PositionHistory(int maxSamples) {
-		positions = new LinkedList<PosAndCourse>();
+		positions = new LinkedList<>();
 		max = maxSamples;
 	}
 	
@@ -84,7 +83,7 @@ public class PositionHistory {
 	 * @return The course data.
 	 */
 	public Course getCourse(long period) {
-		return getCourse(System.currentTimeMillis());
+		return getCourse(period, System.currentTimeMillis());
 	}
 
 	/**
@@ -147,8 +146,8 @@ public class PositionHistory {
 	public void iterate(DoWithPoint doer) {
 		synchronized (positions) {
 			if (doer!=null) {
-				for (Iterator<PosAndCourse> iter = positions.iterator(); iter.hasNext(); ) {
-					doer.doWithPoint(iter.next().p);
+				for (PosAndCourse position : positions) {
+					doer.doWithPoint(position.p);
 				}
 			}
 		}

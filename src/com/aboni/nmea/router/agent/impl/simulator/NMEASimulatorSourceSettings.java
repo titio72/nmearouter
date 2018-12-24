@@ -7,6 +7,7 @@ import java.util.Properties;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 
+@SuppressWarnings("CatchMayIgnoreException")
 public class NMEASimulatorSourceSettings {
 	
 	public long lastConfModified = 0;

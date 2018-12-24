@@ -1,7 +1,6 @@
 package com.aboni.geo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
@@ -28,9 +27,7 @@ public class NavSimulator {
 	private double windDir;
 	
 	private double heading;
-	private double headingStarboard;
-	private double headingPort;
-	
+
 	private double brg;
 	private double dist;
 	
@@ -39,15 +36,13 @@ public class NavSimulator {
 	private static long lastTack;
 	
 	private PolarTable polar;
-	
-	private double polarAdj = 0.9;
-	
-	private static double REACH = 55.0;
+
+	private static final double REACH = 55.0;
 	
 	public NavSimulator() {
 	}
 	
-	public void loadPolars(String file) throws FileNotFoundException, IOException {
+	public void loadPolars(String file) throws IOException {
 		polar = new PolarTable();
 		polar.load(new FileReader(new File(file)));
 	}
@@ -128,6 +123,8 @@ public class NavSimulator {
 	
 	private void calcHeadings() {
 		double trueWind = Utils.normalizeDegrees180_180(brg - windDir);
+		double headingPort;
+		double headingStarboard;
 		if (Math.abs(trueWind)<REACH) {
 			
 			headingStarboard = REACH + windDir;
@@ -135,27 +132,25 @@ public class NavSimulator {
 			double d1 = Math.abs(Utils.normalizeDegrees180_180(headingStarboard - brg)); 
 			double d2 = Math.abs(Utils.normalizeDegrees180_180(headingPort - brg));
 			
-			double newH = d1<d2?headingStarboard:headingPort;
+			double newH = d1<d2? headingStarboard : headingPort;
 			double newTrue = Utils.normalizeDegrees180_180(newH - windDir);
 			int newSide =  newTrue>0?STARBOARD:PORT;
 			
 			if (side==0) {
-				heading = newSide==PORT?headingPort:headingStarboard;
+				heading = newSide==PORT? headingPort : headingStarboard;
 				side = newSide;
 			} if (newSide==side) {
-				heading = newSide==PORT?headingPort:headingStarboard;
+				heading = newSide==PORT? headingPort : headingStarboard;
 			} else {
 				if ((time - lastTack) > 60*60*1000) {
-					heading = newSide==PORT?headingPort:headingStarboard;
+					heading = newSide==PORT? headingPort : headingStarboard;
 					side = newSide;
 					lastTack = time;
 				} else {
-					heading = side==PORT?headingPort:headingStarboard;
+					heading = side==PORT? headingPort : headingStarboard;
 				}
 			} 
 		} else {
-			headingStarboard = brg;
-			headingPort = brg;
 			heading = brg;
 			side = Utils.normalizeDegrees180_180(heading - windDir)>0?STARBOARD:PORT;
 		}
@@ -163,6 +158,7 @@ public class NavSimulator {
 	
 	private void calcSpeed() {
 		if (polar!=null) {
+			double polarAdj = 0.9;
 			speed = polarAdj * polar.getSpeed((int)Math.abs(getWindTrue()), (float)getWindSpeed());
 		}
 	}
@@ -195,7 +191,7 @@ public class NavSimulator {
 		return c.getP1();
 	}
 
-	private static Random r = new Random();
+	private static final Random r = new Random();
 
 	public static Position calcNewLL(Position p0, double heading, double dist, double noiseRadiusMeters) {
 		Course c = new Course(p0, heading, dist);
@@ -206,6 +202,7 @@ public class NavSimulator {
 		return c.getP1();
 	}
 
+	@SuppressWarnings("PointlessArithmeticExpression")
 	public PositionHistory doSimulate(DoWithSim oncalc) {
 		PositionHistory p = new PositionHistory();
 		long t0 = System.currentTimeMillis();

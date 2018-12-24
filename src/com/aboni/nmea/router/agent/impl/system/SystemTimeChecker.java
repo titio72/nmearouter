@@ -17,7 +17,7 @@ public class SystemTimeChecker {
 
 	private static final long TOLERANCE_MS = 5000;
 	
-	private NMEACache cache;
+	private final NMEACache cache;
 	
 	public SystemTimeChecker(NMEACache cache) {
 		this.cache = cache;

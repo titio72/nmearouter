@@ -15,11 +15,10 @@ public class I2CInterface {
 		BIG_ENDIAN
 	}
 
-	private I2CBus bus;
-	private I2CDevice device;
+	private final I2CDevice device;
 
 	public I2CInterface(int busId, int deviceAddr) throws IOException, UnsupportedBusNumberException {
-		bus = I2CFactory.getInstance(busId);
+		I2CBus bus = I2CFactory.getInstance(busId);
 		device = bus.getDevice(deviceAddr);
 	}
 
@@ -81,8 +80,7 @@ public class I2CInterface {
 	 */
 	public int readU8(int reg) throws IOException {
 	    synchronized (device) {
-    	    int result = device.read(reg);
-    		return result; // & 0xFF;
+			return device.read(reg); // & 0xFF;
 	    }
 	}
 
@@ -118,7 +116,7 @@ public class I2CInterface {
 
 	public int readS16(int register, Endianness endianness) throws IOException {
 		synchronized (device) {
-    	    int hi = 0, lo = 0;
+    	    int hi, lo;
     		if (endianness == Endianness.BIG_ENDIAN) {
     			hi = readS8(register);
     			lo = readU8(register + 1);

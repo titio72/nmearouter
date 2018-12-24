@@ -30,11 +30,11 @@ import net.sf.marineapi.nmea.util.Position;
  */
 public class NMEAHDGFiller implements NMEAPostProcess {
 
-    private NMEAMagnetic2TrueConverter m;
+    private final NMEAMagnetic2TrueConverter m;
     
     private boolean doHDM = true;
     private boolean doHDT = true;
-    private NMEACache cache;
+    private final NMEACache cache;
     
     public NMEAHDGFiller(NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
@@ -53,7 +53,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
         try {
             if (sentence instanceof HDGSentence) {
                 HDGSentence hdg = (HDGSentence)sentence;
-                List<Sentence> out = new ArrayList<Sentence>(2); 
+                List<Sentence> out = new ArrayList<>(2);
                 boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDM) {
                     out.add(getHDM(hdg));
@@ -62,7 +62,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                     out.add(getHDT(hdg));
                 }
                 
-                return new Pair<>(Boolean.TRUE, (Sentence[]) out.toArray(new Sentence[0]));
+                return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
             }
         } catch (Exception e) {
             ServerLog.getLogger().Warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
@@ -81,8 +81,6 @@ public class NMEAHDGFiller implements NMEAPostProcess {
 		        d = Utils.normalizeDegrees180_180(d);
 		        hdg.setVariation(d);
 		        canDoT = true;
-		    } else {
-		        //hdg.setVariation(0.0);
 		    }
 		}
 		return canDoT;
@@ -107,8 +105,10 @@ public class NMEAHDGFiller implements NMEAPostProcess {
 		HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
 		double var = 0.0;
 		double dev = 0.0;
-		try { var = hdg.getVariation(); } catch (Exception e) {}
-		try { dev = hdg.getDeviation(); } catch (Exception e) {}
+		//noinspection CatchMayIgnoreException
+		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) {}
+		//noinspection CatchMayIgnoreException
+		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) {}
 		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
 		return hdt;
 	}

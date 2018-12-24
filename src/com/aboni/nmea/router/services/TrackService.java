@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.services;
 
+import java.io.IOException;
 import java.util.Calendar;
 
 import com.aboni.geo.Track2GPX;
@@ -8,6 +9,7 @@ import com.aboni.geo.Track2KML;
 import com.aboni.geo.TrackDumper;
 import com.aboni.geo.TrackLoader;
 import com.aboni.geo.TrackLoaderDB;
+import com.aboni.utils.ServerLog;
 
 public class TrackService  implements WebService {
 
@@ -34,46 +36,50 @@ public class TrackService  implements WebService {
         	if (d==null) d = "0";
         	boolean download = "1".equals(d);
         	
-        	if (cFrom!=null && cTo!=null) {
-	        	TrackLoader loader = new TrackLoaderDB();
-	            if (loader.load(cFrom, cTo)) {
-	            	TrackDumper dumper = null;
-	            	String mime = null;
-	            	String fileName = null;
-	            	
-		            if (f.equals("gpx")) {
-			            mime = "application/gpx+xml";
-			            fileName = "track.gpx";
-		                dumper = new Track2GPX();
-		            } else if (f.equals("kml")) {
-			            mime = "application/vnd.google-earth.kml+xml";
-			            fileName = "track.kml";
-	                    dumper = new Track2KML();
-		            } else if (f.equals("json")) {
-		            	mime = "application/json";
-		            	fileName = "track.json";
-		            	dumper = new Track2JSON();
-		            }
+			TrackLoader loader = new TrackLoaderDB();
+			if (loader.load(cFrom, cTo)) {
+				TrackDumper dumper = null;
+				String mime = null;
+				String fileName = null;
 
-		            if (dumper!=null) {
-			            response.setContentType(mime);
-			            if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-		            	dumper.setTrack(loader.getTrack());
-		            	dumper.dump(response.getWriter());
-	                    response.ok();
+				switch (f) {
+					case "gpx":
+						mime = "application/gpx+xml";
+						fileName = "track.gpx";
+						dumper = new Track2GPX();
+						break;
+					case "kml":
+						mime = "application/vnd.google-earth.kml+xml";
+						fileName = "track.kml";
+						dumper = new Track2KML();
+						break;
+					case "json":
+						mime = "application/json";
+						fileName = "track.json";
+						dumper = new Track2JSON();
+						break;
+				}
 
-		            } else {
-		                response.setContentType("text/html;charset=utf-8");
-		                response.error("Unknown format '" + f + "'");
-		            }
-	            }
-        	} else {
-                response.setContentType("text/html;charset=utf-8");
-                response.error("Cannot read parameters");
-        	}
-        } catch (Exception e) {
+				if (dumper!=null) {
+					response.setContentType(mime);
+					if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+					dumper.setTrack(loader.getTrack());
+					dumper.dump(response.getWriter());
+					response.ok();
+
+				} else {
+					response.setContentType("text/html;charset=utf-8");
+					response.error("Unknown format '" + f + "'");
+				}
+			}
+        } catch (IOException e) {
+			ServerLog.getLogger().Error("Error downloading track", e);
             response.setContentType("text/html;charset=utf-8");
-            response.error(e.getMessage());
+            try {
+            	response.error(e.getMessage());
+            } catch (Exception ee) {
+				ServerLog.getLogger().Error("Error downloading track", ee);
+			}
         }
 		
 	}

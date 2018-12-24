@@ -38,10 +38,10 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     
     private ASensorCompass compassSensor;
     
-    private boolean sendHDM = false;
-    private boolean sendHDT = false;
+    private final static boolean sendHDM = false;
+    private final static boolean sendHDT = false;
     
-    private NMEACache cache;
+    private final NMEACache cache;
     
     public NMEASourceGyro(NMEACache cache, String name, QOS q) {
         super(cache, name, q);
@@ -179,8 +179,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	}
 	
 	private double round(double d, int precision) {
-	    double r = Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
-	    return r;
+		return Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
 	}
 	
     @Override
@@ -190,18 +189,16 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         		double headingBoat = ((HDMSentence)s).getHeading();
         		double headingSens = compassSensor.getUnfilteredSensorHeading();
         		dump(headingSens, headingBoat);
-        	} catch (Exception e) {}
+        	} catch (Exception e) {
+        		getLogger().Error("Error dumping compass readings", e);
+			}
         }
     }
 
-	private void dump(double headingSens, double headingBoat) {
+	private void dump(double headingSens, double headingBoat) throws IOException {
 		int hdg = (int)headingSens;
-		try {
-			FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true);
+		try (FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true)) {
 			stream.write(String.format("%d%n", (int)headingBoat).getBytes());
-			stream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	

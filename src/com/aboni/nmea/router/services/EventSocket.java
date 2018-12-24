@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.websocket.ClientEndpoint;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
-import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
@@ -22,7 +21,7 @@ import com.aboni.utils.ServerLog;
 @ServerEndpoint(value="/events")
 public class EventSocket
 {
-	private static Map<Session, MySession> sessions = new HashMap<>();
+	private final static Map<Session, MySession> sessions = new HashMap<>();
 
 	private static NMEAStream stream;
 	
@@ -43,11 +42,6 @@ public class EventSocket
     		sessions.put(sess,  s);
 	        s.start(stream);
     	}
-    }
-    
-    @OnMessage
-    public void onWebSocketText(String message)
-    {
     }
 
     @OnClose
@@ -71,9 +65,9 @@ public class EventSocket
     }
     	
     public static class MySession {
-    	private Session sess;
+    	private final Session sess;
     	private static long sc;
-    	private long id;
+    	private final long id;
     	
     	MySession(Session s) {
     		sess = s;

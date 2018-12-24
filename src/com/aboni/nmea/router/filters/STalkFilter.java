@@ -5,8 +5,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class STalkFilter implements NMEASentenceFilter {
 
-	private String command = "84";
-	private boolean negate = false; 
+	private final String command; // = "84";
+	private final boolean negate; // = false;
 	
 	public STalkFilter(String command, boolean negate) {
 		this.command = command;
@@ -25,7 +25,7 @@ public class STalkFilter implements NMEASentenceFilter {
 	public boolean match(Sentence s, String src) {
 		if (s instanceof STALKSentence) {
 			boolean b = command.equals(((STALKSentence)s).getCommand()); 
-			return negate?(!b):b;
+			return negate == (!b);
 		}
 		return false;
 	}

@@ -17,7 +17,7 @@ import java.util.Properties;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 
-public class DBHelper {
+public class DBHelper implements AutoCloseable {
 	
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
@@ -29,10 +29,10 @@ public class DBHelper {
     private String user = USER;
     private String password = PASS;
 
-    private boolean autocommit;
+    private final boolean autocommit;
     private Connection conn;
     
-    public DBHelper(boolean autocommit) throws ClassNotFoundException, SQLException {
+    public DBHelper(boolean autocommit) throws ClassNotFoundException {
     	readConf();
         this.autocommit = autocommit;
         Class.forName(jdbc);
@@ -60,13 +60,16 @@ public class DBHelper {
     public Connection getConnection() {
         return conn;
     }
-    
+
+    @Override
     public void close() {
-        if (conn!=null)
+		if (conn != null) {
 			try {
 				conn.close();
 			} catch (SQLException e) {
+				ServerLog.getLogger().Error("Error closing connection!", e);
 			}
+		}
     }
     
     public boolean reconnect() {
@@ -85,11 +88,12 @@ public class DBHelper {
     
     public synchronized PreparedStatement getTimeSeries(String table, String[] fields, Calendar cFrom, Calendar cTo, String where) throws SQLException {
     	if (getConnection()!=null) {
-	    	String sql = "select TS ";
-		    for (String f: fields) {
-		    	sql += ", " + f;
+			StringBuilder sqlBuilder = new StringBuilder("select TS ");
+			for (String f: fields) {
+		    	sqlBuilder.append(", ").append(f);
 		    }
-	    	sql += " from " + table + " where TS>=? and TS<=?";
+			String sql = sqlBuilder.toString();
+			sql += " from " + table + " where TS>=? and TS<=?";
 	    	if (where!=null) {
 	    		sql += " AND " + where;
 	    	}
@@ -104,9 +108,9 @@ public class DBHelper {
     }    
     
     public class Range {
-    	private Timestamp max;
-    	private Timestamp min;
-    	private long count;
+    	private final Timestamp max;
+    	private final Timestamp min;
+    	private final long count;
     	
     	public Range(Timestamp max, Timestamp min, long count) {
     		this.max = max;

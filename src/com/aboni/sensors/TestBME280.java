@@ -1,5 +1,6 @@
 package com.aboni.sensors;
 
+@SuppressWarnings("InfiniteLoopStatement")
 public class TestBME280 {
 
 	public static void main(String[] args) {
