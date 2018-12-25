@@ -1,13 +1,13 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.Event;
+import com.aboni.utils.db.EventWriter;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.Event;
-import com.aboni.utils.db.EventWriter;
 
 public class DBMeteoEventWriter implements EventWriter {
 
@@ -41,7 +41,7 @@ public class DBMeteoEventWriter implements EventWriter {
 	        stm.setDouble(2, m.getSerie().getAvg());
 	        stm.setDouble(3, m.getSerie().getMax());
 	        stm.setDouble(4, m.getSerie().getMin());
-	        stm.setTimestamp(5, new Timestamp(m.getTime()));
+	        stm.setTimestamp(5, new Timestamp(e.getTime()));
 	        stm.execute();
 		}
     }

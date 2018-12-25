@@ -1,12 +1,12 @@
 package com.aboni.sensors;
 
 
-import java.io.IOException;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class I2CInterface {
 
@@ -99,10 +99,6 @@ public class I2CInterface {
 		return readU16(register, Endianness.LITTLE_ENDIAN);
 	}
 
-	public int readU16BE(int register) throws IOException {
-		return readU16(register, Endianness.BIG_ENDIAN);
-	}
-
 	public int readU16(int register, Endianness endianness) throws IOException {
 	    synchronized (device) {
     	    int hi = readU8(register);
@@ -130,9 +126,5 @@ public class I2CInterface {
 
 	public int readS16LE(int register) throws IOException {
 		return readS16(register, Endianness.LITTLE_ENDIAN);
-	}
-
-	public int readS16BE(int register) throws IOException {
-		return readS16(register, Endianness.BIG_ENDIAN);
 	}
 }

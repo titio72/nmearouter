@@ -1,5 +1,7 @@
 package com.aboni.geo;
 
+import java.io.InputStream;
+
 public interface DeviationManager {
 
 	/**
@@ -14,6 +16,10 @@ public interface DeviationManager {
 	 * @param magnetic Magnetic north in decimal degrees to be converted.
 	 * @return The compass north in decimal degrees [0..360].
 	 */
+	@SuppressWarnings("unused")
 	double getCompass(double magnetic);
 
+	void reset();
+
+	boolean load(InputStream s);
 }

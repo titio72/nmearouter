@@ -7,7 +7,6 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
-
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class FanAgent extends NMEAAgentImpl {
@@ -54,10 +53,6 @@ public class FanAgent extends NMEAAgentImpl {
 		return HWSettings.getPropertyAsDouble("fan.on", FAN_THRESHOLD_ON);
 	}
 
-	@Override
-	protected void onDeactivate() {
-	}
-	
 	private void fan(boolean on) {
 		getLogger().Info("Switch fan {" + on + "} RPi {" + fan.isRaspberry() + "}");
 		fan.switchFan(on);

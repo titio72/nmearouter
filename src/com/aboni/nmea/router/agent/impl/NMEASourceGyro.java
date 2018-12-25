@@ -1,30 +1,19 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.sensors.ASensorCompass;
-import com.aboni.sensors.Sensor;
-import com.aboni.sensors.SensorCMPS11;
-import com.aboni.sensors.SensorCompass;
-import com.aboni.sensors.SensorNotInititalizedException;
-import com.aboni.utils.HWSettings;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
-
+import com.aboni.sensors.*;
+import com.aboni.utils.HWSettings;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class NMEASourceGyro extends NMEAAgentImpl {
 
@@ -168,9 +157,9 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	        	double roll = compassSensor.getUnfilteredRoll();
 	        	double pitch = compassSensor.getUnfilteredPitch();
 	        	double hd = compassSensor.getHeading();
-                xdr.addMeasurement(new Measurement("A", round(hd, 0), "D", "HEAD"));
-                xdr.addMeasurement(new Measurement("A", round(roll, 0), "D", "ROLL"));
-                xdr.addMeasurement(new Measurement("A", round(pitch, 0), "D", "PITCH"));
+                xdr.addMeasurement(new Measurement("A", round(hd), "D", "HEAD"));
+                xdr.addMeasurement(new Measurement("A", round(roll), "D", "ROLL"));
+                xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
                 notify(xdr);
 	        } catch (Exception e) {
 	            getLogger().Error("Cannot post XDR data", e);
@@ -178,8 +167,8 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         }
 	}
 	
-	private double round(double d, int precision) {
-		return Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
+	private double round(double d) {
+		return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
 	}
 	
     @Override

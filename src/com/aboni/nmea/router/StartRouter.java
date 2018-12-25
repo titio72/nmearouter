@@ -1,18 +1,5 @@
 package com.aboni.nmea.router;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import javax.websocket.server.ServerContainer;
-
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
-
 import com.aboni.nmea.router.impl.NMEARouterDefaultBuilderImpl;
 import com.aboni.nmea.router.impl.NMEARouterPlayerBuilderImpl;
 import com.aboni.nmea.router.services.EventSocket;
@@ -24,12 +11,22 @@ import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+
+import javax.websocket.server.ServerContainer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class StartRouter {
 
     private static final String CALIBRATION = "-cal";
     private static final String PLAY = "-play";
-    private static final String WEB = "-web";
     private static final String HELP = "-help";
     
 	private static int checkFlag(String flag, String[] args) {
@@ -51,16 +48,16 @@ public class StartRouter {
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
         } else if ((ix = checkFlag(PLAY, args))>=0) {
-        	startRouter(injector, args, new NMEARouterPlayerBuilderImpl(injector, args[ix + 1]));
+        	startRouter(injector, new NMEARouterPlayerBuilderImpl(injector, args[ix + 1]));
        } else if (checkFlag(CALIBRATION, args)>=0) {
             startCalibration(args);
 	    } else {
-            startRouter(injector, args, new NMEARouterDefaultBuilderImpl(injector, Constants.ROUTER_CONF));
-    		startWebInterface(injector, args);
+            startRouter(injector, new NMEARouterDefaultBuilderImpl(injector, Constants.ROUTER_CONF));
+    		startWebInterface(injector);
 	    }
 	}
 
-	private static void startWebInterface(Injector injector, String[] args) {
+	private static void startWebInterface(Injector injector) {
         try {
             org.eclipse.jetty.util.log.Logger l;
             l = new org.eclipse.jetty.util.log.JavaUtilLog("jetty");
@@ -101,7 +98,7 @@ public class StartRouter {
         DoCalibration.main(args);
     }
 
-    private static void startRouter(Injector injector, String[] args, NMEARouterBuilder builder) {
+    private static void startRouter(Injector injector, NMEARouterBuilder builder) {
         System.out.println("Start");
 		Date date = new Date();
 		SimpleDateFormat f = new SimpleDateFormat("yyyy MM dd HH:mm:ss");

@@ -1,33 +1,19 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Logger;
-
-import org.json.JSONObject;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
-import com.aboni.nmea.router.agent.NMEASource;
-import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-import com.aboni.nmea.router.processors.NMEADepthEnricher;
-import com.aboni.nmea.router.processors.NMEAHDGFiller;
-import com.aboni.nmea.router.processors.NMEAHeadingEnricher;
-import com.aboni.nmea.router.processors.NMEAMWVTrue;
-import com.aboni.nmea.router.processors.NMEAPostProcess;
-import com.aboni.nmea.router.processors.NMEARMC2VTGProcessor;
-import com.aboni.nmea.router.processors.NMEARMCFilter;
+import com.aboni.nmea.router.processors.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.Sentence;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
 
 public abstract class NMEAAgentImpl implements NMEAAgent {
 
@@ -48,11 +34,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 			_setSentenceListener(listener);
 		}
 
-		@Override
-		public void unsetSentenceListener() {
-			_unsetSentenceListener();
-		}
-		
 	}
 	
 	private class _Target implements NMEATarget {
@@ -103,7 +84,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         if (qos!=null) { 
             if (qos.get("dpt")) {
                 getLogger().Info("QoS {DPT} Agent {" + name + "}");
-                addProc(new NMEADepthEnricher(cache));
+                addProc(new NMEADepthEnricher());
             }
             if (qos.get("rmc2vtg")) {
                 getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
@@ -138,10 +119,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     
 	public NMEAAgentImpl(NMEACache cache, String name) {
 		this(cache, name, null);
-	}
-	
-	protected void setBuiltIn() {
-		builtin = true;
 	}
 
 	protected void setSourceTarget(boolean isSource, boolean isTarget) {
@@ -263,12 +240,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         sl = listener;
     }
 
-    @Override
-    public void unsetStatusListener() {
-        sl = null;
-    }
-	
-	private NMEASentenceFilterSet _getTargetFilter() {
+    private NMEASentenceFilterSet _getTargetFilter() {
 		return fsetInput;
 	}
 	
@@ -298,22 +270,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	}
 
 	/**
-	 * Used by sources to notify data back to the router.
-	 * No specific purpose.
-	 * Ex: Notify diagnostic info that the router will make available to the admin UI.
-	 * @param data
-	 */
-	protected final void notify(JSONObject data) {
-		if (isStarted()) {
-			if (sl!=null) {
-                sl.onData(data, this);
-			}
-		}
-	}
-	
-	/**
 	 * Used by "sources" to push sentences into the stream
-	 * @param sentence
+	 * @param sentence Teh sentemce to be notified to agents
 	 */
 	protected final void notify(Sentence sentence) {
 		if (isStarted()) {
@@ -340,23 +298,16 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	
 	/**
 	 * Sources can use post-proc delegates to add additional elaboration to the sentences they pushes into the stream.
-	 * @param f
+	 * @param f The post processor to be added (sequence is important)
 	 */
 	protected final void addProc(NMEAPostProcess f) {
 		proc.add(f);
 	}
 
 	/**
-	 * Sources can use post-proc delegates to add additional elaboration to the sentences they pushes into the stream.
-	 */
-	protected final Collection<NMEAPostProcess> getProc() {
-		return proc;
-	}
-
-	/**
 	 * Must be overridden by targets. They will receive here the stream. 
-	 * @param s
-	 * @param source
+	 * @param s The sentence just received
+	 * @param source The source that originated the sentence
 	 */
 	protected abstract void doWithSentence(Sentence s, NMEAAgent source);
 
@@ -364,12 +315,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     private void _setSentenceListener(NMEASentenceListener listener) {
         this.listener = listener;
     }
-    
-    private void _unsetSentenceListener() {
-        listener = null;
-    }
-    
-    private void _pushSentence(Sentence s, NMEAAgent source) {
+
+	private void _pushSentence(Sentence s, NMEAAgent source) {
 		try {
 			if (isStarted() && 
 					(_getTargetFilter()==null || _getTargetFilter().match(s,  source.getName()))) {

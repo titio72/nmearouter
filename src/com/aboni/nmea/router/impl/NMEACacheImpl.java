@@ -1,22 +1,9 @@
 package com.aboni.nmea.router.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.HeadingSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TimeSentence;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
-import net.sf.marineapi.nmea.util.Measurement;
+import net.sf.marineapi.nmea.sentence.*;
 
 public class NMEACacheImpl implements NMEACache {
 
@@ -24,14 +11,12 @@ public class NMEACacheImpl implements NMEACache {
     private final DataEvent<TimeSentence> lastTime;
     private final DataEvent<HeadingSentence> lastHeading;
     private final DataEvent<PositionSentence> lastPosition;
-    private final Map<String, DataEvent<Measurement>> sensors;
 	private boolean synced;
     
     public NMEACacheImpl() {
         lastHeading = new DataEvent<>();
         lastTime = new DataEvent<>();
         lastPosition = new DataEvent<>();
-        sensors = new HashMap<>();
     }
     
     @Override
@@ -51,19 +36,7 @@ public class NMEACacheImpl implements NMEACache {
 		            lastPosition.timestamp = System.currentTimeMillis();
 	            }
 	        }
-	        else if (s instanceof XDRSentence) {
-	        	for (Measurement m: ((XDRSentence)s).getMeasurements()) {
-	        		DataEvent<Measurement> x = new DataEvent<>();
-	        		x.data = m;
-	        		x.source = src;
-	        		x.timestamp = System.currentTimeMillis();
-	        		synchronized (sensors) {
-	            		sensors.put(m.getName(), x);
-					}
-	        	}
-	        		
-	        }
-	        
+
 	        if (s instanceof TimeSentence) {
 	            lastTime.data = (TimeSentence)s;
 	            lastTime.source = src;
@@ -99,28 +72,8 @@ public class NMEACacheImpl implements NMEACache {
 	public DataEvent<PositionSentence> getLastPosition() {
         return lastPosition;
     }
-    
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#getSensorData(java.lang.String)
-	 */
-    @Override
-	public DataEvent<Measurement> getSensorData(String sensorName) {
-    	synchronized (sensors) {
-        	return sensors.getOrDefault(sensorName, null);
-		}
-    }
-    
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#getSensors()
-	 */
-    @Override
-	public Collection<String> getSensors() {
-    	synchronized (sensors) {
-			return sensors.keySet();
-		}
-    }
-    
-    /* (non-Javadoc)
+
+	/* (non-Javadoc)
 	 * @see com.aboni.nmea.router.NMEACache#isHeadingOlderThan(long, long)
 	 */
     @Override

@@ -17,7 +17,7 @@ public class Pair<T, U> {
 				return first.equals(_x.first) && second.equals(_x.second);
 			else if (first==null && second!=null)
 				return _x.first==null && second.equals(_x.second);
-			else if (first!=null && second==null)
+			else if (first!=null)
 				return first.equals(_x.first) && _x.second == null;
 			else
 				return _x.first == null && _x.second == null;

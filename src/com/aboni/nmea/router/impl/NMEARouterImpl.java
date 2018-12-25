@@ -1,30 +1,20 @@
 package com.aboni.nmea.router.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.NMEATarget;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
+import javax.inject.Inject;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.inject.Inject;
-
-import org.json.JSONObject;
-
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
-import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEARouterImpl implements NMEARouter {
 
@@ -137,14 +127,7 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			ServerLog.getLogger().Info("Adding Agent {" + agent.getName() + "}");
 			agents.put(agent.getName(), agent);
-			agent.setStatusListener(new NMEAAgentStatusListener() {
-				
-				@Override
-				public void onStatusChange(NMEAAgent agent) { _onStatusChange(agent); }
-
-				@Override
-				public void onData(JSONObject s, NMEAAgent src) { _queueUpData(s, src); }
-			});
+			agent.setStatusListener(this::_onStatusChange);
 			if (agent.getSource()!=null) {
 			    agent.getSource().setSentenceListener(this::_queueUpSentence);
 			}
@@ -166,6 +149,7 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 	
 	private void _onStatusChange(NMEAAgent src) {
+		ServerLog.getLogger().Debug("New status received for {" + src + "}");
 	}
 
     private void _queueUpSentence(Sentence s, NMEAAgent src) {
@@ -177,11 +161,7 @@ public class NMEARouterImpl implements NMEARouter {
 		}
     }
 
-    private void _queueUpData(JSONObject s, NMEAAgent src) {
-		stream.pushData(s, src);
-    }
-	
-	private void _routeSentence(Sentence s, NMEAAgent src) {
+    private void _routeSentence(Sentence s, NMEAAgent src) {
 		if (started.get()) {
 			cache.onSentence(s, src.getName());
 			routeToTarget(s, src);

@@ -1,21 +1,16 @@
 package com.aboni.utils.db;
 
+import com.aboni.utils.Constants;
+import com.aboni.utils.ServerLog;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
-
-import com.aboni.utils.Constants;
-import com.aboni.utils.ServerLog;
 
 public class DBHelper implements AutoCloseable {
 	
@@ -39,7 +34,7 @@ public class DBHelper implements AutoCloseable {
         reconnect();
     }
     
-    protected final void readConf() {
+    private void readConf() {
         try {
             File f = new File(Constants.DB);
             FileInputStream propInput = new FileInputStream(f);
@@ -72,7 +67,7 @@ public class DBHelper implements AutoCloseable {
 		}
     }
     
-    public boolean reconnect() {
+    private boolean reconnect() {
     	try {
     		close();
     		ServerLog.getLogger().Info("Establishing connection to DB {" + dburl + "}!");
@@ -118,14 +113,6 @@ public class DBHelper implements AutoCloseable {
     		this.count = count;
     	}
 
-		public Timestamp getMax() {
-			return max;
-		}
-
-		public Timestamp getMin() {
-			return min;
-		}
-		
 		public long getCount() {
 			return count;
 		}

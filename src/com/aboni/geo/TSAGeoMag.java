@@ -12,48 +12,39 @@ makes any warranty, express or implied, or assumes any liability
 or responsibility for the use of this software.
 */
 
-import java.io.File;
-import java.io.FileInputStream;
+import com.aboni.utils.Constants;
+
+import java.io.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*           License Statement from the NOAA
-The WMM source code is in the public domain and not licensed or 
-under copyright. The information and software may be used freely 
-by the public. As required by 17 U.S.C. 403, third parties producing 
-copyrighted works consisting predominantly of the material produced 
-by U.S. government agencies must provide notice with such work(s) 
-identifying the U.S. Government material incorporated and stating 
-that such material is not subject to copyright protection. 
+The WMM source code is in the public domain and not licensed or
+under copyright. The information and software may be used freely
+by the public. As required by 17 U.S.C. 403, third parties producing
+copyrighted works consisting predominantly of the material produced
+by U.S. government agencies must provide notice with such work(s)
+identifying the U.S. Government material incorporated and stating
+that such material is not subject to copyright protection.
 */
-
 ////////////////////////////////////////////////////////////////////////////
 //
 //GeoMag.java - originally geomag.c
-//Ported to Java 1.0.2 by Tim Walker	
+//Ported to Java 1.0.2 by Tim Walker
 //tim.walker@worldnet.att.net
 //tim@acusat.com
 //
 //Updated: 1/28/98
 //
-//Original source geomag.c available at 
+//Original source geomag.c available at
 //http://www.ngdc.noaa.gov/seg/potfld/DoDWMM.html
 //
 //NOTE: original comments from the geomag.c source file are in ALL CAPS
 //Tim's added comments for the port to Java are not
 //
 ////////////////////////////////////////////////////////////////////////////
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.aboni.utils.Constants;
 
 /**<p>
  * 
@@ -222,7 +213,7 @@ import com.aboni.utils.Constants;
  *                              FAX: (303) 273-8600<br>
  *                     EMAIL:   quinn@ghtmail.cr.usgs.gov<br>
  */
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class TSAGeoMag
 {
     

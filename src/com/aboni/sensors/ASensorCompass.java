@@ -1,17 +1,18 @@
 package com.aboni.sensors;
 
-import java.io.File;
-import java.io.FileInputStream;
-
+import com.aboni.geo.DeviationManager;
 import com.aboni.geo.DeviationManagerImpl;
 import com.aboni.utils.Constants;
 import com.aboni.utils.DataFilter;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 public abstract class ASensorCompass extends I2CSensor {
 
-	private final DeviationManagerImpl devManager;
+	private final DeviationManager devManager;
 	
 	private double compassSmoothing = 0.75;
 	private double attitudeSmoothing = 0.75;
@@ -26,21 +27,23 @@ public abstract class ASensorCompass extends I2CSensor {
 	}
 
 	/**
-	 * Get pitch in degrees.
-	 * @return
+	 * Get pitch in degrees without any wmoothing.
+	 * @return The pitch value in degrees
+	 * @throws SensorNotInititalizedException When the sensot has not been initialized
 	 */
 	public abstract double getUnfilteredPitch() throws SensorNotInititalizedException;
 	
 	/**
-	 * Get the roll in degrees.
-	 * @return
+	 * Get the roll in degrees without smoothing.
+	 * @return The valkue in degrees
+	 * @throws SensorNotInititalizedException When the sensot has not been initialized
 	 */
 	public abstract double getUnfilteredRoll() throws SensorNotInititalizedException;
 	
 	/**
 	 * Get the the heading in degrees [0..360].
-	 * @return
-	 * @throws SensorNotInititalizedException
+	 * @return The heading in degrees
+	 * @throws SensorNotInititalizedException When the sensot has not been initialized
 	 */
 	public abstract double getUnfilteredSensorHeading() throws SensorNotInititalizedException;
 
@@ -84,7 +87,9 @@ public abstract class ASensorCompass extends I2CSensor {
         		lastModifiedDevTable = f.lastModified();
 	        	FileInputStream s = new FileInputStream(f); 
 				devManager.reset();
-	        	devManager.load(s);
+	        	if (!devManager.load(s)) {
+					ServerLog.getLogger().Error("CompassSensor cannot load deviation table!");
+				}
 				s.close();
         	}
 		} catch (Exception e) {

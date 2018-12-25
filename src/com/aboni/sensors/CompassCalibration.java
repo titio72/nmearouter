@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class CompassCalibration {
 
     private final SensorHMC5883 sensor;

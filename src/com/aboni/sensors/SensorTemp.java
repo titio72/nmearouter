@@ -1,12 +1,12 @@
 package com.aboni.sensors;
 
+import com.aboni.sensors.hw.DS18B20;
+import com.aboni.utils.ServerLog;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.aboni.sensors.hw.DS18B20;
-import com.aboni.utils.ServerLog;
 
 public class SensorTemp implements Sensor {
 
@@ -51,7 +51,7 @@ public class SensorTemp implements Sensor {
 	public void read() throws SensorNotInititalizedException {
 		lastRead = System.currentTimeMillis();
 		if (sensor!=null) {
-			sensor.read();
+			//sensor.read();
 			synchronized (readings) {
 				Map<String, Double> m = sensor.getValues();
 				for (String k : m.keySet()) {
@@ -64,13 +64,6 @@ public class SensorTemp implements Sensor {
 			}
 		} else {
 			throw new SensorNotInititalizedException("Temp sensor notr initialized!");
-		}
-	}
-
-	public double readTemp(String key) {
-		synchronized (readings) {
-			Reading r = readings.getOrDefault(key, new Reading());
-			return r.v;
 		}
 	}
 

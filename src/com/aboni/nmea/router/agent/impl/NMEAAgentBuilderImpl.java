@@ -1,13 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.lang.reflect.Method;
-import java.util.StringTokenizer;
-
-import javax.inject.Inject;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAFilterable;
-import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
@@ -15,27 +9,16 @@ import com.aboni.nmea.router.agent.impl.meteo.DBMeteoWriter;
 import com.aboni.nmea.router.agent.impl.meteo.NMEAMeteoTarget;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
 import com.aboni.nmea.router.agent.impl.track.NMEATrackAgent;
-import com.aboni.nmea.router.conf.AgentBase;
-import com.aboni.nmea.router.conf.ConsoleAgent;
-import com.aboni.nmea.router.conf.Filter;
-import com.aboni.nmea.router.conf.FilterSet;
-import com.aboni.nmea.router.conf.GyroAgent;
-import com.aboni.nmea.router.conf.InOut;
-import com.aboni.nmea.router.conf.JSONAgent;
-import com.aboni.nmea.router.conf.MWDAgent;
-import com.aboni.nmea.router.conf.MeteoAgent;
-import com.aboni.nmea.router.conf.SensorAgent;
-import com.aboni.nmea.router.conf.SerialAgent;
-import com.aboni.nmea.router.conf.SimulatorAgent;
-import com.aboni.nmea.router.conf.TcpAgent;
-import com.aboni.nmea.router.conf.TrackAgent;
-import com.aboni.nmea.router.conf.UdpAgent;
+import com.aboni.nmea.router.conf.*;
 import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-
 import net.sf.marineapi.nmea.sentence.TalkerId;
+
+import javax.inject.Inject;
+import java.lang.reflect.Method;
+import java.util.StringTokenizer;
 
 public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     
@@ -77,7 +60,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	 * @see com.aboni.nmea.router.agent.NMEAAgentBuilder#createAgent(com.aboni.nmea.router.conf.AgentBase, com.aboni.nmea.router.NMEARouter)
 	 */
 	@Override
-	public NMEAAgent createAgent(AgentBase a, NMEARouter r) {
+	public NMEAAgent createAgent(AgentBase a) {
 		NMEAAgent agent = null;
 		QOS q = getQos(a.getQos());
 		switch (getType(a)) {
@@ -89,9 +72,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 			case "JSON": agent = buildSocketJSON((JSONAgent)a, q); break;
 			case "UDP": agent = buildUDP((UdpAgent)a, q); break;
 			case "Console": agent = buildConsoleTarget((ConsoleAgent)a, q); break;
-		    case "Track": agent = buildTrackTarget((TrackAgent)a, q); break;
+		    case "Track": agent = buildTrackTarget((TrackAgent)a); break;
 		    case "Meteo": agent = buildMeteoTarget((MeteoAgent)a, q); break;
-		    case "MWDSynthetizer": agent = buildMWDSynt((MWDAgent)a, q); break;
+		    case "MWDSynthetizer": agent = buildMWDSynt(q); break;
 		    case "GPXPlayer": agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent)a, q); break;
 			default: break;
 		}
@@ -174,7 +157,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		}
 	}
 	
-	private NMEAAgent buildMWDSynt(MWDAgent a, QOS q) {
+	private NMEAAgent buildMWDSynt(QOS q) {
 		return new NMEAMWDSentenceCalculator(cache, "MWD", q);
 	}
 
@@ -224,7 +207,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return new NMEASocketServer(cache, name, port, r, t, q);
     }
 
-	private NMEAAgent buildTrackTarget(TrackAgent c, QOS q) {
+	private NMEAAgent buildTrackTarget(TrackAgent c) {
 		NMEATrackAgent track = new NMEATrackAgent(cache, c.getName());
 		track.setFile(c.getFile());
 	    track.setPeriod(c.getInterval() * 1000);

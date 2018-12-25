@@ -1,13 +1,14 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
+import java.io.IOException;
+
 public abstract class I2CSensor implements Sensor {
 
+    @SuppressWarnings("unused")
     protected void debug(String msg) {
         ServerLog.getLogger().Debug( 
                 "sensor {" + getSensorName() + "} instance {" + 
@@ -20,6 +21,7 @@ public abstract class I2CSensor implements Sensor {
                 instance + "} " + msg);
     }
     
+    @SuppressWarnings("unused")
     protected void warning(String msg, Throwable t) {
         if (t==null) 
             ServerLog.getLogger().Warning(

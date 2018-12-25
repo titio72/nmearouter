@@ -12,8 +12,7 @@ public interface NMEAAgent extends Startable {
 	boolean isUserCanStartAndStop();
 	
 	void setStatusListener(NMEAAgentStatusListener listener);
-	void unsetStatusListener();
-    
+
 	NMEASource getSource();
 	NMEATarget getTarget();
 	

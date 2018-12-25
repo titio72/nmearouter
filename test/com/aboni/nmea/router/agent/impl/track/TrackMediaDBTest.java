@@ -1,18 +1,16 @@
 package com.aboni.nmea.router.agent.impl.track;
 
-import static org.junit.Assert.*;
+import com.aboni.geo.GeoPositionT;
+import com.aboni.utils.db.DBHelper;
+import org.junit.Test;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.sql.PreparedStatement;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
-
-import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.agent.impl.track.DBTrackWriter;
-import com.aboni.utils.db.DBHelper;
+import static org.junit.Assert.*;
 
 public class TrackMediaDBTest {
 
@@ -30,13 +28,13 @@ public class TrackMediaDBTest {
 		st.setTimestamp(1, new Timestamp(t));
 		ResultSet rs = st.executeQuery();
 		while (rs.next()) {
-			TrackPoint p = new TrackPoint();
-			p.position = new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon") );
-			p.anchor = rs.getBoolean("anchor");
-			p.averageSpeed = rs.getDouble("speed");
-			p.maxSpeed = rs.getDouble("maxSpeed");
-			p.period = rs.getInt("dTime");
-			p.distance = rs.getDouble("dist");
+			TrackPoint p = new TrackPoint(
+					new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon") ),
+					rs.getBoolean("anchor"),
+					rs.getDouble("dist"),
+					rs.getDouble("speed"),
+					rs.getDouble("maxSpeed"),
+					rs.getInt("dTime"));
 			res.add(p);
 		}
 		db.close();

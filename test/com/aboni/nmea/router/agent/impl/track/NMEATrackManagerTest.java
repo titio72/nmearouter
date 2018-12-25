@@ -1,23 +1,20 @@
 package com.aboni.nmea.router.agent.impl.track;
 
+import com.aboni.geo.GeoPositionT;
+import com.aboni.misc.Utils;
+import net.sf.marineapi.nmea.util.Position;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import com.aboni.geo.GeoPositionT;
-import com.aboni.misc.Utils;
-import com.aboni.nmea.router.agent.impl.track.TrackManager;
-
-import net.sf.marineapi.nmea.util.Position;
-
 import static org.junit.Assert.*;
 
-@SuppressWarnings("IntegerDivisionInFloatingPointContext")
+@SuppressWarnings("ALL")
 public class NMEATrackManagerTest {
 	
 	//private static final long STATIC_DEFAULT_PERIOD = 30 * 60000; // 30 minutes;
@@ -63,11 +60,11 @@ public class NMEATrackManagerTest {
 		return m.processPosition(new GeoPositionT(ts + t0, lat, lon), speed);
 	}
 	
-	private List<TrackPoint> cruise(int seconds, double speed) throws Exception {
+	private List<TrackPoint> cruise(int seconds, double speed) {
 		return cruise(seconds, speed, 0);
 	}
 	
-	private List<TrackPoint> cruise(int seconds, double speed, int waitBeforeCruising) throws Exception {
+	private List<TrackPoint> cruise(int seconds, double speed, int waitBeforeCruising) {
 		int interval = 1000; // 1 second
 		List<TrackPoint> out = new ArrayList<>();
 		long start = lastPosted + interval + waitBeforeCruising*1000;
@@ -82,13 +79,13 @@ public class NMEATrackManagerTest {
 
 	
 	@Test
-	public void testFirstPoint() throws Exception {
+	public void testFirstPoint() {
 		TrackPoint p = postPosition(1000, 0.0);
 		assertNull(p); // first point is null because it is figuring out if it's anchored or not
 	}
 	
 	@Test
-	public void testSecondPointStationary() throws Exception {
+	public void testSecondPointStationary() {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
 		TrackPoint p = postPosition(2000, 0.0);
 		assertNotNull(p);
@@ -96,7 +93,7 @@ public class NMEATrackManagerTest {
 	}
 	
 	@Test
-	public void testSecondPointMoving() throws Exception {
+	public void testSecondPointMoving() {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
 		TrackPoint p = postPosition(2000, 5.0);
 		assertNotNull(p);

@@ -1,13 +1,13 @@
 package com.aboni.nmea.router.agent.impl.track;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.Event;
+import com.aboni.utils.db.EventWriter;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.Event;
-import com.aboni.utils.db.EventWriter;
 
 public class DBTrackEventWriter implements EventWriter {
 
@@ -39,7 +39,7 @@ public class DBTrackEventWriter implements EventWriter {
         	TrackEvent t = (TrackEvent)e;
             stm.setDouble(1, t.getP().getLatitude());
             stm.setDouble(2, t.getP().getLongitude());
-            Timestamp x = new Timestamp(t.getTime());
+            Timestamp x = new Timestamp(e.getTime());
             stm.setTimestamp(3, x);
             stm.setInt(4, t.isAnchor()?1:0);
             stm.setInt(5, t.getInterval());

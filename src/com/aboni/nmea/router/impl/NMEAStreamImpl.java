@@ -1,21 +1,15 @@
 package com.aboni.nmea.router.impl;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONObject;
-
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.Sentence;
+import org.json.JSONObject;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class NMEAStreamImpl implements NMEAStream {
 
@@ -34,14 +28,7 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	@Override
-	public void pushData(JSONObject s, NMEAAgent src) {
-		synchronized (this) {
-			push(s, src);
-		}
-	}
-
-	@Override
+    @Override
 	public void subscribe(Object b) {
 		synchronized (annotatedListeners) {
 			annotatedListeners.put(b, new ListenerWrapper(b));
@@ -76,21 +63,7 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	private void push(JSONObject s, NMEAAgent src) {
-		synchronized (annotatedListeners) {
-			for (ListenerWrapper i: annotatedListeners.values()) {
-				try {
-					if (i.isJSON()) {
-						i.onSentence(s);
-					}
-				} catch (Exception e) {
-					ServerLog.getLogger().Warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
-				}
-			}
-		}
-	}
-	
-	private class ListenerWrapper {
+    private class ListenerWrapper {
 		
 		private final List<Method> listeners;
 		private final List<Method> listenersJSON;

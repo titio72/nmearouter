@@ -1,43 +1,24 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
+import com.aboni.geo.NavSimulator;
+import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.sentences.VWRSentence;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.*;
+import net.sf.marineapi.nmea.util.*;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
-import com.aboni.geo.NavSimulator;
-import com.aboni.misc.Utils;
-import com.aboni.utils.ServerLog;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.sentences.VWRSentence;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.GLLSentence;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.VHWSentence;
-import net.sf.marineapi.nmea.sentence.VTGSentence;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
-import net.sf.marineapi.nmea.util.CompassPoint;
-import net.sf.marineapi.nmea.util.DataStatus;
-import net.sf.marineapi.nmea.util.Date;
-import net.sf.marineapi.nmea.util.FaaMode;
-import net.sf.marineapi.nmea.util.Measurement;
-import net.sf.marineapi.nmea.util.Position;
-import net.sf.marineapi.nmea.util.Side;
-import net.sf.marineapi.nmea.util.Time;
-import net.sf.marineapi.nmea.util.Units;
-
+@SuppressWarnings("ALL")
 public class NMEANavSimulatorSource extends NMEAAgentImpl {
 
 	public static NMEANavSimulatorSource SIMULATOR;

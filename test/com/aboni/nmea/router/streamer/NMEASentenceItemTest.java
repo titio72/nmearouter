@@ -1,13 +1,11 @@
 package com.aboni.nmea.router.streamer;
 
-import static org.junit.Assert.*;
-
+import com.aboni.nmea.sentences.NMEASentenceItem;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.aboni.nmea.sentences.NMEASentenceItem;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
+import static org.junit.Assert.assertEquals;
 
 public class NMEASentenceItemTest {
 

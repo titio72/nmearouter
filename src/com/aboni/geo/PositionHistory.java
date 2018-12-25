@@ -76,7 +76,7 @@ public class PositionHistory {
 	private void setTotalDistance(double totalDistance) {
 		this.totalDistance = totalDistance;
 	}
-	
+
 	/**
 	 * Get the course for the last period. Passing the period X (in milliseconds) it will calculate the course from X up to now.
 	 * @param period Last X milliseconds
@@ -122,27 +122,7 @@ public class PositionHistory {
 			}
 		}
 	}
-	
-	public GeoPositionT getLastKnownPosition() {
-		synchronized (positions) {
-			if (positions.size() > 0) {
-				return positions.getLast().p;
-			} else {
-				return null;
-			}
-		}
-	}
-	
-	public Course getLastKnownCourse() {
-		synchronized (positions) {
-			if (positions.size() > 0) {
-				return positions.getLast().c;
-			} else {
-				return null;
-			}
-		}
-	}
-	
+
 	public void iterate(DoWithPoint doer) {
 		synchronized (positions) {
 			if (doer!=null) {

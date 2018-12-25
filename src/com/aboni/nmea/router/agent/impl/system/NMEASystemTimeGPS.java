@@ -29,16 +29,12 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
-		systemTimeCHecker.checkAndSetTime(s, src);
+		systemTimeCHecker.checkAndSetTime(s);
 	}
 
 	@Override
 	protected boolean onActivate() {
 		return true;
-	}
-
-	@Override
-	protected void onDeactivate() {
 	}
 
     @Override

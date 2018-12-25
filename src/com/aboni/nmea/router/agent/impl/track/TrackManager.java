@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl.track;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-
 import net.sf.marineapi.nmea.util.Position;
 
 public class TrackManager {
@@ -42,24 +41,12 @@ public class TrackManager {
     public long getPeriod() {
     	return period;
     }
-    
-    /**
-     * Sampling period when at anchor
-     * @return milliseconds
-     */
-    public long getSTationaryPeriod() {
-    	return staticPeriod;
-    }
-    
-    public boolean isStationary() {
+
+	public boolean isStationary() {
     	return stationaryStatus.stationary;
     }
-    
-    public long getStationaryTime() {
-    	return stationaryStatus.stationarySince;
-    }
-    
-    private boolean isFirstReport() {
+
+	private boolean isFirstReport() {
     	return (getLastTrackedPosition()==null);
     }
     
@@ -78,7 +65,7 @@ public class TrackManager {
     	TrackPoint res = null;
 
     	if (isFirstReport()) {
-	        stationaryStatus.init(true);
+	        stationaryStatus.init();
 	        if (lastPoint!=null) {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(lastPoint, p));
                 setLastTrackedPosition(p);
@@ -115,7 +102,7 @@ public class TrackManager {
     
     /**
      * Set the sampling time in ms.
-     * @param period
+     * @param period The sampling period for normal navigation
      */
     public void setPeriod(long period) {
         this.period = period;
@@ -127,7 +114,7 @@ public class TrackManager {
 
     /**
      * Set the sampling time in ms.
-     * @param period
+     * @param period The sampling period when at anchor
      */
     public void setStaticPeriod(long period) {
         this.staticPeriod = period;
@@ -173,9 +160,9 @@ public class TrackManager {
         boolean stationary = true;
     	long stationarySince = 0;
     	
-    	void init(boolean stationary) {
+    	void init() {
     		if (!init) {
-    			this.stationary = stationary;
+    			this.stationary = true;
     			init = true;
     		}
     	}

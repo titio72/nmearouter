@@ -1,15 +1,11 @@
 package com.aboni.sensors.hw;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.pi4j.component.temperature.TemperatureSensor;
 import com.pi4j.component.temperature.impl.TmpDS18B20DeviceType;
 import com.pi4j.io.w1.W1Device;
 import com.pi4j.io.w1.W1Master;
+
+import java.util.*;
 
 public class DS18B20 {
 
@@ -38,10 +34,6 @@ public class DS18B20 {
 	public void finalize() {
 	}
 
-	public void read() {
-
-	}
-	
 	private void _read() {
 		synchronized (_values) {
 			if (!reading) {

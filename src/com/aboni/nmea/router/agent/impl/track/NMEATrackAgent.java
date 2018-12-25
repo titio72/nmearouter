@@ -8,7 +8,6 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.nmea.sentences.XMCParser;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -31,22 +30,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         media = null;
     }
 
-    public void setMedia(TrackWriter m) {
-    	media = m;
-    }
-    
     /**
      * Set "" for DB.
-     * @param file
+     * @param file WHen not empty redirect tracking info to the specified file
      */
     public void setFile(String file) {
     	mediaFile = file;
     }
-    
-    
-    public String getFile() { 
-    	return mediaFile;
-    }
+
 
     @Override
     protected boolean onActivate() {
@@ -66,27 +57,19 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             media.dispose();
         }
         media = null;
-    }    
-    
-    public long getPeriod() {
-        return tracker.getPeriod();
     }
 
     /**
      * Set the sampling time in ms.
-     * @param period
+     * @param period Period in milliseconds
      */
     public void setPeriod(long period) {
         tracker.setPeriod(period);
     }
 
-    public long getStaticPeriod() {
-        return tracker.getStaticPeriod();
-    }
-
     /**
      * Set the sampling time in ms.
-     * @param period
+     * @param period Period in milliseconds when at anchor
      */
     public void setStaticPeriod(long period) {
         tracker.setStaticPeriod(period);

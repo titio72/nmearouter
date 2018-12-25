@@ -1,21 +1,15 @@
 package com.aboni.nmea.router.services;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.websocket.ClientEndpoint;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
-
-import org.json.JSONObject;
-
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.utils.ServerLog;
+import org.json.JSONObject;
+
+import javax.websocket.*;
+import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @ClientEndpoint
 @ServerEndpoint(value="/events")
@@ -34,6 +28,7 @@ public class EventSocket
 	}
 	
     @OnOpen
+	@SuppressWarnings("unused")
     public void onWebSocketConnect(Session sess)
     {
     	synchronized (sessions) {
@@ -45,6 +40,7 @@ public class EventSocket
     }
 
     @OnClose
+	@SuppressWarnings("unused")
     public void onWebSocketClose(Session sess)
     {
     	synchronized (sessions) {
@@ -59,6 +55,7 @@ public class EventSocket
     }
     	
     @OnError
+	@SuppressWarnings("unused")
     public void onWebSocketError(Throwable cause)
     {
         ServerLog.getLogger().Error("Error handling websockets", cause);
@@ -88,6 +85,7 @@ public class EventSocket
 	    	}
 		}
 
+		@SuppressWarnings("unused")
 		@OnSentence
 		public void onSentence(JSONObject obj) {
 			synchronized (this) {

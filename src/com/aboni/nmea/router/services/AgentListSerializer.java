@@ -1,15 +1,16 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
+import com.aboni.nmea.router.conf.db.AgentStatusProvider;
+
 import java.io.PrintWriter;
 import java.util.Collection;
 
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.conf.db.AgentStatusProvider;
-import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
-
 public class AgentListSerializer {
-	public final NMEARouter router;
+
+	private final NMEARouter router;
 
 	public AgentListSerializer(NMEARouter router) {
 		this.router = router; 
@@ -24,7 +25,7 @@ public class AgentListSerializer {
         w.println("]}");
 	}
     	
-	boolean first = true;
+	private boolean first = true;
 	
 	private void dumpService(NMEAAgent ag, PrintWriter w) {
 		if (!first)

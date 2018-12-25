@@ -5,16 +5,8 @@ import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.MWDSentence;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.VHWSentence;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Units;
 
@@ -23,10 +15,6 @@ import net.sf.marineapi.nmea.util.Units;
  * @author aboni
  */
 public class NMEAMWVTrue implements NMEAPostProcess {
-	
-	public NMEAMWVTrue() {
-		this(false);
-	}
 
 	public NMEAMWVTrue(boolean useSOG) {
 		useRMC = useSOG;

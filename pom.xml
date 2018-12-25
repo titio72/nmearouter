@@ -45,8 +45,8 @@
                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Main-Class>com.aboni.nmea.router.StartRouter</Main-Class>
-                                <X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
-                                <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
+                                <X-Compile-Source-JDK>1.8</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>1.8</X-Compile-Target-JDK>
                             </manifestEntries>
                         </transformer>
                     </transformers>

@@ -1,8 +1,8 @@
 package com.aboni.sensors.hw;
 
-import java.io.IOException;
-
 import com.aboni.sensors.I2CInterface;
+
+import java.io.IOException;
 
 public class HMC5883L {
 
@@ -15,6 +15,7 @@ public class HMC5883L {
 	
     public static final int  HMC5883_I2CADDR = 0x1e;
 
+    @SuppressWarnings("unused")
     public static class Scale {
         private final double scale;
         private final int reg;
@@ -42,6 +43,7 @@ public class HMC5883L {
         public static final Scale Gauss_8_10 = new Scale(4.65, 0x07);
     }
 
+    @SuppressWarnings("unused")
     public static class Constants {
         public static final int OUTPUT_RATE_0_75_Hz = 0;
         public static final int OUTPUT_RATE_1_5_Hz = 1;

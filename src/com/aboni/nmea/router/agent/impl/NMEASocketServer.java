@@ -1,5 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,21 +19,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.Sentence;
-
 public class NMEASocketServer extends NMEAAgentImpl {
 
 	private final int port;
 	private Selector selector;
 	private ServerSocketChannel serverSocket;
-	private static final int DEFAULT_PORT = 1111;
 	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
 	private final Map<SocketChannel, ClientDescriptor> clients;
@@ -57,10 +54,6 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	
 	public NMEASocketServer(NMEACache cache, String name, int port, QOS q) {
 		this(cache, name, port, false, true, q);
-	}
-
-	public NMEASocketServer(NMEACache cache, String name) {
-		this(cache, name, DEFAULT_PORT, null);
 	}
 
 	public int getPort() {

@@ -1,10 +1,8 @@
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DBTSentence;
 import net.sf.marineapi.nmea.sentence.DPTSentence;
@@ -20,7 +18,7 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
  */
 public class NMEADepthEnricher implements NMEAPostProcess {
 
-    public NMEADepthEnricher(NMEACache cache) {
+    public NMEADepthEnricher() {
     }
 
     @Override

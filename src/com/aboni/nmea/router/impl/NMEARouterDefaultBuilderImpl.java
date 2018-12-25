@@ -7,11 +7,7 @@ import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
-import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
-import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
-import com.aboni.nmea.router.agent.impl.NMEAPlayer;
-import com.aboni.nmea.router.agent.impl.NMEASocketServer;
+import com.aboni.nmea.router.agent.impl.*;
 import com.aboni.nmea.router.agent.impl.system.FanAgent;
 import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
 import com.aboni.nmea.router.agent.impl.system.PowerLedAgent;
@@ -69,29 +65,29 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 		}
         
         for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
-        	NMEAAgent agent = builder.createAgent(a, r);
+        	NMEAAgent agent = builder.createAgent(a);
             if (agent!=null) {
             	r.addAgent(agent);
             	handlePersistentState(agent, a);
             }
         }
         
-        if (ENABLE_GPS_TIME) buildGPSTimeTarget(conf, r);
-        buildStreamDump(conf, r);
-        buildPowerLedTarget(conf, r);
-        buildFanTarget(conf, r);
-        buildDPTStats(conf, r);
-        buildAutoPilot(conf, r);
+        if (ENABLE_GPS_TIME) buildGPSTimeTarget(r);
+        buildStreamDump(r);
+        buildPowerLedTarget(r);
+        buildFanTarget(r);
+        buildDPTStats(r);
+        buildAutoPilot(r);
         return r;
     }
     
     private void handlePersistentState(NMEAAgent agent, AgentBase a) {
     	boolean activate = handleActivation(agent, a);
-    	handleFilter(agent, a);
+    	handleFilter(agent);
 		if (activate) agent.start();
 	}
 
-	private void handleFilter(NMEAAgent agent, AgentBase a) {
+	private void handleFilter(NMEAAgent agent) {
     	AgentStatus s = AgentStatusProvider.getAgentStatus();
     	if (s!=null) {
     		NMEAFilterable tgt = agent.getTarget();
@@ -129,7 +125,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	return active;
     }
     
-    private void buildStreamDump(Router conf2, NMEARouter r) {
+    private void buildStreamDump(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEA2FileAgent dumper = new NMEA2FileAgent(
         		injector.getInstance(NMEACache.class), 
@@ -137,7 +133,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         r.addAgent(dumper);
 	}
 
-	private void buildDPTStats(Router conf2, NMEARouter r) {
+	private void buildDPTStats(NMEARouter r) {
         QOS q = createBuiltInQOS();
         DepthStatsAgent a = new DepthStatsAgent(
         		injector.getInstance(NMEACache.class), 
@@ -146,7 +142,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         a.start();
     }
 
-    private void buildPowerLedTarget(Router conf2, NMEARouter r) {
+    private void buildPowerLedTarget(NMEARouter r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
 	        QOS q = createBuiltInQOS();
 	        PowerLedAgent pwrled = new PowerLedAgent(
@@ -157,7 +153,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	}
     }
 
-    private void buildAutoPilot(Router conf2, NMEARouter r) {
+    private void buildAutoPilot(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEAAutoPilotAgent ap = new NMEAAutoPilotAgent(
         		injector.getInstance(NMEACache.class), 
@@ -166,7 +162,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         ap.start();
     }
 
-    private void buildFanTarget(Router conf2, NMEARouter r) {
+    private void buildFanTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
         FanAgent fan = new FanAgent(
         		injector.getInstance(NMEACache.class), 
@@ -175,7 +171,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         fan.start();
     }
 
-    private void buildGPSTimeTarget(Router conf2, NMEARouter r) {
+    private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
     	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
         		injector.getInstance(NMEACache.class), 

@@ -46,8 +46,6 @@ public abstract class JSONWebService implements WebService {
                 ServerLog.getLogger().Error("Error sending output for Svc {" + this.getClass().getName() + "}", e);
             }
             db.close();
-        } else {
-
         }
     }
 }

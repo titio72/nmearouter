@@ -1,9 +1,9 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
 import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class SensorMPU6050 extends I2CSensor {
 
@@ -175,8 +175,8 @@ public class SensorMPU6050 extends I2CSensor {
     }
 
     
-    protected static double dist(double x, double y) {
-        return Math.sqrt((x*x) + (y*y));
+    protected static double dist(double a, double b) {
+        return Math.sqrt((a*a) + (b*b));
     }
     
     protected static double getYRotation(double x, double y, double z) {

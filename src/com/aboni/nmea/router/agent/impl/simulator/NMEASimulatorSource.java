@@ -1,13 +1,5 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
-import java.io.File;
-import java.io.FileReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Calendar;
-import java.util.Random;
-import java.util.TimeZone;
-
 import com.aboni.geo.ApparentWind;
 import com.aboni.geo.NavSimulator;
 import com.aboni.misc.PolarTable;
@@ -19,41 +11,17 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.seatalk.Stalk84;
 import com.aboni.utils.Constants;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.DBTSentence;
-import net.sf.marineapi.nmea.sentence.DPTSentence;
-import net.sf.marineapi.nmea.sentence.GLLSentence;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.MDASentence;
-import net.sf.marineapi.nmea.sentence.MHUSentence;
-import net.sf.marineapi.nmea.sentence.MMBSentence;
-import net.sf.marineapi.nmea.sentence.MTASentence;
-import net.sf.marineapi.nmea.sentence.MTWSentence;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.RSASentence;
-import net.sf.marineapi.nmea.sentence.STALKSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.VHWSentence;
-import net.sf.marineapi.nmea.sentence.VLWSentence;
-import net.sf.marineapi.nmea.sentence.VTGSentence;
-import net.sf.marineapi.nmea.sentence.VWTSentence;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
-import net.sf.marineapi.nmea.util.CompassPoint;
-import net.sf.marineapi.nmea.util.DataStatus;
-import net.sf.marineapi.nmea.util.Date;
-import net.sf.marineapi.nmea.util.Direction;
-import net.sf.marineapi.nmea.util.FaaMode;
-import net.sf.marineapi.nmea.util.Measurement;
-import net.sf.marineapi.nmea.util.Position;
-import net.sf.marineapi.nmea.util.Side;
-import net.sf.marineapi.nmea.util.Time;
-import net.sf.marineapi.nmea.util.Units;
+import net.sf.marineapi.nmea.sentence.*;
+import net.sf.marineapi.nmea.util.*;
+
+import java.io.File;
+import java.io.FileReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Calendar;
+import java.util.Random;
+import java.util.TimeZone;
 
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
@@ -110,10 +78,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		return true;
 	}
 	    
-	@Override
-	protected void onDeactivate() {
-	}
-	
 	@Override
 	public String getDescription() {
 		return "";

@@ -1,19 +1,17 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.util.Deque;
-import java.util.LinkedList;
-
 import com.aboni.nmea.router.NMEACache;
-
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.sentences.XDPParser;
 import com.aboni.nmea.sentences.XDPSentence;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DPTSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+
+import java.util.Deque;
+import java.util.LinkedList;
 
 public class DepthStatsAgent extends NMEAAgentImpl {
 
@@ -60,8 +58,8 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 
     /**
      * For testing purposes only
-     * @param d
-     * @param ts
+     * @param d The value of the depth
+     * @param ts The timestamp (unix time) of the reading
      */
     @SuppressWarnings("unused")
     public void _pushDepth(double d, long ts) {

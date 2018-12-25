@@ -8,13 +8,7 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 	private final String sentenceId;
 	private final TalkerId talkerId;
 	private final String source;
-	
-	public NMEABasicSentenceFilter() {
-		sentenceId = "";
-		talkerId = null;
-		source = "";
-	}
-	
+
 	public NMEABasicSentenceFilter(String sentenceId, TalkerId talkerId, String source) {
 		if (sentenceId==null) sentenceId = "";
 		this.sentenceId = sentenceId;
@@ -22,13 +16,6 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 		this.source = source;
 	}
 
-	public NMEABasicSentenceFilter(String sentenceId, TalkerId talkerId) {
-		if (sentenceId==null) sentenceId = "";
-		this.sentenceId = sentenceId;
-		this.talkerId = talkerId;
-		this.source = "";
-	}
-	
 	public NMEABasicSentenceFilter(String sentenceId, String source) {
 		if (sentenceId==null) sentenceId = "";
 		this.sentenceId = sentenceId;

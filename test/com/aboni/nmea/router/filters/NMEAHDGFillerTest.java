@@ -1,29 +1,18 @@
 package com.aboni.nmea.router.filters;
 
-import static org.junit.Assert.*;
-
-import java.util.Collection;
-
-import org.junit.Test;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.processors.NMEAHDGFiller;
 import com.aboni.utils.DataEvent;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.GLLSentence;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.HeadingSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.util.Measurement;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class NMEAHDGFillerTest {
 
+	@SuppressWarnings("unused")
 	class MyCache implements NMEACache {
 
 		boolean hasPosition = true;
@@ -47,12 +36,6 @@ public class NMEAHDGFillerTest {
 			e.data = gll;
 			return e;
 		}
-		
-		@Override
-		public DataEvent<Measurement> getSensorData(String sensorName) { return null; }
-
-		@Override
-		public Collection<String> getSensors() { return null; }
 
 		@Override
 		public boolean isHeadingOlderThan(long time, long threshold) { return false; }

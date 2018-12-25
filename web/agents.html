@@ -230,18 +230,18 @@
 										<div ng-if="a.source=='true'">
 											<div ng-if="a.hasFilterIn=='true'">
 												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-left" style="color: blue" aria-hidden="true"/>
+													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" style="color: blue" aria-hidden="true"></span>
 												</button>
 											</div>
 											<div ng-if="a.hasFilterIn=='false'">
 												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"/>
+													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 												</button>
 											</div>
 										</div>
 										<div ng-if="a.source=='false'">
 											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"/>
+												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
 											</button>
 										</div>
 									</td>
@@ -249,18 +249,18 @@
 										<div ng-if="a.target=='true'">
 											<div ng-if="a.hasFilterOut=='true'">
 												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-right" style="color: blue" aria-hidden="true"/>
+													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" style="color: blue" aria-hidden="true"></span>
 												</button>
 											</div>
 											<div ng-if="a.hasFilterOut=='false'">
 												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"/>
+													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
 												</button>
 											</div>
 										</div>
 										<div ng-if="a.target=='false'">
 											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"/><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"/>
+												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
 											</button>
 										</div>
 									</td>
@@ -269,20 +269,20 @@
 											<div ng-if="a.auto=='false'">
 												<button name={{a.agent}} type="button"
 													class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 1)">
-													<span class="glyphicon glyphicon-pushpin" aria-hidden="true" />
+													<span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
 												</button>
 											</div>
 											<div ng-if="a.auto=='true'">
 												<button name={{a.agent}} type="button"
 													class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 0)">
 													<span class="glyphicon glyphicon-pushpin"
-														style="color: blue" aria-hidden="true" />
+														style="color: blue" aria-hidden="true"></span>
 												</button>
 											</div>
 										</div>
 										<div ng-if="a.startStop=='false' || a.builtin=='true'">
 											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"/>
+												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 											</button>
 										</div>
 									</td>
@@ -304,7 +304,7 @@
 										</div>
 										<div ng-if="a.startStop=='false'">
 											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"/>
+												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 											</button>
 										</div>
 									</td>
@@ -340,7 +340,7 @@
 								type="text" class="form-control" id="sentences">
 						</div>
 						<div class="form-group">
-							<label for="exampleSelect2">Filter type:</label> <select
+							<label for="filterType">Filter type:</label> <select
 								class="form-control" id="filtertype">
 								<option>Blacklist</option>
 								<option>Whitelist</option>

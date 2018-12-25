@@ -1,12 +1,12 @@
 package com.aboni.geo;
 
-import static org.junit.Assert.*;
-
-import java.io.StringWriter;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+
+import java.io.StringWriter;
+
+import static org.junit.Assert.assertEquals;
 
 public class Track2JSONTest {
 
@@ -23,7 +23,7 @@ public class Track2JSONTest {
 	}
 	
 	@Test
-	public void testPath() throws Exception {
+	public void testPath() {
 		Track2JSON j = new Track2JSON();
 		j.setTrack(createPositionHistory());
 		StringWriter w = new StringWriter();
@@ -48,7 +48,7 @@ public class Track2JSONTest {
 	}
 	
 	@Test
-	public void testName() throws Exception {
+	public void testName() {
 		Track2JSON j = new Track2JSON();
 		j.setTrack(createPositionHistory());
 		j.setTrackName("pippo");
@@ -60,7 +60,7 @@ public class Track2JSONTest {
 	
 	
 	@Test
-	public void testDefaultName() throws Exception {
+	public void testDefaultName() {
 		Track2JSON j = new Track2JSON();
 		j.setTrack(createPositionHistory());
 		StringWriter w = new StringWriter();

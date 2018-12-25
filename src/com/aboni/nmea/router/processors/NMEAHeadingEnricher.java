@@ -6,15 +6,9 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
 /**
@@ -27,29 +21,21 @@ import net.sf.marineapi.nmea.util.Position;
 public class NMEAHeadingEnricher implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
-    
-    private boolean doHDT = true;
-    private final NMEACache cache;
+
+	private final NMEACache cache;
     
     public NMEAHeadingEnricher(NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
         this.cache = cache;
     }
-    
-    public NMEAHeadingEnricher(NMEACache cache, boolean hdm, boolean hdt) {
-        m = new NMEAMagnetic2TrueConverter();
-        this.cache = cache;
-        this.doHDT = hdt;
-    }
 
-    @Override
+	@Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
             if (sentence instanceof HDMSentence) {
                 HDMSentence hdm = (HDMSentence)sentence;
                 HDGSentence hdg = getHDG(hdm);
-                boolean canDoT = fillVariation(hdg, getLastPosition());
-                if (doHDT && canDoT) {
+				if (fillVariation(hdg, getLastPosition())) {
                 	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg, getHDT(hdg)});
                 } else {
                 	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg});

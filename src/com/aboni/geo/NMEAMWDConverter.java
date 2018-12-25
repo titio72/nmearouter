@@ -1,14 +1,9 @@
 package com.aboni.geo;
 
 import com.aboni.misc.Utils;
-
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.MWDSentence;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.*;
 
 public class NMEAMWDConverter {
 
@@ -75,7 +70,7 @@ public class NMEAMWDConverter {
 	/**
 	 * Set the heading (necessary to calculate the direction of the wind from north).
 	 * The sample will be tagged with a timestamp set to now. 
-	 * @param s
+	 * @param s The HDG sentence used for enriching the wind direction
 	 */
 	public void setHeading(HDGSentence s) {
 		setHeading(s, System.currentTimeMillis());
@@ -94,7 +89,7 @@ public class NMEAMWDConverter {
 	/**
 	 * Set the wind information. Only "true" wind will be taken into account while "relative" will be discarded.
 	 * The timestamp is as of now.
-	 * @param s
+	 * @param s The wind sentence to be enriched
 	 */
 	public void setWind(MWVSentence s) {
 		setWind(s, System.currentTimeMillis());

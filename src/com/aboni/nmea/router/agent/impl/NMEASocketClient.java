@@ -1,9 +1,5 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
@@ -11,6 +7,10 @@ import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
 
 public class NMEASocketClient extends NMEAAgentImpl {
 
@@ -20,10 +20,6 @@ public class NMEASocketClient extends NMEAAgentImpl {
 	private SentenceReader reader;
     private final boolean receive;
     private final boolean transmit;
-	
-	public NMEASocketClient(NMEACache cache, String name, String server, int port) {
-	    this(cache, name, server, port, true, false, null);
-	}
 	
 	public NMEASocketClient(NMEACache cache, String name, String server, int port, boolean rec, boolean trans, QOS qos) {
         super(cache, name, qos);

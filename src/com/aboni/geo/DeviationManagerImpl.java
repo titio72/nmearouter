@@ -1,10 +1,8 @@
 package com.aboni.geo;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import com.aboni.utils.ServerLog;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,21 +51,27 @@ public class DeviationManagerImpl implements DeviationManager {
     /**
      * Load an existing deviation map.
      * Each line is a sample in the form compass,magnetic
-     * @param stream An InputStream for the deviation map. 
-     * @throws IOException In case reading fails.
+     * @param stream An InputStream for the deviation map.
      */
-    public void load(InputStream stream) throws IOException {
+    @Override
+    public boolean load(InputStream stream) {
     
     	synchronized (this) {
-	        BufferedReader r = new BufferedReader(new InputStreamReader(stream));
-	        String line;
-			while ((line = r.readLine()) != null) {
-	        	String[] sample = line.split(",");
-	        	if (sample.length==2) {
-	        		add(Integer.parseInt(sample[0]), Double.parseDouble(sample[1]));
-	        	}
-	        }
-			r.close();
+    	    try {
+                BufferedReader r = new BufferedReader(new InputStreamReader(stream));
+                String line;
+                while ((line = r.readLine()) != null) {
+                    String[] sample = line.split(",");
+                    if (sample.length == 2) {
+                        add(Integer.parseInt(sample[0]), Double.parseDouble(sample[1]));
+                    }
+                }
+                r.close();
+                return true;
+            } catch (IOException e) {
+                ServerLog.getLogger().Error("DeviationManager cannot read deviation table", e);
+                return false;
+            }
     	}
     }
 

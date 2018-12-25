@@ -1,10 +1,10 @@
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
 <xs:element name="Router" type="Router"/>
 
 <xs:complexType name="Router">
 	<xs:sequence>
-		<xs:element name="Log" type="Log" minOccurs="1" maxOccurs="1"/>
+		<xs:element name="Log" type="Log"/>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="SerialAgent" type="SerialAgent"/>
 			<xs:element name="TcpAgent" type="TcpAgent"/>
@@ -24,9 +24,9 @@
 
 <xs:complexType name="AgentBase">
 	<xs:sequence>
-		<xs:element name="qos" type="xs:string" minOccurs="0" maxOccurs="1"/>
-		<xs:element name="FilterSource" type="FilterSource" minOccurs="0" maxOccurs="1"/>
-		<xs:element name="FilterTarget" type="FilterTarget" minOccurs="0" maxOccurs="1"/>
+		<xs:element name="qos" type="xs:string" minOccurs="0"/>
+		<xs:element name="FilterSource" type="FilterSource" minOccurs="0"/>
+		<xs:element name="FilterTarget" type="FilterTarget" minOccurs="0"/>
 	</xs:sequence>
 	<xs:attribute name="name" type="xs:string" use="required"/>
 	<xs:attribute name="active" type="xs:boolean" default="false"/>
@@ -92,7 +92,7 @@
 	<xs:complexContent>
 	    <xs:extension base="AgentBase">
 			<xs:sequence>
-				<xs:element name="to" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="to" type="xs:string" maxOccurs="unbounded"/>
 			</xs:sequence>		
 			<xs:attribute name="type" type="xs:string" fixed="UDP"/>
 			<xs:attribute name="port" type="xs:int" default="1515"/>
@@ -172,7 +172,7 @@
 
 <xs:complexType name="Log">
 	<xs:sequence>
-		<xs:element name="file" type="xs:string" default="router.log" minOccurs="1" maxOccurs="1"/>
+		<xs:element name="file" type="xs:string" default="router.log"/>
 	</xs:sequence>
 	<xs:attribute name="level" type="LogLevelType" default="INFO"/>
 </xs:complexType>

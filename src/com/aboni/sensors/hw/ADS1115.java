@@ -1,9 +1,9 @@
 package com.aboni.sensors.hw;
 
-import java.io.IOException;
-
 import com.aboni.sensors.I2CInterface;
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
+
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class ADS1115 {
@@ -198,10 +198,10 @@ public class ADS1115 {
 
     /**
      * Writes 16-bits to the specified destination register
-     * @param device
-     * @param register
-     * @param value
-     * @throws IOException
+     * @param device The I2C device
+     * @param register  the Tegister value
+     * @param value The value to be written inthe registry
+     * @throws IOException When the writing on the device fails
      */
     static void writeRegister(I2CInterface device, int register, int value) throws IOException {
       

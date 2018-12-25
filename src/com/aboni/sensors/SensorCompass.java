@@ -1,11 +1,11 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
 import com.aboni.misc.Utils;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class SensorCompass extends ASensorCompass {
 
@@ -35,7 +35,7 @@ public class SensorCompass extends ASensorCompass {
 
     /**
 	 * Get the bearing compensated with the tilt data and deviation.
-	 * @return
+	 * @return Non-smoothed tilt-compensated compass heading
 	 */
     @Override
 	public double getUnfilteredSensorHeading() {

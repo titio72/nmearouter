@@ -1,8 +1,8 @@
 package com.aboni.sensors.hw;
 
-import java.io.IOException;
-
 import com.aboni.sensors.I2CInterface;
+
+import java.io.IOException;
 
 /*
  * Altitude, Pressure, Temperature
@@ -187,7 +187,7 @@ public class BMP180 implements Atmo {
 		}
 	}
 
-	protected static void waitfor(long howMuch)
+	private static void waitfor(long howMuch)
 	{
 		try { Thread.sleep(howMuch); } catch (InterruptedException ie) { ie.printStackTrace(); }
 	}

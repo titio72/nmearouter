@@ -1,17 +1,15 @@
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.sentences.NMEATimestampExtractor;
+import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.sentences.NMEATimestampExtractor;
-import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class SystemTimeChecker {
 
@@ -22,7 +20,7 @@ public class SystemTimeChecker {
 	public SystemTimeChecker(NMEACache cache) {
 		this.cache = cache;
 	}
-	public void checkAndSetTime(Sentence s, NMEAAgent src) {
+	public void checkAndSetTime(Sentence s) {
 		if (!cache.isTimeSynced()) {
 			try {
 				Calendar c = NMEATimestampExtractor.getTimestamp(s);
