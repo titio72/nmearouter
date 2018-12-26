@@ -1,13 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 public class NMEAUDPReceiver extends NMEAAgentImpl {
 
@@ -80,7 +79,4 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         return " {UDP " + port + " R}";
     }
 
-    @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
-    }
 }

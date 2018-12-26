@@ -1,5 +1,8 @@
 package com.aboni.geo;
 
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.util.Position;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.text.SimpleDateFormat;
@@ -7,10 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.util.Position;
-
+@SuppressWarnings("ALL")
 public class TrackLoaderFile implements TrackLoader {
 
 	public class MalformedPointLineException extends Exception {

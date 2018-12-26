@@ -1,13 +1,13 @@
 package com.aboni.geo;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
-
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
 
 public class TrackLoaderDB implements TrackLoader {
 
@@ -56,9 +56,6 @@ public class TrackLoaderDB implements TrackLoader {
 	    return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.geo.TrackLoader#getTrack()
-	 */
 	@Override
 	public PositionHistory getTrack() {
 		return h;

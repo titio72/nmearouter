@@ -42,12 +42,7 @@ public class SensorTemp implements Sensor {
 		return "W1TEMP";
 	}
 
-	@Override
-	public long getReadAge() {
-		return System.currentTimeMillis() - lastRead;
-	}
-
-	@Override
+    @Override
 	public void read() throws SensorNotInititalizedException {
 		lastRead = System.currentTimeMillis();
 		if (sensor!=null) {

@@ -23,6 +23,7 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 		this.source = source;
 	}
 	
+	@SuppressWarnings("unused")
 	public NMEABasicSentenceFilter(String sentenceId) {
 		if (sentenceId==null) sentenceId = "";
 		this.sentenceId = sentenceId;

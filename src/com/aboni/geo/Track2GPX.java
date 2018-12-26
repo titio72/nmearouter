@@ -1,12 +1,12 @@
 package com.aboni.geo;
 
+import com.aboni.geo.PositionHistory.DoWithPoint;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import com.aboni.geo.PositionHistory.DoWithPoint;
 
 public class Track2GPX implements TrackDumper {
 
@@ -34,10 +34,6 @@ public class Track2GPX implements TrackDumper {
 	public static final String DEFAULT_TRACK_NAME = "track";
 	
 	public Track2GPX() {
-	}
-	
-	public PositionHistory getTrack() {
-		return track;
 	}
 
 	/* (non-Javadoc)
@@ -116,13 +112,6 @@ public class Track2GPX implements TrackDumper {
         w.write(name);
 	}
 
-	public String getTrackName() {
-		return trackName;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.aboni.geo.TrackDumper#setTrackName(java.lang.String)
-	 */
 	@Override
 	public void setTrackName(String trackName) {
 		this.trackName = trackName;

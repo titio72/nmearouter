@@ -1,13 +1,11 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class FanAgent extends NMEAAgentImpl {
 
@@ -25,10 +23,6 @@ public class FanAgent extends NMEAAgentImpl {
 	public String getDescription() {
 		return "CPU Temp " + CPUTemp.getInstance().getTemp() + "C° Fan " + (fan.isFanOn()?"On":"Off") + 
 				" [" + getThresholdOff() + "/" + getThresholdOn() + "]";
-	}
-
-	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
 	}
 
 	@Override

@@ -51,9 +51,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     @Override
     protected boolean onActivate() {
     	synchronized (this) {
-    		if (!isStarted()) {
-		        compassSensor = createCompass();
-    		}
+			compassSensor = createCompass();
 	        return true;
     	}
     }

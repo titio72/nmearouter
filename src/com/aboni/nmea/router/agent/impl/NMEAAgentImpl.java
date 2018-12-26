@@ -309,7 +309,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	 * @param s The sentence just received
 	 * @param source The source that originated the sentence
 	 */
-	protected abstract void doWithSentence(Sentence s, NMEAAgent source);
+	protected void doWithSentence(Sentence s, NMEAAgent source) {}
 
     
     private void _setSentenceListener(NMEASentenceListener listener) {

@@ -7,6 +7,7 @@
     <version>0.1.6-SNAPSHOT</version>
     <build>
         <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>test</testSourceDirectory>
         <resources>
             <resource>
                 <directory>src</directory>
@@ -188,17 +189,6 @@
             <version>2.3.0</version>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>oss-snapshots-repo</id>
-            <name>Sonatype OSS Maven Repository</name>
-            <url>https://oss.sonatype.org/content/groups/public</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
     <scm>
         <url>git@github.com:titio72/mmearouter.git</url>
         <connection>scm:git:git@github.com:titio72/mmearouter.git</connection>

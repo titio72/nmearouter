@@ -1,6 +1,8 @@
 package com.aboni.nmea.router.batch;
 
 
+import com.aboni.utils.db.DBHelper;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.text.SimpleDateFormat;
@@ -8,9 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.aboni.utils.db.DBHelper;
-
-@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressWarnings("ALL")
 public class TrackToDB {
 	
 	class PPP {
@@ -24,7 +24,7 @@ public class TrackToDB {
 	}
 
 	DBHelper db;
- 
+
     private final SimpleDateFormat dfParser;
 	
 	public TrackToDB() {

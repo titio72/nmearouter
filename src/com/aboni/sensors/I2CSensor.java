@@ -48,8 +48,6 @@ public abstract class I2CSensor implements Sensor {
     
     private static int instanceCounter;
     private final int instance;
-    
-    private long readTs;
 
     private double smootingAlpha;
 
@@ -60,7 +58,6 @@ public abstract class I2CSensor implements Sensor {
     private boolean initialized;
     
     public I2CSensor() {
-        readTs = 0;
         setDefaultSmootingAlpha(LPF_ALPHA);
         instanceCounter++;
         instance = instanceCounter;
@@ -95,14 +92,6 @@ public abstract class I2CSensor implements Sensor {
     protected final boolean isInitialized() {
         return initialized;
     }
-    
-    /* (non-Javadoc)
-	 * @see com.aboni.sensors.Sensor#getReadAge()
-	 */
-    @Override
-	public long getReadAge() {
-        return System.currentTimeMillis() - readTs;
-    }
 
     protected abstract void _read() throws Exception;
 
@@ -112,7 +101,6 @@ public abstract class I2CSensor implements Sensor {
     @Override
 	public final void read() throws SensorNotInititalizedException {
         if (isInitialized() && (failures<maxFailures)) {
-            readTs = System.currentTimeMillis();
             try {
             	_read();
             } catch (Exception e) {

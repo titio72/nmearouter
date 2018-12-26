@@ -1,34 +1,28 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.aboni.geo.Course;
+import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.RMCSentence;
+import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.util.CompassPoint;
+import net.sf.marineapi.nmea.util.FaaMode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.aboni.geo.Course;
-import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.util.CompassPoint;
-import net.sf.marineapi.nmea.util.FaaMode;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
@@ -146,7 +140,4 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 		prevPos = pos;
 	}
 
-	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
-	}
 }

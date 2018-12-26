@@ -1,12 +1,11 @@
 package com.aboni.geo;
 
+import com.aboni.geo.PositionHistory.DoWithPoint;
+import org.json.JSONObject;
+
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONObject;
-
-import com.aboni.geo.PositionHistory.DoWithPoint;
 
 public class Track2JSON implements TrackDumper {
 
@@ -100,10 +99,6 @@ public class Track2JSON implements TrackDumper {
 		this.track = track;
 	}
 
-	public PositionHistory getTrack() {
-		return track;
-	}
-	
 }
 
 /*

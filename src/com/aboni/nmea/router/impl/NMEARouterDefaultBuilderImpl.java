@@ -7,7 +7,9 @@ import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.agent.impl.*;
+import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
+import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
+import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
 import com.aboni.nmea.router.agent.impl.system.FanAgent;
 import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
 import com.aboni.nmea.router.agent.impl.system.PowerLedAgent;
@@ -194,24 +196,5 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	@Override
 	public NMEARouter getRouter() {
 		return router;
-	}
-
-	public NMEARouterBuilder initPlayFile(String playFile) {
-        router = injector.getInstance(NMEARouter.class);
-        
-        NMEAAgent sock = new NMEASocketServer(
-        		injector.getInstance(NMEACache.class), 
-        		"TCP", 1111, null);
-        router.addAgent(sock);
-        sock.start();
-        
-        NMEAPlayer play = new NMEAPlayer(
-        		injector.getInstance(NMEACache.class), 
-        		"PLAYER", null);
-        play.setFile(playFile);
-        router.addAgent(play);
-        play.start();
-        
-        return this;
 	}
 }

@@ -1,5 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.sentences.NMEASentenceItem;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,16 +15,6 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.sentences.NMEASentenceItem;
-
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAPlayer extends NMEAAgentImpl {
 
@@ -41,12 +38,8 @@ public class NMEAPlayer extends NMEAAgentImpl {
 	public String getFile() {
 		return file;
 	}
-	
+
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
-	}
-	
-	@Override 
 	public void onDeactivate() {
 		if (isStarted() && !stop)
 			stop = true;

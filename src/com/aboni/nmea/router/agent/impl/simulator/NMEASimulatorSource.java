@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
-import com.aboni.geo.NavSimulator;
 import com.aboni.misc.PolarTable;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
@@ -175,7 +174,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
 	        if (lastTS!=0) {
 	        	double dTime = (double)(newTS-lastTS) / 1000d / 60d / 60d;
-	        	pos = NavSimulator.calcNewLL(pos, hdg, speed * dTime);
+	        	pos = Utils.calcNewLL(pos, hdg, speed * dTime);
 	        	pos_out = new Position(pos.getLatitude(), pos.getLongitude());
 	        	if (data._gpsOut) {
 	        		int x = r.nextInt(25);

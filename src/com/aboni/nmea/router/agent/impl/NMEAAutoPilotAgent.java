@@ -2,13 +2,10 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
@@ -88,11 +85,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		return "Raymarine SeaTalk autopilot driver";
 	}
 
-	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
-	}
-	
-	@Override
+    @Override
 	protected boolean onActivate() {
 		return true;
 	}

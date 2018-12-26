@@ -1,29 +1,19 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.sensors.SensorPressureTemp;
-import com.aboni.sensors.SensorTemp;
-import com.aboni.sensors.Sensor;
-import com.aboni.sensors.SensorNotInititalizedException;
-import com.aboni.sensors.SensorVoltage;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.sensors.*;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
-
-import java.util.Collection;
-
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-
+import com.pi4j.io.i2c.I2CFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.MHUSentence;
-import net.sf.marineapi.nmea.sentence.MMBSentence;
-import net.sf.marineapi.nmea.sentence.MTASentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class NMEASourceSensor extends NMEAAgentImpl {
 
@@ -57,13 +47,20 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     @Override
     protected boolean onActivate() {
         started = true;
-    
-        tempSensor = createTempSensor();
-        pressureTempSensor0 = createTempPressure(0);
-        pressureTempSensor1 = createTempPressure(1);
+
+        List<Sensor> sensors = new ArrayList<>();
+        sensors.add(tempSensor = createTempSensor());
+        sensors.add(pressureTempSensor0 = createTempPressure(0));
+        sensors.add(pressureTempSensor1 = createTempPressure(1));
         pressureTempSensors = new SensorPressureTemp[] {pressureTempSensor0, pressureTempSensor1};
-        voltageSensor = createVoltage();
-        
+        sensors.add(voltageSensor = createVoltage());
+        for (Sensor s: sensors) {
+            try {
+                if (s!=null) s.init();
+            } catch (IOException | I2CFactory.UnsupportedBusNumberException e) {
+                getLogger().Error("Error initializing sensor {" + s.getSensorName() + "}", e);
+            }
+        }
         return true;
     }
 
@@ -94,9 +91,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
 	private SensorTemp createTempSensor() {
     	try {
-    		SensorTemp t = new SensorTemp();
-    		t.init();
-    		return t;
+            return new SensorTemp();
     	} catch (Exception e) {
             getLogger().Error("Error creating temp sensor ", e);
             return null;
@@ -105,9 +100,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     private SensorVoltage createVoltage() {
         try {
-            SensorVoltage r = new SensorVoltage();
-            r.init();
-            return r;
+            return new SensorVoltage();
         } catch (Exception e) {
             getLogger().Error("Error creating voltage sensor ", e);
             return null;
@@ -116,11 +109,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
 	private SensorPressureTemp createTempPressure(int i) {
 		try {
-			SensorPressureTemp p = new SensorPressureTemp(
-					(i==0)?SensorPressureTemp.Sensor.BMP180:SensorPressureTemp.Sensor.BME280
-			);
-			p.init();
-			return p;
+            return new SensorPressureTemp(
+                    (i==0)?SensorPressureTemp.Sensor.BMP180:SensorPressureTemp.Sensor.BME280
+            );
 		} catch (Exception e) {
 			getLogger().Error("Error creating temp/press sensor", e);
 			return null;
@@ -255,7 +246,4 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         return Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
 	}
 
-    @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
-    }
 }

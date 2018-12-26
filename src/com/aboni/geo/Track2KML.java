@@ -1,11 +1,10 @@
 package com.aboni.geo;
 
-import java.io.Writer;
-
 import com.aboni.geo.PositionHistory.DoWithPoint;
-
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
+
+import java.io.Writer;
 
 public class Track2KML implements TrackDumper {
 
@@ -29,10 +28,6 @@ public class Track2KML implements TrackDumper {
 	
 	public Track2KML() {
 	    kml = new Kml();
-	}
-	
-	public PositionHistory getTrack() {
-		return track;
 	}
 
 	@Override

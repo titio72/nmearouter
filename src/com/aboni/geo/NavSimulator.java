@@ -1,14 +1,12 @@
 package com.aboni.geo;
 
+import com.aboni.misc.PolarTable;
+import com.aboni.misc.Utils;
+import net.sf.marineapi.nmea.util.Position;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Random;
-
-import com.aboni.misc.PolarTable;
-import com.aboni.misc.Utils;
-
-import net.sf.marineapi.nmea.util.Position;
 
 public class NavSimulator {
 	
@@ -176,7 +174,7 @@ public class NavSimulator {
 	}
 	
 	public void doCalc(long time) {
-		Position newPos = calcNewLL(pos, heading, speed * (double)(time - this.time)/1000d/60d/60d);
+		Position newPos = Utils.calcNewLL(pos, heading, speed * (double)(time - this.time)/1000d/60d/60d);
 		this.time = time;
 		pos = newPos;
 		if (getTo()!=null) {
@@ -184,22 +182,6 @@ public class NavSimulator {
 			calcHeadings();
 		}
 		calcSpeed();
-	}
-	
-	public static Position calcNewLL(Position p0, double heading, double dist) {
-		Course c = new Course(p0, heading, dist);
-		return c.getP1();
-	}
-
-	private static final Random r = new Random();
-
-	public static Position calcNewLL(Position p0, double heading, double dist, double noiseRadiusMeters) {
-		Course c = new Course(p0, heading, dist);
-		Position p1 = c.getP1();
-		double dNoise = (r.nextDouble() * noiseRadiusMeters / 1852.0);
-		double hNoise = (r.nextDouble() * 360.0);
-		c = new Course(p1, hNoise, dNoise);
-		return c.getP1();
 	}
 
 	@SuppressWarnings("PointlessArithmeticExpression")
