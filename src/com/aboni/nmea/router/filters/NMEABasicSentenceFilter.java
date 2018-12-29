@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.filters;
 
+import com.aboni.nmea.sentences.NMEASentenceFilter;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 

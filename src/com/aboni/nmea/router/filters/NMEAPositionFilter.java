@@ -1,17 +1,13 @@
 package com.aboni.nmea.router.filters;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.aboni.nmea.sentences.NMEASentenceFilter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
+
+import java.util.*;
 
 public class NMEAPositionFilter implements NMEASentenceFilter {
 	

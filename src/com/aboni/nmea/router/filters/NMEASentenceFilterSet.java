@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.filters;
 
+import com.aboni.nmea.sentences.NMEASentenceFilter;
+
 import java.util.Iterator;
 
 public interface NMEASentenceFilterSet extends NMEASentenceFilter {

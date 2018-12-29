@@ -1,12 +1,12 @@
 package com.aboni.nmea.router.filters;
 
-import static org.junit.Assert.*;
+import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
+import com.aboni.nmea.sentences.NMEASentenceFilter;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-import org.junit.Test;
-
-import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
+import static org.junit.Assert.*;
 
 public class FilterSetBuilderTest {
 

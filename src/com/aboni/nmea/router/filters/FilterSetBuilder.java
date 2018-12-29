@@ -1,14 +1,13 @@
 package com.aboni.nmea.router.filters;
 
-import java.util.Iterator;
-
+import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
+import com.aboni.nmea.sentences.NMEASentenceFilter;
+import net.sf.marineapi.nmea.sentence.TalkerId;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
-
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import java.util.Iterator;
 
 public class FilterSetBuilder {
 
