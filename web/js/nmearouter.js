@@ -168,13 +168,15 @@ function tripInfo(trip) {
 	var dS = Math.floor(sailtime / 60 / 60 / 24);
 	var hS = Math.floor(sailtime / 60 / 60) % 24;
 	var mS = Math.round(sailtime / 60) % 60;
+
 	bootbox.alert({
 		message: 
 		"<p>" + json.start + " - " + json.end + " UTC</p>" +			
 		"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + d + "d " + h + "h " + m + "m</b></p>" +
 		"<p>Sail time <b>" + dS + "d " + hS + "h " + mS + "m</b></p>" +
 		"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
-		"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>"
+		"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>" +
+		"<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>"
 	});
 	
 }
