@@ -6,14 +6,11 @@
     <artifactId>NMEARouter</artifactId>
     <version>0.1.6-SNAPSHOT</version>
     <build>
-        <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
+        <sourceDirectory>src/java</sourceDirectory>
+        <testSourceDirectory>test/java</testSourceDirectory>
         <resources>
             <resource>
-                <directory>src</directory>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
+                <directory>src/resources</directory>
             </resource>
         </resources>
         <plugins>
@@ -187,6 +184,21 @@
             <groupId>com.fazecast</groupId>
             <artifactId>jSerialComm</artifactId>
             <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-drive</artifactId>
+            <version>v3-rev110-1.23.0</version>
         </dependency>
     </dependencies>
     <scm>
