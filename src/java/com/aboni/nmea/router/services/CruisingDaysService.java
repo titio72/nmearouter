@@ -1,22 +1,16 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.*;
 
 public class CruisingDaysService extends JSONWebService {
 	
@@ -40,6 +34,7 @@ public class CruisingDaysService extends JSONWebService {
 	}
 	
 	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd");
+	private static final DateFormat short_df = new SimpleDateFormat("dd/MM");
 
 	public CruisingDaysService() {
 	}
@@ -101,8 +96,10 @@ public class CruisingDaysService extends JSONWebService {
 			trip.put("lastDay", df.format(t.max));
 			JSONArray dates = new JSONArray();
 			for (Date d: t.dates) {
-				JSONObject dt = new JSONObject();
-				dt.put("day", DateFormat.getDateInstance(DateFormat.SHORT).format(d));
+        JSONObject dt = new JSONObject();
+        String longDate = DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+				dt.put("day", longDate);
+				dt.put("dayShort", (dates.length()>=1)?short_df.format(d):longDate);
 				dt.put("ref", df.format(d));
 				dates.put(dt);
 			}

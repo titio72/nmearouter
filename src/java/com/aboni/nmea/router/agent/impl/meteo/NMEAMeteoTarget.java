@@ -4,16 +4,11 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.utils.Serie;
-import com.aboni.utils.ScalarSerie;
 import com.aboni.utils.AngleSerie;
-
-import net.sf.marineapi.nmea.sentence.MHUSentence;
-import net.sf.marineapi.nmea.sentence.MMBSentence;
-import net.sf.marineapi.nmea.sentence.MTASentence;
-import net.sf.marineapi.nmea.sentence.MTWSentence;
-import net.sf.marineapi.nmea.sentence.MWDSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
+import com.aboni.utils.DataEvent;
+import com.aboni.utils.ScalarSerie;
+import com.aboni.utils.Serie;
+import net.sf.marineapi.nmea.sentence.*;
 
 public class NMEAMeteoTarget extends NMEAAgentImpl {
 
@@ -40,11 +35,14 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     private final NMEACache cache;
 
+    private final boolean useMWD;
+
     public NMEAMeteoTarget(NMEACache cache, String name, QOS qos, StatsWriter w) {
         super(cache, name, qos);
         this.cache = cache;
         setSourceTarget(false, true);
     	writer = w;
+    	useMWD = qos!=null?qos.get("useMWD"):false;
     }
 
     @Override
@@ -102,8 +100,10 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		            processWaterTemp((MTWSentence)s);
 		        } else if (s instanceof MHUSentence) {
 		            processHumidity((MHUSentence)s);
-		        } else if (s instanceof MWDSentence) {
-		            processWind((MWDSentence)s);
+                } else if (useMWD && s instanceof MWDSentence) {
+                    processWind((MWDSentence)s);
+                } else if (!useMWD && s instanceof MWVSentence) {
+                    processWind((MWVSentence)s);
 		        }
 	    	}
     	} catch (Exception e) {
@@ -125,12 +125,30 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     private void processWind(MWDSentence s) {
-    	if (Double.isNaN(s.getWindSpeedKnots())) {
-    		collect(WIND, s.getWindSpeed() * 1.94384);
-    	} else {
-    		collect(WIND, s.getWindSpeedKnots());
-    	}
+        if (Double.isNaN(s.getWindSpeedKnots())) {
+            collect(WIND, s.getWindSpeed() * 1.94384);
+        } else {
+            collect(WIND, s.getWindSpeedKnots());
+        }
         collect(WIND_D, s.getMagneticWindDirection());
+    }
+
+    private void processWind(MWVSentence s) {
+        if (s.isTrue()) {
+            DataEvent<HeadingSentence> e = cache.getLastHeading();
+            if (e!=null && (System.currentTimeMillis() - e.timestamp)<800) {
+                double windDir = e.data.getHeading() + s.getAngle();
+                double windSpd;
+                switch (s.getSpeedUnit().toChar()) {
+                    case 'N': windSpd = s.getSpeed(); break;
+                    case 'K': windSpd = s.getSpeed() / 1.852; break;
+                    case 'M': windSpd = s.getSpeed()  * 1.94384; break;
+                    default: windSpd = 0.0;
+                }
+                collect(WIND, windSpd);
+                collect(WIND_D, windDir);
+            }
+        }
     }
 
     private void processWaterTemp(MTWSentence s) {
