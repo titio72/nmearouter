@@ -48,7 +48,7 @@ public class FilterSetBuilder {
 	}
 	
 	public NMEASentenceFilterSet importFilter(String jsonFilter) throws JSONException {
-		if (jsonFilter!=null) {
+		if (jsonFilter!=null && !jsonFilter.isEmpty()) {
 			JSONObject jFs = new JSONObject(jsonFilter);
 			if (jFs.has("filters")) {
 				NMEAFilterSet res = new NMEAFilterSet();
