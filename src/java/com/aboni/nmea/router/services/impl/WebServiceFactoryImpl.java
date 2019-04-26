@@ -1,26 +1,9 @@
 package com.aboni.nmea.router.services.impl;
 
-import javax.inject.Inject;
-
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.services.AgentFilterService;
-import com.aboni.nmea.router.services.AgentStatusService;
-import com.aboni.nmea.router.services.AutoPilotService;
-import com.aboni.nmea.router.services.ChangeTripDescService;
-import com.aboni.nmea.router.services.CreateTripService;
-import com.aboni.nmea.router.services.CruisingDaysService;
-import com.aboni.nmea.router.services.DropTrackingDayService;
-import com.aboni.nmea.router.services.MeteoService;
-import com.aboni.nmea.router.services.SImulatorService;
-import com.aboni.nmea.router.services.ServiceDBBackup;
-import com.aboni.nmea.router.services.ServiceShutdown;
-import com.aboni.nmea.router.services.SpeedAnalyticsService;
-import com.aboni.nmea.router.services.SpeedService;
-import com.aboni.nmea.router.services.TrackService;
-import com.aboni.nmea.router.services.TripInfoService;
-import com.aboni.nmea.router.services.TripStatService;
-import com.aboni.nmea.router.services.WebService;
-import com.aboni.nmea.router.services.WebServiceFactory;
+import com.aboni.nmea.router.services.*;
+
+import javax.inject.Inject;
 
 public class WebServiceFactoryImpl implements WebServiceFactory {
 
@@ -64,6 +47,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
 				break;
 			case "/tripinfo":
 				s = new TripInfoService();
+				break;
+			case "/dayinfo":
+				s = new DayInfoService();
 				break;
 			case "/trips":
 				s = new TripStatService();

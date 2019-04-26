@@ -1,77 +1,1 @@
-package com.aboni.nmea.router.services;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
-import org.json.JSONObject;
-
-public class TripInfoService extends JSONWebService {
-
-	public TripInfoService() {
-	}
-
-	private static final String sql = "select min(TS), max(TS) from track where tripid=?";
-	private static final double SPEED_THRESHOLD = 0.3;
-	private static final String sql1 = "select sum(dist), max(speed), max(maxSpeed), sum(dTime) from track where tripid=? and anchor=0 and speed>" + SPEED_THRESHOLD;
-
-	@Override
-	public JSONObject getResult(ServiceConfig config, DBHelper db) {
-
-        double dist = 0;
-    	double maxSpeed30 = 0;
-    	double maxSpeed = 0;
-    	Timestamp start = null;
-    	Timestamp end = null;
-    	long sailTime = 0;
-		JSONObject res = new JSONObject();
-		int trip = config.getInteger("trip", -1);
-		if (trip!=-1) {
-			try {
-				PreparedStatement stm = db.getConnection().prepareStatement(sql);
-				stm.setInt(1, trip);
-
-				ResultSet rs = stm.executeQuery();
-				if (rs.next()) {
-					start = rs.getTimestamp(1);
-					end = rs.getTimestamp(2);
-				}
-
-				PreparedStatement stm1 = db.getConnection().prepareStatement(sql1);
-				stm1.setInt(1, trip);
-
-				ResultSet rs1 = stm1.executeQuery();
-				if (rs1.next()) {
-					dist = rs1.getDouble(1);
-					maxSpeed30 = rs1.getDouble(2);
-					maxSpeed = rs1.getDouble(3);
-					sailTime = rs1.getLong(4);
-				}
-				res.put("dist", dist);
-				res.put("maxspeed30", maxSpeed30);
-				res.put("maxspeed", maxSpeed);
-				res.put("sailtime", sailTime);
-				if (start!=null && end!=null) {
-					res.put("start", DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(start));
-					res.put("end", DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(end));
-					res.put("duration", (end.getTime() - start.getTime()) / 1000);
-					res.put("avgspeed", dist / (sailTime/60/60));
-
-				}
-			} catch (SQLException e) {
-				ServerLog.getLogger().Error("Error reading trip stats", e);
-				res = new JSONObject();
-				res.put("Error", "Cannot retrieve trips status - check the logs for errors");
-			}
-		} else {
-			res.put("Error", "Invalid trip id");
-		}
-		return res;
-	}
-
-	
-}
+package com.aboni.nmea.router.services;import com.aboni.utils.ServerLog;import com.aboni.utils.db.DBHelper;import org.json.JSONObject;import java.sql.PreparedStatement;import java.sql.ResultSet;import java.sql.SQLException;import java.sql.Timestamp;import java.text.DateFormat;public class TripInfoService extends JSONWebService {    public TripInfoService() {    }    private static final String sqlDesc = "select description from trip where id=?";    private static final String sql = "select min(TS), max(TS) from track where tripid=?";    private static final double SPEED_THRESHOLD = 0.3;    private static final String sql1 = "select sum(dist), max(speed), max(maxSpeed), sum(dTime) from track where tripid=? and anchor=0 and speed>" + SPEED_THRESHOLD;    @Override    public JSONObject getResult(ServiceConfig config, DBHelper db) {        String name = "";        double dist = 0;        double maxSpeed30 = 0;        double maxSpeed = 0;        Timestamp start = null;        Timestamp end = null;        long sailTime = 0;        JSONObject res = new JSONObject();        int trip = config.getInteger("trip", -1);        if (trip!=-1) {            try {                PreparedStatement stmDesc = db.getConnection().prepareStatement(sqlDesc);                stmDesc.setInt(1, trip);                ResultSet rs = stmDesc.executeQuery();                if (rs.next()) {                    name = rs.getString(1);                }                stmDesc.close();                PreparedStatement stm = db.getConnection().prepareStatement(sql);                stm.setInt(1, trip);                rs = stm.executeQuery();                if (rs.next()) {                    start = rs.getTimestamp(1);                    end = rs.getTimestamp(2);                }                stm.close();                PreparedStatement stm1 = db.getConnection().prepareStatement(sql1);                stm1.setInt(1, trip);                ResultSet rs1 = stm1.executeQuery();                if (rs1.next()) {                    dist = rs1.getDouble(1);                    maxSpeed30 = rs1.getDouble(2);                    maxSpeed = rs1.getDouble(3);                    sailTime = rs1.getLong(4);                }                stm1.close();                res.put("id", trip);                res.put("name", name);                res.put("dist", dist);                res.put("maxspeed30", maxSpeed30);                res.put("maxspeed", maxSpeed);                res.put("sailtime", sailTime);                if (start!=null && end!=null) {                    res.put("start", DateFormat.getDateInstance(DateFormat.SHORT).format(start));                    res.put("end", DateFormat.getDateInstance(DateFormat.SHORT).format(end));                    res.put("duration", (end.getTime() - start.getTime()) / 1000);                    res.put("avgspeed", dist / (sailTime/60/60));                }            } catch (SQLException e) {                ServerLog.getLogger().Error("Error reading trip stats", e);                res = new JSONObject();                res.put("Error", "Cannot retrieve trips status - check the logs for errors");            }        } else {            res.put("Error", "Invalid trip id");        }        return res;    }}

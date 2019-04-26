@@ -5,7 +5,7 @@
   <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
-  <script src="js/nmearouter.js?s"></script>
+  <script src="js/nmearouter.js?z4"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo&callback=initMap"
     async defer></script>
 
@@ -45,6 +45,16 @@
       padding: 5px;
     }
 
+    .panelRouter {
+      height: 300px;
+    }
+
+    .info_cell {
+      padding-bottom: 12px;
+      padding-top: 6px;
+      padding-right: 12px;
+    }
+
     #mapToolbar {
       position: absolute;
       bottom: 30px;
@@ -66,6 +76,7 @@
 
   var dateFrom = null;
   var dateTo = null;
+  var tripId = null;
 
   var path = null;
   var map = null;
@@ -73,20 +84,44 @@
 
   var days;
   days = httpGetCruisingDays();
+  app.controller("infoController", function ($scope) {
+    $scope.days = days;
+  });
+
+  var no_trip = {
+    name: "",
+    id: 0,
+    dist: 0,
+    start: "",
+    end: "",
+    sailTime: "",
+    totalTime: "",
+    maxspeed: 0,
+    maxspeed30: 0,
+    avgspeed: 0,
+    dist: 0
+  };
+
   app.controller("myCtrl", function ($scope) {
     $scope.days = days;
   });
 
+
   function showTrip(d) {
-    dateFrom = d.name.split(".")[0];
-    dateTo = d.name.split(".")[1];
+    var split = d.name.split("."); 
+    dateFrom = split[0];
+    dateTo = split[1];
+    tripId = split[2];
     refreshMap();
+    refreshInfo();
   }
 
   function showDay(d) {
     dateFrom = d.name;
     dateTo = d.name;
+    tripId = null;
     refreshMap();
+    refreshInfo();
   }
 
   function editName(s) {
@@ -303,7 +338,13 @@
     controllerScope.days = days;
     controllerScope.$evalAsync();
   }
-
+  
+  function refreshInfo() {
+    var controllerElement = document.getElementById('panelInfo');
+    var controllerScope = angular.element(controllerElement).scope();
+    controllerScope.trip = (tripId!=null)?getTrip(tripId):getInfo(dateFrom, dateTo);
+    controllerScope.$evalAsync();
+  }
 
 
 </script>
@@ -316,13 +357,13 @@
       <li class="breadcrumb-item active">Track</li>
     </ol>
     <div class="row">
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div id="TripsPanel" class="panel panel-primary" ng-controller="myCtrl">
           <div class="panel-heading">
             <h3 class="panel-title">Tracking <span style="float: right" class="glyphicon glyphicon-refresh"
                 aria-hidden="true" onclick="refreshTrips();"></span></h3>
           </div>
-          <div id="panel_details" class="panel-body" style="height: 400px">
+          <div id="panel_details" class="panel-body panelRouter">
             <div class="table-responsive DocumentList" style="height: 100%">
               <table class="table">
                 <tr ng-repeat="t in days.trips">
@@ -344,7 +385,7 @@
                       <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                     </button>
                   </td>
-                  <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}"
+                  <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}"
                       onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
                   <td>
                     <div style="float:left;" ng-repeat="d in t.dates">
@@ -363,81 +404,104 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Map</h3>
           </div>
-          <div id="map" class="panel-body" style="height: 400px"></div>
-          <div id="mapToolbar">
-            <button name="dwlGPX" type="button" class="btn btn-default" onclick="downloadGPX()">
-              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>GPX
-            </button>
-            <button name="dwlMKL" type="button" class="btn btn-default" onclick="downloadKML()">
-              <span class="glyphicon glyphicon-save" aria-hidden="true"></span>KML
-            </button>
-            <button name="refreshBtn" type="button" class="btn btn-default" onclick="refreshMap()">
-              <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>Refresh
-            </button>
+          <div class="panel-body panelRouter" style="padding: 0%; margin: 0%">
+            <div id="map" style="width: 100%; height: 100%"></div>
+            <div id="mapToolbar">
+              <button name="dwlGPX" type="button" class="btn btn-default" onclick="downloadGPX()">
+                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>GPX
+              </button>
+              <button name="dwlMKL" type="button" class="btn btn-default" onclick="downloadKML()">
+                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>KML
+              </button>
+              <button name="refreshBtn" type="button" class="btn btn-default" onclick="refreshMap()">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Trip</h3>
+          </div>
+          <div id="panelInfo" class="panel-body panelRouter" ng-controller="infoController">
+            <table>
+              <tr><td class="info_cell">Name</td><td class="info_cell">{{trip.name}}</td></tr>
+              <tr><td class="info_cell">Dates</td><td class="info_cell">{{trip.start}} - {{trip.end}}</td></tr>
+              <tr><td class="info_cell">Distance</td><td class="info_cell"><b>{{trip.dist | number:2}}NM</b></td></tr>
+              <tr><td class="info_cell">Sail time</td><td class="info_cell"><b>{{trip.sailTime}}</b></td></tr>
+              <tr><td class="info_cell">Max Speed</td><td class="info_cell"><b>{{trip.maxspeed | number:2}}Kn</b></td></tr>
+              <tr><td class="info_cell">Max 30s Avg Speed</td><td class="info_cell"><b>{{trip.maxspeed30 | number:2}}Kn</b></td></tr>
+              <tr><td class="info_cell">Avg Speed</td><td class="info_cell"><b>{{trip.avgspeed | number:2}}Kn</b></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+  
+
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Speed</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="speedChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Speed Analysis</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="speedAnalysisChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Wind</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="windChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Temperature</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="tempChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Pressure</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="pressChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-md-6" style="min-width:400px">
+      <div class="col-lg-4 col-md-6 col-sm-12"style="min-width:400px">
         <div class="panel panel-primary">
           <div class="panel-heading">
             <h3 class="panel-title">Humidity</h3>
           </div>
-          <div class="panel-body">
+          <div class="panel-body panelRouter">
             <canvas style="min-width: 400px; height: 250px" id="humChart"></canvas>
           </div>
         </div>

@@ -153,9 +153,43 @@ function backup() {
 }
 
 function tripInfo(trip) {
+	bootbox.alert({
+		message: getTripInfo(trip.name)
+	});
+	
+}
+
+function getInfo(dateFrom, dateTo) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + 
-			":1112/tripinfo?trip=" + trip.name, false);
+			":1112/dayinfo?from=" + dateFrom + "&to=" + dateTo, false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	var json = JSON.parse(xmlHttp.responseText);
+
+	var sailtime = json.sailtime;
+	var dS = Math.floor(sailtime / 60 / 60 / 24);
+	var hS = Math.floor(sailtime / 60 / 60) % 24;
+	var mS = Math.round(sailtime / 60) % 60;
+
+  var res = {
+    name: "",
+    id: 0,
+    start: json.start,
+    end: json.end,
+    sailTime: dS + "d " + hS + "h " + mS + "m",
+    maxspeed: json.maxspeed,
+    maxspeed30: json.maxspeed30,
+    avgspeed: json.avgspeed,
+    dist: json.dist
+  };
+  return res;
+}
+
+function getTrip(trip) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + 
+			":1112/tripinfo?trip=" + trip, false);
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var json = JSON.parse(xmlHttp.responseText);
@@ -169,16 +203,32 @@ function tripInfo(trip) {
 	var hS = Math.floor(sailtime / 60 / 60) % 24;
 	var mS = Math.round(sailtime / 60) % 60;
 
-	bootbox.alert({
-		message: 
-		"<p>" + json.start + " - " + json.end + " UTC</p>" +			
-		"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + d + "d " + h + "h " + m + "m</b></p>" +
-		"<p>Sail time <b>" + dS + "d " + hS + "h " + mS + "m</b></p>" +
+  var res = {
+    name: json.name,
+    id: trip,
+    start: json.start,
+    end: json.end,
+    dist: json.dist,
+    sailTime: dS + "d " + hS + "h " + mS + "m",
+    totalTime: d + "d " + h + "h " + m + "m",
+    maxspeed: json.maxspeed,
+    maxspeed30: json.maxspeed30,
+    avgspeed: json.avgspeed
+  };
+  return res;
+}
+
+function getTripInfo(trip) {
+
+  var json = getTrip(trip);
+  
+  return "<p>" + json.name + "</p>" + 
+    "<p>" + json.start + " - " + json.end + " UTC</p>" +			
+		"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + json.totalTime + "</b></p>" +
+		"<p>Sail time <b>" + json.sailTime + "</b></p>" +
 		"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
 		"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>" +
-		"<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>"
-	});
-	
+		"<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>";
 }
 
 function deleteDay(d) {
