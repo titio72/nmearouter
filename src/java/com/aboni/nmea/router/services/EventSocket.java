@@ -10,6 +10,8 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @ClientEndpoint
 @ServerEndpoint(value="/events")
@@ -28,7 +30,6 @@ public class EventSocket
 	}
 	
     @OnOpen
-	@SuppressWarnings("unused")
     public void onWebSocketConnect(Session sess)
     {
     	synchronized (sessions) {
@@ -40,7 +41,6 @@ public class EventSocket
     }
 
     @OnClose
-	@SuppressWarnings("unused")
     public void onWebSocketClose(Session sess)
     {
     	synchronized (sessions) {
@@ -55,7 +55,6 @@ public class EventSocket
     }
     	
     @OnError
-	@SuppressWarnings("unused")
     public void onWebSocketError(Throwable cause)
     {
         ServerLog.getLogger().Error("Error handling websockets", cause);
@@ -65,9 +64,11 @@ public class EventSocket
     	private final Session sess;
     	private static long sc;
     	private final long id;
-    	
+    	private RemoteEndpoint.Async remote;
+
     	MySession(Session s) {
     		sess = s;
+    		remote = null;
     		id = sc++;
     	}
     	
@@ -85,14 +86,20 @@ public class EventSocket
 	    	}
 		}
 
-		@SuppressWarnings("unused")
 		@OnSentence
 		public void onSentence(JSONObject obj) {
 			synchronized (this) {
 				if (obj!=null) {
 					try {
-						sess.getBasicRemote().sendText(obj.toString());
-					} catch (IOException e) {
+						if (sess.isOpen()) {
+							if (remote == null) {
+								remote = sess.getAsyncRemote();
+								remote.setSendTimeout(1000);
+								//remote.setBatchingAllowed(true);
+							}
+							remote.sendText(obj.toString());
+						}
+					} catch (Exception e) {
 						ServerLog.getLogger().Error("Error sending json to WS {" + id + "}", e);
 					}
 				}
