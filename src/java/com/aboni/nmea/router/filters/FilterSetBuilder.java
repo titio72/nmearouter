@@ -4,12 +4,18 @@ import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.sentences.NMEASentenceFilter;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
 
 public class FilterSetBuilder {
+
+	public static final String SENTENCE = "sentence";
+	public static final String TALKER = "talker";
+	public static final String SOURCE = "source";
+	public static final String STALK_NEGATE = "STALK:!";
+	public static final String STALK = "STALK:";
+	public static final String FILTERS = "filters";
 
 	public String exportFilter(NMEASentenceFilterSet s) {
 		if (s!=null) {
@@ -18,61 +24,50 @@ public class FilterSetBuilder {
 			for (Iterator<NMEASentenceFilter> i = s.getFilters(); i.hasNext(); ) {
 				NMEASentenceFilter f = i.next();
 				if (f instanceof NMEABasicSentenceFilter) {
-					JSONObject fJ = new JSONObject();
-					if (((NMEABasicSentenceFilter) f).getTalkerId()==null) {
-						fJ.put("talker", ((NMEABasicSentenceFilter)f).getTalkerId());
-					} else {
-						fJ.put("talker", ((NMEABasicSentenceFilter)f).getTalkerId().toString());
-					}
-					fJ.put("sentence", ((NMEABasicSentenceFilter)f).getSentenceId());
-					fJ.put("source", ((NMEABasicSentenceFilter)f).getSource());
-					sentences.put(fJ);
-				} else if (f instanceof STalkFilter) {					
-					JSONObject fJ = new JSONObject();
-					if (((STalkFilter)f).isNegate()) {
-						fJ.put("sentence", "STALK:!" + ((STalkFilter)f).getCOmmand());
-					} else {
-						fJ.put("sentence", "STALK:" + ((STalkFilter)f).getCOmmand());
-					}
-					sentences.put(fJ);
+					sentences.put(getJSONFilter((NMEABasicSentenceFilter) f));
+				} else if (f instanceof STalkFilter) {
+					sentences.put(getJSONFilter((STalkFilter) f));
 				}
 			}
-			obj.put("filters", sentences);
+			obj.put(FILTERS, sentences);
 			if (s instanceof NMEAFilterSet) {
 				obj.put("type", ((NMEAFilterSet)s).getType()==TYPE.BLACKLIST ? "blacklist":"whitelist");
 			}
 			return obj.toString();
-		} else {
-			return null;
-		}
+		} else return null;
 	}
-	
-	public NMEASentenceFilterSet importFilter(String jsonFilter) throws JSONException {
+
+	private JSONObject getJSONFilter(STalkFilter f) {
+		JSONObject fJ = new JSONObject();
+		if (f.isNegate()) {
+			fJ.put(SENTENCE, STALK_NEGATE + f.getCOmmand());
+		} else {
+			fJ.put(SENTENCE, STALK + f.getCOmmand());
+		}
+		return fJ;
+	}
+
+	private JSONObject getJSONFilter(NMEABasicSentenceFilter f) {
+		JSONObject fJ = new JSONObject();
+		if (f.getTalkerId()==null) {
+			fJ.put(TALKER, f.getTalkerId());
+		} else {
+			fJ.put(TALKER, f.getTalkerId().toString());
+		}
+		fJ.put(SENTENCE, f.getSentenceId());
+		fJ.put(SOURCE, f.getSource());
+		return fJ;
+	}
+
+	public NMEASentenceFilterSet importFilter(String jsonFilter) {
 		if (jsonFilter!=null && !jsonFilter.isEmpty()) {
 			JSONObject jFs = new JSONObject(jsonFilter);
-			if (jFs.has("filters")) {
+			if (jFs.has(FILTERS)) {
 				NMEAFilterSet res = new NMEAFilterSet();
 				res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
-				JSONArray jFa = jFs.getJSONArray("filters");
+				JSONArray jFa = jFs.getJSONArray(FILTERS);
 				for (Object _fJ : jFa) {
-					JSONObject fJ = (JSONObject) _fJ;
-					NMEASentenceFilter f;
-					String sentence = fJ.optString("sentence");
-					if (sentence.startsWith("STALK:!")) {
-						String cmd = sentence.substring("STALK:!".length());
-						f = new STalkFilter(cmd, true);
-					} else if (sentence.startsWith("STALK:")) {
-							String cmd = sentence.substring("STALK:".length());
-							f = new STalkFilter(cmd, false);
-					} else {
-						String stid =  fJ.optString("talker");
-						if (stid==null || "".equals(stid)) {
-							f = new NMEABasicSentenceFilter(fJ.getString("sentence"), fJ.getString("source"));
-						} else {
-							TalkerId tid = TalkerId.parse(stid);
-							f = new NMEABasicSentenceFilter(fJ.getString("sentence"), tid, fJ.getString("source"));
-						}
-					}
+					NMEASentenceFilter f = getNMEASentenceFilter((JSONObject) _fJ);
 					res.addFilter(f);
 				}
 				return res;
@@ -80,5 +75,27 @@ public class FilterSetBuilder {
 		}
 		return null;
 	}
-	
+
+	private NMEASentenceFilter getNMEASentenceFilter(JSONObject filter) {
+		JSONObject fJ = filter;
+		NMEASentenceFilter f;
+		String sentence = fJ.optString(SENTENCE);
+		if (sentence.startsWith(STALK_NEGATE)) {
+			String cmd = sentence.substring(STALK_NEGATE.length());
+			f = new STalkFilter(cmd, true);
+		} else if (sentence.startsWith(STALK)) {
+				String cmd = sentence.substring(STALK.length());
+				f = new STalkFilter(cmd, false);
+		} else {
+			String stid =  fJ.optString(TALKER);
+			if (stid==null || "".equals(stid)) {
+				f = new NMEABasicSentenceFilter(fJ.getString(SENTENCE), fJ.getString(SOURCE));
+			} else {
+				TalkerId tid = TalkerId.parse(stid);
+				f = new NMEABasicSentenceFilter(fJ.getString(SENTENCE), tid, fJ.getString(SOURCE));
+			}
+		}
+		return f;
+	}
+
 }

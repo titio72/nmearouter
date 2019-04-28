@@ -42,7 +42,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         this.cache = cache;
         setSourceTarget(false, true);
     	writer = w;
-    	useMWD = qos!=null?qos.get("useMWD"):false;
+    	useMWD = qos != null && qos.get("useMWD");
     }
 
     @Override

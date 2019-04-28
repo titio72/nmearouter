@@ -39,7 +39,7 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
 	private static final int TIMER_HR		= 250;
-	private int timer_count = 0;
+	private int timerCount = 0;
 	
 	private long lastStatsTime;
 	private static final long STATS_PERIOD = 60; // seconds
@@ -57,10 +57,10 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private void onTimerHR() {
 		synchronized (agents) {
-			timer_count = (timer_count+1) % TIMER_FACTOR;
+			timerCount = (timerCount +1) % TIMER_FACTOR;
 			for (NMEAAgent a: agents.values()) {
 				exec.execute(a::onTimerHR);
-				if (timer_count==0) {
+				if (timerCount ==0) {
 					exec.execute(a::onTimer);
 					dumpStats();
 				}
@@ -117,7 +117,9 @@ public class NMEARouterImpl implements NMEARouter {
 					try { 
 						SentenceEvent e = sentenceQueue.take(); 
 						_routeSentence(e.s, e.src);
-					} catch (InterruptedException e1) { e1.printStackTrace(); }
+					} catch (InterruptedException e1) {
+						Thread.currentThread().interrupt();
+					}
 				}
 			});
 	}
@@ -157,7 +159,7 @@ public class NMEARouterImpl implements NMEARouter {
         try {
 			sentenceQueue.put(e);
 		} catch (InterruptedException e1) {
-			e1.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
     }
 
