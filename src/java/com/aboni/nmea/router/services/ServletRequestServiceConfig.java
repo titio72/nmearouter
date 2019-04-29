@@ -42,7 +42,7 @@ public class ServletRequestServiceConfig implements ServiceConfig {
     @Override
     public Calendar getParamAsCalendar(ServiceConfig request, String param, Calendar def, String format) {
         SimpleDateFormat df = new SimpleDateFormat(format);
-        
+
         String f = request.getParameter(param);
         if (f==null || f.length()==0) {
             return def;
@@ -56,5 +56,4 @@ public class ServletRequestServiceConfig implements ServiceConfig {
             return null;
         }
     }
-
 }
