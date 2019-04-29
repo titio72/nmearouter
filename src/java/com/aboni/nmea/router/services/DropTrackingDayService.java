@@ -1,19 +1,18 @@
 package com.aboni.nmea.router.services;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Calendar;
-
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Calendar;
 
 public class DropTrackingDayService extends JSONWebService {
 
 	@Override
 	public JSONObject getResult(ServiceConfig config, DBHelper db) {
-		try {
-            PreparedStatement stm = db.getConnection().prepareStatement("delete from track where Date(TS)=?");
+		try (PreparedStatement stm = db.getConnection().prepareStatement("delete from track where Date(TS)=?")) {
         	Calendar cDate = config.getParamAsCalendar(config, "date", null, "yyyyMMdd");
         	if (cDate!=null) {
 	        	stm.setDate(1, new java.sql.Date(cDate.getTimeInMillis()));

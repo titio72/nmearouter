@@ -1,5 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.sentences.NMEASentenceItem;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,18 +16,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.sentences.NMEASentenceItem;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.sentence.Sentence;
-
 public class NMEA2FileAgent extends NMEAAgentImpl {
 
-	private static final long DUMP_PERIOD = 10*1000;
+	private static final long DUMP_PERIOD = 10L * 1000L;
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 	
 	private long lastDump = 0;
@@ -62,14 +60,14 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 			lastDump = t;
 			File f = new File("nmea" + df.format(new Date()) + ".log");
 			FileWriter w = new FileWriter(f, true);
-			BufferedWriter bw = new BufferedWriter(w);
-			for (NMEASentenceItem e: queue) {
-				bw.write(e.toString());
-				bw.write("\n");
+			try (BufferedWriter bw = new BufferedWriter(w)) {
+				for (NMEASentenceItem e : queue) {
+					bw.write(e.toString());
+					bw.write("\n");
+				}
+				queue.clear();
+				bw.flush();
 			}
-			queue.clear();
-			bw.flush();
-			bw.close();
 			w.close();
 		}
 	}

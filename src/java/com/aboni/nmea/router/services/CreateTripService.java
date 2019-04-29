@@ -1,20 +1,12 @@
 package com.aboni.nmea.router.services;
 
-import java.util.Calendar;
-
 import com.aboni.utils.db.DBHelper;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.Calendar;
 
 public class CreateTripService implements WebService {
 
-	public CreateTripService() {
-	}
-	
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
 		String strip = config.getParameter("trip");

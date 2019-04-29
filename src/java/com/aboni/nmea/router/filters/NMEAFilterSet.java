@@ -8,7 +8,7 @@ import java.util.*;
 public class NMEAFilterSet implements NMEASentenceFilterSet {
 	
 	private final List<NMEASentenceFilter> filters;
-	private final Set<NMEASentenceFilter> filters_s;
+	private final Set<NMEASentenceFilter> filtersSet;
 	
 	private boolean blackList;
 	
@@ -19,7 +19,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 	
 	public NMEAFilterSet(TYPE type) {
 		filters = new ArrayList<>();
-		filters_s = new HashSet<>();
+		filtersSet = new HashSet<>();
 		blackList = type==TYPE.BLACKLIST;
 	}
 	
@@ -36,16 +36,16 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 	}
 	
 	public void addFilter(NMEASentenceFilter f) {
-		if (!filters_s.contains(f)) {
+		if (!filtersSet.contains(f)) {
 			filters.add(f);
-			filters_s.add(f);
+			filtersSet.add(f);
 		}
 	}
 
 	public void dropFilter(NMEASentenceFilter f) {
-		if (filters_s.contains(f)) {
+		if (filtersSet.contains(f)) {
 			filters.remove(f);
-			filters_s.remove(f);
+			filtersSet.remove(f);
 		}
 	}
 	

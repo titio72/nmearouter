@@ -28,13 +28,10 @@ public class NMEACacheImpl implements NMEACache {
 	            lastHeading.timestamp = System.currentTimeMillis();
 	            lastHeading.source = src;
 	            lastHeading.data = (HeadingSentence)s;
-	        }
-	        else if (s instanceof PositionSentence) {
-	            if (s.isValid()) {
-		            lastPosition.data = (PositionSentence)s;
-		            lastPosition.source = src;
-		            lastPosition.timestamp = System.currentTimeMillis();
-	            }
+	        } else if (s instanceof PositionSentence && s.isValid()) {
+				lastPosition.data = (PositionSentence)s;
+				lastPosition.source = src;
+				lastPosition.timestamp = System.currentTimeMillis();
 	        }
 
 	        if (s instanceof TimeSentence) {

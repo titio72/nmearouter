@@ -133,7 +133,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		String name = s.getName();
 		String portName = s.getDevice();
 		int speed = s.getBps();
-		boolean t, r;
+		boolean t;
+		boolean r;
 		switch (s.getInout()) {
 		case IN: r = true; t = false; break;
 		case OUT: r = false; t = true; break;
@@ -142,7 +143,6 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		}
 		
         return new NMEASerial(cache, name, portName, speed, r, t, q);
-        //return new NMEASerial2(cache, name, portName, speed, r, t, q);
 	}
 	
 	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
@@ -183,7 +183,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         String name = s.getName();
         String server = s.getHost();
         int port = s.getPort();
-        boolean t, r;
+        boolean t;
+        boolean r;
         switch (s.getInout()) {
         case IN: r = true; t = false; break;
         case OUT: r = false; t = true; break;
@@ -197,7 +198,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     private NMEAAgent buildServerSocket(TcpAgent s, QOS q) {
         String name = s.getName();
         int port = s.getPort();
-        boolean t, r;
+        boolean t;
+        boolean r;
         switch (s.getInout()) {
         case IN: r = true; t = false; break;
         case OUT: r = false; t = true; break;
@@ -210,8 +212,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	private NMEAAgent buildTrackTarget(TrackAgent c) {
 		NMEATrackAgent track = new NMEATrackAgent(cache, c.getName());
 		track.setFile(c.getFile());
-	    track.setPeriod(c.getInterval() * 1000);
-	    track.setStaticPeriod(c.getIntervalStatic() * 1000);
+	    track.setPeriod(c.getInterval() * 1000L);
+	    track.setStaticPeriod(c.getIntervalStatic() * 1000L);
 		return track; 
 	}
     

@@ -26,9 +26,9 @@ public class AgentFilterService implements WebService {
 		final String source;
 		
 		public FltSentence(String s) {
-			String[] _s = s.split("@");
-			sentence = _s[0];
-			source = (_s.length==2)?_s[1]:"";
+			String[] tokens = s.split("@");
+			sentence = tokens[0];
+			source = (tokens.length==2)?tokens[1]:"";
 		}
 		
 		NMEABasicSentenceFilter getFilter() {
@@ -50,21 +50,7 @@ public class AgentFilterService implements WebService {
 		NMEAAgent a = router.getAgent(agentname);
 		String msg;
 		if (a!=null) {
-			NMEAFilterSet fs = null;
-			if (sentences.length!=0) {
-				fs = new NMEAFilterSet("whitelist".equals(type)? TYPE.WHITELIST: TYPE.BLACKLIST);
-				boolean atLeast1 = false;
-				for (String str: sentences) {
-					str = str.trim();
-					FltSentence fltSentence = new FltSentence(str.trim());
-					if (!fltSentence.sentence.isEmpty()) {
-						NMEABasicSentenceFilter f = fltSentence.getFilter();
-						fs.addFilter(f);
-						atLeast1 = true;
-					}
-				}
-				fs = (atLeast1?fs:null);
-			}
+			NMEAFilterSet fs  = getNmeaFilterSet(sentences, type);
 			String sfs = (fs!=null)?new FilterSetBuilder().exportFilter(fs):null;
 			if (isOut && a.getTarget()!=null) {
 				a.getTarget().setFilter(fs);
@@ -78,6 +64,23 @@ public class AgentFilterService implements WebService {
 			msg = "Agent " + agentname + " not found";
 		}
 		return msg;
+	}
+
+	private NMEAFilterSet getNmeaFilterSet(String[] sentences, String type) {
+		NMEAFilterSet fs;
+		fs = new NMEAFilterSet("whitelist".equals(type)? TYPE.WHITELIST: TYPE.BLACKLIST);
+		boolean atLeast1 = false;
+		for (String str: sentences) {
+			str = str.trim();
+			FltSentence fltSentence = new FltSentence(str.trim());
+			if (!fltSentence.sentence.isEmpty()) {
+				NMEABasicSentenceFilter f = fltSentence.getFilter();
+				fs.addFilter(f);
+				atLeast1 = true;
+			}
+		}
+		fs = (atLeast1?fs:null);
+		return fs;
 	}
 
 	private void sendResponse(ServiceOutput response, String msg) {

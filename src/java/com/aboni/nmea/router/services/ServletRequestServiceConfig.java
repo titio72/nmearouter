@@ -1,11 +1,10 @@
 package com.aboni.nmea.router.services;
 
+import javax.servlet.ServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import javax.servlet.ServletRequest;
 
 public class ServletRequestServiceConfig implements ServiceConfig {
 
@@ -50,7 +49,7 @@ public class ServletRequestServiceConfig implements ServiceConfig {
         }
         try {
             Date d = df.parse(f);
-            Calendar c = Calendar.getInstance();//TimeZone.getTimeZone("UTC"));
+            Calendar c = Calendar.getInstance();
             c.setTime(d);
             return c;
         } catch (ParseException e) {

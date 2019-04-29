@@ -80,18 +80,19 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
 
 	private HDTSentence getHDT(HDGSentence hdg) {
 		HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
-		double var = 0.0;
-		double dev = 0.0;
+		double var;
+		double dev;
 		//noinspection CatchMayIgnoreException
-		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) {}
+		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) { var = 0.0; }
 		//noinspection CatchMayIgnoreException
-		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) {}
+		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) { dev = 0.0; }
 		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
 		return hdt;
 	}
 
 	@Override
 	public void onTimer() {
+    	// nothing ot do
 	}
     
 }

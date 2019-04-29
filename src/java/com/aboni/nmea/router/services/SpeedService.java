@@ -1,14 +1,15 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.Sample;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.aboni.utils.Sample;
-
 public class SpeedService extends SampledQueryService {
 
     public SpeedService() {
+    	// nothing to initialize
     }
     
 	@Override
@@ -57,5 +58,6 @@ public class SpeedService extends SampledQueryService {
 
 	@Override
 	protected void onPrepare(ServiceConfig config) {
+    	// nothing to initialize
 	}
 }

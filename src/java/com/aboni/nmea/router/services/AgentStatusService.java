@@ -64,20 +64,10 @@ public class AgentStatusService implements WebService {
 	private String startStopService(NMEAAgent a, String activate) {
 		String msg;
 		if (a.isUserCanStartAndStop()) {
-			if (activate.toUpperCase().equals("YES") || activate.equals("1")) {
-				if (a.isStarted()) {
-					msg = "Agent '" + a.getName() + "' alread started";
-				} else {
-					a.start();
-					msg = "Agent '" + a.getName() + "' started";
-				}
-			} else if (activate.toUpperCase().equals("NO") || activate.equals("0")) {
-				if (a.isStarted()) {
-					a.stop();
-					msg = "Agent '" + a.getName() + "' stopped";
-				} else {
-					msg = "Agent '" + a.getName() + "' not started";
-				}
+			if (activate.equalsIgnoreCase("YES") || activate.equals("1")) {
+				msg = activate(a);
+			} else if (activate.equalsIgnoreCase("NO") || activate.equals("0")) {
+				msg = deactivate(a);
 			} else {
 				msg = "Unknown status '" + activate + "'"; 
 			}
@@ -85,5 +75,31 @@ public class AgentStatusService implements WebService {
 			msg = "This agent does not support starting/stopping";
 		}
 		return msg;
+	}
+
+	private String deactivate(NMEAAgent a) {
+		String msg;
+		if (a.isStarted()) {
+			a.stop();
+			msg = getMessage(a, "stopped");
+		} else {
+			msg = getMessage(a, "not started");
+		}
+		return msg;
+	}
+
+	private String activate(NMEAAgent a) {
+		String msg;
+		if (a.isStarted()) {
+			msg = getMessage(a, "alread started");
+		} else {
+			a.start();
+			msg = getMessage(a, "started");
+		}
+		return msg;
+	}
+	
+	private String getMessage(NMEAAgent a, String msg) {
+		return "Agent '" + a.getName() + "' " + msg;
 	}
 }

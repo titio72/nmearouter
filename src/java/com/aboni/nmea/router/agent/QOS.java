@@ -22,4 +22,8 @@ public class QOS {
 	public boolean get(String propName) {
 		return qos.containsKey(propName);
 	}
+
+	public String[] getKeys() {
+		return qos.keySet().toArray(new String[] {});
+	}
 }

@@ -1,5 +1,10 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,24 +16,17 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import com.aboni.utils.ServerLog;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.aboni.utils.db.DBHelper;
-
 public class TripStatService extends JSONWebService {
 
 	//2017-10-29T01:08:58Z
-	private static final DateFormat df = new SimpleDateFormat("dd/HH:mm:ssZ", Locale.US);
-	static {
+	private final DateFormat df;
+
+	public TripStatService() {
+		df  = new SimpleDateFormat("dd/HH:mm:ssZ", Locale.US);
 		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
-	public TripStatService() {
-	}
-
-	private static final String sql = "select "
+	private static final String SQL = "select "
 			+ "tripid, "
 			+ "min(description) as description, "
 			+ "min(TS) as start, "
@@ -60,41 +58,18 @@ public class TripStatService extends JSONWebService {
 	}
 
 	private JSONObject getJsonTripStats(DBHelper db, Calendar cFrom, Calendar cTo) throws SQLException {
-		PreparedStatement stm = db.getConnection().prepareStatement(sql);
-		stm.setTimestamp(1, new Timestamp(cFrom.getTimeInMillis()));
-		stm.setTimestamp(2, new Timestamp(cTo.getTimeInMillis()));
-
-		ResultSet rs = stm.executeQuery();
 
 		long totDuration = 0;
 		double totalDistance = 0.0;
-
 		JSONObject res = new JSONObject();
-		JSONArray trips = new JSONArray();
-		res.put("trips", trips);
-		while (rs.next()) {
-			int tripId = rs.getInt(1);
-			String desc = rs.getString(2);
-			Timestamp start = rs.getTimestamp(3);
-			Timestamp end = rs.getTimestamp(4);
-			long duration = (end.getTime()-start.getTime()) / 1000; totDuration += duration;
-			double distance = rs.getDouble(6); totalDistance += distance;
 
-			JSONObject trip = new JSONObject();
-			trip.put("id", tripId);
-			trip.put("description", desc);
-			trip.put("start", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(start));
-			trip.put("end", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(end));
+		try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
+			stm.setTimestamp(1, new Timestamp(cFrom.getTimeInMillis()));
+			stm.setTimestamp(2, new Timestamp(cTo.getTimeInMillis()));
 
-			long days = duration / (60 * 60 * 24);
-			duration = duration % (60 * 60 * 24);
-			if (days==0)
-				trip.put("duration", String.format("%dh %02dm", duration / 3600, (duration % 3600) / 60));
-			else
-				trip.put("duration", String.format("%dd %dh %02dm", days, duration / 3600, (duration % 3600) / 60));
-			trip.put("distance", String.format("%.2f", distance));
-
-			trips.put(trip);
+			TripsScanner tripsScanner = new TripsScanner(totDuration, totalDistance, res, stm).invoke();
+			totDuration = tripsScanner.getTotDuration();
+			totalDistance = tripsScanner.getTotalDistance();
 		}
 
 		JSONObject tot = new JSONObject();
@@ -103,10 +78,9 @@ public class TripStatService extends JSONWebService {
 		tot.put("distance", String.format("%.2f", totalDistance));
 		long days = totDuration / (60 * 60 * 24);
 		totDuration = totDuration% (60 * 60 * 24);
-		if (days==0)
-			tot.put("duration", String.format("%dh %02dm", totDuration / 3600, (totDuration % 3600) / 60));
-		else
-			tot.put("duration", String.format("%dd %dh %02dm", days, totDuration / 3600, (totDuration % 3600) / 60));
+		tot.put("duration", days==0 ?
+				String.format("%dh %02dm", totDuration / 3600, (totDuration % 3600) / 60):
+				String.format("%dd %dh %02dm", days, totDuration / 3600, (totDuration % 3600) / 60));
 		res.put("total", tot);
 		return res;
 	}
@@ -121,5 +95,60 @@ public class TripStatService extends JSONWebService {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		return c;
+	}
+
+	private class TripsScanner {
+		private long totDuration;
+		private double totalDistance;
+		private JSONObject res;
+		private PreparedStatement stm;
+
+		public TripsScanner(long totDuration, double totalDistance, JSONObject res, PreparedStatement stm) {
+			this.totDuration = totDuration;
+			this.totalDistance = totalDistance;
+			this.res = res;
+			this.stm = stm;
+		}
+
+		public long getTotDuration() {
+			return totDuration;
+		}
+
+		public double getTotalDistance() {
+			return totalDistance;
+		}
+
+		public TripsScanner invoke() throws SQLException {
+			try (ResultSet rs = stm.executeQuery()) {
+
+				JSONArray trips = new JSONArray();
+				res.put("trips", trips);
+				while (rs.next()) {
+					int tripId = rs.getInt(1);
+					String desc = rs.getString(2);
+					Timestamp start = rs.getTimestamp(3);
+					Timestamp end = rs.getTimestamp(4);
+					long duration = (end.getTime() - start.getTime()) / 1000;
+					totDuration += duration;
+					double distance = rs.getDouble(6);
+					totalDistance += distance;
+
+					JSONObject trip = new JSONObject();
+					trip.put("id", tripId);
+					trip.put("description", desc);
+					trip.put("start", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(start));
+					trip.put("end", DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(end));
+
+					long days = duration / (60 * 60 * 24);
+					duration = duration % (60 * 60 * 24);
+					trip.put("duration", (days==0)?String.format("%dh %02dm", duration / 3600, (duration % 3600) / 60)
+						:String.format("%dd %dh %02dm", days, duration / 3600, (duration % 3600) / 60));
+					trip.put("distance", String.format("%.2f", distance));
+
+					trips.put(trip);
+				}
+				return this;
+			}
+		}
 	}
 }

@@ -42,22 +42,22 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 				} else if ((time-lastSpeedTime)<AGE_THRESHOLD) {
 					// calculate true wind
 					TrueWind t = new TrueWind(lastSpeed, mwv.getAngle(), mwv.getSpeed());
-					MWVSentence mwv_t = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-					mwv_t.setAngle(Utils.normalizeDegrees0_360(t.getTrueWindDeg()));
-					mwv_t.setTrue(true);
-					mwv_t.setSpeed(t.getTrueWindSpeed());
-					mwv_t.setSpeedUnit(Units.KNOT);
-					mwv_t.setStatus(DataStatus.ACTIVE);
+					MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+					mwvTrue.setAngle(Utils.normalizeDegrees0_360(t.getTrueWindDeg()));
+					mwvTrue.setTrue(true);
+					mwvTrue.setSpeed(t.getTrueWindSpeed());
+					mwvTrue.setSpeedUnit(Units.KNOT);
+					mwvTrue.setStatus(DataStatus.ACTIVE);
 					
 					if ((time-lastHeadingTime)<AGE_THRESHOLD) {
 						MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
-						mwd.setMagneticWindDirection(Utils.normalizeDegrees0_360(lastMagHeading + mwv_t.getAngle()));
-						mwd.setTrueWindDirection(Utils.normalizeDegrees0_360(lastTrueHeading + mwv_t.getAngle()));
-						mwd.setWindSpeed(Math.round(mwv_t.getSpeed() * 51.4444) / 100.0);
-						mwd.setWindSpeedKnots(mwv_t.getSpeed());
-						return new Pair<>(Boolean.TRUE, new Sentence[] {mwv_t, mwd});
+						mwd.setMagneticWindDirection(Utils.normalizeDegrees0_360(lastMagHeading + mwvTrue.getAngle()));
+						mwd.setTrueWindDirection(Utils.normalizeDegrees0_360(lastTrueHeading + mwvTrue.getAngle()));
+						mwd.setWindSpeed(Math.round(mwvTrue.getSpeed() * 51.4444) / 100.0);
+						mwd.setWindSpeedKnots(mwvTrue.getSpeed());
+						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue, mwd});
 					} else {
-						return new Pair<>(Boolean.TRUE, new Sentence[] {mwv_t});
+						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue});
 					}
 				}
 			} else if (!useRMC && sentence instanceof VHWSentence) {
@@ -81,6 +81,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 
 	@Override
 	public void onTimer() {
+		// nothing to do here
 	}
 	
 }

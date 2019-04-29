@@ -6,13 +6,9 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
-public class ServerLog implements Log {
+public class ServerLog implements LogAdmin {
 
     private class MyFormatter extends Formatter {
 
@@ -51,8 +47,7 @@ public class ServerLog implements Log {
             fh = new FileHandler(Constants.LOG, 0, 1, true);
             lg.addHandler(fh);
 
-            //Formatter formatter = new SimpleFormatter();  
-            Formatter formatter = new MyFormatter();  
+            Formatter formatter = new MyFormatter();
 	        fh.setFormatter(formatter);  
 	    } catch (SecurityException | IOException e) {
 	        e.printStackTrace();  
@@ -113,7 +108,7 @@ public class ServerLog implements Log {
 		if (debug)
 			lg.log(Level.SEVERE, msg, t);
 		else
-			lg.log(Level.SEVERE, msg + " error {" + t.getMessage() + "}");
+			lg.severe(String.format("{%s} error {%s}", msg, t.getMessage()));
 	}
 
 	/* (non-Javadoc)

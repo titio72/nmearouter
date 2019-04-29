@@ -23,6 +23,7 @@ public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
 	}
 	@Override
 	public void onTimer() {
+		// nothing to do
 	}
 
 }

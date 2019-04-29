@@ -66,9 +66,9 @@ public class StartRouter {
 
             Server server = new Server(1112);
 
-            ResourceHandler resource_handler = new ResourceHandler();
-            resource_handler.setWelcomeFiles(new String[]{ "index.html" });
-            resource_handler.setResourceBase("./web");
+            ResourceHandler resourceHandler = new ResourceHandler();
+            resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
+            resourceHandler.setResourceBase("./web");
 
             // Setup the basic application "context" for this application at "/"
             // This is also known as the handler tree (in jetty speak)
@@ -78,7 +78,7 @@ public class StartRouter {
 
             HandlerList handlers = new HandlerList();
             WebServiceFactory svcFactory = injector.getInstance(WebServiceFactory.class);
-            handlers.setHandlers(new Handler[] { resource_handler, new WebInterfaceImpl(svcFactory), context });
+            handlers.setHandlers(new Handler[] { resourceHandler, new WebInterfaceImpl(svcFactory), context });
             server.setHandler(handlers);
 
             ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);

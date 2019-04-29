@@ -18,9 +18,6 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
  */
 public class NMEADepthEnricher implements NMEAPostProcess {
 
-    public NMEADepthEnricher() {
-    }
-
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
@@ -40,5 +37,6 @@ public class NMEADepthEnricher implements NMEAPostProcess {
 
 	@Override
 	public void onTimer() {
+        // nothing to do
 	}    
 }

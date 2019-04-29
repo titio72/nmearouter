@@ -1,5 +1,10 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,14 +12,9 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class SpeedAnalyticsService extends JSONWebService {
 
-	private static final String sql = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
+	private static final String SQL = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
 	private static final double SPEED_BUCKET = 0.5;
 	private static final double SPEED_MIN =  0.0;
 	private static final double SPEED_MAX = 12.0;
@@ -25,32 +25,25 @@ public class SpeedAnalyticsService extends JSONWebService {
 	}
 
 	public SpeedAnalyticsService() {
+		// nothing to initialize
 	}
 
 	@Override
 	public JSONObject getResult(ServiceConfig config, final DBHelper db) {
-        try {
-			Map<Double, Stat> distr = new TreeMap<>();
+		Map<Double, Stat> distr = new TreeMap<>();
 
-	        DateRangeParameter fromTo = new DateRangeParameter(config);
-	        Calendar cFrom = fromTo.getFrom();
-	        Calendar cTo = fromTo.getTo();
-            
-            PreparedStatement stm = db.getConnection().prepareStatement(sql);
-            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+		DateRangeParameter fromTo = new DateRangeParameter(config);
+		Calendar cFrom = fromTo.getFrom();
+		Calendar cTo = fromTo.getTo();
+
+		try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
+			stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
 			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-			
+
 			for (double speed=SPEED_MIN; (speed+SPEED_BUCKET/10.0)<SPEED_MAX; speed+=SPEED_BUCKET) {
-	            stm.setDouble(3, speed);
-	            stm.setDouble(4, speed + SPEED_BUCKET);
-				ResultSet rs = stm.executeQuery();
-				Stat s = new Stat();
-				if (rs.next()) {
-					long t = rs.getLong(1);
-					s.distance = rs.getDouble(2);
-					s.time = t;
-				}
-				distr.put(speed, s);
+				stm.setDouble(3, speed);
+				stm.setDouble(4, speed + SPEED_BUCKET);
+				scanSpeedSamples(distr, stm, speed);
 			}
 			JSONObject res = new JSONObject();
 			JSONArray serie = new JSONArray();
@@ -71,5 +64,17 @@ public class SpeedAnalyticsService extends JSONWebService {
         }
 	}
 
-	
+	private void scanSpeedSamples(Map<Double, Stat> distr, PreparedStatement stm, double speed) throws SQLException {
+		try (ResultSet rs = stm.executeQuery()) {
+			Stat s = new Stat();
+			if (rs.next()) {
+				long t = rs.getLong(1);
+				s.distance = rs.getDouble(2);
+				s.time = t;
+			}
+			distr.put(speed, s);
+		}
+	}
+
+
 }

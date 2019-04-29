@@ -13,44 +13,50 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 public abstract class NMEAAgentImpl implements NMEAAgent {
 
-	private class _Source implements NMEASource {
+	private class InternalSource implements NMEASource {
 
 		@Override
 		public NMEASentenceFilterSet getFilter() {
-			return _getSourceFilter();
+		    return fsetOutput;
 		}
 
 		@Override
 		public void setFilter(NMEASentenceFilterSet s) {
-			_setSourceFilter(s);
-		}
+            fsetOutput = s;
+        }
 
 		@Override
 		public void setSentenceListener(NMEASentenceListener listener) {
-			_setSentenceListener(listener);
+            NMEAAgentImpl.this.listener = listener;
 		}
 
 	}
 	
-	private class _Target implements NMEATarget {
+	private class InternalTarget implements NMEATarget {
 
 		@Override
 		public NMEASentenceFilterSet getFilter() {
-			return _getTargetFilter();
+		    return fsetInput;
 		}
 
 		@Override
 		public void setFilter(NMEASentenceFilterSet s) {
-			_setTargetFilter(s);
+            fsetInput = s;
 		}
 
 		@Override
 		public void pushSentence(Sentence e, NMEAAgent src) {
-			_pushSentence(e, src);
+            try {
+                if (isStarted() &&
+                        (getFilter()==null || getFilter().match(e,  src.getName()))) {
+                    doWithSentence(e, src);
+                }
+            } catch (Exception t) {
+                getLogger().Warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
+            }
 		}
 	}
 	
@@ -64,12 +70,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	private boolean builtin;
 	private boolean target;
 	private boolean source;
-	private final _Target targetIf;
-	private final _Source sourceIf;
+	private final InternalTarget targetIf;
+	private final InternalSource sourceIf;
 	
     public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
-    	targetIf = new _Target();
-    	sourceIf = new _Source();
+    	targetIf = new InternalTarget();
+    	sourceIf = new InternalSource();
         this.name = name;
         fsetInput = null;
         fsetOutput = null;
@@ -81,39 +87,46 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
 
     private void handleQos(NMEACache cache, String name, QOS qos) {
-        if (qos!=null) { 
-            if (qos.get("dpt")) {
-                getLogger().Info("QoS {DPT} Agent {" + name + "}");
-                addProc(new NMEADepthEnricher());
-            }
-            if (qos.get("rmc2vtg")) {
-                getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
-                addProc(new NMEARMC2VTGProcessor());
-            }
-            if (qos.get("truewind_sog")) {
-                getLogger().Info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
-                addProc(new NMEAMWVTrue(true));
-            }
-            if (qos.get("truewind")) {
-                getLogger().Info("QoS {TRUEWIND} Agent {" + name + "}");
-                addProc(new NMEAMWVTrue(false));
-            }
-            if (qos.get("enrich_hdg")) {
-                getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");
-                addProc(new NMEAHDGFiller(cache));
-            }
-            if (qos.get("enrich_hdm")) {
-                getLogger().Info("QoS {ENRICH_HDM} Agent {" + name + "}");
-                addProc(new NMEAHeadingEnricher(cache));
-            }
-            if (qos.get("rmc_filter")) {
-                getLogger().Info("QoS {RMC filter} Agent {" + name + "}");
-                addProc(new NMEARMCFilter());
-            }
-            if (qos.get("builtin")) {
-                getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
-                builtin = true;
-            }
+        if (qos!=null) {
+        	for (String q: qos.getKeys()) {
+				switch (q) {
+					case "dpt":
+						getLogger().Info("QoS {DPT} Agent {" + name + "}");
+						addProc(new NMEADepthEnricher());
+						break;
+					case "rmc2vtg":
+						getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
+						addProc(new NMEARMC2VTGProcessor());
+						break;
+					case "truewind_sog":
+						getLogger().Info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
+						addProc(new NMEAMWVTrue(true));
+						break;
+					case "truewind":
+						getLogger().Info("QoS {TRUEWIND} Agent {" + name + "}");
+						addProc(new NMEAMWVTrue(false));
+						break;
+					case "enrich_hdg":
+						getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");
+						addProc(new NMEAHDGFiller(cache));
+						break;
+					case "enrich_hdm":
+						getLogger().Info("QoS {ENRICH_HDM} Agent {" + name + "}");
+						addProc(new NMEAHeadingEnricher(cache));
+						break;
+					case "rmc_filter":
+						getLogger().Info("QoS {RMC filter} Agent {" + name + "}");
+						addProc(new NMEARMCFilter());
+						break;
+					case "builtin":
+						getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
+						builtin = true;
+						break;
+					default:
+						break;
+				}
+			}
+
         }
     }
     
@@ -126,65 +139,49 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	    source = isSource;
 	}
 	
-	protected class _Log implements Log {
+	protected class PrivateLog implements Log {
 
 	    private final Log log;
 	    
-	    private _Log() {
+	    private PrivateLog() {
 	        log = ServerLog.getLogger();
 	    }
-	    
-        @Override
-        public void setError() {}
 
-        @Override
-        public void setWarning() {}
-
-        @Override
-        public void setInfo() {}
-
-        @Override
-        public void setDebug() {}
-
-        @Override
-        public void setNone() {}
+	    private String getMsg(NMEAAgentImpl a, String msg) {
+	        return String.format("Agent {%s} Name {%s} %s", a.toString(), a.getName(), msg);
+        }
 
         @Override
         public void Error(String msg) {
-            log.Error("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + msg);
+            log.Error(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
         public void Error(String msg, Throwable t) {
-            log.Error("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg, t);
+            log.Error(getMsg(NMEAAgentImpl.this, msg), t);
         }
 
         @Override
         public void Warning(String msg) {
-            log.Warning("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
+            log.Warning(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
         public void Info(String msg) {
-            log.Info("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
+            log.Info(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
         public void Debug(String msg) {
-            log.Debug("Agent " + NMEAAgentImpl.this.toString() + " Name {" + getName() + "} " + " " + msg);
-        }
-
-        @Override
-        public Logger getBaseLogger() {
-            return log.getBaseLogger();
+            log.Debug(getMsg(NMEAAgentImpl.this, msg));
         }
 	}
 	
-	private Log _log;
+	private Log internalLog;
 	
 	protected Log getLogger() {
-	    if (_log==null) _log = new _Log();
-		return _log;
+	    if (internalLog ==null) internalLog = new PrivateLog();
+		return internalLog;
 	}
 
 	@Override
@@ -240,22 +237,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         sl = listener;
     }
 
-    private NMEASentenceFilterSet _getTargetFilter() {
-		return fsetInput;
-	}
-	
-	private void _setTargetFilter(NMEASentenceFilterSet s) {
-		fsetInput = s;
-	}
-	
-	private NMEASentenceFilterSet _getSourceFilter() {
-		return fsetOutput;
-	}
-	
-	private void _setSourceFilter(NMEASentenceFilterSet s) {
-		fsetOutput = s;
-	}
-	
 	@Override
 	public String toString() {
 		return "{" + getType() + "}";
@@ -269,33 +250,46 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	    
 	}
 
+	private boolean checkSourceFilter(Sentence sentence) {
+        NMEASource s = getSource();
+        if (s!=null && s.getFilter()!=null)
+            return s.getFilter().match(sentence, getName());
+        return true;
+    }
+
 	/**
 	 * Used by "sources" to push sentences into the stream
-	 * @param sentence Teh sentemce to be notified to agents
+	 * @param sentence The sentemce to be notified to agents
 	 */
 	protected final void notify(Sentence sentence) {
-		if (isStarted()) {
-			if (_getSourceFilter()==null || _getSourceFilter().match(sentence, getName())) {
-				getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
-                List<Sentence> toSend = new ArrayList<>();
-				for (NMEAPostProcess pp: proc) {
-                    Pair<Boolean, Sentence[]> res = pp.process(sentence, this.getName());
-                    if (res!=null) {
-                    	if (!res.first) {
-                    		return; // skip the sentence
-                    	} else if (res.second!=null) {
-							Collections.addAll(toSend, res.second);
-                    	}
-                    }
-                }
-				if (listener!=null) {
-	                listener.onSentence(sentence, this);
-	                for (Sentence s: toSend) listener.onSentence(s, this);
+
+		if (isStarted() && checkSourceFilter(sentence)) {
+            getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
+			List<Sentence> toSend = getSentences(sentence);
+			if (listener!=null) {
+                listener.onSentence(sentence, this);
+                for (Sentence s: toSend) listener.onSentence(s, this);
+            }
+		}
+	}
+
+	private static final List<Sentence> EMPTY = new ArrayList<>();
+
+	private List<Sentence> getSentences(Sentence sentence) {
+		List<Sentence> toSend = new ArrayList<>();
+		for (NMEAPostProcess pp: proc) {
+			Pair<Boolean, Sentence[]> res = pp.process(sentence, this.getName());
+			if (res!=null) {
+				if (!res.first) {
+					return EMPTY;
+				} else if (res.second!=null) {
+					Collections.addAll(toSend, res.second);
 				}
 			}
 		}
+		return toSend;
 	}
-	
+
 	/**
 	 * Sources can use post-proc delegates to add additional elaboration to the sentences they pushes into the stream.
 	 * @param f The post processor to be added (sequence is important)
@@ -311,22 +305,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	 */
 	protected void doWithSentence(Sentence s, NMEAAgent source) {}
 
-    
-    private void _setSentenceListener(NMEASentenceListener listener) {
-        this.listener = listener;
-    }
-
-	private void _pushSentence(Sentence s, NMEAAgent source) {
-		try {
-			if (isStarted() && 
-					(_getTargetFilter()==null || _getTargetFilter().match(s,  source.getName()))) {
-				doWithSentence(s, source);
-			}
-		} catch (Throwable t) {
-			getLogger().Warning("Error delivering sentence to agent {" + s + "} error {" + t.getMessage() + "}");
-    	}
-    }
-    
     @Override
     public final NMEASource getSource() {
         return (source?sourceIf:null);

@@ -1,12 +1,9 @@
 package com.aboni.nmea.router.processors;
 
-import java.util.Calendar;
-
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -14,6 +11,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.util.FaaMode;
+
+import java.util.Calendar;
 
 /**
  * Used to produce a VTG sentence from a RMC to match requirement of NKE
@@ -61,17 +60,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 				vtg.setMode(FaaMode.AUTOMATIC);
 				vtg.setSpeedKnots(rmc.getSpeed());
 				vtg.setSpeedKmh(rmc.getSpeed() * 1.852);
-				try {
-                    vtg.setTrueCourse(rmc.getCourse());
-				    m.setPosition(rmc.getPosition());
-				    double mag = m.getMagnetic(rmc.getCourse(), rmc.getPosition());
-				    mag = Utils.normalizeDegrees0_360(mag);
-                    vtg.setMagneticCourse(mag);
-				} catch (DataNotAvailableException e) {
-				    // stationary, no course (i.e. v=0.0)
-	                vtg.setMagneticCourse(0.0);
-	                vtg.setTrueCourse(0.0);
-				}
+				setHeading(rmc, vtg);
 				return new Pair<>(Boolean.TRUE, new Sentence[] {vtg});
 			}
 		} catch (Exception e) {
@@ -80,8 +69,23 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 		return new Pair<>(Boolean.TRUE, null);
 	}
 
+	private void setHeading(RMCSentence rmc, VTGSentence vtg) {
+		try {
+			vtg.setTrueCourse(rmc.getCourse());
+			m.setPosition(rmc.getPosition());
+			double mag = m.getMagnetic(rmc.getCourse(), rmc.getPosition());
+			mag = Utils.normalizeDegrees0_360(mag);
+			vtg.setMagneticCourse(mag);
+		} catch (DataNotAvailableException e) {
+			// stationary, no course (i.e. v=0.0)
+			vtg.setMagneticCourse(0.0);
+			vtg.setTrueCourse(0.0);
+		}
+	}
+
 	@Override
 	public void onTimer() {
+		// nothing to do
 	}
 	
 }

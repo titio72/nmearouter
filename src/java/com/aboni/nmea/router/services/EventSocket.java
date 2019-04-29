@@ -14,7 +14,7 @@ import java.util.Map;
 @ServerEndpoint(value="/events")
 public class EventSocket
 {
-	private final static Map<Session, MySession> sessions = new HashMap<>();
+	private static final Map<Session, MySession> sessions = new HashMap<>();
 
 	private static NMEAStream stream;
 	
@@ -92,7 +92,6 @@ public class EventSocket
 							if (remote == null) {
 								remote = sess.getAsyncRemote();
 								remote.setSendTimeout(1000);
-								//remote.setBatchingAllowed(true);
 							}
 							remote.sendText(obj.toString());
 						}

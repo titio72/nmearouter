@@ -63,28 +63,8 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 			if (rmc.isValid()) {
 				Position pos = NMEAUtils.getPosition(rmc);
 		        if (pos!=null) {
-		            Calendar timestamp = NMEAUtils.getTimestampOptimistic(rmc);
-		            if (timestamp!=null && timestamp.getTimeInMillis()>lastTime) {
-		            	if (rmc.getSpeed()<SPEED_GATE) {
-			        		resetOnTimeout(timestamp.getTimeInMillis());
-			        		lastTime = timestamp.getTimeInMillis();
-			                addPos(rmc.getPosition());
-			    	        if (ready()) {
-			    	        	if (checkDistance(rmc.getPosition())) {
-			    	        		stats.totProcessed++;
-			    	        		stats.q = positions.size();
-			    	        		return true; 
-			    	        	} else {
-			    	        		stats.totSkippedExceedDistance++;
-			    	        	}
-			    	        }
-		            	} else {
-		            		stats.totSkippedExceedSpeed++;
-		            	}
-		            } else {
-		            	stats.totSkippedReverseTime++;
-		            }
-		        } else {
+					if (checkPosition(rmc)) return true;
+				} else {
 		        	stats.totInvalid++;
 		        }
 	        } else {
@@ -93,6 +73,31 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 			stats.q = positions.size();
 	    	return false;
 		}
+	}
+
+	private boolean checkPosition(RMCSentence rmc) {
+		Calendar timestamp = NMEAUtils.getTimestampOptimistic(rmc);
+		if (timestamp!=null && timestamp.getTimeInMillis()>lastTime) {
+			if (rmc.getSpeed()<SPEED_GATE) {
+				resetOnTimeout(timestamp.getTimeInMillis());
+				lastTime = timestamp.getTimeInMillis();
+				addPos(rmc.getPosition());
+				if (ready()) {
+					if (checkDistance(rmc.getPosition())) {
+						stats.totProcessed++;
+						stats.q = positions.size();
+						return true;
+					} else {
+						stats.totSkippedExceedDistance++;
+					}
+				}
+			} else {
+				stats.totSkippedExceedSpeed++;
+			}
+		} else {
+			stats.totSkippedReverseTime++;
+		}
+		return false;
 	}
 
 	private boolean checkDistance(Position p) {
@@ -141,9 +146,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	private Position getMedian() {
 		if (ready()) {
 			stats.medianRecalc++;
-	 		double median_lat = getMedian(true);
-			double median_lon = getMedian(false);
-			return new Position(median_lat, median_lon);
+	 		return new Position(getMedian(true), getMedian(false));
 		} else {
 			return null;
 		}

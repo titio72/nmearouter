@@ -116,7 +116,7 @@ public class NMEARouterImpl implements NMEARouter {
 				while (started.get()) {
 					try { 
 						SentenceEvent e = sentenceQueue.take(); 
-						_routeSentence(e.s, e.src);
+						routeSentence(e.s, e.src);
 					} catch (InterruptedException e1) {
 						Thread.currentThread().interrupt();
 					}
@@ -129,9 +129,9 @@ public class NMEARouterImpl implements NMEARouter {
 		synchronized (agents) {
 			ServerLog.getLogger().Info("Adding Agent {" + agent.getName() + "}");
 			agents.put(agent.getName(), agent);
-			agent.setStatusListener(this::_onStatusChange);
+			agent.setStatusListener(this::privateOnStatusChange);
 			if (agent.getSource()!=null) {
-			    agent.getSource().setSentenceListener(this::_queueUpSentence);
+			    agent.getSource().setSentenceListener(this::privateQueueUpSentence);
 			}
 		}
 	}
@@ -150,11 +150,11 @@ public class NMEARouterImpl implements NMEARouter {
 		}
 	}
 	
-	private void _onStatusChange(NMEAAgent src) {
+	private void privateOnStatusChange(NMEAAgent src) {
 		ServerLog.getLogger().Debug("New status received for {" + src + "}");
 	}
 
-    private void _queueUpSentence(Sentence s, NMEAAgent src) {
+    private void privateQueueUpSentence(Sentence s, NMEAAgent src) {
         SentenceEvent e = new SentenceEvent(s, src);
         try {
 			sentenceQueue.put(e);
@@ -163,7 +163,7 @@ public class NMEARouterImpl implements NMEARouter {
 		}
     }
 
-    private void _routeSentence(Sentence s, NMEAAgent src) {
+    private void routeSentence(Sentence s, NMEAAgent src) {
 		if (started.get()) {
 			cache.onSentence(s, src.getName());
 			routeToTarget(s, src);

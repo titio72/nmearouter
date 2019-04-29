@@ -1,19 +1,15 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.geo.*;
+import com.aboni.utils.ServerLog;
+
 import java.io.IOException;
 import java.util.Calendar;
-
-import com.aboni.geo.Track2GPX;
-import com.aboni.geo.Track2JSON;
-import com.aboni.geo.Track2KML;
-import com.aboni.geo.TrackDumper;
-import com.aboni.geo.TrackLoader;
-import com.aboni.geo.TrackLoaderDB;
-import com.aboni.utils.ServerLog;
 
 public class TrackService  implements WebService {
 
 	public TrackService() {
+		// nothing to initialize
 	}
 
 	@Override
@@ -57,6 +53,9 @@ public class TrackService  implements WebService {
 						mime = "application/json";
 						fileName = "track.json";
 						dumper = new Track2JSON();
+						break;
+					default:
+						// do nothing to do
 						break;
 				}
 

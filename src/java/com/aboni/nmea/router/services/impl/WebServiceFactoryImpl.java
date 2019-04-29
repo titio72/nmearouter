@@ -72,6 +72,8 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
 			case "/speedanalysis":
 				s = new SpeedAnalyticsService();
 				break;
+			default:
+				break;
 		}
 		return s;
 	}

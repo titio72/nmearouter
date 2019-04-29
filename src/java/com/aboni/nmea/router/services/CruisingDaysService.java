@@ -33,11 +33,8 @@ public class CruisingDaysService extends JSONWebService {
 		}
 	}
 	
-	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd");
-	private static final DateFormat short_df = new SimpleDateFormat("dd/MM");
-
-	public CruisingDaysService() {
-	}
+	private final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd");
+	private final DateFormat shortDateFormatter = new SimpleDateFormat("dd/MM");
 
 	private void addToTrip(Map<Integer, Trip> trips, Date d, Integer id, String desc) {
 		Trip t = trips.getOrDefault(id, null);
@@ -69,20 +66,24 @@ public class CruisingDaysService extends JSONWebService {
 	private List<Trip> getTrips(DBHelper db) throws SQLException {
 		int counter = 0;
 		Map<Integer, Trip> tripsDates = new TreeMap<>();
-		PreparedStatement stm = db.getConnection().prepareStatement("select track.tripid, Date(track.TS), (select trip.description from trip where trip.id=track.tripid) as description from track group by track.tripid, Date(track.TS)");
-		ResultSet rs = stm.executeQuery();
-		while (rs.next()) {
-			Date d = rs.getDate(2);
-			int i = rs.getInt(1);
-			String desc = rs.getString(3);
-			if (i==0) {
-				counter--;
-			}
-			addToTrip(tripsDates, d, (i==0)?counter:i, desc==null?"":desc);
+		try (PreparedStatement stm = db.getConnection().prepareStatement("select track.tripid, Date(track.TS), (select trip.description from trip where trip.id=track.tripid) as description from track group by track.tripid, Date(track.TS)")) {
+			readDays(counter, tripsDates, stm);
 		}
-		rs.close();
-		stm.close();
 		return sortIt(tripsDates);
+	}
+
+	private void readDays(int counter, Map<Integer, Trip> tripsDates, PreparedStatement stm) throws SQLException {
+		try (ResultSet rs = stm.executeQuery()) {
+			while (rs.next()) {
+				Date d = rs.getDate(2);
+				int i = rs.getInt(1);
+				String desc = rs.getString(3);
+				if (i == 0) {
+					counter--;
+				}
+				addToTrip(tripsDates, d, (i == 0) ? counter : i, desc == null ? "" : desc);
+			}
+		}
 	}
 
 	private JSONObject getJsonObject(List<Trip> triplist) {
@@ -92,15 +93,15 @@ public class CruisingDaysService extends JSONWebService {
 			JSONObject trip = new JSONObject();
 			trip.put("trip", t.tripId);
 			trip.put("tripLabel", t.desc);
-			trip.put("firstDay", df.format(t.min));
-			trip.put("lastDay", df.format(t.max));
+			trip.put("firstDay", dateFormatter.format(t.min));
+			trip.put("lastDay", dateFormatter.format(t.max));
 			JSONArray dates = new JSONArray();
 			for (Date d: t.dates) {
         JSONObject dt = new JSONObject();
         String longDate = DateFormat.getDateInstance(DateFormat.SHORT).format(d);
 				dt.put("day", longDate);
-				dt.put("dayShort", (dates.length()>=1)?short_df.format(d):longDate);
-				dt.put("ref", df.format(d));
+				dt.put("dayShort", (dates.length()>=1)? shortDateFormatter.format(d):longDate);
+				dt.put("ref", dateFormatter.format(d));
 				dates.put(dt);
 			}
 			trip.put("dates", dates);

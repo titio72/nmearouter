@@ -17,7 +17,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 
     private class DepthT {
         int depth;
-        long TS;
+        long timestamp;
     }
     
     private final Deque<DepthT> queue;
@@ -25,7 +25,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private int max = Integer.MIN_VALUE;
     private int min = Integer.MAX_VALUE;    
     
-    private static final long DEFAULT_WINDOW = 60 * 60 * 1000; // 1 hour
+    private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
     public DepthStatsAgent(NMEACache cache, String name, QOS qos) {
         super(cache, name, qos);
@@ -69,7 +69,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private DepthT handleDepth(double depth, long ts) {
         DepthT d = new DepthT();
         d.depth = (int)(depth*10f);
-        d.TS = ts;
+        d.timestamp = ts;
         
         if (depth>0.1) {
             queue.add(d);
@@ -84,7 +84,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
                 while (goon) {
                     goon = false;
                     DepthT d0 = queue.getFirst();
-                    if ((d.TS-d0.TS)>DEFAULT_WINDOW) {
+                    if ((d.timestamp -d0.timestamp)>DEFAULT_WINDOW) {
                         DepthT dd = queue.pop();
                         dirty = dirty || (!(dd.depth<max && dd.depth>min));
                         goon = true;

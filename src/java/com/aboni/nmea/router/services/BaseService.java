@@ -22,6 +22,7 @@ public abstract class BaseService extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
     	doIt(new ServletRequestServiceConfig(request), new ServletResponseOutput(response));
 	}
@@ -29,6 +30,7 @@ public abstract class BaseService extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) {
 		doGet(request, response);
 	}

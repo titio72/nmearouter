@@ -1,18 +1,15 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.Sample;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
-
-import com.aboni.utils.Sample;
 
 public class MeteoService extends SampledQueryService {
 
 	private String type;
     
-    public MeteoService() {
-    }
-     
     @Override
 	protected void fillResponse(ServiceOutput response, List<Sample> samples) throws IOException {
 		response.getWriter().write("{\"type\":\""+ type +"\", \"serie\":[");

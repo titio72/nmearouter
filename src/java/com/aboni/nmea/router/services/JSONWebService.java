@@ -9,43 +9,41 @@ import java.io.IOException;
 public abstract class JSONWebService implements WebService {
 
     private static final String APPLICATION_JSON = "application/json";
-    private DBHelper db;
 
     protected abstract JSONObject getResult(ServiceConfig config, DBHelper db);
 
-    private DBHelper getHelper() {
-        if (db==null) {
-            try {
-                db = new DBHelper(true);
-            } catch (ClassNotFoundException e) {
-                ServerLog.getLogger().Error("Error creating database helper Svc {" + this.getClass().getName() + "}", e);
-            }
-        }
-        return db;
-    }
-
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
+        try (DBHelper db = new DBHelper(true)) {
+            setResponse(response, getJsonObjectResult(config, db));
+        } catch (Exception e) {
+            ServerLog.getLogger().Error("Error creating database helper Svc {" + this.getClass().getName() + "}", e);
+        }
+    }
 
-        DBHelper db = getHelper();
-        if (db!=null) {
-            JSONObject res;
-            try {
-                res = getResult(config, db);
-            } catch (Exception e) {
-                ServerLog.getLogger().Error("Error reading trip stats", e);
-                res = new JSONObject();
-                res.put("Error", "Cannot retrieve trips status - check the logs for errors");
-            }
+    private JSONObject getJsonObjectResult(ServiceConfig config, DBHelper db) {
+        JSONObject res;
+        try {
+            res = getResult(config, db);
+        } catch (Exception e) {
+            ServerLog.getLogger().Error("Error reading trip stats", e);
+            res = new JSONObject();
+            res.put("Error", "Cannot retrieve trips status - check the logs for errors");
+        }
+        return res;
+    }
 
-            response.setContentType(APPLICATION_JSON);
-            try {
+    private void setResponse(ServiceOutput response, JSONObject res) {
+        response.setContentType(APPLICATION_JSON);
+        try {
+            if (res!=null) {
                 response.getWriter().append(res.toString());
                 response.ok();
-            } catch (IOException e) {
-                ServerLog.getLogger().Error("Error sending output for Svc {" + this.getClass().getName() + "}", e);
+            } else {
+                response.error("Invalid response detected: something went wrong");
             }
-            db.close();
+        } catch (IOException e) {
+            ServerLog.getLogger().Error("Error sending output for Svc {" + this.getClass().getName() + "}", e);
         }
     }
 }
