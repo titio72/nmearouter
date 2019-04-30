@@ -1,6 +1,9 @@
 package com.aboni.utils;
 
 public class Constants {
+
+	private Constants() {}
+
 	public static final String LOG			= "log/router.log";
 	public static final String CONF_DIR		= "conf";
 	public static final String ROUTER_CONF	= CONF_DIR + "/router.xml";

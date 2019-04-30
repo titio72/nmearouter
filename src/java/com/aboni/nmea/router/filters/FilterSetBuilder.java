@@ -77,9 +77,8 @@ public class FilterSetBuilder {
 	}
 
 	private NMEASentenceFilter getNMEASentenceFilter(JSONObject filter) {
-		JSONObject fJ = filter;
 		NMEASentenceFilter f;
-		String sentence = fJ.optString(SENTENCE);
+		String sentence = filter.optString(SENTENCE);
 		if (sentence.startsWith(STALK_NEGATE)) {
 			String cmd = sentence.substring(STALK_NEGATE.length());
 			f = new STalkFilter(cmd, true);
@@ -87,12 +86,12 @@ public class FilterSetBuilder {
 				String cmd = sentence.substring(STALK.length());
 				f = new STalkFilter(cmd, false);
 		} else {
-			String stid =  fJ.optString(TALKER);
+			String stid =  filter.optString(TALKER);
 			if (stid==null || "".equals(stid)) {
-				f = new NMEABasicSentenceFilter(fJ.getString(SENTENCE), fJ.getString(SOURCE));
+				f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), filter.getString(SOURCE));
 			} else {
 				TalkerId tid = TalkerId.parse(stid);
-				f = new NMEABasicSentenceFilter(fJ.getString(SENTENCE), tid, fJ.getString(SOURCE));
+				f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), tid, filter.getString(SOURCE));
 			}
 		}
 		return f;

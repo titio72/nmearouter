@@ -34,6 +34,7 @@ public class Track2GPX implements TrackDumper {
 	public static final String DEFAULT_TRACK_NAME = "track";
 	
 	public Track2GPX() {
+		// nothing to init
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +67,7 @@ public class Track2GPX implements TrackDumper {
 		
 	}
 	
-	private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     private GeoPositionT previous;
     private GeoPositionT lastTrack;
 	private static final boolean TRACK_THEM_ALL = true;

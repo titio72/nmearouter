@@ -153,7 +153,6 @@ public class ADS1115 {
 
         config |= pga.getConfigValue();
         switch (pin) {
-            case 0: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_0; break;
             case 1: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_1; break;
             case 2: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_2; break;
             case 3: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_3; break;

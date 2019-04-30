@@ -18,7 +18,9 @@ public class Track2KML implements TrackDumper {
 		
 		@Override
 		public void doWithPoint(GeoPositionT p) {
-			handlePoint(p, theWriter);
+			if (TRACK_THEM_ALL ) {
+				theWriter.addToCoordinates(p.getLatitude(), p.getLongitude());
+			}
 		}
 
 	}
@@ -45,20 +47,9 @@ public class Track2KML implements TrackDumper {
 
 	private void writePoints(LineString w) {
 		track.iterate(new PointWriter(w));
-		
 	}
 	
 	private static final boolean TRACK_THEM_ALL = true;
-	
-	private void handlePoint(GeoPositionT p, LineString pk) {
-		if (TRACK_THEM_ALL ) {
-    	    writePoint(p, pk);
-		}
-	}
-
-    private void writePoint(GeoPositionT p, LineString pk) {
-        pk.addToCoordinates(p.getLatitude(), p.getLongitude());
-    }
 
 	private LineString createString() {
 		return kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();

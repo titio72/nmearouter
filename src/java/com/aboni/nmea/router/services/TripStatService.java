@@ -10,20 +10,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class TripStatService extends JSONWebService {
 
-	//2017-10-29T01:08:58Z
-	private final DateFormat df;
-
 	public TripStatService() {
-		df  = new SimpleDateFormat("dd/HH:mm:ssZ", Locale.US);
-		df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		// nothing to initialize
 	}
 
 	private static final String SQL = "select "
@@ -100,8 +94,8 @@ public class TripStatService extends JSONWebService {
 	private class TripsScanner {
 		private long totDuration;
 		private double totalDistance;
-		private JSONObject res;
-		private PreparedStatement stm;
+		private final JSONObject res;
+		private final PreparedStatement stm;
 
 		public TripsScanner(long totDuration, double totalDistance, JSONObject res, PreparedStatement stm) {
 			this.totDuration = totDuration;

@@ -24,31 +24,30 @@ public class TrackLoaderDB implements TrackLoader {
 	public boolean load(Calendar from, Calendar to) {
 		boolean res;
 		try (DBHelper db = new DBHelper(true)) {
-			PreparedStatement st = db.getConnection().prepareStatement(
-					"select lat, lon, TS, dTime anchor from track where TS >= ? and TS <= ?");
-
-			st.setTimestamp(1, new Timestamp(from.getTimeInMillis()));
-			st.setTimestamp(2, new Timestamp(to.getTimeInMillis()));
-
-			long t = 0;
-			if (st.execute()) {
-				ResultSet rs = st.getResultSet();
-				while (rs.next()) {
-					double lat = rs.getDouble(1);
-					double lon = rs.getDouble(2);
-					Timestamp ts = rs.getTimestamp(3);
-					long dTime = rs.getLong(4);
-					if (t == ts.getTime()) {
-						t += dTime * 1000;
-					} else {
-						t = ts.getTime();
+			try (PreparedStatement st = db.getConnection().prepareStatement(
+					"select lat, lon, TS, dTime anchor from track where TS >= ? and TS <= ?")) {
+				st.setTimestamp(1, new Timestamp(from.getTimeInMillis()));
+				st.setTimestamp(2, new Timestamp(to.getTimeInMillis()));
+				long t = 0;
+				if (st.execute()) {
+					try (ResultSet rs = st.getResultSet()) {
+						while (rs.next()) {
+							double lat = rs.getDouble(1);
+							double lon = rs.getDouble(2);
+							Timestamp ts = rs.getTimestamp(3);
+							long dTime = rs.getLong(4);
+							if (t == ts.getTime()) {
+								t += dTime * 1000;
+							} else {
+								t = ts.getTime();
+							}
+							GeoPositionT p = new GeoPositionT(t, lat, lon);
+							h.addPosition(p);
+						}
 					}
-					//boolean anchor = (rs.getInt(6)==1);
-					GeoPositionT p = new GeoPositionT(t, lat, lon);
-					h.addPosition(p);
 				}
+				res = true;
 			}
-			res = true;
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().Error("Cannot query Track DB!", e);
 			res = false;

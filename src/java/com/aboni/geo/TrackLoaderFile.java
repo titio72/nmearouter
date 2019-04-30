@@ -38,29 +38,42 @@ public class TrackLoaderFile implements TrackLoader {
 	public boolean load(Calendar from, Calendar to) {
 		boolean res = false;
 		try {
-			FileReader f = new FileReader(file);
-			BufferedReader r = new BufferedReader(f);
-			String pos;
-			boolean exit = false;
-			while ((pos = r.readLine())!=null && !exit) {
-				GeoPositionT p;
-				try {
-					p = getPoint(pos);
-					exit = p.getTimestamp() > to.getTimeInMillis();
-					if (p.getTimestamp() >= from.getTimeInMillis() && !exit) {
-							h.addPosition(p);
+			try (FileReader f = new FileReader(file)) {
+				try (BufferedReader r = new BufferedReader(f)) {
+					String pos;
+					boolean exit = false;
+					while ((pos = r.readLine()) != null && !exit) {
+						exit = readLine(from, to, pos);
 					}
-				} catch (MalformedPointLineException e) {
-					ServerLog.getLogger().Debug("Cannot parse line " + pos);
 				}
 			}
-			r.close();
-			f.close();
 			res = true;
 		} catch (Exception e) {
 			ServerLog.getLogger().Error("Error loading track", e);
 		}
 		return res;
+	}
+
+	/**
+	 * Read a line from the track file and process it.
+	 * @param from 	Timestamp of the lower bound
+	 * @param to	Timestamp of the upper bound
+	 * @param pos	The position string read from the stream (ex: 1472189694509 260816 053454.000 42.6809667 N 9.2991000 E)
+	 * @return true when the timestamp of the line is greater than the upper bound
+	 */
+	private boolean readLine(Calendar from, Calendar to, String pos) {
+		boolean exit = false;
+		GeoPositionT p;
+		try {
+			p = getPoint(pos);
+			exit = p.getTimestamp() > to.getTimeInMillis();
+			if (p.getTimestamp() >= from.getTimeInMillis() && !exit) {
+				h.addPosition(p);
+			}
+		} catch (MalformedPointLineException e) {
+			ServerLog.getLogger().Debug("Cannot parse line " + pos);
+		}
+		return exit;
 	}
 
 	private GeoPositionT getPoint(String pos) throws MalformedPointLineException {

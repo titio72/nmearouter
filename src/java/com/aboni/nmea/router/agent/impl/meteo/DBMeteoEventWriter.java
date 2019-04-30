@@ -14,6 +14,7 @@ public class DBMeteoEventWriter implements EventWriter {
 	private PreparedStatement stm;
 	
 	public DBMeteoEventWriter() {
+		// nothing to initialize
 	}
 	
 	private void prepareStatement(Connection c) throws SQLException {

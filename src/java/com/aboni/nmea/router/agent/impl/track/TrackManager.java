@@ -13,15 +13,14 @@ public class TrackManager {
 	private GeoPositionT lastTrackedPoint;
 	private final StationaryManager stationaryStatus;
 	private final PositionStats stats;
-	private static final boolean STATS = true;
-	
+
 	private static final int SECOND = 1000;
 	private static final int MINUTE = 60 * SECOND;
 	
-	public static final long STATIC_DEFAULT_PERIOD = 10 * MINUTE;
-	public static final long DEFAULT_PERIOD = 30 * SECOND;
+	public static final long STATIC_DEFAULT_PERIOD = 10L * MINUTE;
+	public static final long DEFAULT_PERIOD = 30L * SECOND;
 	
-	private static final long STATIC_THRESHOLD_TIME = 15 * MINUTE; // if static for more than x minutes set anchor mode
+	private static final long STATIC_THRESHOLD_TIME = 15L * MINUTE; // if static for more than x minutes set anchor mode
 
 	private static final double MOVE_THRESHOLD_SPEED_KN = 3.0; // if reported is greater than X then it's moving 
 	private static final double MOVE_THRESHOLD_POS_METERS =  35.0; // if move by X meters since last reported point then it's moving
@@ -59,7 +58,7 @@ public class TrackManager {
     
     public TrackPoint processPosition(GeoPositionT p, double sog) {
 
-    	if (STATS) stats.addPosition(p);
+    	stats.addPosition(p);
     	
         maxSpeed = Math.max(maxSpeed, sog);
     	TrackPoint res = null;
@@ -96,8 +95,8 @@ public class TrackManager {
         speed = Double.isNaN(speed)?0.0:speed;
         double dist = c.getDistance(); 
         dist = Double.isNaN(speed)?0.0:dist;
-        int period = (int) (c.getInterval()/1000);
-        return new TrackPoint(p, anchor, dist,  speed, maxSpeed, period);
+        int timePeriod = (int) (c.getInterval()/1000);
+        return new TrackPoint(p, anchor, dist,  speed, maxSpeed, timePeriod);
     }
     
     /**
@@ -156,14 +155,14 @@ public class TrackManager {
 	
     private class StationaryManager {
 
-    	boolean init = false;
+    	boolean initialized = false;
         boolean stationary = true;
     	long stationarySince = 0;
     	
     	void init() {
-    		if (!init) {
+    		if (!initialized) {
     			this.stationary = true;
-    			init = true;
+    			initialized = true;
     		}
     	}
     	
