@@ -25,7 +25,12 @@ public class DeviationManagerImpl implements DeviationManager {
         
         int input;
         double output;
-        
+
+        @Override
+        public int hashCode() {
+            return input + (int)output;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Pair) {
@@ -69,7 +74,7 @@ public class DeviationManagerImpl implements DeviationManager {
                 r.close();
                 return true;
             } catch (IOException e) {
-                ServerLog.getLogger().Error("DeviationManager cannot read deviation table", e);
+                ServerLog.getLogger().error("DeviationManager cannot read deviation table", e);
                 return false;
             }
     	}

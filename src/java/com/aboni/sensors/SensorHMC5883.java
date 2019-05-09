@@ -1,12 +1,12 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
+import com.aboni.misc.DataFilter;
 import com.aboni.misc.Utils;
 import com.aboni.sensors.hw.HMC5883L;
-import com.aboni.misc.DataFilter;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class SensorHMC5883 extends I2CSensor {
 
@@ -23,7 +23,7 @@ public class SensorHMC5883 extends I2CSensor {
     }
 
     @Override
-    protected void _init(int bus) throws IOException, UnsupportedBusNumberException {
+    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
     	hmc5883l = new HMC5883L(new I2CInterface(bus, HMC5883L.HMC5883_I2CADDR));
     	int i = 0;
     	while (i<3 && !doInit()) { 
@@ -42,16 +42,20 @@ public class SensorHMC5883 extends I2CSensor {
             hmc5883l.setScale(HMC5883L.Scale.Gauss_1_30);
             return true;
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Failed initialization HMC5883L", e);
+            ServerLog.getLogger().error("Failed initialization HMC5883L", e);
             return false;
         }
     }
 
     @Override
-    protected void _read() throws Exception {
+    protected void readSensor() throws SensorException {
     	synchronized (this) {
     	    if (hmc5883l != null) {
-    	        setMagReading(hmc5883l.getScaledMag());
+    	        try {
+    	            setMagReading(hmc5883l.getScaledMag());
+                } catch (IOException e) {
+    	            throw new SensorException("Error reading compass", e);
+                }
     	    }
     	}
     }

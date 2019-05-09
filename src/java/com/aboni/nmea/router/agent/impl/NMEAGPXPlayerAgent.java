@@ -28,7 +28,6 @@ import java.util.TimeZone;
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
 	private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private Document d;
 	private GeoPositionT prevPos;
 	private long t0Play;
 	private long t0;
@@ -62,14 +61,14 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 	}
 	
 	public boolean play() {
+		final Document d;
 		try {
-			d = null;
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			d = dBuilder.parse(file);
 			d.getDocumentElement().normalize();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot parse GPX file " + file, e);
+			ServerLog.getLogger().error("Cannot parse GPX file " + file, e);
 			return false;
 		}
 	
@@ -87,11 +86,11 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 						Element p = (Element)points.item(j);
 						Node t1 = p.getElementsByTagName("time").item(0);
 						String sTime = t1.getTextContent();
-						Date d = fmt.parse(sTime);
-						GeoPositionT pos = new GeoPositionT(d.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
+						Date dPos = fmt.parse(sTime);
+						GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
 						doIt(pos);
 					} catch (Exception e) {
-						e.printStackTrace();
+						ServerLog.getLogger().error("Error reading gpx", e);
 					}
 				}
 			}

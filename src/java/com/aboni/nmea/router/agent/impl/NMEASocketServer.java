@@ -90,7 +90,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 					try {
 						selector.select();
 					} catch (IOException e) {
-						getLogger().Error("Unexpected exception", e);
+						getLogger().error("Unexpected exception", e);
 					}
 					Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
 					while (iter.hasNext()) {
@@ -112,34 +112,30 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	}
 
 	private void handleRead(SelectionKey ky) {
+		SocketChannel client = (SocketChannel) ky.channel();
+		readBuffer.clear();
 		try {
-			SocketChannel client = (SocketChannel) ky.channel();
-			readBuffer.clear();
-			try {
-				int readBytes = client.read(readBuffer);
-				if (readBytes>2) {
-					String sentence = new String(readBuffer.array(), 0, readBytes).trim();
-					NMEASocketServer.this.notify(SentenceFactory.getInstance().createParser(sentence));
-				} else if (readBytes==0) {
-		    		handleDisconnection(client);
-				}
-			} catch (IOException e) {
+			int readBytes = client.read(readBuffer);
+			if (readBytes>2) {
+				String sentence = new String(readBuffer.array(), 0, readBytes).trim();
+				NMEASocketServer.this.notify(SentenceFactory.getInstance().createParser(sentence));
+			} else if (readBytes==0) {
 				handleDisconnection(client);
 			}
-		} catch (Exception ee) {
-			getLogger().Error("Error reading socket", ee);
+		} catch (IOException e) {
+			handleDisconnection(client);
 		}
 	}
 
 	private void handleDisconnection(SocketChannel client) {
 		try {
-			getLogger().Info("Disconnection {" + clients.getOrDefault(client, null) + "} Agent {" + getName() + "}");
+			getLogger().info("Disconnection {" + clients.getOrDefault(client, null) + "} Agent {" + getName() + "}");
 			synchronized (clients) {
 				clients.remove(client);
 			}
 			client.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			getLogger().error("Error accepting disconnection", e);
 		}
 	}
 
@@ -152,10 +148,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    synchronized (clients) {
 			    clients.put(client, new ClientDescriptor(client.getRemoteAddress().toString()));
 			}
-			getLogger().Info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
+			getLogger().info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
 
 		} catch (Exception ee) {
-			getLogger().Error("Error accepting connection", ee);
+			getLogger().error("Error accepting connection", ee);
 		}
 	}
 
@@ -166,20 +162,20 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				try {
 					c.close();
 				} catch (Exception e) {
-					getLogger().Error("Error trying to close socket with client", e);
+					getLogger().error("Error trying to close socket with client", e);
 				}
 			}
 			clients.clear();
 			try {
 				serverSocket.close();
 			} catch (Exception e) {
-				getLogger().Error("Error trying to close server socket", e);
+				getLogger().error("Error trying to close server socket", e);
 			}
 			try {
 				selector.close();
 			} catch (Exception e)
 			{
-				getLogger().Error("Error trying to close selector", e);
+				getLogger().error("Error trying to close selector", e);
 			}
 		}
 	}
@@ -187,23 +183,21 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, NMEAAgent src) {
 		synchronized (clients) {
-		    if (isTarget()) {
-    			if (!clients.isEmpty()) {
-    				String output = getOutSentence(s);
-    				writeBuffer.clear();
-    				writeBuffer.put(output.getBytes());
-    				writeBuffer.put("\r\n".getBytes());
-    				int p = writeBuffer.position();
-    				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
-    				while (iter.hasNext()) {
-    					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
-    					SocketChannel sc = itm.getKey();
-    					ClientDescriptor cd = itm.getValue();
-    					if (!sendMessageToClient(output, p, sc, cd)) {
-    						iter.remove();
-    					}
-    				}
-    			}
+		    if (isTarget() && !clients.isEmpty()) {
+				String output = getOutSentence(s);
+				writeBuffer.clear();
+				writeBuffer.put(output.getBytes());
+				writeBuffer.put("\r\n".getBytes());
+				int p = writeBuffer.position();
+				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
+				while (iter.hasNext()) {
+					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
+					SocketChannel sc = itm.getKey();
+					ClientDescriptor cd = itm.getValue();
+					if (!sendMessageToClient(output, p, sc, cd)) {
+						iter.remove();
+					}
+				}
 		    }
 		}
 	}
@@ -215,21 +209,21 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			int written = sc.write(writeBuffer);
 			if (written==0) {
 				cd.errors++;
-				ServerLog.getLogger().Warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
+				ServerLog.getLogger().warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
 			} else {
 				cd.errors = 0;
 			}
 			return cd.errors < 10 /* allow a max of 10 failure, then close the channel */;
 		} catch (IOException e) {
 			try { 
-				getLogger().Info("Disconnection {" + sc.getRemoteAddress() + "} "
+				getLogger().info("Disconnection {" + sc.getRemoteAddress() + "} "
 						+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
 				sc.close(); 
 			} catch (IOException e1) {
-				ServerLog.getLogger().Error("Error closing socket with client", e1);
+				ServerLog.getLogger().error("Error closing socket with client", e1);
 			}
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error sending {" + output + "} to client", e);
+			ServerLog.getLogger().error("Error sending {" + output + "} to client", e);
 		}
 		return false;
 	}
@@ -241,7 +235,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private void createServerSocket() {
 		try {
 		    selector = Selector.open();
-		    getLogger().Info("Selector Open {" + selector.isOpen() + "} Agent {" + getName() + "}");
+		    getLogger().info("Selector Open {" + selector.isOpen() + "} Agent {" + getName() + "}");
 		    serverSocket = ServerSocketChannel.open();
 		    InetSocketAddress hostAddress = new InetSocketAddress(getPort());
 		    serverSocket.bind(hostAddress);
@@ -249,7 +243,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    int ops = serverSocket.validOps();
 		    serverSocket.register(selector, ops, null);
 		} catch (Exception e) {
-			getLogger().Error("Cannot open server socket", e);
+			getLogger().error("Cannot open server socket", e);
 		}
 	}
     

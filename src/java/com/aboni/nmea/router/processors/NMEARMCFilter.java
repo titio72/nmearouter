@@ -3,7 +3,6 @@ package com.aboni.nmea.router.processors;
 import com.aboni.nmea.router.filters.NMEAPositionFilter;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 /**
@@ -26,7 +25,7 @@ public class NMEARMCFilter implements NMEAPostProcess {
 		try {
 			return (filter.match(sentence, src)?OK:KO);
 		} catch (Exception e) {
-            ServerLog.getLogger().Warning("Cannot anayze RMC {" + sentence + "} error {" + e.getMessage() + "}");
+            ServerLog.getLogger().warning("Cannot anayze RMC {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;
 		}
 	}

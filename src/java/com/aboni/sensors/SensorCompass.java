@@ -22,7 +22,7 @@ public class SensorCompass extends ASensorCompass {
 	}
 
 	@Override
-	protected void _init(int bus) throws IOException, UnsupportedBusNumberException {
+	protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
 		if (!isInitialized()) {
 		    // initialize gyro first
 			gyro.init(bus);
@@ -39,9 +39,9 @@ public class SensorCompass extends ASensorCompass {
 	 */
     @Override
 	public double getUnfilteredSensorHeading() {
-	    double[] mag_raw = magnetometer.getMagVector();
-	    double[] acc_raw = gyro.readRawAccel();
-	    return compass.getTiltCompensatedHeading(mag_raw, acc_raw); 
+	    double[] magRaw = magnetometer.getMagVector();
+	    double[] accRaw = gyro.readRawAccel();
+	    return compass.getTiltCompensatedHeading(magRaw, accRaw);
 	}
     
 	public double[] getRotationDegrees() throws SensorNotInititalizedException {
@@ -51,8 +51,8 @@ public class SensorCompass extends ASensorCompass {
 	}
 
     @Override
-    protected void _onLoadConfiguration() {
-    	super._onLoadConfiguration();
+    protected void onLoadCompassConfiguration() {
+    	super.onLoadCompassConfiguration();
     	updateCalibration();
     }
 
@@ -63,12 +63,12 @@ public class SensorCompass extends ASensorCompass {
 	        int z = HWSettings.getPropertyAsInteger("calibration.z", 0);
 	        compass.setCalibration(x, y, z);
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Cannot load compass calibration!", e);
+            ServerLog.getLogger().error("Cannot load compass calibration!", e);
         }
     }
 
     @Override
-    protected void _onRead() throws Exception {
+    protected void onCompassRead() throws SensorException {
         gyro.read();
         magnetometer.read();
     }

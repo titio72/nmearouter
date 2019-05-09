@@ -24,7 +24,7 @@ public class HMC5883Calibration {
     private double[] calibration;
     private double sDev;
     
-    public void start() throws SensorNotInititalizedException {
+    public void start() throws SensorException {
         List<double[]> samples = collect();
         
         double[] min = new double[3];
@@ -59,58 +59,58 @@ public class HMC5883Calibration {
             ix++;
         }
         
-        double r_avg = r2s[0];
+        double rAvg = r2s[0];
         for (int i = 1; i<r2s.length; i++) {
-            r_avg = r_avg * ((double)(i-1)/(double)i) + r2s[i]/(double)i; 
+            rAvg = rAvg * ((double)(i-1)/(double)i) + r2s[i]/(double)i;
         }
         
-        double r_sdev = 0.0;
+        double rSdev = 0.0;
         for (double r2 : r2s) {
-            r_sdev += Math.pow(r2 - r_avg, 2);
+            rSdev += Math.pow(r2 - rAvg, 2);
         }
-        r_sdev = Math.sqrt(r_sdev / r2s.length);
+        rSdev = Math.sqrt(rSdev / r2s.length);
         
         
-        return new double[] {r_avg, r_sdev};
+        return new double[] {rAvg, rSdev};
     }
 
-    private void getBoundary(List<double[]> samples, double[] min, double[] max) {
+    private void getBoundary(List<double[]> samples, double[] min, double[] max) throws SensorException {
         try {
-            FileWriter w = new FileWriter("cal.out");
-                    
-            
-            Iterator<double[]> iter = samples.iterator();
-            
-            if (iter.hasNext()) {
-                double[] sample = iter.next();
-                w.write("" + sample[0] + " " + sample[1] + " " + sample[2] + "\n");
-                min[0] = sample[0]; min[1] = sample[1]; min[2] = sample[2];
-                max[0] = sample[0]; max[1] = sample[1]; max[2] = sample[2]; 
-                while (iter.hasNext()) {
-                    sample = iter.next();
+            try (FileWriter w = new FileWriter("cal.out")) {
+
+
+                Iterator<double[]> iter = samples.iterator();
+
+                if (iter.hasNext()) {
+                    double[] sample = iter.next();
                     w.write("" + sample[0] + " " + sample[1] + " " + sample[2] + "\n");
-                    for (int i = 0; i<3; i++) {
-                        min[i] = Math.min(min[i], sample[i]);
-                        max[i] = Math.max(max[i], sample[i]);
+                    min[0] = sample[0];
+                    min[1] = sample[1];
+                    min[2] = sample[2];
+                    max[0] = sample[0];
+                    max[1] = sample[1];
+                    max[2] = sample[2];
+                    while (iter.hasNext()) {
+                        sample = iter.next();
+                        w.write("" + sample[0] + " " + sample[1] + " " + sample[2] + "\n");
+                        for (int i = 0; i < 3; i++) {
+                            min[i] = Math.min(min[i], sample[i]);
+                            max[i] = Math.max(max[i], sample[i]);
+                        }
                     }
                 }
             }
-            w.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new SensorException("Error checking bounbdaries for HMC5883 Calibration", e);
         }
     }
 
-    private List<double[]> collect() throws SensorNotInititalizedException {
+    private List<double[]> collect() throws SensorException {
         if (sensor.isInitialized()) {
             List<double[]> samples = new LinkedList<>();
             long t0 = System.currentTimeMillis();
             while ((System.currentTimeMillis() - t0) < timeThreshold) {
-                try {
-                    sensor.read();
-                } catch (SensorNotInititalizedException e1) {
-                    // should not get here
-                }
+                sensor.readSensor();
                 double[] d = sensor.getMagVector();
                 samples.add(d);
                 Utils.pause(INTERVAL);

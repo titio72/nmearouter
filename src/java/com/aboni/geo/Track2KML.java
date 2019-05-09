@@ -56,10 +56,15 @@ public class Track2KML implements TrackDumper {
 	}
 
 	@Override
+	public String getTrackName() {
+		return "";
+	}
+
+	@Override
 	public void setTrackName(String trackName) {
-		// not supported
-	}	
-	
+		// unsupported
+	}
+
 }
 
 /*

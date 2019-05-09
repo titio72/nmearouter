@@ -21,8 +21,12 @@ import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.filters.FilterSetBuilder;
+import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Injector;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
@@ -45,7 +49,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	        router = buildRouter(conf, builder);
 	        return this;
 		} catch (MalformedConfigurationException e) {
-			e.printStackTrace();
+			Logger.getGlobal().log(Level.SEVERE, "Error", e);
 		}
         return null;
     }
@@ -55,15 +59,15 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         
 		switch (conf.getLog().getLevel()) {
 			case DEBUG: 
-	        	ServerLog.getLogger().setDebug(); break;
+				((LogAdmin)ServerLog.getLogger()).setDebug(); break;
 			case WARNING: 
-	        	ServerLog.getLogger().setWarning(); break;
+	        	((LogAdmin)ServerLog.getLogger()).setWarning(); break;
 			case ERROR: 
-	        	ServerLog.getLogger().setError(); break;
+	        	((LogAdmin)ServerLog.getLogger()).setError(); break;
 			case NONE: 
-	        	ServerLog.getLogger().setNone(); break;
+	        	((LogAdmin)ServerLog.getLogger()).setNone(); break;
 	    	default:
-	        	ServerLog.getLogger().setInfo(); break;
+	        	((LogAdmin)ServerLog.getLogger()).setInfo(); break;
 		}
         
         for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {

@@ -23,14 +23,14 @@ public class EventSocket
 	}
 	
 	public EventSocket() {
-		ServerLog.getLogger().Info("Init web-socket");
+		ServerLog.getLogger().info("Init web-socket");
 	}
 	
     @OnOpen
     public void onWebSocketConnect(Session sess)
     {
     	synchronized (sessions) {
-    		ServerLog.getLogger().Info("Started web-socket session {" + sess.getId() + "}");
+    		ServerLog.getLogger().info("Started web-socket session {" + sess.getId() + "}");
 	    	MySession s = new MySession(sess);
     		sessions.put(sess,  s);
 	        s.start(stream);
@@ -41,10 +41,10 @@ public class EventSocket
     public void onWebSocketClose(Session sess)
     {
     	synchronized (sessions) {
-    		ServerLog.getLogger().Info("Closed web-socket session {" + sess.getId() + "}");
+    		ServerLog.getLogger().info("Closed web-socket session {" + sess.getId() + "}");
 	    	if (sessions.containsKey(sess)) {
 	    		MySession s = sessions.get(sess);
-	    		ServerLog.getLogger().Info("Stopping updates for web-socket id {" + s.id + "}");
+	    		ServerLog.getLogger().info("Stopping updates for web-socket id {" + s.id + "}");
 	    		s.stop(stream);
 	    		sessions.remove(sess);
 	    	}
@@ -54,7 +54,7 @@ public class EventSocket
     @OnError
     public void onWebSocketError(Throwable cause)
     {
-        ServerLog.getLogger().Error("Error handling websockets", cause);
+        ServerLog.getLogger().error("Error handling websockets", cause);
     }
     	
     public static class MySession {
@@ -71,14 +71,14 @@ public class EventSocket
     	
 	    private void start(NMEAStream stream) {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().Info("Start new WS session {" + sess.getId() + "} ID {" + id + "} ");
+		    	ServerLog.getLogger().info("Start new WS session {" + sess.getId() + "} ID {" + id + "} ");
 		    	stream.subscribe(this);
 	    	}
 	    }
 	    
 	    private void stop(NMEAStream stream) {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().Info("Close WS session {" + sess.getId() + "} ID {" + id + "} ");
+		    	ServerLog.getLogger().info("Close WS session {" + sess.getId() + "} ID {" + id + "} ");
 		    	stream.unsubscribe(this);
 	    	}
 		}
@@ -96,7 +96,7 @@ public class EventSocket
 							remote.sendText(obj.toString());
 						}
 					} catch (Exception e) {
-						ServerLog.getLogger().Error("Error sending json to WS {" + id + "}", e);
+						ServerLog.getLogger().error("Error sending json to WS {" + id + "}", e);
 					}
 				}
 			}

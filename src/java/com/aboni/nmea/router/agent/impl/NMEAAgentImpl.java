@@ -55,7 +55,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                     doWithSentence(e, src);
                 }
             } catch (Exception t) {
-                getLogger().Warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
+                getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
             }
 		}
 	}
@@ -91,35 +91,35 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         	for (String q: qos.getKeys()) {
 				switch (q) {
 					case "dpt":
-						getLogger().Info("QoS {DPT} Agent {" + name + "}");
+						getLogger().info("QoS {DPT} Agent {" + name + "}");
 						addProc(new NMEADepthEnricher());
 						break;
 					case "rmc2vtg":
-						getLogger().Info("QoS {RMC2VTG} Agent {" + name + "}");
+						getLogger().info("QoS {RMC2VTG} Agent {" + name + "}");
 						addProc(new NMEARMC2VTGProcessor());
 						break;
 					case "truewind_sog":
-						getLogger().Info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
+						getLogger().info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
 						addProc(new NMEAMWVTrue(true));
 						break;
 					case "truewind":
-						getLogger().Info("QoS {TRUEWIND} Agent {" + name + "}");
+						getLogger().info("QoS {TRUEWIND} Agent {" + name + "}");
 						addProc(new NMEAMWVTrue(false));
 						break;
 					case "enrich_hdg":
-						getLogger().Info("QoS {ENRICH_HDG} Agent {" + name + "}");
+						getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
 						addProc(new NMEAHDGFiller(cache));
 						break;
 					case "enrich_hdm":
-						getLogger().Info("QoS {ENRICH_HDM} Agent {" + name + "}");
+						getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
 						addProc(new NMEAHeadingEnricher(cache));
 						break;
 					case "rmc_filter":
-						getLogger().Info("QoS {RMC filter} Agent {" + name + "}");
+						getLogger().info("QoS {RMC filter} Agent {" + name + "}");
 						addProc(new NMEARMCFilter());
 						break;
 					case "builtin":
-						getLogger().Info("QoS {BuiltIn} Agent {" + name + "}");
+						getLogger().info("QoS {BuiltIn} Agent {" + name + "}");
 						builtin = true;
 						break;
 					default:
@@ -152,28 +152,28 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         }
 
         @Override
-        public void Error(String msg) {
-            log.Error(getMsg(NMEAAgentImpl.this, msg));
+        public void error(String msg) {
+            log.error(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
-        public void Error(String msg, Throwable t) {
-            log.Error(getMsg(NMEAAgentImpl.this, msg), t);
+        public void error(String msg, Throwable t) {
+            log.error(getMsg(NMEAAgentImpl.this, msg), t);
         }
 
         @Override
-        public void Warning(String msg) {
-            log.Warning(getMsg(NMEAAgentImpl.this, msg));
+        public void warning(String msg) {
+            log.warning(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
-        public void Info(String msg) {
-            log.Info(getMsg(NMEAAgentImpl.this, msg));
+        public void info(String msg) {
+            log.info(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
-        public void Debug(String msg) {
-            log.Debug(getMsg(NMEAAgentImpl.this, msg));
+        public void debug(String msg) {
+            log.debug(getMsg(NMEAAgentImpl.this, msg));
         }
 	}
 	
@@ -205,12 +205,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	public void start() {
 		synchronized (this) {
 			if (!active) {
-				getLogger().Info("Activating agent {" + getName() + "}");
+				getLogger().info("Activating agent {" + getName() + "}");
 				if (onActivate()) {
 					active = true;
 					notifyStatus();
 				} else {
-					getLogger().Error("Cannot activate agent {" + getName() + "}");
+					getLogger().error("Cannot activate agent {" + getName() + "}");
 				}
 			}
 		}	
@@ -224,7 +224,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	public void stop() {
 		synchronized (this) {
 			if (active) {
-				getLogger().Info("Deactivating {" + getName() + "}");
+				getLogger().info("Deactivating {" + getName() + "}");
 				onDeactivate();
 				active = false;
 				notifyStatus();
@@ -264,7 +264,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	protected final void notify(Sentence sentence) {
 
 		if (isStarted() && checkSourceFilter(sentence)) {
-            getLogger().Debug("Notify Sentence {" + sentence.toSentence() + "}");
+            getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
 			List<Sentence> toSend = getSentences(sentence);
 			if (listener!=null) {
                 listener.onSentence(sentence, this);

@@ -57,7 +57,7 @@ public class NMEAStreamImpl implements NMEAStream {
 						}
 					}
 				} catch (Exception e) {
-					ServerLog.getLogger().Warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
+					ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
 				}
 			}
 		}
@@ -102,7 +102,7 @@ public class NMEAStreamImpl implements NMEAStream {
 				try {
 					m.invoke(o, p);
 				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error pushing message", e);
+					ServerLog.getLogger().error("Error pushing message", e);
 				}
 			}
 		}
@@ -117,7 +117,7 @@ public class NMEAStreamImpl implements NMEAStream {
 				try {
 					m.invoke(o, p);
 				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error pushing message", e);
+					ServerLog.getLogger().error("Error pushing message", e);
 				}
 			}	
 		}

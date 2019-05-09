@@ -96,7 +96,7 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Error(java.lang.String)
 	 */
 	@Override
-	public void Error(String msg) {
+	public void error(String msg) {
 		lg.log(Level.SEVERE, msg);
 	}
 
@@ -104,7 +104,7 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
 	 */
 	@Override
-	public void Error(String msg, Throwable t) {
+	public void error(String msg, Throwable t) {
 		if (debug)
 			lg.log(Level.SEVERE, msg, t);
 		else
@@ -115,7 +115,7 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Warning(java.lang.String)
 	 */
 	@Override
-	public void Warning(String msg) {
+	public void warning(String msg) {
 		lg.log(Level.WARNING, msg);
 	}
 
@@ -123,7 +123,7 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Info(java.lang.String)
 	 */
 	@Override
-	public void Info(String msg) {
+	public void info(String msg) {
 		lg.log(Level.INFO, msg);
 	}
 	
@@ -131,7 +131,7 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Debug(java.lang.String)
 	 */
 	@Override
-	public void Debug(String msg) {
+	public void debug(String msg) {
 		lg.log(Level.FINER, msg);
 	}
 

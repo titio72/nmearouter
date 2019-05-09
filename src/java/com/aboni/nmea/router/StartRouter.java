@@ -102,11 +102,11 @@ public class StartRouter {
         System.out.println("Start");
 		Date date = new Date();
 		SimpleDateFormat f = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
-		ServerLog.getLogger().Info("---- NMEARouter ----------------------------------------------------------------");
-		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
-		ServerLog.getLogger().Info("---- Start " + f.format(date) + "--------------------------------------------------");
-		ServerLog.getLogger().Info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().info("---- NMEARouter ----------------------------------------------------------------");
+		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().info("---- Start " + f.format(date) + "--------------------------------------------------");
+		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
         NMEAUtils.registerExtraSentences();
         injector.getInstance(NMEAStream.class); // be sure the stream started
     	if (builder.init()!=null) {

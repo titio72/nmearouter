@@ -1,29 +1,38 @@
 package com.aboni.sensors.hw;
 
+import com.aboni.sensors.SensorException;
 import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.GpioUtil;
 
 public class DHT11 {
+
     private static final int MAXTIMINGS = 85;
-    private final int[] dht11_dat = { 0, 0, 0, 0, 0 };
+    private float h;
+    private float c;
+    private final int[] dht11Dat;
     
-    public DHT11() {
-    
-        // setup wiringPi
+    public DHT11() throws SensorException {
+        dht11Dat = new int[] { 0, 0, 0, 0, 0 };
         if (Gpio.wiringPiSetup() == -1) {
-            System.out.println(" ==>> GPIO SETUP FAILED");
-            return;
+            throw new SensorException("GPIO Initialization failed for DHT11");
+        } else {
+            GpioUtil.export(3, GpioUtil.DIRECTION_OUT);
         }
-    
-       GpioUtil.export(3, GpioUtil.DIRECTION_OUT);            
     }
-    
-    public void getTemperature() {
+
+    public float getTemperature() {
+        return c;
+    }
+
+    public float getPressure() {
+        return h;
+    }
+
+    public void read() {
        int laststate = Gpio.HIGH;
        int j = 0;
-       dht11_dat[0] = dht11_dat[1] = dht11_dat[2] = dht11_dat[3] = dht11_dat[4] = 0;
-       //StringBuilder value = new StringBuilder();
-    
+       dht11Dat[0] = dht11Dat[1] = dht11Dat[2] = dht11Dat[3] = dht11Dat[4] = 0;
+
        Gpio.pinMode(3, Gpio.OUTPUT);
        Gpio.digitalWrite(3, Gpio.LOW);
        Gpio.delay(18);
@@ -50,54 +59,40 @@ public class DHT11 {
           /* ignore first 3 transitions */
           if ((i >= 4) && (i % 2 == 0)) {
              /* shove each bit into the storage bytes */
-             dht11_dat[j / 8] <<= 1;
+             dht11Dat[j / 8] <<= 1;
              if (counter > 16) {
-                 dht11_dat[j / 8] |= 1;
+                 dht11Dat[j / 8] |= 1;
              }
              j++;
            }
         }
+        if (j>=40) {
+            setTempAndPress();
+        }
+    }
+
+    private void setTempAndPress() {
         // check we read 40 bits (8bit x 5 ) + verify checksum in the last
         // byte
-        if ((j >= 40) && checkParity()) {
-            float h = (float)((dht11_dat[0] << 8) + dht11_dat[1]) / 10;
+        if (checkParity()) {
+            h = (float)((dht11Dat[0] << 8) + dht11Dat[1]) / 10;
             if ( h > 100 )
             {
-                h = dht11_dat[0];   // for DHT11
+                h = dht11Dat[0];   // for DHT11
             }
-            float c = (float)(((dht11_dat[2] & 0x7F) << 8) + dht11_dat[3]) / 10;
+            c = (float)(((dht11Dat[2] & 0x7F) << 8) + dht11Dat[3]) / 10;
             if ( c > 125 )
             {
-                c = dht11_dat[2];   // for DHT11
+                c = dht11Dat[2];   // for DHT11
             }
-            if ( (dht11_dat[2] & 0x80) != 0 )
+            if ( (dht11Dat[2] & 0x80) != 0 )
             {
                 c = -c;
             }
-            float f = c * 1.8f + 32;
-            System.out.println( "Humidity = " + h + " Temperature = " + c + "(" + f + "f)");
-        }else  {
-            System.out.println( "Data not good, skip" );
         }
-    
     }
-    
+
     private boolean checkParity() {
-      return (dht11_dat[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF));
-    }
-    
-    
-    
-    public static void main (String[] ars) throws Exception {
-    
-        DHT11 dht = new DHT11();
-    
-        for (int i=0; i<10; i++) {
-           Thread.sleep(2000);
-           dht.getTemperature();
-        }
-    
-        System.out.println("Done!!");
-    
+      return (dht11Dat[4] == ((dht11Dat[0] + dht11Dat[1] + dht11Dat[2] + dht11Dat[3]) & 0xFF));
     }
 }

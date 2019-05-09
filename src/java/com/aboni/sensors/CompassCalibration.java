@@ -23,7 +23,7 @@ public class CompassCalibration {
     private double[] calibration;
     private double sDev;
     
-    public void start() throws SensorNotInititalizedException {
+    public void start() throws SensorException {
         List<double[]> samples = collect();
         
         double[] min = new double[3];
@@ -58,19 +58,19 @@ public class CompassCalibration {
             ix++;
         }
         
-        double r_avg = r2s[0];
+        double rAvg = r2s[0];
         for (int i = 1; i<r2s.length; i++) {
-            r_avg = r_avg * ((double)(i-1)/(double)i) + r2s[i]/(double)i; 
+            rAvg = rAvg * ((double)(i-1)/(double)i) + r2s[i]/(double)i;
         }
         
-        double r_sdev = 0.0;
+        double rSdev = 0.0;
         for (double r2 : r2s) {
-            r_sdev += Math.pow(r2 - r_avg, 2);
+            rSdev += Math.pow(r2 - rAvg, 2);
         }
-        r_sdev = Math.sqrt(r_sdev / r2s.length);
+        rSdev = Math.sqrt(rSdev / r2s.length);
         
         
-        return new double[] {r_avg, r_sdev};
+        return new double[] {rAvg, rSdev};
     }
 
     private void getBoundary(List<double[]> samples, double[] min, double[] max) {
@@ -89,7 +89,7 @@ public class CompassCalibration {
         }
     }
 
-    private List<double[]> collect() throws SensorNotInititalizedException {
+    private List<double[]> collect() throws SensorException {
         if (sensor.isInitialized()) {
             List<double[]> samples = new LinkedList<>();
             long t0 = System.currentTimeMillis();

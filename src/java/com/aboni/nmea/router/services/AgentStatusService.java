@@ -25,14 +25,14 @@ public class AgentStatusService implements WebService {
             new AgentListSerializer(router).dump(response.getWriter(), msg);
             response.ok();
         } catch (Exception e) {
-			ServerLog.getLogger().Error("Error reading agent statuses", e);
+			ServerLog.getLogger().error("Error reading agent statuses", e);
 			JSONObject res = new JSONObject();
 			res.put("errror", "Error reading agent statuses");
             try {
             	response.getWriter().write(res.toString());
 				response.ok();
             } catch (Exception ee) {
-				ServerLog.getLogger().Error("Error sending error for agent status", e);
+				ServerLog.getLogger().error("Error sending error for agent status", e);
 			}
         }
         

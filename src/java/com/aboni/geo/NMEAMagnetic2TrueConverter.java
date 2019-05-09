@@ -1,18 +1,13 @@
 package com.aboni.geo;
 
-import java.util.Calendar;
-
 import com.aboni.misc.Utils;
+import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ServerLog;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
+
+import java.util.Calendar;
 
 public class NMEAMagnetic2TrueConverter {
 
@@ -21,7 +16,7 @@ public class NMEAMagnetic2TrueConverter {
 	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
-		geo = new TSAGeoMag(ServerLog.getLogger().getBaseLogger());
+		geo = new TSAGeoMag(((LogAdmin)ServerLog.getLogger()).getBaseLogger());
 		pos = new Position(43.0, 10.0);
 
 		Calendar c = Calendar.getInstance();
@@ -30,7 +25,7 @@ public class NMEAMagnetic2TrueConverter {
 	}
 	
 	public NMEAMagnetic2TrueConverter(double year) {
-		geo = new TSAGeoMag(ServerLog.getLogger().getBaseLogger());
+		geo = new TSAGeoMag(((LogAdmin)ServerLog.getLogger()).getBaseLogger());
 		pos = new Position(43.0, 10.0);
 		this.year = year;
 	}
@@ -70,10 +65,10 @@ public class NMEAMagnetic2TrueConverter {
 		return getTrueSentence(magSentence.getTalkerId(), magSentence.getHeading());
 	}
 	
-	public HDTSentence getTrueSentence(TalkerId tid, double mag_bearing) {
-		double t_heading = getTrue(mag_bearing, getPosition());
+	public HDTSentence getTrueSentence(TalkerId tid, double magBearing) {
+		double trueheading = getTrue(magBearing, getPosition());
 		HDTSentence s = (HDTSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
-		s.setHeading(t_heading);
+		s.setHeading(trueheading);
 		return s;
 	}
 	

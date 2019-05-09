@@ -53,7 +53,7 @@ abstract class SampledQueryService implements WebService {
             }
         	fillResponse(response, samples);
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Error writing sample", e);
+            ServerLog.getLogger().error("Error writing sample", e);
         }
     }
 

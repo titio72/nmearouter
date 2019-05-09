@@ -1,22 +1,22 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.utils.ServerLog;
+import org.json.JSONObject;
 
-public class ServiceShutdown implements WebService {
+public class ServiceShutdown extends JSONWebService {
 
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
+	public JSONObject getResult(ServiceConfig config) {
 	    try {
-	        ServerLog.getLogger().Info("Shutdown");
+	        ServerLog.getLogger().info("Shutdown");
 	        ProcessBuilder b = new ProcessBuilder("./shutdown");
             Process proc = b.start();
             int retCode = proc.waitFor();
-            ServerLog.getLogger().Info("Shutdown Return code {" + retCode + "}");
-            response.setContentType("text/plain;charset=utf-8");
-            response.getWriter().print((retCode==0)?"Ok":"Ko");
-            response.ok();
+            ServerLog.getLogger().info("Shutdown Return code {" + retCode + "}");
+            return getOk();
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Error during shutdown", e);
+            ServerLog.getLogger().error("Error during shutdown", e);
+            return getError("Error " + e.getMessage());
         }
 	}
 }

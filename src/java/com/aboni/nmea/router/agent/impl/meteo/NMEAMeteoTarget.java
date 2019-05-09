@@ -56,7 +56,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             if (writer!=null) writer.init();
             return true;
         } catch (Exception e) {
-            getLogger().Error("Error connecting db Agent {Meteo}", e);
+            getLogger().error("Error connecting db Agent {Meteo}", e);
             return false;
         }
     }
@@ -107,7 +107,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		        }
 	    	}
     	} catch (Exception e) {
-    		getLogger().Warning("Error processing meteo stats {" + s + "} erro {" + e + "}");
+    		getLogger().warning("Error processing meteo stats {" + s + "} erro {" + e + "}");
     	}
     }
 
@@ -136,8 +136,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private void processWind(MWVSentence s) {
         if (s.isTrue()) {
             DataEvent<HeadingSentence> e = cache.getLastHeading();
-            if (e!=null && (System.currentTimeMillis() - e.timestamp)<800) {
-                double windDir = e.data.getHeading() + s.getAngle();
+            if (e!=null && (System.currentTimeMillis() - e.getTimestamp())<800) {
+                double windDir = e.getData().getHeading() + s.getAngle();
                 double windSpd;
                 switch (s.getSpeedUnit().toChar()) {
                     case 'N': windSpd = s.getSpeed(); break;

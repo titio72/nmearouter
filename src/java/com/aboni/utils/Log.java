@@ -2,14 +2,14 @@ package com.aboni.utils;
 
 public interface Log {
 
-	void Error(String msg);
+	void error(String msg);
 
-	void Error(String msg, Throwable t);
+	void error(String msg, Throwable t);
 
-	void Warning(String msg);
+	void warning(String msg);
 
-	void Info(String msg);
+	void info(String msg);
 
-	void Debug(String msg);
+	void debug(String msg);
 
 }

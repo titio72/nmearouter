@@ -1,31 +1,27 @@
 package com.aboni.nmea.router.agent.impl.system;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
-
+import com.pi4j.io.gpio.*;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PowerLedAgent extends NMEAAgentImpl {
 
 	private static final Pin GPS = RaspiPin.GPIO_23;
 	private static final Pin PWR = RaspiPin.GPIO_02;
-    private final GpioPinDigitalOutput pin, pinGps;
+    private final GpioPinDigitalOutput pin;
+    private final GpioPinDigitalOutput pinGps;
     private long lastGps;
 
     public PowerLedAgent(NMEACache cache, String name, QOS qos) {
         super(cache, name, qos);
+        lastGps = 0;
         GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
         pinGps = gpio.provisionDigitalOutputPin(GPS, "gps", PinState.LOW);

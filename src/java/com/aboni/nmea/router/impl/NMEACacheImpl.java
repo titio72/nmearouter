@@ -8,15 +8,13 @@ import net.sf.marineapi.nmea.sentence.*;
 public class NMEACacheImpl implements NMEACache {
 
 
-    private final DataEvent<TimeSentence> lastTime;
-    private final DataEvent<HeadingSentence> lastHeading;
-    private final DataEvent<PositionSentence> lastPosition;
+    private DataEvent<HeadingSentence> lastHeading;
+    private DataEvent<PositionSentence> lastPosition;
 	private boolean synced;
     
     public NMEACacheImpl() {
-        lastHeading = new DataEvent<>();
-        lastTime = new DataEvent<>();
-        lastPosition = new DataEvent<>();
+        lastHeading = new DataEvent<>(null, 0, "");
+        lastPosition = new DataEvent<>(null, 0, "");
     }
     
     @Override
@@ -25,22 +23,12 @@ public class NMEACacheImpl implements NMEACache {
 	        if (s instanceof HDGSentence ||
 	        		s instanceof HDTSentence ||
 	        		s instanceof HDMSentence) {
-	            lastHeading.timestamp = System.currentTimeMillis();
-	            lastHeading.source = src;
-	            lastHeading.data = (HeadingSentence)s;
+	        	lastHeading = new DataEvent<>((HeadingSentence)s, System.currentTimeMillis(),src );
 	        } else if (s instanceof PositionSentence && s.isValid()) {
-				lastPosition.data = (PositionSentence)s;
-				lastPosition.source = src;
-				lastPosition.timestamp = System.currentTimeMillis();
-	        }
-
-	        if (s instanceof TimeSentence) {
-	            lastTime.data = (TimeSentence)s;
-	            lastTime.source = src;
-	            lastTime.timestamp = System.currentTimeMillis();
+				lastPosition = new DataEvent<>((PositionSentence)s, System.currentTimeMillis(), src);
 	        }
     	} catch (Exception e) {
-    		ServerLog.getLogger().Warning("Cannot cache message {" + s + "} error {" + e.getMessage() + "}");
+    		ServerLog.getLogger().warning("Cannot cache message {" + s + "} error {" + e.getMessage() + "}");
     	}
     }
     
@@ -75,7 +63,7 @@ public class NMEACacheImpl implements NMEACache {
 	 */
     @Override
 	public boolean isHeadingOlderThan(long time, long threshold) {
-        return (time - lastHeading.timestamp) > threshold; 
+        return (time - lastHeading.getTimestamp()) > threshold;
     }
     
 }

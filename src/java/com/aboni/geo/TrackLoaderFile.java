@@ -49,7 +49,7 @@ public class TrackLoaderFile implements TrackLoader {
 			}
 			res = true;
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error loading track", e);
+			ServerLog.getLogger().error("Error loading track", e);
 		}
 		return res;
 	}
@@ -71,7 +71,7 @@ public class TrackLoaderFile implements TrackLoader {
 				h.addPosition(p);
 			}
 		} catch (MalformedPointLineException e) {
-			ServerLog.getLogger().Debug("Cannot parse line " + pos);
+			ServerLog.getLogger().debug("Cannot parse line " + pos);
 		}
 		return exit;
 	}

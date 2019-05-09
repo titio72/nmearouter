@@ -5,25 +5,25 @@ import java.util.Map;
 
 public class QOS {
 
-	private final Map<String, Object> qos;
+	private final Map<String, Object> theQOS;
 	
 	public QOS() {
-		qos = new HashMap<>();
+		theQOS = new HashMap<>();
 	}
 
 	public void addProp(String propName) {
-		qos.put(propName, 1);
+		theQOS.put(propName, 1);
 	}
 
 	public void addProp(String propName, String v) {
-		qos.put(propName, v);
+		theQOS.put(propName, v);
 	}
 
 	public boolean get(String propName) {
-		return qos.containsKey(propName);
+		return theQOS.containsKey(propName);
 	}
 
 	public String[] getKeys() {
-		return qos.keySet().toArray(new String[] {});
+		return theQOS.keySet().toArray(new String[] {});
 	}
 }

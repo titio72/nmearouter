@@ -1,12 +1,12 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
+import com.aboni.misc.DataFilter;
 import com.aboni.sensors.hw.Atmo;
 import com.aboni.sensors.hw.BME280;
 import com.aboni.sensors.hw.BMP180;
-import com.aboni.misc.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class SensorPressureTemp extends I2CSensor {
 	
@@ -34,7 +34,7 @@ public class SensorPressureTemp extends I2CSensor {
 	}	
 	
 	@Override
-	protected void _init(int bus) throws IOException, UnsupportedBusNumberException {
+	protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
 		pressurePA = 0.0;
 		temperatureC = 0.0;
 		humidity = 0.0;
@@ -51,28 +51,27 @@ public class SensorPressureTemp extends I2CSensor {
 	}
     
 	@Override
-	protected void _read() {
-	    _readPressurePA();
-	    _readTemperatureCelsius();
-	    _readHumidity();
+	protected void readSensor() {
+	    readPressurePA();
+	    readTemperatureCelsius();
+	    readHumidity();
 	}
 	
-	private void _readPressurePA() {
+	private void readPressurePA() {
     	double p = atmo.readPressure();
 		pressurePA = DataFilter.getLPFReading(getDefaultSmootingAlpha(), pressurePA, p);
 	}
 	
-	private void _readHumidity() {
+	private void readHumidity() {
     	double h = atmo.readHumidity();
 		humidity = DataFilter.getLPFReading(getDefaultSmootingAlpha(), humidity, h);
 	}
 
-	@SuppressWarnings("unused")
 	public double getAltitude(double sealevelPressure) {
 		return (float) (44330.0 * (1.0 - Math.pow(pressurePA / sealevelPressure, 0.1903)));
 	}
 
-	private void _readTemperatureCelsius() {
+	private void readTemperatureCelsius() {
         temperatureC = DataFilter.getLPFReading(getDefaultSmootingAlpha(), temperatureC, atmo.readTemperature());
     }
 

@@ -14,6 +14,7 @@ public class DBTrackEventWriter implements EventWriter {
 	private PreparedStatement stm;
 	
 	public DBTrackEventWriter() {
+		// nothing to init
 	}
 	
 	private void prepareStatement(Connection c) throws SQLException {
@@ -27,7 +28,7 @@ public class DBTrackEventWriter implements EventWriter {
 		try {
 			stm.close();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error closing statement in " + getClass().getSimpleName(), e);
+			ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
 		}
 		stm = null;
 	}

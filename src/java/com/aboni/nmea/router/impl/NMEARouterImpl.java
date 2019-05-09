@@ -72,7 +72,7 @@ public class NMEARouterImpl implements NMEARouter {
 		long t = System.currentTimeMillis();
 		if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
 			lastStatsTime = t;
-			ServerLog.getLogger().Info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
+			ServerLog.getLogger().info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
 		}
 	}
 
@@ -127,7 +127,7 @@ public class NMEARouterImpl implements NMEARouter {
 	@Override
 	public void addAgent(NMEAAgent agent) {
 		synchronized (agents) {
-			ServerLog.getLogger().Info("Adding Agent {" + agent.getName() + "}");
+			ServerLog.getLogger().info("Adding Agent {" + agent.getName() + "}");
 			agents.put(agent.getName(), agent);
 			agent.setStatusListener(this::privateOnStatusChange);
 			if (agent.getSource()!=null) {
@@ -151,7 +151,7 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 	
 	private void privateOnStatusChange(NMEAAgent src) {
-		ServerLog.getLogger().Debug("New status received for {" + src + "}");
+		ServerLog.getLogger().debug("New status received for {" + src + "}");
 	}
 
     private void privateQueueUpSentence(Sentence s, NMEAAgent src) {
@@ -180,7 +180,7 @@ public class NMEARouterImpl implements NMEARouter {
 						exec.execute(() -> target.pushSentence(s, src));
 					}
 				} catch (Exception e) {
-					ServerLog.getLogger().Error("Error dispatching to target!", e);
+					ServerLog.getLogger().error("Error dispatching to target!", e);
 				}
 			}
 		}

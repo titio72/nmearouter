@@ -58,11 +58,10 @@ public class NMEABasicSentenceFilter implements NMEASentenceFilter {
 	
 	@Override
 	public boolean match(Sentence s, String src) {
-		if (isAllSources() || getSource().equals(src)) {
-			if (isAllSentences() || getSentenceId().equals(s.getSentenceId())) {
-				return isAllTalkers() || getTalkerId().equals(s.getTalkerId());
-			}
+		if ((isAllSources() || getSource().equals(src)) && (isAllSentences() || getSentenceId().equals(s.getSentenceId())))  {
+			return isAllTalkers() || getTalkerId().equals(s.getTalkerId());
+		} else {
+			return false;
 		}
-		return false;
 	}
 }

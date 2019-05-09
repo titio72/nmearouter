@@ -7,16 +7,16 @@ import java.io.IOException;
 
 public class SensorMPU6050 extends I2CSensor {
 
-    @SuppressWarnings("unused")
     public static class AccelScale {
-        public static final double ACCEL_SCALE_2g  = 16384.0;
-        public static final double ACCEL_SCALE_4g  =  8092.0;
-        public static final double ACCEL_SCALE_8g  =  4096.0;
-        public static final double ACCEL_SCALE_16g =  2048.0;
+        private AccelScale() {}
+        public static final double ACCEL_SCALE_2_G = 16384.0;
+        public static final double ACCEL_SCALE_4_G =  8092.0;
+        public static final double ACCEL_SCALE_8_G =  4096.0;
+        public static final double ACCEL_SCALE_16_G =  2048.0;
     }
 
-    @SuppressWarnings("unused")
     public static class GyroScale {
+        private GyroScale() {}
         public static final double GYRO_SCALE_250  = 131.0;
         public static final double GYRO_SCALE_500  =  65.5;
         public static final double GYRO_SCALE_1000 =  32.8;
@@ -25,23 +25,21 @@ public class SensorMPU6050 extends I2CSensor {
    
     private static final int  MPU6050_I2CADDR = 0x68;
     
-    private static final int power_mgmt_addr_1 = 0x6b;
-    private static final int power_mgmt_addr_2 = 0x6a;
-    @SuppressWarnings("unused")
-	private static final byte power_mgmt_on = 0x01;
-    private static final byte power_mgmt_off = 0x00;
+    private static final int POWER_MGMT_ADDR_1 = 0x6b;
+    private static final int POWER_MGMT_ADDR_2 = 0x6a;
+	private static final byte POWER_MGMT_ON = 0x01;
+    private static final byte POWER_MGMT_OFF = 0x00;
     
-    private static final int bypass_mode_addr =  0x37;
-    private static final byte bypass_mode_on  = 0x02; 
-    @SuppressWarnings("unused")
-	private static final byte bypass_mode_off = 0x00; 
+    private static final int BYPASS_MODE_ADDR =  0x37;
+    private static final byte BYPASS_MODE_ON = 0x02;
+	private static final byte BYPASS_MODE_OFF = 0x00;
     
     private static final int X = 0;
     private static final int Y = 1;
     private static final int Z = 2;
     
-    private static final double gyroScale = GyroScale.GYRO_SCALE_250;
-    private static final double accellScale = AccelScale.ACCEL_SCALE_2g;
+    private static final double GYRO_SCALE = GyroScale.GYRO_SCALE_250;
+    private static final double ACCELL_SCALE = AccelScale.ACCEL_SCALE_2_G;
     
     private double[] scaledAccel;
     private double[] scaledGyro;
@@ -53,59 +51,63 @@ public class SensorMPU6050 extends I2CSensor {
     }
     
     @Override
-    protected void _init(int bus) throws IOException, UnsupportedBusNumberException {
+    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
         device = new I2CInterface(bus, MPU6050_I2CADDR);
-        device.write(bypass_mode_addr, bypass_mode_on);
-        device.write(power_mgmt_addr_2, power_mgmt_off);
-        device.write(power_mgmt_addr_1, power_mgmt_off);
+        device.write(BYPASS_MODE_ADDR, BYPASS_MODE_ON);
+        device.write(POWER_MGMT_ADDR_2, POWER_MGMT_OFF);
+        device.write(POWER_MGMT_ADDR_1, POWER_MGMT_OFF);
 
     }
    
-    private void _readA() throws IOException {
-        int a_x = device.readWord(0x3b);
-        int a_y = device.readWord(0x3d);
-        int a_z = device.readWord(0x3f);
-        double[] scaledAccel_1 = new double[] {
-                (double)a_x / accellScale,
-                (double)a_y / accellScale,
-                (double)a_z / accellScale
+    private void readA() throws IOException {
+        int aX = device.readWord(0x3b);
+        int aY = device.readWord(0x3d);
+        int aZ = device.readWord(0x3f);
+        double[] scaledAccel1 = new double[] {
+                (double)aX / ACCELL_SCALE,
+                (double)aY / ACCELL_SCALE,
+                (double)aZ / ACCELL_SCALE
         };
 
         if (scaledAccel==null) {
-            scaledAccel = scaledAccel_1;
+            scaledAccel = scaledAccel1;
         } else {
             scaledAccel = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[X], scaledAccel_1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Y], scaledAccel_1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Z], scaledAccel_1[Z])
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[X], scaledAccel1[X]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Z], scaledAccel1[Z])
             };
         }
     }
 
-    private void _readG() throws IOException {
-        int g_x = device.readWord(0x43);
-        int g_y = device.readWord(0x45);
-        int g_z = device.readWord(0x47);
-        double[] scaledGyro_1 = new double[] {
-                (double)g_x / gyroScale,
-                (double)g_y / gyroScale,
-                (double)g_z / gyroScale
+    private void readG() throws IOException {
+        int gX = device.readWord(0x43);
+        int gY = device.readWord(0x45);
+        int gZ = device.readWord(0x47);
+        double[] scaledGyro1 = new double[] {
+                (double)gX / GYRO_SCALE,
+                (double)gY / GYRO_SCALE,
+                (double)gZ / GYRO_SCALE
         };
         if (scaledGyro==null) {
-            scaledGyro = scaledGyro_1;
+            scaledGyro = scaledGyro1;
         } else {
             scaledGyro = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[X], scaledGyro_1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Y], scaledGyro_1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Z], scaledGyro_1[Z])
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[X], scaledGyro1[X]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Z], scaledGyro1[Z])
             };
         }
     }
     
     @Override
-    protected void _read() throws IOException {
-        _readA();
-        _readG();
+    protected void readSensor() throws SensorException{
+        try {
+            readA();
+            readG();
+        } catch (IOException e) {
+            throw new SensorException("Error readinng gyro", e);
+        }
     }
     
     public double[] readRawAccel() {
@@ -114,37 +116,34 @@ public class SensorMPU6050 extends I2CSensor {
     
     public double[] readAccel() throws SensorNotInititalizedException {
         if (isInitialized()) {
-            double a_x_scaled = scaledAccel[X];
-            double a_y_scaled = scaledAccel[Y];
-            double a_z_scaled = scaledAccel[Z];
-            return new double[] {getXRotation(a_x_scaled, a_y_scaled, a_z_scaled),
-                    getYRotation(a_x_scaled, a_y_scaled, a_z_scaled),
-                    getZRotation(a_x_scaled, a_y_scaled, a_z_scaled)};
+            double aXScaled = scaledAccel[X];
+            double aYScaled = scaledAccel[Y];
+            double aZScaled = scaledAccel[Z];
+            return new double[] {getXRotation(aXScaled, aYScaled, aZScaled),
+                    getYRotation(aXScaled, aYScaled, aZScaled),
+                    getZRotation(aXScaled, aYScaled, aZScaled)};
         } else {
             throw new SensorNotInititalizedException("Error reading accelerometer: sensor not initialized");
         }
     }
     
-    @SuppressWarnings("unused")
     public double[] readRawGyro() {
         return scaledGyro;
     }
 
-    @SuppressWarnings("unused")
     public double[] readGyro() throws SensorNotInititalizedException {
         if (isInitialized()) {
-            double g_x_scaled = scaledGyro[X];
-            double g_y_scaled = scaledGyro[Y];
-            double g_z_scaled = scaledGyro[Z];
-            return new double[] {getXRotation(g_x_scaled, g_y_scaled, g_z_scaled),
-                    getYRotation(g_x_scaled, g_y_scaled, g_z_scaled),
-                    getZRotation(g_x_scaled, g_y_scaled, g_z_scaled)};
+            double gXScaled = scaledGyro[X];
+            double gYScaled = scaledGyro[Y];
+            double gZScaled = scaledGyro[Z];
+            return new double[] {getXRotation(gXScaled, gYScaled, gZScaled),
+                    getYRotation(gXScaled, gYScaled, gZScaled),
+                    getZRotation(gXScaled, gYScaled, gZScaled)};
         } else {
             throw new SensorNotInititalizedException("Error reading gyro: sensor not initialized");
         }
     }
 
-    @SuppressWarnings("unused")
     public double[] readAccelDegrees() throws SensorNotInititalizedException {
         double[] r = readAccel();
         return new double[] {
@@ -154,27 +153,22 @@ public class SensorMPU6050 extends I2CSensor {
         };
     }
 
-    @SuppressWarnings("unused")
     public double getPitch() throws SensorNotInititalizedException {
         return readAccel()[X];
     }
 
-    @SuppressWarnings("unused")
     public double getRoll() throws SensorNotInititalizedException {
         return readAccel()[Y];
     }
 
-    @SuppressWarnings("unused")
     public double getPitchDegrees() throws SensorNotInititalizedException {
         return Math.toDegrees(readAccel()[X]);
     }
 
-    @SuppressWarnings("unused")
     public double getRollDegrees() throws SensorNotInititalizedException {
         return Math.toDegrees(readAccel()[Y]);
     }
 
-    
     protected static double dist(double a, double b) {
         return Math.sqrt((a*a) + (b*b));
     }

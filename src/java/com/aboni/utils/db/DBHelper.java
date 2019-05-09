@@ -16,13 +16,12 @@ public class DBHelper implements AutoCloseable {
 	
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
-    private static final String USER = "user";
-    private static final String PASS = "pwd";
+    private static final String DEFAULT_USER = "user";
 
     private String jdbc = JDBC_DRIVER;  
     private String dburl = DB_URL;
-    private String user = USER;
-    private String password = PASS;
+    private String user = DEFAULT_USER;
+    private String password;
 
     private final boolean autocommit;
     private Connection conn;
@@ -37,18 +36,16 @@ public class DBHelper implements AutoCloseable {
     private void readConf() {
         try {
             File f = new File(Constants.DB);
-            FileInputStream propInput = new FileInputStream(f);
-            Properties p = new Properties();
-            p.load(propInput);
-            propInput.close();
-            
-            jdbc = p.getProperty("jdbc.driver.class");
-            dburl = p.getProperty("jdbc.url");
-            user = p.getProperty("user");
-            password = p.getProperty("pwd");
-
+            try (FileInputStream propInput = new FileInputStream(f)) {
+				Properties p = new Properties();
+				p.load(propInput);
+				jdbc = p.getProperty("jdbc.driver.class");
+				dburl = p.getProperty("jdbc.url");
+				user = p.getProperty("user");
+				password = p.getProperty("pwd");
+			}
         } catch (Exception e) {
-            ServerLog.getLogger().Debug("Cannot read db configuration!");
+            ServerLog.getLogger().debug("Cannot read db configuration!");
         }
     }
     
@@ -62,7 +59,7 @@ public class DBHelper implements AutoCloseable {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				ServerLog.getLogger().Error("Error closing connection!", e);
+				ServerLog.getLogger().error("Error closing connection!", e);
 			}
 		}
     }
@@ -70,13 +67,13 @@ public class DBHelper implements AutoCloseable {
     private boolean reconnect() {
     	try {
     		close();
-    		ServerLog.getLogger().Info("Establishing connection to DB {" + dburl + "}!");
+    		ServerLog.getLogger().info("Establishing connection to DB {" + dburl + "}!");
             conn = DriverManager.getConnection(dburl, user, password);
     		conn.setAutoCommit(autocommit);
     		return true;
     	} catch (Exception e) {
     		conn = null;
-            ServerLog.getLogger().Error("Cannot reset onnection!", e);
+            ServerLog.getLogger().error("Cannot reset onnection!", e);
             return false;
     	}
     }
@@ -97,7 +94,7 @@ public class DBHelper implements AutoCloseable {
 			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
 			return stm;
     	} else {
-    		ServerLog.getLogger().Warning("Cannot create statement for {" + table + "} because connection is not established!");
+    		ServerLog.getLogger().warning("Cannot create statement for {" + table + "} because connection is not established!");
     		return null;
     	}
     }    
@@ -129,27 +126,29 @@ public class DBHelper implements AutoCloseable {
     
     public synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
     	if (getConnection()!=null) {
-	        PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?");
-	    	stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-	    	stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-	        ResultSet rs = stm.executeQuery();
-	        if (rs.next()) {
-	        	long count = rs.getLong(1);
-	        	Timestamp tMax = rs.getTimestamp(2);
-	        	Timestamp tMin = rs.getTimestamp(3);
-	        	if (tMax!=null && tMin!=null) {
-		        	return new Range(tMax, tMin, count);
-	        	}
-	        }
+	        try (PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?")) {
+				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
+				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
+				try (ResultSet rs = stm.executeQuery()) {
+					if (rs.next()) {
+						long count = rs.getLong(1);
+						Timestamp tMax = rs.getTimestamp(2);
+						Timestamp tMin = rs.getTimestamp(3);
+						if (tMax != null && tMin != null) {
+							return new Range(tMax, tMin, count);
+						}
+					}
+				}
+			}
     	} else {
-    		ServerLog.getLogger().Warning("Cannot create time range for {" + table + "} because connection is not established!");
+    		ServerLog.getLogger().warning("Cannot create time range for {" + table + "} because connection is not established!");
     	}
         return null;
     }
     
     public synchronized String backup() throws IOException, InterruptedException {
     	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-        ServerLog.getLogger().Info("DB Backup");
+        ServerLog.getLogger().info("DB Backup");
         String file = df.format(new Date()) + ".sql";
         ProcessBuilder b = new ProcessBuilder("./dbBck.sh", user, password, file);
         Process proc = b.start();
@@ -174,15 +173,13 @@ public class DBHelper implements AutoCloseable {
             } catch (Exception ex) {
             	writer.reset();
             	retry = true;
-                ServerLog.getLogger().Error("Cannot write {" + e + "} (" + count + ")!", ex);
+                ServerLog.getLogger().error("Cannot write {" + e + "} (" + count + ")!", ex);
             }
         }
     	if (retry) {
 	    	count++;
-	    	if (count<3) {
-				if (reconnect()) {
-		    		write(writer, e, count);
-				}
+	    	if (count<3 && reconnect()) {
+				write(writer, e, count);
 	    	}
     	}
     	return false;

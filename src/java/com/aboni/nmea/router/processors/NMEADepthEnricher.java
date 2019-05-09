@@ -30,7 +30,7 @@ public class NMEADepthEnricher implements NMEAPostProcess {
                 return new Pair<>(Boolean.TRUE, new Sentence[] {dpt});
             }
         } catch (Exception e) {
-            ServerLog.getLogger().Warning("Cannot enrich depth process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().warning("Cannot enrich depth process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
         return new Pair<>(Boolean.TRUE, null);
     }

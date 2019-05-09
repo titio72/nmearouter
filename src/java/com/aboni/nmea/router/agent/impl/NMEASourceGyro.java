@@ -21,14 +21,14 @@ public class NMEASourceGyro extends NMEAAgentImpl {
      * After 1m no HDx sentence appear on the stream the sensor start providing its own.
      * This is in case the boat can provide heading values (AP, boat compass etc.).
      */
-    private static final long SEND_HDx_IDLE_TIME = 15 * 1000; //ms
+    private static final long SEND_HD_IDLE_TIME = 15L * 1000L; //ms
 
     private static final boolean USE_CMPS11 = true;
     
     private ASensorCompass compassSensor;
     
-    private final static boolean sendHDM = false;
-    private final static boolean sendHDT = false;
+    private static final boolean SEND_HDM = false;
+    private static final boolean SEND_HDT = false;
     
     private final NMEACache cache;
     
@@ -72,7 +72,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 			r.init();
 			return r;
 		} catch (Exception e) {
-			getLogger().Error("Error creating compass sensor ", e);
+			getLogger().error("Error creating compass sensor ", e);
 			return null;
 		}
 	}
@@ -84,7 +84,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 compassSensor = (ASensorCompass)readSensor(compassSensor);
             }
         } catch (Exception e) {
-            getLogger().Error("Error reading sensor data", e);
+            getLogger().error("Error reading sensor data", e);
         }
     }
     
@@ -92,8 +92,8 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         if (s!=null) {
             try {
                 s.read();
-            } catch (SensorNotInititalizedException e) {
-                getLogger().Error("Trying to read from a not initialized sensor {" + s.getSensorName() + "} - disabling it ");
+            } catch (SensorException e) {
+                getLogger().error("Trying to read from a not initialized sensor {" + s.getSensorName() + "} - disabling it ");
                 return null;
             }
         }
@@ -103,10 +103,10 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private boolean headingNotPresentOnStream() {
     	return (
     			/* another source may have provided a heading but it's too old, presumably the source is down*/ 
-    			cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HDx_IDLE_TIME) || 
+    			cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HD_IDLE_TIME) ||
 	    		
 	    		/* there is a heading but it's mine (so no other sources are providing a heading  */
-	    		getName().equals(cache.getLastHeading().source));
+	    		getName().equals(cache.getLastHeading().getSource()));
     }
     
     private void sendHDx() {
@@ -115,17 +115,17 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     	    	double b = compassSensor.getHeading();
 	            
-	            if (sendHDM) {
+	            if (SEND_HDM) {
     	            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
     	            hdm.setHeading(Utils.normalizeDegrees0_360(b));
     	            notify(hdm);
 	            }
 	            
-	            if (cache.getLastPosition().data != null) {
+	            if (cache.getLastPosition().getData() != null) {
 	                NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
-	                m.setPosition(cache.getLastPosition().data.getPosition());
+	                m.setPosition(cache.getLastPosition().getData().getPosition());
 	                
-	                if (sendHDT) {
+	                if (SEND_HDT) {
     	                HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);
     	                notify(hdt);
 	                }
@@ -142,7 +142,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	            }
 	        }	
 		} catch (Exception e) {
-			getLogger().Error("Cannot post heading data", e);
+			getLogger().error("Cannot post heading data", e);
 		}
 
     }
@@ -160,7 +160,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
                 notify(xdr);
 	        } catch (Exception e) {
-	            getLogger().Error("Cannot post XDR data", e);
+	            getLogger().error("Cannot post XDR data", e);
 	        }
         }
 	}
@@ -177,7 +177,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         		double headingSens = compassSensor.getUnfilteredSensorHeading();
         		dump(headingSens, headingBoat);
         	} catch (Exception e) {
-        		getLogger().Error("Error dumping compass readings", e);
+        		getLogger().error("Error dumping compass readings", e);
 			}
         }
     }

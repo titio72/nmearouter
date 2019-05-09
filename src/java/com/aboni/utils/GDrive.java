@@ -69,10 +69,10 @@ public class GDrive {
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-        /*File file = service.files().create(fileMetadata, mediaContent)
+        File file = service.files().create(fileMetadata, mediaContent)
                 .setFields("id")
                 .execute();
-        System.out.println("File ID: " + file.getId());*/
+        System.out.println("File ID: " + file.getId());
 
         // Print the names and IDs for up to 10 files.
         FileList result = service.files().list()
@@ -84,8 +84,8 @@ public class GDrive {
             System.out.println("No files found.");
         } else {
             System.out.println("Files:");
-            for (File file : files) {
-                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+            for (File f : files) {
+                System.out.printf("%s (%s)\n", f.getName(), f.getId());
             }
         }
     }

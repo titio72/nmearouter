@@ -9,6 +9,9 @@ public interface TrackDumper {
 
 	void dump(Writer w) throws IOException;
 
-	void setTrackName(String trackName);
+	void setTrackName(String name);
+
+	String getTrackName();
+
 
 }

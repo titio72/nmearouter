@@ -46,6 +46,8 @@ public class AutoPilotService  implements WebService {
 			case CMD_WVANE:
 				auto.windVane();
 				break;
+			default:
+				break;
 			}
 	        response.setContentType("application/json");
 	        response.getWriter().println("{}");
@@ -55,7 +57,7 @@ public class AutoPilotService  implements WebService {
 	        try {
 	        	response.getWriter().println("{\"error\", \"" + e.getMessage() + "\"}");
 	        } catch (Exception ee) {
-				ServerLog.getLogger().Error("Error sending response to web client", ee);
+				ServerLog.getLogger().error("Error sending response to web client", ee);
 			}
 	        response.ok();
 		}
