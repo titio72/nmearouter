@@ -114,15 +114,16 @@
             var controllerScope = angular.element(controllerElement).scope();
             controllerScope['wind_r'] = msg;
             if (msg.angle>180) {
-                msg.angle = 360 - msg.angle;
+		msg.show_angle = 360 - msg.angle;
                 msg.tack = "Port"
             } else {
+		msg.show_angle = msg.angle;
                 msg.tack = "Starboard"
             }
             rr = trueWind(speed, msg.angle, msg.speed);
             controllerScope['wind_t'] = rr;
             controllerScope['wind'] = {
-                mag_angle: rr.angle + heading,
+                mag_angle: (heading + rr.angle) % 360,
                 speed: rr.speed 
             };
             controllerScope.$evalAsync();
@@ -391,8 +392,8 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.angle | numberFixedLen:3:0}}° {{wind_r.tack}}<br>
-                                    T {{wind_t.speed | number:1}}Kn {{wind_t.angle|numberFixedLen:3:0}}°<br>
+                                    <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.show_angle | numberFixedLen:3:0}}° {{wind_r.tack}}<br>
+                                    T {{wind_t.speed | number:1}}Kn {{wind_t.show_angle|numberFixedLen:3:0}}°<br>
                                      </div>
                                 </td>
                             </tr>
