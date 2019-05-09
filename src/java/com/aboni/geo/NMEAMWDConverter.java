@@ -9,7 +9,8 @@ public class NMEAMWDConverter {
 
 	private HDGSentence heading;
 	private MWVSentence trueWind;
-	long tsHeading, tsWind;
+	long tsHeading;
+	long tsWind;
 	private final TalkerId id;
 	private static final int THRESHOLD = 300 /*ms*/;
 	
@@ -22,18 +23,19 @@ public class NMEAMWDConverter {
     }
 	
     private static double getTrueHeading(HDGSentence h) {
-		double dev = 0.0, var = 0.0;
+		double dev = 0.0;
+		double var = 0.0;
 		//noinspection CatchMayIgnoreException
-		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) {}
+		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) { /* optional data*/ }
 		//noinspection CatchMayIgnoreException
-		try { var = h.getVariation(); } catch (DataNotAvailableException e) {}
+		try { var = h.getVariation(); } catch (DataNotAvailableException e) { /* optional data*/ }
 		return h.getHeading() + var + dev;
     }
 	
     private static double getMagHeading(HDGSentence h) {
 		double dev = 0.0;
 		//noinspection CatchMayIgnoreException
-		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) {}
+		try { dev = h.getDeviation(); } catch (DataNotAvailableException e) { /* optional data*/ }
 		return h.getHeading() + dev;
     }
     

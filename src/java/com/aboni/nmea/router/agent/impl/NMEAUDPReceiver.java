@@ -32,7 +32,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 	        if (socket == null) {
     	        try {
                     socket = new DatagramSocket(port);
-                    getLogger().Info("Opened Datagram socket {" + port + "}");
+                    getLogger().info("Opened Datagram socket {" + port + "}");
                     
                     //$GPRMC,054922.00,A,4337.80466,N,01017.61149,E,0.767,,051018,,*1D
                     
@@ -42,11 +42,11 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 							try {
 								DatagramPacket p = new DatagramPacket(buffer, 256);
 								socket.receive(p);
-								String s_sentence = new String(p.getData(), 0, p.getLength());
-								Sentence s = SentenceFactory.getInstance().createParser(s_sentence);
+								String sSentence = new String(p.getData(), 0, p.getLength());
+								Sentence s = SentenceFactory.getInstance().createParser(sSentence);
 								onSentenceRead(s);
 							} catch (Exception e) {
-								getLogger().Warning("Error receiveing sentence {" + e.getMessage() + "}");
+								getLogger().warning("Error receiveing sentence {" + e.getMessage() + "}");
 							}
 						}
 						socket.close();
@@ -55,7 +55,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                     
                     return true;
                 } catch (Exception e) {
-                    getLogger().Error("Error initializing socket {" + port + "} ", e);
+                    getLogger().error("Error initializing socket {" + port + "} ", e);
                     socket = null;
                 }
             }

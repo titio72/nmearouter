@@ -28,7 +28,7 @@ public class DBMeteoEventWriter implements EventWriter {
 		try {
 			stm.close();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error closing statement in " + getClass().getSimpleName(), e);
+			ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
 		}
 		stm = null;
 	}

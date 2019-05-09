@@ -1,52 +1,53 @@
 package com.aboni.sensors;
 
-import java.io.IOException;
-
-import com.aboni.sensors.hw.ADS1115;
 import com.aboni.misc.DataFilter;
+import com.aboni.sensors.hw.ADS1115;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+
+import java.io.IOException;
 
 public class SensorVoltage extends I2CSensor {
     
     private static final double MULTIPLIER = 5.0;
 
     private ADS1115 ads;
-    private final double[] v = new double[4];
+    private final double[] v;
     private int address;
-    private double smoothing = 0.75; 
-    private final double[] adj = new double[] { 1, 1, 1, 1 };
+    private double smoothing;
+    private final double[] adj;
     
     public SensorVoltage(int address) {
+        super();
         ads = null;
         this.address = address;
+        smoothing = 0.75;
+        adj = new double[] { 1, 1, 1, 1 };
+        v = new double[] {0.0, 0.0, 0.0, 0.0};
     }
 
     public SensorVoltage() {
-    	super();
-        ads = null;
+    	this(ADS1115.ADS1115_ADDRESS_0X48);
 
-        this.address = ADS1115.ADS1115_ADDRESS_0x48;
-        
-        String s_address = HWSettings.getProperty("analog.voltage", "0x48");
+        String sAddress = HWSettings.getProperty("analog.voltage", "0x48");
         
     	smoothing = getDefaultSmootingAlpha();
-        String s_smoothing = HWSettings.getProperty("analog.voltage.smoothing", "");
-        if (s_smoothing!=null && !s_smoothing.isEmpty()) {
+        String sSmoothing = HWSettings.getProperty("analog.voltage.smoothing", "");
+        if (sSmoothing!=null && !sSmoothing.isEmpty()) {
         	try {
-        		smoothing = Double.parseDouble(s_smoothing);
+        		smoothing = Double.parseDouble(sSmoothing);
         	} catch (Exception e) {
-        		ServerLog.getLogger().Error("Cannot parse voltage smoothing factor " + s_smoothing, e);
+        		ServerLog.getLogger().error("Cannot parse voltage smoothing factor " + sSmoothing, e);
         	}
         }
         
         loadAdjustment();
         
-        if (s_address.startsWith("0x")) {
-            this.address = Integer.parseInt(s_address.substring(2), 16);
+        if (sAddress.startsWith("0x")) {
+            this.address = Integer.parseInt(sAddress.substring(2), 16);
         } else {
-            this.address = Integer.parseInt(s_address);
+            this.address = Integer.parseInt(sAddress);
         }
         
         
@@ -75,7 +76,7 @@ public class SensorVoltage extends I2CSensor {
     }
     
     @Override
-    protected void _init(int bus) throws IOException, UnsupportedBusNumberException {
+    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
         ads = new ADS1115(new I2CInterface(bus, address), MULTIPLIER);
     }
 
@@ -85,11 +86,15 @@ public class SensorVoltage extends I2CSensor {
     }
 
     @Override
-    protected void _read() throws Exception {
+    protected void readSensor() throws SensorException {
     	loadAdjustment();
         for (int i = 0; i<4; i++) {
-            double _v = ads.getVoltage(i);
-        	v[i] = DataFilter.getLPFReading(smoothing, v[i], _v);
+            try {
+                double voltage = ads.getVoltage(i);
+            	v[i] = DataFilter.getLPFReading(smoothing, v[i], voltage);
+            } catch (IOException e) {
+                throw new SensorException("Error reading voltage", e);
+            }
         }
     }
 }

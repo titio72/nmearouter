@@ -154,7 +154,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	
 	public void dumpStats() {
 		synchronized (stats) {
-			ServerLog.getLogger().Info("RMCFilter " + stats);
+			ServerLog.getLogger().info("RMCFilter " + stats);
 			stats.reset();
 		}
 	}

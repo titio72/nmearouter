@@ -48,7 +48,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 				try {
 					dump();
 				} catch (IOException e1) {
-					ServerLog.getLogger().Error("Error dumping NMEA stream", e1);
+					ServerLog.getLogger().error("Error dumping NMEA stream", e1);
 				}
 			}
 		}

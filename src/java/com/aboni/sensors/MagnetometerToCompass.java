@@ -42,19 +42,18 @@ public class MagnetometerToCompass {
    
    /**
     * get the tilt compensated bearing in decimal degrees [0..360].
-    * @param mag_raw The reading of the magnetometer
-    * @param acc_raw The reading of the accelerometer
+    * @param magRaw The reading of the magnetometer
+    * @param accRaw The reading of the accelerometer
     * @return The heading tilt-compnsated
     */
-   public double getTiltCompensatedHeading(double[] mag_raw, double[] acc_raw) {
-       double[] mag = getCalibratedMag(mag_raw);
+   public double getTiltCompensatedHeading(double[] magRaw, double[] accRaw) {
+       double[] mag = getCalibratedMag(magRaw);
 
-       double accX = acc_raw[0] / normOf(acc_raw);
-       double accY = acc_raw[1] / normOf(acc_raw);
+       double accX = accRaw[0] / normOf(accRaw);
+       double accY = accRaw[1] / normOf(accRaw);
 
        double pitch = Math.asin(accX);
-       //double roll = -Math.asin(accYnorm / Math.cos(pitch));
-       
+
        double magXcomp = mag[0] * Math.cos(Math.asin(accX)) + mag[2] * Math.sin(pitch);
        double magYcomp = mag[0] * Math.sin(Math.asin(accY / Math.cos(pitch))) * Math.sin(Math.asin(accX)) + 
                mag[1] * Math.cos(Math.asin(accY / Math.cos(pitch))) - 

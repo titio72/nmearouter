@@ -22,14 +22,6 @@ public class I2CInterface {
 		device = bus.getDevice(deviceAddr);
 	}
 
-	/*public int readI2C(int add) throws IOException {
-		synchronized (device) {
-			int res = device.read(add);
-			if (res<0) throw new RuntimeException();
-			return res;
-		}
-	}*/
-
 	public int read(int reg, byte[] data, int from, int to) throws IOException {
 	    synchronized (device) {
 	        return device.read(reg, data, from, to);
@@ -80,7 +72,7 @@ public class I2CInterface {
 	 */
 	public int readU8(int reg) throws IOException {
 	    synchronized (device) {
-			return device.read(reg); // & 0xFF;
+			return device.read(reg);
 	    }
 	}
 
@@ -89,9 +81,9 @@ public class I2CInterface {
 	 */
 	public int readS8(int reg) throws IOException {
         synchronized (device) {
-    		int result = device.read(reg); // & 0x7F;
+    		int result = device.read(reg);
     		if (result > 127) result -= 256;
-    		return result; // & 0xFF;
+    		return result;
         }
 	}
 
@@ -104,15 +96,16 @@ public class I2CInterface {
     	    int hi = readU8(register);
     		int lo = readU8(register + 1);
     		if (endianness == Endianness.BIG_ENDIAN) 
-    		    return (hi << 8) + lo; // & 0xFFFF;
+    		    return (hi << 8) + lo;
     		else
-    		    return (lo << 8) + hi; // & 0xFFFF;
+    		    return (lo << 8) + hi;
 	    }
 	}
 
 	public int readS16(int register, Endianness endianness) throws IOException {
 		synchronized (device) {
-    	    int hi, lo;
+    	    int hi;
+    	    int lo;
     		if (endianness == Endianness.BIG_ENDIAN) {
     			hi = readS8(register);
     			lo = readU8(register + 1);
@@ -120,7 +113,7 @@ public class I2CInterface {
     			lo = readU8(register);
     			hi = readS8(register + 1);
     		}
-    		return ((hi << 8) + lo); // & 0xFFFF;
+    		return ((hi << 8) + lo);
 		}
 	}
 

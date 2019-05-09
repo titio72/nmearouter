@@ -2,8 +2,8 @@ package com.aboni.sensors;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.geo.DeviationManagerImpl;
-import com.aboni.utils.Constants;
 import com.aboni.misc.DataFilter;
+import com.aboni.utils.Constants;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 
@@ -73,39 +73,39 @@ public abstract class ASensorCompass extends I2CSensor {
         updateDeviationTable();
         attitudeSmoothing = HWSettings.getPropertyAsDouble("attitude.smoothing", 0.75);
         compassSmoothing = HWSettings.getPropertyAsDouble("compass.smoothing", 0.75);
-    	_onLoadConfiguration();
+    	onLoadCompassConfiguration();
     }
 
-    protected void _onLoadConfiguration() {
+    protected void onLoadCompassConfiguration() {
     }
     
     private void updateDeviationTable() {
         try {
         	File f = new File(Constants.DEVIATION);
         	if (f.exists() && f.lastModified()>lastModifiedDevTable) {
-        		ServerLog.getLogger().Info("Reloading deviation table.");
+        		ServerLog.getLogger().info("Reloading deviation table.");
         		lastModifiedDevTable = f.lastModified();
-	        	FileInputStream s = new FileInputStream(f); 
-				devManager.reset();
-	        	if (!devManager.load(s)) {
-					ServerLog.getLogger().Error("CompassSensor cannot load deviation table!");
+	        	try (FileInputStream s = new FileInputStream(f)) {
+					devManager.reset();
+					if (!devManager.load(s)) {
+						ServerLog.getLogger().error("CompassSensor cannot load deviation table!");
+					}
 				}
-				s.close();
         	}
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot load deviation table!", e);
+			ServerLog.getLogger().error("Cannot load deviation table!", e);
 		}
     }
 
     @Override
-    protected void _read() throws Exception {
-    	_onRead();
-    	pitch = DataFilter.getLPFReading(attitudeSmoothing, pitch, getUnfilteredPitch());
-    	roll = DataFilter.getLPFReading(attitudeSmoothing, roll, getUnfilteredRoll());
-    	head = DataFilter.getLPFReading(compassSmoothing, head, getUnfilteredSensorHeading());
+    protected void readSensor() throws SensorException {
+    	onCompassRead();
+		pitch = DataFilter.getLPFReading(attitudeSmoothing, pitch, getUnfilteredPitch());
+		roll = DataFilter.getLPFReading(attitudeSmoothing, roll, getUnfilteredRoll());
+		head = DataFilter.getLPFReading(compassSmoothing, head, getUnfilteredSensorHeading());
     }
     
-    protected abstract void _onRead() throws Exception;
+    protected abstract void onCompassRead() throws SensorException;
     
     @Override
     public String getSensorName() {

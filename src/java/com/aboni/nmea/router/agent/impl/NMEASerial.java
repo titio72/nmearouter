@@ -1,10 +1,5 @@
 package com.aboni.nmea.router.agent.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
@@ -12,9 +7,13 @@ import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
-
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEASerial extends NMEAAgentImpl {
     
@@ -47,7 +46,8 @@ public class NMEASerial extends NMEAAgentImpl {
     private class Stats extends StatsSpeed {
         long sentences = 0;
         long sentenceErrs = 0;
-        
+
+        @Override
         void reset(long time) {
         	super.reset(time);
         	sentenceErrs = 0;
@@ -99,19 +99,20 @@ public class NMEASerial extends NMEAAgentImpl {
     protected boolean onActivate() {
         if (port == null) {
             try {
-                getLogger().Info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive ? "R" : "")
+                getLogger().info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive ? "R" : "")
                         + (trasmit ? "X" : "") + "}");
                 port = SerialPort.getCommPort(portName);
                 port.setComPortParameters(speed, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 port.openPort();
                 port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 500, 0);
-                getLogger().Info("Port Opened");
+                getLogger().info("Port Opened");
                 run.set(true);
                 if (receive) {
                 	port.addDataListener(new SerialPortDataListener() {
 						
 						@Override
 						public void serialEvent(SerialPortEvent event) {
+						    // do nothing
 						}
 						
 						@Override
@@ -121,43 +122,45 @@ public class NMEASerial extends NMEAAgentImpl {
 									SerialPort.LISTENING_EVENT_DATA_WRITTEN;
 						}
 					});
-
-
-                    Thread thread = new Thread(() -> {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
-                        while (run.get()) {
-                            String s = "";
-                            try {
-                                s = reader.readLine();
-                                if (s != null) {
-                                    updateReadStats(s);
-                                    Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                                    onSentenceRead(sentence);
-                                }
-                            } catch (IOException e) {
-                                Utils.pause(100);
-                            } catch (Exception e) {
-                                getLogger().Warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
-                            }
-                        }
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            getLogger().Warning("Error serial reader " + e.getMessage());
-                        }
-                    });
-                	thread.start();
+                    startReader();
                 }
                 return true;
             } catch (Exception e) {
-                getLogger().Error("Error initializing serial {" + portName + "}", e);
+                getLogger().error("Error initializing serial {" + portName + "}", e);
                 port = null;
             }
         }
         return false;
     }
-    
-	private void updateReadStats(String s) {
+
+    private void startReader() {
+        Thread thread = new Thread(() -> {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+            while (run.get()) {
+                String s = "";
+                try {
+                    s = reader.readLine();
+                    if (s != null) {
+                        updateReadStats(s);
+                        Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                        onSentenceRead(sentence);
+                    }
+                } catch (IOException e) {
+                    Utils.pause(100);
+                } catch (Exception e) {
+                    getLogger().warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
+                }
+            }
+            try {
+                reader.close();
+            } catch (IOException e) {
+                getLogger().warning("Error serial reader " + e.getMessage());
+            }
+        });
+        thread.start();
+    }
+
+    private void updateReadStats(String s) {
 		synchronized (stats) {
 			int l = s.length() + 2;
 		    fastStats.bytes += l;
@@ -180,7 +183,7 @@ public class NMEASerial extends NMEAAgentImpl {
             try {
                 port.closePort();
             } catch (Exception e) {
-                getLogger().Error("Error closing serial {" + portName + "}", e);
+                getLogger().error("Error closing serial {" + portName + "}", e);
             } finally {
                 port = null;
             }
@@ -195,12 +198,12 @@ public class NMEASerial extends NMEAAgentImpl {
     protected void doWithSentence(Sentence s, NMEAAgent src) {
         if (isStarted() && trasmit) {
             try {
-                String _s = s.toSentence() + "\r\n";
-                byte[] b = _s.getBytes();
+                String strSentence = s.toSentence() + "\r\n";
+                byte[] b = strSentence.getBytes();
                 port.writeBytes(b, b.length);
                 updateWriteStats(b);
             } catch (Exception e) {
-                getLogger().Error("ERROR: cannot write on port " + portName, e);
+                getLogger().error("ERROR: cannot write on port " + portName, e);
                 stop();
             }
         }
@@ -220,7 +223,7 @@ public class NMEASerial extends NMEAAgentImpl {
 	                fastStats.reset(t);
 		        } 
 		        if ((t - stats.resetTime) > STATS_PERIOD) {
-	            	getLogger().Info(String.format("BIn {%d} bpsIn {%d} bpsOut {%d} BOut {%d} Msg {%d} Err {%d}", 
+	            	getLogger().info(String.format("BIn {%d} bpsIn {%d} bpsOut {%d} BOut {%d} Msg {%d} Err {%d}", 
 	            			stats.bytes, (stats.bytes*8*1000)/(t - stats.resetTime), 
 	            			stats.bytesOut, (stats.bytesOut*8*1000)/(t - stats.resetTime), 
 	            			stats.sentences, stats.sentenceErrs));

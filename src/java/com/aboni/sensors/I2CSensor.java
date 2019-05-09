@@ -8,40 +8,32 @@ import java.io.IOException;
 
 public abstract class I2CSensor implements Sensor {
 
+    private String getMessage(String message) {
+        return String.format("Sensor {%s} instance {%d} %s", getSensorName(), instance, message);
+    }
+
     @SuppressWarnings("unused")
     protected void debug(String msg) {
-        ServerLog.getLogger().Debug( 
-                "sensor {" + getSensorName() + "} instance {" + 
-                instance + "} " + msg);
+        ServerLog.getLogger().debug(getMessage(msg));
     }
     
     protected void log(String msg) {
-        ServerLog.getLogger().Info(
-                "sensor {" + getSensorName() + "} instance {" + 
-                instance + "} " + msg);
+        ServerLog.getLogger().info(getMessage(msg));
     }
     
     @SuppressWarnings("unused")
     protected void warning(String msg, Throwable t) {
         if (t==null) 
-            ServerLog.getLogger().Warning(
-                "sensor {" + getSensorName() + "} instance {" + 
-                instance + "} " + msg);
+            ServerLog.getLogger().warning(getMessage(msg));
         else 
-            ServerLog.getLogger().Error( 
-                "sensor {" + getSensorName() + "} instance {" + 
-                instance + "} " + msg,  t);
+            ServerLog.getLogger().error(getMessage(msg),  t);
     }
     
     protected void error(String msg, Throwable t) {
         if (t==null) 
-            ServerLog.getLogger().Error( 
-                    "sensor {" + getSensorName() + "} instance {" + 
-                    instance + "} " + msg);
+            ServerLog.getLogger().error(getMessage(msg));
         else 
-            ServerLog.getLogger().Error( 
-                    "sensor {" + getSensorName() + "} instance {" + 
-                    instance + "} " + msg,  t);
+            ServerLog.getLogger().error( getMessage(msg),  t);
     }
 
     private static final double LPF_ALPHA = 0.75;
@@ -76,38 +68,32 @@ public abstract class I2CSensor implements Sensor {
 
     public final void init(int bus) throws IOException, UnsupportedBusNumberException {
         log("Initializing bus {" + bus + "}");
-        _init(bus);
+        initSensor(bus);
         log("Initialized!");
         initialized = true;
     }
 
-    protected abstract void _init(int bus) throws IOException, UnsupportedBusNumberException;
-
-    /* (non-Javadoc)
-	 * @see com.aboni.sensors.Sensor#getSensorName()
-	 */
-    @Override
-	public abstract String getSensorName();
+    protected abstract void initSensor(int bus) throws IOException, UnsupportedBusNumberException;
 
     protected final boolean isInitialized() {
         return initialized;
     }
 
-    protected abstract void _read() throws Exception;
+    protected abstract void readSensor() throws SensorException;
 
     /* (non-Javadoc)
 	 * @see com.aboni.sensors.Sensor#read()
 	 */
     @Override
-	public final void read() throws SensorNotInititalizedException {
+	public final void read() throws SensorException {
         if (isInitialized() && (failures<maxFailures)) {
             try {
-            	_read();
+            	readSensor();
             } catch (Exception e) {
             	failures++;
             	error("Error reading sensor {" + e.getMessage() + "} failure {" + failures + "/" + maxFailures + "}", e);
             }
-        } else throw new SensorNotInititalizedException("Sensor not initialized!"); 
+        } else throw new SensorException("Sensor not initialized!");
     }
 
 	public double getDefaultSmootingAlpha() {

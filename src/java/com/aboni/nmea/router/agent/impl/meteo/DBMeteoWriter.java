@@ -20,7 +20,7 @@ public class DBMeteoWriter implements StatsWriter {
             try {
 				db = new DBHelper(true);
 	        } catch (Exception e) {
-	            ServerLog.getLogger().Error("Cannot initialize meteo stats writer!", e);
+	            ServerLog.getLogger().error("Cannot initialize meteo stats writer!", e);
             }
     	}
     }

@@ -1,5 +1,8 @@
 package com.aboni.nmea.router.conf.db;
 
+import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,11 +10,9 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
-
 public class AgentStatusImpl implements AgentStatus {
 
+	private static final String ERROR_MSG = "Cannot persist status for Agent";
 	private DBHelper db;
 	
 	private final Map<String, AgentStatus.STATUS> status;
@@ -33,7 +34,7 @@ public class AgentStatusImpl implements AgentStatus {
 			db = new DBHelper(true);
 			loadAll();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error loading agents status", e);
+			ServerLog.getLogger().error("Error loading agents status", e);
 		}
 	}
 
@@ -66,24 +67,25 @@ public class AgentStatusImpl implements AgentStatus {
 				updateFilterIn = db.getConnection().prepareStatement("update agent set filterIn=? where id=?");
 			}
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Error creating statement for agent status update", e);
+			ServerLog.getLogger().error("Error creating statement for agent status update", e);
 		}
 	}
 	
 	private void loadAll() throws SQLException {
 		String sql = "select id, autostart, filterOut, filterIn from agent";
-		Statement st = db.getConnection().createStatement();
-		ResultSet rs = st.executeQuery(sql);
-		while (rs.next()) {
-			String agId = rs.getString(1);
-			STATUS agSt = (1==rs.getInt(2))?STATUS.AUTO:STATUS.MANUAL;
-			String agFOut = rs.getString(3);
-			String agFIn = rs.getString(4);
-			status.put(agId,  agSt);
-			filterOut.put(agId, agFOut);
-			filterIn.put(agId, agFIn);
+		try (Statement st = db.getConnection().createStatement()) {
+			try (ResultSet rs = st.executeQuery(sql)) {
+				while (rs.next()) {
+					String agId = rs.getString(1);
+					STATUS agSt = (1 == rs.getInt(2)) ? STATUS.AUTO : STATUS.MANUAL;
+					String agFOut = rs.getString(3);
+					String agFIn = rs.getString(4);
+					status.put(agId, agSt);
+					filterOut.put(agId, agFOut);
+					filterIn.put(agId, agFIn);
+				}
+			}
 		}
-		st.close();
 	}
 
 	@Override
@@ -111,10 +113,10 @@ public class AgentStatusImpl implements AgentStatus {
 				p.setInt(3, (s==STATUS.AUTO)?1:0);
 				p.executeUpdate();
 			} catch (Exception e) {
-				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Start {" + s + "}", e);
+				ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} Start {" + s + "}", e);
 			}
 		} else {
-			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Start {" + status + "}");
+			ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} Start {" + status + "}");
 		}
 	}
 
@@ -129,10 +131,10 @@ public class AgentStatusImpl implements AgentStatus {
 				p.setString(2, agent);
 				p.executeUpdate();
 			} catch (Exception e) {
-				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}", e);
+				ServerLog.getLogger().error(getErrorMessage(agent, agData), e);
 			}
 		} else {
-			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}");
+			ServerLog.getLogger().error(getErrorMessage(agent, agData));
 		}
 	}
 
@@ -146,11 +148,15 @@ public class AgentStatusImpl implements AgentStatus {
 				p.setString(2, agent);
 				p.executeUpdate();
 			} catch (Exception e) {
-				ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}", e);
+				ServerLog.getLogger().error(getErrorMessage(agent, agData), e);
 			}
 		} else {
-			ServerLog.getLogger().Error("Cannot persist status for Agent {" + agent + "} Data {" + agData + "}");
+			ServerLog.getLogger().error(getErrorMessage(agent, agData));
 		}
+	}
+
+	private static String getErrorMessage(String agent, String data) {
+		return ERROR_MSG + " {" + agent + "} Data {" + data + "}";
 	}
 
 }

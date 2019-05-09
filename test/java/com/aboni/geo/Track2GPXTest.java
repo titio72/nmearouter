@@ -1,15 +1,14 @@
 package com.aboni.geo;
 
-import static org.junit.Assert.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
+import org.junit.Test;
+import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
 
-import org.junit.Test;
-import org.w3c.dom.Document;
+import static org.junit.Assert.assertEquals;
 
 public class Track2GPXTest {
 
@@ -36,17 +35,4 @@ public class Track2GPXTest {
 		assertEquals(Track2GPX.DEFAULT_TRACK_NAME, d.getElementsByTagName("name").item(0).getTextContent());
 	}
 
-	@Test
-	public void testTrackName() throws Exception {
-		TrackDumper g = new Track2GPX();
-		g.setTrack(createPositionHistory());
-		g.setTrackName("pippo");
-		StringWriter w = new StringWriter();
-		g.dump(w);
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document d = builder.parse(new ByteArrayInputStream(w.toString().getBytes()));
-		
-		assertEquals("pippo", d.getElementsByTagName("name").item(0).getTextContent());
-	}
 }

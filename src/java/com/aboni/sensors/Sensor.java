@@ -10,6 +10,6 @@ public interface Sensor {
 
 	String getSensorName();
 
-	void read() throws SensorNotInititalizedException;
+	void read() throws SensorException;
 
 }

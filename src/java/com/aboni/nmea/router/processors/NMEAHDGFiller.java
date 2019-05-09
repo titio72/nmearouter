@@ -57,7 +57,7 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                 return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
             }
         } catch (Exception e) {
-            ServerLog.getLogger().Warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
         return new Pair<>(Boolean.TRUE, null);
     }
@@ -81,8 +81,8 @@ public class NMEAHDGFiller implements NMEAPostProcess {
 	private Position getLastPosition() {
 		Position lastPosition = null;
 		DataEvent<PositionSentence> ev = cache.getLastPosition();
-		if (ev!=null && ev.data!=null) {
-		    lastPosition = ev.data.getPosition(); 
+		if (ev!=null && ev.getData()!=null) {
+		    lastPosition = ev.getData().getPosition();
 		}
 		return lastPosition;
 	}

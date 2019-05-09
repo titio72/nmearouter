@@ -52,11 +52,11 @@ public class CruisingDaysService extends JSONWebService {
 	}
 	
 	@Override
-	public JSONObject getResult(ServiceConfig config, DBHelper db) {
-		try {
+	public JSONObject getResult(ServiceConfig config) {
+		try (DBHelper db = getDBHelper()) {
 			return getJsonObject(getTrips(db));
-		} catch (SQLException e) {
-			ServerLog.getLogger().Error("Error reading trip list", e);
+		} catch (SQLException | ClassNotFoundException e) {
+			ServerLog.getLogger().error("Error reading trip list", e);
 			JSONObject res = new JSONObject();
 			res.put("error", "Error reading trip list. Check the logs.");
 			return res;

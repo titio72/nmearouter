@@ -32,7 +32,7 @@ public class TripStatService extends JSONWebService {
 			+ "group by tripid order by start desc";
 
 	@Override
-	public JSONObject getResult(ServiceConfig config, DBHelper db) {
+	public JSONObject getResult(ServiceConfig config) {
 
 		int year = config.getInteger("year", Calendar.getInstance().get(Calendar.YEAR));
 
@@ -40,10 +40,10 @@ public class TripStatService extends JSONWebService {
 		Calendar cTo = getFirstDayOfYear(cFrom.get(Calendar.YEAR) + 1);
 
 		JSONObject res;
-		try {
+		try (DBHelper db = getDBHelper()) {
 			res = getJsonTripStats(db, cFrom, cTo);
-		} catch (SQLException e) {
-			ServerLog.getLogger().Error("Error reading trip stats", e);
+		} catch (SQLException | ClassNotFoundException e) {
+			ServerLog.getLogger().error("Error reading trip stats", e);
 			res = new JSONObject();
 			res.put("Error", "Cannot retrieve trips status - check the logs for errors");
 		}

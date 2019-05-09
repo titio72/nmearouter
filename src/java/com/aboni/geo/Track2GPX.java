@@ -30,6 +30,7 @@ public class Track2GPX implements TrackDumper {
 	}
 
 	private PositionHistory track;
+
 	private String trackName = DEFAULT_TRACK_NAME;
 	public static final String DEFAULT_TRACK_NAME = "track";
 	
@@ -64,7 +65,6 @@ public class Track2GPX implements TrackDumper {
 
 	private void writePoints(Writer w) {
 		track.iterate(new PointWriter(w));
-		
 	}
 	
 	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -114,11 +114,14 @@ public class Track2GPX implements TrackDumper {
 	}
 
 	@Override
+	public String getTrackName() {
+		return trackName;
+	}
+
+	@Override
 	public void setTrackName(String trackName) {
 		this.trackName = trackName;
 	}
-	
-	
 }
 
 /*

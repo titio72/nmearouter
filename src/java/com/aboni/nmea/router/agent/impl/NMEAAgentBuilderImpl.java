@@ -14,6 +14,7 @@ import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 import javax.inject.Inject;
@@ -120,7 +121,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		try {
 			gpx = new NMEAGPXPlayerAgent(cache, g.getName(), file, q);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ServerLog.getLogger().error("Cannot create GPX reader", e);
 		}
     	return gpx;
 	}
@@ -218,7 +219,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	}
     
 	private NMEAAgent buildSimulator(SimulatorAgent s, QOS q) {
-		return new NMEASimulatorSource(cache, s.getName(), q);
+		return NMEASimulatorSource.create(cache, s.getName(), q);
     }
 
     private NMEAAgent buildSensor(SensorAgent s, QOS q) {

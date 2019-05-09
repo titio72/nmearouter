@@ -29,35 +29,37 @@ public class SpeedAnalyticsService extends JSONWebService {
 	}
 
 	@Override
-	public JSONObject getResult(ServiceConfig config, final DBHelper db) {
+	public JSONObject getResult(ServiceConfig config) {
 		Map<Double, Stat> distr = new TreeMap<>();
 
 		DateRangeParameter fromTo = new DateRangeParameter(config);
 		Calendar cFrom = fromTo.getFrom();
 		Calendar cTo = fromTo.getTo();
 
-		try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
-			stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+		try (DBHelper db = getDBHelper()) {
+			try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
+				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
+				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
 
-			for (double speed=SPEED_MIN; (speed+SPEED_BUCKET/10.0)<SPEED_MAX; speed+=SPEED_BUCKET) {
-				stm.setDouble(3, speed);
-				stm.setDouble(4, speed + SPEED_BUCKET);
-				scanSpeedSamples(distr, stm, speed);
+				for (double speed = SPEED_MIN; (speed + SPEED_BUCKET / 10.0) < SPEED_MAX; speed += SPEED_BUCKET) {
+					stm.setDouble(3, speed);
+					stm.setDouble(4, speed + SPEED_BUCKET);
+					scanSpeedSamples(distr, stm, speed);
+				}
+				JSONObject res = new JSONObject();
+				JSONArray serie = new JSONArray();
+				for (Map.Entry<Double, Stat> entry : distr.entrySet()) {
+					JSONObject e = new JSONObject();
+					e.put("speed", entry.getKey());
+					e.put("time", entry.getValue().time);
+					e.put("distance", entry.getValue().distance);
+					serie.put(e);
+				}
+				res.put("serie", serie);
+				return res;
 			}
-			JSONObject res = new JSONObject();
-			JSONArray serie = new JSONArray();
-			for (Map.Entry<Double, Stat> entry: distr.entrySet()) {
-				JSONObject e = new JSONObject();
-				e.put("speed", entry.getKey());
-				e.put("time", entry.getValue().time);
-				e.put("distance", entry.getValue().distance);
-				serie.put(e);
-			}
-			res.put("serie", serie);
-			return res;
-		} catch (SQLException e) {
-			ServerLog.getLogger().Error("Error reading speeds serie", e);
+		} catch (SQLException | ClassNotFoundException e) {
+			ServerLog.getLogger().error("Error reading speeds serie", e);
 			JSONObject res = new JSONObject();
 			res.put("error", "Error reading speed serie. Check the logs.");
 			return res;

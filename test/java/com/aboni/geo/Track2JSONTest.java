@@ -46,26 +46,5 @@ public class Track2JSONTest {
 		assertEquals(10.08000300, ((JSONObject)path.get(3)).getDouble("lng"), 0.0000001);
 		
 	}
-	
-	@Test
-	public void testName() {
-		Track2JSON j = new Track2JSON();
-		j.setTrack(createPositionHistory());
-		j.setTrackName("pippo");
-		StringWriter w = new StringWriter();
-		j.dump(w);
-		JSONObject jTrack = new JSONObject(w.toString());
-		assertEquals("pippo", jTrack.getJSONObject("track").getString("name"));
-	}
-	
-	
-	@Test
-	public void testDefaultName() {
-		Track2JSON j = new Track2JSON();
-		j.setTrack(createPositionHistory());
-		StringWriter w = new StringWriter();
-		j.dump(w);
-		JSONObject jTrack = new JSONObject(w.toString());
-		assertEquals(Track2JSON.DEFAULT_TRACK_NAME, jTrack.getJSONObject("track").getString("name"));
-	}
+
 }

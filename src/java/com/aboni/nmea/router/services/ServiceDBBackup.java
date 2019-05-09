@@ -1,30 +1,26 @@
 package com.aboni.nmea.router.services;
 
-import org.json.JSONObject;
-
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
+import org.json.JSONObject;
 
-public class ServiceDBBackup implements WebService {
+public class ServiceDBBackup extends JSONWebService {
 
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
-        try (DBHelper h = new DBHelper(true)) {
+	public JSONObject getResult(ServiceConfig config) {
+        try (DBHelper h = getDBHelper()) {
             String file = h.backup();
-            ServerLog.getLogger().Info("DB Backup Return {" + file + "}");
-            response.setContentType("application/json");
-            JSONObject res = new JSONObject();
+            ServerLog.getLogger().info("DB Backup Return {" + file + "}");
             if (file != null) {
-                res.put("result", "Ok");
+                JSONObject res = getOk();
                 res.put("file", file + ".tgz");
+                return res;
             } else {
-                res.put("result", "Ko");
-                res.put("error", "");
+                return getError("Backup failed");
             }
-            response.getWriter().print(res.toString());
-            response.ok();
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Error during db backup", e);
+            ServerLog.getLogger().error("Error during db backup", e);
+            return getError("Error " + e.getMessage());
         }
 	}
 }

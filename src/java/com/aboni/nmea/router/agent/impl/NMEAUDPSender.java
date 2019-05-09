@@ -1,5 +1,11 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.QOS;
+import com.aboni.utils.ServerLog;
+import net.sf.marineapi.nmea.sentence.Sentence;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -7,14 +13,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.aboni.nmea.router.NMEACache;
-
-import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.utils.ServerLog;
-
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public class NMEAUDPSender extends NMEAAgentImpl {
 
@@ -54,7 +52,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 		try {
 			targets.add(InetAddress.getByName(target));
 		} catch (UnknownHostException e) {
-			getLogger().Error("Invalid target {" + target + "}");
+			getLogger().error("Invalid target {" + target + "}");
 		}
 	}
 	
@@ -64,7 +62,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 			serverSocket = new DatagramSocket();
 			return true;
 		} catch (IOException e) {
-			ServerLog.getLogger().Error("Cannot open datagram server", e);
+			ServerLog.getLogger().error("Cannot open datagram server", e);
 		}
 		return false;
 	}
@@ -74,7 +72,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 		try {
 			serverSocket.close();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot close datagram server", e);
+			ServerLog.getLogger().error("Cannot close datagram server", e);
 		}
 	}
 	
@@ -92,7 +90,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 					serverSocket.send(packet);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				ServerLog.getLogger().error("Error sending datagram packet", e);
 			}
 			nSentences = 0;
 			sending = "";

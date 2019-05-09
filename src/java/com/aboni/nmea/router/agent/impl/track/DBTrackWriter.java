@@ -29,7 +29,7 @@ public class DBTrackWriter implements TrackWriter {
             db = new DBHelper(true);
             return true;
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Cannot initialize track db!", e);
+            ServerLog.getLogger().error("Cannot initialize track db!", e);
             return false;
         }
     }

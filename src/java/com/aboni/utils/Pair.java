@@ -12,15 +12,15 @@ public class Pair<T, U> {
 	@Override
 	public boolean equals(Object x) {
 		if (x instanceof Pair<?, ?>) {
-			Pair<?, ?> _x = (Pair<?, ?>)x;
+			Pair<?, ?> pair = (Pair<?, ?>)x;
 			if (first!=null && second!=null)
-				return first.equals(_x.first) && second.equals(_x.second);
+				return first.equals(pair.first) && second.equals(pair.second);
 			else if (first==null && second!=null)
-				return _x.first==null && second.equals(_x.second);
+				return pair.first==null && second.equals(pair.second);
 			else if (first!=null)
-				return first.equals(_x.first) && _x.second == null;
+				return first.equals(pair.first) && pair.second == null;
 			else
-				return _x.first == null && _x.second == null;
+				return pair.first == null && pair.second == null;
 		} else {
 			return false;
 		}

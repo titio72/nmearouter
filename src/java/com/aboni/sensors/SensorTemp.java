@@ -32,7 +32,7 @@ public class SensorTemp implements Sensor {
 		try {
 			sensor = new DS18B20();
 		} catch (Exception e) {
-			ServerLog.getLogger().Error("Cannot initialize temp W1 sensor", e);
+			ServerLog.getLogger().error("Cannot initialize temp W1 sensor", e);
 			sensor = null;
 		}
 	}
@@ -46,7 +46,6 @@ public class SensorTemp implements Sensor {
 	public void read() throws SensorNotInititalizedException {
 		lastRead = System.currentTimeMillis();
 		if (sensor!=null) {
-			//sensor.read();
 			synchronized (readings) {
 				Map<String, Double> m = sensor.getValues();
 				for (String k : m.keySet()) {

@@ -49,7 +49,7 @@ public class TrackLoaderDB implements TrackLoader {
 				res = true;
 			}
 		} catch (SQLException | ClassNotFoundException e) {
-			ServerLog.getLogger().Error("Cannot query Track DB!", e);
+			ServerLog.getLogger().error("Cannot query Track DB!", e);
 			res = false;
 		}
 	    return res;

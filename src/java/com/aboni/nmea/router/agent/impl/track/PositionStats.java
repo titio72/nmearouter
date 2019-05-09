@@ -1,11 +1,10 @@
 package com.aboni.nmea.router.agent.impl.track;
 
+import com.aboni.geo.GeoPositionT;
+import net.sf.marineapi.nmea.util.Position;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import com.aboni.geo.GeoPositionT;
-
-import net.sf.marineapi.nmea.util.Position;
 
 public class PositionStats {
 	
@@ -15,10 +14,10 @@ public class PositionStats {
 	private double avgLat;
 	private double avgLon;
 	
-	private static final long PERIOD = 5L * 60L * 1000L; //5 minutes
+	private static final long PERIOD = 5L * 60000L; //5 minutes
 	
 	public PositionStats() {
-		// no initialization required so far
+		// no init here
 	}
 	
 	public void addPosition(GeoPositionT pos) {

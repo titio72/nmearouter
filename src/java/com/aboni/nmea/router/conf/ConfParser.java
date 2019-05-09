@@ -1,17 +1,16 @@
 package com.aboni.nmea.router.conf;
 
-import java.io.File;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import java.io.File;
 
 public class ConfParser {
 
 	private Router r;
 	
 	public ConfParser() {
-		
+		// nothing to initialize
 	}
 	
 	@SuppressWarnings("unchecked")

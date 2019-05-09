@@ -82,21 +82,20 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                RMCSentence rmc = (RMCSentence)s;
 	                Position pos = NMEAUtils.getPosition((RMCSentence)s);
 	                if (pos!=null) {
-		                GeoPositionT pos_t = new GeoPositionT(
+		                GeoPositionT posT = new GeoPositionT(
 		                		NMEAUtils.getTimestampOptimistic(rmc).getTimeInMillis(), pos);
-                        processPosition(pos_t, rmc.getSpeed());
+                        processPosition(posT, rmc.getSpeed());
 	                }
 	            }
 			} catch (Exception e) {
-				ServerLog.getLogger().Error("Error processing position {" + s + "}", e);
-				e.printStackTrace();
+				ServerLog.getLogger().error("Error processing position {" + s + "}", e);
 			}
 		}
 	}
 	
-    private void processPosition(GeoPositionT pos_t, double sog) {
+    private void processPosition(GeoPositionT posT, double sog) {
 		long t0 = System.currentTimeMillis();
-        TrackPoint point = tracker.processPosition(pos_t, sog);
+        TrackPoint point = tracker.processPosition(posT, sog);
         
         Position avgPos = tracker.getAverage();
         boolean anchor = tracker.isStationary();
@@ -134,7 +133,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
-    			getLogger().Info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
+    			getLogger().info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
     			avgTime = 0;
     			samples = 0;
     			writes = 0;

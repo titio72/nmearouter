@@ -1,9 +1,9 @@
 package com.aboni.sensors.hw;
 
-import java.io.FileInputStream;
-
 import com.aboni.misc.Sample;
 import com.aboni.utils.ServerLog;
+
+import java.io.FileInputStream;
 
 public class CPUTemp {
 
@@ -29,15 +29,15 @@ public class CPUTemp {
 	
 	private double read() {
 		try {
-			FileInputStream f = new FileInputStream("/sys/class/thermal/thermal_zone0/temp");
-			int rr = f.read(bf);
-			if (rr > 0) {
-				String s = new String(bf, 0, rr);
-				return Double.parseDouble(s) / 1000.0;
+			try (FileInputStream f = new FileInputStream("/sys/class/thermal/thermal_zone0/temp")) {
+				int rr = f.read(bf);
+				if (rr > 0) {
+					String s = new String(bf, 0, rr);
+					return Double.parseDouble(s) / 1000.0;
+				}
 			}
-			f.close();
 		} catch (Exception e) {
-			ServerLog.getLogger().Debug("Cannot read cpu temperature {" + e.getMessage() + "}");
+			ServerLog.getLogger().debug("Cannot read cpu temperature {" + e.getMessage() + "}");
 		}
 		return 0;
 	}

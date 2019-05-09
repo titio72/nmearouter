@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class HWSettings {
 
-	private final static Properties prop = new Properties();
+	private static final Properties prop = new Properties();
 	private static long lastProp;
 	
 	private HWSettings() {}
@@ -15,15 +15,15 @@ public class HWSettings {
         try {
             File f = new File(Constants.SENSOR);
             if (f.exists() && f.lastModified() > lastProp) {
-                ServerLog.getLogger().Info("Reading sensor configuration file");
-                FileInputStream propInput = new FileInputStream(f);
-                prop.clear();
-                prop.load(propInput);
-                propInput.close();
-                lastProp = f.lastModified();
+                ServerLog.getLogger().info("Reading sensor configuration file");
+                try (FileInputStream propInput = new FileInputStream(f)) {
+					prop.clear();
+					prop.load(propInput);
+					lastProp = f.lastModified();
+				}
             }
         } catch (Exception e) {
-            ServerLog.getLogger().Error("Cannot read sensors configuration!", e);
+            ServerLog.getLogger().error("Cannot read sensors configuration!", e);
         }
     }
     
@@ -49,7 +49,7 @@ public class HWSettings {
 					return Double.parseDouble(s);
 				} catch (NumberFormatException e) {
 					String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
-					ServerLog.getLogger().Error(msg);
+					ServerLog.getLogger().error(msg);
 					throw new NumberFormatException(msg);
 				}
 			}
@@ -65,7 +65,7 @@ public class HWSettings {
 					return Integer.parseInt(s);
 				} catch (NumberFormatException e) {
 					String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
-					ServerLog.getLogger().Error(msg);
+					ServerLog.getLogger().error(msg);
 					throw new NumberFormatException(msg);
 				}
 			}

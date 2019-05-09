@@ -89,7 +89,7 @@ public class AgentFilterService implements WebService {
             serializer.dump(response.getWriter(), msg);
             response.ok();
         } catch (IOException e) {
-			ServerLog.getLogger().Error("Error serving web call", e);
+			ServerLog.getLogger().error("Error serving web call", e);
             response.ok();
         }
 	}

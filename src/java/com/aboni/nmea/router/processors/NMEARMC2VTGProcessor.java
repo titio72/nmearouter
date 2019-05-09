@@ -64,7 +64,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 				return new Pair<>(Boolean.TRUE, new Sentence[] {vtg});
 			}
 		} catch (Exception e) {
-            ServerLog.getLogger().Warning("Cannot convert message to vtg {" + sentence + "} error {" + e.getMessage() + "}");
+            ServerLog.getLogger().warning("Cannot convert message to vtg {" + sentence + "} error {" + e.getMessage() + "}");
 		}
 		return new Pair<>(Boolean.TRUE, null);
 	}

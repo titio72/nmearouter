@@ -62,7 +62,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
      * @param ts The timestamp (unix time) of the reading
      */
     @SuppressWarnings("unused")
-    public void _pushDepth(double d, long ts) {
+    public void privatePushDepth(double d, long ts) {
         handleDepth(d, ts);
     }
     

@@ -63,11 +63,7 @@ public class Track2JSON implements TrackDumper {
 		jsonTrack = new JSONObject();
 		trackName = DEFAULT_TRACK_NAME;
 	}
-	
-  	public void setTrackName(String trackName) {
-  		this.trackName = trackName;
-  	}
-  	
+
 	public void dump(Writer w) {
 		if (track!=null) {
 			createPath();
@@ -100,4 +96,13 @@ public class Track2JSON implements TrackDumper {
 		this.track = track;
 	}
 
+	@Override
+	public String getTrackName() {
+		return trackName;
+	}
+
+	@Override
+	public void setTrackName(String trackName) {
+		this.trackName = trackName;
+	}
 }

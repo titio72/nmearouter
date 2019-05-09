@@ -12,10 +12,10 @@ public class ADS1115 {
     // =======================================================================
     // ADS1115 I2C ADDRESS
     // =======================================================================
-    public static final int ADS1115_ADDRESS_0x48 = 0x48; // ADDRESS 1 : 0x48 (1001000) ADR -> GND
-    public static final int ADS1115_ADDRESS_0x49 = 0x49; // ADDRESS 2 : 0x49 (1001001) ADR -> VDD
-    public static final int ADS1115_ADDRESS_0x4A = 0x4A; // ADDRESS 3 : 0x4A (1001010) ADR -> SDA
-    public static final int ADS1115_ADDRESS_0x4B = 0x4B; // ADDRESS 4 : 0x4B (1001011) ADR -> SCL
+    public static final int ADS1115_ADDRESS_0X48 = 0x48; // ADDRESS 1 : 0x48 (1001000) ADR -> GND
+    public static final int ADS1115_ADDRESS_0X49 = 0x49; // ADDRESS 2 : 0x49 (1001001) ADR -> VDD
+    public static final int ADS1115_ADDRESS_0X4A = 0x4A; // ADDRESS 3 : 0x4A (1001010) ADR -> SDA
+    public static final int ADS1115_ADDRESS_0X4B = 0x4B; // ADDRESS 4 : 0x4B (1001011) ADR -> SCL
     
     // =======================================================================
     // ADS1115 VALUE RANGES
@@ -31,84 +31,84 @@ public class ADS1115 {
     // =======================================================================
     // POINTER REGISTER
     // =======================================================================
-    protected static final int ADS1x15_REG_POINTER_MASK      = 0x03;
-    protected static final int ADS1x15_REG_POINTER_CONVERT   = 0x00;
-    protected static final int ADS1x15_REG_POINTER_CONFIG    = 0x01;
-    protected static final int ADS1x15_REG_POINTER_LOWTHRESH = 0x02;
-    protected static final int ADS1x15_REG_POINTER_HITHRESH  = 0x03;
+    protected static final int ADS1X15_REG_POINTER_MASK      = 0x03;
+    protected static final int ADS1X15_REG_POINTER_CONVERT   = 0x00;
+    protected static final int ADS1X15_REG_POINTER_CONFIG    = 0x01;
+    protected static final int ADS1X15_REG_POINTER_LOWTHRESH = 0x02;
+    protected static final int ADS1X15_REG_POINTER_HITHRESH  = 0x03;
 
     // =======================================================================
     // CONFIG REGISTER
     // =======================================================================
-    protected static final int  ADS1x15_REG_CONFIG_OS_MASK      = 0x8000;
-    protected static final int  ADS1x15_REG_CONFIG_OS_SINGLE    = 0x8000;  // Write: Set to start a single-conversion
-    protected static final int  ADS1x15_REG_CONFIG_OS_BUSY      = 0x0000;  // Read: Bit = 0 when conversion is in progress
-    protected static final int  ADS1x15_REG_CONFIG_OS_NOTBUSY   = 0x8000;  // Read: Bit = 1 when device is not performing a conversion
+    protected static final int  ADS1X15_REG_CONFIG_OS_MASK      = 0x8000;
+    protected static final int  ADS1X15_REG_CONFIG_OS_SINGLE    = 0x8000;  // Write: Set to start a single-conversion
+    protected static final int  ADS1X15_REG_CONFIG_OS_BUSY      = 0x0000;  // Read: Bit = 0 when conversion is in progress
+    protected static final int  ADS1X15_REG_CONFIG_OS_NOTBUSY   = 0x8000;  // Read: Bit = 1 when device is not performing a conversion
 
-    protected static final int  ADS1x15_REG_CONFIG_MUX_MASK     = 0x7000;
-    protected static final int  ADS1x15_REG_CONFIG_MUX_DIFF_0_1 = 0x0000;  // Differential P = AIN0, N = AIN1 (default)
-    protected static final int  ADS1x15_REG_CONFIG_MUX_DIFF_0_3 = 0x1000;  // Differential P = AIN0, N = AIN3
-    protected static final int  ADS1x15_REG_CONFIG_MUX_DIFF_1_3 = 0x2000;  // Differential P = AIN1, N = AIN3
-    protected static final int  ADS1x15_REG_CONFIG_MUX_DIFF_2_3 = 0x3000;  // Differential P = AIN2, N = AIN3
-    protected static final int  ADS1x15_REG_CONFIG_MUX_SINGLE_0 = 0x4000;  // Single-ended AIN0
-    protected static final int  ADS1x15_REG_CONFIG_MUX_SINGLE_1 = 0x5000;  // Single-ended AIN1
-    protected static final int  ADS1x15_REG_CONFIG_MUX_SINGLE_2 = 0x6000;  // Single-ended AIN2
-    protected static final int  ADS1x15_REG_CONFIG_MUX_SINGLE_3 = 0x7000;  // Single-ended AIN3
+    protected static final int  ADS1X15_REG_CONFIG_MUX_MASK     = 0x7000;
+    protected static final int  ADS1X15_REG_CONFIG_MUX_DIFF_0_1 = 0x0000;  // Differential P = AIN0, N = AIN1 (default)
+    protected static final int  ADS1X15_REG_CONFIG_MUX_DIFF_0_3 = 0x1000;  // Differential P = AIN0, N = AIN3
+    protected static final int  ADS1X15_REG_CONFIG_MUX_DIFF_1_3 = 0x2000;  // Differential P = AIN1, N = AIN3
+    protected static final int  ADS1X15_REG_CONFIG_MUX_DIFF_2_3 = 0x3000;  // Differential P = AIN2, N = AIN3
+    protected static final int  ADS1X15_REG_CONFIG_MUX_SINGLE_0 = 0x4000;  // Single-ended AIN0
+    protected static final int  ADS1X15_REG_CONFIG_MUX_SINGLE_1 = 0x5000;  // Single-ended AIN1
+    protected static final int  ADS1X15_REG_CONFIG_MUX_SINGLE_2 = 0x6000;  // Single-ended AIN2
+    protected static final int  ADS1X15_REG_CONFIG_MUX_SINGLE_3 = 0x7000;  // Single-ended AIN3
 
-    protected static final int  ADS1x15_REG_CONFIG_PGA_MASK     = 0x0E00;
-    protected static final int  ADS1x15_REG_CONFIG_PGA_6_144V   = 0x0000;  // +/-6.144V range
-    protected static final int  ADS1x15_REG_CONFIG_PGA_4_096V   = 0x0200;  // +/-4.096V range
-    protected static final int  ADS1x15_REG_CONFIG_PGA_2_048V   = 0x0400;  // +/-2.048V range (default)
-    protected static final int  ADS1x15_REG_CONFIG_PGA_1_024V   = 0x0600;  // +/-1.024V range
-    protected static final int  ADS1x15_REG_CONFIG_PGA_0_512V   = 0x0800;  // +/-0.512V range
-    protected static final int  ADS1x15_REG_CONFIG_PGA_0_256V   = 0x0A00;  // +/-0.256V range
+    protected static final int  ADS1X15_REG_CONFIG_PGA_MASK     = 0x0E00;
+    protected static final int  ADS1X15_REG_CONFIG_PGA_6_144V   = 0x0000;  // +/-6.144V range
+    protected static final int  ADS1X15_REG_CONFIG_PGA_4_096V   = 0x0200;  // +/-4.096V range
+    protected static final int  ADS1X15_REG_CONFIG_PGA_2_048V   = 0x0400;  // +/-2.048V range (default)
+    protected static final int  ADS1X15_REG_CONFIG_PGA_1_024V   = 0x0600;  // +/-1.024V range
+    protected static final int  ADS1X15_REG_CONFIG_PGA_0_512V   = 0x0800;  // +/-0.512V range
+    protected static final int  ADS1X15_REG_CONFIG_PGA_0_256V   = 0x0A00;  // +/-0.256V range
 
-    protected static final int  ADS1x15_REG_CONFIG_MODE_MASK    = 0x0100;
-    protected static final int  ADS1x15_REG_CONFIG_MODE_CONTIN  = 0x0000;  // Continuous conversion mode
-    protected static final int  ADS1x15_REG_CONFIG_MODE_SINGLE  = 0x0100;  // Power-down single-shot mode (default)
+    protected static final int  ADS1X15_REG_CONFIG_MODE_MASK    = 0x0100;
+    protected static final int  ADS1X15_REG_CONFIG_MODE_CONTIN  = 0x0000;  // Continuous conversion mode
+    protected static final int  ADS1X15_REG_CONFIG_MODE_SINGLE  = 0x0100;  // Power-down single-shot mode (default)
 
-    protected static final int  ADS1x15_REG_CONFIG_DR_MASK      = 0x00E0;  
-    protected static final int  ADS1x15_REG_CONFIG_DR_128SPS    = 0x0000;  // 128 samples per second
-    protected static final int  ADS1x15_REG_CONFIG_DR_250SPS    = 0x0020;  // 250 samples per second
-    protected static final int  ADS1x15_REG_CONFIG_DR_490SPS    = 0x0040;  // 490 samples per second
-    protected static final int  ADS1x15_REG_CONFIG_DR_920SPS    = 0x0060;  // 920 samples per second
-    protected static final int  ADS1x15_REG_CONFIG_DR_1600SPS   = 0x0080;  // 1600 samples per second (default)
-    protected static final int  ADS1x15_REG_CONFIG_DR_2400SPS   = 0x00A0;  // 2400 samples per second
-    protected static final int  ADS1x15_REG_CONFIG_DR_3300SPS   = 0x00C0;  // 3300 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_MASK      = 0x00E0;
+    protected static final int  ADS1X15_REG_CONFIG_DR_128SPS    = 0x0000;  // 128 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_250SPS    = 0x0020;  // 250 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_490SPS    = 0x0040;  // 490 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_920SPS    = 0x0060;  // 920 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_1600SPS   = 0x0080;  // 1600 samples per second (default)
+    protected static final int  ADS1X15_REG_CONFIG_DR_2400SPS   = 0x00A0;  // 2400 samples per second
+    protected static final int  ADS1X15_REG_CONFIG_DR_3300SPS   = 0x00C0;  // 3300 samples per second
 
-    protected static final int  ADS1x15_REG_CONFIG_CMODE_MASK   = 0x0010;
-    protected static final int  ADS1x15_REG_CONFIG_CMODE_TRAD   = 0x0000;  // Traditional comparator with hysteresis (default)
-    protected static final int  ADS1x15_REG_CONFIG_CMODE_WINDOW = 0x0010;  // Window comparator
+    protected static final int  ADS1X15_REG_CONFIG_CMODE_MASK   = 0x0010;
+    protected static final int  ADS1X15_REG_CONFIG_CMODE_TRAD   = 0x0000;  // Traditional comparator with hysteresis (default)
+    protected static final int  ADS1X15_REG_CONFIG_CMODE_WINDOW = 0x0010;  // Window comparator
 
-    protected static final int  ADS1x15_REG_CONFIG_CPOL_MASK    = 0x0008;
-    protected static final int  ADS1x15_REG_CONFIG_CPOL_ACTVLOW = 0x0000;  // ALERT/RDY pin is low when active (default)
-    protected static final int  ADS1x15_REG_CONFIG_CPOL_ACTVHI  = 0x0008;  // ALERT/RDY pin is high when active
+    protected static final int  ADS1X15_REG_CONFIG_CPOL_MASK    = 0x0008;
+    protected static final int  ADS1X15_REG_CONFIG_CPOL_ACTVLOW = 0x0000;  // ALERT/RDY pin is low when active (default)
+    protected static final int  ADS1X15_REG_CONFIG_CPOL_ACTVHI  = 0x0008;  // ALERT/RDY pin is high when active
 
-    protected static final int  ADS1x15_REG_CONFIG_CLAT_MASK    = 0x0004;  // Determines if ALERT/RDY pin latches once asserted
-    protected static final int  ADS1x15_REG_CONFIG_CLAT_NONLAT  = 0x0000;  // Non-latching comparator (default)
-    protected static final int  ADS1x15_REG_CONFIG_CLAT_LATCH   = 0x0004;  // Latching comparator
+    protected static final int  ADS1X15_REG_CONFIG_CLAT_MASK    = 0x0004;  // Determines if ALERT/RDY pin latches once asserted
+    protected static final int  ADS1X15_REG_CONFIG_CLAT_NONLAT  = 0x0000;  // Non-latching comparator (default)
+    protected static final int  ADS1X15_REG_CONFIG_CLAT_LATCH   = 0x0004;  // Latching comparator
 
-    protected static final int  ADS1x15_REG_CONFIG_CQUE_MASK    = 0x0003;
-    protected static final int  ADS1x15_REG_CONFIG_CQUE_1CONV   = 0x0000;  // Assert ALERT/RDY after one conversions
-    protected static final int  ADS1x15_REG_CONFIG_CQUE_2CONV   = 0x0001;  // Assert ALERT/RDY after two conversions
-    protected static final int  ADS1x15_REG_CONFIG_CQUE_4CONV   = 0x0002;  // Assert ALERT/RDY after four conversions
-    protected static final int  ADS1x15_REG_CONFIG_CQUE_NONE    = 0x0003;  // Disable the comparator and put ALERT/RDY in high state (default)
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_MASK    = 0x0003;
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_1CONV   = 0x0000;  // Assert ALERT/RDY after one conversions
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_2CONV   = 0x0001;  // Assert ALERT/RDY after two conversions
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_4CONV   = 0x0002;  // Assert ALERT/RDY after four conversions
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_NONE    = 0x0003;  // Disable the comparator and put ALERT/RDY in high state (default)
 
-    protected static final int[] ADS1x15_REG_CONFIG_MUX_SINGLE = new int[] {
-            ADS1x15_REG_CONFIG_MUX_SINGLE_0, 
-            ADS1x15_REG_CONFIG_MUX_SINGLE_1, 
-            ADS1x15_REG_CONFIG_MUX_SINGLE_2, 
-            ADS1x15_REG_CONFIG_MUX_SINGLE_3
+    protected static final int[] ADS1X15_REG_CONFIG_MUX_SINGLE = new int[] {
+            ADS1X15_REG_CONFIG_MUX_SINGLE_0,
+            ADS1X15_REG_CONFIG_MUX_SINGLE_1,
+            ADS1X15_REG_CONFIG_MUX_SINGLE_2,
+            ADS1X15_REG_CONFIG_MUX_SINGLE_3
     };
 
     @SuppressWarnings("unused")
     protected enum ProgrammableGainAmplifierValue{
-        PGA_6_144V(6.144,ADS1x15_REG_CONFIG_PGA_6_144V),  // +/-6.144V range
-        PGA_4_096V(4.096,ADS1x15_REG_CONFIG_PGA_4_096V),  // +/-4.096V range
-        PGA_2_048V(2.048,ADS1x15_REG_CONFIG_PGA_2_048V),  // +/-2.048V range
-        PGA_1_024V(1.024,ADS1x15_REG_CONFIG_PGA_1_024V),  // +/-1.024V range
-        PGA_0_512V(0.512,ADS1x15_REG_CONFIG_PGA_0_512V),  // +/-0.512V range
-        PGA_0_256V(0.256,ADS1x15_REG_CONFIG_PGA_0_256V);   // +/-0.256V range     
+        PGA_6_144V(6.144,ADS1X15_REG_CONFIG_PGA_6_144V),  // +/-6.144V range
+        PGA_4_096V(4.096,ADS1X15_REG_CONFIG_PGA_4_096V),  // +/-4.096V range
+        PGA_2_048V(2.048,ADS1X15_REG_CONFIG_PGA_2_048V),  // +/-2.048V range
+        PGA_1_024V(1.024,ADS1X15_REG_CONFIG_PGA_1_024V),  // +/-1.024V range
+        PGA_0_512V(0.512,ADS1X15_REG_CONFIG_PGA_0_512V),  // +/-0.512V range
+        PGA_0_256V(0.256,ADS1X15_REG_CONFIG_PGA_0_256V);   // +/-0.256V range
         
         private final double voltage;
         private final int configValue;
@@ -144,31 +144,32 @@ public class ADS1115 {
     private double getImmediateValue(int pin) throws IOException {
         
         // Start with default values
-        int config = ADS1x15_REG_CONFIG_CQUE_NONE    | // Disable the comparator (default val)
-                     ADS1x15_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
-                     ADS1x15_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
-                     ADS1x15_REG_CONFIG_CMODE_TRAD   | // Traditional comparator (default val)
-                     ADS1x15_REG_CONFIG_DR_3300SPS   | // 1600 samples per second (default)
-                     ADS1x15_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
+        int config = ADS1X15_REG_CONFIG_CQUE_NONE    | // Disable the comparator (default val)
+                     ADS1X15_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
+                     ADS1X15_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
+                     ADS1X15_REG_CONFIG_CMODE_TRAD   | // Traditional comparator (default val)
+                     ADS1X15_REG_CONFIG_DR_3300SPS   | // 1600 samples per second (default)
+                     ADS1X15_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
 
         config |= pga.getConfigValue();
         switch (pin) {
-            case 1: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_1; break;
-            case 2: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_2; break;
-            case 3: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_3; break;
-            default: config |= ADS1x15_REG_CONFIG_MUX_SINGLE_0; break; // switch back to 0...
+            case 1: config |= ADS1X15_REG_CONFIG_MUX_SINGLE_1; break;
+            case 2: config |= ADS1X15_REG_CONFIG_MUX_SINGLE_2; break;
+            case 3: config |= ADS1X15_REG_CONFIG_MUX_SINGLE_3; break;
+            default: config |= ADS1X15_REG_CONFIG_MUX_SINGLE_0; break; // switch back to 0...
         }
-        config |= ADS1x15_REG_CONFIG_OS_SINGLE;
+        config |= ADS1X15_REG_CONFIG_OS_SINGLE;
 
         // Write config register to the ADC
-        writeRegister(device, ADS1x15_REG_POINTER_CONFIG, config);
+        writeRegister(device, ADS1X15_REG_POINTER_CONFIG, config);
 
         // Wait for the conversion to complete
         try{ if(ADS1115_CONVERSIONDELAY > 0){
             Thread.sleep(ADS1115_CONVERSIONDELAY); }
             // read the conversion results
-            return readRegister(device, ADS1x15_REG_POINTER_CONVERT);
+            return readRegister(device, ADS1X15_REG_POINTER_CONVERT);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return Double.NaN;
         }
     }
@@ -220,9 +221,6 @@ public class ADS1115 {
         byte[] buffer = new byte[2];  // receive 16 bits (2 bytes)
         int byteCount = device.read(buffer, 0, 2);
         if(byteCount == 2){
-            //System.out.println("-----------------------------------------------");
-            //System.out.println("[RX] " + bytesToHex(buffer));
-            //System.out.println("-----------------------------------------------");            
             return getShort(buffer, 0);
         }
         else{

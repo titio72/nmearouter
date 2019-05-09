@@ -96,7 +96,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("21", "01", "FE");
-		ServerLog.getLogger().Info("Autopilot Command {Auto} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {Auto} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 
@@ -105,7 +105,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("21", "02", "FD");
-		ServerLog.getLogger().Info("Autopilot Command {StandBy} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {StandBy} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 
@@ -114,7 +114,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("21", "23", "DC");
-		ServerLog.getLogger().Info("Autopilot Command {WindVane} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {WindVane} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 	//11  05  FA     -1 
@@ -131,7 +131,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("11", "05", "FA");
-		ServerLog.getLogger().Info("Autopilot Command {Port 1deg} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {Port 1deg} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 
@@ -141,7 +141,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("11", "06", "F9");
-		ServerLog.getLogger().Info("Autopilot Command {Port 10deg} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {Port 10deg} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 
@@ -150,7 +150,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("11", "07", "F8");
-		ServerLog.getLogger().Info("Autopilot Command {Starboard 1deg} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {Starboard 1deg} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 
@@ -159,7 +159,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 		STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
 		s.setCommand("86");
 		s.setParameters("11", "08", "F7");
-		ServerLog.getLogger().Info("Autopilot Command {Starboard 10deg} Send {" + s.toSentence() + "}");
+		ServerLog.getLogger().info("Autopilot Command {Starboard 10deg} Send {" + s.toSentence() + "}");
 		this.notify(s);
 	}
 }

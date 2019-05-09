@@ -202,7 +202,7 @@ xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
 xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
 NMEANavSimulatorSource.this.notify(xdr);
 				} catch (InterruptedException e) {
-					ServerLog.getLogger().Error("Error simulating", e);
+					ServerLog.getLogger().error("Error simulating", e);
 					e.printStackTrace();
 				}
 			}

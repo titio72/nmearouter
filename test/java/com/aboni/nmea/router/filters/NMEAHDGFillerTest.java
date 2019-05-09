@@ -30,10 +30,7 @@ public class NMEAHDGFillerTest {
 		public DataEvent<PositionSentence> getLastPosition() { 
 			GLLSentence gll = (GLLSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, "GLL");
 			gll.setPosition(new Position(43.68008333, 10.28983333));
-			DataEvent<PositionSentence> e = new DataEvent<>();
-			e.source = "SRCGPS";
-			e.timestamp = System.currentTimeMillis() - 1000;
-			e.data = gll;
+			DataEvent<PositionSentence> e = new DataEvent<>(gll, System.currentTimeMillis() - 1000, "SRCGPS");
 			return e;
 		}
 

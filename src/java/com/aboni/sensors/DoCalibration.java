@@ -21,28 +21,6 @@ public class DoCalibration {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-	    
-	    /*
-		try {
-			double[] d = new double[6];
-			m.init(1);
-			System.out.println("Start");
-			long t0 = System.currentTimeMillis();
-			while ((System.currentTimeMillis()-t0)<(SECONDS*1000)) {
-				m.read();
-				double[] reading = m.getMagVector();
-				for (int i = 0; i<3; i++) {
-					d[2*i] = Math.min(d[2*i], reading[i]);
-					d[2*i+1] = Math.max(d[2*i+1], reading[i]);
-				}
-				Thread.sleep(100);
-			}  
-			for (int i = 0; i<3; i++) {
-				System.out.println((d[2*i]+d[2*i+1])/2);
-			}			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		*/
+
 	}
 }

@@ -60,12 +60,12 @@ public class TrackService  implements WebService {
 				}
 			}
         } catch (IOException e) {
-			ServerLog.getLogger().Error("Error downloading track", e);
+			ServerLog.getLogger().error("Error downloading track", e);
             response.setContentType("text/html;charset=utf-8");
             try {
             	response.error(e.getMessage());
             } catch (Exception ee) {
-				ServerLog.getLogger().Error("Error downloading track", ee);
+				ServerLog.getLogger().error("Error downloading track", ee);
 			}
         }
 		

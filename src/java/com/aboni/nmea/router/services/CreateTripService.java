@@ -1,57 +1,74 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
+import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.Calendar;
 
-public class CreateTripService implements WebService {
+public class CreateTripService extends JSONWebService {
 
 	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
+	public JSONObject getResult(ServiceConfig config) {
 		String strip = config.getParameter("trip");
 		Calendar date = config.getParamAsCalendar(config, "date", null, "yyyyMMdd");
 		if (date!=null) {
 			int trip;
-			try {
+			try (DBHelper h = getDBHelper()) {
 				if (strip==null || strip.isEmpty() || strip.trim().charAt(0)=='-') {
-					trip = createTrip();
-					addToTrip(trip, date);
+					trip = createTrip(h);
+					addToTrip(trip, date, h);
 				} else {
 					trip = Integer.parseInt(strip);
-					addToTrip(trip, date);
+					addToTrip(trip, date, h);
 					date.add(Calendar.HOUR, 25); // 25 so it adjusts for DST
 					date.set(Calendar.HOUR, 0);
-					addToTrip(trip, date);
+					addToTrip(trip, date, h);
 				}
-			} catch (ClassNotFoundException | SQLException e) {
-				// TODO
+				return getOk();
+			} catch (SQLException | ClassNotFoundException e) {
+				String msg = "Error creating or adding days to a trip {" + strip + "} {" + date + "}";
+				ServerLog.getLogger().error(msg, e);
+				JSONObject res = new JSONObject();
+				res.put("Error", msg);
+				return res;
 			}
+		} else {
+			String msg = "No valid date selected to create or add days to a trip {" + strip + "}";
+			ServerLog.getLogger().error(msg);
+			JSONObject res = new JSONObject();
+			res.put("Error", msg);
+			return res;
 		}
-		
+
 	}
 
-	private int createTrip() throws SQLException, ClassNotFoundException {
-		DBHelper h = new DBHelper(true);
-		Statement st = h.getConnection().createStatement();
-		ResultSet rs = st.executeQuery("select max(id) from trip");
-		int i = 1;
-		if (rs.next()) {
-			i = rs.getInt(1) + 1;
+	private int createTrip(DBHelper h) throws SQLException {
+		int i;
+		try (Statement st = h.getConnection().createStatement()) {
+			try (ResultSet rs = st.executeQuery("select max(id) from trip")) {
+				if (rs.next()) {
+					i = rs.getInt(1) + 1;
+				} else {
+					i = 1;
+				}
+			}
+			try (PreparedStatement st1 = h.getConnection().prepareStatement("insert into trip (id, description) values (?, ?)")) {
+				st1.setInt(1, i);
+				st1.setString(2, "Trip " + i);
+				st1.executeUpdate();
+			}
 		}
-		PreparedStatement st1 = h.getConnection().prepareStatement("insert into trip (id, description) values (?, ?)");
-		st1.setInt(1, i);
-		st1.setString(2, "Trip " + i);
-		st1.executeUpdate();
 		return i;
 	}
 
-	private void addToTrip(int trip, Calendar date) throws ClassNotFoundException, SQLException {
-		DBHelper h = new DBHelper(true);
-		PreparedStatement stm = h.getConnection().prepareStatement("update track set tripid=? where Date(TS)=?");
-		stm.setInt(1, trip);
-		stm.setTimestamp(2, new Timestamp(date.getTimeInMillis()));
-		stm.executeUpdate();
+	private void addToTrip(int trip, Calendar date, DBHelper h) throws SQLException {
+		try (PreparedStatement stm = h.getConnection().prepareStatement("update track set tripid=? where Date(TS)=?")) {
+			stm.setInt(1, trip);
+			stm.setTimestamp(2, new Timestamp(date.getTimeInMillis()));
+			stm.executeUpdate();
+		}
 	}
 	
 }
