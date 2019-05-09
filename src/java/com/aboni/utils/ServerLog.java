@@ -50,7 +50,7 @@ public class ServerLog implements LogAdmin {
             Formatter formatter = new MyFormatter();
 	        fh.setFormatter(formatter);  
 	    } catch (SecurityException | IOException e) {
-	        e.printStackTrace();  
+	        Logger.getGlobal().log(Level.SEVERE, "Error", e);
 	    }
 
 	}
@@ -104,11 +104,11 @@ public class ServerLog implements LogAdmin {
 	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
 	 */
 	@Override
-	public void error(String msg, Throwable t) {
+	public void error(final String msg, final Throwable t) {
 		if (debug)
 			lg.log(Level.SEVERE, msg, t);
 		else
-			lg.severe(String.format("{%s} error {%s}", msg, t.getMessage()));
+			lg.severe( () -> String.format("{%s} error {%s}", msg, t.getMessage()) );
 	}
 
 	/* (non-Javadoc)

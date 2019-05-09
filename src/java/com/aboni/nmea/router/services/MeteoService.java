@@ -16,10 +16,10 @@ public class MeteoService extends SampledQueryService {
 		boolean first = true;
         if (samples!=null) {
 			for (Sample s: samples) {
-			    Timestamp ts = new Timestamp(s.t0);
-			    double vMax = s.vMax;
-			    double v = s.v;
-			    double vMin = s.vMin;
+			    Timestamp ts = new Timestamp(s.getT0());
+			    double vMax = s.getvMax();
+			    double v = s.getV();
+			    double vMin = s.getvMin();
 				
 				if (!first) {
 			        response.getWriter().write(",");

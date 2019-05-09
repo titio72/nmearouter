@@ -28,7 +28,7 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
 				s = new ServiceShutdown();
 				break;
 			case "/sim":
-				s = new SImulatorService();
+				s = new SimulatorService();
 				break;
 			case "/meteo":
 				s = new MeteoService();

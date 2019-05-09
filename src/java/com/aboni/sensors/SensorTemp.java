@@ -11,9 +11,28 @@ import java.util.Map;
 public class SensorTemp implements Sensor {
 
 	public class Reading {
-		public String k;
-		public long ts;
-		public double v;
+
+		private Reading(String key, long timestamp, double value) {
+			k = key;
+			ts = timestamp;
+			v = value;
+		}
+
+		private String k;
+		private long ts;
+		private double v;
+
+		public String getKey() {
+			return k;
+		}
+
+		public double getValue() {
+			return v;
+		}
+
+		public long getTimestamp() {
+			return ts;
+		}
 	}
 	
 	private final Map<String, Reading> readings;
@@ -49,10 +68,7 @@ public class SensorTemp implements Sensor {
 			synchronized (readings) {
 				Map<String, Double> m = sensor.getValues();
 				for (String k : m.keySet()) {
-					Reading r = new Reading();
-					r.k = k;
-					r.ts = lastRead;
-					r.v = sensor.getTemp(k);
+					Reading r = new Reading(k, lastRead, sensor.getTemp(k));
 					readings.put(k, r);
 				}
 			}

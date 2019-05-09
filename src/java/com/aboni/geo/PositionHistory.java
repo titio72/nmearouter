@@ -83,17 +83,8 @@ public class PositionHistory {
 	 * @return The course data.
 	 */
 	public Course getCourse(long period) {
-		return getCourse(period, System.currentTimeMillis());
-	}
-
-	/**
-	 * Get the course for the last period. Passing the period X (in milliseconds) it will calculate the course from X up to now.
-	 * @param period Last X milliseconds
-	 * @param now 	 timestamp reference (use current time for current course)
-	 * @return The course data.
-	 */
-	public Course getCourse(long period, long now) {
 		synchronized (positions) {
+			long t1 = 0L;
 			if (positions.size() >= 2) {
 				GeoPositionT p0 = null;
 				GeoPositionT p1 = null;
@@ -102,24 +93,26 @@ public class PositionHistory {
 					GeoPositionT p = i.previous().p;
 					if ( p1 == null ) {
 						p1 = p;
-						if (now==-1) {
-							now = p1.getTimestamp();
-						}
-					} else { 
-						if ( (p.getTimestamp() + period) < now) 
+						t1 = p1.getTimestamp();
+					} else {
+						if ( (p.getTimestamp() + period) < t1) {
 							break;
-						else
-							p0 = p;
+						}
+						p0 = p;
 					}
 				}
-				if ( p1!=null && p0!=null) {
-					return new Course(p0, p1);
-				} else {
-					return null;
-				}
+				return getCourse(p0, p1);
 			} else {
 				return null;
 			}
+		}
+	}
+
+	private Course getCourse(GeoPositionT p0, GeoPositionT p1) {
+		if ( p1!=null && p0!=null) {
+			return new Course(p0, p1);
+		} else {
+			return null;
 		}
 	}
 

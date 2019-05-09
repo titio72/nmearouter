@@ -226,12 +226,12 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
                 for (SensorTemp.Reading tr : r) {
-                    if ((System.currentTimeMillis() - tr.ts) < 1000) {
-                        String name = tr.k.substring(tr.k.length() - 4, tr.k.length() - 1);
+                    if ((System.currentTimeMillis() - tr.getTimestamp()) < 1000) {
+                        String name = tr.getKey().substring(tr.getKey().length() - 4, tr.getKey().length() - 1);
                         String mappedName = HWSettings.getProperty("temp.map." + name);
                         if (mappedName == null) mappedName = name;
                         xdr.addMeasurement(
-                                new Measurement("C", Math.round(tr.v * 10d) / 10d, "C", mappedName));
+                                new Measurement("C", Math.round(tr.getValue() * 10d) / 10d, "C", mappedName));
                         empty = false;
                     }
                 }

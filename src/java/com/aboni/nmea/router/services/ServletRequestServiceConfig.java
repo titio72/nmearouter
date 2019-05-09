@@ -39,6 +39,19 @@ public class ServletRequestServiceConfig implements ServiceConfig {
         }
     }
 
+    @Override
+    public double getDouble(String pname, double defaultValue) {
+        String p = getParameter(pname);
+        if (p!=null) {
+            try {
+                return Double.parseDouble(p);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        } else {
+            return defaultValue;
+        }
+    }
 
     @Override
     public Calendar getParamAsDate(String param, int offset) {

@@ -41,23 +41,23 @@ public class NMEASocketClient extends NMEAAgentImpl {
 	    synchronized (this) {
 	        if (socket == null) {
     	        try {
-                    getLogger().Info("Creating Socket {" + server + ":" + port + "}");
+                    getLogger().info("Creating Socket {" + server + ":" + port + "}");
                     socket = new Socket(server, port);
                     InputStream iStream = socket.getInputStream();
-                    getLogger().Info("Opened Socket {" + server + ":" + port + "}");
+                    getLogger().info("Opened Socket {" + server + ":" + port + "}");
     
                     if (receive) {
                         reader = new SentenceReader(iStream);
                         reader.addSentenceListener(new SentenceListener() {
         
                             @Override
-                            public void readingPaused() {}
+                            public void readingPaused() { /* not needed */ }
         
                             @Override
-                            public void readingStarted() {}
+                            public void readingStarted() { /* not needed */ }
         
                             @Override
-                            public void readingStopped() {}
+                            public void readingStopped() { /* not needed */ }
         
                             @Override
                             public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
@@ -68,7 +68,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                     
                     return true;
                 } catch (Exception e) {
-                    getLogger().Error("Error initializing socket {" + server + ":" + port + "} ", e);
+                    getLogger().error("Error initializing socket {" + server + ":" + port + "} ", e);
                     socket = null;
                 }
             }
@@ -84,7 +84,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     	        try {
                     socket.close();
                 } catch (IOException e) {
-    	            getLogger().Error("Error trying to close socket", e);
+    	            getLogger().error("Error trying to close socket", e);
                 } finally {
                     socket = null;
                 }
@@ -110,7 +110,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     	        socket.getOutputStream().write("\r".getBytes());
     	    }
     	} catch (Exception e) {
-            getLogger().Info("Error sending data {" + e.getMessage() + "}");
+            getLogger().info("Error sending data {" + e.getMessage() + "}");
     	}
     }
 }

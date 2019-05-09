@@ -21,7 +21,7 @@ public class Sampler {
 		} else {
 			s = samples.get(samples.size()-1);
 		}
-		if (s.t0>0 && (time-s.t0)>sampling) {
+		if (s.getT0()>0 && (time-s.getT0())>sampling) {
 			s = new Sample();
 			samples.add(s);
 		}

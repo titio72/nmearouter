@@ -24,15 +24,21 @@ public class SensorMPU6050 extends I2CSensor {
     }
    
     private static final int  MPU6050_I2CADDR = 0x68;
-    
-    private static final int POWER_MGMT_ADDR_1 = 0x6b;
-    private static final int POWER_MGMT_ADDR_2 = 0x6a;
-	private static final byte POWER_MGMT_ON = 0x01;
-    private static final byte POWER_MGMT_OFF = 0x00;
-    
-    private static final int BYPASS_MODE_ADDR =  0x37;
-    private static final byte BYPASS_MODE_ON = 0x02;
-	private static final byte BYPASS_MODE_OFF = 0x00;
+
+    public static class PowerManagement {
+        private PowerManagement() {}
+        public static final int POWER_MGMT_ADDR_1 = 0x6b;
+        public static final int POWER_MGMT_ADDR_2 = 0x6a;
+        public static final byte POWER_MGMT_ON = 0x01;
+        public static final byte POWER_MGMT_OFF = 0x00;
+    }
+
+    public static class BypassMode {
+        private BypassMode() {}
+        public static final int BYPASS_MODE_ADDR = 0x37;
+        public static final byte BYPASS_MODE_ON = 0x02;
+        public static final byte BYPASS_MODE_OFF = 0x00;
+    }
     
     private static final int X = 0;
     private static final int Y = 1;
@@ -53,9 +59,9 @@ public class SensorMPU6050 extends I2CSensor {
     @Override
     protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
         device = new I2CInterface(bus, MPU6050_I2CADDR);
-        device.write(BYPASS_MODE_ADDR, BYPASS_MODE_ON);
-        device.write(POWER_MGMT_ADDR_2, POWER_MGMT_OFF);
-        device.write(POWER_MGMT_ADDR_1, POWER_MGMT_OFF);
+        device.write(BypassMode.BYPASS_MODE_ADDR, BypassMode.BYPASS_MODE_ON);
+        device.write(PowerManagement.POWER_MGMT_ADDR_2, PowerManagement.POWER_MGMT_OFF);
+        device.write(PowerManagement.POWER_MGMT_ADDR_1, PowerManagement.POWER_MGMT_OFF);
 
     }
    

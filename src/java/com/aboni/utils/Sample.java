@@ -2,11 +2,31 @@ package com.aboni.utils;
 
 public class Sample {
 
-	public double vMax = Double.NaN;
-	public double v = Double.NaN;
-	public double vMin = Double.NaN;
-	public long t0;
-	long lastTs;
+	public double getvMax() {
+		return vMax;
+	}
+
+	public double getV() {
+		return v;
+	}
+
+	public double getvMin() {
+		return vMin;
+	}
+
+	public long getT0() {
+		return t0;
+	}
+
+	public long getLastTs() {
+		return lastTs;
+	}
+
+	private double vMax = Double.NaN;
+	private double v = Double.NaN;
+	private double vMin = Double.NaN;
+	private long t0;
+	private long lastTs;
 
 	Sample() {}
 

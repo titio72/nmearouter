@@ -124,7 +124,7 @@ public class HMC5883L {
     private short getWord(byte[] b, int i) {
         byte high = (byte)(b[i] & 0xFF);
         byte low  = (byte)(b[i + 1] & 0xFF);
-        return (short)(((high << 8) + low) & 0xFFFF); // Little endian
+        return (short)(((high << 8) + (low & 0xFF)) & 0xFFFF); // Little endian
     }
     
     public double[] getScaledMag() throws IOException {

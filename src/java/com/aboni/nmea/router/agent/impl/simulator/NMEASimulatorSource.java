@@ -42,8 +42,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		return simulator;
 	}
 
+	public static class SimulatorException extends RuntimeException {
+		SimulatorException(String msg) {
+			super(msg);
+		}
+	}
+
 	public static NMEASimulatorSource create(NMEACache cache, String name, QOS qos) {
-		if (simulator!=null) throw new RuntimeException("Cannot create more than one simulator");
+		if (simulator!=null) throw new SimulatorException("Cannot create more than one simulator");
 		else NMEASimulatorSource.simulator = new NMEASimulatorSource(cache, name, qos);
 		return simulator;
 	}
@@ -154,19 +160,11 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			double ph15m = System.currentTimeMillis() / (1000d*60d*15d) * 2 * Math.PI; // 15 minutes phase
 			double depth = round(data.getDepth() + Math.sin(ph15m) * data.getDepthRange(), 1);
 			double hdg = Utils.normalizeDegrees0_360(refHeading + r.nextDouble() * 3.0);
-			
 			double absoluteWindSpeed = data.getwSpeed() + r.nextDouble() * 1.0;
 			double absoluteWindDir = data.getwDirection() + r.nextDouble() * 2.0;
-
 			double tWDirection = 	Utils.normalizeDegrees0_360(absoluteWindDir - hdg);
-	
-			double speed;
-			if (data.isUsePolars()) {
-				speed = polars.getSpeed((int)tWDirection, (float) absoluteWindSpeed) * data.getPolarCoeff();
-			} else {
-				speed = round(data.getSpeed() * (1.0 + r.nextDouble()/10.0), 1);
-			}
-	
+			double speed = getSpeed((float) absoluteWindSpeed, (int) tWDirection);
+
 			distance += speed / 3600.0;
 			trip += speed / 3600.0;
 			
@@ -183,225 +181,283 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	        	double dTime = (double)(newTS-lastTS) / 1000d / 60d / 60d;
 	        	pos = Utils.calcNewLL(pos, hdg, speed * dTime);
 	        	posOut = new Position(pos.getLatitude(), pos.getLongitude());
-	        	if (data.isGpsOut()) {
-	        		int x = r.nextInt(25);
-	        		if (x == 0) {
-	        			if (r.nextBoolean()) 
-	        				posOut.setLongitude(pos.getLongitude() + 1.0);
-	        			else
-	        				posOut.setLatitude(pos.getLatitude() + 1.0);
-	        		}
-	        	}
-	        }
+				addGpsNoise(posOut);
+			}
 			lastTS = newTS;
-			
-			if (data.isVhw()) {
-				VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
-	            s.setHeading(hdg);
-	            s.setMagneticHeading(hdg);
-				s.setSpeedKnots(speed);
-				s.setSpeedKmh(speed * 1.852);
-				NMEASimulatorSource.this.notify(s);
-			}
-			
-			if (data.isVlw()) {
-				VLWSentence s = (VLWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VLW);
-	            s.setTotal(distance);
-	            s.setTotalUnits('N');
-				s.setTrip(trip);
-				s.setTripUnits('N');
-				NMEASimulatorSource.this.notify(s);
-			}
-			
-			if (data.isGll()) {
-				GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
-				s1.setPosition(posOut);
-				s1.setStatus(DataStatus.ACTIVE);
-				s1.setTime(new Time());
-				NMEASimulatorSource.this.notify(s1);
-			}
-			
-			if (data.isRmc()) {
-				RMCSentence rmc = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-				rmc.setCourse(hdg);
-	
-				rmc.setStatus(DataStatus.ACTIVE);
-	
-				Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-				Date ddd = new Date();
-				ddd.setDay(c.get(Calendar.DAY_OF_MONTH));
-	            ddd.setMonth(c.get(Calendar.MONTH)+1);
-	            ddd.setYear(c.get(Calendar.YEAR));
-	            rmc.setDate(ddd);
-				Time ttt = new Time();
-	            ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
-	            ttt.setMinutes(c.get(Calendar.MINUTE));
-	            ttt.setSeconds(c.get(Calendar.SECOND));
-				rmc.setTime(ttt);
-	
-				rmc.setVariation(0.0); 
-				rmc.setMode(FaaMode.AUTOMATIC);
-				rmc.setDirectionOfVariation(CompassPoint.WEST);
-				rmc.setSpeed(speed);
-				rmc.setPosition(posOut);
-				NMEASimulatorSource.this.notify(rmc);
-			}
-	
-			if (data.isDpt()) {
-				DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
-				d.setDepth(depth); 
-				d.setOffset(data.getDepthOffset());
-				NMEASimulatorSource.this.notify(d);
-			}
-			
-			if (data.isDbt()) {
-				DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DBT);
-				d.setDepth(depth);
-				NMEASimulatorSource.this.notify(d);
-			}
-			
-			if (data.isMtw()) {
-				MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
-				t.setTemperature(28.5);
-				NMEASimulatorSource.this.notify(t);
-			}
-			
-			if (data.isMwvA()) {
-	            MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-	            v.setSpeedUnit(Units.KNOT);
-	            v.setAngle(aWDirection);
-	            v.setSpeed(aWSpeed);
-	            v.setTrue(false);
-	            v.setStatus(DataStatus.ACTIVE);
-	            NMEASimulatorSource.this.notify(v);
-			}
-	        
-			if (data.isMwvT()) {
-	            MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-	            vt.setSpeedUnit(Units.KNOT);
-	            vt.setAngle(tWDirection);
-	            vt.setSpeed(absoluteWindSpeed);
-	            vt.setTrue(true);
-	            vt.setStatus(DataStatus.ACTIVE);
-	            NMEASimulatorSource.this.notify(vt);
-			}
-	        
-			if (data.isVwr()) {
-	            VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWR");
-	            vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
-	            vwr.setSpeed(aWSpeed);
-	            vwr.setSide(Side.PORT);
-	            vwr.setStatus(DataStatus.ACTIVE);
-	            NMEASimulatorSource.this.notify(vwr);
-			}
-	        
-			if (data.isVwr()) {
-	            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
-	            vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
-	            vwt.setSpeedKnots(absoluteWindSpeed);
-	            vwt.setDirectionLeftRight(tWDirection>180?Direction.LEFT:Direction.RIGHT);
-	            NMEASimulatorSource.this.notify(vwt);
-			}
-	        
-	        if (data.isHdm()) {
-	            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
-	            hdm.setHeading(hdg);
-	            NMEASimulatorSource.this.notify(hdm);
-	        }
-	        
-	        if (data.isHdt()) {
-	            HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
-	            hdt.setHeading(hdg);
-	            NMEASimulatorSource.this.notify(hdt);
-	        }
-	        
-	        if (data.isHdg()) {
-	            HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
-	            hdgS.setHeading(hdg);
-	            NMEASimulatorSource.this.notify(hdgS);
-	        }
-	        
-	        if (data.isVtg()) {
-	            VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
-	            vtg.setMagneticCourse(hdg);
-	            vtg.setTrueCourse(hdg);
-	            vtg.setMode(FaaMode.AUTOMATIC);
-	            vtg.setSpeedKnots(speed);
-	            vtg.setSpeedKmh(speed * 1.852);
-	            NMEASimulatorSource.this.notify(vtg);
-	        }
-	        
-	        if (data.isMta()) {
-	            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
-	            mta.setTemperature(temp);
-				NMEASimulatorSource.this.notify(mta);
-	        }
-	        
-	        if (data.isMbb()) {
-	            MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-	            mmb.setBars(press/1000.0);
-	            NMEASimulatorSource.this.notify(mmb);
-	        }
-	        
-	        if (data.isMhu()) {
-	            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
-	            mhu.setRelativeHumidity(data.getHum());
-	            NMEASimulatorSource.this.notify(mhu);
-	        }
-	        
-	        if (data.isMda()) {
-	            MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
-	            mda.setRelativeHumidity(data.getHum());
-	            mda.setAirTemperature(temp + 10);
-	            mda.setPrimaryBarometricPressure(press * 750.06375541921);
-	            mda.setPrimaryBarometricPressureUnit('I');
-	            mda.setSecondaryBarometricPressure(press/1000.0);
-	            mda.setSecondaryBarometricPressureUnit('B');
-	            mda.setWaterTemperature(28.5);
-	            mda.setMagneticWindDirection(tWDirection + hdg);
-	            mda.setTrueWindDirection(tWDirection + hdg);
-	            mda.setWindSpeedKnots(absoluteWindSpeed);
-	            NMEASimulatorSource.this.notify(mda);
-	        }
-	        
-	        if (data.isXdrGYR()) {
-	            XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	            xdr.addMeasurement(new Measurement("A", hdg, "D", "HEAD"));
-	            xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
-	            xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
-	            NMEASimulatorSource.this.notify(xdr);
-	        }
-	        if (data.isXdrMeteo()) {
-	            XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	
-	            if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
-	            if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp + 5, "C", "AirTemp_0"));
-	            if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_0"));
-	            if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press + 150, "B", "Barometer_1"));
-	            if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
-	            if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_1"));
-	            NMEASimulatorSource.this.notify(xdr);
-	        }
-	        
-	        if (data.isXdrDiag()) {
-	            XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	            xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
-	            xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));
-	            NMEASimulatorSource.this.notify(xdr);
-	        }
-	        
-	        if (data.isAutoPilot()) {
-	        	sendAutopilotStatus();
-	        }
-	        
-	        if (data.isRsa()){
-	        	RSASentence rsa = (RSASentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
-	        	rsa.setRudderAngle(Side.STARBOARD, data.getRudder());
-	        	NMEASimulatorSource.this.notify(rsa);
-	        }
+
+			sendVHW(hdg, speed);
+			sendVLW();
+			sendGLL(posOut);
+			sendRMC(posOut, hdg, speed);
+			sendDepth(depth);
+			sendWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
+			sendHeading(hdg);
+			sendVTG(hdg, speed);
+			sendDeprecatedMeteo(hdg, absoluteWindSpeed, tWDirection, temp, press);
+			sendGyro(hdg, roll, pitch);
+			sendMeteo(temp, press);
+			sendVoltage();
+			sendAP();
+			sendRSA();
 		}		
 	}
-	
+
+	private void addGpsNoise(Position posOut) {
+		if (data.isGpsOut()) {
+			int x = r.nextInt(25);
+			if (x == 0) {
+				if (r.nextBoolean())
+					posOut.setLongitude(pos.getLongitude() + 1.0);
+				else
+					posOut.setLatitude(pos.getLatitude() + 1.0);
+			}
+		}
+	}
+
+	private double getSpeed(float absoluteWindSpeed, int tWDirection) {
+		double speed;
+		if (data.isUsePolars()) {
+			speed = polars.getSpeed(tWDirection, absoluteWindSpeed) * data.getPolarCoeff();
+		} else {
+			speed = round(data.getSpeed() * (1.0 + r.nextDouble()/10.0), 1);
+		}
+		return speed;
+	}
+
+	private void sendAP() {
+		if (data.isAutoPilot()) {
+			sendAutopilotStatus();
+		}
+	}
+
+	private void sendRSA() {
+		if (data.isRsa()){
+			RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
+			rsa.setRudderAngle(Side.STARBOARD, data.getRudder());
+			NMEASimulatorSource.this.notify(rsa);
+		}
+	}
+
+	private void sendVoltage() {
+		if (data.isXdrDiag()) {
+			XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+			xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
+			xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));
+			NMEASimulatorSource.this.notify(xdr);
+		}
+	}
+
+	private void sendMeteo(double temp, double press) {
+		if (data.isXdrMeteo()) {
+			XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+
+			if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
+			if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp + 5, "C", "AirTemp_0"));
+			if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_0"));
+			if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press + 150, "B", "Barometer_1"));
+			if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
+			if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_1"));
+			NMEASimulatorSource.this.notify(xdr);
+		}
+	}
+
+	private void sendGyro(double hdg, double roll, double pitch) {
+		if (data.isXdrGYR()) {
+			XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+			xdr.addMeasurement(new Measurement("A", hdg, "D", "HEAD"));
+			xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
+			xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
+			NMEASimulatorSource.this.notify(xdr);
+		}
+	}
+
+	private void sendDeprecatedMeteo(double hdg, double absoluteWindSpeed, double tWDirection, double temp, double press) {
+		if (data.isMtw()) {
+			MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
+			t.setTemperature(28.5);
+			NMEASimulatorSource.this.notify(t);
+		}
+
+		if (data.isMta()) {
+			MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
+			mta.setTemperature(temp);
+			NMEASimulatorSource.this.notify(mta);
+		}
+
+		if (data.isMbb()) {
+			MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
+			mmb.setBars(press/1000.0);
+			NMEASimulatorSource.this.notify(mmb);
+		}
+
+		if (data.isMhu()) {
+			MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
+			mhu.setRelativeHumidity(data.getHum());
+			NMEASimulatorSource.this.notify(mhu);
+		}
+
+		if (data.isMda()) {
+			MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
+			mda.setRelativeHumidity(data.getHum());
+			mda.setAirTemperature(temp + 10);
+			mda.setPrimaryBarometricPressure(press * 750.06375541921);
+			mda.setPrimaryBarometricPressureUnit('I');
+			mda.setSecondaryBarometricPressure(press/1000.0);
+			mda.setSecondaryBarometricPressureUnit('B');
+			mda.setWaterTemperature(28.5);
+			mda.setMagneticWindDirection(tWDirection + hdg);
+			mda.setTrueWindDirection(tWDirection + hdg);
+			mda.setWindSpeedKnots(absoluteWindSpeed);
+			NMEASimulatorSource.this.notify(mda);
+		}
+	}
+
+	private void sendVTG(double hdg, double speed) {
+		if (data.isVtg()) {
+			VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
+			vtg.setMagneticCourse(hdg);
+			vtg.setTrueCourse(hdg);
+			vtg.setMode(FaaMode.AUTOMATIC);
+			vtg.setSpeedKnots(speed);
+			vtg.setSpeedKmh(speed * 1.852);
+			NMEASimulatorSource.this.notify(vtg);
+		}
+	}
+
+	private void sendHeading(double hdg) {
+		if (data.isHdm()) {
+			HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
+			hdm.setHeading(hdg);
+			NMEASimulatorSource.this.notify(hdm);
+		}
+
+		if (data.isHdt()) {
+			HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
+			hdt.setHeading(hdg);
+			NMEASimulatorSource.this.notify(hdt);
+		}
+
+		if (data.isHdg()) {
+			HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
+			hdgS.setHeading(hdg);
+			NMEASimulatorSource.this.notify(hdgS);
+		}
+	}
+
+	private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
+		if (data.isMwvA()) {
+			MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+			v.setSpeedUnit(Units.KNOT);
+			v.setAngle(aWDirection);
+			v.setSpeed(aWSpeed);
+			v.setTrue(false);
+			v.setStatus(DataStatus.ACTIVE);
+			NMEASimulatorSource.this.notify(v);
+		}
+
+		if (data.isMwvT()) {
+			MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+			vt.setSpeedUnit(Units.KNOT);
+			vt.setAngle(tWDirection);
+			vt.setSpeed(absoluteWindSpeed);
+			vt.setTrue(true);
+			vt.setStatus(DataStatus.ACTIVE);
+			NMEASimulatorSource.this.notify(vt);
+		}
+
+		if (data.isVwr()) {
+			VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWR");
+			vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
+			vwr.setSpeed(aWSpeed);
+			vwr.setSide(Side.PORT);
+			vwr.setStatus(DataStatus.ACTIVE);
+			NMEASimulatorSource.this.notify(vwr);
+		}
+
+		if (data.isVwr()) {
+			VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
+			vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
+			vwt.setSpeedKnots(absoluteWindSpeed);
+			vwt.setDirectionLeftRight(tWDirection>180? Direction.LEFT:Direction.RIGHT);
+			NMEASimulatorSource.this.notify(vwt);
+		}
+	}
+
+	private void sendDepth(double depth) {
+		if (data.isDpt()) {
+			DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
+			d.setDepth(depth);
+			d.setOffset(data.getDepthOffset());
+			NMEASimulatorSource.this.notify(d);
+		}
+
+		if (data.isDbt()) {
+			DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DBT);
+			d.setDepth(depth);
+			NMEASimulatorSource.this.notify(d);
+		}
+	}
+
+	private void sendRMC(Position posOut, double hdg, double speed) {
+		if (data.isRmc()) {
+			RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
+			rmc.setCourse(hdg);
+
+			rmc.setStatus(DataStatus.ACTIVE);
+
+			Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+			Date ddd = new Date();
+			ddd.setDay(c.get(Calendar.DAY_OF_MONTH));
+			ddd.setMonth(c.get(Calendar.MONTH)+1);
+			ddd.setYear(c.get(Calendar.YEAR));
+			rmc.setDate(ddd);
+			Time ttt = new Time();
+			ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
+			ttt.setMinutes(c.get(Calendar.MINUTE));
+			ttt.setSeconds(c.get(Calendar.SECOND));
+			rmc.setTime(ttt);
+
+			rmc.setVariation(0.0);
+			rmc.setMode(FaaMode.AUTOMATIC);
+			rmc.setDirectionOfVariation(CompassPoint.WEST);
+			rmc.setSpeed(speed);
+			rmc.setPosition(posOut);
+			NMEASimulatorSource.this.notify(rmc);
+		}
+	}
+
+	private void sendGLL(Position posOut) {
+		if (data.isGll()) {
+			GLLSentence s1 = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
+			s1.setPosition(posOut);
+			s1.setStatus(DataStatus.ACTIVE);
+			s1.setTime(new Time());
+			NMEASimulatorSource.this.notify(s1);
+		}
+	}
+
+	private void sendVLW() {
+		if (data.isVlw()) {
+			VLWSentence s = (VLWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VLW);
+			s.setTotal(distance);
+			s.setTotalUnits('N');
+			s.setTrip(trip);
+			s.setTripUnits('N');
+			NMEASimulatorSource.this.notify(s);
+		}
+	}
+
+	private void sendVHW(double hdg, double speed) {
+		if (data.isVhw()) {
+			VHWSentence s = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
+			s.setHeading(hdg);
+			s.setMagneticHeading(hdg);
+			s.setSpeedKnots(speed);
+			s.setSpeedKmh(speed * 1.852);
+			NMEASimulatorSource.this.notify(s);
+		}
+	}
+
 	private void sendAutopilotStatus() {
 		Stalk84 s84 = new Stalk84(
 				(int)refHeading, (headingAuto==Integer.MIN_VALUE)?0:headingAuto, 0,
@@ -418,52 +474,53 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     		if (t.getCommand().equals("86")) {
     			String[] p = t.getParameters();
     			if (p[0].equals("21")) {
-    				if (p[1].equals("01") && p[2].equals("FE")) {
-    					if (headingAuto==Integer.MIN_VALUE) {
-    						headingAuto = (int)refHeading;
-    						sendAutopilotStatus();
-    					}
-    				} else if (p[1].equals("02") && p[2].equals("FD")) {
-    					if (headingAuto!=Integer.MIN_VALUE) {
-    						headingAuto = Integer.MIN_VALUE;
-    						sendAutopilotStatus();
-    					}
-    				}
-    			} else if (p[0].equals("11")) {
-    				if (p[1].equals("05") && p[2].equals("FA")) {
-    					if (headingAuto!=Integer.MIN_VALUE) {
-    						headingAuto -= 1;
-    						sendAutopilotStatus();
-    					}
-						refHeading -= 1;
-    				}
-    				else if (p[1].equals("06") && p[2].equals("F9")) {
-    					if (headingAuto!=Integer.MIN_VALUE) {
-    						headingAuto -= 10;
-    						sendAutopilotStatus();
-    					}
-						refHeading -= 10;
-    				}
-    				else if (p[1].equals("07") && p[2].equals("F8")) {
-    					if (headingAuto!=Integer.MIN_VALUE) {
-    						headingAuto += 1;
-    						sendAutopilotStatus();
-    					}
-						refHeading += 1;
-    				}
-    				else if (p[1].equals("08") && p[2].equals("F7")) {
-    					if (headingAuto!=Integer.MIN_VALUE) {
-    						headingAuto += 10;
-    						sendAutopilotStatus();
-    					}
-						refHeading += 10;
-    				}
-    			}
+					handleAPStatusCommands(p);
+				} else if (p[0].equals("11")) {
+					handleAPDirectionCommands(p);
+				}
     		}
     			
     	}
     		
     }
+
+	private void handleAPStatusCommands(String[] p) {
+		String disc = p[1] + p[2];
+		switch (disc) {
+			case "01FE":
+			if (headingAuto==Integer.MIN_VALUE) {
+				headingAuto = (int)refHeading;
+				sendAutopilotStatus();
+			}
+			break;
+			case "02FD":
+			if (headingAuto!=Integer.MIN_VALUE) {
+				headingAuto = Integer.MIN_VALUE;
+				sendAutopilotStatus();
+			}
+			break;
+			default: break;
+		}
+	}
+
+	private void  handleAPDirectionCommands(String[] p) {
+		String disc = p[1] + p[2];
+		int delta;
+		switch (disc) {
+			case "05FA": delta = -1; break;
+			case "06F9": delta = -10; break;
+			case "07F8": delta = 1; break;
+			case "08F7": delta = 10; break;
+			default: delta = 0; break;
+		}
+		if (delta!=0) {
+			if (headingAuto != Integer.MIN_VALUE) {
+				headingAuto += delta;
+				sendAutopilotStatus();
+			}
+			refHeading += delta;
+		}
+	}
 
 	public double getSpeed() {
 		return data.getSpeed();

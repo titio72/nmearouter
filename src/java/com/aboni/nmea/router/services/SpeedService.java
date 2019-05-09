@@ -21,10 +21,10 @@ public class SpeedService extends SampledQueryService {
 		        if (!first) {
 	                response.getWriter().write(",");
 	        	}
-	            response.getWriter().write("{\"time\":\"" + new Timestamp(s.t0).toString() + "\",");
-	            response.getWriter().write("\"vMin\":" + s.vMin + ",");
-	            response.getWriter().write("\"v\":" + s.v + ",");
-	            response.getWriter().write("\"vMax\":" + s.vMax + "}");
+	            response.getWriter().write("{\"time\":\"" + new Timestamp(s.getT0()).toString() + "\",");
+	            response.getWriter().write("\"vMin\":" + s.getvMin() + ",");
+	            response.getWriter().write("\"v\":" + s.getV() + ",");
+	            response.getWriter().write("\"vMax\":" + s.getvMax() + "}");
 	            first = false;
 	        }
         }

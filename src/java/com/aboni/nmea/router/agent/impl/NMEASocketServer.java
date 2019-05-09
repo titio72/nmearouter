@@ -3,7 +3,6 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -27,7 +26,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
 	private final Map<SocketChannel, ClientDescriptor> clients;
-	
+
 	private class ClientDescriptor {
 		
 		ClientDescriptor(String ip) {
@@ -48,7 +47,6 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		super(cache, name, q);
 		this.port = port;
         setSourceTarget(allowReceive, allowTransmit);
-        
         clients = new HashMap<>();
 	}
 	
@@ -89,26 +87,26 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				while (isSelectorOpen()) {
 					try {
 						selector.select();
+						for (SelectionKey ky: selector.selectedKeys()) { handleSelectionKey(ky); }
+						selector.selectedKeys().clear();
 					} catch (IOException e) {
 						getLogger().error("Unexpected exception", e);
-					}
-					Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
-					while (iter.hasNext()) {
-						SelectionKey ky = iter.next();
-						if (ky.isValid()) {
-							if (ky.isAcceptable()) {
-								handleConnection();
-							} else if (ky.isReadable()) {
-								handleRead(ky);
-							}
-						}
-						iter.remove();
 					}
 				}
 			}
 		});
 		t.setDaemon(true);
 		t.start();
+	}
+
+	private void handleSelectionKey(SelectionKey ky) {
+		if (ky.isValid()) {
+			if (ky.isAcceptable()) {
+				handleConnection();
+			} else if (ky.isReadable()) {
+				handleRead(ky);
+			}
+		}
 	}
 
 	private void handleRead(SelectionKey ky) {
@@ -129,7 +127,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
 	private void handleDisconnection(SocketChannel client) {
 		try {
-			getLogger().info("Disconnection {" + clients.getOrDefault(client, null) + "} Agent {" + getName() + "}");
+			getLogger().info("Disconnection {" + clients.getOrDefault(client, null) + "}");
 			synchronized (clients) {
 				clients.remove(client);
 			}
@@ -148,7 +146,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		    synchronized (clients) {
 			    clients.put(client, new ClientDescriptor(client.getRemoteAddress().toString()));
 			}
-			getLogger().info("Connecting {" + client.getRemoteAddress() + "} Agent {" + getName() + "}");
+			getLogger().info("Connecting {" + client.getRemoteAddress() + "}");
 
 		} catch (Exception ee) {
 			getLogger().error("Error accepting connection", ee);
@@ -209,7 +207,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 			int written = sc.write(writeBuffer);
 			if (written==0) {
 				cd.errors++;
-				ServerLog.getLogger().warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
+				getLogger().warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
 			} else {
 				cd.errors = 0;
 			}
@@ -220,10 +218,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
 						+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
 				sc.close(); 
 			} catch (IOException e1) {
-				ServerLog.getLogger().error("Error closing socket with client", e1);
+				getLogger().error("Error closing socket with client", e1);
 			}
 		} catch (Exception e) {
-			ServerLog.getLogger().error("Error sending {" + output + "} to client", e);
+			getLogger().error("Error sending {" + output + "} to client", e);
 		}
 		return false;
 	}
@@ -235,7 +233,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private void createServerSocket() {
 		try {
 		    selector = Selector.open();
-		    getLogger().info("Selector Open {" + selector.isOpen() + "} Agent {" + getName() + "}");
+		    getLogger().info("Selector Open {" + selector.isOpen() + "}");
 		    serverSocket = ServerSocketChannel.open();
 		    InetSocketAddress hostAddress = new InetSocketAddress(getPort());
 		    serverSocket.bind(hostAddress);
