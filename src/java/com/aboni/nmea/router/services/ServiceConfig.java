@@ -9,4 +9,6 @@ public interface ServiceConfig {
     int getInteger(String pname, int defaultVale);
 
     Calendar getParamAsCalendar(ServiceConfig request, String param, Calendar def, String format);
+
+    Calendar getParamAsDate(String param, int offset);
 }

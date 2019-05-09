@@ -3,6 +3,7 @@ package com.aboni.geo;
 import java.util.Calendar;
 
 import com.aboni.misc.Utils;
+import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ServerLog;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -21,7 +22,7 @@ public class NMEAMagnetic2TrueConverter {
 	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
-		geo = new TSAGeoMag(ServerLog.getLogger().getBaseLogger());
+		geo = new TSAGeoMag(((LogAdmin)ServerLog.getLogger()).getBaseLogger());
 		pos = new Position(43.0, 10.0);
 
 		Calendar c = Calendar.getInstance();
@@ -30,7 +31,7 @@ public class NMEAMagnetic2TrueConverter {
 	}
 	
 	public NMEAMagnetic2TrueConverter(double year) {
-		geo = new TSAGeoMag(ServerLog.getLogger().getBaseLogger());
+		geo = new TSAGeoMag(((LogAdmin)ServerLog.getLogger()).getBaseLogger());
 		pos = new Position(43.0, 10.0);
 		this.year = year;
 	}

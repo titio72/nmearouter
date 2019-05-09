@@ -122,7 +122,7 @@
             rr = trueWind(speed, msg.angle, msg.speed);
             controllerScope['wind_t'] = rr;
             controllerScope['wind'] = {
-                mag_angle: rr.angle + heading,
+                mag_angle: heading - rr.angle,
                 speed: rr.speed 
             };
             controllerScope.$evalAsync();

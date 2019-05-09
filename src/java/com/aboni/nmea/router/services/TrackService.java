@@ -15,22 +15,10 @@ public class TrackService  implements WebService {
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
         try {
-        	Calendar c = Calendar.getInstance();
-        	c.setTimeInMillis( c.getTimeInMillis() - (c.getTimeInMillis()%(24*60*60*1000)) );
-            Calendar cFrom = config.getParamAsCalendar(config, "dateFrom", c, "yyyyMMdd");
-            
-            Calendar c1 = Calendar.getInstance();
-            c1.setTime(cFrom.getTime());
-        	c.setTimeInMillis( c.getTimeInMillis() - (c.getTimeInMillis()%(24*60*60*1000)) );
-        	Calendar cTo = config.getParamAsCalendar(config, "dateTo", c1, "yyyyMMdd");
-        	cTo.add(Calendar.HOUR, 24);
-        	
-        	String f = config.getParameter("format");
-        	if (f==null) f = "gpx";
-
-        	String d = config.getParameter("download");
-        	if (d==null) d = "0";
-        	boolean download = "1".equals(d);
+        	Calendar cFrom = config.getParamAsDate("dateFrom", 0);
+            Calendar cTo = config.getParamAsDate("dateTo", 1);
+        	String f = config.getParameter("format", "gpx");
+        	boolean download = "1".equals(config.getParameter("download", "0"));
         	
 			TrackLoader loader = new TrackLoaderDB();
 			if (loader.load(cFrom, cTo)) {

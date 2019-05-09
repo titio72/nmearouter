@@ -52,8 +52,8 @@ public class TrackManager {
     private boolean shallReport(GeoPositionT p) {
         boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
         long dt = p.getTimestamp() - getLastTrackedTime();
-        long checkperiod = (anchor?getStaticPeriod():getPeriod());
-       	return dt >= checkperiod;
+        long checkPeriod = (anchor?getStaticPeriod():getPeriod());
+       	return dt >= checkPeriod;
     }
     
     public TrackPoint processPosition(GeoPositionT p, double sog) {
@@ -136,14 +136,10 @@ public class TrackManager {
 	    	return false;
 	    } else {
 	    	double dist = p1.distanceTo(p2); // distance in meters
-	    	long idtime = Math.abs(p2.getTimestamp() - p1.getTimestamp()); // d-time in mseconds
+	    	long dTime = Math.abs(p2.getTimestamp() - p1.getTimestamp()); // d-time in mseconds
 	    	// calc the speed but only if the two points are at least 500ms apart 
 	    	double speed = 
-	    			idtime>500 
-	    			? 
-	    			((dist / (double)idtime) * 1000.0) 
-	    			: 
-	    			0.0; // meter/second
+	    			dTime>500?((dist / (double)dTime) * 1000.0):0.0; // meter/second
 	    	speed *= 1.94384; // speed in knots
 	    	return speed <= MOVE_THRESHOLD_SPEED_KN && dist < MOVE_THRESHOLD_POS_METERS;
 	    }

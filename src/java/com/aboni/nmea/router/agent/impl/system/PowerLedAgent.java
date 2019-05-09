@@ -21,7 +21,8 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
 	private static final Pin GPS = RaspiPin.GPIO_23;
 	private static final Pin PWR = RaspiPin.GPIO_02;
-    private final GpioPinDigitalOutput pin, pinGps;
+    private final GpioPinDigitalOutput pin;
+    private final GpioPinDigitalOutput pinGps;
     private long lastGps;
 
     public PowerLedAgent(NMEACache cache, String name, QOS qos) {

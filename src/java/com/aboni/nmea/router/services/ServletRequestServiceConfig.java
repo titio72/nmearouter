@@ -39,7 +39,17 @@ public class ServletRequestServiceConfig implements ServiceConfig {
         }
     }
 
+
     @Override
+    public Calendar getParamAsDate(String param, int offset) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis( c.getTimeInMillis() - (c.getTimeInMillis()%(24*60*60*1000)));
+        c = getParamAsCalendar(this, param, c, "yyyyMMdd");
+        c.add(Calendar.HOUR, 24 * offset);
+	    return c;
+    }
+
+        @Override
     public Calendar getParamAsCalendar(ServiceConfig request, String param, Calendar def, String format) {
         SimpleDateFormat df = new SimpleDateFormat(format);
 

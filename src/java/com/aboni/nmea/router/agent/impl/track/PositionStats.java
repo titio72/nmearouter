@@ -15,9 +15,11 @@ public class PositionStats {
 	private double avgLat;
 	private double avgLon;
 	
-	private static final long period = 5 * 60000; //5 minutes
+	private static final long PERIOD = 5L * 60L * 1000L; //5 minutes
 	
-	public PositionStats() {}
+	public PositionStats() {
+		// no initialization required so far
+	}
 	
 	public void addPosition(GeoPositionT pos) {
 		positions.add(pos);
@@ -26,7 +28,7 @@ public class PositionStats {
 		samples = positions.size();
 		
 		long t = pos.getTimestamp(); 
-		while (!positions.isEmpty() && (t - positions.get(0).getTimestamp()) > period) {
+		while (!positions.isEmpty() && (t - positions.get(0).getTimestamp()) > PERIOD) {
 			GeoPositionT p = positions.get(0);
 			avgLat = (avgLat * samples - p.getLatitude()) / (samples - 1);
 			avgLon = (avgLon * samples - p.getLongitude()) / (samples - 1);
