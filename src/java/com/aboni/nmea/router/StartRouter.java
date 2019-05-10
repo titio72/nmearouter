@@ -6,7 +6,7 @@ import com.aboni.nmea.router.services.EventSocket;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.WebInterfaceImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
-import com.aboni.sensors.DoCalibration;
+import com.aboni.toolkit.DoCalibration;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Guice;
@@ -86,11 +86,10 @@ public class StartRouter {
             wscontainer.addEndpoint(EventSocket.class);
 
             server.start();
-            server.dump(System.err);
             server.join();
                 
         } catch (Exception e) {
-            e.printStackTrace();
+            ServerLog.getLogger().error("Error starting Web server", e);
         }
     }
 
@@ -99,19 +98,24 @@ public class StartRouter {
     }
 
     private static void startRouter(Injector injector, NMEARouterBuilder builder) {
-        System.out.println("Start");
-		Date date = new Date();
+        Date date = new Date();
 		SimpleDateFormat f = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
-		ServerLog.getLogger().info("---- NMEARouter ----------------------------------------------------------------");
-		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
-		ServerLog.getLogger().info("---- Start " + f.format(date) + "--------------------------------------------------");
-		ServerLog.getLogger().info("--------------------------------------------------------------------------------");
+		ServerLog.getLogger().info(FILLER);
+		ServerLog.getLogger().info(fill("---- NMEARouter "));
+		ServerLog.getLogger().info(FILLER);
+		ServerLog.getLogger().info(fill("---- Start " + f.format(date) + " "));
+		ServerLog.getLogger().info(FILLER);
         NMEAUtils.registerExtraSentences();
         injector.getInstance(NMEAStream.class); // be sure the stream started
     	if (builder.init()!=null) {
     		NMEARouter r = builder.getRouter();
         	r.start();
         }
+    }
+
+    private static final String FILLER =  "--------------------------------------------------------------------------------";
+
+	private static String fill(String msg) {
+	    return (msg + FILLER).substring(0, FILLER.length());
     }
 }

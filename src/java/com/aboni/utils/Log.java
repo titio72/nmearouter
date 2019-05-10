@@ -12,4 +12,6 @@ public interface Log {
 
 	void debug(String msg);
 
+	void console(String msg);
+
 }

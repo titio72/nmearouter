@@ -1,14 +1,13 @@
-package com.aboni.nmea.router.batch;
-
-import java.io.FileWriter;
-import java.io.IOException;
+package com.aboni.toolkit;
 
 import com.aboni.geo.NavSimulator;
 import com.aboni.geo.PositionHistory;
 import com.aboni.geo.Track2GPX;
 import com.aboni.misc.Utils;
-
 import net.sf.marineapi.nmea.util.Position;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class SimulatorGoTo {
 	

@@ -1,4 +1,6 @@
-package com.aboni.sensors;
+package com.aboni.toolkit;
+
+import com.aboni.sensors.SensorVoltage;
 
 @SuppressWarnings("InfiniteLoopStatement")
 public class TestVoltage {

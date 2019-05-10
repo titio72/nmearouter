@@ -36,6 +36,8 @@ public class ServerLog implements LogAdmin {
 	
     private final Logger lg;
 	
+	private final Logger lgConsole;
+
 	private ServerLog() {
         lg = Logger.getLogger("NMEARouter");
         lg.setLevel(Level.INFO);
@@ -53,15 +55,29 @@ public class ServerLog implements LogAdmin {
 	        Logger.getGlobal().log(Level.SEVERE, "Error", e);
 	    }
 
+		lgConsole = Logger.getLogger("NMEAConsole");
+		lgConsole.setLevel(Level.INFO);
+		lgConsole.setUseParentHandlers(false);
+		ConsoleHandler c = new ConsoleHandler();
+		lgConsole.addHandler(c);
+		c.setFormatter(new Formatter() {
+			@Override
+			public String format(LogRecord logRecord) {
+				return logRecord.getMessage() + "\n";
+			}
+		});
 	}
 	
-	@SuppressWarnings("CanBeFinal")
 	private static final ServerLog logger = new ServerLog();
-	
-    public static Log getLogger() {
-        return logger;
-    }
-    
+
+	public static Log getLogger() {
+		return getLoggerAdmin();
+	}
+
+	public static LogAdmin getLoggerAdmin() {
+		return logger;
+	}
+
     @Override
     public void setDebug() {
         lg.setLevel(Level.FINEST);
@@ -126,13 +142,21 @@ public class ServerLog implements LogAdmin {
 	public void info(String msg) {
 		lg.log(Level.INFO, msg);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.aboni.utils.Log#Debug(java.lang.String)
 	 */
 	@Override
 	public void debug(String msg) {
 		lg.log(Level.FINER, msg);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.aboni.utils.Log#Debug(java.lang.String)
+	 */
+	@Override
+	public void console(String msg) {
+		lgConsole.log(Level.INFO, msg);
 	}
 
 	@Override

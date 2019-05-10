@@ -1,6 +1,10 @@
-package com.aboni.sensors;
+package com.aboni.toolkit;
 
-@SuppressWarnings("InfiniteLoopStatement")
+import com.aboni.sensors.SensorPressureTemp;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class TestBME280 {
 
 	public static void main(String[] args) {
@@ -13,7 +17,7 @@ public class TestBME280 {
 				Thread.sleep(500);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.getGlobal().log(Level.SEVERE, "Error", e);
 		}
 	}
 }

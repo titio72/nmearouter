@@ -1,16 +1,16 @@
-package com.aboni.nmea.router.batch;
+package com.aboni.toolkit;
 
+
+import com.aboni.utils.db.DBHelper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.sql.Timestamp;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import com.aboni.utils.db.DBHelper;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class TrackToDB2 {

@@ -1,12 +1,12 @@
-package com.aboni.nmea.router.batch;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+package com.aboni.toolkit;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.utils.db.DBHelper;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 
 public class UpdateDistanceAndSpeed {
 

@@ -21,7 +21,6 @@ import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.filters.FilterSetBuilder;
-import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Injector;
 
@@ -33,8 +32,9 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private NMEARouter router;
     private final String confFile;
     private final Injector injector;
-    private static final boolean ENABLE_GPS_TIME = false;
-    
+	private static final boolean ENABLE_GPS_TIME = false;
+	private static final boolean ENABLE_AP = false;
+
     public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {
     	this.confFile = confFile;
     	this.injector = injector;
@@ -59,15 +59,15 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         
 		switch (conf.getLog().getLevel()) {
 			case DEBUG: 
-				((LogAdmin)ServerLog.getLogger()).setDebug(); break;
+				ServerLog.getLoggerAdmin().setDebug(); break;
 			case WARNING: 
-	        	((LogAdmin)ServerLog.getLogger()).setWarning(); break;
+	        	ServerLog.getLoggerAdmin().setWarning(); break;
 			case ERROR: 
-	        	((LogAdmin)ServerLog.getLogger()).setError(); break;
+	        	ServerLog.getLoggerAdmin().setError(); break;
 			case NONE: 
-	        	((LogAdmin)ServerLog.getLogger()).setNone(); break;
+	        	ServerLog.getLoggerAdmin().setNone(); break;
 	    	default:
-	        	((LogAdmin)ServerLog.getLogger()).setInfo(); break;
+	        	ServerLog.getLoggerAdmin().setInfo(); break;
 		}
         
         for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
@@ -83,7 +83,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         buildPowerLedTarget(r);
         buildFanTarget(r);
         buildDPTStats(r);
-        buildAutoPilot(r);
+        if (ENABLE_AP) buildAutoPilot(r);
         return r;
     }
     

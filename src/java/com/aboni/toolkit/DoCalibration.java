@@ -1,4 +1,7 @@
-package com.aboni.sensors;
+package com.aboni.toolkit;
+
+import com.aboni.sensors.HMC5883Calibration;
+import com.aboni.sensors.SensorHMC5883;
 
 public class DoCalibration {
 

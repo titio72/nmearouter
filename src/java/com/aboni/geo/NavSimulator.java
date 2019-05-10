@@ -31,13 +31,14 @@ public class NavSimulator {
 	
 	private double speed = 5.0;
 	
-	private static long lastTack;
+	private long lastTack;
 	
 	private PolarTable polar;
 
 	private static final double REACH = 55.0;
 	
 	public NavSimulator() {
+		// do nothing
 	}
 	
 	public void loadPolars(String file) throws IOException {
@@ -115,45 +116,56 @@ public class NavSimulator {
 		ApparentWind a = new ApparentWind(speed, getWindTrue(), getWindSpeed());
 		return a.getApparentWindSpeed();
 	}
-	
+
+	private static final int NO_SIDE = 0;
 	private static final int PORT = 1;
 	private static final int STARBOARD = -1;
 	
 	private void calcHeadings() {
 		double trueWind = Utils.normalizeDegrees180_180(brg - windDir);
-		double headingPort;
-		double headingStarboard;
 		if (Math.abs(trueWind)<REACH) {
-			
-			headingStarboard = REACH + windDir;
-			headingPort = -REACH + windDir;
-			double d1 = Math.abs(Utils.normalizeDegrees180_180(headingStarboard - brg)); 
-			double d2 = Math.abs(Utils.normalizeDegrees180_180(headingPort - brg));
-			
-			double newH = d1<d2? headingStarboard : headingPort;
-			double newTrue = Utils.normalizeDegrees180_180(newH - windDir);
-			int newSide =  newTrue>0?STARBOARD:PORT;
-			
-			if (side==0) {
-				heading = newSide==PORT? headingPort : headingStarboard;
-				side = newSide;
-			} if (newSide==side) {
-				heading = newSide==PORT? headingPort : headingStarboard;
-			} else {
-				if ((time - lastTack) > 60*60*1000) {
-					heading = newSide==PORT? headingPort : headingStarboard;
-					side = newSide;
-					lastTack = time;
-				} else {
-					heading = side==PORT? headingPort : headingStarboard;
-				}
-			} 
+			handleReach();
 		} else {
-			heading = brg;
-			side = Utils.normalizeDegrees180_180(heading - windDir)>0?STARBOARD:PORT;
+			handleRun();
 		}
 	}
-	
+
+	private void handleRun() {
+		heading = brg;
+		side = Utils.normalizeDegrees180_180(heading - windDir)>0?STARBOARD:PORT;
+	}
+
+	private void handleReach() {
+		double headingStarboard = REACH + windDir;
+		double headingPort = -REACH + windDir;
+		double d1 = Math.abs(Utils.normalizeDegrees180_180(headingStarboard - brg));
+		double d2 = Math.abs(Utils.normalizeDegrees180_180(headingPort - brg));
+
+		double newH = d1<d2? headingStarboard : headingPort;
+		double newTrue = Utils.normalizeDegrees180_180(newH - windDir);
+		int newSide =  newTrue>0?STARBOARD:PORT;
+
+		if (side==NO_SIDE) {
+			heading = getNewHeading(newSide);
+			side = newSide;
+		}
+		if (newSide==side) {
+			heading = getNewHeading(newSide);
+		} else {
+			if ((time - lastTack) > 60*60*1000) {
+				heading = getNewHeading(newSide);
+				side = newSide;
+				lastTack = time;
+			} else {
+				heading = getNewHeading(newSide);
+			}
+		}
+	}
+
+	private double getNewHeading(int newSide) {
+		return newSide==PORT? (-REACH + windDir): (REACH + windDir);
+	}
+
 	private void calcSpeed() {
 		if (polar!=null) {
 			double polarAdj = 0.9;
@@ -188,7 +200,7 @@ public class NavSimulator {
 	public PositionHistory doSimulate(DoWithSim oncalc) {
 		PositionHistory p = new PositionHistory();
 		long t0 = System.currentTimeMillis();
-		long dTime = 1 * 60 * 1000; /* 5 minutes*/ 
+		long dTime = 1L * 60L * 1000L; /* 5 minutes*/
 		double distThreshold = (double)dTime/60d/60d/1000d * getSpeed() * 1.5;
 		while (getDistance()>distThreshold) {
 			doCalc(getTime() + dTime);

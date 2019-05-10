@@ -1,6 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
+import com.aboni.utils.ServerLog;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -10,32 +11,64 @@ import java.util.Date;
 
 public class Track2GPX implements TrackDumper {
 
-	public class PointWriter implements DoWithPoint {
+	private class PointWriter implements DoWithPoint {
 
+		private static final boolean TRACK_THEM_ALL = true;
 		final Writer theWriter;
-		
+		private GeoPositionT previous;
+		private GeoPositionT lastTrack;
+
 		PointWriter(Writer w) {
 			theWriter = w;
 		}
-		
+
 		@Override
 		public void doWithPoint(GeoPositionT p) {
 			try {
-				handlePoint(p, theWriter);
+				if (TRACK_THEM_ALL ) {
+					writePoint(p);
+				} else {
+					if (trackIt(p, previous)) {
+						if (lastTrack!=null && (p.getTimestamp()-lastTrack.getTimestamp())>3600000L) {
+							theWriter.write("</trkseg><trkseg>");
+							writePoint(previous);
+						}
+						lastTrack = p;
+						writePoint(p);
+					}
+				}
+				previous = p;
 			} catch (IOException e) {
-				// ??????
+                ServerLog.getLogger().error("Error writing GPX", e);
 			}
 		}
 
+        private boolean trackIt(GeoPositionT p, GeoPositionT pr) {
+            boolean trackIt = true;
+            if (pr!=null) {
+                Course c = new Course(pr, p);
+                trackIt = (c.getDistance()>0.0025 /* NMg ~5m*/);
+            }
+            return trackIt;
+        }
+
+        private void writePoint(GeoPositionT p) throws IOException {
+            String s = "<trkpt lat=\"" + p.getLatitude() +
+                    "\" lon=\"" + p.getLongitude() +
+                    "\"><time>" + df.format(new Date(p.getTimestamp())) +
+                    "</time></trkpt>\n";
+            theWriter.write(s);
+        }
 	}
 
 	private PositionHistory track;
-
 	private String trackName = DEFAULT_TRACK_NAME;
 	public static final String DEFAULT_TRACK_NAME = "track";
-	
+	private final DateFormat df;
+
+
 	public Track2GPX() {
-		// nothing to init
+		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	}
 
 	/* (non-Javadoc)
@@ -66,45 +99,6 @@ public class Track2GPX implements TrackDumper {
 	private void writePoints(Writer w) {
 		track.iterate(new PointWriter(w));
 	}
-	
-	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-    private GeoPositionT previous;
-    private GeoPositionT lastTrack;
-	private static final boolean TRACK_THEM_ALL = true;
-	
-	private boolean trackIt(GeoPositionT p, GeoPositionT pr) {
-        boolean trackIt = true;
-        if (pr!=null) {
-            Course c = new Course(pr, p);
-            trackIt = (c.getDistance()>0.0025 /* NMg ~5m*/); 
-        }
-        return trackIt;
-	}
-	
-	@SuppressWarnings("PointlessArithmeticExpression")
-	private void handlePoint(GeoPositionT p, Writer w) throws IOException {
-		if (TRACK_THEM_ALL ) {
-    	    writePoint(p, w);
-		} else {
-		    if (trackIt(p, previous)) {
-		        if (lastTrack!=null && (p.getTimestamp()-lastTrack.getTimestamp())>1000*60*60*1) {
-		            w.write("</trkseg><trkseg>");
-		            writePoint(previous, w);
-		        }
-		        lastTrack = p;
-	    	    writePoint(p, w);
-		    }
-		}
-        previous = p;
-	}
-
-    private void writePoint(GeoPositionT p, Writer w) throws IOException {
-        String s = "<trkpt lat=\"" + p.getLatitude() + 
-            		"\" lon=\"" + p.getLongitude() + 
-            		"\"><time>" + df.format(new Date(p.getTimestamp())) + 
-            		"</time></trkpt>\n";
-        w.write(s);
-    }
 
 	private void writeHeader(Writer w) throws IOException {
 		String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"MapSource 6.15.5\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\"><trk>\n";

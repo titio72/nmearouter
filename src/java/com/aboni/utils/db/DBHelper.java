@@ -77,28 +77,20 @@ public class DBHelper implements AutoCloseable {
             return false;
     	}
     }
-    
-    public synchronized PreparedStatement getTimeSeries(String table, String[] fields, Calendar cFrom, Calendar cTo, String where) throws SQLException {
-    	if (getConnection()!=null) {
-			StringBuilder sqlBuilder = new StringBuilder("select TS ");
-			for (String f: fields) {
-		    	sqlBuilder.append(", ").append(f);
-		    }
-			String sql = sqlBuilder.toString();
-			sql += " from " + table + " where TS>=? and TS<=?";
-	    	if (where!=null) {
-	    		sql += " AND " + where;
-	    	}
-	    	PreparedStatement stm = getConnection().prepareStatement(sql);
-			stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-			stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-			return stm;
-    	} else {
-    		ServerLog.getLogger().warning("Cannot create statement for {" + table + "} because connection is not established!");
-    		return null;
-    	}
-    }    
-    
+
+    public static String getTimeSeriesSQL(String table, String[] fields, String where) {
+		StringBuilder sqlBuilder = new StringBuilder("select TS ");
+		for (String f: fields) {
+			sqlBuilder.append(", ").append(f);
+		}
+		String sql = sqlBuilder.toString();
+		sql += " from " + table + " where TS>=? and TS<=?";
+		if (where!=null) {
+			sql += " AND " + where;
+		}
+		return sql;
+	}
+
     public class Range {
     	private final Timestamp max;
     	private final Timestamp min;
@@ -120,13 +112,17 @@ public class DBHelper implements AutoCloseable {
 		
 		public int getSampling(int maxSamples) {
             return (int) ((getCount()<=maxSamples)?1:(getInterval()/maxSamples));
-			
 		}
     }
-    
+
+    private String getTimeFrameSQL(String table) {
+    	return "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
+	}
+
     public synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
     	if (getConnection()!=null) {
-	        try (PreparedStatement stm = getConnection().prepareStatement("select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?")) {
+    		String sql = getTimeFrameSQL(table);
+	        try (PreparedStatement stm = getConnection().prepareStatement(sql)) {
 				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
 				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
 				try (ResultSet rs = stm.executeQuery()) {

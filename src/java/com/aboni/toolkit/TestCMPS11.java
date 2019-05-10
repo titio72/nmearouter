@@ -1,6 +1,10 @@
-package com.aboni.sensors;
+package com.aboni.toolkit;
 
-@SuppressWarnings("InfiniteLoopStatement")
+import com.aboni.sensors.SensorCMPS11;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class TestCMPS11 {
 
 	public static void main(String[] args) {
@@ -13,7 +17,7 @@ public class TestCMPS11 {
 				Thread.sleep(1000);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.getGlobal().log(Level.SEVERE, "Error", e);
 		}
 	}
 }

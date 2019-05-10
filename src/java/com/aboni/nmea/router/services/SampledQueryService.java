@@ -60,7 +60,10 @@ abstract class SampledQueryService implements WebService {
     private Sampler getSampler(Calendar cFrom, Calendar cTo, int maxSamples, DBHelper db, DBHelper.Range range) throws SQLException {
         int sampling = range.getSampling(maxSamples);
         Sampler sampler = new Sampler(sampling, maxSamples);
-        try (PreparedStatement stm = db.getTimeSeries(getTable(), new String[]{getMaxField(), getAvgField(), getMinField()}, cFrom, cTo, getWhere())) {
+        String sql = DBHelper.getTimeSeriesSQL(getTable(), new String[]{getMaxField(), getAvgField(), getMinField()}, getWhere());
+        try (PreparedStatement stm = db.getConnection().prepareStatement(sql)) {
+            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
+            stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
             readSamples(sampler, stm);
         }
         return sampler;

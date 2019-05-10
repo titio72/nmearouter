@@ -175,6 +175,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         public void debug(String msg) {
             log.debug(getMsg(NMEAAgentImpl.this, msg));
         }
+
+        @Override
+		public void console(String msg) { throw new UnsupportedOperationException(); }
 	}
 	
 	private Log internalLog;
