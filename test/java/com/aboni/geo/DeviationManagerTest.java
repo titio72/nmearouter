@@ -62,7 +62,7 @@ public class DeviationManagerTest {
 	}
 
 	@Test
-	public void testConsistency() throws IOException {
+	public void testConsistency() {
 		loadMock1();
 		//double d = m.getMagnetic(221.0);
 		assertTrue(m.getMagnetic(221.0)>0);
@@ -96,7 +96,7 @@ public class DeviationManagerTest {
         }
     }
 
-	private void loadMock1() throws IOException {
+	private void loadMock1() {
 		String s = 
 				"0,40\r\n" +
 				"90,135\r\n" +

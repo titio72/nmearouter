@@ -12,13 +12,13 @@ public class AutoPilotService  implements WebService {
 		this.auto = (AutoPilotDriver)router.getAgent("SmartPilot");
 	}
 
-	public static final String CMD_STARBOARD_1 = "S1";
-	public static final String CMD_PORT_1 = "P1";
-	public static final String CMD_STARBOARD_10 = "S10";
-	public static final String CMD_PORT_10 = "P10";
-	public static final String CMD_AUTO  = "Auto";
-	public static final String CMD_STDBY = "Standby";
-	public static final String CMD_WVANE = "Wind";
+	private static final String CMD_STARBOARD_1 = "S1";
+	private static final String CMD_PORT_1 = "P1";
+	private static final String CMD_STARBOARD_10 = "S10";
+	private static final String CMD_PORT_10 = "P10";
+	private static final String CMD_AUTO  = "Auto";
+	private static final String CMD_STDBY = "Standby";
+	private static final String CMD_WVANE = "Wind";
 	
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {

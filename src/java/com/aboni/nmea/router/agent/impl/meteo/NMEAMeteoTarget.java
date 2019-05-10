@@ -71,7 +71,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
     
     
-    protected void dumpStats() {
+    private void dumpStats() {
         synchronized (series) {
         	long ts = System.currentTimeMillis();
             for (StatsSample series1 : series) {

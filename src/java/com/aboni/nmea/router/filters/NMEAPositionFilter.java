@@ -58,7 +58,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 		return positions.size()==SIZE;
 	}
 	
-	public boolean acceptPoint(RMCSentence rmc) {
+	private boolean acceptPoint(RMCSentence rmc) {
 		synchronized (stats) {
 			if (rmc.isValid()) {
 				Position pos = NMEAUtils.getPosition(rmc);

@@ -2,16 +2,11 @@ package com.aboni.nmea.router.streamer;
 
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class NMEASentenceItemTest {
-
-	@Before
-	public void setUp() {
-	}
 
 	@Test
 	public void testOut() {
@@ -24,7 +19,7 @@ public class NMEASentenceItemTest {
 	}
 
 	@Test
-	public void testIn() throws Exception {
+	public void testIn() {
 		NMEASentenceItem itm = new NMEASentenceItem("[1485070801108][**] $GPMTW,28.50,C*3B");
 		assertEquals(1485070801108L, itm.getTimestamp());
 		assertEquals("**", itm.getData());
