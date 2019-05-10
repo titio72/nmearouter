@@ -5,10 +5,6 @@ import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-/**
- * Used to produce a VTG sentence from a RMC to match requirement of NKE
- * @author aboni
- */
 public class NMEARMCFilter implements NMEAPostProcess {
 	
     private final NMEAPositionFilter filter;
@@ -25,7 +21,7 @@ public class NMEARMCFilter implements NMEAPostProcess {
 		try {
 			return (filter.match(sentence, src)?OK:KO);
 		} catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot anayze RMC {" + sentence + "} error {" + e.getMessage() + "}");
+            ServerLog.getLogger().warning("Cannot analyze RMC {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;
 		}
 	}

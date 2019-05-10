@@ -10,12 +10,12 @@ import java.util.Iterator;
 
 public class FilterSetBuilder {
 
-	public static final String SENTENCE = "sentence";
-	public static final String TALKER = "talker";
-	public static final String SOURCE = "source";
-	public static final String STALK_NEGATE = "STALK:!";
-	public static final String STALK = "STALK:";
-	public static final String FILTERS = "filters";
+	private static final String SENTENCE = "sentence";
+	private static final String TALKER = "talker";
+	private static final String SOURCE = "source";
+	private static final String STALK_NEGATE = "STALK:!";
+	private static final String STALK = "STALK:";
+	private static final String FILTERS = "filters";
 
 	public String exportFilter(NMEASentenceFilterSet s) {
 		if (s!=null) {

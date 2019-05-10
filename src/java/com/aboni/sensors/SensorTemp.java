@@ -18,9 +18,9 @@ public class SensorTemp implements Sensor {
 			v = value;
 		}
 
-		private String k;
-		private long ts;
-		private double v;
+		private final String k;
+		private final long ts;
+		private final double v;
 
 		public String getKey() {
 			return k;

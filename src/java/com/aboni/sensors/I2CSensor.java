@@ -12,7 +12,6 @@ public abstract class I2CSensor implements Sensor {
         return String.format("Sensor {%s} instance {%d} %s", getSensorName(), instance, message);
     }
 
-    @SuppressWarnings("unused")
     protected void debug(String msg) {
         ServerLog.getLogger().debug(getMessage(msg));
     }
@@ -21,7 +20,6 @@ public abstract class I2CSensor implements Sensor {
         ServerLog.getLogger().info(getMessage(msg));
     }
     
-    @SuppressWarnings("unused")
     protected void warning(String msg, Throwable t) {
         if (t==null) 
             ServerLog.getLogger().warning(getMessage(msg));

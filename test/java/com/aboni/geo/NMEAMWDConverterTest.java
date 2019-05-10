@@ -5,16 +5,11 @@ import net.sf.marineapi.nmea.sentence.HDGSentence;
 import net.sf.marineapi.nmea.sentence.MWDSentence;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class NMEAMWDConverterTest {
-
-	@Before
-	public void setUp() {
-	}
 
 	private HDGSentence getHeading(double heading, double variation, double deviation) {
 		HDGSentence h = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");

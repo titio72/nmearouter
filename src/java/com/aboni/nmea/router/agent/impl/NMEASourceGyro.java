@@ -189,7 +189,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 		}
 	}
 	
-	static final int TIMER_FACTOR = 2;
+	private static final int TIMER_FACTOR = 2;
 	private int timerCount = 0;
 	
 	@Override

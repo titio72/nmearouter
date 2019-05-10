@@ -2,6 +2,7 @@ package com.aboni.geo;
 
 import com.aboni.utils.ServerLog;
 
+import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +41,7 @@ public class DeviationManagerImpl implements DeviationManager {
         }
         
         @Override
-        public int compareTo(Pair o) {
+        public int compareTo(@NotNull Pair o) {
             return Integer.compare(input, o.input);
         }
     }

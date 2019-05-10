@@ -25,7 +25,7 @@ public class AgentFilterService implements WebService {
 		final String sentence;
 		final String source;
 		
-		public FltSentence(String s) {
+		FltSentence(String s) {
 			String[] tokens = s.split("@");
 			sentence = tokens[0];
 			source = (tokens.length==2)?tokens[1]:"";
