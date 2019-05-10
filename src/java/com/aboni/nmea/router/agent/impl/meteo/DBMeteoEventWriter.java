@@ -38,10 +38,10 @@ public class DBMeteoEventWriter implements EventWriter {
 		if (c!=null && e instanceof MeteoEvent) {
 			prepareStatement(c);
         	MeteoEvent m = (MeteoEvent)e;
-			stm.setString(1, m.getSerie().getTag());
-	        stm.setDouble(2, m.getSerie().getAvg());
-	        stm.setDouble(3, m.getSerie().getMax());
-	        stm.setDouble(4, m.getSerie().getMin());
+			stm.setString(1, m.getStatsSample().getTag());
+	        stm.setDouble(2, m.getStatsSample().getAvg());
+	        stm.setDouble(3, m.getStatsSample().getMax());
+	        stm.setDouble(4, m.getStatsSample().getMin());
 	        stm.setTimestamp(5, new Timestamp(e.getTime()));
 	        stm.execute();
 		}

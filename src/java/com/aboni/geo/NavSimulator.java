@@ -186,7 +186,7 @@ public class NavSimulator {
 	}
 	
 	public void doCalc(long time) {
-		Position newPos = Utils.calcNewLL(pos, heading, speed * (double)(time - this.time)/1000d/60d/60d);
+		Position newPos = Utils.calcNewLL(pos, heading, speed * (double)(time - this.time)/3600000d);
 		this.time = time;
 		pos = newPos;
 		if (getTo()!=null) {
@@ -196,12 +196,11 @@ public class NavSimulator {
 		calcSpeed();
 	}
 
-	@SuppressWarnings("PointlessArithmeticExpression")
 	public PositionHistory doSimulate(DoWithSim oncalc) {
 		PositionHistory p = new PositionHistory();
 		long t0 = System.currentTimeMillis();
 		long dTime = 1L * 60L * 1000L; /* 5 minutes*/
-		double distThreshold = (double)dTime/60d/60d/1000d * getSpeed() * 1.5;
+		double distThreshold = (double)dTime/3600000d * getSpeed() * 1.5;
 		while (getDistance()>distThreshold) {
 			doCalc(getTime() + dTime);
 			if (oncalc!=null) oncalc.doIt(this, getTime());

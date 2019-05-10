@@ -18,20 +18,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
 
-	private Timer timer;
-	private final AtomicBoolean started;
-	private final ExecutorService exec;
-	
 	private class SentenceEvent {
 		SentenceEvent(Sentence s, NMEAAgent src) {
 			this.s = s;
 			this.src = src;
 		}
-		
+
 		final Sentence s;
 		final NMEAAgent src;
 	}
-	
+
+	private Timer timer;
+	private final AtomicBoolean started;
+	private final ExecutorService exec;
+
 	private final Map<String, NMEAAgent> agents;
 	private final BlockingQueue<SentenceEvent> sentenceQueue;
 	private final NMEACache cache;

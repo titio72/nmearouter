@@ -1,6 +1,6 @@
 package com.aboni.utils;
 
-public abstract class Serie {
+public abstract class StatsSample {
 	private final String tag;
 	protected double avg;
     protected double max;
@@ -13,7 +13,7 @@ public abstract class Serie {
 	public double getMin() { return min; }
 	public double getMax() { return max; }
 	
-	protected Serie(String tag) {
+	protected StatsSample(String tag) {
 		this.tag = tag;
 		reset();
 	}

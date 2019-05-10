@@ -2,9 +2,9 @@ package com.aboni.utils;
 
 import com.aboni.misc.Utils;
 
-public class AngleSerie extends Serie {
+public class AngleStatsSample extends StatsSample {
 	
-	public AngleSerie(String tag) {
+	public AngleStatsSample(String tag) {
 		super(tag);
 	}
 	

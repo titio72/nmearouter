@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
-import com.aboni.utils.Serie;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.StatsSample;
 import com.aboni.utils.db.DBHelper;
 import com.aboni.utils.db.EventWriter;
 
@@ -26,7 +26,7 @@ public class DBMeteoWriter implements StatsWriter {
     }
     
     @Override
-    public void write(Serie s, long ts) {
+    public void write(StatsSample s, long ts) {
     	db.write(ee, new MeteoEvent(s, ts));
     }
     

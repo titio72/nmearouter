@@ -1,6 +1,6 @@
 package com.aboni.utils;
 
-public class Sample {
+public class TimeSerieSample {
 
 	public double getvMax() {
 		return vMax;
@@ -28,7 +28,7 @@ public class Sample {
 	private long t0;
 	private long lastTs;
 
-	Sample() {}
+	TimeSerieSample() {}
 
 	void sample(double vMax, double v, double vMin, long ts) {
 		if (t0==0) t0 = ts;

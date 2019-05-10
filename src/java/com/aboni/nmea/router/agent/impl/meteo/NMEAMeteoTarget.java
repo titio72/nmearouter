@@ -4,10 +4,10 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.utils.AngleSerie;
+import com.aboni.utils.AngleStatsSample;
 import com.aboni.utils.DataEvent;
-import com.aboni.utils.ScalarSerie;
-import com.aboni.utils.Serie;
+import com.aboni.utils.ScalarStatsSample;
+import com.aboni.utils.StatsSample;
 import net.sf.marineapi.nmea.sentence.*;
 
 public class NMEAMeteoTarget extends NMEAAgentImpl {
@@ -24,13 +24,13 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int WIND_D = 4; 
     private static final int HUM = 5; 
 
-    private final Serie[] series = new Serie[] {
-    		new ScalarSerie("AT0", -20.0, 50.0),
-    		new ScalarSerie("WT_", -20.0, 50.0),
-    		new ScalarSerie("PR_", 800.0, 1100.0),
-    		new ScalarSerie("TW_", 0.0, 100.0),
-    		new AngleSerie("TWD"),
-    		new ScalarSerie("HUM", 0.0, 150.0)
+    private final StatsSample[] series = new StatsSample[] {
+    		new ScalarStatsSample("AT0", -20.0, 50.0),
+    		new ScalarStatsSample("WT_", -20.0, 50.0),
+    		new ScalarStatsSample("PR_", 800.0, 1100.0),
+    		new ScalarStatsSample("TW_", 0.0, 100.0),
+    		new AngleStatsSample("TWD"),
+    		new ScalarStatsSample("HUM", 0.0, 150.0)
     };
     
     private final NMEACache cache;
@@ -74,7 +74,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     protected void dumpStats() {
         synchronized (series) {
         	long ts = System.currentTimeMillis();
-            for (Serie series1 : series) {
+            for (StatsSample series1 : series) {
                 write(series1, ts);
                 series1.reset();
             }
@@ -113,12 +113,12 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
 	private void collect(int id, double d) {
         synchronized (series) {
-        	Serie s = series[id];
+        	StatsSample s = series[id];
             s.add(d);
         }
     }
 
-    private void write(Serie s,  long ts) {
+    private void write(StatsSample s, long ts) {
     	if (writer!=null && s!=null && s.getSamples()>0) {
         	writer.write(s, ts);
     	}

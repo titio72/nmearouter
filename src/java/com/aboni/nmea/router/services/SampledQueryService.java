@@ -1,8 +1,8 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.Sample;
-import com.aboni.utils.Sampler;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.TimeSerie;
+import com.aboni.utils.TimeSerieSample;
 import com.aboni.utils.db.DBHelper;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ abstract class SampledQueryService implements WebService {
     protected abstract String	getAvgField();
     protected abstract String	getMinField();
     protected abstract String	getWhere();
-    protected abstract void 	fillResponse(ServiceOutput response, List<Sample> samples) throws IOException;
+    protected abstract void 	fillResponse(ServiceOutput response, List<TimeSerieSample> samples) throws IOException;
 	protected abstract void 	onPrepare(ServiceConfig config);
     
 	private static final int DEFAULT_MAX_SAMPLES = 150;
@@ -46,10 +46,10 @@ abstract class SampledQueryService implements WebService {
         
         try (DBHelper db = new DBHelper(true)) {
             DBHelper.Range range = db.getTimeframe(getTable(), cFrom, cTo);
-            List<Sample> samples = null;
+            List<TimeSerieSample> samples = null;
             if (range!=null) {
-                Sampler sampler = getSampler(cFrom, cTo, maxSamples, db, range);
-                samples = sampler.getSamples();
+                TimeSerie timeSerie = getTimeSerie(cFrom, cTo, maxSamples, db, range);
+                samples = timeSerie.getSamples();
             }
         	fillResponse(response, samples);
         } catch (Exception e) {
@@ -57,26 +57,26 @@ abstract class SampledQueryService implements WebService {
         }
     }
 
-    private Sampler getSampler(Calendar cFrom, Calendar cTo, int maxSamples, DBHelper db, DBHelper.Range range) throws SQLException {
+    private TimeSerie getTimeSerie(Calendar cFrom, Calendar cTo, int maxSamples, DBHelper db, DBHelper.Range range) throws SQLException {
         int sampling = range.getSampling(maxSamples);
-        Sampler sampler = new Sampler(sampling, maxSamples);
+        TimeSerie timeSerie = new TimeSerie(sampling, maxSamples);
         String sql = DBHelper.getTimeSeriesSQL(getTable(), new String[]{getMaxField(), getAvgField(), getMinField()}, getWhere());
         try (PreparedStatement stm = db.getConnection().prepareStatement(sql)) {
             stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
             stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
-            readSamples(sampler, stm);
+            readSamples(timeSerie, stm);
         }
-        return sampler;
+        return timeSerie;
     }
 
-    private void readSamples(Sampler sampler, PreparedStatement stm) throws SQLException {
+    private void readSamples(TimeSerie timeSerie, PreparedStatement stm) throws SQLException {
         try (ResultSet rs = stm.executeQuery()) {
             while (rs.next()) {
                 Timestamp ts = rs.getTimestamp(1);
                 double vMax = rs.getDouble(2);
                 double v = rs.getDouble(3);
                 double vMin = rs.getDouble(4);
-                sampler.doSampling(ts.getTime(), vMax, v, vMin);
+                timeSerie.doSampling(ts.getTime(), vMax, v, vMin);
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.Sample;
+import com.aboni.utils.TimeSerieSample;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -13,11 +13,11 @@ public class SpeedService extends SampledQueryService {
     }
     
 	@Override
-    protected void fillResponse(ServiceOutput response, List<Sample> samples) throws IOException {
+    protected void fillResponse(ServiceOutput response, List<TimeSerieSample> samples) throws IOException {
         boolean first = true;
         response.getWriter().write("{\"serie\":[");
         if (samples!=null) {
-	        for (Sample s: samples) {
+	        for (TimeSerieSample s: samples) {
 		        if (!first) {
 	                response.getWriter().write(",");
 	        	}

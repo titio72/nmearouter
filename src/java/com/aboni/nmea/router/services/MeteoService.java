@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.Sample;
+import com.aboni.utils.TimeSerieSample;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -11,11 +11,11 @@ public class MeteoService extends SampledQueryService {
 	private String type;
     
     @Override
-	protected void fillResponse(ServiceOutput response, List<Sample> samples) throws IOException {
+	protected void fillResponse(ServiceOutput response, List<TimeSerieSample> samples) throws IOException {
 		response.getWriter().write("{\"type\":\""+ type +"\", \"serie\":[");
 		boolean first = true;
         if (samples!=null) {
-			for (Sample s: samples) {
+			for (TimeSerieSample s: samples) {
 			    Timestamp ts = new Timestamp(s.getT0());
 			    double vMax = s.getvMax();
 			    double v = s.getV();

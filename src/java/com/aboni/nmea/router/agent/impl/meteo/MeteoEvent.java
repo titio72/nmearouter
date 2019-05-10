@@ -1,20 +1,20 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
-import com.aboni.utils.Serie;
+import com.aboni.utils.StatsSample;
 import com.aboni.utils.db.Event;
 
 public class MeteoEvent implements Event {
 
-	private final Serie serie;
+	private final StatsSample statsSample;
 	private final long ts;
 	
-	public MeteoEvent(Serie s, long ts) {
-		this.serie = s;
+	public MeteoEvent(StatsSample s, long ts) {
+		this.statsSample = s;
 		this.ts = ts;
 	}
 	
-	public Serie getSerie() {
-		return serie;
+	public StatsSample getStatsSample() {
+		return statsSample;
 	}
 	
 	@Override

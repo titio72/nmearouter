@@ -2,12 +2,12 @@ package com.aboni.utils;
 
 import com.aboni.misc.Utils;
 
-public class ScalarSerie extends Serie {
+public class ScalarStatsSample extends StatsSample {
 	
 	private final double rangeMin;
     private final double rangeMax;
 
-    public ScalarSerie(String tag, double min, double max) {
+    public ScalarStatsSample(String tag, double min, double max) {
 		super(tag);
 		this.rangeMax = max;
 		this.rangeMin = min;

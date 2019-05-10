@@ -8,49 +8,55 @@ import net.sf.marineapi.nmea.util.Position;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SimulatorGoTo {
-	
+
+	private static final Position CAPRAIA = new Position(43.051326, 9.839279);
+	private static final Position MARINA = new Position(43.679416, 10.267679);
+	private static final String POLARS = "web/dufour35c.csv";
+	private static final String OUTPUT = "out.gpx";
+
 	public static void main(String[] args) {
-		
-		
-		
-		Position marina = new Position(43.679416, 10.267679);
-		Position capraia = new Position(43.051326, 9.839279);
+		Position from = MARINA;
+		Position to = CAPRAIA;
 		NavSimulator sim = new NavSimulator();
-		try { sim.loadPolars("web/dufour35c.csv"); } catch (Exception e) { e.printStackTrace(); }
-		sim.setFrom(marina);
-		sim.setTo(capraia);
+		try {
+			sim.loadPolars(POLARS);
+		} catch (Exception e) {
+			Logger.getGlobal().log(Level.SEVERE, "Error reading polars", e);
+		}
+		sim.setFrom(from);
+		sim.setTo(to);
 		sim.setWind(9.0,  205.0);
-		
-		System.out.println("BRG  " + sim.getBRG());
-		System.out.println("Dist " + sim.getDistance());
+
+		Logger.getGlobal().info("BRG  " + sim.getBRG());
+		Logger.getGlobal().info("Dist " + sim.getDistance());
 
 		PositionHistory p = sim.doSimulate((NavSimulator s, long t) -> 	{
-				System.out.format(
+				Logger.getGlobal().info(() -> String.format(
 					"Head %.1f Wind %.1f %.1f %.1f Dist %.2f Speed %.2f %s%n", 
 					s.getHeading(), 
 					s.getWindDir(),
 					s.getWindTrue(),
 					s.getWindApp(),
-					s.getDistance(), s.getSpeed(), s.getSide());
+					s.getDistance(), s.getSpeed(), s.getSide()));
 				rotateWind(s, t);
 			}
 		);
 
-		System.out.println(
+		Logger.getGlobal().info(
 				(int)(sim.getTime() / 1000d / 60d / 60d) + "h " + ((int)(sim.getTime()/1000d/60d) % 60) + "m " +
 						p.getTotalDistance() 
 				);
 		
 		Track2GPX x = new Track2GPX();
 		x.setTrack(p);
-		try {
-			FileWriter w = new FileWriter("out.gpx");
+		try (FileWriter w = new FileWriter(OUTPUT)) {
 			x.dump(w);
-			w.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.getGlobal().log(Level.SEVERE, "Error dumping GPX", e);
 		}
 	}
 
