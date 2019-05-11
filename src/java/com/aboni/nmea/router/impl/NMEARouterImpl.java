@@ -5,6 +5,8 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -34,6 +36,7 @@ public class NMEARouterImpl implements NMEARouter {
 
 	private final Map<String, NMEAAgent> agents;
 	private final BlockingQueue<SentenceEvent> sentenceQueue;
+	private final NMEAProcessorSet processors;
 	private final NMEACache cache;
 	private final NMEAStream stream;
 
@@ -48,6 +51,7 @@ public class NMEARouterImpl implements NMEARouter {
 	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
 	    agents = new HashMap<>();
 		sentenceQueue = new LinkedBlockingQueue<>();
+		processors = new NMEAProcessorSet();
 		started  = new AtomicBoolean(false);
 		this.cache = cache;
 		this.stream = stream;
@@ -125,6 +129,11 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 
 	@Override
+	public void addProcessor(NMEAPostProcess proc) {
+		processors.addProcessor(proc);
+	}
+
+	@Override
 	public void addAgent(NMEAAgent agent) {
 		synchronized (agents) {
 			ServerLog.getLogger().info("Adding Agent {" + agent.getName() + "}");
@@ -165,9 +174,12 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void routeSentence(Sentence s, NMEAAgent src) {
 		if (started.get()) {
-			cache.onSentence(s, src.getName());
-			routeToTarget(s, src);
-			stream.pushSentence(s, src);
+			Collection<Sentence> toSend = processors.getSentences(s, src.getName());
+			for (Sentence ss: toSend) {
+				cache.onSentence(ss, src.getName());
+				routeToTarget(ss, src);
+				stream.pushSentence(ss, src);
+			}
 		}
 	}
 

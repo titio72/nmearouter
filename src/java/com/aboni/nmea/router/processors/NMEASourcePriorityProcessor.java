@@ -4,12 +4,9 @@ import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class NMEAGPSSourceProcessor implements NMEAPostProcess {
+public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     private static final long THRESHOLD = 120000L; // 2 minutes
 
@@ -21,19 +18,30 @@ public class NMEAGPSSourceProcessor implements NMEAPostProcess {
     private String currentSource;
     private int currentPriority;
 
-    public NMEAGPSSourceProcessor() {
+    long timeStamp = -1;
+
+    private long getNow() {
+        return timeStamp==-1 ? System.currentTimeMillis() : timeStamp;
+    }
+
+    public NMEASourcePriorityProcessor() {
         priorities = new HashMap<>();
         lastSourceTimestamp = new HashMap<>();
-        sentences = new HashSet<>();
-        sentences.add("RMC");
-        sentences.add("RMA");
-        sentences.add("RMB");
-        sentences.add("GLL");
-        sentences.add("VTG");
-        sentences.add("GGA");
-        sentences.add("GSA");
-        sentences.add("ZTG");
-        sentences.add("ZDA");
+        sentences = Collections.synchronizedSet(new HashSet<>());
+    }
+
+    public void addAllGPS() {
+        sentences.clear();
+        sentences.addAll(Arrays.asList("RMC", "RMA", "RMB", "GLL", "VTG", "GGA", "GSA", "ZTG", "ZDA"));
+    }
+
+    public void addAllHeading() {
+        sentences.clear();
+        sentences.addAll(Arrays.asList("HDM", "HDT", "HDG"));
+    }
+
+    public void setSentences(String[] sentences) {
+        this.sentences.addAll(Arrays.asList(sentences));
     }
 
     public void setPriority(String source, int priority) {
@@ -42,7 +50,7 @@ public class NMEAGPSSourceProcessor implements NMEAPostProcess {
 
     private void recordInput(@NotNull Sentence sentence, @NotNull String source) {
         if (sentences.contains(sentence.getSentenceId())) {
-            lastSourceTimestamp.put(source, System.currentTimeMillis());
+            lastSourceTimestamp.put(source, getNow());
 
             if (currentSource == null) {
                 currentSource = source;
@@ -54,7 +62,7 @@ public class NMEAGPSSourceProcessor implements NMEAPostProcess {
                     currentSource = source;
                     currentPriority = priority;
                 } else {
-                    long now = System.currentTimeMillis();
+                    long now = getNow();
                     long currentLastSourceTimestamp = lastSourceTimestamp.getOrDefault(currentSource, 0L);
                     if ((now - currentLastSourceTimestamp) > THRESHOLD) {
                         // switch to a lower priority source because the higher priority has not been available for a while
@@ -66,10 +74,22 @@ public class NMEAGPSSourceProcessor implements NMEAPostProcess {
         }
     }
 
+    private static final Sentence[] EMPTY = new Sentence[] {};
+
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
-        recordInput(sentence, src);
-        return null;
+        if (sentences.contains(sentence.getSentenceId())) {
+            recordInput(sentence, src);
+            if (src.equals(currentSource)) {
+                return new Pair<>(true, EMPTY);
+            } else {
+                // force skip the sentence
+                return new Pair<>(false, EMPTY);
+            }
+        } else {
+            return new Pair<>(true, EMPTY);
+        }
+
     }
 
     @Override

@@ -6,12 +6,9 @@ import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.nmea.router.processors.*;
 import com.aboni.utils.Log;
-import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class NMEAAgentImpl implements NMEAAgent {
@@ -64,7 +61,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	private NMEAAgentStatusListener sl;
 	private NMEASentenceFilterSet fsetInput;
 	private NMEASentenceFilterSet fsetOutput;
-	private final List<NMEAPostProcess> proc;
 	private boolean active;
 	private NMEASentenceListener listener;
 	private boolean builtin;
@@ -72,6 +68,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	private boolean source;
 	private final InternalTarget targetIf;
 	private final InternalSource sourceIf;
+	private final NMEAProcessorSet procs;
 	
     public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
     	targetIf = new InternalTarget();
@@ -80,7 +77,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         fsetInput = null;
         fsetOutput = null;
         active = false;
-        proc = new ArrayList<>();
+        procs = new NMEAProcessorSet();
         handleQos(cache, name, qos);
         target = true;
         source = true;
@@ -108,11 +105,11 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 						break;
 					case "enrich_hdg":
 						getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
-						addProc(new NMEAHDGFiller(cache));
+						addProc(new NMEAHDGEnricher(cache));
 						break;
 					case "enrich_hdm":
 						getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
-						addProc(new NMEAHeadingEnricher(cache));
+						addProc(new NMEAHDMEnricher(cache));
 						break;
 					case "rmc_filter":
 						getLogger().info("QoS {RMC filter} Agent {" + name + "}");
@@ -266,31 +263,11 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	 */
 	protected final void notify(Sentence sentence) {
 
-		if (isStarted() && checkSourceFilter(sentence)) {
+		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
-			List<Sentence> toSend = getSentences(sentence);
-			if (listener!=null) {
-                listener.onSentence(sentence, this);
-                for (Sentence s: toSend) listener.onSentence(s, this);
-            }
+			List<Sentence> toSend = procs.getSentences(sentence, getName());
+			for (Sentence s: toSend) listener.onSentence(s, this);
 		}
-	}
-
-	private static final List<Sentence> EMPTY = new ArrayList<>();
-
-	private List<Sentence> getSentences(Sentence sentence) {
-		List<Sentence> toSend = new ArrayList<>();
-		for (NMEAPostProcess pp: proc) {
-			Pair<Boolean, Sentence[]> res = pp.process(sentence, this.getName());
-			if (res!=null) {
-				if (!res.first) {
-					return EMPTY;
-				} else if (res.second!=null) {
-					Collections.addAll(toSend, res.second);
-				}
-			}
-		}
-		return toSend;
 	}
 
 	/**
@@ -298,7 +275,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	 * @param f The post processor to be added (sequence is important)
 	 */
 	protected final void addProc(NMEAPostProcess f) {
-		proc.add(f);
+		procs.addProcessor(f);
 	}
 
 	/**
@@ -343,11 +320,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     @Override
     public void onTimer() {
 		if (isStarted()) {
-			synchronized (proc) {
-		    	for (NMEAPostProcess p: proc) {
-		    		p.onTimer();
-		    	}
-    		}
+			procs.onTimer();
     	}
     } 
 }

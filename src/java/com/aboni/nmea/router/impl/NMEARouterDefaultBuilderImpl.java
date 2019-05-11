@@ -21,9 +21,11 @@ import com.aboni.nmea.router.conf.db.AgentStatus;
 import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.filters.FilterSetBuilder;
+import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Injector;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +58,9 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
         NMEARouter r = injector.getInstance(NMEARouter.class);
-        
+
+		configureGPSPriority(conf, r);
+
 		switch (conf.getLog().getLevel()) {
 			case DEBUG: 
 				ServerLog.getLoggerAdmin().setDebug(); break;
@@ -86,8 +90,21 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         if (ENABLE_AP) buildAutoPilot(r);
         return r;
     }
-    
-    private void handlePersistentState(NMEAAgent agent, AgentBase a) {
+
+	private void configureGPSPriority(Router conf, NMEARouter r) {
+		com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
+		if (gpsPriorityConf!=null) {
+			List<String> gpsPriority = gpsPriorityConf.getGPSSource();
+			NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor();
+			proc.addAllGPS();
+			for (int i = 0; i<gpsPriority.size(); i++) {
+				proc.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */ );
+			}
+			r.addProcessor(proc);
+		}
+	}
+
+	private void handlePersistentState(NMEAAgent agent, AgentBase a) {
     	boolean activate = handleActivation(agent, a);
     	handleFilter(agent);
 		if (activate) agent.start();

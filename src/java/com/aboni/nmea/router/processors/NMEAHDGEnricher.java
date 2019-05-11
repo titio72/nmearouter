@@ -21,7 +21,7 @@ import java.util.List;
  * @author aboni
  *
  */
-public class NMEAHDGFiller implements NMEAPostProcess {
+public class NMEAHDGEnricher implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
     
@@ -29,11 +29,11 @@ public class NMEAHDGFiller implements NMEAPostProcess {
     private final boolean doHDT;
     private final NMEACache cache;
     
-    public NMEAHDGFiller(NMEACache cache) {
+    public NMEAHDGEnricher(NMEACache cache) {
         this(cache, true, true);
     }
 
-    public NMEAHDGFiller(NMEACache cache, boolean hdm, boolean hdt) {
+    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt) {
         m = new NMEAMagnetic2TrueConverter();
         this.cache = cache;
         this.doHDM = hdm;
@@ -55,7 +55,10 @@ public class NMEAHDGFiller implements NMEAPostProcess {
                 }
 
                 return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
-            }
+            } else if ((doHDM && sentence instanceof HDMSentence) || (doHDT && sentence instanceof HDGSentence)) {
+            	// skip HDT & HDM if they are supposed to be produced by the enricher
+				return new Pair<>(Boolean.FALSE, new Sentence[]{});
+			}
         } catch (Exception e) {
             ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }

@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.filters;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.processors.NMEAHDGFiller;
+import com.aboni.nmea.router.processors.NMEAHDGEnricher;
 import com.aboni.utils.DataEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class NMEAHDGFillerTest {
+public class NMEAHDGEnricherTest {
 
 	@SuppressWarnings("unused")
 	class MyCache implements NMEACache {
@@ -52,7 +52,7 @@ public class NMEAHDGFillerTest {
 	
 	@Test
 	public void testEnrichVariation() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), false, false);
+		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -62,7 +62,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testEnrichVariationFail() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(false), false, false);
+		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(false), false, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -72,7 +72,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testHDT() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), false, true);
+		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, true);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);
@@ -84,7 +84,7 @@ public class NMEAHDGFillerTest {
 
 	@Test
 	public void testHDM() {
-		NMEAHDGFiller filler = new NMEAHDGFiller(new MyCache(), true, false);
+		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), true, false);
 
 		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
 		hdg.setHeading(320.0);

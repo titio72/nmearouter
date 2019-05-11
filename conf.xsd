@@ -1,10 +1,12 @@
-<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
 
 <xs:element name="Router" type="Router"/>
 
 <xs:complexType name="Router">
 	<xs:sequence>
 		<xs:element name="Log" type="Log"/>
+		<xs:element name="GPSPriority" type="List"/>
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="SerialAgent" type="SerialAgent"/>
 			<xs:element name="TcpAgent" type="TcpAgent"/>
@@ -19,6 +21,12 @@
 			<xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
 			<xs:element name="JSONAgent" type="JSONAgent"/>
 		</xs:choice>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="List">
+	<xs:sequence>
+		<xs:element name="GPSSource" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 	</xs:sequence>
 </xs:complexType>
 

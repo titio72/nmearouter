@@ -12,19 +12,18 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
 /**
- * Enrich HDG heading information:
- * 1) Listen to GPS location to set the magnetic variation into the HDG sentence (if not present)
- * 2) Split the sentence in HDM & HDT   
+ * To be used when there's only HDM in the stream and one needs to enrich it with variation and deviation.
+ * Enrich HDM heading information and produces additional HDT & HDG sentences
  * @author aboni
  *
  */
-public class NMEAHeadingEnricher implements NMEAPostProcess {
+public class NMEAHDMEnricher implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
 
 	private final NMEACache cache;
     
-    public NMEAHeadingEnricher(NMEACache cache) {
+    public NMEAHDMEnricher(NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
         this.cache = cache;
     }
@@ -40,7 +39,10 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
                 } else {
                 	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg});
                 }
-            }
+            } else if (sentence instanceof HDGSentence || sentence instanceof HDTSentence) {
+            	// skip HDG and HDT as they are produced by the enricher
+				return new Pair<>(Boolean.FALSE, new Sentence[] {});
+			}
         } catch (Exception e) {
             ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
         }
@@ -48,19 +50,20 @@ public class NMEAHeadingEnricher implements NMEAPostProcess {
     }
 
 	private boolean fillVariation(HDGSentence hdg, Position lastPosition) {
-		boolean canDoT = false;
+		boolean variationAvailable = false;
 		try {
+			// if the variaion is already presnt skip the enrichment
 		    hdg.getVariation();
-		    canDoT = true;
+		    variationAvailable = true;
 		} catch (DataNotAvailableException e) {
 		    if (lastPosition!=null) {
 		        double d = m.getDeclination(lastPosition);
 		        d = Utils.normalizeDegrees180_180(d);
 		        hdg.setVariation(d);
-		        canDoT = true;
+		        variationAvailable = true;
 		    }
 		}
-		return canDoT;
+		return variationAvailable;
 	}
 
 	private Position getLastPosition() {
