@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 public class NMEASimulatorSourceSettings {
+
+	private final String confFile;
 	
 	private long lastConfModified = 0;
 	
@@ -384,13 +386,13 @@ public class NMEASimulatorSourceSettings {
 	}
 
 	
-	public NMEASimulatorSourceSettings() {
-		// nothing to init
+	public NMEASimulatorSourceSettings(String confFile) {
+		this.confFile = confFile;
 	}
 	
     public void loadConf() {
     	try {
-    		File f = new File(Constants.SIM);
+    		File f = new File(Constants.CONF_DIR, confFile);
     		if (f.exists() && f.lastModified() > lastConfModified) {
     				lastConfModified = f.lastModified();
     				Properties p = new Properties();

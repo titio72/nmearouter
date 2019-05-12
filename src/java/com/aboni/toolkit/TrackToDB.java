@@ -5,12 +5,18 @@ import com.aboni.utils.db.DBHelper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@SuppressWarnings("ALL")
 public class TrackToDB {
 	
 	class PPP {
@@ -23,8 +29,6 @@ public class TrackToDB {
 	    boolean anchor = false;
 	}
 
-	DBHelper db;
-
     private final SimpleDateFormat dfParser;
 	
 	public TrackToDB() {
@@ -32,59 +36,40 @@ public class TrackToDB {
 	    dfParser.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 	
-	public void load(String file) throws Exception {
-	    //int i = 0;
-	    //db = new DBHelper(false);
-	    
-	    //PreparedStatement st = db.getConnection().prepareStatement("insert into track (lat, lon, TS, anchor) values (?, ?, ?, ?)");
-	    
-	    
-	    FileReader f = new FileReader(file);
-		BufferedReader r = new BufferedReader(f);
-		String pos;
-		String lastPos = null;
-		PPP last = null;
-		while ((pos = r.readLine())!=null) {
-		    //System.out.println(pos);
-			PPP p;
-			try {
-				p = getPoint(pos);
-				if (last!=null) {
-				    if (p.timestamp.before(last.timestamp)) {
-                        System.out.println(lastPos);
-                        System.out.println(pos);
-                        System.out.println();
-				    }
+	public void load(String file) throws SQLException, IOException, ClassNotFoundException {
+	    int i = 0;
+	    try (DBHelper db = new DBHelper(false)) {
+			try (FileReader f = new FileReader(file)) {
+				try (BufferedReader r = new BufferedReader(f)) {
+					try (PreparedStatement st = db.getConnection().prepareStatement("insert into track (lat, lon, TS, anchor) values (?, ?, ?, ?)")) {
+						String pos;
+						while ((pos = r.readLine()) != null) {
+							PPP p;
+							try {
+								p = getPoint(pos);
+								st.setDouble(1, p.lat * (p.latE.equals("N") ? 1.0 : -1.0));
+								st.setDouble(2, p.lon * (p.lonE.equals("E") ? 1.0 : -1.0));
+								Timestamp x = new Timestamp(p.timestamp.getTimeInMillis());
+								st.setTimestamp(3, x);
+								st.setInt(4, 0);
+								st.execute();
+								i++;
+								if (i % 1000 == 0) {
+									db.getConnection().commit();
+								}
+							} catch (Exception e) {
+								Logger.getGlobal().log(Level.SEVERE, "Error", e);
+								System.in.read();
+							}
+						}
+						db.getConnection().commit();
+					}
 				}
-				last = p;
-				lastPos = pos;
-                /*
-				st.setDouble(1, p.lat * (p.latE.equals("N")?1.0:-1.0));
-                st.setDouble(2, p.lon * (p.lonE.equals("E")?1.0:-1.0));
-			    Timestamp x = new Timestamp(p.timestamp.getTimeInMillis());
-			    st.setTimestamp(3, x);
-			    st.setInt(4, 0);
-			    st.execute();
-			    */
-			    //i++;
-			    /*
-			    if (i%1000==0) {
-			        db.getConnection().commit();
-			    }
-			    */
-			} catch (Exception e) {
-				e.printStackTrace();
-                System.in.read();
 			}
 		}
-		//db.getConnection().commit();		
-		//db.getConnection().close();
-
-		r.close();
-		f.close();
 	}
 
-	private PPP getPoint(String pos) throws Exception {
+	private PPP getPoint(String pos) throws ParseException {
 		// 1472189694509 260816 053454.000 42.6809667 N 9.2991000 E
 		String[] tokens = pos.split(" ");
 		String date = tokens[1];
@@ -112,12 +97,10 @@ public class TrackToDB {
 	
 	public static void main(String[] args) {
 	    TrackToDB tdb = new TrackToDB();
-	    try {
-            tdb.load("track.log");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-	    
-	    
+		try {
+			tdb.load("track.log");
+		} catch (Exception e) {
+			Logger.getGlobal().log(Level.SEVERE, "Error", e);
+		}
 	}
 }

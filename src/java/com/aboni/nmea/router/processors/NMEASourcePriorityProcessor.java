@@ -8,7 +8,7 @@ import java.util.*;
 
 public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
-    private static final long THRESHOLD = 120000L; // 2 minutes
+    private static final long THRESHOLD = 30000L; // 0.5 minutes
 
     private Map<String, Integer> priorities;
     private Map<String, Long> lastSourceTimestamp;

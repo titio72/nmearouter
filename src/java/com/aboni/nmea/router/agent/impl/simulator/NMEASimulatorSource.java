@@ -29,7 +29,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	private PolarTable polars;
 	
 	private static NMEASimulatorSource simulator;
-    private final NMEASimulatorSourceSettings data = new NMEASimulatorSourceSettings();
+    private final NMEASimulatorSourceSettings data;
     
     private final TalkerId id;
     private final Random r = new Random();
@@ -42,27 +42,22 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		return simulator;
 	}
 
-	public static class SimulatorException extends RuntimeException {
-		SimulatorException(String msg) {
-			super(msg);
-		}
-	}
-
 	public static NMEASimulatorSource create(NMEACache cache, String name, QOS qos) {
-		if (simulator!=null) throw new SimulatorException("Cannot create more than one simulator");
-		else NMEASimulatorSource.simulator = new NMEASimulatorSource(cache, name, qos);
-		return simulator;
+		NMEASimulatorSource sim = new NMEASimulatorSource(cache, name, qos);
+		if (simulator==null) simulator = sim;
+		return sim;
 	}
 
 	private NMEASimulatorSource(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);
+		data = new NMEASimulatorSourceSettings("sim_" + name + ".properties");
         setSourceTarget(true, true);
         id = TalkerId.GP;
         polars = null;
 	}
 	
 	private String lastPolarFile;
-	
+
 
     @Override
     public String getType() {

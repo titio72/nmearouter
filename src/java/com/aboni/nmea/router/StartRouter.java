@@ -6,7 +6,8 @@ import com.aboni.nmea.router.services.EventSocket;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.WebInterfaceImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
-import com.aboni.toolkit.DoCalibration;
+import com.aboni.sensors.HMC5883Calibration;
+import com.aboni.sensors.SensorHMC5883;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.google.inject.Guice;
@@ -50,7 +51,7 @@ public class StartRouter {
         } else if ((ix = checkFlag(PLAY, args))>=0) {
         	startRouter(injector, new NMEARouterPlayerBuilderImpl(injector, args[ix + 1]));
        } else if (checkFlag(CALIBRATION, args)>=0) {
-            startCalibration(args);
+            startCalibration();
 	    } else {
             startRouter(injector, new NMEARouterDefaultBuilderImpl(injector, Constants.ROUTER_CONF));
     		startWebInterface(injector);
@@ -93,8 +94,23 @@ public class StartRouter {
         }
     }
 
-    private static void startCalibration(String[] args) {
-        DoCalibration.main(args);
+    private static void startCalibration() {
+        SensorHMC5883 m = new SensorHMC5883();
+        m.setDefaultSmootingAlpha(1.0);
+        try {
+            m.init(1);
+            HMC5883Calibration cc = new HMC5883Calibration(m, 15L * 1000L);
+            System.out.println("Start");
+            cc.start();
+            System.out.println("Radius: " + cc.getRadius());
+            System.out.println("StdDev: " + cc.getsDev());
+            System.out.println("StdDev: " + cc.getsDev());
+            System.out.println("C_X:    " + cc.getCalibration()[0]);
+            System.out.println("C_Y:    " + cc.getCalibration()[1]);
+            System.out.println("C_Z:    " + cc.getCalibration()[2]);
+        } catch (Exception e1) {
+            ServerLog.getLogger().error("Error during calibration", e1);
+        }
     }
 
     private static void startRouter(Injector injector, NMEARouterBuilder builder) {

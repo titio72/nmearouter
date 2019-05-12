@@ -1,26 +1,44 @@
 package com.aboni.toolkit;
 
 import com.aboni.sensors.SensorVoltage;
+import com.aboni.utils.Tester;
 
-@SuppressWarnings("InfiniteLoopStatement")
+import java.io.PrintStream;
+
 public class TestVoltage {
+
+	private static final String FORMAT = "%.3f";
+
 	public static void main(String[] args) {
-		SensorVoltage v = new SensorVoltage(0x48);
-		try {
-			v.init(1);
-			while (true) {
-				v.read();
-		        System.out.format("%.3f%n",v.getVoltage0());
-		        System.out.format("%.3f%n",v.getVoltage1());
-		        System.out.format("%.3f%n",v.getVoltage2());
-		        System.out.format("%.3f%n",v.getVoltage3());
-		        Thread.sleep(500);
+
+		new Tester(500).start(new Tester.TestingProc() {
+			final SensorVoltage v = new SensorVoltage(0x48);
+
+			@Override
+			public boolean doIt(PrintStream out) {
+				try {
+					v.read();
+					out.format(FORMAT, v.getVoltage0());
+					out.format(FORMAT, v.getVoltage1());
+					out.format(FORMAT, v.getVoltage2());
+					out.format(FORMAT, v.getVoltage3());
+					out.println();
+					return true;
+				} catch (Exception e) {
+					e.printStackTrace(out);
+					return false;
+				}
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
+
+			@Override
+			public boolean init(PrintStream out) {
+				return true;
+			}
+
+			@Override
+			public void shutdown(PrintStream out) {
+				// nothing to bring down
+			}
+		});
 	}
 }
