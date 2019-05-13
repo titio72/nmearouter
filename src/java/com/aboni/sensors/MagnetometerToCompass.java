@@ -65,7 +65,7 @@ public class MagnetometerToCompass {
 
        if (heading < 0.0) heading += 360.0;
        
-       return Utils.normalizeDegrees0_360(heading);
+       return Utils.normalizeDegrees0To360(heading);
    }
 
    private double[] getCalibratedMag(double[] mag) {

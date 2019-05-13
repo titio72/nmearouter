@@ -21,12 +21,12 @@ public class SimulatorService extends JSONWebService {
 
 			double windDir = config.getDouble("wdir", Double.NaN);
 			if (!Double.isNaN(windDir)) {
-				NMEASimulatorSource.getSimulator().setwDirection(Utils.normalizeDegrees0_360(windDir));
+				NMEASimulatorSource.getSimulator().setwDirection(Utils.normalizeDegrees0To360(windDir));
 			}
 
 			double heading = config.getDouble("head", Double.NaN);
 			if (!Double.isNaN(heading)) {
-				NMEASimulatorSource.getSimulator().setHeading(Utils.normalizeDegrees0_360(heading));
+				NMEASimulatorSource.getSimulator().setHeading(Utils.normalizeDegrees0To360(heading));
 			}
 		}
 		JSONObject res = new JSONObject();

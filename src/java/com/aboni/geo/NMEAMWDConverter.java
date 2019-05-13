@@ -51,11 +51,11 @@ public class NMEAMWDConverter {
 			MWDSentence s = (MWDSentence) SentenceFactory.getInstance().createParser(id, SentenceId.MWD);
 
 			double td = getTrueHeading(heading) + trueWind.getAngle();
-			td = Utils.normalizeDegrees0_360(td);
+			td = Utils.normalizeDegrees0To360(td);
 			s.setTrueWindDirection(td);
 
 			double md = getMagHeading(heading) + trueWind.getAngle();
-			md = Utils.normalizeDegrees0_360(md);
+			md = Utils.normalizeDegrees0To360(md);
 			s.setMagneticWindDirection(md);
 
 			s.setWindSpeedKnots(trueWind.getSpeed());

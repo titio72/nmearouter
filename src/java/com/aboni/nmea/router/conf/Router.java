@@ -157,7 +157,7 @@ public class Router {
      */
     public java.util.List<AgentBase> getSerialAgentOrTcpAgentOrUdpAgent() {
         if (serialAgentOrTcpAgentOrUdpAgent == null) {
-            serialAgentOrTcpAgentOrUdpAgent = new ArrayList<AgentBase>();
+            serialAgentOrTcpAgentOrUdpAgent = new ArrayList<>();
         }
         return this.serialAgentOrTcpAgentOrUdpAgent;
     }

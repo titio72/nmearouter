@@ -31,17 +31,17 @@ public class NMEAMagnetic2TrueConverter {
 	
     public double getTrue(double magnetic) {
         double declination = geo.getDeclination(pos.getLatitude(), pos.getLongitude(), year, 0);
-        return Utils.normalizeDegrees0_360(magnetic + declination);
+        return Utils.normalizeDegrees0To360(magnetic + declination);
     }
 
     public double getTrue(double magnetic, Position p) {
         double declination = geo.getDeclination(p.getLatitude(), p.getLongitude(), year, 0);
-        return Utils.normalizeDegrees0_360(magnetic + declination);
+        return Utils.normalizeDegrees0To360(magnetic + declination);
     }
 
     public double getMagnetic(double trueCourse, Position p) {
         double declination = geo.getDeclination(p.getLatitude(), p.getLongitude(), year, 0);
-        return Utils.normalizeDegrees0_360(trueCourse - declination);
+        return Utils.normalizeDegrees0To360(trueCourse - declination);
     }
 
     public double getDeclination(Position p) {

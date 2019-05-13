@@ -31,13 +31,14 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Router_QNAME = new QName("", "Router");
+    private static final QName _Router_QNAME = new QName("", "Router");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.aboni.nmea.router.conf
      * 
      */
     public ObjectFactory() {
+        // do nothing
     }
 
     /**
@@ -206,7 +207,7 @@ public class ObjectFactory {
      */
     @XmlElementDecl(namespace = "", name = "Router")
     public JAXBElement<Router> createRouter(Router value) {
-        return new JAXBElement<Router>(_Router_QNAME, Router.class, null, value);
+        return new JAXBElement<>(_Router_QNAME, Router.class, null, value);
     }
 
 }

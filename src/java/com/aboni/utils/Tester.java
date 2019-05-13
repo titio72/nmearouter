@@ -24,13 +24,17 @@ public class Tester {
         this.period = period;
     }
 
+    private PrintStream getOut() {
+        return ServerLog.getConsoleOut();
+    }
+
     public void start(TestingProc runnable) {
-        if (runnable.init(System.out)) {
+        if (runnable.init(getOut())) {
             goon.set(true);
             Thread t = new Thread(() -> {
                 try {
                     while (goon.get()) {
-                        if (runnable.doIt(System.out)) {
+                        if (runnable.doIt(getOut())) {
                             Utils.pause(period);
                         } else {
                             break;
@@ -39,7 +43,7 @@ public class Tester {
                 } catch (Exception e) {
                     Logger.getGlobal().log(Level.SEVERE, "Error", e);
                 }
-                runnable.shutdown(System.out);
+                runnable.shutdown(getOut());
             });
             t.setDaemon(true);
             t.start();

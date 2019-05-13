@@ -62,7 +62,7 @@ public class SimulatorGoTo {
 
 	private static void rotateWind(NavSimulator s, long t) {
 		double w = s.getWindDir();
-		w = Utils.normalizeDegrees0_360( w + (((double)t/1000d/60d/60d) * 5.0));
+		w = Utils.normalizeDegrees0To360( w + (((double)t/1000d/60d/60d) * 5.0));
 		s.setWind(9.0, w);
 	}
 

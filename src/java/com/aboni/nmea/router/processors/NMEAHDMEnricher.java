@@ -58,7 +58,7 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 		} catch (DataNotAvailableException e) {
 		    if (lastPosition!=null) {
 		        double d = m.getDeclination(lastPosition);
-		        d = Utils.normalizeDegrees180_180(d);
+		        d = Utils.normalizeDegrees180To180(d);
 		        hdg.setVariation(d);
 		        variationAvailable = true;
 		    }
@@ -87,7 +87,7 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 		double dev;
 		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) { var = 0.0; }
 		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) { dev = 0.0; }
-		hdt.setHeading(Utils.normalizeDegrees0_360(hdg.getHeading() + var + dev));
+		hdt.setHeading(Utils.normalizeDegrees0To360(hdg.getHeading() + var + dev));
 		return hdt;
 	}
 

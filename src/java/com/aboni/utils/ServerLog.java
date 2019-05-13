@@ -1,6 +1,7 @@
 package com.aboni.utils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -9,6 +10,10 @@ import java.util.Date;
 import java.util.logging.*;
 
 public class ServerLog implements LogAdmin {
+
+	public static PrintStream getConsoleOut() {
+		return System.out;
+	}
 
     private class MyFormatter extends Formatter {
 

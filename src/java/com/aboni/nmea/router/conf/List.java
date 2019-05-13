@@ -67,7 +67,7 @@ public class List {
      */
     public java.util.List<String> getGPSSource() {
         if (gpsSource == null) {
-            gpsSource = new ArrayList<String>();
+            gpsSource = new ArrayList<>();
         }
         return this.gpsSource;
     }

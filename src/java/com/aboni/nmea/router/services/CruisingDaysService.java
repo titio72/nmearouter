@@ -47,7 +47,10 @@ public class CruisingDaysService extends JSONWebService {
 
 	private List<Trip> sortIt(Map<Integer, Trip> trips) {
 		List<Trip> triplist = new ArrayList<>(trips.values());
-		triplist.sort((o1, o2) -> -o1.min.compareTo(o2.min));
+		triplist.sort((o1, o2) -> {
+			int res = o1.min.compareTo(o2.min);
+			return (res!=Integer.MIN_VALUE)?-res:0;
+		});
 		return triplist;
 	}
 	

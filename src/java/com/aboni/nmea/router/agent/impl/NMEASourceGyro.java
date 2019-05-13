@@ -117,7 +117,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	            
 	            if (SEND_HDM) {
     	            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
-    	            hdm.setHeading(Utils.normalizeDegrees0_360(b));
+    	            hdm.setHeading(Utils.normalizeDegrees0To360(b));
     	            notify(hdm);
 	            }
 	            
@@ -134,7 +134,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	                notify(hdg);
 	            } else {
 	                HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
-                    hdg.setHeading(Utils.normalizeDegrees0_360(b));
+                    hdg.setHeading(Utils.normalizeDegrees0To360(b));
                     hdg.setDeviation(0.0);
                     // do not set variation
 	                notify(hdg);

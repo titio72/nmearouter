@@ -7,8 +7,11 @@
   <title>Andrea Boni NMEARouter</title>
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script src="js/nmearouter.js?l"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?v=3.36&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo" async
-    defer></script>
+  <!--script src="https://maps.googleapis.com/maps/api/js?v=3.36&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo" async
+    defer></script-->
+  <script type="text/javascript" 
+    src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"> 
+  </script>
   <style>
     .panelTable {
       width: 100%;
@@ -42,6 +45,8 @@
   var speed = 0.0;
   var map;
   var marker;
+  var markerTo;
+  var poly;
 
   var socket = null;
   $(document).ready(function () {
@@ -96,7 +101,7 @@
       controllerScope['xmc'] = msg;
       controllerScope.$evalAsync();
     } else if (msg.topic == 'RMC') {
-      setMarker(msg.dec_latitude, msg.dec_longitude, "I am here");
+      setMarker(msg.dec_latitude, msg.dec_longitude, msg.SOG, msg.COG, "I am here");
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
       msg.s_dir = direction(msg.COG);
@@ -128,7 +133,7 @@
       rr = trueWind(speed, msg.angle, msg.speed);
       controllerScope['wind_t'] = rr;
       controllerScope['wind'] = {
-        mag_angle: heading - rr.angle,
+        mag_angle: (heading + rr.angle) % 360,
         speed: rr.speed
       };
       controllerScope.$evalAsync();
@@ -162,14 +167,10 @@
 
   function loadMap(lat, lon, title) {
     map = new google.maps.Map(document.getElementById('map'), {
-      mapTypeId: 'terrain'
+      mapTypeId: 'terrain',
+      disableDefaultUI: true
     });
     var markerPos = { lat: lat, lng: lon };
-    marker = new google.maps.Marker({
-      position: markerPos,
-      title: title
-    });
-    marker.setMap(map);
     map.setCenter(markerPos);
 
     var bounds = new google.maps.LatLngBounds();
@@ -181,23 +182,96 @@
 
   }
 
-  function setMarker(lat, lon, title) {
+  var iconA = {
+      path: 'M -5 -10 L 0 0 L 5 -10Z',
+      strokeColor: '#FF0000',
+      fillColor: '#FF0000',
+      fillOpacity: .6,
+      anchor: new google.maps.Point(0,0),
+      strokeWeight: 3,
+      scale: 1
+  }
+
+  var icon = {
+      path: 'M-10,0a10,10 0 1,0 20,0a10,10 0 1,0 -20,0',
+      fillColor: '#FF0000',
+      fillOpacity: .6,
+      anchor: new google.maps.Point(0,0),
+      strokeWeight: 0,
+      scale: 1
+  }
+  var iconHere = {
+      path: 'M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0',
+      fillColor: '#00FF00',
+      fillOpacity: .6,
+      anchor: new google.maps.Point(0,0),
+      strokeWeight: 0,
+      scale: 1
+  }
+
+  function setMarker(lat, lon, speed, heading, title) {
+
+    var p = new google.maps.LatLng(lat, lon);
+    var p1 = google.maps.geometry.spherical.computeOffset(p, speed * 1852, heading);
+
     if (map == null) {
       loadMap(lat, lon, title);
     }
 
     if (map != null) {
-      var p = new google.maps.LatLng(lat, lon);
-      if (marker != null) {
+      if (marker != null && markerTo!=null) {
         marker.setPosition(p);
+        markerTo.setPosition(p1);
+        icon = {
+          path: 'M -5 10 L 0 0 L 5 10Z',
+              strokeColor: '#FF0000',
+              fillColor: '#FF0000',
+              fillOpacity: .6,
+              anchor: new google.maps.Point(0,0),
+              strokeWeight: 3,
+              scale: 1,
+              rotation: heading
+        }
+        markerTo.setIcon(icon);
       } else {
         marker = new google.maps.Marker({
           position: p,
-          title: title
+          title: title,
+          icon: icon
         });
+
+        markerTo = new google.maps.Marker({
+          position: p1,
+          title: title,
+          icon: {
+              path: 'M -5 10 L 0 0 L 5 10Z',
+              strokeColor: '#FF0000',
+              fillColor: '#FF0000',
+              fillOpacity: .6,
+              anchor: new google.maps.Point(0,0),
+              strokeWeight: 3,
+              scale: 1,
+              rotation: heading
+          }
+        });
+
         marker.setMap(map);
+        markerTo.setMap(map);
       }
       map.setCenter(p);
+    }
+    if (poly==null) {
+      poly = new google.maps.Polyline({
+          strokeColor: '#000000',
+          strokeOpacity: 1.0,
+          strokeWeight: 3
+        });
+        poly.getPath().push(p);
+        poly.getPath().push(p1);
+        poly.setMap(map);
+    } else {
+      poly.getPath().setAt(0, p);
+      poly.getPath().setAt(1, p1);
     }
   }
 

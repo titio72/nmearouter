@@ -43,7 +43,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					// calculate true wind
 					TrueWind t = new TrueWind(lastSpeed, mwv.getAngle(), mwv.getSpeed());
 					MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-					mwvTrue.setAngle(Utils.normalizeDegrees0_360(t.getTrueWindDeg()));
+					mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
 					mwvTrue.setTrue(true);
 					mwvTrue.setSpeed(t.getTrueWindSpeed());
 					mwvTrue.setSpeedUnit(Units.KNOT);
@@ -51,8 +51,8 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					
 					if ((time-lastHeadingTime)<AGE_THRESHOLD) {
 						MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
-						mwd.setMagneticWindDirection(Utils.normalizeDegrees0_360(lastMagHeading + mwvTrue.getAngle()));
-						mwd.setTrueWindDirection(Utils.normalizeDegrees0_360(lastTrueHeading + mwvTrue.getAngle()));
+						mwd.setMagneticWindDirection(Utils.normalizeDegrees0To360(lastMagHeading + mwvTrue.getAngle()));
+						mwd.setTrueWindDirection(Utils.normalizeDegrees0To360(lastTrueHeading + mwvTrue.getAngle()));
 						mwd.setWindSpeed(Math.round(mwvTrue.getSpeed() * 51.4444) / 100.0);
 						mwd.setWindSpeedKnots(mwvTrue.getSpeed());
 						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue, mwd});

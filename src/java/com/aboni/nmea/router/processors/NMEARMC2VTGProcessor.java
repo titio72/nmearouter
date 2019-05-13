@@ -74,7 +74,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 			vtg.setTrueCourse(rmc.getCourse());
 			m.setPosition(rmc.getPosition());
 			double mag = m.getMagnetic(rmc.getCourse(), rmc.getPosition());
-			mag = Utils.normalizeDegrees0_360(mag);
+			mag = Utils.normalizeDegrees0To360(mag);
 			vtg.setMagneticCourse(mag);
 		} catch (DataNotAvailableException e) {
 			// stationary, no course (i.e. v=0.0)

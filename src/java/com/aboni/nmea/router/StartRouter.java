@@ -38,13 +38,17 @@ public class StartRouter {
         }
         return -1;
 	}
-    
+
+	private static void consoleOut(String s) {
+	    ServerLog.getConsoleOut().println(s);
+    }
+
 	public static void main(String[] args) {
 		Injector injector = Guice.createInjector(new NMEARouterModule());
 		
 		int ix;
         if (checkFlag(HELP, args)>=0) {
-            System.out.println("-web : activate web interface\r\n" + 
+            consoleOut("-web : activate web interface\r\n" +
                     "-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
@@ -100,14 +104,14 @@ public class StartRouter {
         try {
             m.init(1);
             HMC5883Calibration cc = new HMC5883Calibration(m, 15L * 1000L);
-            System.out.println("Start");
+            consoleOut("Start");
             cc.start();
-            System.out.println("Radius: " + cc.getRadius());
-            System.out.println("StdDev: " + cc.getsDev());
-            System.out.println("StdDev: " + cc.getsDev());
-            System.out.println("C_X:    " + cc.getCalibration()[0]);
-            System.out.println("C_Y:    " + cc.getCalibration()[1]);
-            System.out.println("C_Z:    " + cc.getCalibration()[2]);
+            consoleOut("Radius: " + cc.getRadius());
+            consoleOut("StdDev: " + cc.getsDev());
+            consoleOut("StdDev: " + cc.getsDev());
+            consoleOut("C_X:    " + cc.getCalibration()[0]);
+            consoleOut("C_Y:    " + cc.getCalibration()[1]);
+            consoleOut("C_Z:    " + cc.getCalibration()[2]);
         } catch (Exception e1) {
             ServerLog.getLogger().error("Error during calibration", e1);
         }

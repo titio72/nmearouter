@@ -100,7 +100,7 @@ public class NavSimulator {
 	}
 
 	public double getWindTrue() {
-		return Utils.normalizeDegrees180_180(windDir - heading);
+		return Utils.normalizeDegrees180To180(windDir - heading);
 	}
 
 	public double getWindTrueSpeed() {
@@ -109,7 +109,7 @@ public class NavSimulator {
 	
 	public double getWindApp() {
 		ApparentWind a = new ApparentWind(speed, getWindTrue(), getWindSpeed());
-		return Utils.normalizeDegrees180_180(a.getApparentWindDeg());
+		return Utils.normalizeDegrees180To180(a.getApparentWindDeg());
 	}
 	
 	public double getWindAppSpeed() {
@@ -122,7 +122,7 @@ public class NavSimulator {
 	private static final int STARBOARD = -1;
 	
 	private void calcHeadings() {
-		double trueWind = Utils.normalizeDegrees180_180(brg - windDir);
+		double trueWind = Utils.normalizeDegrees180To180(brg - windDir);
 		if (Math.abs(trueWind)<REACH) {
 			handleReach();
 		} else {
@@ -132,17 +132,17 @@ public class NavSimulator {
 
 	private void handleRun() {
 		heading = brg;
-		side = Utils.normalizeDegrees180_180(heading - windDir)>0?STARBOARD:PORT;
+		side = Utils.normalizeDegrees180To180(heading - windDir)>0?STARBOARD:PORT;
 	}
 
 	private void handleReach() {
 		double headingStarboard = REACH + windDir;
 		double headingPort = -REACH + windDir;
-		double d1 = Math.abs(Utils.normalizeDegrees180_180(headingStarboard - brg));
-		double d2 = Math.abs(Utils.normalizeDegrees180_180(headingPort - brg));
+		double d1 = Math.abs(Utils.normalizeDegrees180To180(headingStarboard - brg));
+		double d2 = Math.abs(Utils.normalizeDegrees180To180(headingPort - brg));
 
 		double newH = d1<d2? headingStarboard : headingPort;
-		double newTrue = Utils.normalizeDegrees180_180(newH - windDir);
+		double newTrue = Utils.normalizeDegrees180To180(newH - windDir);
 		int newSide =  newTrue>0?STARBOARD:PORT;
 
 		if (side==NO_SIDE) {
@@ -199,7 +199,7 @@ public class NavSimulator {
 	public PositionHistory doSimulate(DoWithSim oncalc) {
 		PositionHistory p = new PositionHistory();
 		long t0 = System.currentTimeMillis();
-		long dTime = 1L * 60L * 1000L; /* 5 minutes*/
+		long dTime = 60000L; // 1 minute
 		double distThreshold = (double)dTime/3600000d * getSpeed() * 1.5;
 		while (getDistance()>distThreshold) {
 			doCalc(getTime() + dTime);
