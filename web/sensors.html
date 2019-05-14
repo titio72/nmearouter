@@ -41,12 +41,15 @@
     $scope.V1 = { value: 0.0 };
   });
 
-  var heading = 0.0;
-  var speed = 0.0;
+  var heading;
+  var speed;
   var map;
   var marker;
   var markerTo;
   var poly;
+  var polyWind;
+  var absoluteWind;
+  var trueWind;
 
   var socket = null;
   $(document).ready(function () {
@@ -125,17 +128,29 @@
       var controllerScope = angular.element(controllerElement).scope();
       controllerScope['wind_r'] = msg;
       if (msg.angle > 180) {
-        msg.angle = 360 - msg.angle;
+        msg.show_angle = 360 - msg.angle;
         msg.tack = "Port"
       } else {
+        msg.show_angle = msg.angle;
         msg.tack = "Starboard"
       }
-      rr = trueWind(speed, msg.angle, msg.speed);
-      controllerScope['wind_t'] = rr;
-      controllerScope['wind'] = {
-        mag_angle: (heading + rr.angle) % 360,
-        speed: rr.speed
+
+      trueWind = calcTrueWind(speed, msg.angle, msg.speed);
+      if (trueWind.angle > 180) {
+        trueWind.show_angle = 360 - msg.angle;
+        trueWind.tack = "Port"
+      } else {
+        trueWind.show_angle = msg.angle;
+        trueWind.tack = "Starboard"
+      }
+      controllerScope['wind_t'] = trueWind;
+      
+      absoluteWind = {
+        mag_angle: (heading + trueWind.angle) % 360,
+        speed: trueWind.speed
       };
+      controllerScope['wind'] = absoluteWind;
+      
       controllerScope.$evalAsync();
     } else if (msg.topic == 'HDG') {
       var controllerElement = document.getElementById('sensorPanel');
@@ -147,7 +162,7 @@
     }
   }
 
-  function trueWind(speed, appWindDeg, appWindSpeed) {
+  function calcTrueWind(speed, appWindDeg, appWindSpeed) {
     v = speed;
     w = appWindSpeed;
     wA = appWindDeg / 180.0 * Math.PI;
@@ -209,10 +224,11 @@
       scale: 1
   }
 
-  function setMarker(lat, lon, speed, heading, title) {
+  function setMarker(lat, lon, speed, cog, title) {
 
     var p = new google.maps.LatLng(lat, lon);
-    var p1 = google.maps.geometry.spherical.computeOffset(p, speed * 1852, heading);
+    var p1 = google.maps.geometry.spherical.computeOffset(p, speed * 1852, cog);
+    var pW = (trueWind!=null) ? google.maps.geometry.spherical.computeOffset(p, trueWind.speed * 1852, 180 + trueWind.angle + cog) : null;
 
     if (map == null) {
       loadMap(lat, lon, title);
@@ -230,7 +246,7 @@
               anchor: new google.maps.Point(0,0),
               strokeWeight: 3,
               scale: 1,
-              rotation: heading
+              rotation: cog
         }
         markerTo.setIcon(icon);
       } else {
@@ -251,7 +267,7 @@
               anchor: new google.maps.Point(0,0),
               strokeWeight: 3,
               scale: 1,
-              rotation: heading
+              rotation: cog
           }
         });
 
@@ -262,17 +278,34 @@
     }
     if (poly==null) {
       poly = new google.maps.Polyline({
-          strokeColor: '#000000',
+        strokeColor: '#000000',
+        strokeOpacity: 1.0,
+        strokeWeight: 3
+      });
+      poly.getPath().push(p1);
+      poly.getPath().push(p);
+      poly.setMap(map);
+    } else {
+      poly.getPath().setAt(0, p1);
+      poly.getPath().setAt(1, p);
+    }
+
+    if (pW!=null) {
+      if (polyWind==null) {
+        polyWind = new google.maps.Polyline({
+          strokeColor: '#FFFF00',
           strokeOpacity: 1.0,
           strokeWeight: 3
         });
-        poly.getPath().push(p);
-        poly.getPath().push(p1);
-        poly.setMap(map);
-    } else {
-      poly.getPath().setAt(0, p);
-      poly.getPath().setAt(1, p1);
+        polyWind.getPath().push(p);
+        polyWind.getPath().push(pW);
+        polyWind.setMap(map);
+      } else {
+        polyWind.getPath().setAt(0, p);
+        polyWind.getPath().setAt(1, pW);
+      }
     }
+
   }
 
 
@@ -488,9 +521,9 @@
             <table width="100%">
               <tr>
                 <td>
-                  <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.angle | numberFixedLen:3:0}}&deg;
+                  <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.show_angle | numberFixedLen:3:0}}&deg;
                     {{wind_r.tack}}<br>
-                    T {{wind_t.speed | number:1}}Kn {{wind_t.angle|numberFixedLen:3:0}}&deg;<br>
+                    T {{wind_t.speed | number:1}}Kn {{wind_t.show_angle|numberFixedLen:3:0}}&deg;<br>
                   </div>
                 </td>
               </tr>
