@@ -2,7 +2,6 @@
 <html>
 
 <head>
-  <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
   <link rel="icon" type="image/png" href="nmeasail.png">
@@ -104,7 +103,7 @@
       controllerScope['xmc'] = msg;
       controllerScope.$evalAsync();
     } else if (msg.topic == 'RMC') {
-      setMarker(msg.dec_latitude, msg.dec_longitude, msg.SOG, msg.COG, "I am here");
+      setMarker(msg, msg.dec_latitude, msg.dec_longitude, msg.SOG, msg.COG);
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
       msg.s_dir = direction(msg.COG);
@@ -180,7 +179,7 @@
     return r;
   }
 
-  function loadMap(lat, lon, title) {
+  function loadMap(msg, lat, lon) {
     map = new google.maps.Map(document.getElementById('map'), {
       mapTypeId: 'terrain',
       disableDefaultUI: true
@@ -224,20 +223,22 @@
       scale: 1
   }
 
-  function setMarker(lat, lon, speed, cog, title) {
+  function setMarker(msg, lat, lon, speed, cog) {
 
     var p = new google.maps.LatLng(lat, lon);
     var p1 = google.maps.geometry.spherical.computeOffset(p, speed * 1852, cog);
     var pW = (trueWind!=null) ? google.maps.geometry.spherical.computeOffset(p, trueWind.speed * 1852, 180 + trueWind.angle + cog) : null;
 
     if (map == null) {
-      loadMap(lat, lon, title);
+      loadMap(msg, lat, lon);
     }
 
     if (map != null) {
       if (marker != null && markerTo!=null) {
         marker.setPosition(p);
+        marker.setTitle("" + msg.SOG + "Kn " + msg.COG + "\u00B0");
         markerTo.setPosition(p1);
+        markerTo.setTitle('');
         icon = {
           path: 'M -5 10 L 0 0 L 5 10Z',
               strokeColor: '#FF0000',
@@ -252,13 +253,13 @@
       } else {
         marker = new google.maps.Marker({
           position: p,
-          title: title,
+          title: "" + msg.SOG + "Kn " + msg.COG + "&deg;",
           icon: icon
         });
 
         markerTo = new google.maps.Marker({
           position: p1,
-          title: title,
+          title: '',
           icon: {
               path: 'M -5 10 L 0 0 L 5 10Z',
               strokeColor: '#FF0000',
