@@ -10,10 +10,9 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     private static final long THRESHOLD = 30000L; // 0.5 minutes
 
-    private Map<String, Integer> priorities;
-    private Map<String, Long> lastSourceTimestamp;
-
-    private Set<String> sentences;
+    private final Map<String, Integer> priorities;
+    private final Map<String, Long> lastSourceTimestamp;
+    private final Set<String> sentences;
 
     private String currentSource;
     private int currentPriority;

@@ -16,8 +16,8 @@ public class Tester {
         void shutdown(PrintStream out);
     }
 
-    private AtomicBoolean goon;
-    private int period;
+    private final AtomicBoolean goon;
+    private final int period;
 
     public Tester(int period) {
         goon = new AtomicBoolean();
