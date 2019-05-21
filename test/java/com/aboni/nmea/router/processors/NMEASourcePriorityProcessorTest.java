@@ -3,7 +3,6 @@ package com.aboni.nmea.router.processors;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,10 +15,6 @@ public class NMEASourcePriorityProcessorTest {
     @Before
     public void setUp() {
         proc = new NMEASourcePriorityProcessor();
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test

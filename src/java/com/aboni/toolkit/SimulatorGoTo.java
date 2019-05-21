@@ -13,22 +13,20 @@ import java.util.logging.Logger;
 
 public class SimulatorGoTo {
 
-	private static final Position CAPRAIA = new Position(43.051326, 9.839279);
-	private static final Position MARINA = new Position(43.679416, 10.267679);
-	private static final String POLARS = "web/dufour35c.csv";
+	private static final Position FROM = new Position(43.051326, 9.839279); // Capraia
+	private static final Position TO = new Position(43.679416, 10.267679); // Marina di Pisa
+	private static final String POLARS = "web/dufour40.csv";
 	private static final String OUTPUT = "out.gpx";
 
 	public static void main(String[] args) {
-		Position from = MARINA;
-		Position to = CAPRAIA;
 		NavSimulator sim = new NavSimulator();
 		try {
 			sim.loadPolars(POLARS);
 		} catch (Exception e) {
 			Logger.getGlobal().log(Level.SEVERE, "Error reading polars", e);
 		}
-		sim.setFrom(from);
-		sim.setTo(to);
+		sim.setFrom(FROM);
+		sim.setTo(TO);
 		sim.setWind(9.0,  205.0);
 
 		Logger.getGlobal().info("BRG  " + sim.getBRG());

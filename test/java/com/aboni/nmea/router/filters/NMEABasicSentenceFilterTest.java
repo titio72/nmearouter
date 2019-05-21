@@ -19,7 +19,7 @@ public class NMEABasicSentenceFilterTest {
 		assertTrue(f.match(sMatch, "whatever"));
 
 		Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
-		assertTrue(!f.match(sNoMatch, "whatever"));
+        assertFalse(f.match(sNoMatch, "whatever"));
 	}
 
 	@Test
@@ -28,11 +28,11 @@ public class NMEABasicSentenceFilterTest {
 		
 		Sentence sMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
 		assertTrue(f.match(sMatch, "SRC"));
-		assertTrue(!f.match(sMatch, "ANOTHERSRC"));
+		assertFalse(f.match(sMatch, "ANOTHERSRC"));
 
 		Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
-		assertTrue(!f.match(sNoMatch, "SRC"));
-		assertTrue(!f.match(sNoMatch, "ANOTHERSRC"));
+		assertFalse(f.match(sNoMatch, "SRC"));
+		assertFalse(f.match(sNoMatch, "ANOTHERSRC"));
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class NMEABasicSentenceFilterTest {
 		assertTrue(f.match(s, "whatever"));
 
 		Sentence s1 = SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
-		assertTrue(!f.match(s1, "whatever"));
+		assertFalse(f.match(s1, "whatever"));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class NMEABasicSentenceFilterTest {
 		NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("", null, "SRC");
 		Sentence s = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
 		assertTrue(f.match(s, "SRC"));
-		assertTrue(!f.match(s, "ANOTHERSRC"));
+		assertFalse(f.match(s, "ANOTHERSRC"));
 	}
 
 }

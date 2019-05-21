@@ -14,6 +14,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
@@ -29,7 +30,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	private PolarTable polars;
 	
 	private static NMEASimulatorSource simulator;
-    private final NMEASimulatorSourceSettings data;
+
+	@Nonnull
+	private final NMEASimulatorSourceSettings data;
     
     private final TalkerId id;
     private final Random r = new Random();

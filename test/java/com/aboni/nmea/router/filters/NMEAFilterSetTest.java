@@ -18,7 +18,7 @@ public class NMEAFilterSetTest {
 		NMEAFilterSet set = new NMEAFilterSet(TYPE.WHITELIST);
 		Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
 		// any sentence fails
-		assertTrue(!set.match(test, "WHATEVER"));
+        assertFalse(set.match(test, "WHATEVER"));
 	}
 	
 
@@ -37,7 +37,7 @@ public class NMEAFilterSetTest {
 		assertTrue(set.match(test, "WHATEVER"));
 		
 		test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
-		assertTrue(!set.match(test, "WHATEVER"));
+		assertFalse(set.match(test, "WHATEVER"));
 	}
 
 
@@ -57,10 +57,10 @@ public class NMEAFilterSetTest {
 		set.addFilter(f2);
 
 		Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-		assertTrue(!set.match(test, "WHATEVER"));
+		assertFalse(set.match(test, "WHATEVER"));
 		
 		test = SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		assertTrue(!set.match(test, "WHATEVER"));
+		assertFalse(set.match(test, "WHATEVER"));
 		
 		test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
 		assertTrue(set.match(test, "WHATEVER"));

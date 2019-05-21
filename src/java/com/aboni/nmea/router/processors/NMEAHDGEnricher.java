@@ -55,7 +55,7 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
                 }
 
                 return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
-            } else if ((doHDM && sentence instanceof HDMSentence) || (doHDT && sentence instanceof HDGSentence)) {
+            } else if ((doHDM && sentence instanceof HDMSentence) || (doHDT && sentence instanceof HDTSentence)) {
             	// skip HDT & HDM if they are supposed to be produced by the enricher
 				return new Pair<>(Boolean.FALSE, new Sentence[]{});
 			}
