@@ -16,11 +16,12 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 public class GDrive {
@@ -32,8 +33,8 @@ public class GDrive {
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "/gdrive_credentials.json";
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_METADATA);
+    private static final String CREDENTIALS_FILE_PATH = "/home/aboni/Downloads/gdrive_credentials.json";
 
     /**
      * Creates an authorized Credential object.
@@ -43,8 +44,8 @@ public class GDrive {
      */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
-        InputStream in = GDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        //InputStream in = new FileInputStream("/data/Downloads/credentials.json");
+        //InputStream in = GDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
@@ -59,34 +60,39 @@ public class GDrive {
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
 
-
-        File fileMetadata = new File();
-        fileMetadata.setName("photo.jpg");
-        java.io.File filePath = new java.io.File("README.md");
-        FileContent mediaContent = new FileContent("text/plain", filePath);
-
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-        File file = service.files().create(fileMetadata, mediaContent)
-                .setFields("id")
-                .execute();
-        System.out.println("File ID: " + file.getId());
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
 
-        // Print the names and IDs for up to 10 files.
+        //createFile(service);
+
+        listFiles(service);
+
+    }
+
+    private static void listFiles(Drive service) throws IOException {
         FileList result = service.files().list()
                 .setPageSize(1000)
-                .setFields("nextPageToken, files(id, name)")
                 .execute();
-        List<File> files = result.getFiles();
-        if (files == null || files.isEmpty()) {
-            System.out.println("No files found.");
-        } else {
-            System.out.println("Files:");
-            for (File f : files) {
-                System.out.printf("%s (%s)\n", f.getName(), f.getId());
-            }
-        }
+
+        result.getFiles().stream().
+                filter(f->"ray.jpg".equals(f.getName())).
+                filter(f->{
+                    try {
+                        File ff = service.files().get(f.getId()).execute();
+                        return ff.getTrashed() == null || !ff.getTrashed();
+                    } catch (IOException e) {
+                        return false;
+                    }
+                }).
+                forEach((File f)->System.out.println(f.getName()));
+    }
+
+    private static void createFile(Drive service) throws IOException {
+        File fileMetadata = new File();
+        fileMetadata.setName("ray.jpg");
+        java.io.File filePath = new java.io.File("/home/aboni/Downloads/ray.jpg");
+        FileContent mediaContent = new FileContent("image/jpeg", filePath);
+        File file = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
+        System.out.println("File ID: " + file.getId());
     }
 }

@@ -19,4 +19,6 @@ public interface NMEACache {
 
 	void setTimeSynced();
 
+	long getTimeSkew();
+
 }

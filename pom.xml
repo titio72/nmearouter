@@ -203,7 +203,7 @@
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-drive</artifactId>
-            <version>v3-rev110-1.23.0</version>
+            <version>v3-rev162-1.25.0</version>
         </dependency>
     </dependencies>
     <scm>

@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 
 public class NMEAHDGEnricherTest {
 
-	@SuppressWarnings("unused")
 	class MyCache implements NMEACache {
 
 		boolean hasPosition = true;
@@ -46,6 +45,10 @@ public class NMEAHDGEnricherTest {
 
 		@Override
 		public void setTimeSynced() {
+		}
+
+		public long getTimeSkew() {
+			return 0;
 		}
 		
 	}
