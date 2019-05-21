@@ -9,16 +9,23 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	private final SystemTimeChecker systemTimeCHecker;
-	
+
+	private final NMEACache cache;
+
 	public NMEASystemTimeGPS(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);
+		this.cache = cache;
 		setSourceTarget(false, true);
 		systemTimeCHecker = new SystemTimeChecker(cache);
 	}
 
 	@Override
 	public String getType() {
-		return "GPSTime";
+		if (cache!=null) {
+			return "GPSTime " + cache.isTimeSynced() + " " + cache.getTimeSkew();
+		} else {
+			return "GPSTime";
+		}
 	}
 	
 	@Override

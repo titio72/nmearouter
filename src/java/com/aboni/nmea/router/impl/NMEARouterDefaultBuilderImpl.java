@@ -34,7 +34,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private NMEARouter router;
     private final String confFile;
     private final Injector injector;
-	private static final boolean ENABLE_GPS_TIME = false;
+	private static final boolean ENABLE_GPS_TIME = true;
 	private static final boolean ENABLE_AP = false;
 
     public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {

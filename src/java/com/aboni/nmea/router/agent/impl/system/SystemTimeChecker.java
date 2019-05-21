@@ -20,6 +20,7 @@ public class SystemTimeChecker {
 	public SystemTimeChecker(NMEACache cache) {
 		this.cache = cache;
 	}
+
 	public void checkAndSetTime(Sentence s) {
 		if (!cache.isTimeSynced()) {
 			try {
