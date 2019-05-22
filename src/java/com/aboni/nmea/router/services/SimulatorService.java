@@ -8,6 +8,7 @@ public class SimulatorService extends JSONWebService {
 
 	@Override
 	public JSONObject getResult(ServiceConfig config) {
+		JSONObject res = new JSONObject();
 		if (NMEASimulatorSource.getSimulator()!=null) {
 			double speed = config.getDouble("speed", Double.NaN);
 			if (!Double.isNaN(speed)) {
@@ -28,12 +29,11 @@ public class SimulatorService extends JSONWebService {
 			if (!Double.isNaN(heading)) {
 				NMEASimulatorSource.getSimulator().setHeading(Utils.normalizeDegrees0To360(heading));
 			}
+			res.put("speed", NMEASimulatorSource.getSimulator().getSpeed());
+			res.put("wspeed", NMEASimulatorSource.getSimulator().getwSpeed());
+			res.put("wdir", NMEASimulatorSource.getSimulator().getwDirection());
+			res.put("heading", NMEASimulatorSource.getSimulator().getHeading());
 		}
-		JSONObject res = new JSONObject();
-		res.put("speed", NMEASimulatorSource.getSimulator().getSpeed());
-		res.put("wspeed", NMEASimulatorSource.getSimulator().getwSpeed());
-		res.put("wdir", NMEASimulatorSource.getSimulator().getwDirection());
-		res.put("heading", NMEASimulatorSource.getSimulator().getHeading());
 		return res;
 	}
 }
