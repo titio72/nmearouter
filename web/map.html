@@ -11,6 +11,7 @@
   <script type="text/javascript" 
     src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"> 
   </script>
+  <script src="js/maplabel-compiled.js"></script>
   <style>
     .panelTable {
       width: 100%;
@@ -45,6 +46,8 @@
   var polyWind;
   var absoluteWind;
   var trueWind;
+  var mapVectorLabel;
+  var mapWindLabel;
 
   app.controller("myCtrl", function ($scope) {
     $scope.V0 = { value: 0.0 };
@@ -152,6 +155,12 @@
       angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
       speed: Math.sqrt(wTx * wTx + wTy * wTy)
     }
+
+    r.angle = r.angle % 360;
+    if (r.angle<0) r.angle = 360 + r.angle; 
+
+
+
     return r;
   }
 
@@ -212,14 +221,14 @@
         marker = new google.maps.Marker({
           position: p,
           title: sog + 'Kn ' + cog + '\u00B0',
-          icon: icon
+          icon: icon,
+          map: map
         });
-        marker.setMap(map);
       }
     }
   }
 
-  function setMarkerSpeed(p1, cog) {
+  function setMarkerSpeed(p1, cog, sog) {
     if (map!=null) {
       var icon = {
             path: 'M -5 10 L 0 0 L 5 10Z',
@@ -234,13 +243,22 @@
       if (markerTo != null) {
         markerTo.setPosition(p1);
         markerTo.setIcon(icon);
+        mapVectorLabel.set('text', '    ' + sog + 'Kn ' + cog + '\u00B0    ');  
+        mapVectorLabel.set('position', p1);  
       } else {
         markerTo = new google.maps.Marker({
           position: p1,
           title: "",
-          icon: icon
+          icon: icon,
+          map: map
         });
-        markerTo.setMap(map);
+        mapVectorLabel = new MapLabel({
+            text: '    ' + sog + 'Kn ' + cog + '\u00B0    ',
+            position: p1,
+            map: map,
+            fontSize: 20,
+            align: 'right'
+          });
       }
     }
   }
@@ -256,18 +274,27 @@
                 anchor: new google.maps.Point(0,0),
                 strokeWeight: 3,
                 scale: 1,
-                rotation: 180 + (trueWind.angle + cog)
+                rotation: 180 + (tw.angle + cog)
             };
         if (markerWind != null) {
           markerWind.setPosition(pW);
           markerWind.setIcon(icon);
+          mapWindLabel.set('text', '    ' + tw.speed.toFixed(1) + 'Kn ' + tw.show_angle.toFixed(0) + '\u00B0 ' + tw.tack + '   ');
+          mapWindLabel.set('position', pW);
         } else {
           markerWind = new google.maps.Marker({
             position: pW,
             title: "",
-            icon: icon
+            icon: icon,
+            map: map
           });
-          markerWind.setMap(map);
+          mapWindLabel = new MapLabel({
+            text: '    ' + tw.speed.toFixed(1) + 'Kn ' + tw.angle.toFixed(0) + '\u00B0    ',
+            position: pW,
+            map: map,
+            fontSize: 20,
+            align: 'right'
+          });          
         }
       }
     }
@@ -286,7 +313,7 @@
     if (map != null) {
 
       setMarkerPos(p, cog, sog);
-      setMarkerSpeed(p1, cog);
+      setMarkerSpeed(p1, cog, sog);
       setMarkerWind(p, pW, trueWind, cog);
 
       map.setCenter(p);
@@ -323,7 +350,6 @@
     }
   }
 
-
 </script>
 
 
@@ -334,51 +360,14 @@
       <li class="breadcrumb-item active">Sensors</li>
     </ol>
 
-    <table width="100%">
-      <tr>
-        <td style="vertical-align: top; width: 75%; height: 100%" rowspan="3">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h2 class="panel-title">Map</h2>
-            </div>
-            <div class="panel-body">
-              <div style="width: 100%; height: 100%; min-height: 864px" id="map"></div>
-            </div>
-          </div>
-        </td>
-        <td style="width: 25%; height: 33%">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h2 class="panel-title">Heading</h2>
-            </div>
-            <div class="panel-body panelRouter">
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="width: 25%; height: 33%">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h2 class="panel-title">Abs. Wind</h2>
-            </div>
-            <div class="panel-body panelRouter">
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td style="width: 25%; height: 33%">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h2 class="panel-title">Rel. Wind</h2>
-            </div>
-            <div class="panel-body panelRouter">
-            </div>
-          </div>              
-        </td>
-      </tr>
-    </table>
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h2 class="panel-title">Map</h2>
+      </div>
+      <div class="panel-body">
+        <div style="width: 100%; height: 100%; min-height: 864px" id="map"></div>
+      </div>
+    </div>
   </div>
 </body>
 

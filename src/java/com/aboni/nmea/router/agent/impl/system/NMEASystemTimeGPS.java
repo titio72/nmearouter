@@ -21,16 +21,12 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
 	public String getType() {
-		if (cache!=null) {
-			return "GPSTime " + cache.isTimeSynced() + " " + cache.getTimeSkew();
-		} else {
-			return "GPSTime";
-		}
+		return "GPSTime";
 	}
-	
+
 	@Override
     public String getDescription() {
-    	return "Sync up system time with GPS UTC time feed";
+    	return "Sync up system time with GPS UTC time feed [" + (cache.isTimeSynced()?"Sync " + cache.getTimeSkew():"Not Sync") + "]";
     }
     
 

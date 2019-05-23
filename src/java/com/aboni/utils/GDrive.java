@@ -27,14 +27,14 @@ import java.util.List;
 public class GDrive {
     private static final String APPLICATION_NAME = "NMEARouter";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "/home/aboni/Downloads";
+    private static final String TOKENS_DIRECTORY_PATH = "./";
 
     /**
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_METADATA);
-    private static final String CREDENTIALS_FILE_PATH = "/home/aboni/Downloads/gdrive_credentials.json";
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPDATA, DriveScopes.DRIVE_METADATA, DriveScopes.DRIVE);
+    private static final String CREDENTIALS_FILE_PATH = "gdrive_credentials.json";
 
     /**
      * Creates an authorized Credential object.
@@ -52,7 +52,7 @@ public class GDrive {
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
+                .setAccessType("online")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
@@ -78,13 +78,14 @@ public class GDrive {
                 filter(f->"ray.jpg".equals(f.getName())).
                 filter(f->{
                     try {
-                        File ff = service.files().get(f.getId()).execute();
+                        File ff = service.files().get(f.getId()).set("fields", "name, trashed").execute();
                         return ff.getTrashed() == null || !ff.getTrashed();
                     } catch (IOException e) {
+                        e.printStackTrace();
                         return false;
                     }
                 }).
-                forEach((File f)->System.out.println(f.getName()));
+                forEach((File f)->System.out.println(f));
     }
 
     private static void createFile(Drive service) throws IOException {
