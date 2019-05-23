@@ -27,6 +27,29 @@ var app = angular.module("nmearouter", ['ngSanitize'])
     };
 });
 
+function calcTrueWind(speed, appWindDeg, appWindSpeed) {
+	v = speed;
+	w = appWindSpeed;
+	wA = appWindDeg / 180.0 * Math.PI;
+
+	wAx = w * Math.sin(wA);
+	wAy = w * Math.cos(wA);
+
+	wTx = wAx;
+	wTy = wAy - v;
+
+	var r = {
+		angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
+		speed: Math.sqrt(wTx * wTx + wTy * wTy)
+	}
+
+	r.angle = r.angle % 360;
+	if (r.angle<0) r.angle = 360 + r.angle; 
+
+	return r;
+}
+
+
 function httpGetShutdown() {
 	bootbox.confirm({
 		message: "Do you really want to shutdown?",

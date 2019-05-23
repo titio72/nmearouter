@@ -1,18 +1,32 @@
-<!DOCTYPE html>
-<html>
-
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
   <link rel="icon" type="image/png" href="nmeasail.png">
-  <script src="js/nmearouter.js?l"></script>
-  <!--script src="https://maps.googleapis.com/maps/api/js?v=3.36&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo" async
-    defer></script-->
+  <script src="js/nmearouter.js?l1"></script>
   <script type="text/javascript" 
     src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"> 
   </script>
-  <script src="js/maplabel-compiled.js"></script>
+  <script src="js/maplabel.js"></script>
   <style>
+    .container {
+      display: flex;
+      flex-flow: column;
+      align-items: stretch;
+      height: 100%;
+      width: 100%;
+    }
+    .header {
+      flex: 0 1 auto;
+    }
+
+    .middle {
+      flex: 1 1 auto;
+      overflow: auto;
+      background: white;
+    }
+    .footer {
+      flex: 0 1 60px;
+    }
     .panelTable {
       width: 100%;
       font-family: monospace;
@@ -32,6 +46,7 @@
     .panelRouter {
       height: 300px;
     }
+
   </style>
 </head>
 <script type="text/javascript">
@@ -47,13 +62,7 @@
   var absoluteWind;
   var trueWind;
   var mapVectorLabel;
-  var mapWindLabel;
-
-  app.controller("myCtrl", function ($scope) {
-    $scope.V0 = { value: 0.0 };
-    $scope.V1 = { value: 0.0 };
-  });
-
+  var follow = true;
 
   var socket = null;
   $(document).ready(function () {
@@ -84,27 +93,17 @@
   function socketClosed(event) {
   }
 
+  function switchFollow() {
+    follow = !follow;
+  }
+
   function processEvent(event) {
     var msg = JSON.parse(event.data);
     if (msg.topic == 'RMC') {
       setMarker(msg, msg.dec_latitude, msg.dec_longitude, msg.SOG, msg.COG);
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.COG);
-      msg.s_time = new Date(Date.parse(msg.UTC)).toLocaleTimeString();
-      controllerScope['rmc'] = msg;
-      controllerScope.$evalAsync();
     } else if (msg.topic == 'VHW') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.mag_angle);
       speed = msg.speed;
-      controllerScope['vector'] = msg;
-      controllerScope.$evalAsync();
     } else if (msg.topic == 'MWV_R') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope['wind_r'] = msg;
       if (msg.angle > 180) {
         msg.show_angle = 360 - msg.angle;
         msg.tack = "Port"
@@ -115,69 +114,39 @@
 
       trueWind = calcTrueWind(speed, msg.angle, msg.speed);
       if (trueWind.angle > 180) {
-        trueWind.show_angle = 360 - msg.angle;
+        trueWind.show_angle = 360 - trueWind.angle;
         trueWind.tack = "Port"
+        trueWind.tack_short = "P"
       } else {
-        trueWind.show_angle = msg.angle;
+        trueWind.show_angle = trueWind.angle;
         trueWind.tack = "Starboard"
+        trueWind.tack_short = "S"
       }
-      controllerScope['wind_t'] = trueWind;
       
       absoluteWind = {
         mag_angle: (heading + trueWind.angle) % 360,
         speed: trueWind.speed
       };
-      controllerScope['wind'] = absoluteWind;
-      
-      controllerScope.$evalAsync();
     } else if (msg.topic == 'HDG') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.angle);
       heading = msg.angle;
-      controllerScope['hdg'] = msg;
-      controllerScope.$evalAsync();
     }
-  }
-
-  function calcTrueWind(speed, appWindDeg, appWindSpeed) {
-    v = speed;
-    w = appWindSpeed;
-    wA = appWindDeg / 180.0 * Math.PI;
-
-    wAx = w * Math.sin(wA);
-    wAy = w * Math.cos(wA);
-
-    wTx = wAx;
-    wTy = wAy - v;
-
-    var r = {
-      angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
-      speed: Math.sqrt(wTx * wTx + wTy * wTy)
-    }
-
-    r.angle = r.angle % 360;
-    if (r.angle<0) r.angle = 360 + r.angle; 
-
-
-
-    return r;
   }
 
   function loadMap(msg, lat, lon) {
     map = new google.maps.Map(document.getElementById('map'), {
       mapTypeId: 'terrain',
-      disableDefaultUI: true
+      disableDefaultUI: false,
+      zoom: 9
     });
     var markerPos = { lat: lat, lng: lon };
     map.setCenter(markerPos);
 
-    var bounds = new google.maps.LatLngBounds();
+    /*var bounds = new google.maps.LatLngBounds();
     var nw = { lat: markerPos.lat - 0.1, lng: markerPos.lng + 0.1 };
     var se = { lat: markerPos.lat + 0.1, lng: markerPos.lng - 0.1 };
     bounds.extend(nw);
     bounds.extend(se);
-    map.fitBounds(bounds);
+    map.fitBounds(bounds);*/
 
   }
 
@@ -190,7 +159,6 @@
       strokeWeight: 3,
       scale: 1
   }
-
   var icon = {
       path: 'M-10,0a10,10 0 1,0 20,0a10,10 0 1,0 -20,0',
       fillColor: '#FF0000',
@@ -213,16 +181,29 @@
       if (marker != null) {
         marker.setPosition(p);
 
-        if (trueWind==null)
-          marker.title = 'Vect ' + sog + 'Kn ' + cog + '\u00B0';
-        else 
-          marker.title = 'Vect ' + sog + 'Kn ' + cog + '\u00B0 \nWind ' + (trueWind.speed.toFixed(1) + 'Kn ' + trueWind.angle.toFixed(0) + '\u00B0');
+        if (trueWind==null) {
+          marker.title = 'Vect ' + sog.toFixed(1) + 'Kn ' + cog.toFixed(0) + '\u00B0';
+          mapVectorLabel.set('text', sog.toFixed(1) + 'Kn ' + cog.toFixed(0) + '\u00B0');  
+        } else {
+          marker.title = 'Vect ' + sog.toFixed(1) + 'Kn ' + cog.toFixed(0) + '\u00B0 \nWind ' + trueWind.speed.toFixed(1) + 'Kn ' + trueWind.show_angle.toFixed(0) + '\u00B0 ' + trueWind.tack;
+          mapVectorLabel.set('text', '' + sog.toFixed(1) + 'Kn ' + cog.toFixed(0) + '\u00B0    \n\n' + trueWind.speed.toFixed(1) + 'Kn ' + trueWind.show_angle.toFixed(0) + '\u00B0 ' + trueWind.tack_short + '    ');  
+        }
+        mapVectorLabel.set('position', p);  
+
+
       } else {
         marker = new google.maps.Marker({
           position: p,
           title: sog + 'Kn ' + cog + '\u00B0',
           icon: icon,
           map: map
+        });
+        mapVectorLabel = new MapLabel({
+          text: '',
+          position: p,
+          map: map,
+          fontSize: 20,
+          align: 'right'
         });
       }
     }
@@ -243,8 +224,6 @@
       if (markerTo != null) {
         markerTo.setPosition(p1);
         markerTo.setIcon(icon);
-        mapVectorLabel.set('text', '    ' + sog + 'Kn ' + cog + '\u00B0    ');  
-        mapVectorLabel.set('position', p1);  
       } else {
         markerTo = new google.maps.Marker({
           position: p1,
@@ -252,13 +231,6 @@
           icon: icon,
           map: map
         });
-        mapVectorLabel = new MapLabel({
-            text: '    ' + sog + 'Kn ' + cog + '\u00B0    ',
-            position: p1,
-            map: map,
-            fontSize: 20,
-            align: 'right'
-          });
       }
     }
   }
@@ -279,8 +251,6 @@
         if (markerWind != null) {
           markerWind.setPosition(pW);
           markerWind.setIcon(icon);
-          mapWindLabel.set('text', '    ' + tw.speed.toFixed(1) + 'Kn ' + tw.show_angle.toFixed(0) + '\u00B0 ' + tw.tack + '   ');
-          mapWindLabel.set('position', pW);
         } else {
           markerWind = new google.maps.Marker({
             position: pW,
@@ -288,13 +258,6 @@
             icon: icon,
             map: map
           });
-          mapWindLabel = new MapLabel({
-            text: '    ' + tw.speed.toFixed(1) + 'Kn ' + tw.angle.toFixed(0) + '\u00B0    ',
-            position: pW,
-            map: map,
-            fontSize: 20,
-            align: 'right'
-          });          
         }
       }
     }
@@ -316,7 +279,9 @@
       setMarkerSpeed(p1, cog, sog);
       setMarkerWind(p, pW, trueWind, cog);
 
-      map.setCenter(p);
+      if (follow) {
+        map.setCenter(p);
+      }
 
       if (poly==null) {
         poly = new google.maps.Polyline({
@@ -353,22 +318,17 @@
 </script>
 
 
-<body ng-app="nmearouter">
-  <div id="sensorPanel" ng-controller="myCtrl">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-      <li class="breadcrumb-item active">Sensors</li>
-    </ol>
-
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h2 class="panel-title">Map</h2>
-      </div>
-      <div class="panel-body">
-        <div style="width: 100%; height: 100%; min-height: 864px" id="map"></div>
-      </div>
+<body>
+  <div class="container">
+    <div class="header">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item active">Map</li>
+      </ol>
     </div>
+    <div id="map" class="middle panel"></div>
   </div>
+  <button style="position: absolute; bottom: 50px; left: 50px;" type="button" class="btn btn-primary acrive" data-toggle="button" aria-pressed="true" autocomplete="off" onclick="switchFollow();">Follow</button>
 </body>
 
 </html>
