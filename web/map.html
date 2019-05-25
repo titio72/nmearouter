@@ -7,6 +7,7 @@
     src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"> 
   </script>
   <script src="js/maplabel.js"></script>
+  <script src="js/moment-with-locales.min.js"></script>
   <style>
     .container {
       display: flex;
@@ -140,18 +141,20 @@
       msg.put("lat", point.position.getLatitude());      */
       if (map!=null) {
         if (path==null) {
+          var d0 = moment().format('YYYYMMDD');
+          var d1 = moment().add(1, 'day').format('YYYYMMDD');
+          var dailyPath = httpGetTrack(d0, d1);
           path = new google.maps.Polyline({
-            path: [{lat: msg.lat, lng: msg.lon}],
+            path: dailyPath,
             geodesic: true,
             strokeColor: '#FF0000',
             strokeOpacity: 1.0,
             strokeWeight: 2,
             map: map
           });
-        } else {
-          var p = path.getPath();
-          p.push(new google.maps.LatLng(msg.lat, msg.lon));
         }
+        var p = path.getPath();
+        p.push(new google.maps.LatLng(msg.lat, msg.lon));
       }
     }
   }
