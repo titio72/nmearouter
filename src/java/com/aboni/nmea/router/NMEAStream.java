@@ -7,11 +7,10 @@ public interface NMEAStream {
 
 	/**
 	 * Push a sentence into the stream.
-	 * @param s	The sentence to be distributed.
-	 * @param src The source that generated the sentence.
-	 * @see com.aboni.nmea.router.agent.NMEASource 
+	 * @param msg	The message to be distributed.
+	 * @see com.aboni.nmea.router.agent.NMEASource
 	 */
-	void pushSentence(Sentence s, NMEAAgent src);
+	void pushSentence(RouterMessage msg);
 
 	/**
 	 * Subscribe to NMEA stream.

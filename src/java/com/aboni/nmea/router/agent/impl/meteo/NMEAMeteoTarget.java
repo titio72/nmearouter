@@ -89,7 +89,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }    
     
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
     	try {
 	    	if (cache.isTimeSynced()) {
 		        if (s instanceof MTASentence) {

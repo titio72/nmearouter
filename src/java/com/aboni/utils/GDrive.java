@@ -69,6 +69,10 @@ public class GDrive {
 
     }
 
+    public static void upload(String file) {
+
+    }
+
     private static void listFiles(Drive service) throws IOException {
         FileList result = service.files().list()
                 .setPageSize(1000)

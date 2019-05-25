@@ -31,7 +31,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     
 
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent src) {
+	protected void doWithSentence(Sentence s, String src) {
 		systemTimeCHecker.checkAndSetTime(s);
 	}
 

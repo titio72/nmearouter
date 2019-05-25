@@ -179,7 +179,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	}
 	
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent src) {
+	protected void doWithSentence(Sentence s, String src) {
 		synchronized (clients) {
 		    if (isTarget() && !clients.isEmpty()) {
 				String output = getOutSentence(s);

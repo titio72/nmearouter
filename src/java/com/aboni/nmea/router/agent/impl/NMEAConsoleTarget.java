@@ -17,9 +17,9 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 	}
 
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent src) {
+	protected void doWithSentence(Sentence s, String src) {
 		ServerLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
-				" [" + src.getName() + "] " + s);
+				" [" + src + "] " + s);
 	}
 	
 	@Override

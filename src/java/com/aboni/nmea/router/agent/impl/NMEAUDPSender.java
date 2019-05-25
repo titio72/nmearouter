@@ -80,7 +80,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 	private int nSentences = 0;
 	
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent src) {
+	protected void doWithSentence(Sentence s, String src) {
 		String toSend = getOutSentence(s);
 		
 		if (nSentences==3) {

@@ -2,12 +2,15 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.processors.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -45,15 +48,15 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		}
 
 		@Override
-		public void pushSentence(Sentence e, NMEAAgent src) {
-            try {
-                if (isStarted() &&
-                        (getFilter()==null || getFilter().match(e,  src.getName()))) {
-                    doWithSentence(e, src);
-                }
-            } catch (Exception t) {
-                getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
-            }
+		public void pushSentence(Sentence e, String src) {
+			try {
+				if (isStarted() &&
+						(getFilter()==null || getFilter().match(e,  src))) {
+					doWithSentence(e, src);
+				}
+			} catch (Exception t) {
+				getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
+			}
 		}
 	}
 	
@@ -266,7 +269,18 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
 			List<Sentence> toSend = procs.getSentences(sentence, getName());
-			for (Sentence s: toSend) listener.onSentence(s, this);
+			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()), this);
+		}
+	}
+	/**
+	 * Used by "sources" to push sentences into the stream
+	 * @param m The message to be notified to agents
+	 */
+	protected final void notify(JSONObject m) {
+
+		if (isStarted()) {
+			getLogger().debug("Notify Sentence {" + m + "}");
+			listener.onSentence(RouterMessageImpl.createMessage(m, getName()), this);
 		}
 	}
 
@@ -283,7 +297,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	 * @param s The sentence just received
 	 * @param source The source that originated the sentence
 	 */
-	protected void doWithSentence(Sentence s, NMEAAgent source) {}
+	protected void doWithSentence(Sentence s, String source) {}
 
     @Override
     public final NMEASource getSource() {

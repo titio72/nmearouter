@@ -2,6 +2,7 @@ package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
@@ -22,9 +23,9 @@ public class NMEAStreamImpl implements NMEAStream {
 	}
 
 	@Override
-	public void pushSentence(Sentence s, NMEAAgent src) {
+	public void pushSentence(RouterMessage msg) {
 		synchronized (this) {
-			push(s, src);
+			push(msg);
 		}
 	}
 
@@ -42,14 +43,18 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	private void push(Sentence s, NMEAAgent src) {
+	private void push(RouterMessage message) {
 		synchronized (annotatedListeners) {
-			JSONObject msg = null;
+			Object payload = message.getPayload();
+			JSONObject msg = (payload instanceof JSONObject)?(JSONObject)payload:null;
+			Sentence s = (payload instanceof Sentence)?(Sentence)payload:null;
 			for (ListenerWrapper i: annotatedListeners.values()) {
 				try {
-					i.onSentence(s, src);
+					if (s!=null) {
+						i.onSentence(s, message.getSource());
+					}
 					if (i.isJSON()) {
-						if (msg==null) {
+						if (msg==null && s!=null) {
 							msg = jsonConv.convert(s);
 						}
 						if (msg!=null) {
@@ -79,7 +84,7 @@ public class NMEAStreamImpl implements NMEAStream {
 		            	Class<?>[] params = method.getParameterTypes();
 		            	if (params[0].equals(JSONObject.class)) {
 		            		listenersJSON.add(method);
-		            	} else if (params[0].equals(Sentence.class) && params[1].equals(NMEAAgent.class)) {
+		            	} else if (params[0].equals(Sentence.class) && params[1].equals(String.class)) {
 		            		listeners.add(method);
 		            	}
 		            }
@@ -96,7 +101,7 @@ public class NMEAStreamImpl implements NMEAStream {
 			fillMethodsAnnotatedWith();
 		}
 
-		private void onSentence(Sentence s, NMEAAgent src) {
+		private void onSentence(Sentence s, String src) {
 			for (Method m: listeners) {
 				Object[] p = new Object[] {s, src};
 				try {

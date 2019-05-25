@@ -466,7 +466,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	}
 	
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
     	if (!source.equals(this) && s instanceof STALKSentence) {
     		STALKSentence t = (STALKSentence)s;
     		if (t.getCommand().equals("86")) {

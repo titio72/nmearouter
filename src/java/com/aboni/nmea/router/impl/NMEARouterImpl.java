@@ -3,12 +3,14 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -20,22 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
 
-	private class SentenceEvent {
-		SentenceEvent(Sentence s, NMEAAgent src) {
-			this.s = s;
-			this.src = src;
-		}
-
-		final Sentence s;
-		final NMEAAgent src;
-	}
-
 	private Timer timer;
 	private final AtomicBoolean started;
 	private final ExecutorService exec;
 
 	private final Map<String, NMEAAgent> agents;
-	private final BlockingQueue<SentenceEvent> sentenceQueue;
+	private final BlockingQueue<RouterMessage> sentenceQueue;
 	private final NMEAProcessorSet processors;
 	private final NMEACache cache;
 	private final NMEAStream stream;
@@ -119,8 +111,7 @@ public class NMEARouterImpl implements NMEARouter {
 		exec.execute(()->{
 				while (started.get()) {
 					try { 
-						SentenceEvent e = sentenceQueue.take(); 
-						routeSentence(e.s, e.src);
+						routeSentence(sentenceQueue.take());
 					} catch (InterruptedException e1) {
 						Thread.currentThread().interrupt();
 					}
@@ -163,32 +154,36 @@ public class NMEARouterImpl implements NMEARouter {
 		ServerLog.getLogger().debug("New status received for {" + src + "}");
 	}
 
-    private void privateQueueUpSentence(Sentence s, NMEAAgent src) {
-        SentenceEvent e = new SentenceEvent(s, src);
+    private void privateQueueUpSentence(RouterMessage s, NMEAAgent source) {
         try {
-			sentenceQueue.put(e);
+			sentenceQueue.put(s);
 		} catch (InterruptedException e1) {
 			Thread.currentThread().interrupt();
 		}
     }
 
-    private void routeSentence(Sentence s, NMEAAgent src) {
+    private void routeSentence(RouterMessage m) {
 		if (started.get()) {
-			Collection<Sentence> toSend = processors.getSentences(s, src.getName());
-			for (Sentence ss: toSend) {
-				cache.onSentence(ss, src.getName());
-				routeToTarget(ss, src);
-				stream.pushSentence(ss, src);
+			if (m.getPayload() instanceof Sentence) {
+				Sentence s = (Sentence)m.getPayload();
+				Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
+				for (Sentence ss : toSend) {
+					cache.onSentence(ss, m.getSource());
+					routeToTarget(ss, m.getSource());
+					stream.pushSentence(RouterMessageImpl.createMessage(ss, m.getSource()));
+				}
+			} else if (m.getPayload() instanceof JSONObject) {
+				stream.pushSentence(m);
 			}
 		}
 	}
 
-	private void routeToTarget(Sentence s, NMEAAgent src) {
+	private void routeToTarget(Sentence s, String src) {
 		synchronized (agents) {
 			for (NMEAAgent nmeaAgent : agents.values()) {
 				try {
 					NMEATarget target = nmeaAgent.getTarget();
-					if (target != null && !src.getName().equals(nmeaAgent.getName())) {
+					if (target != null && !src.equals(nmeaAgent.getName())) {
 						exec.execute(() -> target.pushSentence(s, src));
 					}
 				} catch (Exception e) {

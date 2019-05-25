@@ -195,7 +195,7 @@ public class NMEASerial extends NMEAAgentImpl {
     }
 
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent src) {
+    protected void doWithSentence(Sentence s, String src) {
         if (isStarted() && trasmit) {
             try {
                 String strSentence = s.toSentence() + "\r\n";

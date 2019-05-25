@@ -170,7 +170,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 	}
 	
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
         if (HWSettings.getPropertyAsInteger("compass.dump", 0)>0 && s instanceof HDMSentence && compassSensor!=null) {
         	try {
         		double headingBoat = ((HDMSentence)s).getHeading();

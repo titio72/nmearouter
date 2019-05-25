@@ -69,7 +69,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     }
     
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
         if (s instanceof PositionSentence) {
             lastGps = System.currentTimeMillis();
             powerGPSUp();

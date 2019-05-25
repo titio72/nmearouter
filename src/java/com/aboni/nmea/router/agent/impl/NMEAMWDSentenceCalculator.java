@@ -29,7 +29,7 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 	}
 
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
+	protected void doWithSentence(Sentence s, String source) {
 		if (s instanceof HDGSentence) {
 			conv.setHeading((HDGSentence) s, System.currentTimeMillis());
 		} else if (s instanceof MWVSentence && ((MWVSentence)s).isTrue()) {

@@ -40,7 +40,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 	}
 
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent source) {
+	protected void doWithSentence(Sentence s, String source) {
 		NMEASentenceItem e = new NMEASentenceItem(s, System.currentTimeMillis(), "  ");
 		synchronized (queue) {
 			if (isStarted()) {

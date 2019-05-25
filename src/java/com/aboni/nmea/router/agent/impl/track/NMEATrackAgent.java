@@ -12,6 +12,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.util.Position;
+import org.json.JSONObject;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
@@ -75,7 +76,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     }
     
 	@Override
-	protected void doWithSentence(Sentence s, NMEAAgent src) {
+	protected void doWithSentence(Sentence s, String src) {
 		if (isStarted()) {
 			try {
 	            if (s instanceof RMCSentence) {
@@ -114,6 +115,9 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             		point.averageSpeed, 
             		point.maxSpeed, 
             		point.period);
+
+            notifyTrackedPoint(point);
+
             synchronized (this) {
                 writes++;
             }
@@ -125,7 +129,20 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             samples++;
         }
     }
-    
+
+    private void notifyTrackedPoint(TrackPoint point) {
+        JSONObject msg = new JSONObject();
+        msg.put("topic", "track");
+        msg.put("anchor", point.anchor);
+        msg.put("distance", point.distance);
+        msg.put("maxSpeed", point.maxSpeed);
+        msg.put("speed", point.averageSpeed);
+        msg.put("period", point.period);
+        msg.put("lon", point.position.getLongitude());
+        msg.put("lat", point.position.getLatitude());
+        notify(msg);
+    }
+
     private long lastStats = 0;
     
     @Override

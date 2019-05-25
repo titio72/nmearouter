@@ -103,7 +103,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
     	try {
     	    if (socket!=null && transmit) {
     	        socket.getOutputStream().write(s.toSentence().getBytes());

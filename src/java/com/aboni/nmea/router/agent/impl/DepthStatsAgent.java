@@ -44,7 +44,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 	}
 
     @Override
-    protected void doWithSentence(Sentence s, NMEAAgent source) {
+    protected void doWithSentence(Sentence s, String source) {
         if (s instanceof DPTSentence) {
             DepthT d = handleDepth(((DPTSentence) s).getDepth(), System.currentTimeMillis());
             
