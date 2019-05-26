@@ -131,13 +131,6 @@
     } else if (msg.topic == 'HDG') {
       heading = msg.angle;
     } else if (msg.topic == 'track') {
-      /*msg.put("anchor", point.anchor);
-      msg.put("distance", point.distance);
-      msg.put("maxSpeed", point.maxSpeed);
-      msg.put("speed", point.averageSpeed);
-      msg.put("period", point.period);
-      msg.put("lon", point.position.getLongitude());
-      msg.put("lat", point.position.getLatitude());      */
       if (map!=null) {
         if (path==null) {
           var d0 = moment().format('YYYYMMDD');
@@ -166,14 +159,6 @@
     });
     var markerPos = { lat: lat, lng: lon };
     map.setCenter(markerPos);
-
-    /*var bounds = new google.maps.LatLngBounds();
-    var nw = { lat: markerPos.lat - 0.1, lng: markerPos.lng + 0.1 };
-    var se = { lat: markerPos.lat + 0.1, lng: markerPos.lng - 0.1 };
-    bounds.extend(nw);
-    bounds.extend(se);
-    map.fitBounds(bounds);*/
-
   }
 
   var iconA = {
@@ -272,7 +257,7 @@
                 anchor: new google.maps.Point(0,0),
                 strokeWeight: 3,
                 scale: 1,
-                rotation: 180 + (tw.angle + cog)
+                rotation: 180 + (tw.mag_angle + cog)
             };
         if (markerWind != null) {
           markerWind.setPosition(pW);
@@ -293,7 +278,7 @@
 
     var p = new google.maps.LatLng(lat, lon);
     var p1 = google.maps.geometry.spherical.computeOffset(p, sog * 1852, cog);
-    var pW = (trueWind!=null) ? google.maps.geometry.spherical.computeOffset(p, trueWind.speed * 1852, trueWind.angle + cog) : null;
+    var pW = (trueWind!=null) ? google.maps.geometry.spherical.computeOffset(p, absoluteWind.speed * 1852, absoluteWind.mag_angle) : null;
 
     if (map == null) {
       loadMap(msg, lat, lon);
@@ -303,7 +288,7 @@
 
       setMarkerPos(p, cog, sog);
       setMarkerSpeed(p1, cog, sog);
-      setMarkerWind(p, pW, trueWind, cog);
+      setMarkerWind(p, pW, absoluteWind, cog);
 
       if (follow) {
         map.setCenter(p);
