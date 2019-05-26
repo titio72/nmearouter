@@ -2,15 +2,13 @@ package com.aboni.nmea.router.agent.impl.track;
 
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
-import com.aboni.nmea.sentences.XMCParser;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -96,18 +94,9 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	
     private void processPosition(GeoPositionT posT, double sog) {
 		long t0 = System.currentTimeMillis();
-        TrackPoint point = tracker.processPosition(posT, sog);
-        
-        Position avgPos = tracker.getAverage();
-        boolean anchor = tracker.isStationary();
 
-        if (avgPos!=null) {
-	        XMCParser s = new XMCParser(TalkerId.P);
-	        s.setAveragePosition(avgPos);
-	        s.setAnchor(anchor);
-	        notify(s);
-        }
-        
+        TrackPoint point = tracker.processPosition(posT, sog);
+        notifyAnchorStatus();
     	if (point!=null && media!=null) {
             media.write(point.position, 
             		point.anchor, 
@@ -115,12 +104,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             		point.averageSpeed, 
             		point.maxSpeed, 
             		point.period);
-
             notifyTrackedPoint(point);
-
-            synchronized (this) {
-                writes++;
-            }
+            synchronized (this) {writes++;}
         }
 
         long t = System.currentTimeMillis() - t0;
@@ -130,10 +115,24 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         }
     }
 
+    private void notifyAnchorStatus() {
+        Position avgPos = tracker.getAverage();
+        if (avgPos!=null) {
+            JSONObject msg = new JSONObject();
+            msg.put("topic", "anchor");
+            msg.put("stationary", tracker.isStationary());
+            msg.put("latDec", avgPos.getLatitude());
+            msg.put("lonDec", avgPos.getLongitude());
+            msg.put("lat", Utils.formatLatitude(avgPos.getLatitude()));
+            msg.put("lon", Utils.formatLongitude(avgPos.getLongitude()));
+            notify(msg);
+        }
+    }
+
     private void notifyTrackedPoint(TrackPoint point) {
         JSONObject msg = new JSONObject();
         msg.put("topic", "track");
-        msg.put("anchor", point.anchor);
+        msg.put("stationary", point.anchor);
         msg.put("distance", point.distance);
         msg.put("maxSpeed", point.maxSpeed);
         msg.put("speed", point.averageSpeed);

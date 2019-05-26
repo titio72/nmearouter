@@ -85,12 +85,12 @@
           controllerScope.$evalAsync();
         }
       }
-    } else if (msg.topic == "XMC") {
+    } else if (msg.topic == "anchor") {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
-      if (msg.anchor) {
-        msg.anchor_lat = msg.avg_lat;
-        msg.anchor_lon = msg.avg_lon;
+      if (msg.stationary) {
+        msg.anchor_lat = msg.lat;
+        msg.anchor_lon = msg.lon;
       } else {
         msg.anchor_lat = "";
         msg.anchor_lon = "";
@@ -466,6 +466,71 @@
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
         <div class="panel panel-primary">
           <div class="panel-heading">
+            <h2 class="panel-title">GPS</h2>
+          </div>
+          <div class="panel-body panelRouter">
+            <table class="panelTable">
+              <tr>
+                <td>Position</td>
+                <td style="text-align: right">{{rmc.latitude}}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td style="text-align: right">{{rmc.longitude}}</td>
+              </tr>
+              <tr>
+                <td>Anchor</td>
+                <td style="text-align: right">{{xmc.anchor_lat}}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td style="text-align: right">{{xmc.anchor_lon}}</td>
+              </tr>
+              <tr>
+                <td>SOG</td>
+                <td style="text-align: right">{{rmc.SOG | number:1}} Kn</td>
+              </tr>
+              <tr>
+                <td>COG</td>
+                <td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}&deg;</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align: right">{{rmc.s_time}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h2 class="panel-title">Navi</h2>
+          </div>
+          <div class="panel-body panelRouter">
+            <table class="panelTable">
+              <tr>
+                <td>Speed</td>
+                <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
+              </tr>
+              <tr>
+                <td>Head</td>
+                <td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}&deg;</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td style="text-align: right">&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Depth</td>
+                <td style="text-align: right">{{depth.depth | number:1}} m</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
             <h2 class="panel-title">Diag</h2>
           </div>
           <div class="panel-body panelRouter">
@@ -555,71 +620,6 @@
               <tr>
                 <td>Pitch</td>
                 <td style="text-align: right">{{PITCH.value | number:1}}&deg;</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">GPS</h2>
-          </div>
-          <div class="panel-body panelRouter">
-            <table class="panelTable">
-              <tr>
-                <td>Position</td>
-                <td style="text-align: right">{{rmc.latitude}}</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">{{rmc.longitude}}</td>
-              </tr>
-              <tr>
-                <td>Anchor</td>
-                <td style="text-align: right">{{xmc.anchor_lat}}</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">{{xmc.anchor_lon}}</td>
-              </tr>
-              <tr>
-                <td>SOG</td>
-                <td style="text-align: right">{{rmc.SOG | number:1}} Kn</td>
-              </tr>
-              <tr>
-                <td>COG</td>
-                <td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td colspan="2" style="text-align: right">{{rmc.s_time}}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Navi</h2>
-          </div>
-          <div class="panel-body panelRouter">
-            <table class="panelTable">
-              <tr>
-                <td>Speed</td>
-                <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
-              </tr>
-              <tr>
-                <td>Head</td>
-                <td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                <td>Depth</td>
-                <td style="text-align: right">{{depth.depth | number:1}} m</td>
               </tr>
             </table>
           </div>

@@ -6,9 +6,9 @@ rm -Rf css/*
 rm -Rf fonts/*
 
 echo "Backup nmearouter.js"
-cp -f js/nmearouter.js .
+cp -f js/nmearouter.js js/maplabel.js .
 rm -Rf js/*
-mv -f ./nmearouter.js js/
+mv -f ./nmearouter.js ./maplabel.js js/
 
 echo "Copy bootstrap"
 cp -Rf ../node_modules/bootstrap/dist/js/* ./js
@@ -30,7 +30,7 @@ echo "Copy Chart.js"
 cp -f ../node_modules/chart.js/dist/Chart.min.js js/
 echo "Copy moment-with-locales"
 cp -f ../node_modules/moment/min/moment-with-locales.min.js js/
-cp -f ../node_modules/moment/moment.js js/
+#cp -f ../node_modules/moment/moment.js js/
 
 echo "Copy bootstrap-datepicker"
 cp -f ../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css css/
