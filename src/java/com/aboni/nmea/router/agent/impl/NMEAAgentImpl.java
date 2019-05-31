@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
-import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.nmea.router.impl.RouterMessageImpl;

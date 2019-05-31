@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;

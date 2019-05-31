@@ -3,7 +3,6 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;

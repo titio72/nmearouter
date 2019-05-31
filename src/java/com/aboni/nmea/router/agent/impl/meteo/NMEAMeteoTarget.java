@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.utils.AngleStatsSample;

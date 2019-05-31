@@ -3,7 +3,6 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.geo.NMEAMWDConverter;
 import com.aboni.nmea.router.NMEACache;
 
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 
 import net.sf.marineapi.nmea.sentence.HDGSentence;

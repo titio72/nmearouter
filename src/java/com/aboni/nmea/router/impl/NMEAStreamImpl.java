@@ -3,7 +3,6 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;

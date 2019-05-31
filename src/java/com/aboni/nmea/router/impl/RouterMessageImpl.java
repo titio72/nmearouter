@@ -4,7 +4,7 @@ import com.aboni.nmea.router.RouterMessage;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
-public class RouterMessageImpl<T extends Object> implements RouterMessage {
+public class RouterMessageImpl<T> implements RouterMessage {
 
     private final long timestamp;
     private final T message;
