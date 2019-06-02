@@ -4,7 +4,6 @@ import com.aboni.geo.ApparentWind;
 import com.aboni.misc.PolarTable;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
@@ -467,7 +466,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	
     @Override
     protected void doWithSentence(Sentence s, String source) {
-    	if (!source.equals(this) && s instanceof STALKSentence) {
+    	if (!source.equals(getName()) && s instanceof STALKSentence) {
     		STALKSentence t = (STALKSentence)s;
     		if (t.getCommand().equals("86")) {
     			String[] p = t.getParameters();

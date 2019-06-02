@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.pi4j.io.gpio.*;

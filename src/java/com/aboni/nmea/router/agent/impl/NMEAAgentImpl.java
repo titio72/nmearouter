@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
-import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
@@ -269,7 +268,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
 			List<Sentence> toSend = procs.getSentences(sentence, getName());
-			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()), this);
+			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()));
 		}
 	}
 	/**
@@ -280,7 +279,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		if (isStarted()) {
 			getLogger().debug("Notify Sentence {" + m + "}");
-			listener.onSentence(RouterMessageImpl.createMessage(m, getName()), this);
+			listener.onSentence(RouterMessageImpl.createMessage(m, getName()));
 		}
 	}
 
