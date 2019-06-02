@@ -89,7 +89,7 @@ public class GDrive {
                         return false;
                     }
                 }).
-                forEach((File f)->System.out.println(f));
+                forEach(System.out::println);
     }
 
     private static void createFile(Drive service) throws IOException {
