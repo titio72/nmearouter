@@ -4,6 +4,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
+	<link href="css/glyphicons.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script src="js/nmearouter.js?l"></script>
   <!--script src="https://maps.googleapis.com/maps/api/js?v=3.36&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo" async
@@ -15,21 +16,26 @@
     .panelTable {
       width: 100%;
       font-family: monospace;
-      font-size: 17pt;
+      font-size: 13pt;
     }
 
-    .panelText {
+    .card-sensor-text {
       font-family: monospace;
       font-size: 18pt;
     }
 
-    .panelTextSmall {
+    .card-sensor-text-small {
       font-family: monospace;
       font-size: 12pt;
     }
 
-    .panelRouter {
+    .cardRouterBody {
       height: 300px;
+    }
+
+    .cardRouter {
+      width: 100%;
+      margin: 10px 0px 10px 0px;
     }
   </style>
 </head>
@@ -177,22 +183,20 @@
 
 
 <body ng-app="nmearouter">
-  <div id="sensorPanel" class="container-fluid" ng-controller="myCtrl">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="index.html">Home</a></li>
       <li class="breadcrumb-item active">Sensors</li>
     </ol>
+    <div id="sensorPanel" class="container-fluid" ng-controller="myCtrl">
     <div class="row">
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Heading</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Heading</h3>
+          <div class="card-body cardRouterBody">
             <table width="100%">
               <tr>
                 <td>
-                  <div class="panelTextSmall">{{hdg.angle|numberFixedLen:3:0}}&deg; {{hdg.s_dir}}</div>
+                  <div class="card-sensor-text-small">{{hdg.angle|numberFixedLen:3:0}}&deg; {{hdg.s_dir}}</div>
                 </td>
               </tr>
               <tr>
@@ -275,15 +279,13 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Abs. Wind</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Abs. Wind</h3>
+          <div class="card-body cardRouterBody">
             <table width="100%">
               <tr>
                 <td>
-                  <div class="panelTextall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}&deg;
+                  <div class="card-sensor-textall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}&deg;
                     {{wind.s_dir}}</div>
                 </td>
               </tr>
@@ -367,15 +369,13 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Rel. Wind</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Rel. Wind</h3>
+          <div class="card-body cardRouterBody">
             <table width="100%">
               <tr>
                 <td>
-                  <div class="panelTextSmall">A {{wind_r.speed | number:1}}Kn {{wind_r.show_angle | numberFixedLen:3:0}}&deg;
+                  <div class="card-sensor-text-small">A {{wind_r.speed | number:1}}Kn {{wind_r.show_angle | numberFixedLen:3:0}}&deg;
                     {{wind_r.tack}}<br>
                     T {{wind_t.speed | number:1}}Kn {{wind_t.show_angle|numberFixedLen:3:0}}&deg;<br>
                   </div>
@@ -464,11 +464,9 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">GPS</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">GPS</h3>
+          <div class="card-body cardRouterBody">
             <table class="panelTable">
               <tr>
                 <td>Position</td>
@@ -502,11 +500,9 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Navi</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Navi</h3>
+          <div class="card-body cardRouterBody">
             <table class="panelTable">
               <tr>
                 <td>Speed</td>
@@ -529,11 +525,9 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Diag</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Diag</h3>
+          <div class="card-body cardRouterBody">
             <table class="panelTable">
               <tr>
                 <td>Battery Svc</td>
@@ -564,11 +558,9 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Meteo</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Meteo</h3>
+          <div class="card-body cardRouterBody">
             <table class="panelTable">
               <tr>
                 <td>Cab Temp</td>
@@ -595,11 +587,9 @@
         </div>
       </div>
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Gyro</h2>
-          </div>
-          <div class="panel-body panelRouter">
+        <div class="card cardRouter">
+          <h3 class="card-header">Gyro</h3>
+          <div class="card-body cardRouterBody">
             <table class="panelTable">
               <tr>
                 <td>Head</td>

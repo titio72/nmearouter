@@ -5,10 +5,10 @@
   <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
+  <script src="js/nmearouter.js?z6"></script>
+  <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
-  <script src="js/nmearouter.js?z4"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"
-    async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=" async defer></script>
 
   <style>
     /* Always set the map height explicitly to define the size of the div
@@ -17,37 +17,20 @@
       height: 100%;
     }
 
-    /* Optional: Makes the sample page fill the window. */
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    .darkb {
-      background-color: darkgray;
-    }
-
-    .fill {
-      min-height: 100%
-    }
-
-    .DocumentList {
+    .documentList {
       overflow-y: scroll;
       height: 200px;
       width: 100%;
-      padding: 0 15px;
+      padding: 5px 5px;
     }
 
-    .tripBack {
-      background: #eeeeee;
-      border-radius: 5px;
-      padding: 5px;
+    .card-router-body {
+      height: 320px;
+      padding: 10px;
     }
 
-    .panelRouter {
-      height: 300px;
+    .card-router {
+      margin-bottom: 10px;
     }
 
     .info_cell {
@@ -75,6 +58,7 @@
 
   var tempChart = null;
   var windChart = null;
+  var windAngleChart = null;
   var pressChart = null;
   var humChart = null;
   var speedChart = null;
@@ -131,13 +115,13 @@
   }
 
   function editName(s) {
-    var ss = s.name.split(".");
-    var trip = ss[0];
-    var name = ss[1];
+    var ss = s.split("|");
+    var trip = ss[1];
+    var name = ss[2];
     bootbox.prompt({
       title: "Trip description",
-      message: "Edit description for trip '" + ss[1] + "'",
-      value: ss[1],
+      message: "Edit description for trip '" + ss[2] + "'",
+      value: ss[2],
       callback: function (result) {
         if (result != null) {
           changeName(trip, result);
@@ -170,6 +154,7 @@
   function refreshMap() {
     tempChart = refreshChart(tempChart, "tempChart", "AT0", 0);
     windChart = refreshChart(windChart, "windChart", "TW_", 1);
+    windAngleChart = refreshChart(windAngleChart, "windAngleChart", "TWD", 1);
     pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
     humChart = refreshChart(humChart, "humChart", "HUM", 0);
     speedChart = refreshSpeedChart(speedChart, "speedChart");
@@ -357,48 +342,39 @@
 
 <body ng-app="nmearouter">
 
-  <div id="nmearouter" class="container-fluid fill">
+  <div id="nmearouter" class="container-fluid">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="index.html">Home</a></li>
       <li class="breadcrumb-item active">Track</li>
     </ol>
     <div class="row">
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div id="TripsPanel" class="panel panel-primary" ng-controller="myCtrl">
-          <div class="panel-heading">
-            <h3 class="panel-title">Tracking <span style="float: right" class="glyphicon glyphicon-refresh"
-                aria-hidden="true" onclick="refreshTrips();"></span></h3>
-          </div>
-          <div id="panel_details" class="panel-body panelRouter">
-            <div class="table-responsive DocumentList" style="height: 100%">
-              <table class="table">
+      <div class="col-lg-8 col-md-12">
+        <div id="TripsPanel" class="card card-router" ng-controller="myCtrl">
+          <h3 class="card-header">Tracking <span style="float: right" class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="refreshTrips();"></span></h3>
+          <div id="panel_details" class="card-body card-router-body">
+            <div class="table-responsive documentList" style="height: 100%">
+              <table class="table table-sm">
                 <tr ng-repeat="t in days.trips">
                   <td>
-                    <button name="{{t.trip}}.{{t.lastDay}}" type="button" class="btn darkb btn-xs"
-                      onclick="tripIt(this)">
-                      <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span>
+                    <button id="btnTripIt|{{t.trip}}|{{t.lastDay}}" type="button" class="btn btn-circle btn-secondary" onclick="tripIt(this.id)">
+                      <span class="glyphicon glyphicon-bookmark circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
                   <td>
-                    <button ng-if="t.tripLabel!=''" name="{{t.trip}}.{{t.tripLabel}}" type="button"
-                      class="btn darkb btn-xs" onclick="editName(this)">
-                      <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                    <button ng-if="t.tripLabel!=''" id="btnTripLabel|{{t.trip}}|{{t.tripLabel}}" type="button" class="btn btn-circle btn-secondary" onclick="editName(this.id);">
+                      <span class="glyphicon glyphicon-pencil circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
                   <td>
-                    <button ng-if="t.tripLabel!=''" name="{{t.trip}}" type="button" class="btn darkb btn-xs"
-                      onclick="tripInfo(this)">
-                      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    <button ng-if="t.tripLabel!=''" id="btnTripInfo|{{t.trip}}" type="button" class="btn btn-circle btn-secondary" onclick="tripInfo(this.id)">
+                      <span class="glyphicon glyphicon-info-sign circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
-                  <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}"
-                      onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
+                  <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}" onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
                   <td>
                     <div style="float:left;" ng-repeat="d in t.dates">
-                      <button name="{{d.ref}}" type="button" class="btn darkb btn-xs" style="margin:3px;"
-                        onclick="showDay(this)">{{d.dayShort}}</button>
-                      <button ng-if="t.tripLabel==''" name="{{d.ref}}" type="button" class="btn darkb btn-xs"
-                        onclick="askDeleteDay(this)">
+                      <a name="{{d.ref}}" href="#" onclick="showDay(this)">{{d.dayShort}}</a>
+                      <button ng-if="t.tripLabel==''" name="{{d.ref}}" type="button" class="btn btn-xs" onclick="askDeleteDay(this)">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                       </button>
                       &nbsp;&nbsp;
@@ -410,31 +386,26 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Map</h3>
-          </div>
-          <div class="panel-body panelRouter" style="padding: 0%; margin: 0%">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Map</h3>
+          <div class="card-body card-router-body" style="padding: 0%; margin: 0%">
             <div id="map" style="width: 100%; height: 100%"></div>
             <div id="mapToolbar">
-              <button name="dwlGPX" type="button" class="btn btn-default" onclick="downloadGPX()">
+              <button name="dwlGPX" type="button" class="btn btn-info" onclick="downloadGPX()">
                 <span class="glyphicon glyphicon-save" aria-hidden="true"></span>GPX
               </button>
-              <button name="dwlMKL" type="button" class="btn btn-default" onclick="downloadKML()">
+              <button name="dwlMKL" type="button" class="btn btn-info" onclick="downloadKML()">
                 <span class="glyphicon glyphicon-save" aria-hidden="true"></span>KML
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Trip</h3>
-          </div>
-          <div id="panelInfo" class="panel-body panelRouter" ng-controller="infoController">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Trip</h3>
+          <div id="panelInfo" class="card-body card-router-body" ng-controller="infoController">
             <table>
               <tr><td class="info_cell">Name</td><td class="info_cell">{{trip.name}}</td></tr>
               <tr><td class="info_cell">Dates</td><td class="info_cell">{{trip.start}} - {{trip.end}}</td></tr>
@@ -447,64 +418,58 @@
           </div>
         </div>
       </div>
-  
-
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Speed</h3>
-          </div>
-          <div class="panel-body panelRouter">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Speed</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="speedChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Speed Analysis</h3>
-          </div>
-          <div class="panel-body panelRouter">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Speed Analysis</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="speedAnalysisChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Wind</h3>
-          </div>
-          <div class="panel-body panelRouter">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Wind</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="windChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Temperature</h3>
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Wind Angle</h3>
+          <div class="card-body card-router-body">
+            <canvas class="chart-canvas" id="windAngleChart"></canvas>
           </div>
-          <div class="panel-body panelRouter">
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Temperature</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="tempChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Pressure</h3>
-          </div>
-          <div class="panel-body panelRouter">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Pressure</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="pressChart"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12" style="min-width:400px">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h3 class="panel-title">Humidity</h3>
-          </div>
-          <div class="panel-body panelRouter">
+      <div class="col-lg-4 col-md-6" >
+        <div class="card card-router">
+          <h3 class="card-header">Humidity</h3>
+          <div class="card-body card-router-body">
             <canvas class="chart-canvas" id="humChart"></canvas>
           </div>
         </div>

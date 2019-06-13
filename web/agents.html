@@ -4,8 +4,10 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<link rel="icon" type="image/png" href="nmeasail.png">
 	<script src="js/nmearouter.js?G"></script>
+	<link href="css/nmearouter.css" rel="stylesheet" />
+	<link rel="icon" type="image/png" href="nmeasail.png">
+
 	<style>
 	/* The Modal (background) */
 	.modal {
@@ -22,8 +24,8 @@
 		background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 	}
 	
-	.darkb {
-		background-color: darkgray;
+	.ab-glyphicon-on {
+		color: yellowgreen;
 	}
 	
 	/* Modal Content */
@@ -42,7 +44,7 @@
 	table, tr, td {
         padding-left: 3px;
 	}
-	
+
 	</style>
 
 </head>
@@ -209,113 +211,104 @@
 </script>
 
 <body ng-app="nmearouter">
-
+	<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="index.html">Home</a></li>
+				<li class="breadcrumb-item active">Agents</li>
+			</ol>
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="index.html">Home</a></li>
-			<li class="breadcrumb-item active">Agents</li>
-		</ol>
-		<div class="row" ng-repeat="a in agents" >
-			<div class="col-lg-12"  style="min-width: 400px">
-				<div class="panel">
-					<div class="panel-body">
-						<div class="col-lg-4 col-md-5 col-sm-7 col-xs-6">
-                            <span ng-if="a.builtin=='false'" class="glyphicon glyphicon glyphicon-user" style="color: {{a.color}}" aria-hidden="true"></span>
-                            <span ng-if="a.builtin=='true'" class="glyphicon glyphicon glyphicon-cog" style="color: {{a.color}}" aria-hidden="true"></span>
-    						{{a.agent}} ({{a.type}})
-						</div>
-						<div class="col-lg-2 col-md-3 col-sm-5 col-xs-6" style="min-width:150px">
-							<table style="float: right">
-								<tr>
-									<td>
-										<div ng-if="a.source=='true'">
-											<div ng-if="a.hasFilterIn=='true'">
-												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" style="color: blue" aria-hidden="true"></span>
-												</button>
-											</div>
-											<div ng-if="a.hasFilterIn=='false'">
-												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "in")'>
-													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-												</button>
-											</div>
-										</div>
-										<div ng-if="a.source=='false'">
-											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-											</button>
-										</div>
-									</td>
-									<td align="right">
-										<div ng-if="a.target=='true'">
-											<div ng-if="a.hasFilterOut=='true'">
-												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-													<span class="glyphicon glyphicon glyphicon-filter" style="color: blue" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" style="color: blue" aria-hidden="true"></span>
-												</button>
-											</div>
-											<div ng-if="a.hasFilterOut=='false'">
-												<button name={{a.agent}} type="button" class="btn darkb btn-xs" onclick='showFilter(this, "out")'>
-													<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-												</button>
-											</div>
-										</div>
-										<div ng-if="a.target=='false'">
-											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span><span class="glyphicon glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-											</button>
-										</div>
-									</td>
-									<td align="right">
-										<div ng-if="a.startStop=='true' && a.builtin=='false'">
-											<div ng-if="a.auto=='false'">
-												<button name={{a.agent}} type="button"
-													class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 1)">
-													<span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
-												</button>
-											</div>
-											<div ng-if="a.auto=='true'">
-												<button name={{a.agent}} type="button"
-													class="btn darkb btn-xs" onclick="httpGetSynAuto(this, 0)">
-													<span class="glyphicon glyphicon-pushpin"
-														style="color: blue" aria-hidden="true"></span>
-												</button>
-											</div>
-										</div>
-										<div ng-if="a.startStop=='false' || a.builtin=='true'">
-											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
-											</button>
-										</div>
-									</td>
-									<td align="right">
-										<div ng-if="a.startStop=='true'">
-											<div ng-if="a.started=='false'">
-												<button name={{a.agent}} type="button"
-													class="btn darkb btn-xs" onclick="httpGetSyn(this, 1)">
-													<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
-												</button>
-											</div>
-											<div ng-if="a.started=='true'">
-												<button name={{a.agent}} type="button"
-													class="btn darkb btn-xs" onclick="httpGetSyn(this, 0)">
-													<span class="glyphicon glyphicon-stop" style="color: blue"
-														aria-hidden="true"></span>
-												</button>
-											</div>
-										</div>
-										<div ng-if="a.startStop=='false'">
-											<button name={{a.agent}} type="button" class="btn darkb btn-xs">
-												<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
-											</button>
-										</div>
-									</td>
-								</tr>
-							</table>
-						</div>
-						<div class="col-lg-6 col-md-4 col-sm-12 col-xs-12" ng-bind-html="to_trusted(a.description)"></div>
-					</div>
-				</div>
+		<div class="row alert alert-primary" ng-repeat="a in agents" >
+			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+				<span ng-if="a.builtin=='false'" class="glyphicon glyphicon glyphicon-user" style="color: {{a.color}}" aria-hidden="true"></span>
+				<span ng-if="a.builtin=='true'" class="glyphicon glyphicon glyphicon-cog" style="color: {{a.color}}" aria-hidden="true"></span>
+				{{a.agent}} ({{a.type}})
 			</div>
+			<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="min-width:260px">
+				<table style="float: right">
+					<tr>
+						<td>
+							<div ng-if="a.source=='true'">
+								<div ng-if="a.hasFilterIn=='true'">
+									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "in")'>
+										<span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on" aria-hidden="true"></span>
+									</button>
+								</div>
+								<div ng-if="a.hasFilterIn=='false'">
+									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "in")'>
+										<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div ng-if="a.source=='false'">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+								</button>
+							</div>
+						</td>
+						<td align="right">
+							<div ng-if="a.target=='true'">
+								<div ng-if="a.hasFilterOut=='true'">
+									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "out")'>
+										<span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on" aria-hidden="true"></span>
+									</button>
+								</div>
+								<div ng-if="a.hasFilterOut=='false'">
+									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "out")'>
+										<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div ng-if="a.target=='false'">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+								</button>
+							</div>
+						</td>
+						<td align="right">
+							<div ng-if="a.startStop=='true' && a.builtin=='false'">
+								<div ng-if="a.auto=='false'">
+									<button name={{a.agent}} type="button"
+										class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 1)">
+										<span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
+									</button>
+								</div>
+								<div ng-if="a.auto=='true'">
+									<button name={{a.agent}} type="button"
+										class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 0)">
+										<span class="glyphicon glyphicon-pushpin ab-glyphicon-on" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div ng-if="a.startStop=='false' || a.builtin=='true'">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+								</button>
+							</div>
+						</td>
+						<td align="right">
+							<div ng-if="a.startStop=='true'">
+								<div ng-if="a.started=='false'">
+									<button name={{a.agent}} type="button"
+										class="btn btn-circle btn-secondary" onclick="httpGetSyn(this, 1)">
+										<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+									</button>
+								</div>
+								<div ng-if="a.started=='true'">
+									<button name={{a.agent}} type="button"
+										class="btn btn-circle btn-secondary" onclick="httpGetSyn(this, 0)">
+										<span class="glyphicon glyphicon-stop ab-glyphicon-on" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+							<div ng-if="a.startStop=='false'">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="col" ng-bind-html="to_trusted(a.description)"></div>
 		</div>
 	</div>
 
@@ -333,7 +326,7 @@
 				<div class="panel-heading">
 					<h3 class="panel-title" id="filterDialogLabel">Filters for xyz</h3>
 				</div>
-				<div class="panel-body">
+				<div class="card-body">
 					<form>
 						<input type="hidden" id="agent" /> <input type="hidden" id="inout" />
 						<div class="form-group">
@@ -347,9 +340,9 @@
 								<option>Whitelist</option>
 							</select>
 						</div>
-						<button type="reset" class="btn darkb btn-secondary"
+						<button type="reset" class="btn btn-secondary btn-secondary"
 							onClick="hideFilter()">Cancel</button>
-						<button type="submit" class="btn darkb btn-primary"
+						<button type="submit" class="btn btn-secondary btn-primary"
 							onClick="commitFilter()">Ok</button>
 					</form>
 				</div>

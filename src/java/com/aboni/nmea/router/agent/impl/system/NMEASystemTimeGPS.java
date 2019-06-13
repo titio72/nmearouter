@@ -28,7 +28,6 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     	return "Sync up system time with GPS UTC time feed [" + (cache.isTimeSynced()?"Sync " + cache.getTimeSkew():"Not Sync") + "]";
     }
     
-
 	@Override
 	protected void doWithSentence(Sentence s, String src) {
 		systemTimeCHecker.checkAndSetTime(s);

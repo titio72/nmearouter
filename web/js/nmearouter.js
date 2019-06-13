@@ -83,15 +83,6 @@ function httpGetAgents() {
 	return JSON.parse(xmlHttp.responseText).agents;
 }
 
-function httpBackup() {
-	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/backup", false);
-	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	xmlHttp.send(null);
-	var json = JSON.parse(xmlHttp.responseText);
-	return json;
-}
-
 function httpLoadSpeedDateRange(dt0, dt1) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?date=" + dt0 + "&dateTo=" + dt1, false);
@@ -153,8 +144,11 @@ function fillDataset(caption, sr, attr, color, borderColor) {
 		datapoint.y = parseFloat(item[attr]);
 		dataset.data.push(datapoint);
 	}
-    dataset.pointBackgroundColor = color;"#FF0000",
-    dataset.pointBorderColor = borderColor;
+    dataset.pointBackgroundColor = color;
+	dataset.pointBorderColor = borderColor;
+	dataset.pointRadius = 0;
+	dataset.borderColor = borderColor;
+	dataset.fill = 'false';
 	return dataset;
 }
 
@@ -166,20 +160,52 @@ function info() {
 	});
 }
 
-function backup() {
-	var res = httpBackup();
-	if (res.result=="Ok") {
-		window.open("http://" + window.location.hostname + ":1112/" + res.file);
-	} else {
-		
-	}
+function httpBackup() {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onload = function() {
+		if (this.status == 200) {
+			var json = JSON.parse(xmlHttp.responseText);
+			window.open("http://" + window.location.hostname + ":1112/" + json.file);
+		} else {
+			bootbox.alert({
+				title: "Backup",
+				message: "Sorry, it didn't work..."
+			});
+		}
+	};
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/backup", true);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
 }
 
-function tripInfo(trip) {
+function backup() {
+	httpBackup();
+}
+
+function tripInfo(tripString) {
+    var ss = tripString.split("|");
+	var trip = ss[1];
+	var json = getTrip(trip);
+
 	bootbox.alert({
-		message: getTripInfo(trip.name)
+		title: json.name,
+		message: "<p>" + json.start + " - " + json.end + " UTC</p>" +			
+			"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + json.totalTime + "</b></p>" +
+			"<p>Sail time <b>" + json.sailTime + "</b></p>" +
+			"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
+			"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>" +
+			"<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>"
+	
 	});
 	
+}
+
+function getGKey() {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "gmap.key", false);
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+	return xmlHttp.responseText;
 }
 
 function getInfo(dateFrom, dateTo) {
@@ -241,19 +267,6 @@ function getTrip(trip) {
   return res;
 }
 
-function getTripInfo(trip) {
-
-  var json = getTrip(trip);
-  
-  return "<p>" + json.name + "</p>" + 
-    "<p>" + json.start + " - " + json.end + " UTC</p>" +			
-		"<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + json.totalTime + "</b></p>" +
-		"<p>Sail time <b>" + json.sailTime + "</b></p>" +
-		"<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
-		"<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>" +
-		"<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>";
-}
-
 function deleteDay(d) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/dropcruisingday?date=" + d.name, false);
@@ -269,8 +282,8 @@ function deleteDay(d) {
 
 function tripIt(d) {
 	var xmlHttp = new XMLHttpRequest();
-	var ss = d.name.split(".");
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/createtrip?trip=" + ss[0] + "&date=" + ss[1], false);
+	var ss = d.name.split("|");
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/createtrip?trip=" + ss[1] + "&date=" + ss[2], false);
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 	var controllerElement = document.getElementById('TripsPanel');

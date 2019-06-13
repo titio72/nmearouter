@@ -52,8 +52,8 @@ public class SystemTimeChecker {
 	    try {
 	        ServerLog.getLogger().info("Running {./setGPSTime '" + formatter.format(c.getTime()) + "'}");
 	        ProcessBuilder b = new ProcessBuilder("./setGPSTime", formatter.format(c.getTime()));
-            Process proc = b.start();
-            int retCode = proc.waitFor();
+            Process process = b.start();
+            int retCode = process.waitFor();
             ServerLog.getLogger().info("SetTime Return code {" + retCode + "}");
         } catch (Exception e) {
         	ServerLog.getLogger().error("Cannot set GPS time", e);
