@@ -8,6 +8,7 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -49,17 +50,8 @@ public class NMEAStreamImpl implements NMEAStream {
 			Sentence s = (payload instanceof Sentence)?(Sentence)payload:null;
 			for (ListenerWrapper i: annotatedListeners.values()) {
 				try {
-					if (s!=null) {
-						i.onSentence(s, message.getSource());
-					}
-					if (i.isJSON()) {
-						if (msg==null && s!=null) {
-							msg = jsonConv.convert(s);
-						}
-						if (msg!=null) {
-							i.onSentence(msg);
-						}
-					}
+					sendNMEASentence(message, s, i);
+					msg = sendJsonObject(msg, s, i);
 				} catch (Exception e) {
 					ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
 				}
@@ -67,7 +59,31 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-    private class ListenerWrapper {
+	@Nullable
+	private JSONObject sendJsonObject(JSONObject msg, Sentence s, ListenerWrapper i) {
+		if (i.isJSON()) {
+			msg = getJsonObject(msg, s);
+			if (msg!=null) {
+				i.onSentence(msg);
+			}
+		}
+		return msg;
+	}
+
+	private void sendNMEASentence(RouterMessage message, Sentence s, ListenerWrapper i) {
+		if (i.isNMEA() && s != null) {
+			i.onSentence(s, message.getSource());
+		}
+	}
+
+	private JSONObject getJsonObject(JSONObject msg, Sentence s) {
+		if (msg==null && s!=null) {
+			msg = jsonConv.convert(s);
+		}
+		return msg;
+	}
+
+	private class ListenerWrapper {
 		
 		private final List<Method> listeners;
 		private final List<Method> listenersJSON;
@@ -114,7 +130,11 @@ public class NMEAStreamImpl implements NMEAStream {
 		boolean isJSON() {
 			return !listenersJSON.isEmpty();
 		}
-		
+
+		boolean isNMEA() {
+			return !listeners.isEmpty();
+		}
+
 		private void onSentence(JSONObject s) {
 			Object[] p = new Object[] {s};
 			for (Method m: listenersJSON) {

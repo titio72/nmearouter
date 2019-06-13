@@ -154,7 +154,7 @@ public class NMEARouterImpl implements NMEARouter {
 		ServerLog.getLogger().debug("New status received for {" + src + "}");
 	}
 
-    private void privateQueueUpSentence(RouterMessage s, NMEAAgent source) {
+    private void privateQueueUpSentence(RouterMessage s) {
         try {
 			sentenceQueue.put(s);
 		} catch (InterruptedException e1) {

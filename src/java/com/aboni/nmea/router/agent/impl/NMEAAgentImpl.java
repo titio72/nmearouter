@@ -268,7 +268,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
 			List<Sentence> toSend = procs.getSentences(sentence, getName());
-			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()), this);
+			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()));
 		}
 	}
 	/**
@@ -279,7 +279,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		if (isStarted()) {
 			getLogger().debug("Notify Sentence {" + m + "}");
-			listener.onSentence(RouterMessageImpl.createMessage(m, getName()), this);
+			listener.onSentence(RouterMessageImpl.createMessage(m, getName()));
 		}
 	}
 
