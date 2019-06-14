@@ -13,7 +13,6 @@ var app = angular.module("nmearouter", ['ngSanitize'])
 .filter('numberFixedLen', function () {
     return function (n, zeroes, digits) {
         var num = parseFloat(n, 10);
-        dig = parseInt(digits, 10);
         zeroes = parseInt(zeroes, 10);
         if (isNaN(num) || isNaN(digits) || isNaN(zeroes)) {
             return n;
@@ -28,15 +27,15 @@ var app = angular.module("nmearouter", ['ngSanitize'])
 });
 
 function calcTrueWind(speed, appWindDeg, appWindSpeed) {
-  v = speed;
-  w = appWindSpeed;
-  wA = appWindDeg / 180.0 * Math.PI;
+  var v = speed;
+  var w = appWindSpeed;
+  var wA = appWindDeg / 180.0 * Math.PI;
 
-  wAx = w * Math.sin(wA);
-  wAy = w * Math.cos(wA);
+  var wAx = w * Math.sin(wA);
+  var wAy = w * Math.cos(wA);
 
-  wTx = wAx;
-  wTy = wAy - v;
+  var wTx = wAx;
+  var wTy = wAy - v;
 
   var r = {
     angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
@@ -109,7 +108,8 @@ function httpLoadSpeedAnalysisDateRange(dt0, dt1, cback) {
       dataset.backgroundColor = "#FF0000";
       dataset.data = [];
       
-      sr = json.serie;
+      var sr = json.serie;
+      var i;
       for (i = 0; i<sr.length; i++) {
         var item = sr[i];
         dataset.data.push(item.distance);
@@ -149,6 +149,7 @@ function fillDataset(caption, sr, attr, color, borderColor) {
   var dataset = new Object();
   dataset.label = caption;
   dataset.data = [];
+  var i;
   for (i = 0; i<sr.length; i++) {
     var item = sr[i];
     var datapoint = new Object();
@@ -351,7 +352,6 @@ function changeName(trip, name) {
 }
 
 function httpGetCruisingDays() {
-  var caption;
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/cruisingdays", false);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
@@ -361,7 +361,6 @@ function httpGetCruisingDays() {
 }
 
 function httpGetTrack(dtF, dtT, cback) {
-  var caption;
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/track?format=json&dateFrom=" + dtF +
       "&dateTo=" + dtT, true);
@@ -380,15 +379,11 @@ function loadJavascript( url ) {
     ajax.open( 'GET', url, false ); // <-- the 'false' makes it synchronous
     ajax.onreadystatechange = function () {
         var script = ajax.response || ajax.responseText;
-        if (ajax.readyState === 4) {
-            switch( ajax.status) {
-                case 200:
-                    eval.apply( window, [script] );
-                    console.log("script loaded: ", url);
-                    break;
-                default:
-                    console.log("ERROR: script not loaded: ", url);
-            }
+        if (ajax.readyState === 4 && ajax.status==200) {
+            eval.apply( window, [script] );
+            console.log("script loaded: ", url);
+        } else {
+            console.log("ERROR: script not loaded: ", url);
         }
     };
     ajax.send(null);
