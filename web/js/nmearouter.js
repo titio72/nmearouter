@@ -124,6 +124,24 @@ function httpLoadMeteoDateRange(tp, all, dt0, dt1) {
 	return getDataset(tp, json.serie, all, 1, all);
 }
 
+function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, true);
+	xmlHttp.onreadystatechange = function() {
+		if (this.readyState==4 && this.status==200) {
+			var json = JSON.parse(xmlHttp.responseText);
+			cback(getDataset(tp, json.serie, all, 1, all));
+		}
+	}
+	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	xmlHttp.send(null);
+}
+
+function onhttpresult(cback) {
+
+}
+
+
 function getDataset(caption, sr, min, avg, max) {
 	var data = new Object();
 	data.datasets = [];

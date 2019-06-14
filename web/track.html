@@ -8,13 +8,30 @@
   <script src="js/nmearouter.js?z6"></script>
   <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
-  <script src="https://maps.googleapis.com/maps/api/js?key=" async defer></script>
-
+  <script>
+    $.getScript("https://maps.googleapis.com/maps/api/js?key=" + getGKey(), function(data, textStatus, jqxhr) {
+      console.log(data); //data returned
+      console.log(textStatus); //success
+      console.log(jqxhr.status); //200
+      console.log('GMAP API Lodaded');
+      $.getScript("js/maplabel.js", function(d, t, j) {
+        console.log('GMAP Labels API Lodaded');
+      });
+    });
+  </script>
   <style>
     /* Always set the map height explicitly to define the size of the div
          * element that contains the map. */
     #map {
       height: 100%;
+    }
+
+    .centered {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      margin-top: -50px;
+      margin-left: -100px;
     }
 
     .documentList {
@@ -102,6 +119,7 @@
     dateFrom = split[0];
     dateTo = split[1];
     tripId = split[2];
+    //$("#track_spinner").removeClass('d-none');
     refreshMap();
     refreshInfo();
   }
@@ -241,7 +259,7 @@
     }
     var c1 = new Chart(ctx, {
       type: 'line',
-      data: httpLoadMeteoDateRange(type, style, dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
+      data: httpLoadMeteoDateRangeA(type, style, dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
       options: {
         scales: {
           xAxes: [{
@@ -252,6 +270,9 @@
     });
     return c1;
   }
+
+  function dorefreshdata()
+
 
   function loadMap(dtF, dtT) {
     path = httpGetTrack(dtF, dtT);
@@ -476,6 +497,14 @@
       </div>
     </div>
   </div>
+
+  <div style="position: absolute; left: 50%;  top: 50%; margin-left: -85px; margin-top: -85px; width: 170px; height: 170px; padding: 10px; z-index: 1000;" 
+    id="track_spinner" class="alert alert-secondary d-none">
+    <div style="width: 150px; height: 150px;" class="spinner-grow">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+
 </body>
 
 </html>
