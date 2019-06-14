@@ -21,7 +21,6 @@ public class ScalarStatsSample extends StatsSample {
      		(Double.isNaN(getRangeMax()) || v<=getRangeMax())) { 
             
  			if (samples == 0) {
-             	v = Utils.normalizeDegrees0To360(v);
                 avg = v;
                 max = v;
                 min = v;

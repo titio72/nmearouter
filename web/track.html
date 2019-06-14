@@ -19,19 +19,12 @@
       });
     });
   </script>
+
   <style>
     /* Always set the map height explicitly to define the size of the div
          * element that contains the map. */
     #map {
       height: 100%;
-    }
-
-    .centered {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      margin-top: -50px;
-      margin-left: -100px;
     }
 
     .documentList {
@@ -73,14 +66,6 @@
 
 <script type="text/javascript">
 
-  var tempChart = null;
-  var windChart = null;
-  var windAngleChart = null;
-  var pressChart = null;
-  var humChart = null;
-  var speedChart = null;
-  var speedAnalysisChart = null;
-
   var dateFrom = null;
   var dateTo = null;
   var tripId = null;
@@ -119,9 +104,7 @@
     dateFrom = split[0];
     dateTo = split[1];
     tripId = split[2];
-    //$("#track_spinner").removeClass('d-none');
     refreshMap();
-    refreshInfo();
   }
 
   function showDay(d) {
@@ -129,7 +112,6 @@
     dateTo = d.name;
     tripId = null;
     refreshMap();
-    refreshInfo();
   }
 
   function editName(s) {
@@ -169,23 +151,25 @@
     });
   }
 
+  var chartMap = new Map();
+
   function refreshMap() {
-    tempChart = refreshChart(tempChart, "tempChart", "AT0", 0);
-    windChart = refreshChart(windChart, "windChart", "TW_", 1);
-    windAngleChart = refreshChart(windAngleChart, "windAngleChart", "TWD", 1);
-    pressChart = refreshChart(pressChart, "pressChart", "PR_", 0);
-    humChart = refreshChart(humChart, "humChart", "HUM", 0);
-    speedChart = refreshSpeedChart(speedChart, "speedChart");
-    speedAnalysisChart = refreshSpeedAnalysisChart(speedAnalysisChart, "speedAnalysisChart");
+    refreshChart("tempChart", "AT0", 0);
+    refreshChart("windChart", "TW_", 1);
+    refreshChart("windAngleChart", "TWD", 1);
+    refreshChart("pressChart", "PR_", 0);
+    refreshChart("humChart", "HUM", 0);
+    refreshSpeedChart("speedChart");
+    refreshSpeedAnalysisChart("speedAnalysisChart");
+    refreshInfo();
     loadMap(dateFrom, dateTo);
   }
 
-  function refreshSpeedChart(c, chart) {
+  function refreshSpeedChart(chart) {
 
 
     var ctx = document.getElementById(chart);
-
-    ctx.onmousemove = function (evt) {
+    /*ctx.onmousemove = function (evt) {
       if (speedChart != null) {
         var el = speedChart.getElementsAtEvent(evt);
         if (el.length > 0) {
@@ -196,119 +180,127 @@
       }
       //do something with the el object to display other information
       //elsewhere on the page
-    }
+    }*/
 
-
-    if (c != null) {
-      c.destroy();
-    }
-    var c1 = new Chart(ctx, {
-      type: 'line',
-      data: httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
-      options: {
-        scales: {
-          xAxes: [{
-            type: 'time',
-          }]
-        },
-        tooltips: {
-          callbacks: {
-            label: function (tooltipItem, data) {
-              ix = tooltipItem.index;
-              _minSpeed = data.datasets[0].data[ix].y;
-              _avgSpeed = data.datasets[1].data[ix].y;
-              _maxSpeed = data.datasets[2].data[ix].y;
-              return _minSpeed.toFixed(2) + " - " + _avgSpeed.toFixed(2) + " - " + _maxSpeed.toFixed(2);
-            },
-            title: function (tooltipItem, data) {
-              ix = tooltipItem[0].index;
-              _time = new Date(data.datasets[0].data[ix].x);
-              _minSpeed = data.datasets[0].data[ix].y;
-              _avgSpeed = data.datasets[1].data[ix].y;
-              _maxSpeed = data.datasets[2].data[ix].y;
-              return _time.toLocaleTimeString();
+    httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
+      var c = chartMap.get(chart);
+      if (c != null) {
+        c.destroy();
+      }
+      var c1 = new Chart(ctx, {
+        type: 'line',
+        data: res,
+        options: {
+          scales: {
+            xAxes: [{
+              type: 'time',
+            }]
+          },
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem, data) {
+                ix = tooltipItem.index;
+                _minSpeed = data.datasets[0].data[ix].y;
+                _avgSpeed = data.datasets[1].data[ix].y;
+                _maxSpeed = data.datasets[2].data[ix].y;
+                return _minSpeed.toFixed(2) + " - " + _avgSpeed.toFixed(2) + " - " + _maxSpeed.toFixed(2);
+              },
+              title: function (tooltipItem, data) {
+                ix = tooltipItem[0].index;
+                _time = new Date(data.datasets[0].data[ix].x);
+                _minSpeed = data.datasets[0].data[ix].y;
+                _avgSpeed = data.datasets[1].data[ix].y;
+                _maxSpeed = data.datasets[2].data[ix].y;
+                return _time.toLocaleTimeString();
+              }
             }
           }
         }
+      });
+      chartMap.set(chart, c1);
+    });
+  }
+
+  function refreshSpeedAnalysisChart(chart) {
+    var ctx = document.getElementById(chart);
+    httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
+      var c = chartMap.get(chart);
+      if (c != null) {
+        c.destroy();
       }
+      var c1 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
+            '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
+          datasets: [res]
+        },
+        options: {}
+      });
+      chartMap.set(chart, c1);
     });
-    return c1;
+
   }
 
-  function refreshSpeedAnalysisChart(c, chart) {
+  function refreshChart(chart, type, style) {
     var ctx = document.getElementById(chart);
-    if (c != null) {
-      c.destroy();
-    }
-    var c1 = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
-          '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
-        datasets: [httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", ctx.clientWidth)]
-      },
-      options: {}
-    });
-    return c1;
-  }
-
-  function refreshChart(c, chart, type, style) {
-    var ctx = document.getElementById(chart);
-    if (c != null) {
-      c.destroy();
-    }
-    var c1 = new Chart(ctx, {
-      type: 'line',
-      data: httpLoadMeteoDateRangeA(type, style, dateFrom + "0000", dateTo + "2359", ctx.clientWidth),
-      options: {
-        scales: {
-          xAxes: [{
-            type: 'time',
-          }]
+    httpLoadMeteoDateRangeA(type, style, dateFrom + "0000", dateTo + "2359", function(res) {
+      var c = chartMap.get(chart);
+      if (c != null) {
+        c.destroy();
+      }
+      var c1 = new Chart(ctx, {
+        type: 'line',
+        data: res,
+        options: {
+          scales: {
+            xAxes: [{
+              type: 'time',
+            }]
+          }
         }
-      }
+      });
+      chartMap.set(chart, c1);
+
     });
-    return c1;
   }
-
-  function dorefreshdata()
-
 
   function loadMap(dtF, dtT) {
-    path = httpGetTrack(dtF, dtT);
-    var bounds = new google.maps.LatLngBounds();
-    if (path.length > 0) {
-      for (i = 0; i < path.length; i++) {
-        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng));
-        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng + 0.016));
-        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng - 0.016));
+    httpGetTrack(dtF, dtT, function(path) {
+      var bounds = new google.maps.LatLngBounds();
+      if (path.length > 0) {
+        for (i = 0; i < path.length; i++) {
+          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng));
+          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng + 0.016));
+          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng - 0.016));
+        }
       }
-    }
-    var mPath = new google.maps.Polyline({
-      path: path,
-      geodesic: true,
-      strokeColor: '#FF0000',
-      strokeOpacity: 1.0,
-      strokeWeight: 2
+      var mPath = new google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      map = new google.maps.Map(document.getElementById('map'), {
+        mapTypeId: 'terrain'
+      });
+      var startPoint = { lat: path[0].lat, lng: path[0].lng };
+      var marker = new google.maps.Marker({
+        position: startPoint,
+        title: 'Start'
+      });
+      var endPoint = { lat: path[path.length - 1].lat, lng: path[path.length - 1].lng };
+      var marker1 = new google.maps.Marker({
+        position: endPoint,
+        title: 'End'
+      });
+      mPath.setMap(map);
+      marker.setMap(map);
+      marker1.setMap(map);
+      map.setCenter(bounds.getCenter());
+      map.fitBounds(bounds);
     });
-    map = new google.maps.Map(document.getElementById('map'), {
-      mapTypeId: 'terrain'
-    });
-    var startPoint = { lat: path[0].lat, lng: path[0].lng };
-    var marker = new google.maps.Marker({
-      position: startPoint,
-      title: 'Start'
-    });
-    var endPoint = { lat: path[path.length - 1].lat, lng: path[path.length - 1].lng };
-    var marker1 = new google.maps.Marker({
-      position: endPoint,
-      title: 'End'
-    });
-    mPath.setMap(map);
-    marker.setMap(map);
-    marker1.setMap(map);
-    map.setCenter(bounds.getCenter());
-    map.fitBounds(bounds);
   }
 
   function setMarker(lat, lon, title) {
@@ -352,9 +344,17 @@
   }
   
   function refreshInfo() {
+    if (tripId!=null) {
+      getTripA(tripId, applyInfo);
+    } else {
+      getInfoA(dateFrom, dateTo, applyInfo);
+    }
+  }
+
+  function applyInfo(info) {
     var controllerElement = document.getElementById('panelInfo');
     var controllerScope = angular.element(controllerElement).scope();
-    controllerScope.trip = (tripId!=null)?getTrip(tripId):getInfo(dateFrom, dateTo);
+    controllerScope.trip = info;
     controllerScope.$evalAsync();
   }
 
@@ -369,7 +369,7 @@
       <li class="breadcrumb-item active">Track</li>
     </ol>
     <div class="row">
-      <div class="col-lg-8 col-md-12">
+      <div class="col-lg-4 col-md-6">
         <div id="TripsPanel" class="card card-router" ng-controller="myCtrl">
           <h3 class="card-header">Tracking <span style="float: right" class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="refreshTrips();"></span></h3>
           <div id="panel_details" class="card-body card-router-body">
@@ -497,14 +497,6 @@
       </div>
     </div>
   </div>
-
-  <div style="position: absolute; left: 50%;  top: 50%; margin-left: -85px; margin-top: -85px; width: 170px; height: 170px; padding: 10px; z-index: 1000;" 
-    id="track_spinner" class="alert alert-secondary d-none">
-    <div style="width: 150px; height: 150px;" class="spinner-grow">
-      <span class="sr-only">Loading...</span>
-    </div>
-  </div>
-
 </body>
 
 </html>
