@@ -210,7 +210,7 @@ function backup() {
 }
 
 function tripInfo(tripString) {
-    var ss = tripString.split("|");
+  var ss = tripString.split("|");
   var trip = ss[1];
   var json = getTrip(trip);
 
@@ -343,7 +343,7 @@ function deleteDay(d) {
 
 function tripIt(d) {
   var xmlHttp = new XMLHttpRequest();
-  var ss = d.name.split("|");
+  var ss = d.split("|");
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/createtrip?trip=" + ss[1] + "&date=" + ss[2], false);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
