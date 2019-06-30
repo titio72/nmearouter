@@ -386,11 +386,6 @@
                       <span class="glyphicon glyphicon-pencil circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
-                  <td>
-                    <button ng-if="t.tripLabel!=''" id="btnTripInfo|{{t.trip}}" type="button" class="btn btn-circle btn-secondary" onclick="tripInfo(this.id)">
-                      <span class="glyphicon glyphicon-info-sign circle-icon-content" aria-hidden="true"></span>
-                    </button>
-                  </td>
                   <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}" onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
                   <td>
                     <div style="float:left;" ng-repeat="d in t.dates">

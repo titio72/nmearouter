@@ -217,13 +217,8 @@
 			</ol>
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
 		<div class="row alert alert-primary" ng-repeat="a in agents" >
-			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-				<span ng-if="a.builtin=='false'" class="glyphicon glyphicon glyphicon-user" style="color: {{a.color}}" aria-hidden="true"></span>
-				<span ng-if="a.builtin=='true'" class="glyphicon glyphicon glyphicon-cog" style="color: {{a.color}}" aria-hidden="true"></span>
-				{{a.agent}} ({{a.type}})
-			</div>
-			<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="min-width:260px">
-				<table style="float: right">
+			<div class="col-1" style="min-width:260px">
+				<table style="float: left">
 					<tr>
 						<td>
 							<div ng-if="a.source=='true'">
@@ -239,12 +234,12 @@
 								</div>
 							</div>
 							<div ng-if="a.source=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
 						</td>
-						<td align="right">
+						<td>
 							<div ng-if="a.target=='true'">
 								<div ng-if="a.hasFilterOut=='true'">
 									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "out")'>
@@ -258,12 +253,12 @@
 								</div>
 							</div>
 							<div ng-if="a.target=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
 						</td>
-						<td align="right">
+						<td>
 							<div ng-if="a.startStop=='true' && a.builtin=='false'">
 								<div ng-if="a.auto=='false'">
 									<button name={{a.agent}} type="button"
@@ -279,12 +274,12 @@
 								</div>
 							</div>
 							<div ng-if="a.startStop=='false' || a.builtin=='true'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
 						</td>
-						<td align="right">
+						<td>
 							<div ng-if="a.startStop=='true'">
 								<div ng-if="a.started=='false'">
 									<button name={{a.agent}} type="button"
@@ -300,7 +295,7 @@
 								</div>
 							</div>
 							<div ng-if="a.startStop=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary">
+								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
@@ -308,6 +303,12 @@
 					</tr>
 				</table>
 			</div>
+			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+				<span ng-if="a.builtin=='false'" class="glyphicon glyphicon glyphicon-user" style="color: {{a.color}}" aria-hidden="true"></span>
+				<span ng-if="a.builtin=='true'" class="glyphicon glyphicon glyphicon-cog" style="color: {{a.color}}" aria-hidden="true"></span>
+				{{a.agent}} ({{a.type}})
+			</div>
+
 			<div class="col" ng-bind-html="to_trusted(a.description)"></div>
 		</div>
 	</div>
