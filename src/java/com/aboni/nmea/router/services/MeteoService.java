@@ -9,9 +9,10 @@ import java.util.List;
 public class MeteoService extends SampledQueryService {
 
 	private String type;
-    
+
     @Override
 	protected void fillResponse(ServiceOutput response, List<TimeSerieSample> samples) throws IOException {
+		long lastTS = 0;
 		response.getWriter().write("{\"type\":\""+ type +"\", \"serie\":[");
 		boolean first = true;
         if (samples!=null) {
@@ -24,6 +25,15 @@ public class MeteoService extends SampledQueryService {
 				if (!first) {
 			        response.getWriter().write(",");
 				}
+				if (lastTS!=0 && (s.getT0()-lastTS)>(1000*60*60)) {
+					Timestamp tsEmpty = new Timestamp(s.getT0()-1000);
+					response.getWriter().write("{\"time\":\"" + tsEmpty.toString() + "\",");
+					response.getWriter().write("\"vMin\": null,");
+					response.getWriter().write("\"v\": null,");
+					response.getWriter().write("\"vMax\": null}");
+					response.getWriter().write(",");
+				}
+				lastTS = s.getT0();
 			    response.getWriter().write("{\"time\":\"" + ts.toString() + "\",");
 			    response.getWriter().write("\"vMin\":" + vMin + ",");
 			    response.getWriter().write("\"v\":" + v + ",");

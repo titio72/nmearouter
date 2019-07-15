@@ -14,7 +14,7 @@ import java.util.TreeMap;
 
 public class SpeedAnalyticsService extends JSONWebService {
 
-	private static final String SQL = "select sum(dTime), sum(dist) from track where TS>=? and TS<? and speed>=? and speed<?";
+	private static final String SQL = "select round(speed*2)/2, sum(dTime), sum(dist) from track where TS>=? and TS<? and anchor=0 group by round(speed*2)";
 	private static final double SPEED_BUCKET = 0.5;
 	private static final double SPEED_MIN =  0.0;
 	private static final double SPEED_MAX = 12.0;
@@ -31,6 +31,9 @@ public class SpeedAnalyticsService extends JSONWebService {
 	@Override
 	public JSONObject getResult(ServiceConfig config) {
 		Map<Double, Stat> distr = new TreeMap<>();
+		for (double speed = SPEED_MIN; (speed + SPEED_BUCKET / 10.0) < SPEED_MAX; speed += SPEED_BUCKET) {
+			distr.put(speed, new Stat());
+		}
 
 		DateRangeParameter fromTo = new DateRangeParameter(config);
 		Calendar cFrom = fromTo.getFrom();
@@ -40,12 +43,14 @@ public class SpeedAnalyticsService extends JSONWebService {
 			try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
 				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
 				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
-
-				for (double speed = SPEED_MIN; (speed + SPEED_BUCKET / 10.0) < SPEED_MAX; speed += SPEED_BUCKET) {
-					stm.setDouble(3, speed);
-					stm.setDouble(4, speed + SPEED_BUCKET);
-					scanSpeedSamples(distr, stm, speed);
+				try (ResultSet rs = stm.executeQuery()) {
+					while (rs.next()) {
+						double s = rs.getDouble(1);
+						distr.get(s).distance = rs.getDouble(3);
+						distr.get(s).time = rs.getInt(2);
+					}
 				}
+
 				JSONObject res = new JSONObject();
 				JSONArray serie = new JSONArray();
 				for (Map.Entry<Double, Stat> entry : distr.entrySet()) {
@@ -65,18 +70,4 @@ public class SpeedAnalyticsService extends JSONWebService {
 			return res;
         }
 	}
-
-	private void scanSpeedSamples(Map<Double, Stat> distr, PreparedStatement stm, double speed) throws SQLException {
-		try (ResultSet rs = stm.executeQuery()) {
-			Stat s = new Stat();
-			if (rs.next()) {
-				long t = rs.getLong(1);
-				s.distance = rs.getDouble(2);
-				s.time = t;
-			}
-			distr.put(speed, s);
-		}
-	}
-
-
 }
