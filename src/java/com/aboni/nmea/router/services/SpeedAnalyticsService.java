@@ -14,7 +14,7 @@ import java.util.TreeMap;
 
 public class SpeedAnalyticsService extends JSONWebService {
 
-	private static final String SQL = "select round(speed*2)/2, sum(dTime), sum(dist) from track where TS>=? and TS<? and anchor=0 group by round(speed*2)";
+	private static final String SQL = "select round(speed*2)/2, sum(dTime), sum(dist) from track where TS>=? and TS<? and anchor=0 group by round(speed*2)/2";
 	private static final double SPEED_BUCKET = 0.5;
 	private static final double SPEED_MIN =  0.0;
 	private static final double SPEED_MAX = 12.0;
