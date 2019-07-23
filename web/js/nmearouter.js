@@ -1,3 +1,4 @@
+loadJavascript("js/hammer.min.js");
 loadJavascript("js/jquery.min.js");
 loadJavascript("js/angular.min.js");
 loadJavascript("js/angular-sanitize.min.js");
@@ -5,6 +6,7 @@ loadJavascript("js/bootbox.min.js");
 loadJavascript("js/bootstrap.min.js");
 loadJavascript("js/moment-with-locales.min.js");
 loadJavascript("js/Chart.min.js");
+loadJavascript("js/chartjs-plugin-zoom.min.js");
 
 loadStylesheet("css/bootstrap.min.css");
 loadStylesheet("css/bootstrap-datepicker.min.css");
@@ -142,7 +144,7 @@ function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
 	xmlHttp.onreadystatechange = function() {
 		if (this.readyState==4 && this.status==200) {
 			var json = JSON.parse(xmlHttp.responseText);
-			cback(getDataset(tp, json.serie, all, 1, all));
+			cback(getDataset(tp, json.serie, (all & 1)!=0, (all & 2)!=0, (all & 4)!=0));
 		}
 	}
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
@@ -179,6 +181,7 @@ function fillDataset(caption, sr, attr, color, borderColor) {
   dataset.pointBorderColor = borderColor;
   dataset.pointRadius = 0;
   dataset.borderColor = borderColor;
+  dataset.lineTension = 0;
   dataset.fill = 'false';
   return dataset;
 }

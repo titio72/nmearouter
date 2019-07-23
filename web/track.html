@@ -5,7 +5,8 @@
   <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
-  <script src="js/nmearouter.js?z6"></script>
+  <!--script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script-->
+  <script src="js/nmearouter.js?z12"></script>
   <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script>
@@ -154,11 +155,11 @@
   var chartMap = new Map();
 
   function refreshMap() {
-    refreshChart("tempChart", "AT0", 0);
-    refreshChart("windChart", "TW_", 1);
-    refreshChart("windAngleChart", "TWD", 1);
-    refreshChart("pressChart", "PR_", 0);
-    refreshChart("humChart", "HUM", 0);
+    refreshChart("tempChart", "AT0", 2);
+    refreshChart("windChart", "TW_", 7);
+    refreshChart("windAngleChart", "TWD", 7);
+    refreshChart("pressChart", "PR_", 4);
+    refreshChart("humChart", "HUM", 4);
     refreshSpeedChart("speedChart");
     refreshSpeedAnalysisChart("speedAnalysisChart");
     refreshInfo();
@@ -196,6 +197,18 @@
               type: 'time',
             }]
           },
+					plugins: {
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'x'
+							},
+							zoom: {
+								enabled: true,
+								mode: 'x'
+							}
+						}
+					},
           tooltips: {
             callbacks: {
               label: function (tooltipItem, data) {
@@ -208,9 +221,6 @@
               title: function (tooltipItem, data) {
                 ix = tooltipItem[0].index;
                 _time = new Date(data.datasets[0].data[ix].x);
-                _minSpeed = data.datasets[0].data[ix].y;
-                _avgSpeed = data.datasets[1].data[ix].y;
-                _maxSpeed = data.datasets[2].data[ix].y;
                 return _time.toLocaleTimeString();
               }
             }
@@ -257,7 +267,19 @@
             xAxes: [{
               type: 'time',
             }]
-          }
+          },
+					plugins: {
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'x'
+							},
+							zoom: {
+								enabled: true,
+								mode: 'x'
+							}
+						}
+					}          
         }
       });
       chartMap.set(chart, c1);
