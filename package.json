@@ -9,6 +9,7 @@
     "bootstrap-datepicker": "^1.7.1",
     "bootswatch": "^4.3.1",
     "chart.js": "^2.7.1",
+    "chartjs-plugin-zoom": "^0.7.3",
     "google-maps": "^3.3.0",
     "jquery": "^3.4.1",
     "locales": "0.0.2",
