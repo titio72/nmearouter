@@ -31,102 +31,97 @@
 
 	</style>
 </head>
-<body ng-app="nmearouter" onload="loadchart();">
+<body ng-app="nmearouter" onload="loadme();">
+	<ol class="breadcrumb">
+		<li class="breadcrumb-item"><a href="index.html">Home</a></li>
+		<li class="breadcrumb-item active">Stats</li>
+	</ol>
+
 	<script>
 
-		var p = {"values": [
-		[2016,8,309.902892],
-		[2016,9,105.717397],
-		[2016,10,85.441216],
-		[2016,11,47.912589],
-		[2016,12,102.120697],
-		[2017,1,1.595890],
-		[2017,4,168.934732],
-		[2017,5,168.420737],
-		[2017,6,216.579619],
-		[2017,7,149.133546],
-		[2017,8,405.956946],
-		[2017,9,133.670175],
-		[2017,10,152.992504],
-		[2017,11,60.274520],
-		[2018,4,178.979974],
-		[2018,7,382.831453],
-		[2018,8,319.838371],
-		[2018,9,100.263901],
-		[2018,10,97.876906],
-		[2018,11,43.405352],
-		[2018,12,32.709693],
-		[2019,2,8.014202],
-		[2019,3,112.145709],
-		[2019,4,194.699319],
-		[2019,5,133.841103],
-		[2019,6,244.736360],
-		[2019,7,289.494316],
-		]};
+		var xmlHttp = new XMLHttpRequest();
+	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
+	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	    xmlHttp.send( null );
+	    var res = JSON.parse(xmlHttp.responseText);
+		
+		app.controller("myCtrl", function($scope) {
+			$scope.years = [];  
+		});
 
-		var milesPerYear = {
-			"years": []
-		};
-		var y = 0;
-		var currentY;
-		var minYear = p.values[0][0];
-		var maxYear = p.values[0][0];
+		function loadme() {
+			var p = res.NM_per_month;
+			if (p!=null && p.length!=0) {
 
-		var yearsMilesArray = [];
-		var yearsLabelsArray = [];
+				var minYear = p[0][0];
+				var maxYear = p[p.length-1][0];
+				var milesPerYear = fillsYearsStats(p);
+				var monthly = fillMonthlyStats(p, minYear, maxYear);
 
-		p.values.forEach(x => {
-			minYear = minYear>x[0]?x[0]:minYear;
-			maxYear = maxYear<x[0]?x[0]:maxYear;
-			if (x[0]!=y) {
-				currentY = {
-					"year": x[0],
-					"NM": x[2]
+				var controllerElement = document.getElementById('nmearouter');
+				var controllerScope = angular.element(controllerElement).scope();
+				controllerScope.years = milesPerYear.years;
+				controllerScope.$evalAsync();
+
+				loadYearBarChart(milesPerYear);
+				loadMonthsChart(monthly, minYear, maxYear);
+			}
+		}
+
+		function toHex(d) {
+			return  ("0"+(Math.round(d).toString(16))).slice(-2).toUpperCase()
+		}
+
+		function loadMonthsChart(data, minYear, maxYear) {
+			var dsets = [];
+			var colorGrad = Math.round(255 / (maxYear-minYear+1));
+
+			for (var y = minYear; y<=maxYear; y++) {
+				var color = "#" +
+					"9664" +
+					toHex(((y-minYear)*colorGrad));
+					
+				var dset = {
+					label: ""+ y,
+					borderColor: color,
+					pointRadius: 0,
+  					lineTension: 0,
+  					fill: false,
+					data: []
+				};
+				data.months.forEach(x => {
+					dset.data.push(x["Y"+y]);
+				});
+				dsets.push(dset);
+			}
+
+			var ctx = document.getElementById("monthsChart");
+			var c = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+					datasets: dsets
+				},
+				options: {
+					scales: {
+						yAxes: [{
+							ticks: {
+								beginAtZero: true
+							}
+						}]
+					}					
 				}
-				milesPerYear.years.push(currentY);
-				y = x[0];
-			} else {
-				currentY.NM += x[2];
-			}
-		});
+			});
+		}
 
-		milesPerYear.years.forEach(x => {
-			yearsLabelsArray.push(x.year);
-			yearsMilesArray.push(x.NM);
-		});
+		function loadYearBarChart(data) {
+			var yearsMilesArray = [];
+			var yearsLabelsArray = [];
+			data.years.forEach(x => {
+				yearsLabelsArray.push(x.year);
+				yearsMilesArray.push(x.NM);
+			});
 
-
-		var monthly = { "months": [
-			{"month": "Jan"},
-			{"month": "Feb"},
-			{"month": "Mar"},
-			{"month": "Apr"},
-			{"month": "May"},
-			{"month": "Jun"},
-			{"month": "Jul"},
-			{"month": "Aug"},
-			{"month": "Sep"},
-			{"month": "Oct"},
-			{"month": "Nov"},
-			{"month": "Dec"}
-		]};
-
-		monthly.months.forEach(x => {
-			for (var i = minYear; i<=maxYear; i++) {
-				x[i] = 0;
-			}
-		});
-
-		p.values.forEach(x => {
-			var m = x[1] - 1;
-			monthly.months[m][x[0]] += x[2];
-		});
-
-	    app.controller("myCtrl", function($scope) {
-			$scope.years = milesPerYear.years;  
-		});
-
-		function loadchart() {
 			var ctx = document.getElementById("yearsChart");
 			var c = new Chart(ctx, {
 				type: 'bar',
@@ -150,10 +145,73 @@
 			});
 		}
 
+		function fillsYearsStats(values) {
+			var yearlyStats = {"years": []};
+			var y = 0;
+			var currentY;
+			values.forEach(x => {
+				if (x[0]!=y) {
+					currentY = {
+						"year": x[0],
+						"NM": x[2]
+					}
+					yearlyStats.years.push(currentY);
+					y = x[0];
+				} else {
+					currentY.NM += x[2];
+				}
+			});
+
+			return yearlyStats;
+		}
+
+		function fillMonthlyStats(values, min, max) {
+			var mStats = { "months": [
+				{"month": "Jan"},
+				{"month": "Feb"},
+				{"month": "Mar"},
+				{"month": "Apr"},
+				{"month": "May"},
+				{"month": "Jun"},
+				{"month": "Jul"},
+				{"month": "Aug"},
+				{"month": "Sep"},
+				{"month": "Oct"},
+				{"month": "Nov"},
+				{"month": "Dec"}
+			]};
+
+			/*mStats.months.forEach(x => {
+				for (var i = min; i<=max; i++) {
+					x["Y"+i] = 0;
+				}
+			});*/
+
+			values.forEach(x => {
+				var m = x[1] - 1;
+				if (m==0) {
+					mStats.months[m]["Y"+x[0]] = x[2];
+				} else {
+					mStats.months[m]["Y"+x[0]] = mStats.months[m-1]["Y"+x[0]] + x[2];
+				}
+			});
+
+			return mStats;
+		}
+
+
 	</script>
 
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
 
+		<div class="row alert alert-primary">
+			<div class="col-6">
+				<canvas class="chart-canvas" id="yearsChart"></canvas>
+			</div>
+			<div class="col-6">
+				<canvas class="chart-canvas" id="monthsChart"></canvas>
+			</div>
+		</div>
 		<div class="row alert alert-primary" ng-repeat="t in years">
 			<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
 				{{t.year}}
@@ -162,9 +220,10 @@
 				{{t.NM | number:1}} NM
 			</div>
 		</div>
+
+
 	</div>
 
-	<canvas class="chart-canvas" id="yearsChart"></canvas>
 
 </body>
 </html>

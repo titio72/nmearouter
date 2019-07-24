@@ -5,8 +5,8 @@
   <meta charset="ISO-8859-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
-  <!--script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script-->
-  <script src="js/nmearouter.js?z12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+  <script src="js/nmearouter.js?z13"></script>
   <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script>
@@ -155,7 +155,7 @@
   var chartMap = new Map();
 
   function refreshMap() {
-    refreshChart("tempChart", "AT0", 2);
+    //refreshChart("tempChart", "AT0", 2);
     refreshChart("windChart", "TW_", 7);
     refreshChart("windAngleChart", "TWD", 7);
     refreshChart("pressChart", "PR_", 4);
@@ -285,6 +285,13 @@
       chartMap.set(chart, c1);
 
     });
+  }
+
+  function resetZoom(chart) {
+    var c = chartMap.get(chart);
+    if (c != null) {
+      c.resetZoom();
+    }
   }
 
   function loadMap(dtF, dtT) {
@@ -460,7 +467,7 @@
         <div class="card card-router">
           <h3 class="card-header">Speed</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="speedChart"></canvas>
+            <canvas class="chart-canvas" id="speedChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div>
@@ -476,7 +483,7 @@
         <div class="card card-router">
           <h3 class="card-header">Wind</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="windChart"></canvas>
+            <canvas class="chart-canvas" id="windChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div>
@@ -484,23 +491,23 @@
         <div class="card card-router">
           <h3 class="card-header">Wind Angle</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="windAngleChart"></canvas>
+            <canvas class="chart-canvas" id="windAngleChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6" >
+      <!--div class="col-lg-4 col-md-6" >
         <div class="card card-router">
           <h3 class="card-header">Temperature</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="tempChart"></canvas>
+            <canvas class="chart-canvas" id="tempChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
-      </div>
+      </div-->
       <div class="col-lg-4 col-md-6" >
         <div class="card card-router">
           <h3 class="card-header">Pressure</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="pressChart"></canvas>
+            <canvas class="chart-canvas" id="pressChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div>
@@ -508,7 +515,7 @@
         <div class="card card-router">
           <h3 class="card-header">Humidity</h3>
           <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="humChart"></canvas>
+            <canvas class="chart-canvas" id="humChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div>

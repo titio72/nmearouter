@@ -6,6 +6,7 @@ loadJavascript("js/bootbox.min.js");
 loadJavascript("js/bootstrap.min.js");
 loadJavascript("js/moment-with-locales.min.js");
 loadJavascript("js/Chart.min.js");
+loadJavascript("js/hammer.min.js");
 loadJavascript("js/chartjs-plugin-zoom.min.js");
 
 loadStylesheet("css/bootstrap.min.css");
@@ -177,7 +178,7 @@ function fillDataset(caption, sr, attr, color, borderColor) {
     datapoint.y = parseFloat(item[attr]);
     dataset.data.push(datapoint);
   }
-    dataset.pointBackgroundColor = color;
+  dataset.pointBackgroundColor = color;
   dataset.pointBorderColor = borderColor;
   dataset.pointRadius = 0;
   dataset.borderColor = borderColor;
