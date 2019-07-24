@@ -223,18 +223,18 @@
 						<td>
 							<div ng-if="a.source=='true'">
 								<div ng-if="a.hasFilterIn=='true'">
-									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "in")'>
+									<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" onclick="showFilter(this, 'in')">
 										<span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on" aria-hidden="true"></span>
 									</button>
 								</div>
 								<div ng-if="a.hasFilterIn=='false'">
-									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "in")'>
+									<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" onclick="showFilter(this, 'in')">
 										<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
 									</button>
 								</div>
 							</div>
 							<div ng-if="a.source=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
+								<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
@@ -242,18 +242,18 @@
 						<td>
 							<div ng-if="a.target=='true'">
 								<div ng-if="a.hasFilterOut=='true'">
-									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "out")'>
+									<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" onclick="showFilter(this, 'out')">
 										<span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on" aria-hidden="true"></span>
 									</button>
 								</div>
 								<div ng-if="a.hasFilterOut=='false'">
-									<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" onclick='showFilter(this, "out")'>
+									<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" onclick="showFilter(this, 'out')">
 										<span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
 									</button>
 								</div>
 							</div>
 							<div ng-if="a.target=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
+								<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
@@ -261,20 +261,20 @@
 						<td>
 							<div ng-if="a.startStop=='true' && a.builtin=='false'">
 								<div ng-if="a.auto=='false'">
-									<button name={{a.agent}} type="button"
+									<button name="{{a.agent}}" type="button"
 										class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 1)">
 										<span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
 									</button>
 								</div>
 								<div ng-if="a.auto=='true'">
-									<button name={{a.agent}} type="button"
+									<button name="{{a.agent}}" type="button"
 										class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 0)">
 										<span class="glyphicon glyphicon-pushpin ab-glyphicon-on" aria-hidden="true"></span>
 									</button>
 								</div>
 							</div>
 							<div ng-if="a.startStop=='false' || a.builtin=='true'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
+								<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
@@ -282,20 +282,20 @@
 						<td>
 							<div ng-if="a.startStop=='true'">
 								<div ng-if="a.started=='false'">
-									<button name={{a.agent}} type="button"
+									<button name="{{a.agent}}" type="button"
 										class="btn btn-circle btn-secondary" onclick="httpGetSyn(this, 1)">
 										<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 									</button>
 								</div>
 								<div ng-if="a.started=='true'">
-									<button name={{a.agent}} type="button"
+									<button name="{{a.agent}}" type="button"
 										class="btn btn-circle btn-secondary" onclick="httpGetSyn(this, 0)">
 										<span class="glyphicon glyphicon-stop ab-glyphicon-on" aria-hidden="true"></span>
 									</button>
 								</div>
 							</div>
 							<div ng-if="a.startStop=='false'">
-								<button name={{a.agent}} type="button" class="btn btn-circle btn-secondary" disabled>
+								<button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" disabled>
 									<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
 								</button>
 							</div>
@@ -342,9 +342,9 @@
 							</select>
 						</div>
 						<button type="reset" class="btn btn-secondary btn-secondary"
-							onClick="hideFilter()">Cancel</button>
+							onclick="hideFilter()">Cancel</button>
 						<button type="submit" class="btn btn-secondary btn-primary"
-							onClick="commitFilter()">Ok</button>
+							onclick="commitFilter()">Ok</button>
 					</form>
 				</div>
 			</div>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+	<script src="js/nmearouter.js?g2"></script>
+	<script src="js/Chart.min.js"></script>
+	<script src="js/chartjs-plugin-zoom.min.js"></script>
+	<link href="css/nmearouter.css" rel="stylesheet" />
+	<link rel="icon" type="image/png" href="nmeasail.png">
+	<style>
+		.tile-button {
+			width:100%;
+			font-size: 22px;
+			margin: 0px 0px 10px 0px;
+			padding: 0px;
+			height: 150px;
+		}
+		
+		.no-gutters-ab {
+			margin-right: -30px;
+			margin-left: -30px;
+  		}
+
+		.chart-canvas {
+			min-height: 300px;
+			min-width: 100%;
+		}
+
+
+	</style>
+</head>
+<body ng-app="nmearouter" onload="loadchart();">
+	<script>
+
+		var p = {"values": [
+		[2016,8,309.902892],
+		[2016,9,105.717397],
+		[2016,10,85.441216],
+		[2016,11,47.912589],
+		[2016,12,102.120697],
+		[2017,1,1.595890],
+		[2017,4,168.934732],
+		[2017,5,168.420737],
+		[2017,6,216.579619],
+		[2017,7,149.133546],
+		[2017,8,405.956946],
+		[2017,9,133.670175],
+		[2017,10,152.992504],
+		[2017,11,60.274520],
+		[2018,4,178.979974],
+		[2018,7,382.831453],
+		[2018,8,319.838371],
+		[2018,9,100.263901],
+		[2018,10,97.876906],
+		[2018,11,43.405352],
+		[2018,12,32.709693],
+		[2019,2,8.014202],
+		[2019,3,112.145709],
+		[2019,4,194.699319],
+		[2019,5,133.841103],
+		[2019,6,244.736360],
+		[2019,7,289.494316],
+		]};
+
+		var milesPerYear = {
+			"years": []
+		};
+		var y = 0;
+		var currentY;
+		var minYear = p.values[0][0];
+		var maxYear = p.values[0][0];
+
+		var yearsMilesArray = [];
+		var yearsLabelsArray = [];
+
+		p.values.forEach(x => {
+			minYear = minYear>x[0]?x[0]:minYear;
+			maxYear = maxYear<x[0]?x[0]:maxYear;
+			if (x[0]!=y) {
+				currentY = {
+					"year": x[0],
+					"NM": x[2]
+				}
+				milesPerYear.years.push(currentY);
+				y = x[0];
+			} else {
+				currentY.NM += x[2];
+			}
+		});
+
+		milesPerYear.years.forEach(x => {
+			yearsLabelsArray.push(x.year);
+			yearsMilesArray.push(x.NM);
+		});
+
+
+		var monthly = { "months": [
+			{"month": "Jan"},
+			{"month": "Feb"},
+			{"month": "Mar"},
+			{"month": "Apr"},
+			{"month": "May"},
+			{"month": "Jun"},
+			{"month": "Jul"},
+			{"month": "Aug"},
+			{"month": "Sep"},
+			{"month": "Oct"},
+			{"month": "Nov"},
+			{"month": "Dec"}
+		]};
+
+		monthly.months.forEach(x => {
+			for (var i = minYear; i<=maxYear; i++) {
+				x[i] = 0;
+			}
+		});
+
+		p.values.forEach(x => {
+			var m = x[1] - 1;
+			monthly.months[m][x[0]] += x[2];
+		});
+
+	    app.controller("myCtrl", function($scope) {
+			$scope.years = milesPerYear.years;  
+		});
+
+		function loadchart() {
+			var ctx = document.getElementById("yearsChart");
+			var c = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: yearsLabelsArray,
+					datasets: [{
+						backgroundColor: "#FF0000",
+						data: yearsMilesArray,
+						label: "Nautical Miles"
+					}]
+				},
+				options: {
+					scales: {
+						yAxes: [{
+							ticks: {
+								beginAtZero: true
+							}
+						}]
+					}					
+				}
+			});
+		}
+
+	</script>
+
+	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
+
+		<div class="row alert alert-primary" ng-repeat="t in years">
+			<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+				{{t.year}}
+			</div>
+			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
+				{{t.NM | number:1}} NM
+			</div>
+		</div>
+	</div>
+
+	<canvas class="chart-canvas" id="yearsChart"></canvas>
+
+</body>
+</html>
