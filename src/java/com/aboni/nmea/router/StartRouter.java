@@ -48,8 +48,7 @@ public class StartRouter {
 		
 		int ix;
         if (checkFlag(HELP, args)>=0) {
-            consoleOut("-web : activate web interface\r\n" +
-                    "-sensor : sensor monitor\r\n" +
+            consoleOut("-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
         } else if ((ix = checkFlag(PLAY, args))>=0) {

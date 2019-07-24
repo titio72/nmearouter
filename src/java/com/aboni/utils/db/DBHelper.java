@@ -85,7 +85,7 @@ public class DBHelper implements AutoCloseable {
 		}
 		String sql = sqlBuilder.toString();
 		sql += " from " + table + " where TS>=? and TS<=?";
-		if (where!=null) {
+		if (where!=null && !where.isEmpty()) {
 			sql += " AND " + where;
 		}
 		return sql;
