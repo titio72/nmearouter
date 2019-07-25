@@ -38,6 +38,18 @@
 	</ol>
 
 	<script>
+		var colors = [
+		/*$blue:    */ "#007bff",
+		/*$indigo:  */ "#6610f2",
+		/*$purple:  */ "#6f42c1",
+		/*$pink:    */ "#e83e8c",
+		/*$red:     */ "#ee5f5b",
+		/*$orange:  */ "#fd7e14",
+		/*$yellow:  */ "#f89406",
+		/*$green:   */ "#62c462",
+		/*$teal:    */ "#20c997",
+		/*$cyan:    */ "#5bc0de"
+		];
 
 		var xmlHttp = new XMLHttpRequest();
 	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
@@ -77,9 +89,11 @@
 			var colorGrad = Math.round(255 / (maxYear-minYear+1));
 
 			for (var y = minYear; y<=maxYear; y++) {
-				var color = "#" +
+				var color = colors[y-minYear];
+					
+					/*"#" +
 					"9664" +
-					toHex(((y-minYear)*colorGrad));
+					toHex(((y-minYear)*colorGrad));*/
 					
 				var dset = {
 					label: ""+ y,
@@ -128,7 +142,7 @@
 				data: {
 					labels: yearsLabelsArray,
 					datasets: [{
-						backgroundColor: "#FF0000",
+						backgroundColor: getComputedStyle(document.body).getPropertyValue("--secondary"),
 						data: yearsMilesArray,
 						label: "Nautical Miles"
 					}]

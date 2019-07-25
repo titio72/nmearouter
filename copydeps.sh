@@ -41,6 +41,8 @@ cp -f ../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css
 cp -f ../node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js js/
 echo "Copy chartjs-plugin-zoom"
 cp -f "../node_modules/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js" js/
+echo "Copy hammer"
+cp -f "../node_modules/hammer/hammer.min.js" js/
 
 echo "Copy glypicons"
 cp -Rf ../web_cache/fonts .
