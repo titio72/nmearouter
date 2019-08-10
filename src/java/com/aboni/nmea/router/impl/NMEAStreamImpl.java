@@ -83,7 +83,7 @@ public class NMEAStreamImpl implements NMEAStream {
 		return msg;
 	}
 
-	private class ListenerWrapper {
+	private static class ListenerWrapper {
 		
 		private final List<Method> listeners;
 		private final List<Method> listenersJSON;

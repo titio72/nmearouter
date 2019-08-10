@@ -19,7 +19,7 @@ public class SpeedAnalyticsService extends JSONWebService {
 	private static final double SPEED_MIN =  0.0;
 	private static final double SPEED_MAX = 12.0;
 
-	private class Stat {
+	private static class Stat {
 		long time = 0L;
 		double distance = 0.0;
 	}

@@ -91,7 +91,7 @@ function httpLoadSpeedDateRange(dt0, dt1, cback) {
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.status==200 && xmlHttp.readyState==4) {
       var json = JSON.parse(xmlHttp.responseText);
-      cback(getDataset("Speed", json.serie, 1, 1, 1));
+      cback(json);
     }
   };
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
@@ -125,6 +125,20 @@ function httpLoadSpeedAnalysisDateRange(dt0, dt1, cback) {
   xmlHttp.send(null);
 }
 
+function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
+      var json = JSON.parse(xmlHttp.responseText);
+      cback(json);
+    }
+  }
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1, true);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
+/*
 function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
@@ -138,7 +152,9 @@ function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
 }
+*/
 
+/*
 function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, true);
@@ -151,11 +167,11 @@ function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
 	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 	xmlHttp.send(null);
 }
+*/
 
 function onhttpresult(cback) {
 
 }
-
 
 function getDataset(caption, sr, min, avg, max) {
   var data = new Object();
@@ -164,27 +180,6 @@ function getDataset(caption, sr, min, avg, max) {
   if (avg>0) data.datasets.push(fillDataset(caption, 			sr, "v", 	"#555555", "#22FF22"));
   if (max>0) data.datasets.push(fillDataset(caption + "Max", 	sr, "vMax", "#FF0000", "#FF2222"));
   return data;
-}
-
-function fillDataset(caption, sr, attr, color, borderColor) {
-  var dataset = new Object();
-  dataset.label = caption;
-  dataset.data = [];
-  var i;
-  for (i = 0; i<sr.length; i++) {
-    var item = sr[i];
-    var datapoint = new Object();
-    datapoint.x = Date.parse(item['time']);
-    datapoint.y = parseFloat(item[attr]);
-    dataset.data.push(datapoint);
-  }
-  dataset.pointBackgroundColor = color;
-  dataset.pointBorderColor = borderColor;
-  dataset.pointRadius = 0;
-  dataset.borderColor = borderColor;
-  dataset.lineTension = 0;
-  dataset.fill = 'false';
-  return dataset;
 }
 
 function info() {

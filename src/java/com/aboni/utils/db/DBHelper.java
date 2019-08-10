@@ -6,9 +6,10 @@ import com.aboni.utils.ServerLog;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -73,75 +74,11 @@ public class DBHelper implements AutoCloseable {
     		return true;
     	} catch (Exception e) {
     		conn = null;
-            ServerLog.getLogger().error("Cannot reset onnection!", e);
+            ServerLog.getLogger().error("Cannot reset connection!", e);
             return false;
     	}
     }
 
-    public static String getTimeSeriesSQL(String table, String[] fields, String where) {
-		StringBuilder sqlBuilder = new StringBuilder("select TS ");
-		for (String f: fields) {
-			sqlBuilder.append(", ").append(f);
-		}
-		String sql = sqlBuilder.toString();
-		sql += " from " + table + " where TS>=? and TS<=?";
-		if (where!=null && !where.isEmpty()) {
-			sql += " AND " + where;
-		}
-		return sql;
-	}
-
-    public class Range {
-    	private final Timestamp max;
-    	private final Timestamp min;
-    	private final long count;
-    	
-    	public Range(Timestamp max, Timestamp min, long count) {
-    		this.max = max;
-    		this.min = min;
-    		this.count = count;
-    	}
-
-		public long getCount() {
-			return count;
-		}
-		
-		public long getInterval() {
-			return max.getTime() - min.getTime();
-		}
-		
-		public int getSampling(int maxSamples) {
-            return (int) ((getCount()<=maxSamples)?1:(getInterval()/maxSamples));
-		}
-    }
-
-    private String getTimeFrameSQL(String table) {
-    	return "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
-	}
-
-    public synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) throws SQLException {
-    	if (getConnection()!=null) {
-    		String sql = getTimeFrameSQL(table);
-	        try (PreparedStatement stm = getConnection().prepareStatement(sql)) {
-				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
-				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
-				try (ResultSet rs = stm.executeQuery()) {
-					if (rs.next()) {
-						long count = rs.getLong(1);
-						Timestamp tMax = rs.getTimestamp(2);
-						Timestamp tMin = rs.getTimestamp(3);
-						if (tMax != null && tMin != null) {
-							return new Range(tMax, tMin, count);
-						}
-					}
-				}
-			}
-    	} else {
-    		ServerLog.getLogger().warning("Cannot create time range for {" + table + "} because connection is not established!");
-    	}
-        return null;
-    }
-    
     public synchronized String backup() throws IOException, InterruptedException {
     	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         ServerLog.getLogger().info("DB Backup");

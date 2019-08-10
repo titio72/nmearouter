@@ -1,6 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
+import com.aboni.nmea.router.agent.impl.track.TrackPoint;
 import org.json.JSONObject;
 
 import java.io.Writer;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public class Track2JSON implements TrackDumper {
 
-	public class PointWriter implements DoWithPoint {
+    public class PointWriter implements DoWithPoint<TrackPoint> {
 
 		private static final boolean TRACK_THEM_ALL = true;
 
@@ -17,13 +18,18 @@ public class Track2JSON implements TrackDumper {
 
 		PointWriter() {
 		}
-		
+
 		@Override
-		public void doWithPoint(GeoPositionT p) {
-			handlePoint(p);
+        public void doWithPoint(GeoPositionT p, TrackPoint pt) {
+            handlePoint(p, pt);
+        }
+
+        @Override
+        public void finish() {
+            // noting to do
 		}
 
-		private void handlePoint(GeoPositionT p) {
+        private void handlePoint(GeoPositionT p, TrackPoint pt) {
 			if (TRACK_THEM_ALL ) {
 				writePoint(p);
 			} else {

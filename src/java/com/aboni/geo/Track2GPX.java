@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class Track2GPX implements TrackDumper {
 
-	private class PointWriter implements DoWithPoint {
+    private class PointWriter implements DoWithPoint<Object> {
 
 		private static final boolean TRACK_THEM_ALL = true;
 		final Writer theWriter;
@@ -23,7 +23,12 @@ public class Track2GPX implements TrackDumper {
 		}
 
 		@Override
-		public void doWithPoint(GeoPositionT p) {
+        public void finish() {
+            // do nothing
+        }
+
+        @Override
+        public void doWithPoint(GeoPositionT p, Object notUsed) {
 			try {
 				if (TRACK_THEM_ALL ) {
 					writePoint(p);

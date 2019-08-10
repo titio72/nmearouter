@@ -91,7 +91,7 @@ public class TripStatService extends JSONWebService {
 		return c;
 	}
 
-	private class TripsScanner {
+	private static class TripsScanner {
 		private long totDuration;
 		private double totalDistance;
 		private final JSONObject res;

@@ -15,7 +15,7 @@ public class ServerLog implements LogAdmin {
 		return System.out;
 	}
 
-    private class MyFormatter extends Formatter {
+	private static class MyFormatter extends Formatter {
 
         final DateFormat df;
         

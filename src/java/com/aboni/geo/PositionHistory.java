@@ -3,20 +3,45 @@ package com.aboni.geo;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-public class PositionHistory {
+public class PositionHistory<PAYLOAD> {
 
 	class PosAndCourse {
-		public PosAndCourse(GeoPositionT t) {
+        PosAndCourse(GeoPositionT t, PAYLOAD payload) {
 			p = t;
+            prev = null;
+            this.payload = payload;
 		}
-		
-		public PosAndCourse(GeoPositionT t, GeoPositionT previous) {
+
+        PosAndCourse(GeoPositionT t, GeoPositionT previous, PAYLOAD payload) {
 			p = t;
-			c = new Course(previous, t);
+            prev = previous;
+            this.payload = payload;
 		}
 		
 		final GeoPositionT p;
-		Course c;
+        final GeoPositionT prev;
+        final PAYLOAD payload;
+
+        double getDistance() {
+            if (p != null && prev != null) {
+                return new Course(prev, p).getDistance();
+            } else {
+                return 0.0;
+            }
+        }
+
+        long getTime() {
+            if (p != null && prev != null) {
+                return p.getTimestamp() - prev.getTimestamp();
+            } else {
+                return 0L;
+            }
+        }
+
+        PAYLOAD getPayload() {
+            return payload;
+        }
+
 	}
 	
 	private final LinkedList<PosAndCourse> positions;
@@ -32,22 +57,22 @@ public class PositionHistory {
 		positions = new LinkedList<>();
 		max = maxSamples;
 	}
-	
-	public void addPosition(GeoPositionT p) {
-		synchronized (positions) {
-			if (positions.isEmpty()) {
-				positions.add(new PosAndCourse(p));
-			} else {
-				setTotalTime(getTotalTime() + p.getTimestamp() - positions.getLast().p.getTimestamp());
-				positions.add(new PosAndCourse(p, positions.getLast().p));
-				setTotalDistance(getTotalDistance() + positions.getLast().c.getDistance());
-			}
-			
-			if (max>0 && positions.size() > max) {
-				positions.removeFirst();
-			}
-		}
-	}
+
+    public void addPosition(GeoPositionT p) {
+        addPosition(p, null);
+    }
+
+    public void addPosition(GeoPositionT p, PAYLOAD payload) {
+        synchronized (positions) {
+            PosAndCourse newSample = positions.isEmpty() ? new PosAndCourse(p, payload) : new PosAndCourse(p, positions.getLast().p, payload);
+            positions.add(newSample);
+            setTotalTime(getTotalTime() + newSample.getTime());
+            setTotalDistance(getTotalDistance() + newSample.getDistance());
+            if (max>0 && positions.size() > max) {
+                positions.removeFirst();
+            }
+        }
+    }
 	
 	public void reset() {
 		positions.clear();
@@ -108,7 +133,7 @@ public class PositionHistory {
 		}
 	}
 
-	private Course getCourse(GeoPositionT p0, GeoPositionT p1) {
+    private static Course getCourse(GeoPositionT p0, GeoPositionT p1) {
 		if ( p1!=null && p0!=null) {
 			return new Course(p0, p1);
 		} else {
@@ -116,17 +141,20 @@ public class PositionHistory {
 		}
 	}
 
-	public void iterate(DoWithPoint doer) {
+    public void iterate(DoWithPoint<PAYLOAD> doer) {
 		synchronized (positions) {
 			if (doer!=null) {
 				for (PosAndCourse position : positions) {
-					doer.doWithPoint(position.p);
+                    doer.doWithPoint(position.p, position.getPayload());
 				}
+                doer.finish();
 			}
 		}
 	}
-	
-	public interface DoWithPoint {
-		void doWithPoint(GeoPositionT p);
+
+    public interface DoWithPoint<P> {
+        void doWithPoint(GeoPositionT p, P payload);
+
+        void finish();
 	}
 }

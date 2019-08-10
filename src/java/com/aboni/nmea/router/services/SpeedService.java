@@ -1,105 +1,102 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.misc.Utils;
 import com.aboni.utils.TimeSerieSample;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.List;
+import org.json.JSONObject;
 
 public class SpeedService extends SampledQueryService {
 
-    public SpeedService() {
-    	// nothing to initialize
-    }
+	private static SampledQueryConf getConf() {
+		SampledQueryService.SampledQueryConf conf = new SampledQueryConf();
+		conf.setAvgField("speed");
+		conf.setMaxField("maxSpeed");
+		conf.setMinField("speed");
+		conf.setWhere(null);
+		conf.setSeriesNameField("'SOG' as type");
+		conf.setTable("track");
+		return conf;
+	}
 
+	private static class SpeedSampleWriter implements SampleWriter {
 
+		private long lastTS = 0;
+		private double lastV = 0.0;
+		private boolean lastSkipped = true;
+		private boolean lastNull = false;
+		private int count = 0;
 
-    @Override
-    protected void fillResponse(ServiceOutput response, List<TimeSerieSample> samples) throws IOException {
-		long lastTS = 0;
-		double lastV = 0.0;
-		boolean lastSkipped = true;
-		boolean lastNull = false;
-        int count = 0;
-
-        response.getWriter().write("{\"serie\":[");
-        if (samples!=null) {
-	        for (TimeSerieSample s: samples) {
-		        if (s.getV()<=0.1 && lastV<=0.1) {
-					if (count > 0) {
-						if (!lastSkipped) {
-							count = writeZero(count, response, s.getT0());
-						} else if (!lastNull) {
-							count = writeNull(count, response, s.getT0());
-							lastNull = true;
-						}
+		@Override
+		public JSONObject[] getSampleNode(TimeSerieSample s) {
+			JSONObject[] ret;
+			if (s.getV() <= 0.1 && lastV <= 0.1) {
+				if (count > 0) {
+					if (!lastSkipped) {
+						// speed is 0 but last sample was not skipped so write a 0 to bring chart to 0
+						ret = new JSONObject[]{writeZero(s.getT0())};
+						lastNull = false;
+						count++;
+					} else if (!lastNull) {
+						// last one was speed=0 but it was written. Write a null.
+						ret = new JSONObject[]{writeNull(s.getT0())};
+						lastNull = true;
+						count++;
 					} else {
-						// skip
+						// last one was skipped and speed is still 0 - skip again
+						ret = null;
 					}
-					lastSkipped = true;
 				} else {
-		        	if (lastSkipped && lastTS!=0) {
-		        		lastSkipped = false;
-						count = writeZero(count, response, lastTS);
-					}
-					count = writeValue(count, response, s);
-					lastNull = false;
+					// skip
+					ret = null;
 				}
-				lastV = s.getV();
-				lastTS = s.getLastTs();
+				lastSkipped = true;
+			} else {
+				if (lastSkipped && count > 0) {
+					ret = new JSONObject[]{writeNull(lastTS - 1), writeZero(lastTS), writeValue(s)};
+					count += 2;
+				} else {
+					ret = new JSONObject[]{writeValue(s)};
+					count++;
+				}
+				lastSkipped = false;
+				lastNull = false;
 			}
-        }
-        response.getWriter().write("]}");
-    }
+			lastV = s.getV();
+			lastTS = s.getLastTs();
+			return ret;
+		}
 
-	private int writeValue(int count, ServiceOutput response, TimeSerieSample s) throws IOException {
-		return write(count, response, s.getT0(), s.getvMin(), s.getV(), s.getvMax());
+		private JSONObject writeValue(TimeSerieSample s) {
+			return write(s.getT0(), Utils.round(s.getvMin(), 2), Utils.round(s.getV(), 2), Utils.round(s.getvMax(), 2));
+		}
+
+		private JSONObject writeNull(long ts) {
+			return write(ts, "null", "null", "null");
+		}
+
+		private JSONObject writeZero(long ts) {
+			return write(ts, "0.0", "0.0", "0.0");
+		}
+
+		private JSONObject write(long ts, Object min, Object avg, Object max) {
+			JSONObject s = new JSONObject();
+			s.put("time", ts);
+			s.put("vMin", min);
+			s.put("v", avg);
+			s.put("vMax", max);
+			return s;
+		}
 	}
 
-	private int writeNull(int count, ServiceOutput response, long ts) throws IOException {
-		return write(count, response, ts, "null", "null", "null");
+	private static class SpeedSampleWriterFactory implements SampleWriterFactory {
+
+		@Override
+		public SampleWriter getWriter(String type) {
+			return new SpeedSampleWriter();
+		}
 	}
 
-	private int writeZero(int count, ServiceOutput response, long ts) throws IOException {
-		return write(count, response, ts, "0.0", "0.0", "0.0");
+	public SpeedService() {
+		super(getConf(), new SpeedSampleWriterFactory());
 	}
 
-	private int write(int count, ServiceOutput response, long ts, Object min, Object avg, Object max) throws IOException {
-		if (count>0) response.getWriter().write(",");
-		response.getWriter().write("{\"time\":\"" + new Timestamp(ts).toString() + "\",");
-		response.getWriter().write("\"vMin\":" + min + ",");
-		response.getWriter().write("\"v\":" + avg + ",");
-		response.getWriter().write("\"vMax\":" + max + "}");
-		return count + 1;
-	}
-
-	@Override
-	protected String getTable() {
-		return "track";
-	}
-
-	@Override
-	protected String getMaxField() {
-		return "maxSpeed";
-	}
-
-	@Override
-	protected String getAvgField() {
-		return "speed";
-	}
-
-	@Override
-	protected String getMinField() {
-		return "speed";
-	}
-
-	@Override
-	protected String getWhere() {
-		return null;
-	}
-
-	@Override
-	protected void onPrepare(ServiceConfig config) {
-    	// nothing to initialize
-	}
 }

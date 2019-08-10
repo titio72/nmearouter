@@ -26,7 +26,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
 	private final Map<SocketChannel, ClientDescriptor> clients;
 
-	private class ClientDescriptor {
+	private static class ClientDescriptor {
 		
 		ClientDescriptor(String ip) {
 			this.ip = ip;

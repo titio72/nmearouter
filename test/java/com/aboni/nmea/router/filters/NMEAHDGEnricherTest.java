@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class NMEAHDGEnricherTest {
 
-	class MyCache implements NMEACache {
+	static class MyCache implements NMEACache {
 
 		boolean hasPosition = true;
 		

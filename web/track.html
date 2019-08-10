@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
   <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-  <script src="js/nmearouter.js?z13"></script>
+    <script src="js/nmearouter.js?a3"></script>
   <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script>
@@ -155,11 +155,7 @@
   var chartMap = new Map();
 
   function refreshMap() {
-    //refreshChart("tempChart", "AT0", 2);
-    refreshChart("windChart", "TW_", 7);
-    refreshChart("windAngleChart", "TWD", 7);
-    refreshChart("pressChart", "PR_", 4);
-    refreshChart("humChart", "HUM", 4);
+    refreshMeteoCharts()
     refreshSpeedChart("speedChart");
     refreshSpeedAnalysisChart("speedAnalysisChart");
     refreshInfo();
@@ -184,14 +180,58 @@
     }*/
 
     httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
+      drawSpeedChart(res, chart);
+    });
+  }
+
+  function refreshSpeedAnalysisChart(chart) {
+    var ctx = document.getElementById(chart);
+    httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
       var c = chartMap.get(chart);
       if (c != null) {
         c.destroy();
       }
       var c1 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
+            '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
+          datasets: [res]
+        },
+        options: {}
+      });
+      chartMap.set(chart, c1);
+    });
+
+  }
+
+  function getSerie(data, serie, attr, color) {
+    return {
+      		data: getDataPoints(data, serie, attr),
+      		borderColor: color,
+          pointRadius: 0,
+          lineTension: 0,
+          fill: false
+      	};
+  }
+
+  function drawSpeedChart(data, chart) {
+    var ctx = document.getElementById(chart);
+    var c = chartMap.get(chart);
+      if (c != null) {
+        c.destroy();
+      }
+      var datasets = [];
+      datasets.push(getSerie(data, "SOG", "vMin", "#777777"));
+      datasets.push(getSerie(data, "SOG", "v",    "#22FF22"));
+      datasets.push(getSerie(data, "SOG", "vMax", "#FF2222"));
+      var c1 = new Chart(ctx, {
         type: 'line',
-        data: res,
+        data: {
+          datasets: datasets
+        },
         options: {
+          spanGaps: false,
           scales: {
             xAxes: [{
               type: 'time',
@@ -227,32 +267,82 @@
           }
         }
       });
-      chartMap.set(chart, c1);
-    });
+      chartMap.set(chart, c1);    
   }
 
-  function refreshSpeedAnalysisChart(chart) {
+  function drawMeteoChart(data, chart, serie, min, avg, max) {
     var ctx = document.getElementById(chart);
-    httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
-      var c = chartMap.get(chart);
+    var c = chartMap.get(chart);
       if (c != null) {
         c.destroy();
       }
+      var datasets = [];
+      if (min!=0) datasets.push(getSerie(data, serie, "vMin", "#777777"));
+      if (avg!=0) datasets.push(getSerie(data, serie, "v",    "#22FF22"));
+      if (max!=0) datasets.push(getSerie(data, serie, "vMax", "#FF2222"));
       var c1 = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
-          labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
-            '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
-          datasets: [res]
+        	datasets: datasets
         },
-        options: {}
+        options: {
+          legend: {
+            display: false
+          },
+          scales: {
+            xAxes: [{
+              type: 'time',
+            }]
+          },
+					plugins: {
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'x'
+							},
+							zoom: {
+								enabled: true,
+								mode: 'x'
+							}
+						}
+					}          
+        }
       });
       chartMap.set(chart, c1);
-    });
-
   }
 
-  function refreshChart(chart, type, style) {
+  function refreshMeteoCharts() {
+    httpLoadAllMeteoDateRange(dateFrom + "0000" , dateTo + "2359", function(res) {
+      //drawMeteoChart(res, "tempChart", "AT0", 1, 1, 1);
+      drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
+      drawMeteoChart(res, "windAngleChart", "TWD", 1, 1, 1);
+      drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
+      drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
+    });    
+  }
+
+  function getDataPoints(data, name, attr) {
+    var dt = [];
+    var sr = data[name];
+    var i;
+    var lastT = 0;
+    for (i = 0; i<sr.length; i++) {
+      var item = sr[i];
+      var t = item['time'];
+      if (lastT==0 || lastT<t) {
+        var datapoint = new Object();
+        datapoint.x = new Date(t);
+        datapoint.y = parseFloat(item[attr]);
+        lastT = t;
+      } else {
+        console.log("Out of sync items!")
+      }
+      dt.push(datapoint);
+    }
+    return dt;
+  }
+
+  /*function refreshChart(chart, type, style) {
     var ctx = document.getElementById(chart);
     httpLoadMeteoDateRangeA(type, style, dateFrom + "0000", dateTo + "2359", function(res) {
       var c = chartMap.get(chart);
@@ -285,7 +375,7 @@
       chartMap.set(chart, c1);
 
     });
-  }
+  }*/
 
   function resetZoom(chart) {
     var c = chartMap.get(chart);
@@ -356,6 +446,7 @@
       "&dateTo=" + dateTo + "&format=kml", "_blank");
   }
 
+  /*
   function binarySearch(d, t, s, e) {
     m = Math.floor((s + e) / 2);
     if (t == d[m].time) return d[m];
@@ -363,6 +454,7 @@
     if (t > d[m].time) return binarySearch(d, t, m, e);
     if (t < d[m].time) return binarySearch(d, t, s, m);
   }
+  */
 
   function refreshTrips() {
     days = httpGetCruisingDays();

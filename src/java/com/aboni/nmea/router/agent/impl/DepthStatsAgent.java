@@ -14,7 +14,7 @@ import java.util.LinkedList;
 
 public class DepthStatsAgent extends NMEAAgentImpl {
 
-    private class DepthT {
+    private static class DepthT {
         int depth;
         long timestamp;
     }

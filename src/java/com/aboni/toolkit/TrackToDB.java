@@ -18,8 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TrackToDB {
-	
-	class PPP {
+
+	static class PPP {
 	    double lat;
 	    String latE;
 	    double lon;

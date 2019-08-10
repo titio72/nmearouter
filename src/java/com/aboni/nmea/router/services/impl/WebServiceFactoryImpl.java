@@ -33,6 +33,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
 			case "/meteo":
 				s = new MeteoService();
 				break;
+            case "/meteo2":
+                s = new MeteoService2();
+                break;
 			case "/cruisingdays":
 				s = new CruisingDaysService();
 				break;

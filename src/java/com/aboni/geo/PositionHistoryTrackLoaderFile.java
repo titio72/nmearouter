@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 @SuppressWarnings("ALL")
-public class TrackLoaderFile implements TrackLoader {
+public class PositionHistoryTrackLoaderFile implements PositionHistoryTrackLoader {
 
 	public class MalformedPointLineException extends Exception {
 
@@ -26,8 +26,8 @@ public class TrackLoaderFile implements TrackLoader {
 	private final PositionHistory h;
 	private final SimpleDateFormat dfParser;
 	private final String file;
-	
-	public TrackLoaderFile(String file) {
+
+    public PositionHistoryTrackLoaderFile(String file) {
 	    dfParser = new SimpleDateFormat("ddMMyy HHmmss.SSS");
 	    dfParser.setTimeZone(TimeZone.getTimeZone("UTC"));
         h = new PositionHistory(0);

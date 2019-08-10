@@ -1,7 +1,5 @@
 package com.aboni.utils;
 
-import com.aboni.misc.Utils;
-
 public class ScalarStatsSample extends StatsSample {
 	
 	private final double rangeMin;

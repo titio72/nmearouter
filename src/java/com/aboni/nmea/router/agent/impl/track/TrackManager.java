@@ -148,8 +148,8 @@ public class TrackManager {
 	public Position getAverage() {
 		return stats.getAveragePosition();
 	}
-	
-    private class StationaryManager {
+
+	private static class StationaryManager {
 
     	boolean initialized = false;
         boolean stationary = true;

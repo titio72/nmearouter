@@ -17,7 +17,7 @@ public class NMEAProcessorSetTest {
 
     private NMEAProcessorSet theSet;
 
-    private class MyProc implements NMEAPostProcess {
+    private static class MyProc implements NMEAPostProcess {
 
         private Pair<Boolean, Sentence[]> nextAnswer;
 

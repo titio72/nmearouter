@@ -13,8 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class CruisingDaysService extends JSONWebService {
-	
-	class Trip {
+
+	static class Trip {
 		final int tripId;
 		final Set<Date> dates = new TreeSet<>();
 		final String desc;

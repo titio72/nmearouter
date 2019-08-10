@@ -21,8 +21,8 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private long bps;
     private long bpsOut;
-    
-    private class StatsSpeed {
+
+    private static class StatsSpeed {
         long bytes = 0;
         long bytesOut = 0;
         long resetTime = 0;

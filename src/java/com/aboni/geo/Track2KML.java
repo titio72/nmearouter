@@ -8,7 +8,7 @@ import java.io.Writer;
 
 public class Track2KML implements TrackDumper {
 
-	public class PointWriter implements DoWithPoint {
+    public static class PointWriter implements DoWithPoint<Object> {
 
 		final LineString theWriter;
 		
@@ -17,11 +17,15 @@ public class Track2KML implements TrackDumper {
 		}
 		
 		@Override
-		public void doWithPoint(GeoPositionT p) {
+        public void doWithPoint(GeoPositionT p, Object notUsed) {
 			if (TRACK_THEM_ALL ) {
 				theWriter.addToCoordinates(p.getLatitude(), p.getLongitude());
 			}
 		}
+
+        public void finish() {
+            // do nothing
+        }
 
 	}
 

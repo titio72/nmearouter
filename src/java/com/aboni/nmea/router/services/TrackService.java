@@ -19,8 +19,8 @@ public class TrackService  implements WebService {
             Calendar cTo = config.getParamAsDate("dateTo", 1);
         	String f = config.getParameter("format", "gpx");
         	boolean download = "1".equals(config.getParameter("download", "0"));
-        	
-			TrackLoader loader = new TrackLoaderDB();
+
+            PositionHistoryTrackLoader loader = new PositionHistoryTrackLoaderDB();
 			if (loader.load(cFrom, cTo)) {
 				TrackDumper dumper = null;
 				String mime = null;
@@ -68,6 +68,5 @@ public class TrackService  implements WebService {
 				ServerLog.getLogger().error("Error downloading track", ee);
 			}
         }
-		
 	}
 }

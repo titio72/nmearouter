@@ -23,7 +23,7 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	
 	private final FilterStats stats;
 
-	private class FilterStats {
+    private static class FilterStats {
 		int totProcessed;
 		int totSkippedReverseTime;
 		int totSkippedExceedDistance;

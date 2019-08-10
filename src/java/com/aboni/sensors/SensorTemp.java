@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class SensorTemp implements Sensor {
 
-	public class Reading {
+	public static class Reading {
 
 		private Reading(String key, long timestamp, double value) {
 			k = key;

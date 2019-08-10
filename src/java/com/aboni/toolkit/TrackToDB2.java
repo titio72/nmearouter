@@ -18,8 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TrackToDB2 {
-	
-	class PPP {
+
+    static class PPP {
 	    double lat;
 	    double lon;
 	    Calendar timestamp;

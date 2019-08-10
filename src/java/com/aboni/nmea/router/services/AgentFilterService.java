@@ -20,8 +20,8 @@ public class AgentFilterService implements WebService {
 		this.router = router;
 		isOut = "out".equals(inOut);
 	}
-	
-	private class FltSentence {
+
+	private static class FltSentence {
 		final String sentence;
 		final String source;
 		

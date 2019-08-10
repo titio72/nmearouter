@@ -2,7 +2,7 @@ package com.aboni.geo;
 
 import java.util.Calendar;
 
-public interface TrackLoader {
+public interface PositionHistoryTrackLoader {
 
 	boolean load(Calendar from, Calendar to);
 
