@@ -5,8 +5,12 @@ import org.json.JSONObject;
 
 public class ServiceShutdown extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    public ServiceShutdown() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
 	    try {
 	        ServerLog.getLogger().info("Shutdown");
 	        ProcessBuilder b = new ProcessBuilder("./shutdown");

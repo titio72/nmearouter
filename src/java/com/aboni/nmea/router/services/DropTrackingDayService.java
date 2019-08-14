@@ -10,9 +10,13 @@ import java.util.Calendar;
 
 public class DropTrackingDayService extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
-		try (DBHelper db = getDBHelper()) {
+    public DropTrackingDayService() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
+        try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement stm = db.getConnection().prepareStatement("delete from track where Date(TS)=?")) {
 				Calendar cDate = config.getParamAsCalendar(config, "date", null, "yyyyMMdd");
 				if (cDate != null) {

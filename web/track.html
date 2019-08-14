@@ -222,8 +222,8 @@
         c.destroy();
       }
       var datasets = [];
-      datasets.push(getSerie(data, "SOG", "vMin", "#777777"));
       datasets.push(getSerie(data, "SOG", "v",    "#22FF22"));
+      datasets.push(getSerie(data, "SOG", "vMin", "#777777"));
       datasets.push(getSerie(data, "SOG", "vMax", "#FF2222"));
       var c1 = new Chart(ctx, {
         type: 'line',
@@ -232,6 +232,9 @@
         },
         options: {
           spanGaps: false,
+          legend: {
+            display: false
+          },
           scales: {
             xAxes: [{
               type: 'time',
@@ -341,41 +344,6 @@
     }
     return dt;
   }
-
-  /*function refreshChart(chart, type, style) {
-    var ctx = document.getElementById(chart);
-    httpLoadMeteoDateRangeA(type, style, dateFrom + "0000", dateTo + "2359", function(res) {
-      var c = chartMap.get(chart);
-      if (c != null) {
-        c.destroy();
-      }
-      var c1 = new Chart(ctx, {
-        type: 'line',
-        data: res,
-        options: {
-          scales: {
-            xAxes: [{
-              type: 'time',
-            }]
-          },
-					plugins: {
-						zoom: {
-							pan: {
-								enabled: true,
-								mode: 'x'
-							},
-							zoom: {
-								enabled: true,
-								mode: 'x'
-							}
-						}
-					}          
-        }
-      });
-      chartMap.set(chart, c1);
-
-    });
-  }*/
 
   function resetZoom(chart) {
     var c = chartMap.get(chart);

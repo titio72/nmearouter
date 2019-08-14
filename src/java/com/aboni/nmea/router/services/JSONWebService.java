@@ -1,19 +1,26 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
-public abstract class JSONWebService implements WebService {
+public class JSONWebService implements WebService {
 
     private static final String APPLICATION_JSON = "application/json";
+    private WebServiceJSONLoader loader;
 
-    protected abstract JSONObject getResult(ServiceConfig config);
+    public JSONWebService(@NotNull WebServiceJSONLoader loader) {
+        this.loader = loader;
+    }
 
-    protected DBHelper getDBHelper() throws ClassNotFoundException {
-        return new DBHelper(true);
+    public JSONWebService() {
+        loader = null;
+    }
+
+    public void setLoader(@NotNull WebServiceJSONLoader loader) {
+        this.loader = loader;
     }
 
     @Override
@@ -28,7 +35,7 @@ public abstract class JSONWebService implements WebService {
     private JSONObject getJsonObjectResult(ServiceConfig config) {
         JSONObject res;
         try {
-            res = getResult(config);
+            res = loader.getResult(config);
         } catch (Exception e) {
             ServerLog.getLogger().error("Error reading trip stats", e);
             res = new JSONObject();

@@ -6,8 +6,12 @@ import org.json.JSONObject;
 
 public class SimulatorService extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    public SimulatorService() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
 		NMEASimulatorSource sim = NMEASimulatorSource.getSimulator();
 		if (sim!=null) {
 
@@ -37,7 +41,7 @@ public class SimulatorService extends JSONWebService {
 			res.put("heading", sim.getHeading());
 			return res;
 		} else {
-			return getError("Simulator is not confifured in this system");
+            return getError("Simulator is not configured in this system");
 		}
 	}
 }

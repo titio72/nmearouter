@@ -9,13 +9,17 @@ import java.sql.SQLException;
 
 public class ChangeTripDescService extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    public ChangeTripDescService() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
 		int trip = config.getInteger("trip", -1);
 		JSONObject res = new JSONObject();
 		if (trip!=-1) {
 			String desc = config.getParameter("desc", "Unknown");
-			try (DBHelper db = getDBHelper()) {
+            try (DBHelper db = new DBHelper(true)) {
 				try (PreparedStatement st1 = db.getConnection().prepareStatement("update trip set description=? where id=?")) {
 					st1.setString(1, desc);
 					st1.setInt(2, trip);

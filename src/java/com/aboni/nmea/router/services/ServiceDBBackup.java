@@ -6,9 +6,13 @@ import org.json.JSONObject;
 
 public class ServiceDBBackup extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
-        try (DBHelper h = getDBHelper()) {
+    public ServiceDBBackup() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
+        try (DBHelper h = new DBHelper(true)) {
             String file = h.backup();
             ServerLog.getLogger().info("DB Backup Return {" + file + "}");
             if (file != null) {

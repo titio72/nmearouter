@@ -25,11 +25,11 @@ public class SpeedAnalyticsService extends JSONWebService {
 	}
 
 	public SpeedAnalyticsService() {
-		// nothing to initialize
-	}
+        super();
+        setLoader(this::getResult);
+    }
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    private JSONObject getResult(ServiceConfig config) {
 		Map<Double, Stat> distr = new TreeMap<>();
 		for (double speed = SPEED_MIN; (speed + SPEED_BUCKET / 10.0) < SPEED_MAX; speed += SPEED_BUCKET) {
 			distr.put(speed, new Stat());
@@ -39,7 +39,7 @@ public class SpeedAnalyticsService extends JSONWebService {
 		Calendar cFrom = fromTo.getFrom();
 		Calendar cTo = fromTo.getTo();
 
-		try (DBHelper db = getDBHelper()) {
+        try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
 				stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
 				stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));

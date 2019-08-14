@@ -75,7 +75,7 @@
 				controllerScope.years = milesPerYear.years;
 				controllerScope.$evalAsync();
 
-				loadYearBarChart(milesPerYear);
+				loadYearBarChart(milesPerYear, minYear, maxYear);
 				loadMonthsChart(monthly, minYear, maxYear);
 			}
 		}
@@ -128,12 +128,14 @@
 			});
 		}
 
-		function loadYearBarChart(data) {
+		function loadYearBarChart(data, minYear, maxYear) {
 			var yearsMilesArray = [];
 			var yearsLabelsArray = [];
+			var yearsColorsArray = [];
 			data.years.forEach(x => {
 				yearsLabelsArray.push(x.year);
 				yearsMilesArray.push(x.NM);
+				yearsColorsArray.push(colors[x.year - minYear]);
 			});
 
 			var ctx = document.getElementById("yearsChart");
@@ -144,6 +146,7 @@
 					datasets: [{
 						backgroundColor: getComputedStyle(document.body).getPropertyValue("--secondary"),
 						data: yearsMilesArray,
+						backgroundColor: yearsColorsArray,
 						label: "Nautical Miles"
 					}]
 				},
@@ -167,12 +170,17 @@
 				if (x[0]!=y) {
 					currentY = {
 						"year": x[0],
-						"NM": x[2]
+						"NM": x[2],
+						"sailTime": (x[0]>=2017)?x[3]:null,
+						"days": x[4]
+						
 					}
 					yearlyStats.years.push(currentY);
 					y = x[0];
 				} else {
 					currentY.NM += x[2];
+					if (x[0]>=2017) currentY.sailTime += x[3];
+					currentY.days += x[4];
 				}
 			});
 
@@ -218,21 +226,27 @@
 
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
 
-		<div class="row alert alert-primary">
-			<div class="col-6">
+        <div class="row">
+            <div class="col-lg-6 col-sm-12">
 				<canvas class="chart-canvas" id="yearsChart"></canvas>
 			</div>
-			<div class="col-6">
+            <div class="col-lg-6 col-sm-12">
 				<canvas class="chart-canvas" id="monthsChart"></canvas>
 			</div>
 		</div>
 		<div class="row alert alert-primary" ng-repeat="t in years">
-			<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
 				{{t.year}}
 			</div>
-			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12" style="text-align: right">
 				{{t.NM | number:1}} NM
-			</div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="text-align: right">
+                {{t.sailTime | number:0}} h
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="text-align: right">
+                {{t.days | number:0}} Days
+            </div>
 		</div>
 
 

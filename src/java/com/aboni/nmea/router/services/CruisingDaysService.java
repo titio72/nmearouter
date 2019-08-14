@@ -36,6 +36,11 @@ public class CruisingDaysService extends JSONWebService {
 	private final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd");
 	private final DateFormat shortDateFormatter = new SimpleDateFormat("dd/MM");
 
+    public CruisingDaysService() {
+        super();
+        setLoader(this::getResult);
+    }
+
 	private void addToTrip(Map<Integer, Trip> trips, Date d, Integer id, String desc) {
 		Trip t = trips.getOrDefault(id, null);
 		if (t==null) {
@@ -46,14 +51,13 @@ public class CruisingDaysService extends JSONWebService {
 	}
 
 	private List<Trip> sortIt(Map<Integer, Trip> trips) {
-		List<Trip> triplist = new ArrayList<>(trips.values());
-		triplist.sort((o1, o2) -> -o1.min.compareTo(o2.min));
-		return triplist;
+        List<Trip> tripList = new ArrayList<>(trips.values());
+        tripList.sort((o1, o2) -> -o1.min.compareTo(o2.min));
+        return tripList;
 	}
-	
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
-		try (DBHelper db = getDBHelper()) {
+
+    private JSONObject getResult(ServiceConfig config) {
+        try (DBHelper db = new DBHelper(true)) {
 			return getJsonObject(getTrips(db));
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().error("Error reading trip list", e);

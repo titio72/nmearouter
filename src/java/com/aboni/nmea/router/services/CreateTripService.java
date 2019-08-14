@@ -9,13 +9,17 @@ import java.util.Calendar;
 
 public class CreateTripService extends JSONWebService {
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    public CreateTripService() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
 		String strip = config.getParameter("trip");
 		Calendar date = config.getParamAsCalendar(config, "date", null, "yyyyMMdd");
 		if (date!=null) {
 			int trip;
-			try (DBHelper h = getDBHelper()) {
+            try (DBHelper h = new DBHelper(true)) {
 				if (strip==null || strip.isEmpty() || strip.trim().charAt(0)=='-') {
 					trip = createTrip(h);
 					addToTrip(trip, date, h);

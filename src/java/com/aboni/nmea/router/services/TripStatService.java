@@ -17,7 +17,8 @@ import java.util.TimeZone;
 public class TripStatService extends JSONWebService {
 
 	public TripStatService() {
-		// nothing to initialize
+        super();
+        setLoader(this::getResult);
 	}
 
 	private static final String SQL = "select "
@@ -31,8 +32,7 @@ public class TripStatService extends JSONWebService {
 			+ "where TS>=? and TS<? "
 			+ "group by tripid order by start desc";
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
+    private JSONObject getResult(ServiceConfig config) {
 
 		int year = config.getInteger("year", Calendar.getInstance().get(Calendar.YEAR));
 
@@ -40,7 +40,7 @@ public class TripStatService extends JSONWebService {
 		Calendar cTo = getFirstDayOfYear(cFrom.get(Calendar.YEAR) + 1);
 
 		JSONObject res;
-		try (DBHelper db = getDBHelper()) {
+        try (DBHelper db = new DBHelper(true)) {
 			res = getJsonTripStats(db, cFrom, cTo);
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().error("Error reading trip stats", e);

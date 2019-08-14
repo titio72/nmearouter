@@ -11,15 +11,15 @@ import java.sql.SQLException;
 
 public class DistanceAnalyticsService extends JSONWebService {
 
-	private static final String SQL = "select year(TS), month(TS), sum(dist) from track group by year(TS), month(TS)";
+	private static final String SQL = "select year(TS), month(TS), sum(dist), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
 
 	public DistanceAnalyticsService() {
-		// nothing to initialize
+		super();
+		setLoader(this::getResult);
 	}
 
-	@Override
-	public JSONObject getResult(ServiceConfig config) {
-		try (DBHelper db = getDBHelper()) {
+	private JSONObject getResult(ServiceConfig config) {
+		try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
 				JSONObject res = new JSONObject();
 				JSONArray samples = new JSONArray();
@@ -30,7 +30,7 @@ public class DistanceAnalyticsService extends JSONWebService {
 						int y = rs.getInt(1);
 						if (lastY<y && lastY>0) {
 							for (int i = lastM + 1; i<=12; i++) {
-								JSONArray e = new JSONArray(new Object[] {lastY, i, 0.0});
+								JSONArray e = new JSONArray(new Object[]{lastY, i, 0.0, 0, 0});
 								samples.put(e);
 							}
 							lastM = 0;
@@ -40,13 +40,15 @@ public class DistanceAnalyticsService extends JSONWebService {
 						int m = rs.getInt(2);
 						if ((m - lastM)>1) {
 							for (int i = lastM + 1; i<m; i++) {
-								JSONArray e = new JSONArray(new Object[] {y, i, 0.0});
+								JSONArray e = new JSONArray(new Object[]{y, i, 0.0, 0, 0});
 								samples.put(e);
 							}
 						}
 						lastM = m;
-						double d = rs.getDouble(3);
-						JSONArray e = new JSONArray(new Object[] {y, m, d});
+						double dist = rs.getDouble(3);
+						double sailTime = rs.getDouble(4);
+						double days = rs.getDouble(5);
+						JSONArray e = new JSONArray(new Object[]{y, m, dist, sailTime / 3600, days});
 						samples.put(e);
 					}
 				}

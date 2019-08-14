@@ -16,8 +16,12 @@ public class MeteoService2 extends JSONWebService {
     private String type;
     private static final String SQL = "select type, TS, vMin, v, vMax from meteo where TS>=? and TS<?";
 
-    @Override
-    protected JSONObject getResult(ServiceConfig config) {
+    public MeteoService2() {
+        super();
+        setLoader(this::getResult);
+    }
+
+    private JSONObject getResult(ServiceConfig config) {
         Calendar from = config.getParamAsDate("dateFrom", 0);
         Calendar to = config.getParamAsDate("dateTo", 1);
 
