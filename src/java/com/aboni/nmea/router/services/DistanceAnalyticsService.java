@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 public class DistanceAnalyticsService extends JSONWebService {
 
-	private static final String SQL = "select year(TS), month(TS), sum(dist), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
+	private static final String SQL = "select year(TS), month(TS), sum(dist*(1-anchor) 	), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
 
 	public DistanceAnalyticsService() {
 		super();

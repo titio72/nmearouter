@@ -27,7 +27,7 @@ public class TripStatService extends JSONWebService {
 			+ "min(TS) as start, "
 			+ "max(TS) as end, "
 			+ "timediff(max(TS),min(TS)) as duration, "
-			+ "sum(dist) as distance "
+			+ "sum(dist * (1-anchor)) as distance "
 			+ "from track inner join trip on track.tripid = trip.id "
 			+ "where TS>=? and TS<? "
 			+ "group by tripid order by start desc";

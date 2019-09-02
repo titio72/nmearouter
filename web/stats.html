@@ -183,7 +183,6 @@
 					currentY.days += x[4];
 				}
 			});
-
 			return yearlyStats;
 		}
 
@@ -234,7 +233,7 @@
 				<canvas class="chart-canvas" id="monthsChart"></canvas>
 			</div>
 		</div>
-		<div class="row alert alert-primary" ng-repeat="t in years">
+        <div class="row alert alert-primary" ng-repeat="t in years | orderBy:'-year'">
             <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
 				{{t.year}}
 			</div>
