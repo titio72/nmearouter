@@ -4,31 +4,15 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?g2"></script>
-	<script src="js/Chart.min.js"></script>
-	<script src="js/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="js/nmearouter.js?a3"></script>
 	<link href="css/nmearouter.css" rel="stylesheet" />
 	<link rel="icon" type="image/png" href="nmeasail.png">
 	<style>
-		.tile-button {
-			width:100%;
-			font-size: 22px;
-			margin: 0px 0px 10px 0px;
-			padding: 0px;
-			height: 150px;
-		}
-		
-		.no-gutters-ab {
-			margin-right: -30px;
-			margin-left: -30px;
-  		}
-
 		.chart-canvas {
 			min-height: 300px;
 			min-width: 100%;
 		}
-
-
 	</style>
 </head>
 <body ng-app="nmearouter" onload="loadme();">
@@ -51,17 +35,16 @@
 		/*$cyan:    */ "#5bc0de"
 		];
 
-		var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
-	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	    xmlHttp.send( null );
-	    var res = JSON.parse(xmlHttp.responseText);
-		
 		app.controller("myCtrl", function($scope) {
 			$scope.years = [];  
 		});
 
 		function loadme() {
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
+			xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+			xmlHttp.send( null );
+			var res = JSON.parse(xmlHttp.responseText);
 			var p = res.NM_per_month;
 			if (p!=null && p.length!=0) {
 
@@ -77,6 +60,7 @@
 
 				loadYearBarChart(milesPerYear, minYear, maxYear);
 				loadMonthsChart(monthly, minYear, maxYear);
+				loadThisYearMonthsChart(p, minYear, maxYear);
 			}
 		}
 
@@ -128,6 +112,31 @@
 			});
 		}
 
+		function loadThisYearMonthsChart(values, minYear, maxYear) {
+			var data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+			var color = colors[maxYear-minYear];
+
+			values.forEach(x => {
+				if (x[0]==maxYear) {
+					data[x[1]-1] = x[2];
+				}
+			});
+
+			var ctx1 = document.getElementById("monthsChartThisYear");
+			var c1 = new Chart(ctx1, {
+				type: 'bar',
+				data: {
+					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+					datasets: [{
+						backgroundColor: color,
+						data: data,
+						label: ("Nautical Miles " + maxYear)
+					}]
+				},
+			});
+		}
+
 		function loadYearBarChart(data, minYear, maxYear) {
 			var yearsMilesArray = [];
 			var yearsLabelsArray = [];
@@ -144,7 +153,7 @@
 				data: {
 					labels: yearsLabelsArray,
 					datasets: [{
-						backgroundColor: getComputedStyle(document.body).getPropertyValue("--secondary"),
+						/*backgroundColor: getComputedStyle(document.body).getPropertyValue("--secondary"),*/
 						data: yearsMilesArray,
 						backgroundColor: yearsColorsArray,
 						label: "Nautical Miles"
@@ -226,12 +235,15 @@
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
 
         <div class="row">
-            <div class="col-lg-6 col-sm-12">
+            <div class="col-lg-4 col-md-6 col-sm-12">
 				<canvas class="chart-canvas" id="yearsChart"></canvas>
 			</div>
-            <div class="col-lg-6 col-sm-12">
+            <div class="col-lg-4 col-md-6 col-sm-12">
 				<canvas class="chart-canvas" id="monthsChart"></canvas>
-			</div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-sm-12">
+                <canvas class="chart-canvas" id="monthsChartThisYear"></canvas>
+            </div>
 		</div>
         <div class="row alert alert-primary" ng-repeat="t in years | orderBy:'-year'">
             <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
@@ -247,10 +259,6 @@
                 {{t.days | number:0}} Days
             </div>
 		</div>
-
-
 	</div>
-
-
 </body>
 </html>
