@@ -7,16 +7,26 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private TrackWriter media;
 	private String mediaFile;
 	private final TrackManager tracker;
+	private Integer currentTrip;
 	
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
@@ -143,10 +153,52 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     }
 
     private long lastStats = 0;
-    
+
+    private long lastTripCheckTs = 0;
+
+    private static final String SQL_GETLASTTRIP = "select max(tripId), max(track.ts) from track where tripId=(select max(track.tripId) from track)";
+
+    private void checkTrip() {
+        if (currentTrip == null) {
+            long now = System.currentTimeMillis();
+            if ((now - lastTripCheckTs) > 60000L) {
+                try (DBHelper db = new DBHelper(true)) {
+                    try (PreparedStatement st = db.getConnection().prepareStatement(SQL_GETLASTTRIP)) {
+                        ResultSet r = st.executeQuery();
+                        if (r.next()) {
+                            Timestamp lastTripTs = r.getTimestamp(2);
+                            int lastTrip = r.getInt(1);
+                            if ((now - lastTripTs.getTime()) < (3 * 60 * 1000) /* 3 hours */) {
+                                currentTrip = lastTrip;
+                                updateLastSamples(db, lastTripTs);
+                            }
+                        }
+                    } catch (SQLException e) {
+                        getLogger().error("Error detecting current trip", e);
+                    }
+                } catch (ClassNotFoundException e) {
+                    getLogger().error("Error detecting current trip", e);
+                }
+            }
+            lastTripCheckTs = now;
+        }
+    }
+
+    private void updateLastSamples(DBHelper db, Timestamp ts) throws SQLException {
+        String sql = "UPDATE track SET tripId=? WHERE TS>? AND TS<=?";
+        try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
+            st.setInt(1, currentTrip);
+            st.setTimestamp(2, ts);
+            st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            int n = st.executeUpdate();
+            getLogger().info("Detected current trip {" + currentTrip + "} Updated {" + n + "} track points");
+        }
+    }
+
     @Override
     public void onTimer() {
-    	if (System.currentTimeMillis() - lastStats > 30000) {
+    	checkTrip();
+        if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
     			getLogger().info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
