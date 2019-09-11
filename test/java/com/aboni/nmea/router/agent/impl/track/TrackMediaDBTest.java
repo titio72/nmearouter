@@ -60,20 +60,20 @@ public class TrackMediaDBTest {
 		DBTrackWriter trackDb = new DBTrackWriter();
 		trackDb.init();
 		long t = getNow();
-		trackDb.write(new GeoPositionT(t, 43.23, 10.54), false, 0.12, 6.2, 7.4, 60);
+        trackDb.write(new TrackPoint(new GeoPositionT(t, 43.23, 10.54), false, 0.12, 6.2, 7.4, 60));
 		List<TrackPoint> res = get(t);
 		cleanUp(t);
 
 		assertEquals(1, res.size());
 		TrackPoint p = res.get(0);
-		assertEquals(t, p.position.getTimestamp());
-		assertEquals(43.23, p.position.getLatitude(), 0.000001);
-		assertEquals(10.54, p.position.getLongitude(), 0.000001);
-		assertEquals(6.2, p.averageSpeed, 0.000001);
-		assertEquals(7.4, p.maxSpeed, 0.000001);
-		assertEquals(0.12, p.distance, 0.000001);
-		assertEquals(60, p.period);
-        assertFalse(p.anchor);
+        assertEquals(t, p.getPosition().getTimestamp());
+        assertEquals(43.23, p.getPosition().getLatitude(), 0.000001);
+        assertEquals(10.54, p.getPosition().getLongitude(), 0.000001);
+        assertEquals(6.2, p.getAverageSpeed(), 0.000001);
+        assertEquals(7.4, p.getMaxSpeed(), 0.000001);
+        assertEquals(0.12, p.getDistance(), 0.000001);
+        assertEquals(60, p.getPeriod());
+        assertFalse(p.isAnchor());
 		trackDb.dispose();
 	}
 
@@ -82,20 +82,20 @@ public class TrackMediaDBTest {
 		DBTrackWriter trackDb = new DBTrackWriter();
 		trackDb.init();
 		long t = getNow();
-		trackDb.write(new GeoPositionT(t, 43.23, 10.54), true, 0.12, 6.2, 7.4, 60);
+        trackDb.write(new TrackPoint(new GeoPositionT(t, 43.23, 10.54), true, 0.12, 6.2, 7.4, 60));
 		List<TrackPoint> res = get(t);
 		cleanUp(t);
 
 		assertEquals(1, res.size());
 		TrackPoint p = res.get(0);
-		assertEquals(t, p.position.getTimestamp());
-		assertEquals(43.23, p.position.getLatitude(), 0.000001);
-		assertEquals(10.54, p.position.getLongitude(), 0.000001);
-		assertEquals(6.2, p.averageSpeed, 0.000001);
-		assertEquals(7.4, p.maxSpeed, 0.000001);
-		assertEquals(0.12, p.distance, 0.000001);
-		assertEquals(60, p.period);
-		assertTrue(p.anchor);
+        assertEquals(t, p.getPosition().getTimestamp());
+        assertEquals(43.23, p.getPosition().getLatitude(), 0.000001);
+        assertEquals(10.54, p.getPosition().getLongitude(), 0.000001);
+        assertEquals(6.2, p.getAverageSpeed(), 0.000001);
+        assertEquals(7.4, p.getMaxSpeed(), 0.000001);
+        assertEquals(0.12, p.getDistance(), 0.000001);
+        assertEquals(60, p.getPeriod());
+        assertTrue(p.isAnchor());
 	}
 
 }

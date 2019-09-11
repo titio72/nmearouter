@@ -1,9 +1,7 @@
 package com.aboni.nmea.router.agent.impl.track;
 
-import com.aboni.geo.GeoPositionT;
-
 public interface TrackWriter {
-    void write(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval);
+    void write(TrackPoint point);
     boolean init();
     void dispose();
 }

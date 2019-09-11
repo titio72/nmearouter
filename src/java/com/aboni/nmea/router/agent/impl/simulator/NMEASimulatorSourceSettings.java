@@ -55,7 +55,10 @@ public class NMEASimulatorSourceSettings {
 	private double depthRange = 2.0;
 	private String polars = "dufour40.csv";
 
+    private boolean splitWind = false;
+
 	private boolean usePolars;
+    private boolean windSpeedInMS;
 
 	public boolean isVhw() {
 		return vhw;
@@ -436,6 +439,9 @@ public class NMEASimulatorSourceSettings {
 		 xdrMeteoTmp 	= p.getProperty("simulate.xdr.meteo.tmp", "0").equals("1");
 		 xdrGYR 		= p.getProperty("simulate.xdr.gyro", "0").equals("1");
 
+        splitWind = p.getProperty("simulate.split.wind", "0").equals("1");
+        windSpeedInMS = p.getProperty("simulate.wind.ms", "0").equals("1");
+
 		 polars = p.getProperty("simulate.polars.file", "dufour35c.csv");
 		 
 		 try { polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85")); } catch (Exception ignored) { /* optional data */ }
@@ -454,5 +460,20 @@ public class NMEASimulatorSourceSettings {
 		 
 		 
 	}
-	    
+
+    public boolean isSplitWind() {
+        return splitWind;
+    }
+
+    public void setSplitWind(boolean splitWind) {
+        this.splitWind = splitWind;
+    }
+
+    public boolean isWindSpeedInMS() {
+        return windSpeedInMS;
+    }
+
+    public void setWindSpeedInMS(boolean windSpeedInMS) {
+        this.windSpeedInMS = windSpeedInMS;
+    }
 }

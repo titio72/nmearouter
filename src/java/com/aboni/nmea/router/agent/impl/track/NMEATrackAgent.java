@@ -17,15 +17,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	private TrackWriter media;
 	private String mediaFile;
 	private final TrackManager tracker;
+    private Integer tripId;
 	
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
-        
         setSourceTarget(true, true);
-
         tracker = new TrackManager();
-        
         media = null;
+        tripId = null;
     }
 
     /**
@@ -98,12 +97,10 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
-            media.write(point.position, 
-            		point.anchor, 
-            		point.distance,  
-            		point.averageSpeed, 
-            		point.maxSpeed, 
-            		point.period);
+            if (tripId != null) {
+                point = new TrackPoint(point, tripId);
+            }
+            media.write(point);
             notifyTrackedPoint(point);
             synchronized (this) {writes++;}
         }
@@ -132,13 +129,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void notifyTrackedPoint(TrackPoint point) {
         JSONObject msg = new JSONObject();
         msg.put("topic", "track");
-        msg.put("stationary", point.anchor);
-        msg.put("distance", point.distance);
-        msg.put("maxSpeed", point.maxSpeed);
-        msg.put("speed", point.averageSpeed);
-        msg.put("period", point.period);
-        msg.put("lon", point.position.getLongitude());
-        msg.put("lat", point.position.getLatitude());
+        msg.put("stationary", point.isAnchor());
+        msg.put("distance", point.getDistance());
+        msg.put("maxSpeed", point.getMaxSpeed());
+        msg.put("speed", point.getAverageSpeed());
+        msg.put("period", point.getPeriod());
+        msg.put("lon", point.getPosition().getLongitude());
+        msg.put("lat", point.getPosition().getLatitude());
+        if (tripId != null) msg.put("lat", point.getTrip());
         notify(msg);
     }
 

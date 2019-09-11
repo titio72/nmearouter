@@ -29,7 +29,11 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 	private long lastSpeedTime;
 
 	private final boolean useRMC;
-	
+
+    private double lastSentTWindSpeed = Double.NaN;
+
+    private static final double SMOOTHING = 0.75;
+
 	@Override
 	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		try {
@@ -45,7 +49,13 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 					MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
 					mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
 					mwvTrue.setTrue(true);
-					mwvTrue.setSpeed(t.getTrueWindSpeed());
+
+                    double speed = t.getTrueWindSpeed();
+                    if (!Double.isNaN(lastSentTWindSpeed)) {
+                        speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
+                    }
+                    lastSentTWindSpeed = speed;
+                    mwvTrue.setSpeed(speed);
 					mwvTrue.setSpeedUnit(Units.KNOT);
 					mwvTrue.setStatus(DataStatus.ACTIVE);
 					
@@ -53,8 +63,8 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 						MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
 						mwd.setMagneticWindDirection(Utils.normalizeDegrees0To360(lastMagHeading + mwvTrue.getAngle()));
 						mwd.setTrueWindDirection(Utils.normalizeDegrees0To360(lastTrueHeading + mwvTrue.getAngle()));
-						mwd.setWindSpeed(Math.round(mwvTrue.getSpeed() * 51.4444) / 100.0);
-						mwd.setWindSpeedKnots(mwvTrue.getSpeed());
+                        mwd.setWindSpeed(Math.round(speed * 51.4444) / 100.0);
+                        mwd.setWindSpeedKnots(speed);
 						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue, mwd});
 					} else {
 						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue});
@@ -74,7 +84,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 			}
 			return null;
 		} catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich wind message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().warning("Cannot enrich wind message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
 		}
 		return new Pair<>(Boolean.TRUE, null);
 	}

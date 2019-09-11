@@ -4,22 +4,37 @@ import com.aboni.geo.GeoPositionT;
 
 public class TrackPoint {
 
-	final GeoPositionT position;
-	final boolean anchor;
-	final double distance;
-	final double averageSpeed;
-	final double maxSpeed;
-	final int period;
-
+    private final GeoPositionT position;
+    private final boolean anchor;
+    private final double distance;
+    private final double averageSpeed;
+    private final double maxSpeed;
+    private final int period;
+    private final int tripId;
 
     public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
-		this.position = p;
-		this.anchor = anchor;
-		this.distance = dist;
-		this.averageSpeed = speed;
-		this.maxSpeed = maxSpeed;
-		this.period = period;
-	}
+        this(p, anchor, dist, speed, maxSpeed, period, Integer.MIN_VALUE);
+    }
+
+    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, int tripId) {
+        this.position = p;
+        this.anchor = anchor;
+        this.distance = dist;
+        this.averageSpeed = speed;
+        this.maxSpeed = maxSpeed;
+        this.period = period;
+        this.tripId = tripId;
+    }
+
+    public TrackPoint(TrackPoint point, int tripId) {
+        this.position = point.position;
+        this.anchor = point.anchor;
+        this.distance = point.distance;
+        this.averageSpeed = point.averageSpeed;
+        this.maxSpeed = point.maxSpeed;
+        this.period = point.period;
+        this.tripId = tripId;
+    }
 
     public GeoPositionT getPosition() {
         return position;
@@ -45,5 +60,7 @@ public class TrackPoint {
         return period;
     }
 
-
+    public Integer getTrip() {
+        return tripId == Integer.MIN_VALUE ? null : tripId;
+    }
 }
