@@ -26,16 +26,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	private TrackWriter media;
 	private String mediaFile;
 	private final TrackManager tracker;
-	private Integer currentTrip;
-	
+    private Integer tripId;
+
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
-        
         setSourceTarget(true, true);
-
         tracker = new TrackManager();
-        
         media = null;
+        tripId = null;
     }
 
     /**
@@ -108,12 +106,10 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
-            media.write(point.position, 
-            		point.anchor, 
-            		point.distance,  
-            		point.averageSpeed, 
-            		point.maxSpeed, 
-            		point.period);
+            if (tripId != null) {
+                point = new TrackPoint(point, tripId);
+            }
+            media.write(point);
             notifyTrackedPoint(point);
             synchronized (this) {writes++;}
         }
@@ -142,13 +138,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void notifyTrackedPoint(TrackPoint point) {
         JSONObject msg = new JSONObject();
         msg.put("topic", "track");
-        msg.put("stationary", point.anchor);
-        msg.put("distance", point.distance);
-        msg.put("maxSpeed", point.maxSpeed);
-        msg.put("speed", point.averageSpeed);
-        msg.put("period", point.period);
-        msg.put("lon", point.position.getLongitude());
-        msg.put("lat", point.position.getLatitude());
+        msg.put("stationary", point.isAnchor());
+        msg.put("distance", point.getDistance());
+        msg.put("maxSpeed", point.getMaxSpeed());
+        msg.put("speed", point.getAverageSpeed());
+        msg.put("period", point.getPeriod());
+        msg.put("lon", point.getPosition().getLongitude());
+        msg.put("lat", point.getPosition().getLatitude());
+        if (tripId != null) msg.put("lat", point.getTrip());
         notify(msg);
     }
 
@@ -159,7 +156,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private static final String SQL_GETLASTTRIP = "select max(tripId), max(track.ts) from track where tripId=(select max(track.tripId) from track)";
 
     private void checkTrip() {
-        if (currentTrip == null) {
+        if (tripId == null) {
             long now = System.currentTimeMillis();
             if ((now - lastTripCheckTs) > 60000L) {
                 try (DBHelper db = new DBHelper(true)) {
@@ -169,7 +166,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                             Timestamp lastTripTs = r.getTimestamp(2);
                             int lastTrip = r.getInt(1);
                             if ((now - lastTripTs.getTime()) < (3 * 60 * 1000) /* 3 hours */) {
-                                currentTrip = lastTrip;
+                                tripId = lastTrip;
                                 updateLastSamples(db, lastTripTs);
                             }
                         }
@@ -187,11 +184,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void updateLastSamples(DBHelper db, Timestamp ts) throws SQLException {
         String sql = "UPDATE track SET tripId=? WHERE TS>? AND TS<=?";
         try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, currentTrip);
+            st.setInt(1, tripId);
             st.setTimestamp(2, ts);
             st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             int n = st.executeUpdate();
-            getLogger().info("Detected current trip {" + currentTrip + "} Updated {" + n + "} track points");
+            getLogger().info("Detected current trip {" + tripId + "} Updated {" + n + "} track points");
         }
     }
 

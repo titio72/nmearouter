@@ -45,8 +45,11 @@ public class NMEATrackManagerTest {
 	
 	private void dump(List<TrackPoint> l) {
 		for (TrackPoint p: l) {
-			System.out.format("%d %.2f %d %s %n", 
-					p.anchor?1:0, p.distance * 1852.0, p.period, fmt.format(new Date((p.position.getTimestamp() - t0))) );
+			System.out.format("%d %.2f %d %s %n",
+                    p.isAnchor() ? 1 : 0,
+                    p.getDistance() * 1852.0,
+                    p.getPeriod(),
+                    fmt.format(new Date((p.getPosition().getTimestamp() - t0))));
 		}
 		
 	}
@@ -89,7 +92,7 @@ public class NMEATrackManagerTest {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
 		TrackPoint p = postPosition(2000, 0.0);
 		assertNotNull(p);
-		assertTrue(p.anchor);
+        assertTrue(p.isAnchor());
 	}
 	
 	@Test
@@ -97,12 +100,12 @@ public class NMEATrackManagerTest {
 		postPosition(1000, 0.0);  // first point is null because it is figuring out if it's anchored or not
 		TrackPoint p = postPosition(2000, 5.0);
 		assertNotNull(p);
-		assertTrue(!p.anchor);
-		assertEquals(5.0, p.averageSpeed, 0.1);
-		assertEquals(0.001389, p.distance, 0.000001);
-		assertEquals(43.678301, p.position.getLatitude(), 0.000001);
-		assertEquals(10.266413, p.position.getLongitude(), 0.000001);
-		assertEquals(2000 + t0, p.position.getTimestamp());
+        assertTrue(!p.isAnchor());
+        assertEquals(5.0, p.getAverageSpeed(), 0.1);
+        assertEquals(0.001389, p.getDistance(), 0.000001);
+        assertEquals(43.678301, p.getPosition().getLatitude(), 0.000001);
+        assertEquals(10.266413, p.getPosition().getLongitude(), 0.000001);
+        assertEquals(2000 + t0, p.getPosition().getTimestamp());
 		
 	}
 	
@@ -112,8 +115,8 @@ public class NMEATrackManagerTest {
 		cruise(10 /* 10s */, 6.0);
 		List<TrackPoint> l = cruise(20 /* 20s */, 5.0);
 		TrackPoint p = l.get(0);
-		assertEquals(6.00, p.maxSpeed, 0.01);
-		assertEquals((5.0*20 + 6.0*(period-20))/period, p.averageSpeed, 0.01);
+        assertEquals(6.00, p.getMaxSpeed(), 0.01);
+        assertEquals((5.0 * 20 + 6.0 * (period - 20)) / period, p.getAverageSpeed(), 0.01);
 	}
 	
 	@Test
@@ -123,10 +126,10 @@ public class NMEATrackManagerTest {
 		assertEquals(60/*m*/ * 60 / period, l.size());
 		int counter = 0;
 		for (TrackPoint p: l) {
-			//System.out.println(p.period + " " + p.averageSpeed);
-			assertTrue(!p.anchor);
-			assertEquals(5.0, p.averageSpeed, 0.1);
-			assertEquals((counter==0)?1:period, p.period);
+            //System.out.println(p.getPeriod() + " " + p.averageSpeed);
+            assertTrue(!p.isAnchor());
+            assertEquals(5.0, p.getAverageSpeed(), 0.1);
+            assertEquals((counter == 0) ? 1 : period, p.getPeriod());
 			counter++;
 		}
 	}
@@ -136,11 +139,11 @@ public class NMEATrackManagerTest {
 		cruise(10 * 60 /* 1m */, 5.0);
 		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 0.0);
 		for (TrackPoint p: l) {
-			System.out.println(p.period + " " + p.anchor + " " + p.averageSpeed);
-		}
-		assertTrue(l.get(l.size()-1).anchor);
-		assertEquals(0.0, l.get(l.size()-1).averageSpeed, 0.1);
-		assertEquals(m.getStaticPeriod() / 1000, l.get(l.size()-1).period);
+            System.out.println(p.getPeriod() + " " + p.isAnchor() + " " + p.getAverageSpeed());
+        }
+        assertTrue(l.get(l.size() - 1).isAnchor());
+        assertEquals(0.0, l.get(l.size() - 1).getAverageSpeed(), 0.1);
+        assertEquals(m.getStaticPeriod() / 1000, l.get(l.size() - 1).getPeriod());
 	}
 	
 	
@@ -153,10 +156,10 @@ public class NMEATrackManagerTest {
 		//dump(l);
 		int counter = 0;
 		for (TrackPoint p: l) {
-			assertTrue(!p.anchor);
+            assertTrue(!p.isAnchor());
 			if (counter>0) {
-				assertEquals(s, p.averageSpeed, 0.1);
-				assertEquals(period, p.period); // first depends on how long it has been anchored
+                assertEquals(s, p.getAverageSpeed(), 0.1);
+                assertEquals(period, p.getPeriod()); // first depends on how long it has been anchored
 			}
 			counter++;
 		}
@@ -167,8 +170,8 @@ public class NMEATrackManagerTest {
 	public void testSlowDown() throws Exception {
 		cruise(10 * 60 /* 10m */, 5.0);
 		List<TrackPoint> l = cruise(10 * 60 /* 10m */, 0.0); //slow down for less than 15m
-		assertTrue(!l.get(l.size()-1).anchor);
-		assertEquals(period, l.get(l.size()-1).period);
+        assertTrue(!l.get(l.size() - 1).isAnchor());
+        assertEquals(period, l.get(l.size() - 1).getPeriod());
 	}
 
 	@Test
@@ -177,9 +180,9 @@ public class NMEATrackManagerTest {
 		cruise(10 * 60 /* 10m */, 0.0); //slow down for less than 15m
 		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 5.0); //accelerate again
 		for (TrackPoint p: l) {
-			assertTrue(!p.anchor);
-			assertEquals(5.0, p.averageSpeed, 0.1);
-			assertEquals(period, p.period); // first depends on how long it has been anchored
+            assertTrue(!p.isAnchor());
+            assertEquals(5.0, p.getAverageSpeed(), 0.1);
+            assertEquals(period, p.getPeriod()); // first depends on how long it has been anchored
 		}
 	}
 	
@@ -189,7 +192,7 @@ public class NMEATrackManagerTest {
 		for (int i = 0; i<5*60; i++) { //swing for a few minutes with a period of 30s
 			TrackPoint p = postPosition(lastPosted + 1000, 1.0 * Math.sin(2 * Math.PI * (i / 30)));
 			if (p!=null) {
-				assertTrue(p.anchor);
+                assertTrue(p.isAnchor());
 			}
 		}
 	}
@@ -209,7 +212,7 @@ public class NMEATrackManagerTest {
 		List<TrackPoint> l = cruise(10 * 60 /* 10m */, 5.0, 8 * 3600);
 		//dump(l);
 		assertTrue(l.size()>1);
-		assertTrue(!l.get(1).anchor);
+        assertTrue(!l.get(1).isAnchor());
 	}
 
 	/**
@@ -227,6 +230,6 @@ public class NMEATrackManagerTest {
 		List<TrackPoint> l = cruise(60 * 60 /* 1h */, 0.0, 8 * 3600);
 		dump(l);
 		assertTrue(l.size()>1);
-		assertTrue(l.get(1).anchor);
+        assertTrue(l.get(1).isAnchor());
 	}
 }

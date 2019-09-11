@@ -82,7 +82,13 @@
 
   function processEvent(event) {
     var msg = JSON.parse(event.data);
-    if (msg.topic == 'XDR') {
+    if (msg.topic == 'MTW') {
+        var controllerElement = document.getElementById('sensorPanel');
+        var controllerScope = angular.element(controllerElement).scope();
+        controllerScope['WaterTemp'] = msg.temperature;
+        controllerScope.$evalAsync();
+	irr = 0;
+    } else if (msg.topic == 'XDR') {
       for (var prop in msg) {
         if (prop != 'XDR') {
           var controllerElement = document.getElementById('sensorPanel');
@@ -567,8 +573,8 @@
                 <td style="text-align: right">{{AirTemp_0.value | number:1}} &deg;C</td>
               </tr>
               <tr>
-                <td>Ext Temp</td>
-                <td style="text-align: right">{{ExtAirTemp.value | number:1}} &deg;C</td>
+                <td>Water Temp</td>
+                <td style="text-align: right">{{WaterTemp | number:1}} &deg;C</td>
               </tr>
               <tr>
                 <td>&nbsp;</td>

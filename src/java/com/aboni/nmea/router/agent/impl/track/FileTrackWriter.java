@@ -21,8 +21,8 @@ public class FileTrackWriter implements TrackWriter {
     }
     
     @Override
-    public void write(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
-        String msg = getPositionString(p, anchor, dist, speed, maxSpeed, interval);
+    public void write(TrackPoint point) {
+        String msg = getPositionString(point);
         if (msg!=null) {
             writeLine(msg);
         }
@@ -38,16 +38,17 @@ public class FileTrackWriter implements TrackWriter {
         }
     }
 
-    private String getPositionString(GeoPositionT pos, boolean anchor, double dist, double speed, double maxSpeed, int interval) {
-    	if (pos!=null) {
+    private String getPositionString(TrackPoint point) {
+        if (point != null) {
+            GeoPositionT pos = point.getPosition();
             return pos.getTimestamp() +
             " " + myPosFormatter.format(Math.abs(pos.getLatitude())) + ((pos.getLatitude()>0)?"N":"S") +
             " " + myPosFormatter.format(Math.abs(pos.getLongitude())) + ((pos.getLongitude()>0)?"E":"W") +
-            " " + (anchor?"A":"T") +
-            " " + myDistFormatter.format(dist) +
-            " " + mySpeedFormatter.format(speed) +
-            " " + mySpeedFormatter.format(maxSpeed) +
-            " " + interval +
+                    " " + (point.isAnchor() ? "A" : "T") +
+                    " " + myDistFormatter.format(point.getDistance()) +
+                    " " + mySpeedFormatter.format(point.getMaxSpeed()) +
+                    " " + mySpeedFormatter.format(point.getMaxSpeed()) +
+                    " " + point.getPeriod() +
             "\r\n";
     	} else {
     		return null;

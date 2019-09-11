@@ -341,22 +341,52 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
 	}
 
+	private void sendSplitApparentWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
+		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+		v.setAngle(aWDirection);
+		v.setTrue(false);
+		v.setSpeedUnit(Units.KNOT);
+		v.setStatus(DataStatus.ACTIVE);
+		NMEASimulatorSource.this.notify(v);
+
+		v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+		v.setTrue(false);
+		v.setSpeedUnit(Units.KMH);
+		v.setSpeed(aWSpeed * 1.852);
+		v.setStatus(DataStatus.ACTIVE);
+		NMEASimulatorSource.this.notify(v);
+	}
+
 	private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
 		if (data.isMwvA()) {
-			MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-			v.setSpeedUnit(Units.KNOT);
-			v.setAngle(aWDirection);
-			v.setSpeed(aWSpeed);
-			v.setTrue(false);
-			v.setStatus(DataStatus.ACTIVE);
-			NMEASimulatorSource.this.notify(v);
+			if (data.isSplitWind()) {
+				sendSplitApparentWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
+			} else {
+				MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+				if (data.isWindSpeedInMS()) {
+					v.setSpeedUnit(Units.METER);
+					v.setSpeed(aWSpeed / 1.947);
+				} else {
+					v.setSpeedUnit(Units.KNOT);
+					v.setSpeed(aWSpeed);
+				}
+				v.setAngle(aWDirection);
+				v.setTrue(false);
+				v.setStatus(DataStatus.ACTIVE);
+				NMEASimulatorSource.this.notify(v);
+			}
 		}
 
 		if (data.isMwvT()) {
 			MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-			vt.setSpeedUnit(Units.KNOT);
+			if (data.isWindSpeedInMS()) {
+				vt.setSpeedUnit(Units.METER);
+				vt.setSpeed(absoluteWindSpeed / 1.947);
+			} else {
+				vt.setSpeedUnit(Units.KNOT);
+				vt.setSpeed(absoluteWindSpeed);
+			}
 			vt.setAngle(tWDirection);
-			vt.setSpeed(absoluteWindSpeed);
 			vt.setTrue(true);
 			vt.setStatus(DataStatus.ACTIVE);
 			NMEASimulatorSource.this.notify(vt);
