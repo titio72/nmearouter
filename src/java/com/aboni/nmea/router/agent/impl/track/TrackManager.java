@@ -31,9 +31,10 @@ public class TrackManager {
         maxSpeed = 0.0;
         stationaryStatus = new StationaryManager();
         stats = new PositionStats();
+
     }
 
-    /**
+	/**
      * Sampling period when cruising
      * @return milliseconds
      */
@@ -55,8 +56,8 @@ public class TrackManager {
         long checkPeriod = (anchor?getStaticPeriod():getPeriod());
        	return dt >= checkPeriod;
     }
-    
-    public TrackPoint processPosition(GeoPositionT p, double sog) {
+
+	public TrackPoint processPosition(GeoPositionT p, double sog, Integer tripId) {
 
     	stats.addPosition(p);
     	
@@ -69,7 +70,7 @@ public class TrackManager {
 	        	stationaryStatus.updateStationaryStatus(p.getTimestamp(), isStationary(lastPoint, p));
                 setLastTrackedPosition(p);
                 maxSpeed = sog;
-            	res = fillPoint(stationaryStatus.isAnchor(p.getTimestamp()), lastPoint, p);
+				res = fillPoint(stationaryStatus.isAnchor(p.getTimestamp()), lastPoint, p, tripId);
 	        }
     	} else {
 	        long dt = p.getTimestamp() - getLastTrackedTime();
@@ -78,7 +79,7 @@ public class TrackManager {
 	            if (shallReport(p)) {
 	            	boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
 	            	GeoPositionT posToTrack = anchor ? new GeoPositionT(p.getTimestamp(), stats.getAveragePosition()) : p;
-                	res = fillPoint(anchor, getLastTrackedPosition(), posToTrack);
+					res = fillPoint(anchor, getLastTrackedPosition(), posToTrack, tripId);
                     setLastTrackedPosition(p);
 	                maxSpeed = 0.0; // reset maxSpeed for the new sampling period
 	        	}
@@ -89,14 +90,14 @@ public class TrackManager {
         return res;
     }
 
-    private TrackPoint fillPoint(boolean anchor, GeoPositionT prevPos, GeoPositionT p) {
+	private TrackPoint fillPoint(boolean anchor, GeoPositionT prevPos, GeoPositionT p, Integer trip) {
         Course c = new Course(prevPos, p);
         double speed = c.getSpeed(); 
         speed = Double.isNaN(speed)?0.0:speed;
         double dist = c.getDistance(); 
         dist = Double.isNaN(speed)?0.0:dist;
         int timePeriod = (int) (c.getInterval()/1000);
-        return new TrackPoint(p, anchor, dist,  speed, maxSpeed, timePeriod);
+		return new TrackPoint(p, anchor, dist, speed, maxSpeed, timePeriod, trip);
     }
     
     /**
