@@ -10,13 +10,13 @@ public class TrackPoint {
     private final double averageSpeed;
     private final double maxSpeed;
     private final int period;
-    private final int tripId;
+    private final Integer tripId;
 
     public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
-        this(p, anchor, dist, speed, maxSpeed, period, Integer.MIN_VALUE);
+        this(p, anchor, dist, speed, maxSpeed, period, null);
     }
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, int tripId) {
+    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, Integer tripId) {
         this.position = p;
         this.anchor = anchor;
         this.distance = dist;
@@ -61,6 +61,6 @@ public class TrackPoint {
     }
 
     public Integer getTrip() {
-        return tripId == Integer.MIN_VALUE ? null : tripId;
+        return tripId;
     }
 }

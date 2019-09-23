@@ -44,7 +44,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	mediaFile = file;
     }
 
-
     @Override
     protected boolean onActivate() {
     	if (media==null) {
@@ -103,12 +102,9 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void processPosition(GeoPositionT posT, double sog) {
 		long t0 = System.currentTimeMillis();
 
-        TrackPoint point = tracker.processPosition(posT, sog);
+        TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
-            if (tripId != null) {
-                point = new TrackPoint(point, tripId);
-            }
             media.write(point);
             notifyTrackedPoint(point);
             synchronized (this) {writes++;}
