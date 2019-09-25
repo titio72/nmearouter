@@ -60,7 +60,7 @@ public class NMEATrackManagerTest {
 		lat = p1.getLatitude();
 		lon = p1.getLongitude();
 		lastPosted = ts;
-		return m.processPosition(new GeoPositionT(ts + t0, lat, lon), speed);
+		return m.processPosition(new GeoPositionT(ts + t0, lat, lon), speed, -1);
 	}
 	
 	private List<TrackPoint> cruise(int seconds, double speed) {

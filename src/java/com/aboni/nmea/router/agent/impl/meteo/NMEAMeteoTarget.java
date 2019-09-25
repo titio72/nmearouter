@@ -31,7 +31,26 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     		new AngleStatsSample("TWD"),
     		new ScalarStatsSample("HUM", 0.0, 150.0)
     };
-    
+
+    /* Cycles of timer*/
+    private final int[] periods = new int[] {
+            /*AT0*/ 10,
+            /*WT_*/ 10,
+            /*PR_*/  5,
+            /*TW_*/  1,
+            /*TWD*/  1,
+            /*HUM*/ 10
+    };
+
+    private int[] statsPeriodCounter = new int[] {
+            /*AT0*/ 0,
+            /*WT_*/ 0,
+            /*PR_*/ 0,
+            /*TW_*/ 0,
+            /*TWD*/ 0,
+            /*HUM*/ 0
+    };
+
     private final NMEACache cache;
 
     private final boolean useMWD;
@@ -73,9 +92,14 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private void dumpStats() {
         synchronized (series) {
         	long ts = System.currentTimeMillis();
-            for (StatsSample series1 : series) {
-                write(series1, ts);
-                series1.reset();
+            for (int i = 0; i<series.length; i++) {
+                statsPeriodCounter[i]++;
+                if (statsPeriodCounter[i]>=periods[i]) {
+                    StatsSample series1 = series[i];
+                    write(series1, ts);
+                    series1.reset();
+                    statsPeriodCounter[i] = 0;
+                }
             }
         }
     }

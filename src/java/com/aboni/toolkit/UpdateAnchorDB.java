@@ -55,7 +55,7 @@ public class UpdateAnchorDB {
                             while (rs.next()) {
                                 i++;
                                 TrackItem item = getItem(rs);
-                                TrackPoint tp = trackManager.processPosition(item.position, item.speed);
+                                TrackPoint tp = trackManager.processPosition(item.position, item.speed, -1);
 
                                 if (last != null) {
                                     if (last.position.getTimestamp() > item.position.getTimestamp()) {
