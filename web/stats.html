@@ -4,7 +4,7 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script-->
     <script src="js/nmearouter.js?a3"></script>
 	<link href="css/nmearouter.css" rel="stylesheet" />
 	<link rel="icon" type="image/png" href="nmeasail.png">
@@ -180,7 +180,7 @@
 					currentY = {
 						"year": x[0],
 						"NM": x[2],
-						"sailTime": (x[0]>=2017)?x[3]:null,
+						"sailTime": x[3],
 						"days": x[4]
 						
 					}
@@ -188,7 +188,7 @@
 					y = x[0];
 				} else {
 					currentY.NM += x[2];
-					if (x[0]>=2017) currentY.sailTime += x[3];
+					currentY.sailTime += x[3];
 					currentY.days += x[4];
 				}
 			});

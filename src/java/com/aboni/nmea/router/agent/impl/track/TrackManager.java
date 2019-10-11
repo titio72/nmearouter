@@ -14,6 +14,8 @@ public class TrackManager {
 	private final StationaryManager stationaryStatus;
 	private final PositionStats stats;
 
+	private boolean reportAll;
+
 	private static final int SECOND = 1000;
 	private static final int MINUTE = 60 * SECOND;
 	
@@ -25,14 +27,18 @@ public class TrackManager {
 	private static final double MOVE_THRESHOLD_SPEED_KN = 3.0; // if reported is greater than X then it's moving 
 	private static final double MOVE_THRESHOLD_POS_METERS =  35.0; // if move by X meters since last reported point then it's moving
 
-    public TrackManager() {
-        period = DEFAULT_PERIOD;
-        staticPeriod = STATIC_DEFAULT_PERIOD;
-        maxSpeed = 0.0;
-        stationaryStatus = new StationaryManager();
-        stats = new PositionStats();
+	public TrackManager() {
+		this(false);
+	}
 
-    }
+	public TrackManager(boolean reportAll) {
+		period = DEFAULT_PERIOD;
+		staticPeriod = STATIC_DEFAULT_PERIOD;
+		maxSpeed = 0.0;
+		stationaryStatus = new StationaryManager();
+		stats = new PositionStats();
+		this.reportAll = reportAll;
+	}
 
 	/**
      * Sampling period when cruising
@@ -51,10 +57,14 @@ public class TrackManager {
     }
     
     private boolean shallReport(GeoPositionT p) {
-        boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
-        long dt = p.getTimestamp() - getLastTrackedTime();
-        long checkPeriod = (anchor?getStaticPeriod():getPeriod());
-       	return dt >= checkPeriod;
+		if (reportAll)
+			return true;
+		else {
+			boolean anchor = stationaryStatus.isAnchor(p.getTimestamp());
+			long dt = p.getTimestamp() - getLastTrackedTime();
+			long checkPeriod = (anchor ? getStaticPeriod() : getPeriod());
+			return dt >= checkPeriod;
+		}
     }
 
 	public TrackPoint processPosition(GeoPositionT p, double sog, Integer tripId) {
