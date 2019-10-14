@@ -4,7 +4,6 @@
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
-    <!--script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script-->
     <script src="js/nmearouter.js?a3"></script>
 	<link href="css/nmearouter.css" rel="stylesheet" />
 	<link rel="icon" type="image/png" href="nmeasail.png">
@@ -14,14 +13,13 @@
 			min-width: 100%;
 		}
 	</style>
-</head>
-<body ng-app="nmearouter" onload="loadme();">
-	<ol class="breadcrumb">
-		<li class="breadcrumb-item"><a href="index.html">Home</a></li>
-		<li class="breadcrumb-item active">Stats</li>
-	</ol>
-
 	<script>
+		var stats = loadTrips();
+		app.controller("myCtrl", function($scope) {
+			$scope.years = [];
+			loadme(stats, $scope);
+		});
+
 		var colors = [
 		/*$blue:    */ "#007bff",
 		/*$indigo:  */ "#6610f2",
@@ -34,30 +32,23 @@
 		/*$teal:    */ "#20c997",
 		/*$cyan:    */ "#5bc0de"
 		];
-
-		app.controller("myCtrl", function($scope) {
-			$scope.years = [];  
-		});
-
-		function loadme() {
+	
+		function loadTrips() {
 			var xmlHttp = new XMLHttpRequest();
 			xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
 			xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 			xmlHttp.send( null );
-			var res = JSON.parse(xmlHttp.responseText);
+			return JSON.parse(xmlHttp.responseText);
+		}
+
+		function loadme(res, controllerScope) {
 			var p = res.NM_per_month;
 			if (p!=null && p.length!=0) {
-
 				var minYear = p[0][0];
 				var maxYear = p[p.length-1][0];
 				var milesPerYear = fillsYearsStats(p);
 				var monthly = fillMonthlyStats(p, minYear, maxYear);
-
-				var controllerElement = document.getElementById('nmearouter');
-				var controllerScope = angular.element(controllerElement).scope();
 				controllerScope.years = milesPerYear.years;
-				controllerScope.$evalAsync();
-
 				loadYearBarChart(milesPerYear, minYear, maxYear);
 				loadMonthsChart(monthly, minYear, maxYear);
 				loadThisYearMonthsChart(p, minYear, maxYear);
@@ -83,8 +74,8 @@
 					label: ""+ y,
 					borderColor: color,
 					pointRadius: 0,
-  					lineTension: 0,
-  					fill: false,
+					lineTension: 0,
+					fill: false,
 					data: []
 				};
 				data.months.forEach(x => {
@@ -230,7 +221,14 @@
 		}
 
 
-	</script>
+    </script>
+
+</head>
+<body ng-app="nmearouter">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+    <li class="breadcrumb-item active">Stats</li>
+</ol>
 
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
 
