@@ -273,7 +273,19 @@ function readInfo(resText) {
     maxspeed: json.maxspeed,
     maxspeed30: json.maxspeed30,
     avgspeed: json.avgspeed,
-    dist: json.dist
+    dist: json.dist,
+
+    maxspeed1NM: json.speed_1NM,
+    maxspeed1N_time_0: (json.t0_1NM!=null)?moment.unix(json.t0_1NM / 1000).format('hh:mm:ss'):'',
+    maxspeed1N_time_1: (json.t1_1NM!=null)?moment.unix(json.t1_1NM / 1000).format('hh:mm:ss'):'',
+
+    maxspeed5NM: json.speed_5NM,
+    maxspeed5N_time_0: (json.t0_5NM!=null)?moment.unix(json.t0_5NM / 1000).format('hh:mm:ss'):'',
+    maxspeed5N_time_1: (json.t1_5NM!=null)?moment.unix(json.t1_5NM / 1000).format('hh:mm:ss'):'',
+
+    maxspeed10NM: json.speed_10NM,
+    maxspeed10N_time_0: (json.t0_10NM!=null)?moment.unix(json.t0_10NM / 1000).format('hh:mm:ss'):'',
+    maxspeed10N_time_1: (json.t1_10NM!=null)?moment.unix(json.t1_10NM / 1000).format('hh:mm:ss'):'',
   };
   return res;
 }

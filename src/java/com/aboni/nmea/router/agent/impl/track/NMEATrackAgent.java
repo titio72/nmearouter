@@ -1,25 +1,16 @@
 package com.aboni.nmea.router.agent.impl.track;
 
-
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
+import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
@@ -27,6 +18,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	private String mediaFile;
 	private final TrackManager tracker;
     private Integer tripId;
+    private TripManager tripManager;
 
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
@@ -34,6 +26,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         tracker = new TrackManager();
         media = null;
         tripId = null;
+        tripManager = new DBTripManager();
     }
 
     /**
@@ -102,6 +95,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void processPosition(GeoPositionT posT, double sog) {
 		long t0 = System.currentTimeMillis();
 
+		checkTrip(posT.getTimestamp());
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
@@ -149,48 +143,25 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private long lastTripCheckTs = 0;
 
-    private static final String SQL_GETLASTTRIP = "select max(tripId), max(track.ts) from track where tripId=(select max(track.tripId) from track)";
-
-    private void checkTrip() {
+    private void checkTrip(long now) {
         if (tripId == null) {
-            long now = System.currentTimeMillis();
             if ((now - lastTripCheckTs) > 60000L) {
-                try (DBHelper db = new DBHelper(true)) {
-                    try (PreparedStatement st = db.getConnection().prepareStatement(SQL_GETLASTTRIP)) {
-                        ResultSet r = st.executeQuery();
-                        if (r.next()) {
-                            Timestamp lastTripTs = r.getTimestamp(2);
-                            int lastTrip = r.getInt(1);
-                            if ((now - lastTripTs.getTime()) < (3 * 60 * 1000) /* 3 hours */) {
-                                tripId = lastTrip;
-                                updateLastSamples(db, lastTripTs);
-                            }
-                        }
-                    } catch (SQLException e) {
-                        getLogger().error("Error detecting current trip", e);
+                Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
+                if (tripInfo!=null) {
+                    long lastTripTs = tripInfo.second;
+                    int lastTrip = tripInfo.first;
+                    if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
+                        tripId = lastTrip;
+                        tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
                     }
-                } catch (ClassNotFoundException e) {
-                    getLogger().error("Error detecting current trip", e);
                 }
             }
             lastTripCheckTs = now;
         }
     }
 
-    private void updateLastSamples(DBHelper db, Timestamp ts) throws SQLException {
-        String sql = "UPDATE track SET tripId=? WHERE TS>? AND TS<=?";
-        try (PreparedStatement st = db.getConnection().prepareStatement(sql)) {
-            st.setInt(1, tripId);
-            st.setTimestamp(2, ts);
-            st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            int n = st.executeUpdate();
-            getLogger().info("Detected current trip {" + tripId + "} Updated {" + n + "} track points");
-        }
-    }
-
     @Override
     public void onTimer() {
-    	checkTrip();
         if (System.currentTimeMillis() - lastStats > 30000) {
     		lastStats = System.currentTimeMillis();
     		synchronized (this) {
@@ -221,6 +192,4 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     	GeoPositionT pos = tracker.getLastTrackedPosition();
     	return "Tracking position " + ((pos==null)?"":("<br>" + pos));
     }
-    
-
 }

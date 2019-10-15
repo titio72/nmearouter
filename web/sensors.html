@@ -41,6 +41,21 @@
 </head>
 <script type="text/javascript">
 
+  var deliver = false;
+  var inView = false;
+  window.onfocus = window.onblur = window.onpageshow = window.onpagehide = function (e) {
+    if ({focus:1, pageshow:1}[e.type]) {
+      if (inView) return;
+      inView = true;
+      deliver = true;
+      console.log("visible");
+    } else if (inView) {
+      inView = false;
+      deliver = false;
+      console.log("non-visible");
+    }
+  }
+
   app.controller("myCtrl", function ($scope) {
     $scope.V0 = { value: 0.0 };
     $scope.V1 = { value: 0.0 };
@@ -70,7 +85,9 @@
     }
     socket = new WebSocket("ws://" + window.location.hostname + ":1112/events");
     socket.onmessage = function (event) {
-      processEvent(event);
+      if (deliver) {
+        processEvent(event);
+      }
     }
     socket.onclose = function (event) {
       socketClosed(event);
