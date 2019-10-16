@@ -87,6 +87,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                }
 	            }
 			} catch (Exception e) {
+                e.printStackTrace();
 				ServerLog.getLogger().error("Error processing position {" + s + "}", e);
 			}
 		}
@@ -95,7 +96,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void processPosition(GeoPositionT posT, double sog) {
 		long t0 = System.currentTimeMillis();
 
-		checkTrip(posT.getTimestamp());
+        checkTrip(posT.getTimestamp());
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
@@ -135,7 +136,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         msg.put("period", point.getPeriod());
         msg.put("lon", point.getPosition().getLongitude());
         msg.put("lat", point.getPosition().getLatitude());
-        if (tripId != null) msg.put("lat", point.getTrip());
+        if (tripId != null) msg.put("trip", point.getTrip());
         notify(msg);
     }
 
@@ -145,6 +146,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private void checkTrip(long now) {
         if (tripId == null) {
+            System.out.println(now - lastTripCheckTs);
             if ((now - lastTripCheckTs) > 60000L) {
                 Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
                 if (tripInfo!=null) {
@@ -155,8 +157,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                         tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
                     }
                 }
+                lastTripCheckTs = now;
             }
-            lastTripCheckTs = now;
         }
     }
 

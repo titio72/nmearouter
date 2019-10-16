@@ -21,23 +21,27 @@ public class PositionStats {
 	}
 	
 	public void addPosition(GeoPositionT pos) {
-		positions.add(pos);
-		avgLat = (avgLat * samples + pos.getLatitude()) / (samples + 1);
-		avgLon = (avgLon * samples + pos.getLongitude()) / (samples + 1);
-		samples = positions.size();
-		
-		long t = pos.getTimestamp(); 
-		while (!positions.isEmpty() && (t - positions.get(0).getTimestamp()) > PERIOD) {
-			GeoPositionT p = positions.get(0);
-			avgLat = (avgLat * samples - p.getLatitude()) / (samples - 1);
-			avgLon = (avgLon * samples - p.getLongitude()) / (samples - 1);
-			positions.remove(0);
-			samples = positions.size();
+        synchronized (this) {
+            positions.add(pos);
+            avgLat = (avgLat * samples + pos.getLatitude()) / (samples + 1);
+            avgLon = (avgLon * samples + pos.getLongitude()) / (samples + 1);
+            samples = positions.size();
+
+            long t = pos.getTimestamp();
+            while (!positions.isEmpty() && (t - positions.get(0).getTimestamp()) > PERIOD) {
+                GeoPositionT p = positions.get(0);
+                avgLat = (avgLat * samples - p.getLatitude()) / (samples - 1);
+                avgLon = (avgLon * samples - p.getLongitude()) / (samples - 1);
+                positions.remove(0);
+                samples = positions.size();
+            }
 		}
 	}
 
 	public Position getAveragePosition() {
-		return new Position(avgLat, avgLon);
+        synchronized (this) {
+            return new Position(avgLat, avgLon);
+        }
 	}
 	
 }

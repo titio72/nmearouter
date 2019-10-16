@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 
 public class DBTrackEventWriter implements EventWriter {
 
+    static String TABLE = "track";
+
 	private PreparedStatement stm;
     private PreparedStatement stmTrip;
 
@@ -20,48 +22,58 @@ public class DBTrackEventWriter implements EventWriter {
 
 	private void prepareStatement(Connection c) throws SQLException {
 		if (stm==null) {
-			stm = c.prepareStatement("insert into track (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist) values (?, ?, ?, ?, ?, ?, ?, ?)");
+            stm = c.prepareStatement("insert into " + TABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist) values (?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
     private void prepareStatementWithTrip(Connection c) throws SQLException {
         if (stmTrip == null) {
-            stmTrip = c.prepareStatement("insert into track (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmTrip = c.prepareStatement("insert into " + TABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
-	@Override
-	public void reset() {
-		try {
-			stm.close();
-		} catch (Exception e) {
-			ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
-		}
-		stm = null;
+    private PreparedStatement closeStatement(PreparedStatement s) {
+        if (s != null) {
+            try {
+                s.close();
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void reset() {
+        stm = closeStatement(stm);
+        stmTrip = closeStatement(stmTrip);
 	}
 	
 	@Override
 	public void write(Event e, Connection conn) throws SQLException{
 		if (conn!=null && e instanceof TrackEvent) {
+            PreparedStatement s;
             if (((TrackEvent) e).getPoint().getTrip() == null) {
                 prepareStatement(conn);
+                s = stm;
             } else {
                 prepareStatementWithTrip(conn);
+                s = stmTrip;
             }
         	TrackEvent t = (TrackEvent)e;
-            stm.setDouble(1, t.getPoint().getPosition().getLatitude());
-            stm.setDouble(2, t.getPoint().getPosition().getLongitude());
+            s.setDouble(1, t.getPoint().getPosition().getLatitude());
+            s.setDouble(2, t.getPoint().getPosition().getLongitude());
             Timestamp x = new Timestamp(e.getTime());
-            stm.setTimestamp(3, x);
-            stm.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
-            stm.setInt(5, t.getPoint().getPeriod());
-            stm.setDouble(6, t.getPoint().getAverageSpeed());
-            stm.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
-            stm.setDouble(8, t.getPoint().getDistance());
+            s.setTimestamp(3, x);
+            s.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
+            s.setInt(5, t.getPoint().getPeriod());
+            s.setDouble(6, t.getPoint().getAverageSpeed());
+            s.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
+            s.setDouble(8, t.getPoint().getDistance());
             if (((TrackEvent) e).getPoint().getTrip() != null) {
-                stm.setInt(9, t.getPoint().getTrip());
+                s.setInt(9, t.getPoint().getTrip());
             }
-            stm.execute();
+            s.execute();
 	    }
 	}
 }
