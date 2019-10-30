@@ -23,7 +23,7 @@ public class DBTrackEventWriterTest {
     public void setUp() throws Exception {
         TrackTestTableManager.setUp();
         evW = new DBTrackEventWriter();
-        evW.TABLE = "track_test";
+        evW.sTABLE = "track_test";
     }
 
     @After
@@ -39,10 +39,20 @@ public class DBTrackEventWriterTest {
                 new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30);
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
-        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false));
+        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0));
     }
 
-    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor) throws Exception {
+    @Test
+    public void writeWithTrip() throws Exception {
+        long l = f.parse("2019-10-15 15:54:12").getTime();
+        TrackPoint p = new TrackPoint(
+                new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, 124);
+        DBHelper h = new DBHelper(true);
+        evW.write(new TrackEvent(p), h.getConnection());
+        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 124));
+    }
+
+    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, int trip) throws Exception {
         PreparedStatement st = h.getConnection().prepareStatement("select id, TS, lat, lon, dist, speed, maxSpeed, dTime, anchor, tripId from track_test where TS=?");
         st.setTimestamp(1, new Timestamp(ts));
         ResultSet rs = st.executeQuery();
@@ -55,6 +65,7 @@ public class DBTrackEventWriterTest {
         assertEquals(maxSpeed, rs.getDouble(7), 0.000001);
         assertEquals(dTime, rs.getInt(8));
         assertEquals(anchor ? 1 : 0, rs.getInt(9));
+        assertEquals(trip, rs.getInt(10));
         return true;
     }
 }

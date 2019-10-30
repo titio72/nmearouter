@@ -114,8 +114,6 @@ public class UpdateAnchorDB {
                                 last = item;
                                 if (i % 2500 == 0) {
                                     db.getConnection().commit();
-                                    final int k = i;
-                                    //ServerLog.getConsoleOut().println("Done: " + k);
                                 }
                             }
                             db.getConnection().commit();

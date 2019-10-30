@@ -15,7 +15,7 @@ import java.util.TimeZone;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("ALL")
-public class NMEATrackManagerTest {
+public class TrackManagerTest {
 	
 	//private static final long STATIC_DEFAULT_PERIOD = 30 * 60000; // 30 minutes;
 	//private static final long DEFAULT_PERIOD = 60000; // 1 minute

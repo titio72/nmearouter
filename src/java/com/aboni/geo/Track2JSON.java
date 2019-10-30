@@ -21,7 +21,7 @@ public class Track2JSON implements TrackDumper {
 
 		@Override
         public void doWithPoint(GeoPositionT p, TrackPoint pt) {
-            handlePoint(p, pt);
+			handlePoint(p);
         }
 
         @Override
@@ -29,7 +29,7 @@ public class Track2JSON implements TrackDumper {
             // noting to do
 		}
 
-        private void handlePoint(GeoPositionT p, TrackPoint pt) {
+		private void handlePoint(GeoPositionT p) {
 			if (TRACK_THEM_ALL ) {
 				writePoint(p);
 			} else {
@@ -83,7 +83,7 @@ public class Track2JSON implements TrackDumper {
 	}
 
 	private void writePoints() {
-		track.iterate(new PointWriter());
+		if (track != null) track.iterate(new PointWriter());
 		((JSONObject)jsonTrack.get(JSON_TRACK_TAG)).put("path", getPath());
 	}
 

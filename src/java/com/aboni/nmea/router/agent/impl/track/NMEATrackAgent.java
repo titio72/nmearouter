@@ -87,7 +87,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	                }
 	            }
 			} catch (Exception e) {
-                e.printStackTrace();
 				ServerLog.getLogger().error("Error processing position {" + s + "}", e);
 			}
 		}
@@ -145,20 +144,17 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private long lastTripCheckTs = 0;
 
     private void checkTrip(long now) {
-        if (tripId == null) {
-            System.out.println(now - lastTripCheckTs);
-            if ((now - lastTripCheckTs) > 60000L) {
-                Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
-                if (tripInfo!=null) {
-                    long lastTripTs = tripInfo.second;
-                    int lastTrip = tripInfo.first;
-                    if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
-                        tripId = lastTrip;
-                        tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
-                    }
+        if (tripId == null && (now - lastTripCheckTs) > 60000L) {
+            Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
+            if (tripInfo != null) {
+                long lastTripTs = tripInfo.second;
+                int lastTrip = tripInfo.first;
+                if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
+                    tripId = lastTrip;
+                    tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
                 }
-                lastTripCheckTs = now;
             }
+            lastTripCheckTs = now;
         }
     }
 

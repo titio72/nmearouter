@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 
 public class DBTrackEventWriter implements EventWriter {
 
-    static String TABLE = "track";
+    static String sTABLE = "track";
 
 	private PreparedStatement stm;
     private PreparedStatement stmTrip;
@@ -22,13 +22,13 @@ public class DBTrackEventWriter implements EventWriter {
 
 	private void prepareStatement(Connection c) throws SQLException {
 		if (stm==null) {
-            stm = c.prepareStatement("insert into " + TABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist) values (?, ?, ?, ?, ?, ?, ?, ?)");
+            stm = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist) values (?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
     private void prepareStatementWithTrip(Connection c) throws SQLException {
         if (stmTrip == null) {
-            stmTrip = c.prepareStatement("insert into " + TABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmTrip = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 

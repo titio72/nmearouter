@@ -3,16 +3,16 @@ package com.aboni.geo;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-public class PositionHistory<PAYLOAD> {
+public class PositionHistory<T> {
 
 	class PosAndCourse {
-        PosAndCourse(GeoPositionT t, PAYLOAD payload) {
+        PosAndCourse(GeoPositionT t, T payload) {
 			p = t;
             prev = null;
             this.payload = payload;
 		}
 
-        PosAndCourse(GeoPositionT t, GeoPositionT previous, PAYLOAD payload) {
+        PosAndCourse(GeoPositionT t, GeoPositionT previous, T payload) {
 			p = t;
             prev = previous;
             this.payload = payload;
@@ -20,7 +20,7 @@ public class PositionHistory<PAYLOAD> {
 		
 		final GeoPositionT p;
         final GeoPositionT prev;
-        final PAYLOAD payload;
+        final T payload;
 
         double getDistance() {
             if (p != null && prev != null) {
@@ -38,7 +38,7 @@ public class PositionHistory<PAYLOAD> {
             }
         }
 
-        PAYLOAD getPayload() {
+        T getPayload() {
             return payload;
         }
 
@@ -62,7 +62,7 @@ public class PositionHistory<PAYLOAD> {
         addPosition(p, null);
     }
 
-    public void addPosition(GeoPositionT p, PAYLOAD payload) {
+    public void addPosition(GeoPositionT p, T payload) {
         synchronized (positions) {
             PosAndCourse newSample = positions.isEmpty() ? new PosAndCourse(p, payload) : new PosAndCourse(p, positions.getLast().p, payload);
             positions.add(newSample);
@@ -141,7 +141,7 @@ public class PositionHistory<PAYLOAD> {
 		}
 	}
 
-    public void iterate(DoWithPoint<PAYLOAD> doer) {
+    public void iterate(DoWithPoint<T> doer) {
 		synchronized (positions) {
 			if (doer!=null) {
 				for (PosAndCourse position : positions) {

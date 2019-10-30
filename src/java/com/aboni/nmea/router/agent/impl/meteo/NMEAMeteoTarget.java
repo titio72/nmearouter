@@ -143,11 +143,9 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private void write(StatsSample s, long ts) {
     	if (writer!=null && s!=null && s.getSamples()>0) {
-        	if ("TW_".equals(s.getTag())) {
-        	    if (s.getAvg()<10.0 && s.getMax()>(s.getAvg()*4.5)) {
-        	        // skip anomalous reading (like 80kn of max with avg of 4kn)
-        	        return;
-                }
+            if ("TW_".equals(s.getTag()) && s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)) {
+                // skip anomalous reading (like 80kn of max with avg of 4kn)
+                return;
             }
     	    writer.write(s, ts);
     	}

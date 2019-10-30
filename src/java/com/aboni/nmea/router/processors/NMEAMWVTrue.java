@@ -32,61 +32,63 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 
     private double lastSentTWindSpeed = Double.NaN;
 
-    private static final double SMOOTHING = 0.75;
-
 	@Override
 	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		try {
 			long time = System.currentTimeMillis(); 
 			if (sentence instanceof MWVSentence) {
-				MWVSentence mwv = (MWVSentence)sentence;
-				if (mwv.isTrue()) {
-					// skip it (filter out true wind)
-					return new Pair<>(Boolean.FALSE, new Sentence[] {});
-				} else if ((time-lastSpeedTime)<AGE_THRESHOLD) {
-					// calculate true wind
-					TrueWind t = new TrueWind(lastSpeed, mwv.getAngle(), mwv.getSpeed());
-					MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-					mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
-					mwvTrue.setTrue(true);
-
-                    double speed = t.getTrueWindSpeed();
-                    if (!Double.isNaN(lastSentTWindSpeed)) {
-                        speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
-                    }
-                    lastSentTWindSpeed = speed;
-                    mwvTrue.setSpeed(speed);
-					mwvTrue.setSpeedUnit(Units.KNOT);
-					mwvTrue.setStatus(DataStatus.ACTIVE);
-					
-					if ((time-lastHeadingTime)<AGE_THRESHOLD) {
-						MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
-						mwd.setMagneticWindDirection(Utils.normalizeDegrees0To360(lastMagHeading + mwvTrue.getAngle()));
-						mwd.setTrueWindDirection(Utils.normalizeDegrees0To360(lastTrueHeading + mwvTrue.getAngle()));
-                        mwd.setWindSpeed(Math.round(speed * 51.4444) / 100.0);
-                        mwd.setWindSpeedKnots(speed);
-						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue, mwd});
-					} else {
-						return new Pair<>(Boolean.TRUE, new Sentence[] {mwvTrue});
-					}
-				}
-			} else if (!useRMC && sentence instanceof VHWSentence) {
-				lastSpeed = ((VHWSentence)sentence).getSpeedKnots();
-				lastSpeedTime = time;
-			} else if (useRMC && sentence instanceof RMCSentence) {
-				lastSpeed = ((RMCSentence)sentence).getSpeed();
-				lastSpeedTime = time;
-			} else if (sentence instanceof HDMSentence) {
-				HDMSentence hdm = (HDMSentence)sentence;
-				lastMagHeading = hdm.getHeading();
-				lastTrueHeading = new NMEAMagnetic2TrueConverter().getTrue(lastMagHeading);
-				lastHeadingTime = time;
-			}
-			return null;
-		} catch (Exception e) {
+                return processWind((MWVSentence) sentence, time);
+            } else if (!useRMC && sentence instanceof VHWSentence) {
+                lastSpeed = ((VHWSentence) sentence).getSpeedKnots();
+                lastSpeedTime = time;
+            } else if (useRMC && sentence instanceof RMCSentence) {
+                lastSpeed = ((RMCSentence) sentence).getSpeed();
+                lastSpeedTime = time;
+            } else if (sentence instanceof HDMSentence) {
+                HDMSentence hdm = (HDMSentence) sentence;
+                lastMagHeading = hdm.getHeading();
+                lastTrueHeading = new NMEAMagnetic2TrueConverter().getTrue(lastMagHeading);
+                lastHeadingTime = time;
+            }
+            return null;
+        } catch (Exception e) {
             ServerLog.getLogger().warning("Cannot enrich wind message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
-		}
-		return new Pair<>(Boolean.TRUE, null);
+        }
+        return new Pair<>(Boolean.TRUE, null);
+    }
+
+    private Pair<Boolean, Sentence[]> processWind(MWVSentence sentence, long time) {
+        if (sentence.isTrue()) {
+            // skip it (filter out true wind)
+            return new Pair<>(Boolean.FALSE, new Sentence[]{});
+        } else if ((time - lastSpeedTime) < AGE_THRESHOLD) {
+            // calculate true wind
+            TrueWind t = new TrueWind(lastSpeed, sentence.getAngle(), sentence.getSpeed());
+            MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+            mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
+            mwvTrue.setTrue(true);
+
+            double speed = t.getTrueWindSpeed();
+            if (!Double.isNaN(lastSentTWindSpeed)) {
+                speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
+            }
+            lastSentTWindSpeed = speed;
+            mwvTrue.setSpeed(speed);
+            mwvTrue.setSpeedUnit(Units.KNOT);
+            mwvTrue.setStatus(DataStatus.ACTIVE);
+
+            if ((time - lastHeadingTime) < AGE_THRESHOLD) {
+                MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
+                mwd.setMagneticWindDirection(Utils.normalizeDegrees0To360(lastMagHeading + mwvTrue.getAngle()));
+                mwd.setTrueWindDirection(Utils.normalizeDegrees0To360(lastTrueHeading + mwvTrue.getAngle()));
+                mwd.setWindSpeed(Math.round(speed * 51.4444) / 100.0);
+                mwd.setWindSpeedKnots(speed);
+                return new Pair<>(Boolean.TRUE, new Sentence[]{mwvTrue, mwd});
+            } else {
+                return new Pair<>(Boolean.TRUE, new Sentence[]{mwvTrue});
+            }
+        }
+        return null;
 	}
 
 	@Override

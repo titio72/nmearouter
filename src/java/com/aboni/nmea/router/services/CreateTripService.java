@@ -68,7 +68,7 @@ public class CreateTripService extends JSONWebService {
 	}
 
 	private void addToTrip(int trip, Calendar date, DBHelper h) throws SQLException {
-		try (PreparedStatement stm = h.getConnection().prepareStatement("update track set tripid=? where Date(TS)=?")) {
+		try (PreparedStatement stm = h.getConnection().prepareStatement("update track set tripId=? where Date(TS)=?")) {
 			stm.setInt(1, trip);
 			stm.setTimestamp(2, new Timestamp(date.getTimeInMillis()));
 			stm.executeUpdate();

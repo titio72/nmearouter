@@ -102,7 +102,7 @@ public class Track2GPX implements TrackDumper {
 	}
 
 	private void writePoints(Writer w) {
-		track.iterate(new PointWriter(w));
+        if (track != null) track.iterate(new PointWriter(w));
 	}
 
 	private void writeHeader(Writer w) throws IOException {

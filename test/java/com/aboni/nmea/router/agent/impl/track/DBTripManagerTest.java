@@ -45,7 +45,7 @@ public class DBTripManagerTest {
         TrackTestTableManager.setUp();
 
         m = new DBTripManager();
-        m.TABLE = "track_test";
+        m.sTABLE = "track_test";
         try (DBHelper db = new DBHelper(true)) {
             for (String sql : SQL_CREATE_ROWS) db.getConnection().createStatement().executeUpdate(sql);
         }
