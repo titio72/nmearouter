@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.agent.impl.track;
 
+import com.aboni.geo.GeoPositionT;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
@@ -7,10 +8,37 @@ import com.aboni.utils.db.DBHelper;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DBTripManager implements TripManager {
 
     static String TABLE = "track";
+
+    public List<TrackPoint> loadTrip(int trip) {
+        try (DBHelper db = new DBHelper(true)) {
+            try (PreparedStatement st = db.getConnection().prepareStatement("select * from track where tripId=?")) {
+                st.setTimestamp(1, new Timestamp(trip));
+                ResultSet rs = st.executeQuery();
+                List<TrackPoint> res = new LinkedList<>();
+                while (rs.next()) {
+                    TrackPoint p = new TrackPoint(
+                            new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon")),
+                            rs.getBoolean("anchor"),
+                            rs.getDouble("dist"),
+                            rs.getDouble("speed"),
+                            rs.getDouble("maxSpeed"),
+                            rs.getInt("dTime"),
+                            trip);
+                    res.add(p);
+                }
+                return res;
+            }
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Error detecting current trip", e);
+        }
+        return null;
+    }
 
     @Override
     public Pair<Integer, Long> getCurrentTrip(long now) {

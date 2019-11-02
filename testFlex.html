@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>Map Label Utility Library Example</title>
+    <style>
+.container {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  height: 100%;
+}
+.header {
+  flex: 0 1 auto;
+  background: tomato;
+}
+
+.middle {
+  flex: 1 1 auto;
+  background: gold;
+  overflow: auto;
+}
+.footer {
+  flex: 0 1 60px;
+  background: lightgreen;
+  /* fixes the footer: min-height: 60px; */
+}
+  </style>
+  </head>
+  <body>
+  <div class="container">
+    <div class="header">
+      header: sized to content
+      <br>(but is it really?)
+    </div>
+    <div class="middle">
+      main content: fills remaining space<br>
+      x<br>x<br>x<br>x<br>x<br>x<br>x<br>x<br>x<br>x<br>
+    </div>
+    <div class="footer">
+      footer: fixed height in px
+    </div>
+  </div>
+  </body>
+</html>
