@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DBTripManager implements TripManager {
 
-    static String TABLE = "track";
+    static String sTABLE = "track";
 
     public List<TrackPoint> loadTrip(int trip) {
         try (DBHelper db = new DBHelper(true)) {
@@ -43,7 +43,7 @@ public class DBTripManager implements TripManager {
     @Override
     public Pair<Integer, Long> getCurrentTrip(long now) {
         try (DBHelper db = new DBHelper(false)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement("select max(tripId), max(TS) from " + TABLE + " where TS>=? and TS<=? AND tripId is not null")) {
+            try (PreparedStatement st = db.getConnection().prepareStatement("select max(tripId), max(TS) from " + sTABLE + " where TS>=? and TS<=? AND tripId is not null")) {
                 st.setTimestamp(1, new Timestamp(now - (3L * 60L * 60L * 1000L)));
                 st.setTimestamp(2, new Timestamp(now));
                 try (ResultSet rs = st.executeQuery()) {
@@ -61,7 +61,7 @@ public class DBTripManager implements TripManager {
     @Override
     public void setTrip(long from, long to, int tripId) {
         try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement("UPDATE " + TABLE + " SET tripId=? WHERE TS>? AND TS<=? AND tripId is null")) {
+            try (PreparedStatement st = db.getConnection().prepareStatement("UPDATE " + sTABLE + " SET tripId=? WHERE TS>? AND TS<=? AND tripId is null")) {
                 st.setInt(1, tripId);
                 st.setTimestamp(2, new Timestamp(from));
                 st.setTimestamp(3, new Timestamp(to));

@@ -10,9 +10,9 @@ import java.text.DecimalFormat;
 
 public class FileTrackWriter implements TrackWriter {
 
-    private final DecimalFormat myPosFormatter = new DecimalFormat("000.0000000");
-    private final DecimalFormat mySpeedFormatter = new DecimalFormat("#0.0");
-    private final DecimalFormat myDistFormatter = new DecimalFormat("#0.00000");
+    private static final DecimalFormat myPosFormatter = new DecimalFormat("000.0000000");
+    private static final DecimalFormat mySpeedFormatter = new DecimalFormat("#0.0");
+    private static final DecimalFormat myDistFormatter = new DecimalFormat("#0.00000");
 
     private final String fileName;
     

@@ -50,7 +50,7 @@ public class Track2KML implements TrackDumper {
 	}
 
 	private void writePoints(LineString w) {
-		track.iterate(new PointWriter(w));
+        if (track != null) track.iterate(new PointWriter(w));
 	}
 	
 	private static final boolean TRACK_THEM_ALL = true;

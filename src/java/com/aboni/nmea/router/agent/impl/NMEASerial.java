@@ -41,8 +41,8 @@ public class NMEASerial extends NMEAAgentImpl {
         	resetTime = time;
         }
     }
-    
-    private class Stats extends StatsSpeed {
+
+    private static class Stats extends StatsSpeed {
         long sentences = 0;
         long sentenceErrs = 0;
 

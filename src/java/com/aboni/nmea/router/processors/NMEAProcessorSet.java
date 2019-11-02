@@ -23,7 +23,7 @@ public class NMEAProcessorSet {
             for (NMEAPostProcess pp : proc) {
                 Pair<Boolean, Sentence[]> res = pp.process(sentence, source);
                 if (res != null) {
-                    if (!res.first) {
+                    if (!Boolean.TRUE.equals(res.first)) {
                         return EMPTY;
                     } else if (res.second != null) {
                         Collections.addAll(toSend, res.second);

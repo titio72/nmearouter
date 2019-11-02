@@ -16,7 +16,6 @@ public class PositionHistoryTrackLoaderDB implements PositionHistoryTrackLoader 
 
     public PositionHistoryTrackLoaderDB() {
         h = new PositionHistory<>(0);
-        TrackPoint p;
 	}
 	
 	/* (non-Javadoc)

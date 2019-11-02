@@ -166,13 +166,7 @@ public class SampledQueryService implements WebService {
         SampleWriter w = ctx.getWriter(type);
         if (w != null) {
             for (TimeSerieSample sample : samples) {
-                JSONArray a;
-                if (ctx.res.has(type)) {
-                    a = ctx.res.getJSONArray(type);
-                } else {
-                    a = new JSONArray();
-                    ctx.res.put(type, a);
-                }
+                JSONArray a = getOrCreateSamplesArray(ctx, type);
                 JSONObject[] res = w.getSampleNode(sample);
                 if (res != null) {
                     for (JSONObject n : res) {
@@ -181,6 +175,17 @@ public class SampledQueryService implements WebService {
                 }
             }
         }
+    }
+
+    private JSONArray getOrCreateSamplesArray(ResultContext ctx, String type) {
+        JSONArray a;
+        if (ctx.res.has(type)) {
+            a = ctx.res.getJSONArray(type);
+        } else {
+            a = new JSONArray();
+            ctx.res.put(type, a);
+        }
+        return a;
     }
 
     private Map<String, TimeSerie> getTimeSerie(Calendar cFrom, Calendar cTo, int maxSamples, DBHelper db, Range range) throws SQLException {

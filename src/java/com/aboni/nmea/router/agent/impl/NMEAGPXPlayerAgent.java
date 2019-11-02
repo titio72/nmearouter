@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLInputFactory;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -64,6 +65,8 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 		final Document d;
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+			dbFactory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			d = dBuilder.parse(file);
 			d.getDocumentElement().normalize();

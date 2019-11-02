@@ -70,7 +70,7 @@ public class CruisingDaysService extends JSONWebService {
 	private List<Trip> getTrips(DBHelper db) throws SQLException {
 		int counter = 0;
 		Map<Integer, Trip> tripsDates = new TreeMap<>();
-		try (PreparedStatement stm = db.getConnection().prepareStatement("select track.tripid, Date(track.TS), (select trip.description from trip where trip.id=track.tripid) as description from track group by track.tripid, Date(track.TS)")) {
+		try (PreparedStatement stm = db.getConnection().prepareStatement("select track.tripId, Date(track.TS), (select trip.description from trip where trip.id=track.tripId) as description from track group by track.tripid, Date(track.TS)")) {
 			readDays(counter, tripsDates, stm);
 		}
 		return sortIt(tripsDates);
@@ -90,10 +90,10 @@ public class CruisingDaysService extends JSONWebService {
 		}
 	}
 
-	private JSONObject getJsonObject(List<Trip> triplist) {
+	private JSONObject getJsonObject(List<Trip> tripList) {
 		JSONObject res = new JSONObject();
 		JSONArray trips = new JSONArray();
-		for (Trip t: triplist) {
+		for (Trip t : tripList) {
 			JSONObject trip = new JSONObject();
 			trip.put("trip", t.tripId);
 			trip.put("tripLabel", t.desc);

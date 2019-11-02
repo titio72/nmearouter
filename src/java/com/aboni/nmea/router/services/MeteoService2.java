@@ -13,7 +13,6 @@ import java.util.Calendar;
 
 public class MeteoService2 extends JSONWebService {
 
-    private String type;
     private static final String SQL = "select type, TS, vMin, v, vMax from meteo where TS>=? and TS<?";
 
     public MeteoService2() {

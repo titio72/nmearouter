@@ -20,6 +20,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
+import javax.annotation.Nonnull;
 import javax.websocket.server.ServerContainer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,7 +44,7 @@ public class StartRouter {
 	    ServerLog.getConsoleOut().println(s);
     }
 
-	public static void main(String[] args) {
+    public static void main(@Nonnull String[] args) {
 		Injector injector = Guice.createInjector(new NMEARouterModule());
 		
 		int ix;

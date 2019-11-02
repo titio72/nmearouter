@@ -27,26 +27,26 @@ public class EventSocket
 	}
 	
     @OnOpen
-    public void onWebSocketConnect(Session sess)
+	public void onWebSocketConnect(Session session)
     {
     	synchronized (sessions) {
-    		ServerLog.getLogger().info("Started web-socket session {" + sess.getId() + "}");
-	    	MySession s = new MySession(sess);
-    		sessions.put(sess,  s);
+			ServerLog.getLogger().info("Started web-socket session {" + session.getId() + "}");
+			MySession s = new MySession(session);
+			sessions.put(session, s);
 	        s.start(stream);
     	}
     }
 
     @OnClose
-    public void onWebSocketClose(Session sess)
+	public void onWebSocketClose(Session session)
     {
     	synchronized (sessions) {
-    		ServerLog.getLogger().info("Closed web-socket session {" + sess.getId() + "}");
-	    	if (sessions.containsKey(sess)) {
-	    		MySession s = sessions.get(sess);
+			ServerLog.getLogger().info("Closed web-socket session {" + session.getId() + "}");
+			if (sessions.containsKey(session)) {
+				MySession s = sessions.get(session);
 	    		ServerLog.getLogger().info("Stopping updates for web-socket id {" + s.id + "}");
 	    		s.stop(stream);
-	    		sessions.remove(sess);
+				sessions.remove(session);
 	    	}
     	}
     }
@@ -54,31 +54,31 @@ public class EventSocket
     @OnError
     public void onWebSocketError(Throwable cause)
     {
-        ServerLog.getLogger().error("Error handling websockets", cause);
+		ServerLog.getLogger().error("Error handling web sockets", cause);
     }
     	
     public static class MySession {
-    	private final Session sess;
+		private final Session session;
     	private static long sc;
     	private final long id;
     	private RemoteEndpoint.Async remote;
 
     	MySession(Session s) {
-    		sess = s;
+			session = s;
     		remote = null;
     		id = sc++;
     	}
     	
 	    private void start(NMEAStream stream) {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().info("Start new WS session {" + sess.getId() + "} ID {" + id + "} ");
+				ServerLog.getLogger().info("Start new WS session {" + session.getId() + "} ID {" + id + "} ");
 		    	stream.subscribe(this);
 	    	}
 	    }
 	    
 	    private void stop(NMEAStream stream) {
 	    	synchronized (this) {
-		    	ServerLog.getLogger().info("Close WS session {" + sess.getId() + "} ID {" + id + "} ");
+				ServerLog.getLogger().info("Close WS session {" + session.getId() + "} ID {" + id + "} ");
 		    	stream.unsubscribe(this);
 	    	}
 		}
@@ -88,9 +88,9 @@ public class EventSocket
 			synchronized (this) {
 				if (obj!=null) {
 					try {
-						if (sess.isOpen()) {
+						if (session.isOpen()) {
 							if (remote == null) {
-								remote = sess.getAsyncRemote();
+								remote = session.getAsyncRemote();
 								remote.setSendTimeout(1000);
 							}
 							remote.sendText(obj.toString());

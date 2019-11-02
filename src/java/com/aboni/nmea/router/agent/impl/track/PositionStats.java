@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PositionStats {
-	
-	private final List<GeoPositionT> positions = new LinkedList<>();
+
+    private final List<GeoPositionT> positions;
 	
 	private int samples;
 	private double avgLat;
@@ -17,7 +17,7 @@ public class PositionStats {
 	private static final long PERIOD = 5L * 60000L; //5 minutes
 	
 	public PositionStats() {
-		// no init here
+        positions = new LinkedList<>();
 	}
 	
 	public void addPosition(GeoPositionT pos) {
