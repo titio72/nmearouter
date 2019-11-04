@@ -28,7 +28,7 @@ public class GDrive {
     private static final String APPLICATION_NAME = "NMEARouter";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "./";
-
+    private static final String DUMPS_ROOT_ID = "0B--7j-n2mogkYWFpdUVXT3J6UEk";
     /**
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
@@ -44,7 +44,6 @@ public class GDrive {
      */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
-        //InputStream in = GDrive.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
@@ -59,46 +58,44 @@ public class GDrive {
     }
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
-
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
-
-        //createFile(service);
-
-        listFiles(service);
-
+        upload( "/users/aboni/Downloads/sss.jpg", "application/image");
     }
 
-    public static void upload(String file) {
-
+    public static String upload(String file, String mime) throws IOException, GeneralSecurityException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+        return createFile(service, file, mime);
     }
 
     private static void listFiles(Drive service) throws IOException {
+
         FileList result = service.files().list()
                 .setPageSize(1000)
+                .setQ("'0B--7j-n2mogkYWFpdUVXT3J6UEk' in parents")
                 .execute();
 
         result.getFiles().stream().
-                filter(f->"ray.jpg".equals(f.getName())).
-                filter(f->{
+                filter(f->f.getName().equals("sss.jpg")).
+                /*filter(f->{
                     try {
-                        File ff = service.files().get(f.getId()).set("fields", "name, trashed").execute();
+                        File ff = service.files().get(f.getId()).set("fields", "name, trashed, parents").execute();
                         return ff.getTrashed() == null || !ff.getTrashed();
                     } catch (IOException e) {
                         e.printStackTrace();
                         return false;
                     }
-                }).
+                }).*/
                 forEach(System.out::println);
     }
 
-    private static void createFile(Drive service) throws IOException {
+    private static String createFile(Drive service, String file, String mime) throws IOException {
         File fileMetadata = new File();
-        fileMetadata.setName("ray.jpg");
-        java.io.File filePath = new java.io.File("/home/aboni/Downloads/ray.jpg");
-        FileContent mediaContent = new FileContent("image/jpeg", filePath);
-        File file = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
-        System.out.println("File ID: " + file.getId());
+        fileMetadata.setName("sss.jpg");
+        fileMetadata.setParents(Arrays.asList(DUMPS_ROOT_ID));
+        java.io.File filePath = new java.io.File(file);
+        FileContent mediaContent = new FileContent(mime, filePath);
+        File gFile = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
+        return gFile.getId();
     }
 
 }
