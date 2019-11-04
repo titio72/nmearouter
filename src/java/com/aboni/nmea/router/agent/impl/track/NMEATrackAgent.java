@@ -145,14 +145,18 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private void checkTrip(long now) {
         if (tripId == null && (now - lastTripCheckTs) > 60000L) {
-            Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
-            if (tripInfo != null) {
-                long lastTripTs = tripInfo.second;
-                int lastTrip = tripInfo.first;
-                if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
-                    tripId = lastTrip;
-                    tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
+            try {
+                Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
+                if (tripInfo != null) {
+                    long lastTripTs = tripInfo.second;
+                    int lastTrip = tripInfo.first;
+                    if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
+                        tripId = lastTrip;
+                        tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
+                    }
                 }
+            } catch (TripManagerException e) {
+                getLogger().error("Error detecting current trip", e);
             }
             lastTripCheckTs = now;
         }

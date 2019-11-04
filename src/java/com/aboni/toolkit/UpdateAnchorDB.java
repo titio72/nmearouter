@@ -10,6 +10,7 @@ import com.aboni.utils.db.DBHelper;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 
 public class UpdateAnchorDB {
@@ -41,15 +42,22 @@ public class UpdateAnchorDB {
     }
 
     private TrackItem last;
+    private int idDiscrepancies = 0;
+    private int anchorDiscrepancies = 0;
+
+    private boolean filter(TrackItem item) {
+        Calendar d = Calendar.getInstance();
+        d.setTimeInMillis(item.position.getTimestamp());
+        return d.get(Calendar.YEAR) <= 2016;
+    }
 
 	public void load() {
-        int idDiscrepancies = 0;
-        int anchorDoubts = 0;
+        idDiscrepancies = 0;
+        anchorDiscrepancies = 0;
         try (DBHelper db = new DBHelper(false)) {
             try (PreparedStatement stUpd = db.getConnection().prepareStatement("update track set anchor=?, dist=?, dTime=? where id=?")) {
                 try (PreparedStatement st = db.getConnection().prepareStatement(
                         "select lat, lon, TS, anchor, id, speed, maxSpeed, dist, dTime from track order by id")) {
-                    /*"select lat, lon, TS, anchor, id, speed, maxSpeed, dist, dTime from track order by id")) {*/
 
                     if (st.execute()) {
                         try (ResultSet rs = st.getResultSet()) {
@@ -59,58 +67,8 @@ public class UpdateAnchorDB {
                                 TrackItem item = getItem(rs);
                                 TrackPoint tp = trackManager.processPosition(item.position, item.speed, -1);
 
-                                if (last != null) {
-                                    if (last.position.getTimestamp() > item.position.getTimestamp()) {
-                                        ServerLog.getConsoleOut().println("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
-                                        ServerLog.getConsoleOut().println("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
-                                        ServerLog.getConsoleOut().println("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
-                                        idDiscrepancies++;
-                                    } else {
-                                        if ((item.position.getTimestamp() - last.position.getTimestamp()) < (6L * 60L * 60L * 1000L) /*6 hours*/) {
-                                            Course c = new Course(last.position, item.position);
-                                            double dist = c.getDistance();
-                                            int interval = (int) (c.getInterval() / 1000);
+                                processPoint(item, tp, stUpd);
 
-                                            boolean anchor = item.anchor;
-                                            int y = new Date(item.position.getTimestamp()).getYear();
-                                            if (y < 117) {
-                                                if (tp == null) {
-                                                    //ServerLog.getConsoleOut().println("Discrepancy: " + item.id + " " + new Date(item.position.getTimestamp()) + " Speed: " + item.speed);
-                                                    anchor = item.speed < 1.0;
-                                                } else {
-                                                    //ServerLog.getConsoleOut().println("Discrepancy: " + new Date(item.position.getTimestamp()) + " Speed: " + item.speed);
-                                                    anchor = tp.isAnchor();
-                                                }
-
-                                                if (anchor != item.anchor) {
-                                                    if (anchor && item.speed > 1.0) {
-                                                        ServerLog.getConsoleOut().println("Discrepancy: " + item.anchor + " " + item.id + " " + new Date(item.position.getTimestamp()) + " Speed: " + item.speed);
-                                                        anchorDoubts++;
-                                                    }
-                                                    if (!anchor && item.speed < 1.0) {
-                                                        ServerLog.getConsoleOut().println("Discrepancy: " + item.anchor + " " + item.id + " " + new Date(item.position.getTimestamp()) + " Speed: " + item.speed);
-                                                        anchorDoubts++;
-                                                    }
-                                                }
-                                            }
-                                            stUpd.setInt(1, anchor ? 1 : 0);
-                                            stUpd.setDouble(2, dist);
-                                            stUpd.setInt(3, interval);
-                                            stUpd.setInt(4, item.id);
-                                            stUpd.execute();
-                                        } else {
-                                            double speed = rs.getDouble(6);
-                                            if ((speed < 1.0) != item.anchor) {
-                                                //ServerLog.getConsoleOut().println("Discrepancy: " + new Date(item.position.getTimestamp()));
-                                            }
-                                            stUpd.setInt(1, speed < 0.1 ? 1 : 0);
-                                            stUpd.setDouble(2, 0);
-                                            stUpd.setInt(3, 0);
-                                            stUpd.setInt(4, item.id);
-                                            stUpd.execute();
-                                        }
-                                    }
-                                }
                                 last = item;
                                 if (i % 2500 == 0) {
                                     db.getConnection().commit();
@@ -120,7 +78,7 @@ public class UpdateAnchorDB {
                             final int count = i;
                             ServerLog.getConsoleOut().println("Processed %d points " + count);
                             ServerLog.getConsoleOut().println("wrong ids   " + idDiscrepancies);
-                            ServerLog.getConsoleOut().println("anchor xxxx " + anchorDoubts);
+                            ServerLog.getConsoleOut().println("anchor xxxx " + anchorDiscrepancies);
                         }
                     }
                 }
@@ -129,6 +87,61 @@ public class UpdateAnchorDB {
             e.printStackTrace(ServerLog.getConsoleOut());
         }
 	}
+
+	private void processPoint(TrackItem item, TrackPoint tp, PreparedStatement stUpd) throws SQLException {
+
+        if (filter(item)) {
+
+            if (last != null && last.position.getTimestamp() > item.position.getTimestamp()) {
+                // very bad issue... consecutive points are not ordered with time
+                ServerLog.getConsoleOut().println("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
+                ServerLog.getConsoleOut().println("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
+                ServerLog.getConsoleOut().println("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
+                idDiscrepancies++;
+            } else {
+                if (last != null && (item.position.getTimestamp() - last.position.getTimestamp()) < (6L * 60L * 60L * 1000L) /*6 hours*/) {
+                    Course c = new Course(last.position, item.position);
+                    double dist = c.getDistance();
+                    int interval = (int) (c.getInterval() / 1000);
+
+                    boolean anchor;
+                    if (tp == null) {
+                        // track manager says that this sample should not be tracked (so you're moored)
+                        // speed check should not be necessary but...
+                        anchor = item.speed < 1.0;
+                    } else {
+                        anchor = tp.isAnchor();
+                    }
+
+                    if (anchor != item.anchor) {
+                        logItem(item, anchor);
+                        anchorDiscrepancies++;
+                    }
+                    stUpd.setInt(1, anchor ? 1 : 0);
+                    stUpd.setDouble(2, dist);
+                    stUpd.setInt(3, interval);
+                    stUpd.setInt(4, item.id);
+                    stUpd.execute();
+                } else {
+                    if ((item.speed < 1.0) != item.anchor) {
+                        logItem(item, true);
+                    }
+                    stUpd.setInt(1, item.speed < 0.1 ? 1 : 0);
+                    stUpd.setDouble(2, 0);
+                    stUpd.setInt(3, 0);
+                    stUpd.setInt(4, item.id);
+                    stUpd.execute();
+                }
+            }
+        }
+    }
+
+
+    private void logItem(TrackItem item, boolean expectedAnchor) {
+        ServerLog.getConsoleOut().format("Discrepancy: %s %s %d %s Speed %f.2 %n",
+                item.anchor ? "Y" : "N", expectedAnchor?"Y":"N", item.id,
+                new Date(item.position.getTimestamp()), item.speed);
+    }
 
     public static void main(String[] args) {
 		new UpdateAnchorDB().load();

@@ -57,7 +57,7 @@ public class DBTripManagerTest {
     }
 
     @Test
-    public void getCurrentTrip() throws ParseException {
+    public void getCurrentTrip() throws TripManagerException, ParseException {
         Date d = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-10-15 20:10:00");
         Pair<Integer, Long> p = m.getCurrentTrip(d.getTime());
         assertNotNull(p);
@@ -66,7 +66,7 @@ public class DBTripManagerTest {
     }
 
     @Test
-    public void setTrip() throws ParseException, SQLException, ClassNotFoundException {
+    public void setTrip() throws TripManagerException, ParseException, SQLException, ClassNotFoundException {
         m.setTrip(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-10-15 19:21:16").getTime(),
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-10-15 20:10:00").getTime(), 124);
 
