@@ -64,9 +64,9 @@ public class AgentStatusService implements WebService {
 	private String startStopService(NMEAAgent a, String activate) {
 		String msg;
 		if (a.isUserCanStartAndStop()) {
-			if (activate.equalsIgnoreCase("YES") || activate.equals("1")) {
+			if ("YES".equalsIgnoreCase(activate) || "1".equals(activate)) {
 				msg = activate(a);
-			} else if (activate.equalsIgnoreCase("NO") || activate.equals("0")) {
+			} else if ("NO".equalsIgnoreCase(activate) || "0".equals(activate)) {
 				msg = deactivate(a);
 			} else {
 				msg = "Unknown status '" + activate + "'"; 

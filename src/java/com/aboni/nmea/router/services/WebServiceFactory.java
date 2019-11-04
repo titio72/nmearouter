@@ -1,5 +1,5 @@
 package com.aboni.nmea.router.services;
 
 public interface WebServiceFactory {
-	WebService getService(String target);
+    WebService getService(String target);
 }
