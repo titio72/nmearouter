@@ -12,6 +12,8 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
+import java.util.Date;
+
 public class NMEATrackAgent extends NMEAAgentImpl {
 
 	private TrackWriter media;
@@ -121,6 +123,9 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             msg.put("lonDec", avgPos.getLongitude());
             msg.put("lat", Utils.formatLatitude(avgPos.getLatitude()));
             msg.put("lon", Utils.formatLongitude(avgPos.getLongitude()));
+            if (tripId!=null) {
+                msg.put("trip", tripId);
+            }
             notify(msg);
         }
     }
@@ -135,7 +140,9 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         msg.put("period", point.getPeriod());
         msg.put("lon", point.getPosition().getLongitude());
         msg.put("lat", point.getPosition().getLatitude());
-        if (tripId != null) msg.put("trip", point.getTrip());
+        if (tripId != null) {
+            msg.put("trip", point.getTrip());
+        }
         notify(msg);
     }
 
@@ -145,12 +152,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private void checkTrip(long now) {
         if (tripId == null && (now - lastTripCheckTs) > 60000L) {
+            getLogger().info("Checking trip");
             try {
                 Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
                 if (tripInfo != null) {
                     long lastTripTs = tripInfo.second;
                     int lastTrip = tripInfo.first;
-                    if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
+                    getLogger().info(String.format("Last trip {%d} {%s}", lastTrip, new Date(lastTripTs).toString()));
+                    if ((now - lastTripTs) < (3 * 60 * 60 * 1000) /* 3 hours */) {
                         getLogger().info("Setting current trip {" + lastTrip + "}");
                         tripId = lastTrip;
                         tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
