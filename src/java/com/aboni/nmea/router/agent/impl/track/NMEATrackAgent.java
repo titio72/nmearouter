@@ -151,6 +151,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                     long lastTripTs = tripInfo.second;
                     int lastTrip = tripInfo.first;
                     if ((now - lastTripTs) < (3 * 60 * 1000) /* 3 hours */) {
+                        getLogger().info("Setting current trip {" + lastTrip + "}");
                         tripId = lastTrip;
                         tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
                     }
