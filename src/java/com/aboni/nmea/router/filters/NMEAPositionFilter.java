@@ -121,7 +121,6 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 		return valid;
 	}
 	
-	
 	private void resetOnTimeout(long t) {
 		if (Math.abs(t-lastTime)>RESET_TIMEOUT) {
 			positions.clear();

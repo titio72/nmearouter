@@ -17,7 +17,7 @@ public class ServiceDBBackup extends JSONWebService {
             ServerLog.getLogger().info("DB Backup Return {" + file + "}");
             if (file != null) {
                 JSONObject res = getOk();
-                res.put("file", file + ".tgz");
+                res.put("file", file);
                 return res;
             } else {
                 return getError("Backup failed");

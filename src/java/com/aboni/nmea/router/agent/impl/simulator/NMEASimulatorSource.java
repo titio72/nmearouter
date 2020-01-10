@@ -497,17 +497,17 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, String source) {
     	if (!source.equals(getName()) && s instanceof STALKSentence) {
-    		STALKSentence t = (STALKSentence)s;
-    		if (t.getCommand().equals("86")) {
-    			String[] p = t.getParameters();
-    			if (p[0].equals("21")) {
+			STALKSentence t = (STALKSentence) s;
+			if ("86".equals(t.getCommand())) {
+				String[] p = t.getParameters();
+				if ("21".equals(p[0])) {
 					handleAPStatusCommands(p);
-				} else if (p[0].equals("11")) {
+				} else if ("11".equals(p[0])) {
 					handleAPDirectionCommands(p);
 				}
-    		}
-    			
-    	}
+			}
+
+		}
     		
     }
 

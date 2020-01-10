@@ -135,26 +135,28 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	}
 
 	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
-    	AgentStatus s = AgentStatusProvider.getAgentStatus();
-    	boolean active = a.isActive();
-    	if (s!=null) {
-    		AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());  
-    		if (requestedStatus==STATUS.UNKNOWN) {
-    			s.setStartMode(agent.getName(), active?STATUS.AUTO:STATUS.MANUAL);
-    		} else {
-    			active = (requestedStatus==STATUS.AUTO);
-    		}
-    	}
-    	return active;
+        AgentStatus s = AgentStatusProvider.getAgentStatus();
+        boolean active = a == null ? false : a.isActive();
+        if (s != null) {
+            AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());
+            if (requestedStatus == STATUS.UNKNOWN) {
+                s.setStartMode(agent.getName(), active ? STATUS.AUTO : STATUS.MANUAL);
+            } else {
+                active = (requestedStatus == STATUS.AUTO);
+            }
+        }
+        return active;
     }
     
     private void buildStreamDump(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEA2FileAgent dumper = new NMEA2FileAgent(
-        		injector.getInstance(NMEACache.class), 
-        		"Log", q);
+                injector.getInstance(NMEACache.class),
+                "Log", q);
         r.addAgent(dumper);
-	}
+        handlePersistentState(dumper, null);
+        handleFilter(dumper);
+    }
 
 	private void buildDPTStats(NMEARouter r) {
         QOS q = createBuiltInQOS();
@@ -196,12 +198,13 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
-    	NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
-        		injector.getInstance(NMEACache.class), 
-        		"GPSTime", q);
-    	r.addAgent(gpstime);
-    	gpstime.start();
-	}
+        NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
+                injector.getInstance(NMEACache.class),
+                "GPSTime", q);
+        r.addAgent(gpstime);
+        handleFilter(gpstime);
+        gpstime.start();
+    }
 
     private Router parseConf(String file) throws MalformedConfigurationException {
         ConfParser parser = new ConfParser();

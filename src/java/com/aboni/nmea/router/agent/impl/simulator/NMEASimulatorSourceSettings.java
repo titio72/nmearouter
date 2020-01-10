@@ -9,10 +9,12 @@ import java.util.Properties;
 
 public class NMEASimulatorSourceSettings {
 
+	private static final String YES = "1";
+
 	private final String confFile;
-	
+
 	private long lastConfModified = 0;
-	
+
 	private boolean vhw = true;
 	private boolean vlw = true;
 	private boolean gll = true;
@@ -410,47 +412,61 @@ public class NMEASimulatorSourceSettings {
     }
     
 	private void readConf(Properties p) {
-		 vhw    = p.getProperty("simulate.vhw", "0").equals("1");  // water spead and heading
-		 vlw    = p.getProperty("simulate.vlw", "0").equals("1");  // distance traveled through water
-		 gll    = p.getProperty("simulate.gll", "0").equals("1");  // gps
-		 rmc    = p.getProperty("simulate.rmc", "0").equals("1");  // gps
-		 gpsOut = p.getProperty("simulate.gps.outlier", "0").equals("1"); // simulate GPS going nuts
-		 dpt    = p.getProperty("simulate.dpt", "0").equals("1");  // depth
-		 dbt    = p.getProperty("simulate.dbt", "0").equals("1");  // depth
-		 mtw    = p.getProperty("simulate.mtw", "0").equals("1");  // water temp
-		 mta    = p.getProperty("simulate.mta", "0").equals("1");  // air temp
-		 mbb    = p.getProperty("simulate.mbb", "0").equals("1");  // atm pressure
-		 mhu    = p.getProperty("simulate.mhu", "0").equals("1");  // humidity
-		 mda    = p.getProperty("simulate.mda", "0").equals("1");  // aggregated meteo
-		 mwva  = p.getProperty("simulate.mwv.apparent", "0").equals("1");  // wind apparent
-		 mwvt  = p.getProperty("simulate.mwv.true", "0").equals("1");  // wind true
-		 vwr    = p.getProperty("simulate.vwr", "0").equals("1");  // relative wind speed and angle (apparent)
-		 hdm    = p.getProperty("simulate.hdm", "0").equals("1"); // magn heading
-		 hdg    = p.getProperty("simulate.hdg", "0").equals("1");  // magn heading + variation/deviation
-		 hdt    = p.getProperty("simulate.hdt", "0").equals("1"); // true heading
-		 vtg    = p.getProperty("simulate.vtg", "0").equals("1");  // cog-sog
-		 rsa    = p.getProperty("simulate.rsa", "0").equals("1");  // rudder angle
-		 usePolars = p.getProperty("simulate.use.polars", "0").equals("1");  // use polars to calculate the speed
-		 autoPilot	= p.getProperty("simulate.autopilot", "0").equals("1");
-		 xdrDiag 		= p.getProperty("simulate.xdr.diag", "0").equals("1");
-		 xdrMeteo 		= p.getProperty("simulate.xdr.meteo", "0").equals("1");
-		 xdrMeteoAtm 	= p.getProperty("simulate.xdr.meteo.atm", "0").equals("1");
-		 xdrMeteoHum 	= p.getProperty("simulate.xdr.meteo.hum", "0").equals("1");
-		 xdrMeteoTmp 	= p.getProperty("simulate.xdr.meteo.tmp", "0").equals("1");
-		 xdrGYR 		= p.getProperty("simulate.xdr.gyro", "0").equals("1");
+		vhw = p.getProperty("simulate.vhw", "0").equals(YES);  // water spead and heading
+		vlw = p.getProperty("simulate.vlw", "0").equals(YES);  // distance traveled through water
+		gll = p.getProperty("simulate.gll", "0").equals(YES);  // gps
+		rmc = p.getProperty("simulate.rmc", "0").equals(YES);  // gps
+		gpsOut = p.getProperty("simulate.gps.outlier", "0").equals(YES); // simulate GPS going nuts
+		dpt = p.getProperty("simulate.dpt", "0").equals(YES);  // depth
+		dbt = p.getProperty("simulate.dbt", "0").equals(YES);  // depth
+		mtw = p.getProperty("simulate.mtw", "0").equals(YES);  // water temp
+		mta = p.getProperty("simulate.mta", "0").equals(YES);  // air temp
+		mbb = p.getProperty("simulate.mbb", "0").equals(YES);  // atm pressure
+		mhu = p.getProperty("simulate.mhu", "0").equals(YES);  // humidity
+		mda = p.getProperty("simulate.mda", "0").equals(YES);  // aggregated meteo
+		mwva = p.getProperty("simulate.mwv.apparent", "0").equals(YES);  // wind apparent
+		mwvt = p.getProperty("simulate.mwv.true", "0").equals(YES);  // wind true
+		vwr = p.getProperty("simulate.vwr", "0").equals(YES);  // relative wind speed and angle (apparent)
+		hdm = p.getProperty("simulate.hdm", "0").equals(YES); // magn heading
+		hdg = p.getProperty("simulate.hdg", "0").equals(YES);  // magn heading + variation/deviation
+		hdt = p.getProperty("simulate.hdt", "0").equals(YES); // true heading
+		vtg = p.getProperty("simulate.vtg", "0").equals(YES);  // cog-sog
+		rsa = p.getProperty("simulate.rsa", "0").equals(YES);  // rudder angle
+		usePolars = p.getProperty("simulate.use.polars", "0").equals(YES);  // use polars to calculate the speed
+		autoPilot = p.getProperty("simulate.autopilot", "0").equals(YES);
+		xdrDiag = p.getProperty("simulate.xdr.diag", "0").equals(YES);
+		xdrMeteo = p.getProperty("simulate.xdr.meteo", "0").equals(YES);
+		xdrMeteoAtm = p.getProperty("simulate.xdr.meteo.atm", "0").equals(YES);
+		xdrMeteoHum = p.getProperty("simulate.xdr.meteo.hum", "0").equals(YES);
+		xdrMeteoTmp = p.getProperty("simulate.xdr.meteo.tmp", "0").equals(YES);
+		xdrGYR = p.getProperty("simulate.xdr.gyro", "0").equals(YES);
 
-        splitWind = p.getProperty("simulate.split.wind", "0").equals("1");
-        windSpeedInMS = p.getProperty("simulate.wind.ms", "0").equals("1");
+		splitWind = p.getProperty("simulate.split.wind", "0").equals(YES);
+		windSpeedInMS = p.getProperty("simulate.wind.ms", "0").equals(YES);
 
-		 polars = p.getProperty("simulate.polars.file", "dufour35c.csv");
-		 
-		 try { polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85")); } catch (Exception ignored) { /* optional data */ }
-		 try { speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9")); } catch (Exception ignored) { /* optional data */ }
-		 try { rudder = Double.parseDouble(p.getProperty("simulate.rudder", "6.0")); } catch (Exception ignored) { /* optional data */ }
-		 try { wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1")); } catch (Exception ignored) { /* optional data */ }
-		 try { wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "270")); } catch (Exception ignored) { /* optional data */ }
-		 try { heading = Double.parseDouble(p.getProperty("simulate.heading", "354")); } catch (Exception ignored) { /* optional data */ }
-		 try { press = Double.parseDouble(p.getProperty("simulate.pressure", "1013")); } catch (Exception ignored) { /* optional data */ }
+		polars = p.getProperty("simulate.polars.file", "dufour35c.csv");
+
+		try {
+			polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			rudder = Double.parseDouble(p.getProperty("simulate.rudder", "6.0"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			wSpeed = Double.parseDouble(p.getProperty("simulate.wSpeed", "11.1"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			wDirection = Double.parseDouble(p.getProperty("simulate.wDirection", "270"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			heading = Double.parseDouble(p.getProperty("simulate.heading", "354"));
+		} catch (Exception ignored) { /* optional data */ }
+		try {
+			press = Double.parseDouble(p.getProperty("simulate.pressure", "1013"));
+		} catch (Exception ignored) { /* optional data */ }
 		 try { temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception ignored) { /* optional data */ }
 		 try { hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception ignored) { /* optional data */ }
 

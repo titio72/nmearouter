@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class GDrive {
@@ -38,18 +40,19 @@ public class GDrive {
 
     /**
      * Creates an authorized Credential object.
-     * @param HTTP_TRANSPORT The network HTTP Transport.
+     *
+     * @param netHttpTransport The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private static Credential getCredentials(final NetHttpTransport netHttpTransport) throws IOException {
         // Load client secrets.
         InputStream in = new FileInputStream(CREDENTIALS_FILE_PATH);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                netHttpTransport, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("online")
                 .build();
@@ -58,24 +61,28 @@ public class GDrive {
     }
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
-        upload( "/users/aboni/Downloads/sss.jpg", "application/image");
+        //upload( "/users/aboni/Downloads/sss.jpg", "application/image");
+        for (String s : listFiles()) System.out.println(s);
     }
 
     public static String upload(String file, String mime) throws IOException, GeneralSecurityException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT)).setApplicationName(APPLICATION_NAME).build();
+        final NetHttpTransport netHttpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(netHttpTransport, JSON_FACTORY, getCredentials(netHttpTransport)).setApplicationName(APPLICATION_NAME).build();
         return createFile(service, file, mime);
     }
 
-    private static void listFiles(Drive service) throws IOException {
+    public static Collection<String> listFiles() throws IOException, GeneralSecurityException {
+        final NetHttpTransport netHttpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(netHttpTransport, JSON_FACTORY, getCredentials(netHttpTransport)).setApplicationName(APPLICATION_NAME).build();
 
         FileList result = service.files().list()
                 .setPageSize(1000)
                 .setQ("'0B--7j-n2mogkYWFpdUVXT3J6UEk' in parents")
                 .execute();
 
+        List<String> res = new ArrayList<>();
         result.getFiles().stream().
-                filter(f->f.getName().equals("sss.jpg")).
+                filter(f -> f.getName().endsWith(".sql.tgz")).
                 /*filter(f->{
                     try {
                         File ff = service.files().get(f.getId()).set("fields", "name, trashed, parents").execute();
@@ -85,14 +92,17 @@ public class GDrive {
                         return false;
                     }
                 }).*/
-                forEach(System.out::println);
+                        forEach(f -> res.add(f.getName()));
+
+        return res;
     }
 
     private static String createFile(Drive service, String file, String mime) throws IOException {
         File fileMetadata = new File();
-        fileMetadata.setName("sss.jpg");
-        fileMetadata.setParents(Arrays.asList(DUMPS_ROOT_ID));
         java.io.File filePath = new java.io.File(file);
+
+        fileMetadata.setName(filePath.getName());
+        fileMetadata.setParents(Arrays.asList(DUMPS_ROOT_ID));
         FileContent mediaContent = new FileContent(mime, filePath);
         File gFile = service.files().create(fileMetadata, mediaContent).setFields("id").execute();
         return gFile.getId();

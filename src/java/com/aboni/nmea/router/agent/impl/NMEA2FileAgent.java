@@ -56,6 +56,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 	private void dump() throws IOException {
 		long t = System.currentTimeMillis();
 		if (t-lastDump > DUMP_PERIOD) {
+			getLogger().debug("Dumping NMEA log at {" + new Date() + "}");
 			lastDump = t;
 			File f = new File("nmea" + df.format(new Date()) + ".log");
 			FileWriter w = new FileWriter(f, true);

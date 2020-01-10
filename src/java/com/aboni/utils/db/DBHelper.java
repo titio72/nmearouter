@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 public class DBHelper implements AutoCloseable {
 	
@@ -89,7 +88,7 @@ public class DBHelper implements AutoCloseable {
         Process proc = b.start();
         int retCode = proc.waitFor();
         if (retCode==0) {
-            upload(file);
+            upload("./web/" + file + ".tgz");
             return file;
         } else {
         	return null;
@@ -100,16 +99,14 @@ public class DBHelper implements AutoCloseable {
 
     private void upload(String file) {
         if (gDriveThread==null) {
-            gDriveThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        GDrive.upload(file, "application/x-gtar");
-                    } catch (Exception e) {
-                        ServerLog.getLogger().error("Error uploading backup", e);
-                    }
+            gDriveThread = new Thread(() -> {
+                try {
+                    GDrive.upload(file, "application/x-gtar");
+                } catch (Exception e) {
+                    ServerLog.getLogger().error("Error uploading backup", e);
                 }
-            });
+            }
+            );
             gDriveThread.setDaemon(true);
         } else if (gDriveThread.isAlive()) {
             gDriveThread.interrupt();

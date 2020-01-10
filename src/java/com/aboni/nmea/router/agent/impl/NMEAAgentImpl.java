@@ -4,6 +4,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.nmea.router.filters.NMEASpeedFilter;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.processors.*;
 import com.aboni.utils.Log;
@@ -89,6 +90,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         if (qos!=null) {
         	for (String q: qos.getKeys()) {
 				switch (q) {
+					case "speed_filter":
+						getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
+						addProc(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
+						break;
 					case "dpt":
 						getLogger().info("QoS {DPT} Agent {" + name + "}");
 						addProc(new NMEADepthEnricher());
