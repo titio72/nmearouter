@@ -63,7 +63,7 @@
 			var dsets = [];
 			var colorGrad = Math.round(255 / (maxYear-minYear+1));
 
-			for (var y = minYear; y<=maxYear; y++) {
+			for (var y = maxYear; y>=minYear; y--) {
 				var color = colors[y-minYear];
 					
 					/*"#" +
@@ -73,6 +73,7 @@
 				var dset = {
 					label: ""+ y,
 					borderColor: color,
+					backgroundColor: color,
 					pointRadius: 0,
 					lineTension: 0,
 					fill: false,
@@ -125,16 +126,18 @@
 					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 					datasets: [
 						{
+							borderColor: colorThisYear,
 							backgroundColor: colorThisYear,
 							barPercentage: 0.9,
 							data: dataThisYear,
-							label: ("Nautical Miles " + maxYear)
+							label: ("" + maxYear)
 						},
 						{
+							borderColor: colorLastYear,
 							backgroundColor: colorLastYear,
 							barPercentage: 0.3,
 							data: dataLastYear,
-							label: ("Nautical Miles " + (maxYear-1))
+							label: ("" + (maxYear-1))
 						}
 					]
 				},
@@ -159,11 +162,13 @@
 					datasets: [{
 						/*backgroundColor: getComputedStyle(document.body).getPropertyValue("--secondary"),*/
 						data: yearsMilesArray,
-						backgroundColor: yearsColorsArray,
-						label: "Nautical Miles"
+						backgroundColor: yearsColorsArray
 					}]
 				},
 				options: {
+					legend: {
+						display: false
+					},
 					scales: {
 						yAxes: [{
 							ticks: {
