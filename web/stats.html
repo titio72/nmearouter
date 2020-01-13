@@ -104,13 +104,17 @@
 		}
 
 		function loadThisYearMonthsChart(values, minYear, maxYear) {
-			var data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+			var dataThisYear = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+			var dataLastYear = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-			var color = colors[maxYear-minYear];
+			var colorThisYear = colors[maxYear-minYear];
+			var colorLastYear = colors[maxYear-minYear-1];
 
 			values.forEach(x => {
 				if (x[0]==maxYear) {
-					data[x[1]-1] = x[2];
+					dataThisYear[x[1]-1] = x[2];
+				} else if (x[0]==(maxYear-1)) {
+					dataLastYear[x[1]-1] = x[2];
 				}
 			});
 
@@ -119,11 +123,20 @@
 				type: 'bar',
 				data: {
 					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-					datasets: [{
-						backgroundColor: color,
-						data: data,
-						label: ("Nautical Miles " + maxYear)
-					}]
+					datasets: [
+						{
+							backgroundColor: colorThisYear,
+							barPercentage: 0.9,
+							data: dataThisYear,
+							label: ("Nautical Miles " + maxYear)
+						},
+						{
+							backgroundColor: colorLastYear,
+							barPercentage: 0.3,
+							data: dataLastYear,
+							label: ("Nautical Miles " + (maxYear-1))
+						}
+					]
 				},
 			});
 		}
