@@ -21,4 +21,8 @@ public interface NMEACache {
 
 	long getTimeSkew();
 
+	<T> void setStatus(String statusKey, T status);
+
+	<T> T getStatus(String statusKey);
+
 }

@@ -22,13 +22,13 @@ public class DBTrackEventWriter implements EventWriter {
 
 	private void prepareStatement(Connection c) throws SQLException {
 		if (stm==null) {
-            stm = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist) values (?, ?, ?, ?, ?, ?, ?, ?)");
+            stm = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
     private void prepareStatementWithTrip(Connection c) throws SQLException {
         if (stmTrip == null) {
-            stmTrip = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmTrip = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
@@ -70,8 +70,9 @@ public class DBTrackEventWriter implements EventWriter {
             s.setDouble(6, t.getPoint().getAverageSpeed());
             s.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
             s.setDouble(8, t.getPoint().getDistance());
+            s.setByte(9, t.getPoint().getEngine().toByte());
             if (((TrackEvent) e).getPoint().getTrip() != null) {
-                s.setInt(9, t.getPoint().getTrip());
+                s.setInt(10, t.getPoint().getTrip());
             }
             s.execute();
 	    }

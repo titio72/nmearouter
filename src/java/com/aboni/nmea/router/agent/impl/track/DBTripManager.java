@@ -28,6 +28,7 @@ public class DBTripManager implements TripManager {
                                 rs.getDouble("speed"),
                                 rs.getDouble("maxSpeed"),
                                 rs.getInt("dTime"),
+                                EngineStatus.valueOf(rs.getByte("engine")),
                                 trip);
                         res.add(p);
                     }

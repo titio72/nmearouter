@@ -48,7 +48,7 @@ public class FanAgent extends NMEAAgentImpl {
 	}
 
 	private void fan(boolean on) {
-		getLogger().info("Switch fan {" + on + "} RPi {" + fan.isRaspberry() + "}");
+		getLogger().info("Switch fan {" + on + "}");
 		fan.switchFan(on);
 	}
 	

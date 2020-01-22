@@ -11,18 +11,28 @@ public class TrackPoint {
     private final double maxSpeed;
     private final int period;
     private final Integer tripId;
+    private final EngineStatus engine;
 
     public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
-        this(p, anchor, dist, speed, maxSpeed, period, null);
+        this(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, null);
     }
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, Integer tripId) {
+    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine) {
+        this(p, anchor, dist, speed, maxSpeed, period, engine, null);
+    }
+
+    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, int tripId) {
+        this(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, tripId);
+    }
+
+    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine, Integer tripId) {
         this.position = p;
         this.anchor = anchor;
         this.distance = dist;
         this.averageSpeed = speed;
         this.maxSpeed = maxSpeed;
         this.period = period;
+        this.engine = engine;
         this.tripId = tripId;
     }
 
@@ -33,6 +43,7 @@ public class TrackPoint {
         this.averageSpeed = point.averageSpeed;
         this.maxSpeed = point.maxSpeed;
         this.period = point.period;
+        this.engine = point.engine;
         this.tripId = tripId;
     }
 
@@ -62,5 +73,9 @@ public class TrackPoint {
 
     public Integer getTrip() {
         return tripId;
+    }
+
+    public EngineStatus getEngine() {
+        return engine;
     }
 }

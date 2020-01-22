@@ -7,6 +7,8 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.*;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NMEACacheImpl implements NMEACache {
 
@@ -16,10 +18,12 @@ public class NMEACacheImpl implements NMEACache {
 	private boolean synced;
 	private static final long SYNC_THRESHOLD = 10000L; // 10 seconds
     private long timeSkew;
+    private final Map<String, Object> statuses;
 
     public NMEACacheImpl() {
         lastHeading = new DataEvent<>(null, 0, "");
         lastPosition = new DataEvent<>(null, 0, "");
+        statuses = new HashMap<>();
     }
     
     @Override
@@ -78,14 +82,28 @@ public class NMEACacheImpl implements NMEACache {
 
 	/* (non-Javadoc)
 	 * @see com.aboni.nmea.router.NMEACache#isHeadingOlderThan(long, long)
-	 */
+     */
     @Override
-	public boolean isHeadingOlderThan(long time, long threshold) {
+    public boolean isHeadingOlderThan(long time, long threshold) {
         return (time - lastHeading.getTimestamp()) > threshold;
     }
 
     @Override
     public long getTimeSkew() {
         return timeSkew;
+    }
+
+    @Override
+    public <T> void setStatus(String statusKey, T status) {
+        synchronized (statuses) {
+            statuses.put(statusKey, status);
+        }
+    }
+
+    @Override
+    public <T> T getStatus(String statusKey) {
+        synchronized (statuses) {
+            return (T) statuses.get(statusKey);
+        }
     }
 }
