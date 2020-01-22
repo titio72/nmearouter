@@ -50,7 +50,17 @@ public class NMEAHDGEnricherTest {
 		public long getTimeSkew() {
 			return 0;
 		}
-		
+
+		@Override
+		public <T> void setStatus(String statusKey, T status) {
+
+		}
+
+		@Override
+		public <T> T getStatus(String statusKey) {
+			return null;
+		}
+
 	}
 	
 	@Test

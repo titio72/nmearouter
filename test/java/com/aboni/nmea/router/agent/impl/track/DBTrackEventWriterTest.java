@@ -43,6 +43,16 @@ public class DBTrackEventWriterTest {
     }
 
     @Test
+    public void writeWithEngineOn() throws Exception {
+        long l = f.parse("2019-10-15 15:54:12").getTime();
+        TrackPoint p = new TrackPoint(
+                new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, EngineStatus.ON);
+        DBHelper h = new DBHelper(true);
+        evW.write(new TrackEvent(p), h.getConnection());
+        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0, EngineStatus.ON));
+    }
+
+    @Test
     public void writeWithTrip() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
         TrackPoint p = new TrackPoint(
@@ -53,7 +63,11 @@ public class DBTrackEventWriterTest {
     }
 
     private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, int trip) throws Exception {
-        PreparedStatement st = h.getConnection().prepareStatement("select id, TS, lat, lon, dist, speed, maxSpeed, dTime, anchor, tripId from track_test where TS=?");
+        return check(h, ts, lat, lon, dist, speed, maxSpeed, dTime, anchor, trip, EngineStatus.UNKNOWN);
+    }
+
+    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, int trip, EngineStatus engine) throws Exception {
+        PreparedStatement st = h.getConnection().prepareStatement("select id, TS, lat, lon, dist, speed, maxSpeed, dTime, anchor, engine, tripId from track_test where TS=?");
         st.setTimestamp(1, new Timestamp(ts));
         ResultSet rs = st.executeQuery();
         assertTrue(rs.next());
@@ -65,7 +79,8 @@ public class DBTrackEventWriterTest {
         assertEquals(maxSpeed, rs.getDouble(7), 0.000001);
         assertEquals(dTime, rs.getInt(8));
         assertEquals(anchor ? 1 : 0, rs.getInt(9));
-        assertEquals(trip, rs.getInt(10));
+        assertEquals(engine.toByte(), rs.getByte(10));
+        assertEquals(trip, rs.getInt(11));
         return true;
     }
 }

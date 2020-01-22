@@ -4,7 +4,7 @@ import com.aboni.utils.db.DBHelper;
 
 public class TrackTestTableManager {
 
-    private static String SQL_DROP = "DROP TABLE `track_test`";
+    private static String SQL_DROP = "DROP TABLE IF EXISTS `track_test`";
 
     private static String SQL_CREATE = "CREATE TABLE `track_test` (" +
             "`lat` decimal(10,7) DEFAULT NULL," +
@@ -17,12 +17,14 @@ public class TrackTestTableManager {
             "`speed` double(10,2) DEFAULT NULL," +
             "`tripid` int(11) DEFAULT NULL," +
             "`maxSpeed` double(10,2) DEFAULT NULL," +
+            "`engine` TINYINT DEFAULT 2," +
             " PRIMARY KEY (`id`)," +
             " KEY `track_time` (`TS`)" +
             ");";
 
     public static void setUp() throws Exception {
         try (DBHelper db = new DBHelper(true)) {
+            db.getConnection().createStatement().executeUpdate(SQL_DROP);
             db.getConnection().createStatement().executeUpdate(SQL_CREATE);
         }
     }
