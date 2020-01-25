@@ -101,9 +101,9 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
-    public <T> T getStatus(String statusKey) {
+    public <T> T getStatus(String statusKey, T defaultValue) {
         synchronized (statuses) {
-            return (T) statuses.get(statusKey);
+            return (T) statuses.getOrDefault(statusKey, defaultValue);
         }
     }
 }

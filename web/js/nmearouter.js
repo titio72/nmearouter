@@ -269,7 +269,7 @@ function readInfo(resText) {
     id: 0,
     start: json.start,
     end: json.end,
-    sailTime: dS + "d " + hS + "h " + mS + "m",
+    navigationTime: dS + "d " + hS + "h " + mS + "m",
     maxspeed: json.maxspeed,
     maxspeed30: json.maxspeed30,
     avgspeed: json.avgspeed,
@@ -286,6 +286,10 @@ function readInfo(resText) {
     maxspeed10NM: json.speed_10NM,
     maxspeed10N_time_0: (json.t0_10NM!=null)?moment.unix(json.t0_10NM / 1000).format('hh:mm:ss'):'',
     maxspeed10N_time_1: (json.t1_10NM!=null)?moment.unix(json.t1_10NM / 1000).format('hh:mm:ss'):'',
+
+    distSailing: json.engineOff,
+    distEngine: json.engineOn,
+    distUnknown: json.engineUnknown,
   };
   return res;
 }

@@ -5,6 +5,7 @@ import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ public class PinDetector {
     private boolean pinOn;
     private final Set<PinListener> listener;
     private InternalPinListener pinListener = new InternalPinListener();
+    private final String name;
 
     public interface PinListener {
         void engineStateEvent(boolean status);
@@ -40,13 +42,14 @@ public class PinDetector {
         }
     }
 
-    public PinDetector(Pin p) {
+    public PinDetector(Pin p, boolean active) {
         listener = new HashSet<>();
+        name = "pin_" + p.getName();
         if (RPIHelper.isRaspberry()) {
             GpioController gpio = GpioFactory.getInstance();
-            pin = gpio.provisionDigitalInputPin(p, "pin_" + p.getName(), PinPullResistance.PULL_DOWN);
+            pin = gpio.provisionDigitalInputPin(p, name, PinPullResistance.PULL_DOWN);
             pin.setShutdownOptions(true);
-            pin.addListener(pinListener);
+            if (active) pin.addListener(pinListener);
         }
     }
 
@@ -63,13 +66,29 @@ public class PinDetector {
     }
 
     public boolean isPinOn() {
-        return pinOn;
+        synchronized (this) {
+            return pinOn;
+        }
     }
 
-    public static void main(String args[]) {
-        PinDetector e = new PinDetector(RaspiPin.GPIO_27);
-        e.addListener((boolean b) -> {
-            System.out.println("Engine: " + b);
-        });
+    public void refresh() {
+        synchronized (this) {
+            if (pin != null) {
+                pinOn = pin.getState().isHigh();
+            } else {
+                try (FileReader is = new FileReader(name)) {
+                    char[] buffer = new char[16];
+                    int r = is.read(buffer);
+                    String v = new String(buffer).trim();
+                    pinOn = 1 == (Integer.parseInt(v));
+                } catch (Exception e) {
+                    pinOn = false;
+                }
+            }
+        }
+    }
+
+    public String getName() {
+        return name;
     }
 }

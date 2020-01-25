@@ -35,7 +35,7 @@ public class DBTrackEventWriterTest {
     @Test
     public void write() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = new TrackPoint(
+        TrackPoint p = TrackPoint.newInstanceBase(
                 new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30);
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
@@ -45,7 +45,7 @@ public class DBTrackEventWriterTest {
     @Test
     public void writeWithEngineOn() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = new TrackPoint(
+        TrackPoint p = TrackPoint.newInstanceWithEngine(
                 new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, EngineStatus.ON);
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
@@ -55,7 +55,7 @@ public class DBTrackEventWriterTest {
     @Test
     public void writeWithTrip() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = new TrackPoint(
+        TrackPoint p = TrackPoint.newInstanceWithTrip(
                 new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, 124);
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());

@@ -10,6 +10,7 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
 import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
+import com.aboni.nmea.router.agent.impl.system.EngineDetectionAgent;
 import com.aboni.nmea.router.agent.impl.system.FanAgent;
 import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
 import com.aboni.nmea.router.agent.impl.system.PowerLedAgent;
@@ -87,6 +88,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         buildPowerLedTarget(r);
         buildFanTarget(r);
         buildDPTStats(r);
+        buildEngineDetector(r);
         if (ENABLE_AP) buildAutoPilot(r);
         return r;
     }
@@ -169,20 +171,20 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildPowerLedTarget(NMEARouter r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
-	        QOS q = createBuiltInQOS();
-	        PowerLedAgent pwrled = new PowerLedAgent(
-	        		injector.getInstance(NMEACache.class), 
-	        		"PowerLed", q);
-	        r.addAgent(pwrled);
-	        pwrled.start();
-    	}
+            QOS q = createBuiltInQOS();
+            PowerLedAgent pwrLed = new PowerLedAgent(
+                    injector.getInstance(NMEACache.class),
+                    "PowerLed", q);
+            r.addAgent(pwrLed);
+            pwrLed.start();
+        }
     }
 
     private void buildAutoPilot(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEAAutoPilotAgent ap = new NMEAAutoPilotAgent(
-        		injector.getInstance(NMEACache.class), 
-        		"SmartPilot", q);
+                injector.getInstance(NMEACache.class),
+                "SmartPilot", q);
         r.addAgent(ap);
         ap.start();
     }
@@ -190,20 +192,29 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildFanTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
         FanAgent fan = new FanAgent(
-        		injector.getInstance(NMEACache.class), 
-        		"FanManager", q);
+                injector.getInstance(NMEACache.class),
+                "FanManager", q);
         r.addAgent(fan);
         fan.start();
     }
 
+    private void buildEngineDetector(NMEARouter r) {
+        QOS q = createBuiltInQOS();
+        EngineDetectionAgent eng = new EngineDetectionAgent(
+                injector.getInstance(NMEACache.class),
+                "EngineManager", q);
+        r.addAgent(eng);
+        eng.start();
+    }
+
     private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        NMEASystemTimeGPS gpstime = new NMEASystemTimeGPS(
+        NMEASystemTimeGPS gpsTime = new NMEASystemTimeGPS(
                 injector.getInstance(NMEACache.class),
                 "GPSTime", q);
-        r.addAgent(gpstime);
-        handleFilter(gpstime);
-        gpstime.start();
+        r.addAgent(gpsTime);
+        handleFilter(gpsTime);
+        gpsTime.start();
     }
 
     private Router parseConf(String file) throws MalformedConfigurationException {

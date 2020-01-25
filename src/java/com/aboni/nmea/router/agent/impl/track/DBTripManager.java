@@ -21,7 +21,7 @@ public class DBTripManager implements TripManager {
                 try (ResultSet rs = st.executeQuery()) {
                     List<TrackPoint> res = new LinkedList<>();
                     while (rs.next()) {
-                        TrackPoint p = new TrackPoint(
+                        TrackPoint p = TrackPoint.newInstance(
                                 new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon")),
                                 rs.getBoolean("anchor"),
                                 rs.getDouble("dist"),
