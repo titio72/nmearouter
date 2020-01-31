@@ -13,16 +13,16 @@ public interface NMEACache {
 
 	boolean isHeadingOlderThan(long time, long threshold);
 
-	void onSentence(Sentence s, String src);
+    void onSentence(Sentence s, String src);
 
-	boolean isTimeSynced();
+    boolean isTimeSynced();
 
-	void setTimeSynced();
+    void setTimeSynced();
 
-	long getTimeSkew();
+    long getTimeSkew();
 
-	<T> void setStatus(String statusKey, T status);
+    <T> void setStatus(String statusKey, T status);
 
-	<T> T getStatus(String statusKey);
+    <T> T getStatus(String statusKey, T defaultValue);
 
 }

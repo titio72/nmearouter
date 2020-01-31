@@ -101,14 +101,17 @@ public class TrackManager {
     }
 
 	private TrackPoint fillPoint(boolean anchor, GeoPositionT prevPos, GeoPositionT p, Integer trip) {
-        Course c = new Course(prevPos, p);
-        double speed = c.getSpeed(); 
-        speed = Double.isNaN(speed)?0.0:speed;
-        double dist = c.getDistance(); 
-        dist = Double.isNaN(speed)?0.0:dist;
-        int timePeriod = (int) (c.getInterval()/1000);
-		return new TrackPoint(p, anchor, dist, speed, maxSpeed, timePeriod, trip);
-    }
+		Course c = new Course(prevPos, p);
+		double speed = c.getSpeed();
+		speed = Double.isNaN(speed) ? 0.0 : speed;
+		double dist = c.getDistance();
+		dist = Double.isNaN(speed) ? 0.0 : dist;
+		int timePeriod = (int) (c.getInterval() / 1000);
+		if (trip != null)
+			return TrackPoint.newInstanceWithTrip(p, anchor, dist, speed, maxSpeed, timePeriod, trip);
+		else
+			return TrackPoint.newInstanceBase(p, anchor, dist, speed, maxSpeed, timePeriod);
+	}
     
     /**
      * Set the sampling time in ms.

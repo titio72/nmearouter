@@ -1,5 +1,6 @@
 package com.aboni.geo;
 
+import com.aboni.nmea.router.agent.impl.track.EngineStatus;
 import com.aboni.nmea.router.agent.impl.track.TrackPoint;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
@@ -26,7 +27,7 @@ public class PositionHistoryTrackLoaderDB implements PositionHistoryTrackLoader 
 		boolean res;
 		try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement st = db.getConnection().prepareStatement(
-                    "select lat, lon, TS, anchor, speed, maxSpeed, dist, dTime from track where TS >= ? and TS <= ?")) {
+					"select lat, lon, TS, anchor, speed, maxSpeed, dist, dTime, engine from track where TS >= ? and TS <= ?")) {
 				st.setTimestamp(1, new Timestamp(from.getTimeInMillis()));
 				st.setTimestamp(2, new Timestamp(to.getTimeInMillis()));
 				if (st.execute()) {
@@ -35,14 +36,15 @@ public class PositionHistoryTrackLoaderDB implements PositionHistoryTrackLoader 
 							double lat = rs.getDouble(1);
 							double lon = rs.getDouble(2);
 							Timestamp ts = rs.getTimestamp(3);
-                            int anchor = rs.getInt(4);
-                            double speed = rs.getDouble(5);
-                            double maxSpeed = rs.getDouble(6);
-                            double dist = rs.getDouble(7);
-                            int dTme = rs.getInt(8);
-                            GeoPositionT p = new GeoPositionT(ts.getTime(), lat, lon);
-                            TrackPoint point = new TrackPoint(p, anchor == 1, dist, speed, maxSpeed, dTme);
-                            doWithPoint(point);
+							int anchor = rs.getInt(4);
+							double speed = rs.getDouble(5);
+							double maxSpeed = rs.getDouble(6);
+							double dist = rs.getDouble(7);
+							int dTme = rs.getInt(8);
+							EngineStatus eng = EngineStatus.valueOf((byte) rs.getInt(9));
+							GeoPositionT p = new GeoPositionT(ts.getTime(), lat, lon);
+							TrackPoint point = TrackPoint.newInstanceWithEngine(p, anchor == 1, dist, speed, maxSpeed, dTme, eng);
+							doWithPoint(point);
 							h.addPosition(p);
 						}
 					}

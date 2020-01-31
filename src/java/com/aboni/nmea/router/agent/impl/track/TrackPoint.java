@@ -13,19 +13,39 @@ public class TrackPoint {
     private final Integer tripId;
     private final EngineStatus engine;
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
-        this(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, null);
+    public static TrackPoint newInstanceWithTrip(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, int tripId) {
+        return new TrackPoint(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, tripId);
     }
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine) {
-        this(p, anchor, dist, speed, maxSpeed, period, engine, null);
+    public static TrackPoint newInstanceBase(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period) {
+        return new TrackPoint(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, null);
     }
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, int tripId) {
-        this(p, anchor, dist, speed, maxSpeed, period, EngineStatus.UNKNOWN, tripId);
+    public static TrackPoint newInstanceWithEngine(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine) {
+        return new TrackPoint(p, anchor, dist, speed, maxSpeed, period, engine, null);
     }
 
-    public TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine, Integer tripId) {
+    public static TrackPoint newInstance(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine, Integer tripId) {
+        return new TrackPoint(p, anchor, dist, speed, maxSpeed, period, engine, tripId);
+    }
+
+    public static TrackPoint clone(TrackPoint point) {
+        return new TrackPoint(point.position, point.anchor, point.distance, point.averageSpeed, point.maxSpeed, point.period, point.engine, point.tripId);
+    }
+
+    public static TrackPoint cloneOverride(TrackPoint point, EngineStatus engine, int tripId) {
+        return new TrackPoint(point.position, point.anchor, point.distance, point.averageSpeed, point.maxSpeed, point.period, engine, tripId);
+    }
+
+    public static TrackPoint cloneOverrideEngine(TrackPoint point, EngineStatus engine) {
+        return new TrackPoint(point.position, point.anchor, point.distance, point.averageSpeed, point.maxSpeed, point.period, engine, point.tripId);
+    }
+
+    public static TrackPoint cloneOverrideTrip(TrackPoint point, int tripId) {
+        return new TrackPoint(point.position, point.anchor, point.distance, point.averageSpeed, point.maxSpeed, point.period, point.engine, tripId);
+    }
+
+    private TrackPoint(GeoPositionT p, boolean anchor, double dist, double speed, double maxSpeed, int period, EngineStatus engine, Integer tripId) {
         this.position = p;
         this.anchor = anchor;
         this.distance = dist;
@@ -33,17 +53,6 @@ public class TrackPoint {
         this.maxSpeed = maxSpeed;
         this.period = period;
         this.engine = engine;
-        this.tripId = tripId;
-    }
-
-    public TrackPoint(TrackPoint point, int tripId) {
-        this.position = point.position;
-        this.anchor = point.anchor;
-        this.distance = point.distance;
-        this.averageSpeed = point.averageSpeed;
-        this.maxSpeed = point.maxSpeed;
-        this.period = point.period;
-        this.engine = point.engine;
         this.tripId = tripId;
     }
 

@@ -126,6 +126,11 @@
       }
       controllerScope['xmc'] = msg;
       controllerScope.$evalAsync();
+    } else if (msg.topic == "engine") {
+      var controllerElement = document.getElementById('sensorPanel');
+      var controllerScope = angular.element(controllerElement).scope();
+      controllerScope['engine'] = msg;
+      controllerScope.$evalAsync();
     } else if (msg.topic == 'RMC') {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
@@ -565,17 +570,21 @@
                 <td style="text-align: right">&nbsp;</td>
               </tr>
               <tr>
-                <td>CPU</td>
-                <td style="text-align: right">{{CPUTemp.value | number:1}} &deg;C</td>
+                  <td>CPU</td>
+                  <td style="text-align: right">{{CPUTemp.value | number:1}} &deg;C</td>
               </tr>
-              <tr>
-                <td>Equipment</td>
-                <td style="text-align: right">{{AirTemp_1.value | number:1}} &deg;C</td>
-              </tr>
-              <tr>
-                <td>Engine</td>
-                <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
-              </tr>
+                <tr>
+                    <td>Equipment</td>
+                    <td style="text-align: right">{{AirTemp_1.value | number:1}} &deg;C</td>
+                </tr>
+                <tr>
+                    <td>Engine</td>
+                    <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td style="text-align: right">{{engine.status}}</td>
+                </tr>
             </table>
           </div>
         </div>

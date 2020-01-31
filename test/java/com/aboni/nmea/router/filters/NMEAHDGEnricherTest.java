@@ -57,9 +57,9 @@ public class NMEAHDGEnricherTest {
 		}
 
 		@Override
-		public <T> T getStatus(String statusKey) {
-			return null;
-		}
+        public <T> T getStatus(String statusKey, T defV) {
+            return null;
+        }
 
 	}
 	

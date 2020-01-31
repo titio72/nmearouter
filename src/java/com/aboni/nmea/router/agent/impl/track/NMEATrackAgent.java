@@ -21,16 +21,18 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private TrackWriter media;
 	private String mediaFile;
 	private final TrackManager tracker;
+    private final TripManager tripManager;
+    private final NMEACache cache;
     private Integer tripId;
-    private TripManager tripManager;
 
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
         setSourceTarget(true, true);
-        tracker = new TrackManager();
-        media = null;
-        tripId = null;
-        tripManager = new DBTripManager();
+        this.cache = cache;
+        this.tracker = new TrackManager();
+        this.tripManager = new DBTripManager();
+        this.media = null;
+        this.tripId = null;
     }
 
     /**
@@ -103,6 +105,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
     	if (point!=null && media!=null) {
+            point = TrackPoint.cloneOverrideEngine(point, cache.getStatus("Engine", EngineStatus.UNKNOWN));
             media.write(point);
             notifyTrackedPoint(point);
             synchronized (this) {writes++;}

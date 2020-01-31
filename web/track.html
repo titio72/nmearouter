@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Andrea Boni NMEARouter</title>
   <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-    <script src="js/nmearouter.js?b9"></script>
+    <script src="js/nmearouter.js?b13"></script>
   <link href="css/nmearouter.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="nmeasail.png">
   <script>
@@ -511,22 +511,47 @@
         <div class="card card-router">
           <h3 class="card-header">Trip</h3>
           <div id="panelInfo" class="card-body card-router-body" ng-controller="infoController">
-            <table>
-              <tr ng-if="trip.name!=''"><td class="info_cell">Name</td><td class="info_cell">{{trip.name}}</td></tr>
-              <tr><td class="info_cell">Dates</td><td class="info_cell">{{trip.start}} - {{trip.end}}</td></tr>
-              <tr><td class="info_cell">Trip</td><td class="info_cell"><b>{{trip.dist | number:2}}NM {{trip.sailTime}}</b></td></tr>
-              <tr><td class="info_cell">Speed</td><td class="info_cell"><b>{{trip.avgspeed | number:2}}Kn ({{trip.maxspeed | number:2}}Kn)</b></td></tr>
-              <tr><td class="info_cell">Max 30s Avg Speed</td><td class="info_cell"><b>{{trip.maxspeed30 | number:2}}Kn</b></td></tr>
-              <tr ng-if="trip.maxspeed1NM>0"><td class="info_cell">1NM Max Speed</td><td class="info_cell"><b>{{trip.maxspeed1NM | number:2}}Kn
-                {{trip.maxspeed1N_time_0}}-{{trip.maxspeed1N_time_1}}
-              </b></td></tr>
-              <tr ng-if="trip.maxspeed5NM>0"><td class="info_cell">5NM Max Speed</td><td class="info_cell"><b>{{trip.maxspeed5NM | number:2}}Kn
-                {{trip.maxspeed5N_time_0}}-{{trip.maxspeed5N_time_1}}
-              </b></td></tr>
-              <tr ng-if="trip.maxspeed10NM>0"><td class="info_cell">10NM Max Speed</td><td class="info_cell"><b>{{trip.maxspeed10NM | number:2}}Kn
-                {{trip.maxspeed10N_time_0}}-{{trip.maxspeed10N_time_1}}
-              </b></td></tr>
-            </table>
+              <table>
+                  <tr ng-if="trip.name!=''">
+                      <td class="info_cell">Name</td>
+                      <td class="info_cell">{{trip.name}}</td>
+                  </tr>
+                  <tr>
+                      <td class="info_cell">Dates</td>
+                      <td class="info_cell">{{trip.start}} - {{trip.end}}</td>
+                  </tr>
+                  <tr>
+                      <td class="info_cell">Trip</td>
+                      <td class="info_cell"><b>{{trip.dist | number:2}}NM ({{trip.distSailing | number:2}}NM)</b></td>
+                  </tr>
+                  <tr>
+                      <td class="info_cell">Nav time</td>
+                      <td class="info_cell"><b>{{trip.navigationTime}}</b></td>
+                  </tr>
+                  <tr>
+                      <td class="info_cell">Speed</td>
+                      <td class="info_cell"><b>{{trip.avgspeed | number:2}}Kn ({{trip.maxspeed |
+                          number:2}}/{{trip.maxspeed30 | number:2}}Kn)</b></td>
+                  </tr>
+                  <tr ng-if="trip.maxspeed1NM>0">
+                      <td class="info_cell">1NM Max Speed</td>
+                      <td class="info_cell"><b>{{trip.maxspeed1NM | number:2}}Kn
+                          {{trip.maxspeed1N_time_0}}-{{trip.maxspeed1N_time_1}}
+                      </b></td>
+                  </tr>
+                  <tr ng-if="trip.maxspeed5NM>0">
+                      <td class="info_cell">5NM Max Speed</td>
+                      <td class="info_cell"><b>{{trip.maxspeed5NM | number:2}}Kn
+                          {{trip.maxspeed5N_time_0}}-{{trip.maxspeed5N_time_1}}
+                      </b></td>
+                  </tr>
+                  <tr ng-if="trip.maxspeed10NM>0">
+                      <td class="info_cell">10NM Max Speed</td>
+                      <td class="info_cell"><b>{{trip.maxspeed10NM | number:2}}Kn
+                          {{trip.maxspeed10N_time_0}}-{{trip.maxspeed10N_time_1}}
+                      </b></td>
+                  </tr>
+              </table>
           </div>
         </div>
       </div>

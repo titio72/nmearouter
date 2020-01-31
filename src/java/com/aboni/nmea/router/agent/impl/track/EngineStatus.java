@@ -15,7 +15,7 @@ public enum EngineStatus {
         return value;
     }
 
-    public static EngineStatus valueOf(byte b) {
+    public static EngineStatus valueOf(int b) {
         switch (b) {
             case 0:
                 return OFF;
