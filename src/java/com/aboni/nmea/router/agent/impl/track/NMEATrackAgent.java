@@ -16,7 +16,9 @@ import java.util.Date;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
-	private TrackWriter media;
+    private static final long CHECK_TRIP_TIMEOUT = 60000L;
+    private static final int CONTINUE_TRIP_THRESHOLD = 3 * 60 * 60 * 1000;  /* 3 hours */
+    private TrackWriter media;
 	private String mediaFile;
 	private final TrackManager tracker;
     private Integer tripId;
@@ -151,7 +153,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private long lastTripCheckTs = 0;
 
     private void checkTrip(long now) {
-        if (tripId == null && (now - lastTripCheckTs) > 60000L) {
+        if (tripId == null && (now - lastTripCheckTs) > CHECK_TRIP_TIMEOUT) {
             getLogger().info("Checking trip");
             try {
                 Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
@@ -159,7 +161,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                     long lastTripTs = tripInfo.second;
                     int lastTrip = tripInfo.first;
                     getLogger().info(String.format("Last trip {%d} {%s}", lastTrip, new Date(lastTripTs).toString()));
-                    if ((now - lastTripTs) < (3 * 60 * 60 * 1000) /* 3 hours */) {
+                    if ((now - lastTripTs) < CONTINUE_TRIP_THRESHOLD) {
                         getLogger().info("Setting current trip {" + lastTrip + "}");
                         tripId = lastTrip;
                         tripManager.setTrip(lastTripTs - 1, now + 1, tripId);

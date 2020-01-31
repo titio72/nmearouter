@@ -12,15 +12,17 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
 
     private NMEACache cache;
     private SpeedMovingAverage speedMovingAverage;
+    private boolean useGPS = true;
+    private boolean useAverage = false;
 
     // check if the speed is within gps*factor
-    private static final double GPS_TOLERANCE_FACTOR = 2.0;
+    private static final double SPEED_TOLERANCE_FACTOR = 2.0;
 
     // beyond this speed the boat can't possibly go
     private static final double SPEED_UNREASONABLE_THRESHOLD = 30.0;
 
-    // below this speed do not GPS factor
-    private static final double SPEED_CHECK_GPS_THRESHOLD = 1.0;
+    // below this speed do not use GPS factor
+    private static final double SPEED_CHECK_GPS_THRESHOLD = 2.5;
 
     public NMEASpeedFilter(NMEACache cache) {
         this.cache = cache;
@@ -28,11 +30,11 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
     }
 
     private boolean checkGPS(double speed) {
-        if (speed > SPEED_CHECK_GPS_THRESHOLD) {
+        if (useGPS && speed > SPEED_CHECK_GPS_THRESHOLD) {
             PositionSentence posSentence = cache.getLastPosition().getData();
             if (posSentence instanceof RMCSentence) {
                 RMCSentence rmc = (RMCSentence) posSentence;
-                return (speed <= (rmc.getSpeed() * GPS_TOLERANCE_FACTOR));
+                return (speed <= (rmc.getSpeed() * SPEED_TOLERANCE_FACTOR));
             } else {
                 return true;
             }
@@ -46,9 +48,13 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
     }
 
     private boolean checkMovingAverage(double speed) {
-        double movingAvg = speedMovingAverage.getAvg();
-        if (!Double.isNaN(movingAvg)) {
-            return (speed <= (movingAvg * GPS_TOLERANCE_FACTOR));
+        if (useAverage) {
+            double movingAvg = speedMovingAverage.getAvg();
+            if (!Double.isNaN(movingAvg)) {
+                return (speed <= (movingAvg * SPEED_TOLERANCE_FACTOR));
+            } else {
+                return true;
+            }
         } else {
             return true;
         }
