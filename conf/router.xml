@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Router>
-    <Log level="NORMAL"/>
+    <Log level="INFO"/>
     <GPSPriority>
         <GPSSource>SIM1</GPSSource>
         <GPSSource>SIM2</GPSSource>
     </GPSPriority>
     <SimulatorAgent name="SIM1" active="false">
-        <qos>enrich_hdm;dpt</qos>
+        <qos>speed_filter;rmc_filter;enrich_hdm;dpt</qos>
     </SimulatorAgent>
     <SimulatorAgent name="SIM2" active="false">
         <qos>enrich_hdm;dpt</qos>
@@ -17,7 +17,6 @@
         <qos>rs120;enrich_hdm;truewind;dpt</qos>
     </TcpAgent>
     <TcpAgent name="TCPOUT" port="1111" host="" inout="OUT" active="false"/>
-    <TcpAgent name="SHIPMODUL" port="10110" host="" inout="OUT" active="false"/>
     <UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
         <to>192.168.2.255</to>
         <to>192.168.2.130</to>

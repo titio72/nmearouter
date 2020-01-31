@@ -334,7 +334,7 @@ function readTrip(trip, resText) {
     start: json.start,
     end: json.end,
     dist: json.dist,
-    sailTime: dS + "d " + hS + "h " + mS + "m",
+    navigationTime: dS + "d " + hS + "h " + mS + "m",
     totalTime: d + "d " + h + "h " + m + "m",
     maxspeed: json.maxspeed,
     maxspeed30: json.maxspeed30,

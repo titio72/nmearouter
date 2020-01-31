@@ -76,15 +76,19 @@ public class PinDetector {
             if (pin != null) {
                 pinOn = pin.getState().isHigh();
             } else {
-                try (FileReader is = new FileReader(name)) {
-                    char[] buffer = new char[16];
-                    int r = is.read(buffer);
-                    String v = new String(buffer).trim();
-                    pinOn = 1 == (Integer.parseInt(v));
-                } catch (Exception e) {
-                    pinOn = false;
-                }
+                readFromFile();
             }
+        }
+    }
+
+    private void readFromFile() {
+        try (FileReader is = new FileReader(name)) {
+            char[] buffer = new char[16];
+            int r = is.read(buffer);
+            String v = new String(buffer).trim();
+            pinOn = 1 == (Integer.parseInt(v));
+        } catch (Exception e) {
+            pinOn = false;
         }
     }
 
