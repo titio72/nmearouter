@@ -5,6 +5,7 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.agent.impl.track.EngineStatus;
 import com.aboni.sensors.EngineDetector;
+import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
 public class EngineDetectionAgent extends NMEAAgentImpl {
@@ -27,8 +28,12 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
 
     private void refreshEngine() {
         EngineDetector.getInstance().refresh();
-        engineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
-        cache.setStatus("Engine", engineRunning);
+        EngineStatus _engineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
+	if (engineRunning!=_engineRunning) {
+	    ServerLog.getLogger().info("Engine status change {" + _engineRunning + "}");
+	}
+	engineRunning = _engineRunning;
+	cache.setStatus("Engine", engineRunning);
         notifyEngineStatus();
     }
 

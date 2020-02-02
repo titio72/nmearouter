@@ -5,6 +5,7 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.sensors.*;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -20,9 +21,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private int readCounter;
 
     private SensorVoltage voltageSensor;
-    private SensorPressureTemp pressureTempSensor0;
     private SensorPressureTemp pressureTempSensor1;
-    private SensorPressureTemp[] pressureTempSensors;
     private SensorTemp tempSensor;
     private final Map<String, Measurement> xDrMap;
 
@@ -43,7 +42,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     	return 
     			"Temp(" + (tempSensor==null?"-":"*") + ") " + 
     			"Volt(" + (voltageSensor==null?"-":"*") + ") " + 
-    			"Atm1(" + (pressureTempSensor0==null?"-":"*") + ") " + 
     			"Atm2(" + (pressureTempSensor1==null?"-":"*") + ")";
     }
     
@@ -53,12 +51,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
         List<Sensor> sensors = new ArrayList<>();
         tempSensor = createTempSensor();
-        pressureTempSensor0 = createTempPressure(0);
         pressureTempSensor1 = createTempPressure(1);
         sensors.add(tempSensor);
-        sensors.add(pressureTempSensor0);
         sensors.add(pressureTempSensor1);
-        pressureTempSensors = new SensorPressureTemp[] {pressureTempSensor0, pressureTempSensor1};
         voltageSensor = createVoltage();
         sensors.add(voltageSensor);
         for (Sensor s: sensors) {
@@ -73,8 +68,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-    	doLF();
     	super.onTimer();
+        doLF();
     }
     
     @Override
@@ -89,9 +84,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             sendPressure();
             sendTemperature();
             sendVoltage();
-            sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp_0"));
-            sendMMB(HWSettings.getPropertyAsInteger("mmb.sensor", 0));
-            sendMHU(HWSettings.getPropertyAsInteger("mhu.sensor", 0));
+            sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp"));
+            sendMMB("Barometer");
+            sendMHU("Humidity");
             sendCPUTemp();
         }
     }
@@ -136,9 +131,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             voltageSensor = (SensorVoltage) readSensor(voltageSensor);
             if (readCounter == 0) {
                 tempSensor = (SensorTemp) readSensor(tempSensor);
-            }
-            if (readCounter == 5) {
-                pressureTempSensor0 = (SensorPressureTemp) readSensor(pressureTempSensor0);
                 pressureTempSensor1 = (SensorPressureTemp) readSensor(pressureTempSensor1);
             }
         } catch (Exception e) {
@@ -158,12 +150,17 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         return s;
     }
 
-	private void sendMMB(int sensor) {
+    private static boolean checkReadingAge(Sensor sensor, long timeout) {
+        return sensor!=null && (System.currentTimeMillis() - sensor.getLastReadingTimestamp())<timeout;
+    }
+
+	private void sendMMB(String xdrName) {
 		try {
-		    if (pressureTempSensors[sensor]!=null) {
-    	        double pr = pressureTempSensors[sensor].getPressureMB();
+            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            if (m != null) {
+    	        double pr = m.getValue();
     	        MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-    	        mmb.setBars(pr / 1000.0);
+    	        mmb.setBars(pr);
     	        notify(mmb);
 		    }
 		} catch (Exception e) {
@@ -171,11 +168,13 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 		}
     }
 
-	private void sendMHU(int sensor) {
+	private void sendMHU(String xdrName) {
 		try {
-            if (pressureTempSensors[sensor] != null) {
+            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            if (m != null) {
+                double hum = m.getValue();
                 MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
-                mhu.setRelativeHumidity(pressureTempSensors[sensor].getHumidity());
+                mhu.setRelativeHumidity(hum);
                 notify(mhu);
             }
         } catch (Exception e) {
@@ -213,23 +212,21 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     }
 
     private void sendPressure() {
-        for (int i = 0; i < pressureTempSensors.length; i++) {
-            long now = System.currentTimeMillis();
-            if (pressureTempSensors[i] != null && (now - pressureTempSensors[i].getLastReadingTimestamp()) < 1000) {
-                try {
-                    XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-                    double t = pressureTempSensors[i].getTemperatureCelsius();
-                    double pr = pressureTempSensors[i].getPressureMB();
-                    double h = pressureTempSensors[i].getHumidity();
-                    addXDR(xdr, new Measurement("B", Math.round(pr) / 1000d, "B", "Barometer_" + i));
-                    addXDR(xdr, new Measurement("C", round(t, 1), "C", "AirTemp_" + i));
-                    addXDR(xdr, new Measurement("P", round(h, 2), "H", "Humidity_" + i));
-                    notify(xdr);
-                } catch (Exception e) {
-	                getLogger().error(ERROR_POST_XDR_DATA, e);
-	            }
-	        }
-	    }
+        SensorPressureTemp sensor = pressureTempSensor1;
+        if (checkReadingAge(sensor, 600)) {
+            try {
+                XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+                double t = sensor.getTemperatureCelsius();
+                double pr = sensor.getPressureMB();
+                double h = sensor.getHumidity();
+                addXDR(xdr, new Measurement("B", Math.round(pr) / 1000d, "B", "Barometer"));
+                addXDR(xdr, new Measurement("C", round(t, 1), "C", "AirTemp"));
+                addXDR(xdr, new Measurement("P", round(h, 2), "H", "Humidity"));
+                notify(xdr);
+            } catch (Exception e) {
+                getLogger().error(ERROR_POST_XDR_DATA, e);
+            }
+        }
     }
 
     private void sendTemperature() {
