@@ -5,7 +5,6 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.sensors.*;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;

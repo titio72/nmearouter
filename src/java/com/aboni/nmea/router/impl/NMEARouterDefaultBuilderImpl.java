@@ -138,7 +138,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
 	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
         AgentStatus s = AgentStatusProvider.getAgentStatus();
-        boolean active = a == null ? false : a.isActive();
+        boolean active = (a != null) && a.isActive();
         if (s != null) {
             AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());
             if (requestedStatus == STATUS.UNKNOWN) {

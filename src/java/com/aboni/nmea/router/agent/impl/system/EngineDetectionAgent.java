@@ -28,12 +28,12 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
 
     private void refreshEngine() {
         EngineDetector.getInstance().refresh();
-        EngineStatus _engineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
-	if (engineRunning!=_engineRunning) {
-	    ServerLog.getLogger().info("Engine status change {" + _engineRunning + "}");
-	}
-	engineRunning = _engineRunning;
-	cache.setStatus("Engine", engineRunning);
+        EngineStatus localEngineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
+        if (engineRunning != localEngineRunning) {
+            ServerLog.getLogger().info("Engine status change {" + localEngineRunning + "}");
+        }
+        engineRunning = localEngineRunning;
+        cache.setStatus("Engine", engineRunning);
         notifyEngineStatus();
     }
 

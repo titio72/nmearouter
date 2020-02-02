@@ -68,14 +68,10 @@ public class AgentStatusImpl implements AgentStatus {
 		ServerLog.getLogger().info("Saving startup setting for agent {" + agent + "} Startup {" + s + "}");
 		try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?")) {
-				try {
-					updateStatusSt.setString(1, agent);
-					updateStatusSt.setInt(2, (s == STATUS.AUTO) ? 1 : 0);
-					updateStatusSt.setInt(3, (s == STATUS.AUTO) ? 1 : 0);
-					updateStatusSt.executeUpdate();
-				} catch (Exception e) {
-					ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} Start {" + s + "}", e);
-				}
+				updateStatusSt.setString(1, agent);
+				updateStatusSt.setInt(2, (s == STATUS.AUTO) ? 1 : 0);
+				updateStatusSt.setInt(3, (s == STATUS.AUTO) ? 1 : 0);
+				updateStatusSt.executeUpdate();
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} Start {" + s + "}", e);
@@ -90,13 +86,9 @@ public class AgentStatusImpl implements AgentStatus {
 		try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement updateFilterOut =
 						 db.getConnection().prepareStatement("update agent set filterOut=? where id=?")) {
-				try {
-					updateFilterOut.setString(1, agData);
-					updateFilterOut.setString(2, agent);
-					updateFilterOut.executeUpdate();
-				} catch (Exception e) {
-					ServerLog.getLogger().error(getErrorMessage(agent, agData), e);
-				}
+				updateFilterOut.setString(1, agData);
+				updateFilterOut.setString(2, agent);
+				updateFilterOut.executeUpdate();
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} FilterOut {" + agData + "}", e);
@@ -109,21 +101,12 @@ public class AgentStatusImpl implements AgentStatus {
 		ServerLog.getLogger().info("Saving inbound filter for agent {" + agent + "} FilterIn {" + agData + "}");
 		try (DBHelper db = new DBHelper(true)) {
 			try (PreparedStatement updateFilterIn = db.getConnection().prepareStatement("update agent set filterIn=? where id=?")) {
-				try {
-					updateFilterIn.setString(1, agData);
-					updateFilterIn.setString(2, agent);
-					updateFilterIn.executeUpdate();
-				} catch (Exception e) {
-					ServerLog.getLogger().error(getErrorMessage(agent, agData), e);
-				}
+				updateFilterIn.setString(1, agData);
+				updateFilterIn.setString(2, agent);
+				updateFilterIn.executeUpdate();
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} FilterIn {" + agData + "}", e);
 		}
 	}
-
-	private static String getErrorMessage(String agent, String data) {
-		return ERROR_MSG + " {" + agent + "} Data {" + data + "}";
-	}
-
 }

@@ -341,7 +341,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
 	}
 
-	private void sendSplitApparentWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
+	private void sendSplitApparentWind(double aWSpeed, double aWDirection) {
 		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
 		v.setAngle(aWDirection);
 		v.setTrue(false);
@@ -360,36 +360,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
 		if (data.isMwvA()) {
 			if (data.isSplitWind()) {
-				sendSplitApparentWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
+				sendSplitApparentWind(aWSpeed, aWDirection);
 			} else {
-				MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-				if (data.isWindSpeedInMS()) {
-					v.setSpeedUnit(Units.METER);
-					v.setSpeed(aWSpeed / 1.947);
-				} else {
-					v.setSpeedUnit(Units.KNOT);
-					v.setSpeed(aWSpeed);
-				}
-				v.setAngle(aWDirection);
-				v.setTrue(false);
-				v.setStatus(DataStatus.ACTIVE);
-				NMEASimulatorSource.this.notify(v);
+				sendApparentWind(aWSpeed, aWDirection, false);
 			}
 		}
 
 		if (data.isMwvT()) {
-			MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-			if (data.isWindSpeedInMS()) {
-				vt.setSpeedUnit(Units.METER);
-				vt.setSpeed(absoluteWindSpeed / 1.947);
-			} else {
-				vt.setSpeedUnit(Units.KNOT);
-				vt.setSpeed(absoluteWindSpeed);
-			}
-			vt.setAngle(tWDirection);
-			vt.setTrue(true);
-			vt.setStatus(DataStatus.ACTIVE);
-			NMEASimulatorSource.this.notify(vt);
+			sendApparentWind(absoluteWindSpeed, tWDirection, true);
 		}
 
 		if (data.isVwr()) {
@@ -403,11 +381,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 		if (data.isVwr()) {
 			VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
-			vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
+			vwt.setWindAngle(tWDirection > 180 ? 360 - tWDirection : tWDirection);
 			vwt.setSpeedKnots(absoluteWindSpeed);
-			vwt.setDirectionLeftRight(tWDirection>180? Direction.LEFT:Direction.RIGHT);
+			vwt.setDirectionLeftRight(tWDirection > 180 ? Direction.LEFT : Direction.RIGHT);
 			NMEASimulatorSource.this.notify(vwt);
 		}
+	}
+
+	private void sendApparentWind(double aWSpeed, double aWDirection, boolean b) {
+		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+		if (data.isWindSpeedInMS()) {
+			v.setSpeedUnit(Units.METER);
+			v.setSpeed(aWSpeed / 1.947);
+		} else {
+			v.setSpeedUnit(Units.KNOT);
+			v.setSpeed(aWSpeed);
+		}
+		v.setAngle(aWDirection);
+		v.setTrue(b);
+		v.setStatus(DataStatus.ACTIVE);
+		NMEASimulatorSource.this.notify(v);
 	}
 
 	private void sendDepth(double depth) {
