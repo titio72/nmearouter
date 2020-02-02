@@ -28,20 +28,20 @@ public class SensorVoltage extends I2CSensor {
     }
 
     public SensorVoltage() {
-    	this(ADS1115.ADS1115_ADDRESS_0X48);
+        this(ADS1115.ADS1115_ADDRESS_0X48);
 
         String sAddress = HWSettings.getProperty("analog.voltage", "0x48");
-        
-    	smoothing = getDefaultSmootingAlpha();
+
+        smoothing = getDefaultSmoothingAlpha();
         String sSmoothing = HWSettings.getProperty("analog.voltage.smoothing", "");
-        if (sSmoothing!=null && !sSmoothing.isEmpty()) {
-        	try {
-        		smoothing = Double.parseDouble(sSmoothing);
-        	} catch (Exception e) {
-        		ServerLog.getLogger().error("Cannot parse voltage smoothing factor " + sSmoothing, e);
-        	}
+        if (sSmoothing != null && !sSmoothing.isEmpty()) {
+            try {
+                smoothing = Double.parseDouble(sSmoothing);
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Cannot parse voltage smoothing factor " + sSmoothing, e);
+            }
         }
-        
+
         loadAdjustment();
         
         if (sAddress.startsWith("0x")) {

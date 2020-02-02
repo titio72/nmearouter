@@ -82,4 +82,9 @@ public class SensorTemp implements Sensor {
 			return new ArrayList<>(readings.values());
 		}
 	}
+
+	@Override
+	public long getLastReadingTimestamp() {
+		return lastRead;
+	}
 }

@@ -35,20 +35,22 @@ public abstract class I2CSensor implements Sensor {
     }
 
     private static final double LPF_ALPHA = 0.75;
-    
+
     private static int instanceCounter;
     private final int instance;
 
-    private double smootingAlpha;
+    private double smoothingAlpha;
 
     private static final int MAX_FAILURES = 5;
     private final int maxFailures;
     private int failures;
-    
+
     private boolean initialized;
-    
+
+    private long lastReadingTS;
+
     public I2CSensor() {
-        setDefaultSmootingAlpha(LPF_ALPHA);
+        setDefaultSmoothingAlpha(LPF_ALPHA);
         instanceCounter++;
         instance = instanceCounter;
         initialized = false;
@@ -86,23 +88,29 @@ public abstract class I2CSensor implements Sensor {
 	public final void read() throws SensorException {
         if (isInitialized() && (failures<maxFailures)) {
             try {
-            	readSensor();
+                readSensor();
+                lastReadingTS = System.currentTimeMillis();
             } catch (Exception e) {
-            	failures++;
-            	error("Error reading sensor {" + e.getMessage() + "} failure {" + failures + "/" + maxFailures + "}", e);
+                failures++;
+                error("Error reading sensor {" + e.getMessage() + "} failure {" + failures + "/" + maxFailures + "}", e);
             }
         } else throw new SensorException("Sensor not initialized!");
     }
 
-	public double getDefaultSmootingAlpha() {
-        return smootingAlpha;
+    public double getDefaultSmoothingAlpha() {
+        return smoothingAlpha;
     }
 
-	public void setDefaultSmootingAlpha(double smootingAlpha) {
-        this.smootingAlpha = smootingAlpha;
+    public void setDefaultSmoothingAlpha(double smootingAlpha) {
+        this.smoothingAlpha = smootingAlpha;
     }
-    
+
     protected int getBus() {
         return HWSettings.getPropertyAsInteger("bus", 1);
+    }
+
+    @Override
+    public long getLastReadingTimestamp() {
+        return lastReadingTS;
     }
 }

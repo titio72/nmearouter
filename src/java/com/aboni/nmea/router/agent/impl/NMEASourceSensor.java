@@ -85,14 +85,13 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private synchronized void doLF() {
         if (started) {
             readSensors();
-            String mtaSensor = HWSettings.getProperty("mta.sensor", "AirTemp_0");
-            int mmbSensor = HWSettings.getPropertyAsInteger("mmb.sensor", 0);
-            int mhuSensor = HWSettings.getPropertyAsInteger("mhu.sensor", 0);
             resetXDR();
-            sendXDR();
-            sendMTA(mtaSensor);
-            sendMMB(mmbSensor);
-            sendMHU(mhuSensor);
+            sendPressure();
+            sendTemperature();
+            sendVoltage();
+            sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp_0"));
+            sendMMB(HWSettings.getPropertyAsInteger("mmb.sensor", 0));
+            sendMHU(HWSettings.getPropertyAsInteger("mhu.sensor", 0));
             sendCPUTemp();
         }
     }
@@ -208,12 +207,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         }
     }
 
-    private void sendXDR() {
-        sendPressure();
-        sendTemperature();
-        sendVoltage();
-    }
-
     private void addXDR(XDRSentence xdr, Measurement m) {
         xdr.addMeasurement(m);
         xDrMap.put(m.getName(), m);
@@ -221,7 +214,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     private void sendPressure() {
         for (int i = 0; i < pressureTempSensors.length; i++) {
-            if (pressureTempSensors[i] != null) {
+            long now = System.currentTimeMillis();
+            if (pressureTempSensors[i] != null && (now - pressureTempSensors[i].getLastReadingTimestamp()) < 1000) {
                 try {
                     XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
                     double t = pressureTempSensors[i].getTemperatureCelsius();

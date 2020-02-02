@@ -19,7 +19,7 @@ public class SensorHMC5883 extends I2CSensor {
 
     public SensorHMC5883() {
         super();
-        setDefaultSmootingAlpha(0.66);
+        setDefaultSmoothingAlpha(0.66);
     }
 
     @Override
@@ -64,11 +64,11 @@ public class SensorHMC5883 extends I2CSensor {
 		if (mag==null) {
 		    mag = m; 
 		} else {
-		    mag = new double[] {
-		            DataFilter.getLPFReading(getDefaultSmootingAlpha(), mag[X], m[X]),
-		            DataFilter.getLPFReading(getDefaultSmootingAlpha(), mag[Y], m[Y]),
-		            DataFilter.getLPFReading(getDefaultSmootingAlpha(), mag[Z], m[Z])
-		    };
+		    mag = new double[]{
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[X], m[X]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Y], m[Y]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Z], m[Z])
+            };
 		}
 	}
 
