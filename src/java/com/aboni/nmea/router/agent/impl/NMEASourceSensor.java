@@ -84,8 +84,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     private synchronized void doLF() {
         if (started) {
-            readSensors();
             resetXDR();
+            readSensors();
             sendPressure();
             sendTemperature();
             sendVoltage();
