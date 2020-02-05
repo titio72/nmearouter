@@ -116,22 +116,22 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
 	private void doIt(GeoPositionT pos) {
 		if (t0==0) {
-			t0 = System.currentTimeMillis();
-			t0Play = pos.getTimestamp();
-		}
+            t0 = getCache().getNow();
+            t0Play = pos.getTimestamp();
+        }
 		if (prevPos!=null) {
-			long dt = pos.getTimestamp() - t0Play;
-			long elapsed = System.currentTimeMillis() - t0;
-			Utils.pause((int)(dt - elapsed));
-			Course c = new Course(prevPos, pos);
-			RMCSentence s = (RMCSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
-			s.setCourse(c.getCOG());
-			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-			cal.setTimeInMillis(pos.getTimestamp());
-			s.setDate(new net.sf.marineapi.nmea.util.Date(
-					cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH)));
-			s.setTime(new net.sf.marineapi.nmea.util.Time(
-					cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND)));
+            long dt = pos.getTimestamp() - t0Play;
+            long elapsed = getCache().getNow() - t0;
+            Utils.pause((int) (dt - elapsed));
+            Course c = new Course(prevPos, pos);
+            RMCSentence s = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);
+            s.setCourse(c.getCOG());
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.setTimeInMillis(pos.getTimestamp());
+            s.setDate(new net.sf.marineapi.nmea.util.Date(
+                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH)));
+            s.setTime(new net.sf.marineapi.nmea.util.Time(
+                    cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND)));
 			s.setMode(FaaMode.AUTOMATIC);
 			s.setSpeed(c.getSpeed());
 			s.setPosition(pos);

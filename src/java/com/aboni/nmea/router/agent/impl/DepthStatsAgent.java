@@ -45,7 +45,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, String source) {
         if (s instanceof DPTSentence) {
-            DepthT d = handleDepth(((DPTSentence) s).getDepth(), System.currentTimeMillis());
+            DepthT d = handleDepth(((DPTSentence) s).getDepth(), getCache().getNow());
             
             XDPSentence x = (XDPSentence)SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
             x.setDepth((float)d.depth/10f);

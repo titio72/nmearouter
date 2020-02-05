@@ -6,7 +6,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
-import java.util.Calendar;
+import java.time.OffsetDateTime;
 
 public class NMEAMagnetic2TrueConverter {
 
@@ -15,13 +15,12 @@ public class NMEAMagnetic2TrueConverter {
 	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
-		geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
-		pos = new Position(43.0, 10.0);
+        geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
+        pos = new Position(43.0, 10.0);
 
-		Calendar c = Calendar.getInstance();
-		this.year = ((double)c.get(Calendar.YEAR) + (double)(c.get(Calendar.MONTH) + 1) / 12.0); 
-		
-	}
+        OffsetDateTime odt = OffsetDateTime.now();
+        this.year = (double) odt.getYear() + ((double) odt.getMonthValue() / 12.0);
+    }
 	
 	public NMEAMagnetic2TrueConverter(double year) {
 		geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());

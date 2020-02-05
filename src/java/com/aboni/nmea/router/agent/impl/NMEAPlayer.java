@@ -62,10 +62,10 @@ public class NMEAPlayer extends NMEAAgentImpl {
 					long t0 = 0;
 					while ((line = r.readLine()) != null) {
 						if (line.startsWith("[")) {
-							long logT = readLineWithTimestamp(line, logT0, t0);
-							t0 = System.currentTimeMillis();
-							logT0 = logT;
-						} else {
+                            long logT = readLineWithTimestamp(line, logT0, t0);
+                            t0 = getCache().getNow();
+                            logT0 = logT;
+                        } else {
 							readLine(line);
 						}
 					}
@@ -91,16 +91,16 @@ public class NMEAPlayer extends NMEAAgentImpl {
 	private long readLineWithTimestamp(String line, long logT0, long t0) {
 		long logT = logT0;
 		try {
-			NMEASentenceItem itm = new NMEASentenceItem(line);
-			long t = System.currentTimeMillis();
-			logT = itm.getTimestamp();
-			long dt = t - t0;
-			long dLogT = logT - logT0;
-			if (dLogT > dt) {
-				Utils.pause((int) (dLogT - dt));
-			}
-			notify(itm.getSentence());
-		} catch (Exception e) {
+            NMEASentenceItem itm = new NMEASentenceItem(line);
+            long t = getCache().getNow();
+            logT = itm.getTimestamp();
+            long dt = t - t0;
+            long dLogT = logT - logT0;
+            if (dLogT > dt) {
+                Utils.pause((int) (dLogT - dt));
+            }
+            notify(itm.getSentence());
+        } catch (Exception e) {
 			getLogger().error("Error playing sentence {" + line + "}", e);
 		}
 		return logT;

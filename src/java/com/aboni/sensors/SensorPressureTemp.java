@@ -56,28 +56,28 @@ public class SensorPressureTemp extends I2CSensor {
 	    readTemperatureCelsius();
 	    readHumidity();
 	}
-	
-	private void readPressurePA() {
+
+    private void readPressurePA() {
         double p = atmo.readPressure();
         pressurePA = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), pressurePA, p);
     }
-	
-	private void readHumidity() {
+
+    private void readHumidity() {
         double h = atmo.readHumidity();
         humidity = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), humidity, h);
     }
 
-	public double getAltitude(double sealevelPressure) {
-		return (float) (44330.0 * (1.0 - Math.pow(pressurePA / sealevelPressure, 0.1903)));
-	}
+    public double getAltitude(double seaLevelPressure) {
+        return (float) (44330.0 * (1.0 - Math.pow(pressurePA / seaLevelPressure, 0.1903)));
+    }
 
-	private void readTemperatureCelsius() {
+    private void readTemperatureCelsius() {
         temperatureC = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), temperatureC, atmo.readTemperature());
     }
 
-	public double getTemperatureCelsius() {
-	    return temperatureC;
-	}
+    public double getTemperatureCelsius() {
+        return temperatureC;
+    }
 		
     @Override
     public String getSensorName() {

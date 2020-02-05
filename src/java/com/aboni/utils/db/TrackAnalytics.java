@@ -1,6 +1,6 @@
 package com.aboni.utils.db;
 
-import com.aboni.nmea.router.agent.impl.track.EngineStatus;
+import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;

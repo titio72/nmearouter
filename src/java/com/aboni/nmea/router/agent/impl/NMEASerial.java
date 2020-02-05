@@ -210,7 +210,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        long t = System.currentTimeMillis();
+        long t = getCache().getNow();
         synchronized (stats) {
 	        if (fastStats.resetTime == 0) {
 	            fastStats.reset(t);

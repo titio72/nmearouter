@@ -14,15 +14,17 @@ import java.util.*;
 
 public class CruisingDaysService extends JSONWebService {
 
-	static class Trip {
-		final int tripId;
-		final Set<Date> dates = new TreeSet<>();
-		final String desc;
-		Date min;
-		Date max;
+    private static final String SQL = "select track.tripId, Date(track.TS), (select trip.description from trip where trip.id=track.tripId) as description from track group by track.tripid, Date(track.TS)";
 
-		Trip(int id, String desc) {
-			this.desc = desc;
+    static class Trip {
+        final int tripId;
+        final Set<Date> dates = new TreeSet<>();
+        final String desc;
+        Date min;
+        Date max;
+
+        Trip(int id, String desc) {
+            this.desc = desc;
 			this.tripId = id;
 		}
 
@@ -32,7 +34,7 @@ public class CruisingDaysService extends JSONWebService {
 			dates.add(d);
 		}
 	}
-	
+
 	private final DateFormat dateFormatter = new SimpleDateFormat("yyyyMMdd");
 	private final DateFormat shortDateFormatter = new SimpleDateFormat("dd/MM");
 
@@ -68,13 +70,13 @@ public class CruisingDaysService extends JSONWebService {
 	}
 
 	private List<Trip> getTrips(DBHelper db) throws SQLException {
-		int counter = 0;
-		Map<Integer, Trip> tripsDates = new TreeMap<>();
-		try (PreparedStatement stm = db.getConnection().prepareStatement("select track.tripId, Date(track.TS), (select trip.description from trip where trip.id=track.tripId) as description from track group by track.tripid, Date(track.TS)")) {
-			readDays(counter, tripsDates, stm);
-		}
-		return sortIt(tripsDates);
-	}
+        int counter = 0;
+        Map<Integer, Trip> tripsDates = new TreeMap<>();
+        try (PreparedStatement stm = db.getConnection().prepareStatement(SQL)) {
+            readDays(counter, tripsDates, stm);
+        }
+        return sortIt(tripsDates);
+    }
 
 	private void readDays(int counter, Map<Integer, Trip> tripsDates, PreparedStatement stm) throws SQLException {
 		try (ResultSet rs = stm.executeQuery()) {
@@ -101,13 +103,13 @@ public class CruisingDaysService extends JSONWebService {
 			trip.put("lastDay", dateFormatter.format(t.max));
 			JSONArray dates = new JSONArray();
 			for (Date d: t.dates) {
-        JSONObject dt = new JSONObject();
-        String longDate = DateFormat.getDateInstance(DateFormat.SHORT).format(d);
-				dt.put("day", longDate);
-				dt.put("dayShort", (dates.length()>=1)? shortDateFormatter.format(d):longDate);
-				dt.put("ref", dateFormatter.format(d));
-				dates.put(dt);
-			}
+                JSONObject dt = new JSONObject();
+                String longDate = DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+                dt.put("day", longDate);
+                dt.put("dayShort", (dates.length() >= 1) ? shortDateFormatter.format(d) : longDate);
+                dt.put("ref", dateFormatter.format(d));
+                dates.put(dt);
+            }
 			trip.put("dates", dates);
 			trips.put(trip);
 		}

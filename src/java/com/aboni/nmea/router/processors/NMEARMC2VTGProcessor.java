@@ -12,7 +12,7 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.util.FaaMode;
 
-import java.util.Calendar;
+import java.time.OffsetDateTime;
 
 /**
  * Used to produce a VTG sentence from a RMC to match requirement of NKE
@@ -43,8 +43,8 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
     private final NMEAMagnetic2TrueConverter m;
     
 	public NMEARMC2VTGProcessor() {
-	    this(Calendar.getInstance().get(Calendar.YEAR));
-	}
+        this(OffsetDateTime.now().getYear());
+    }
 
 	public NMEARMC2VTGProcessor(double year) {
 	    m = new NMEAMagnetic2TrueConverter(year);

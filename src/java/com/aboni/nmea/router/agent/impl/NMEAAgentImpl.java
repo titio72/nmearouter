@@ -62,20 +62,22 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	
 	private final String name;
 	private NMEAAgentStatusListener sl;
-	private NMEASentenceFilterSet fsetInput;
-	private NMEASentenceFilterSet fsetOutput;
-	private boolean active;
-	private NMEASentenceListener listener;
-	private boolean builtin;
-	private boolean target;
-	private boolean source;
-	private final InternalTarget targetIf;
-	private final InternalSource sourceIf;
-	private final NMEAProcessorSet procs;
-	
+    private NMEASentenceFilterSet fsetInput;
+    private NMEASentenceFilterSet fsetOutput;
+    private boolean active;
+    private NMEASentenceListener listener;
+    private boolean builtin;
+    private boolean target;
+    private boolean source;
+    private final InternalTarget targetIf;
+    private final InternalSource sourceIf;
+    private final NMEAProcessorSet procs;
+    private final NMEACache cache;
+
     public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
-    	targetIf = new InternalTarget();
-    	sourceIf = new InternalSource();
+        this.cache = cache;
+        targetIf = new InternalTarget();
+        sourceIf = new InternalSource();
         this.name = name;
         fsetInput = null;
         fsetOutput = null;
@@ -94,31 +96,31 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 						getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
 						addProc(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
 						break;
-					case "dpt":
-						getLogger().info("QoS {DPT} Agent {" + name + "}");
-						addProc(new NMEADepthEnricher());
-						break;
-					case "rmc2vtg":
-						getLogger().info("QoS {RMC2VTG} Agent {" + name + "}");
-						addProc(new NMEARMC2VTGProcessor());
-						break;
-					case "truewind_sog":
-						getLogger().info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
-						addProc(new NMEAMWVTrue(true));
-						break;
-					case "truewind":
-						getLogger().info("QoS {TRUEWIND} Agent {" + name + "}");
-						addProc(new NMEAMWVTrue(false));
-						break;
-					case "enrich_hdg":
-						getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
-						addProc(new NMEAHDGEnricher(cache));
-						break;
-					case "enrich_hdm":
-						getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
-						addProc(new NMEAHDMEnricher(cache));
-						break;
-					case "rmc_filter":
+                    case "dpt":
+                        getLogger().info("QoS {DPT} Agent {" + name + "}");
+                        addProc(new NMEADepthEnricher());
+                        break;
+                    case "rmc2vtg":
+                        getLogger().info("QoS {RMC2VTG} Agent {" + name + "}");
+                        addProc(new NMEARMC2VTGProcessor());
+                        break;
+                    case "truewind_sog":
+                        getLogger().info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
+                        addProc(new NMEAMWVTrue(cache, true));
+                        break;
+                    case "truewind":
+                        getLogger().info("QoS {TRUEWIND} Agent {" + name + "}");
+                        addProc(new NMEAMWVTrue(cache, false));
+                        break;
+                    case "enrich_hdg":
+                        getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
+                        addProc(new NMEAHDGEnricher(cache));
+                        break;
+                    case "enrich_hdm":
+                        getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
+                        addProc(new NMEAHDMEnricher(cache));
+                        break;
+                    case "rmc_filter":
 						getLogger().info("QoS {RMC filter} Agent {" + name + "}");
 						addProc(new NMEARMCFilter());
 						break;
@@ -272,9 +274,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
-			List<Sentence> toSend = procs.getSentences(sentence, getName());
-			for (Sentence s: toSend) listener.onSentence(RouterMessageImpl.createMessage(s, getName()));
-		}
+            List<Sentence> toSend = procs.getSentences(sentence, getName());
+            for (Sentence s : toSend)
+                listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
+        }
 	}
 	/**
 	 * Used by "sources" to push sentences into the stream
@@ -283,9 +286,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	protected final void notify(JSONObject m) {
 
 		if (isStarted()) {
-			getLogger().debug("Notify Sentence {" + m + "}");
-			listener.onSentence(RouterMessageImpl.createMessage(m, getName()));
-		}
+            getLogger().debug("Notify Sentence {" + m + "}");
+            listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
+        }
 	}
 
 	/**
@@ -330,15 +333,19 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     public String getType() { 
     	return getClass().getSimpleName();
     }
-    
+
     @Override
     public void onTimerHR() {
-    } 
-    
+    }
+
     @Override
     public void onTimer() {
-		if (isStarted()) {
-			procs.onTimer();
-    	}
-    } 
+        if (isStarted()) {
+            procs.onTimer();
+        }
+    }
+
+    protected NMEACache getCache() {
+        return cache;
+    }
 }

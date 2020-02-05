@@ -59,7 +59,7 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
         if (s instanceof VHWSentence) {
             VHWSentence vhw = (VHWSentence) s;
             double speed = vhw.getSpeedKnots();
-            speedMovingAverage.setSample(System.currentTimeMillis(), speed);
+            speedMovingAverage.setSample(cache.getNow(), speed);
             return (checkThresholds(speed) && checkGPS(speed) && checkMovingAverage(speed));
         } else {
             return true;

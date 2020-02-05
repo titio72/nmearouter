@@ -2,14 +2,8 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.NMEAMWDConverter;
 import com.aboni.nmea.router.NMEACache;
-
 import com.aboni.nmea.router.agent.QOS;
-
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.MWDSentence;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.*;
 
 public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 
@@ -30,10 +24,10 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, String source) {
 		if (s instanceof HDGSentence) {
-			conv.setHeading((HDGSentence) s, System.currentTimeMillis());
-		} else if (s instanceof MWVSentence && ((MWVSentence)s).isTrue()) {
-			conv.setWind((MWVSentence) s, System.currentTimeMillis());
-		} else {
+            conv.setHeading((HDGSentence) s, getCache().getNow());
+        } else if (s instanceof MWVSentence && ((MWVSentence)s).isTrue()) {
+            conv.setWind((MWVSentence) s, getCache().getNow());
+        } else {
 			return;
 		}
 		MWDSentence outSentence = (threshold==-1)?conv.getMWDSentence():conv.getMWDSentence(threshold);

@@ -9,11 +9,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	private final SystemTimeChecker systemTimeCHecker;
 
-	private final NMEACache cache;
-
 	public NMEASystemTimeGPS(NMEACache cache, String name, QOS qos) {
 		super(cache, name, qos);
-		this.cache = cache;
 		setSourceTarget(false, true);
 		systemTimeCHecker = new SystemTimeChecker(cache);
 	}
@@ -25,7 +22,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
 	@Override
     public String getDescription() {
-    	return "Sync up system time with GPS UTC time feed [" + (cache.isTimeSynced()?"Sync " + cache.getTimeSkew():"Not Sync") + "]";
+        return "Sync up system time with GPS UTC time feed [" + (systemTimeCHecker.isSynced() ? "Sync " + systemTimeCHecker.getTimeSkew() : "Not Sync") + "]";
     }
     
 	@Override

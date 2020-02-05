@@ -149,18 +149,18 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         return s;
     }
 
-    private static boolean checkReadingAge(Sensor sensor, long timeout) {
-        return sensor!=null && (System.currentTimeMillis() - sensor.getLastReadingTimestamp())<timeout;
+    private boolean checkReadingAge(Sensor sensor, long timeout) {
+        return sensor != null && (getCache().getNow() - sensor.getLastReadingTimestamp()) < timeout;
     }
 
-	private void sendMMB(String xdrName) {
-		try {
+    private void sendMMB(String xdrName) {
+        try {
             Measurement m = xDrMap.getOrDefault(xdrName, null);
             if (m != null) {
-    	        double pr = m.getValue();
-    	        MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-    	        mmb.setBars(pr);
-    	        notify(mmb);
+                double pr = m.getValue();
+                MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
+                mmb.setBars(pr);
+                notify(mmb);
 		    }
 		} catch (Exception e) {
 			getLogger().error("Cannot post pressure data", e);
@@ -235,7 +235,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
                 for (SensorTemp.Reading tr : r) {
-                    if ((System.currentTimeMillis() - tr.getTimestamp()) < 1000) {
+                    if ((getCache().getNow() - tr.getTimestamp()) < 1000) {
                         String name = tr.getKey().substring(tr.getKey().length() - 4, tr.getKey().length() - 1);
                         String mappedName = HWSettings.getProperty("temp.map." + name);
                         if (mappedName == null) mappedName = name;

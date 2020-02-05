@@ -9,20 +9,16 @@ public interface NMEACache {
 
 	DataEvent<HeadingSentence> getLastHeading();
 
-	DataEvent<PositionSentence> getLastPosition();
+    DataEvent<PositionSentence> getLastPosition();
 
-	boolean isHeadingOlderThan(long time, long threshold);
+    boolean isHeadingOlderThan(long time, long threshold);
 
     void onSentence(Sentence s, String src);
-
-    boolean isTimeSynced();
-
-    void setTimeSynced();
-
-    long getTimeSkew();
 
     <T> void setStatus(String statusKey, T status);
 
     <T> T getStatus(String statusKey, T defaultValue);
+
+    long getNow();
 
 }

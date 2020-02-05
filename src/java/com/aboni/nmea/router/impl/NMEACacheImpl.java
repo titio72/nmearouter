@@ -1,12 +1,10 @@
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.*;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +13,6 @@ public class NMEACacheImpl implements NMEACache {
 
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;
-	private boolean synced;
-	private static final long SYNC_THRESHOLD = 10000L; // 10 seconds
-    private long timeSkew;
     private final Map<String, Object> statuses;
 
     public NMEACacheImpl() {
@@ -25,45 +20,22 @@ public class NMEACacheImpl implements NMEACache {
         lastPosition = new DataEvent<>(null, 0, "");
         statuses = new HashMap<>();
     }
-    
+
     @Override
     public void onSentence(Sentence s, String src) {
     	try {
 	        if (s instanceof HDGSentence ||
 	        		s instanceof HDTSentence ||
 	        		s instanceof HDMSentence) {
-	        	lastHeading = new DataEvent<>((HeadingSentence)s, System.currentTimeMillis(),src );
-	        } else if (s instanceof PositionSentence && s.isValid()) {
-				lastPosition = new DataEvent<>((PositionSentence)s, System.currentTimeMillis(), src);
-                checkTimeSkew(s);
-	        }
+                lastHeading = new DataEvent<>((HeadingSentence) s, getNow(), src);
+            } else if (s instanceof PositionSentence && s.isValid()) {
+                lastPosition = new DataEvent<>((PositionSentence) s, getNow(), src);
+            }
     	} catch (Exception e) {
     		ServerLog.getLogger().warning("Cannot cache message {" + s + "} error {" + e.getMessage() + "}");
     	}
     }
 
-    private void checkTimeSkew(Sentence s) {
-        try {
-            Calendar c = NMEATimestampExtractor.getTimestamp(s);
-            if (c!=null) {
-                timeSkew = c.getTimeInMillis() - System.currentTimeMillis();
-                synced = Math.abs(timeSkew) < SYNC_THRESHOLD;
-            }
-        } catch (NMEATimestampExtractor.GPSTimeException ignored) {
-            // do nothing
-        }
-    }
-    
-    @Override
-    public boolean isTimeSynced() {
-    	return synced;
-    }
-    
-    @Override
-    public void setTimeSynced() {
-    	synced = true;
-    }
-    
     /* (non-Javadoc)
 	 * @see com.aboni.nmea.router.NMEACache#getLastHeading()
 	 */
@@ -89,11 +61,6 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
-    public long getTimeSkew() {
-        return timeSkew;
-    }
-
-    @Override
     public <T> void setStatus(String statusKey, T status) {
         synchronized (statuses) {
             statuses.put(statusKey, status);
@@ -105,5 +72,10 @@ public class NMEACacheImpl implements NMEACache {
         synchronized (statuses) {
             return (T) statuses.getOrDefault(statusKey, defaultValue);
         }
+    }
+
+    @Override
+    public long getNow() {
+        return System.currentTimeMillis();
     }
 }
