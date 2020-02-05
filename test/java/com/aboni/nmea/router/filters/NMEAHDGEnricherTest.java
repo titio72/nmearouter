@@ -26,11 +26,11 @@ public class NMEAHDGEnricherTest {
 		public DataEvent<HeadingSentence> getLastHeading() { return null; }
 
 		@Override
-		public DataEvent<PositionSentence> getLastPosition() { 
-			GLLSentence gll = (GLLSentence)SentenceFactory.getInstance().createParser(TalkerId.GP, "GLL");
-			gll.setPosition(new Position(43.68008333, 10.28983333));
-			return new DataEvent<>(gll, System.currentTimeMillis() - 1000, "SRCGPS");
-		}
+		public DataEvent<PositionSentence> getLastPosition() {
+            GLLSentence gll = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, "GLL");
+            gll.setPosition(new Position(43.68008333, 10.28983333));
+            return new DataEvent<>(gll, getNow() - 1000, "SRCGPS");
+        }
 
 		@Override
 		public boolean isHeadingOlderThan(long time, long threshold) { return false; }
@@ -38,30 +38,21 @@ public class NMEAHDGEnricherTest {
 		@Override
 		public void onSentence(Sentence s, String src) {}
 
-		@Override
-		public boolean isTimeSynced() {
-			return true;
-		}
+        @Override
+        public <T> void setStatus(String statusKey, T status) {
 
-		@Override
-		public void setTimeSynced() {
-		}
+        }
 
-		public long getTimeSkew() {
-			return 0;
-		}
-
-		@Override
-		public <T> void setStatus(String statusKey, T status) {
-
-		}
-
-		@Override
+        @Override
         public <T> T getStatus(String statusKey, T defV) {
             return null;
         }
 
-	}
+        @Override
+        public long getNow() {
+            return System.currentTimeMillis();
+        }
+    }
 	
 	@Test
 	public void testEnrichVariation() {

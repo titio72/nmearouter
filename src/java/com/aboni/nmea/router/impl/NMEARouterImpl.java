@@ -65,12 +65,12 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 	
 	private void dumpStats() {
-		long t = System.currentTimeMillis();
-		if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
-			lastStatsTime = t;
-			ServerLog.getLogger().info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
-		}
-	}
+        long t = cache.getNow();
+        if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
+            lastStatsTime = t;
+            ServerLog.getLogger().info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
+        }
+    }
 
 	@Override
 	public void start() {
@@ -168,10 +168,10 @@ public class NMEARouterImpl implements NMEARouter {
 				Sentence s = (Sentence)m.getPayload();
 				Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
 				for (Sentence ss : toSend) {
-					cache.onSentence(ss, m.getSource());
-					routeToTarget(ss, m.getSource());
-					stream.pushSentence(RouterMessageImpl.createMessage(ss, m.getSource()));
-				}
+                    cache.onSentence(ss, m.getSource());
+                    routeToTarget(ss, m.getSource());
+                    stream.pushSentence(RouterMessageImpl.createMessage(ss, m.getSource(), cache.getNow()));
+                }
 			} else if (m.getPayload() instanceof JSONObject) {
 				stream.pushSentence(m);
 			}

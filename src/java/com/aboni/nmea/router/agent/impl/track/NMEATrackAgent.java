@@ -5,6 +5,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
+import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -19,16 +20,14 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private static final long CHECK_TRIP_TIMEOUT = 60000L;
     private static final int CONTINUE_TRIP_THRESHOLD = 3 * 60 * 60 * 1000;  /* 3 hours */
     private TrackWriter media;
-	private String mediaFile;
-	private final TrackManager tracker;
+    private String mediaFile;
+    private final TrackManager tracker;
     private final TripManager tripManager;
-    private final NMEACache cache;
     private Integer tripId;
 
     public NMEATrackAgent(NMEACache cache, String name) {
         super(cache, name);
         setSourceTarget(true, true);
-        this.cache = cache;
         this.tracker = new TrackManager();
         this.tripManager = new DBTripManager();
         this.media = null;
@@ -99,19 +98,21 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 	}
 	
     private void processPosition(GeoPositionT posT, double sog) {
-		long t0 = System.currentTimeMillis();
+        long t0 = getCache().getNow();
 
         checkTrip(posT.getTimestamp());
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
-    	if (point!=null && media!=null) {
-            point = TrackPoint.cloneOverrideEngine(point, cache.getStatus("Engine", EngineStatus.UNKNOWN));
+        if (point != null && media != null) {
+            point = TrackPoint.cloneOverrideEngine(point, getCache().getStatus("Engine", EngineStatus.UNKNOWN));
             media.write(point);
             notifyTrackedPoint(point);
-            synchronized (this) {writes++;}
+            synchronized (this) {
+                writes++;
+            }
         }
 
-        long t = System.currentTimeMillis() - t0;
+        long t = getCache().getNow() - t0;
         synchronized (this) {
         	avgTime = ((avgTime * samples) + t) / (samples + 1);
             samples++;
@@ -179,15 +180,16 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        if (System.currentTimeMillis() - lastStats > 30000) {
-    		lastStats = System.currentTimeMillis();
-    		synchronized (this) {
-    			getLogger().info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
-    			avgTime = 0;
-    			samples = 0;
-    			writes = 0;
-    		}
-    	}
+        long now = getCache().getNow();
+        if (now - lastStats > 30000) {
+            lastStats = now;
+            synchronized (this) {
+                getLogger().info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
+                avgTime = 0;
+                samples = 0;
+                writes = 0;
+            }
+        }
     }
     
     private double avgTime = 0;

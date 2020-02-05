@@ -31,7 +31,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-    	return ((System.currentTimeMillis()-lastGps)<2000)?"On Gps[on]":"On Gps[off]";
+        return ((getCache().getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
     }
     
     @Override
@@ -41,7 +41,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
             
             @Override
             public void run() {
-                if ((System.currentTimeMillis()-lastGps) > 2000) {
+                if ((getCache().getNow() - lastGps) > 2000) {
                     powerGPSDown();
                 }
             }
@@ -70,7 +70,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, String source) {
         if (s instanceof PositionSentence) {
-            lastGps = System.currentTimeMillis();
+            lastGps = getCache().getNow();
             powerGPSUp();
         }
     }

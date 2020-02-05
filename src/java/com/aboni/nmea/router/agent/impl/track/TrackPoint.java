@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl.track;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.sensors.EngineStatus;
 
 public class TrackPoint {
 

@@ -10,19 +10,19 @@ public class RouterMessageImpl<T> implements RouterMessage {
     private final T message;
     private final String source;
 
-    public static RouterMessage createMessage(Sentence obj, String source) {
-        return new RouterMessageImpl<>(obj, source, System.currentTimeMillis());
+    public static RouterMessage createMessage(Sentence obj, String source, long timestamp) {
+        return new RouterMessageImpl<>(obj, source, timestamp);
     }
 
-    public static RouterMessage createMessage(JSONObject obj, String source) {
-        return new RouterMessageImpl<>(obj, source, System.currentTimeMillis());
+    public static RouterMessage createMessage(JSONObject obj, String source, long timestamp) {
+        return new RouterMessageImpl<>(obj, source, timestamp);
     }
 
     public static RouterMessage clone(RouterMessage m) {
         return new RouterMessageImpl<>(m.getPayload(), m.getSource(), m.getTimestamp());
     }
 
-    private RouterMessageImpl(T msg, String source, long timestamp){
+    private RouterMessageImpl(T msg, String source, long timestamp) {
         this.timestamp = timestamp;
         this.message = msg;
         this.source = source;

@@ -40,31 +40,31 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
 	@Override
 	protected void doWithSentence(Sentence s, String source) {
-		NMEASentenceItem e = new NMEASentenceItem(s, System.currentTimeMillis(), "  ");
-		synchronized (queue) {
-			if (isStarted()) {
-				queue.add(e);
-				try {
-					dump();
-				} catch (IOException e1) {
-					ServerLog.getLogger().error("Error dumping NMEA stream", e1);
-				}
-			}
-		}
+        NMEASentenceItem e = new NMEASentenceItem(s, getCache().getNow(), "  ");
+        synchronized (queue) {
+            if (isStarted()) {
+                queue.add(e);
+                try {
+                    dump();
+                } catch (IOException e1) {
+                    ServerLog.getLogger().error("Error dumping NMEA stream", e1);
+                }
+            }
+        }
 	}
 
 	private void dump() throws IOException {
-		long t = System.currentTimeMillis();
-		if (t-lastDump > DUMP_PERIOD) {
-			getLogger().debug("Dumping NMEA log at {" + new Date() + "}");
-			lastDump = t;
-			File f = new File("nmea" + df.format(new Date()) + ".log");
-			FileWriter w = new FileWriter(f, true);
-			try (BufferedWriter bw = new BufferedWriter(w)) {
-				for (NMEASentenceItem e : queue) {
-					bw.write(e.toString());
-					bw.write("\n");
-				}
+        long t = getCache().getNow();
+        if (t - lastDump > DUMP_PERIOD) {
+            getLogger().debug("Dumping NMEA log at {" + new Date() + "}");
+            lastDump = t;
+            File f = new File("nmea" + df.format(new Date()) + ".log");
+            FileWriter w = new FileWriter(f, true);
+            try (BufferedWriter bw = new BufferedWriter(w)) {
+                for (NMEASentenceItem e : queue) {
+                    bw.write(e.toString());
+                    bw.write("\n");
+                }
 				queue.clear();
 				bw.flush();
 			}

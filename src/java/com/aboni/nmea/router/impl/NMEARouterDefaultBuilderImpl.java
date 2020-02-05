@@ -96,14 +96,14 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	private void configureGPSPriority(Router conf, NMEARouter r) {
 		com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
 		if (gpsPriorityConf!=null) {
-			List<String> gpsPriority = gpsPriorityConf.getGPSSource();
-			NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor();
-			proc.addAllGPS();
-			for (int i = 0; i<gpsPriority.size(); i++) {
-				proc.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */ );
-			}
-			r.addProcessor(proc);
-		}
+            List<String> gpsPriority = gpsPriorityConf.getGPSSource();
+            NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor(injector.getInstance(NMEACache.class));
+            proc.addAllGPS();
+            for (int i = 0; i < gpsPriority.size(); i++) {
+                proc.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */);
+            }
+            r.addProcessor(proc);
+        }
 	}
 
 	private void handlePersistentState(NMEAAgent agent, AgentBase a) {
@@ -138,7 +138,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
 	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
         AgentStatus s = AgentStatusProvider.getAgentStatus();
-        boolean active = (a!=null) && a.isActive();
+        boolean active = (a != null) && a.isActive();
         if (s != null) {
             AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());
             if (requestedStatus == STATUS.UNKNOWN) {

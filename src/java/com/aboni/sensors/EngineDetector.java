@@ -18,7 +18,7 @@ public class EngineDetector {
     private final PinDetector pin;
 
     private EngineDetector() {
-        Pin p = RaspiPin.getPinByName(HWSettings.getProperty("engine.pin", "GPIO 27"));
+        Pin p = RaspiPin.getPinByName(HWSettings.getProperty("engine.pin", "GPIO 24"));
         pin = new PinDetector(p, false);
         ServerLog.getLogger().info("Engine Detection created {" + pin.getName() + "}");
     }

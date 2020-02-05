@@ -79,9 +79,9 @@ public class SensorMPU6050 extends I2CSensor {
             scaledAccel = scaledAccel1;
         } else {
             scaledAccel = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[X], scaledAccel1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledAccel[Z], scaledAccel1[Z])
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[X], scaledAccel1[X]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Z], scaledAccel1[Z])
             };
         }
     }
@@ -98,10 +98,10 @@ public class SensorMPU6050 extends I2CSensor {
         if (scaledGyro==null) {
             scaledGyro = scaledGyro1;
         } else {
-            scaledGyro = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[X], scaledGyro1[X]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmootingAlpha(), scaledGyro[Z], scaledGyro1[Z])
+            scaledGyro = new double[]{
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[X], scaledGyro1[X]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
+                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Z], scaledGyro1[Z])
             };
         }
     }

@@ -1,6 +1,6 @@
 package com.aboni.utils.db;
 
-import com.aboni.nmea.router.agent.impl.track.EngineStatus;
+import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,9 +74,9 @@ public class TrackAnalytics {
         }
     }
 
-    private static final String SQL = "select TS, dist, speed, maxSpeed, engine, anchor, period from track where TS>=? and TS<?";
+    private static final String SQL = "select TS, dist, speed, maxSpeed, engine, anchor, dTime from track where TS>=? and TS<?";
 
-    private class Stats {
+    public class Stats {
         long samples;
         long totalNavigationTime = 0;
         long totalAnchorTime = 0;
@@ -93,6 +93,36 @@ public class TrackAnalytics {
                 new MovingAverageMax(1.0, "1NM"),
                 new MovingAverageMax(5.0, "5NM"),
                 new MovingAverageMax(10.0, "10NM")};
+
+        public JSONObject toJson() {
+            JSONObject j = new JSONObject();
+            j.put("samples", samples);
+            j.put("navTime", totalNavigationTime);
+            j.put("navDist", totalNavigationDistance);
+            j.put("navEngineOffTime", sailEngineTime[EngineStatus.OFF.getValue()]);
+            j.put("navEngineOn_Time", sailEngineTime[EngineStatus.ON.getValue()]);
+            j.put("navEngineUnkTime", sailEngineTime[EngineStatus.UNKNOWN.getValue()]);
+            j.put("navEngineOffDist", sailEngineDistance[EngineStatus.OFF.getValue()]);
+            j.put("navEngineOn_Dist", sailEngineDistance[EngineStatus.ON.getValue()]);
+            j.put("navEngineUnkDist", sailEngineDistance[EngineStatus.UNKNOWN.getValue()]);
+            j.put("anchorTime", totalAnchorTime);
+            j.put("maxSpeed", maxSpeed);
+            j.put("maxSpeedTime", maxSpeedTime);
+            j.put("maxAvgSpeed", max30sAverageSpeed);
+            j.put("maxAvgSpeedTime", max30sAverageSpeedTime);
+            j.put("maxSampledSpeed", maxSampleAverageSpeed);
+            j.put("maxSampledSpeedTime", maxSampleAverageSpeedTime);
+            j.put("max01NMSpeed", movingAvgMaxes[0].getMaxSpeed());
+            j.put("max01NMSpeedTime0", movingAvgMaxes[0].getMaxSpeedT0());
+            j.put("max01NMSpeedTime1", movingAvgMaxes[0].getMaxSpeedT1());
+            j.put("max05NMSpeed", movingAvgMaxes[1].getMaxSpeed());
+            j.put("max05NMSpeedTime0", movingAvgMaxes[1].getMaxSpeedT0());
+            j.put("max05NMSpeedTime1", movingAvgMaxes[1].getMaxSpeedT1());
+            j.put("max10NMSpeed", movingAvgMaxes[2].getMaxSpeed());
+            j.put("max10NMSpeedTime0", movingAvgMaxes[2].getMaxSpeedT0());
+            j.put("max10NMSpeedTime1", movingAvgMaxes[2].getMaxSpeedT1());
+            return j;
+        }
     }
 
     private class MySample {
@@ -115,11 +145,11 @@ public class TrackAnalytics {
         }
     }
 
-    public Stats run(Calendar from, Calendar to) throws DBException {
+    public Stats run(Instant from, Instant to) throws DBException {
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(SQL)) {
-                st.setTimestamp(1, new Timestamp(from.getTimeInMillis()));
-                st.setTimestamp(2, new Timestamp(to.getTimeInMillis()));
+                st.setTimestamp(1, new Timestamp(from.toEpochMilli()));
+                st.setTimestamp(2, new Timestamp(to.toEpochMilli()));
                 Stats stats = new Stats();
                 MySample prevSample = null;
                 try (ResultSet rs = st.executeQuery()) {

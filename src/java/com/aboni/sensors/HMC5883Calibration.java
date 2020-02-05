@@ -17,7 +17,7 @@ public class HMC5883Calibration {
     public HMC5883Calibration(SensorHMC5883 sensor, long timeout) {
         this.sensor = sensor;
         this.timeThreshold = timeout;
-        sensor.setDefaultSmootingAlpha(1.0);
+        sensor.setDefaultSmoothingAlpha(1.0);
         
     }
 

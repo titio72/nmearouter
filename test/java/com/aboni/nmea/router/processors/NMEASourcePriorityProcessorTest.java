@@ -1,7 +1,11 @@
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.HeadingSentence;
+import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,10 +15,52 @@ import static org.junit.Assert.*;
 public class NMEASourcePriorityProcessorTest {
 
     private NMEASourcePriorityProcessor proc;
+    private MyCache cache;
+
+    private class MyCache implements NMEACache {
+
+        @Override
+        public DataEvent<HeadingSentence> getLastHeading() {
+            return null;
+        }
+
+        @Override
+        public DataEvent<PositionSentence> getLastPosition() {
+            return null;
+        }
+
+        @Override
+        public boolean isHeadingOlderThan(long time, long threshold) {
+            return false;
+        }
+
+        @Override
+        public void onSentence(Sentence s, String src) {
+
+        }
+
+        @Override
+        public <T> void setStatus(String statusKey, T status) {
+
+        }
+
+        @Override
+        public <T> T getStatus(String statusKey, T defaultValue) {
+            return null;
+        }
+
+        @Override
+        public long getNow() {
+            return timestamp == -1 ? System.currentTimeMillis() : timestamp;
+        }
+
+        long timestamp = -1;
+    }
 
     @Before
     public void setUp() {
-        proc = new NMEASourcePriorityProcessor();
+        cache = new MyCache();
+        proc = new NMEASourcePriorityProcessor(cache);
     }
 
     @Test
@@ -98,17 +144,17 @@ public class NMEASourcePriorityProcessorTest {
     }
 
     @Test
-    public void testAllowLowPriorityAfterTimeou() {
-        proc.setSentences(new String[] {"MWV", "VWR"});
+    public void testAllowLowPriorityAfterTimeout() {
+        proc.setSentences(new String[]{"MWV", "VWR"});
         proc.setPriority("MySrc", 10);
         proc.setPriority("MyOtherSrc", 5);
 
         long t0 = 10000000L;
-        proc.timeStamp = t0;
+        cache.timestamp = t0;
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         proc.process(s0, "MySrc");
 
-        proc.timeStamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
+        cache.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         Pair<Boolean, Sentence[]> res = proc.process(s, "MyOtherSrc");
         assertNotNull(res);
@@ -124,11 +170,11 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MyOtherSrc", 5);
 
         long t0 = 10000000L;
-        proc.timeStamp = t0;
+        cache.timestamp = t0;
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         proc.process(s0, "MySrc");
 
-        proc.timeStamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
+        cache.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
         assertNotNull(res);

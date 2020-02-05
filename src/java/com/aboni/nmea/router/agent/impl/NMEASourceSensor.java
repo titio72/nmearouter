@@ -11,29 +11,29 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class NMEASourceSensor extends NMEAAgentImpl {
 
     private static final String ERROR_POST_XDR_DATA = "Cannot post XDR data";
     private boolean started;
-    
+    private int readCounter;
+
     private SensorVoltage voltageSensor;
-    private SensorPressureTemp pressureTempSensor0;
     private SensorPressureTemp pressureTempSensor1;
-    private SensorPressureTemp[] pressureTempSensors;
     private SensorTemp tempSensor;
-    
+    private final Map<String, Measurement> xDrMap;
+
+
     public NMEASourceSensor(NMEACache cache, String name, QOS q) {
         super(cache, name, q);
         setSourceTarget(true, false);
+        xDrMap = new HashMap<>();
     }
-    
+
     @Override
     public String getType() {
-    	return "Onboard Sensor";
+        return "Onboard Sensor";
     }
     
     @Override
@@ -41,7 +41,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     	return 
     			"Temp(" + (tempSensor==null?"-":"*") + ") " + 
     			"Volt(" + (voltageSensor==null?"-":"*") + ") " + 
-    			"Atm1(" + (pressureTempSensor0==null?"-":"*") + ") " + 
     			"Atm2(" + (pressureTempSensor1==null?"-":"*") + ")";
     }
     
@@ -51,12 +50,9 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
         List<Sensor> sensors = new ArrayList<>();
         tempSensor = createTempSensor();
-        pressureTempSensor0 = createTempPressure(0);
         pressureTempSensor1 = createTempPressure(1);
         sensors.add(tempSensor);
-        sensors.add(pressureTempSensor0);
         sensors.add(pressureTempSensor1);
-        pressureTempSensors = new SensorPressureTemp[] {pressureTempSensor0, pressureTempSensor1};
         voltageSensor = createVoltage();
         sensors.add(voltageSensor);
         for (Sensor s: sensors) {
@@ -71,8 +67,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-    	doLF();
     	super.onTimer();
+        doLF();
     }
     
     @Override
@@ -82,25 +78,29 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     private synchronized void doLF() {
         if (started) {
-        	readSensors();
-        	int mtaSensor = HWSettings.getPropertyAsInteger("mta.sensor", 0);
-        	int mmbSensor = HWSettings.getPropertyAsInteger("mmb.sensor", 0);
-        	int mhuSensor = HWSettings.getPropertyAsInteger("mhu.sensor", 0);
-            sendMTA(mtaSensor);
-            sendMMB(mmbSensor);
-            sendMHU(mhuSensor);
-            sendXDR();
+            resetXDR();
+            readSensors();
+            sendPressure();
+            sendTemperature();
+            sendVoltage();
+            sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp"));
+            sendMMB("Barometer");
+            sendMHU("Humidity");
             sendCPUTemp();
-        }            
+        }
     }
 
-	private SensorTemp createTempSensor() {
-    	try {
+    private void resetXDR() {
+        xDrMap.clear();
+    }
+
+    private SensorTemp createTempSensor() {
+        try {
             return new SensorTemp();
-    	} catch (Exception e) {
+        } catch (Exception e) {
             getLogger().error("Error creating temp sensor ", e);
             return null;
-    	}
+        }
     }
 
     private SensorVoltage createVoltage() {
@@ -125,10 +125,13 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     
 	private void readSensors() {
         try {
-        	tempSensor = (SensorTemp)readSensor(tempSensor);
-            voltageSensor = (SensorVoltage)readSensor(voltageSensor);
-            pressureTempSensor0 = (SensorPressureTemp)readSensor(pressureTempSensor0);
-            pressureTempSensor1 = (SensorPressureTemp)readSensor(pressureTempSensor1);
+            readCounter = (readCounter + 1) % 10;
+
+            voltageSensor = (SensorVoltage) readSensor(voltageSensor);
+            if (readCounter == 0) {
+                tempSensor = (SensorTemp) readSensor(tempSensor);
+                pressureTempSensor1 = (SensorPressureTemp) readSensor(pressureTempSensor1);
+            }
         } catch (Exception e) {
             getLogger().error("Error reading sensor data", e);
         }
@@ -146,77 +149,83 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         return s;
     }
 
-	private void sendMMB(int sensor) {
-		try {
-		    if (pressureTempSensors[sensor]!=null) {
-    	        double pr = pressureTempSensors[sensor].getPressureMB();
-    	        MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-    	        mmb.setBars(pr / 1000.0);
-    	        notify(mmb);
+    private boolean checkReadingAge(Sensor sensor, long timeout) {
+        return sensor != null && (getCache().getNow() - sensor.getLastReadingTimestamp()) < timeout;
+    }
+
+    private void sendMMB(String xdrName) {
+        try {
+            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            if (m != null) {
+                double pr = m.getValue();
+                MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
+                mmb.setBars(pr);
+                notify(mmb);
 		    }
 		} catch (Exception e) {
 			getLogger().error("Cannot post pressure data", e);
 		}
     }
 
-	private void sendMHU(int sensor) {
+	private void sendMHU(String xdrName) {
 		try {
-		    if (pressureTempSensors[sensor]!=null) {
-    	        MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
-    	        mhu.setRelativeHumidity(pressureTempSensors[sensor].getHumidity());
-    	        notify(mhu);
-		    }
-		} catch (Exception e) {
-			getLogger().error("Cannot post pressure data", e);
-		}
+            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            if (m != null) {
+                double hum = m.getValue();
+                MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
+                mhu.setRelativeHumidity(hum);
+                notify(mhu);
+            }
+        } catch (Exception e) {
+            getLogger().error("Cannot post pressure data", e);
+        }
     }
 
-	private void sendMTA(int sensor) {
-		try {
-		    if (pressureTempSensors[sensor]!=null) {
-    			double t = pressureTempSensors[sensor].getTemperatureCelsius();
-    	        MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
-    	        mta.setTemperature(t);
-    	        notify(mta);
-		    }
-		} catch (Exception e) {
-			getLogger().error("Cannot post temperature data", e);
+    private void sendMTA(String xdrName) {
+        try {
+            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            if (m != null) {
+                double t = m.getValue();
+                MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
+                mta.setTemperature(t);
+                notify(mta);
+            }
+        } catch (Exception e) {
+            getLogger().error("Cannot post temperature data", e);
 		}
 	}
 	
 	private void sendCPUTemp() {
 		try {
 			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-			xdr.addMeasurement(new Measurement("C", round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
-			notify(xdr);
+            addXDR(xdr, new Measurement("C", round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
+            notify(xdr);
 		} catch (Exception e) {
-			getLogger().error(ERROR_POST_XDR_DATA, e);
-		}
-	}
+            getLogger().error(ERROR_POST_XDR_DATA, e);
+        }
+    }
 
-	private void sendXDR() {
-        sendPressure();
-        sendTemperature();
-        sendVoltage();
+    private void addXDR(XDRSentence xdr, Measurement m) {
+        xdr.addMeasurement(m);
+        xDrMap.put(m.getName(), m);
     }
 
     private void sendPressure() {
-        for (int i = 0; i<pressureTempSensors.length; i++) {
-	        if (pressureTempSensors[i]!=null) {
-	            try {
-	                XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	                double t = pressureTempSensors[i].getTemperatureCelsius();
-	                double pr = pressureTempSensors[i].getPressureMB();
-	                double h = pressureTempSensors[i].getHumidity();
-	                xdr.addMeasurement(new Measurement("B", Math.round(pr)/1000d, "B", "Barometer_" + i));
-	                xdr.addMeasurement(new Measurement("C", round(t, 1), "C", "AirTemp_" + i));
-	                xdr.addMeasurement(new Measurement("P", round(h, 2), "H", "Humidity_" + i));
-	                notify(xdr);
-	            } catch (Exception e) {
-	                getLogger().error(ERROR_POST_XDR_DATA, e);
-	            }
-	        }
-	    }
+        SensorPressureTemp sensor = pressureTempSensor1;
+        if (checkReadingAge(sensor, 600)) {
+            try {
+                XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+                double t = sensor.getTemperatureCelsius();
+                double pr = sensor.getPressureMB();
+                double h = sensor.getHumidity();
+                addXDR(xdr, new Measurement("B", Math.round(pr) / 1000d, "B", "Barometer"));
+                addXDR(xdr, new Measurement("C", round(t, 1), "C", "AirTemp"));
+                addXDR(xdr, new Measurement("P", round(h, 2), "H", "Humidity"));
+                notify(xdr);
+            } catch (Exception e) {
+                getLogger().error(ERROR_POST_XDR_DATA, e);
+            }
+        }
     }
 
     private void sendTemperature() {
@@ -226,12 +235,11 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
                 for (SensorTemp.Reading tr : r) {
-                    if ((System.currentTimeMillis() - tr.getTimestamp()) < 1000) {
+                    if ((getCache().getNow() - tr.getTimestamp()) < 1000) {
                         String name = tr.getKey().substring(tr.getKey().length() - 4, tr.getKey().length() - 1);
                         String mappedName = HWSettings.getProperty("temp.map." + name);
                         if (mappedName == null) mappedName = name;
-                        xdr.addMeasurement(
-                                new Measurement("C", Math.round(tr.getValue() * 10d) / 10d, "C", mappedName));
+                        addXDR(xdr, new Measurement("C", Math.round(tr.getValue() * 10d) / 10d, "C", mappedName));
                         empty = false;
                     }
                 }
@@ -246,11 +254,11 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         if (voltageSensor!=null) {
             try {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-				xdr.addMeasurement(new Measurement("V", round(voltageSensor.getVoltage0(), 3), "V", "V0"));
-				xdr.addMeasurement(new Measurement("V", round(voltageSensor.getVoltage1(), 3), "V", "V1"));
-				xdr.addMeasurement(new Measurement("V", round(voltageSensor.getVoltage2(), 3), "V", "V2"));
-				xdr.addMeasurement(new Measurement("V", round(voltageSensor.getVoltage3(), 3), "V", "V3"));
-		        notify(xdr);
+                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage0(), 3), "V", "V0"));
+                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage1(), 3), "V", "V1"));
+                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage2(), 3), "V", "V2"));
+                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage3(), 3), "V", "V3"));
+                notify(xdr);
             } catch (Exception e) {
                 getLogger().error(ERROR_POST_XDR_DATA, e);
             }

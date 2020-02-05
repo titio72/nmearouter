@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -17,13 +18,16 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
     private String currentSource;
     private int currentPriority;
 
+    private final NMEACache cache;
+
     long timeStamp = -1;
 
     private long getNow() {
-        return timeStamp==-1 ? System.currentTimeMillis() : timeStamp;
+        return timeStamp == -1 ? cache.getNow() : timeStamp;
     }
 
-    public NMEASourcePriorityProcessor() {
+    public NMEASourcePriorityProcessor(@NotNull NMEACache cache) {
+        this.cache = cache;
         priorities = new HashMap<>();
         lastSourceTimestamp = new HashMap<>();
         sentences = Collections.synchronizedSet(new HashSet<>());

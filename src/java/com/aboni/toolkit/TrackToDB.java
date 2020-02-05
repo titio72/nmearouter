@@ -47,8 +47,8 @@ public class TrackToDB {
 							PPP p;
 							try {
 								p = getPoint(pos);
-								st.setDouble(1, p.lat * (p.latE.equals("N") ? 1.0 : -1.0));
-								st.setDouble(2, p.lon * (p.lonE.equals("E") ? 1.0 : -1.0));
+								st.setDouble(1, p.lat * ("N".equals(p.latE) ? 1.0 : -1.0));
+								st.setDouble(2, p.lon * ("E".equals(p.lonE) ? 1.0 : -1.0));
 								Timestamp x = new Timestamp(p.timestamp.getTimeInMillis());
 								st.setTimestamp(3, x);
 								st.setInt(4, 0);

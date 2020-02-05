@@ -35,12 +35,12 @@ public class SensorPressureTemp extends I2CSensor {
 	
 	@Override
 	protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-		pressurePA = 0.0;
-		temperatureC = 0.0;
-		humidity = 0.0;
-		setDefaultSmootingAlpha(0.4);
-		atmo = createAtmo(bus);
-	}
+        pressurePA = 0.0;
+        temperatureC = 0.0;
+        humidity = 0.0;
+        setDefaultSmoothingAlpha(0.4);
+        atmo = createAtmo(bus);
+    }
 
 	public double getPressureMB() {
         return pressurePA * 0.01;
@@ -56,28 +56,28 @@ public class SensorPressureTemp extends I2CSensor {
 	    readTemperatureCelsius();
 	    readHumidity();
 	}
-	
-	private void readPressurePA() {
-    	double p = atmo.readPressure();
-		pressurePA = DataFilter.getLPFReading(getDefaultSmootingAlpha(), pressurePA, p);
-	}
-	
-	private void readHumidity() {
-    	double h = atmo.readHumidity();
-		humidity = DataFilter.getLPFReading(getDefaultSmootingAlpha(), humidity, h);
-	}
 
-	public double getAltitude(double sealevelPressure) {
-		return (float) (44330.0 * (1.0 - Math.pow(pressurePA / sealevelPressure, 0.1903)));
-	}
-
-	private void readTemperatureCelsius() {
-        temperatureC = DataFilter.getLPFReading(getDefaultSmootingAlpha(), temperatureC, atmo.readTemperature());
+    private void readPressurePA() {
+        double p = atmo.readPressure();
+        pressurePA = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), pressurePA, p);
     }
 
-	public double getTemperatureCelsius() {
-	    return temperatureC;
-	}
+    private void readHumidity() {
+        double h = atmo.readHumidity();
+        humidity = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), humidity, h);
+    }
+
+    public double getAltitude(double seaLevelPressure) {
+        return (float) (44330.0 * (1.0 - Math.pow(pressurePA / seaLevelPressure, 0.1903)));
+    }
+
+    private void readTemperatureCelsius() {
+        temperatureC = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), temperatureC, atmo.readTemperature());
+    }
+
+    public double getTemperatureCelsius() {
+        return temperatureC;
+    }
 		
     @Override
     public String getSensorName() {

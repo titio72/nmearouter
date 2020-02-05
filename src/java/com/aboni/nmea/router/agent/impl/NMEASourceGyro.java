@@ -29,11 +29,8 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
     
-    private final NMEACache cache;
-    
     public NMEASourceGyro(NMEACache cache, String name, QOS q) {
         super(cache, name, q);
-        this.cache = cache;
         setSourceTarget(true, true);
     }
     
@@ -101,37 +98,37 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     
     private boolean headingNotPresentOnStream() {
     	return (
-    			/* another source may have provided a heading but it's too old, presumably the source is down*/ 
-    			cache.isHeadingOlderThan(System.currentTimeMillis(), SEND_HD_IDLE_TIME) ||
-	    		
-	    		/* there is a heading but it's mine (so no other sources are providing a heading  */
-	    		getName().equals(cache.getLastHeading().getSource()));
+                /* another source may have provided a heading but it's too old, presumably the source is down*/
+                getCache().isHeadingOlderThan(getCache().getNow(), SEND_HD_IDLE_TIME) ||
+
+                        /* there is a heading but it's mine (so no other sources are providing a heading  */
+                        getName().equals(getCache().getLastHeading().getSource()));
     }
     
     private void sendHDx() {
     	try {
     	    if (compassSensor!=null && headingNotPresentOnStream()) {
 
-    	    	double b = compassSensor.getHeading();
-	            
-	            if (SEND_HDM) {
-    	            HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
-    	            hdm.setHeading(Utils.normalizeDegrees0To360(b));
-    	            notify(hdm);
-	            }
-	            
-	            if (cache.getLastPosition().getData() != null) {
-	                NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
-	                m.setPosition(cache.getLastPosition().getData().getPosition());
-	                
-	                if (SEND_HDT) {
-    	                HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);
-    	                notify(hdt);
-	                }
-	                
-	                HDGSentence hdg = m.getSentence(TalkerId.II, b, 0.0);
-	                notify(hdg);
-	            } else {
+                double b = compassSensor.getHeading();
+
+                if (SEND_HDM) {
+                    HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
+                    hdm.setHeading(Utils.normalizeDegrees0To360(b));
+                    notify(hdm);
+                }
+
+                if (getCache().getLastPosition().getData() != null) {
+                    NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
+                    m.setPosition(getCache().getLastPosition().getData().getPosition());
+
+                    if (SEND_HDT) {
+                        HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);
+                        notify(hdt);
+                    }
+
+                    HDGSentence hdg = m.getSentence(TalkerId.II, b, 0.0);
+                    notify(hdg);
+                } else {
 	                HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
                     hdg.setHeading(Utils.normalizeDegrees0To360(b));
                     hdg.setDeviation(0.0);

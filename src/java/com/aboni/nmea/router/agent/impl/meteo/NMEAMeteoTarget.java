@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl.meteo;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.utils.AngleStatsSample;
@@ -51,13 +52,10 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             /*HUM*/ 0
     };
 
-    private final NMEACache cache;
-
     private final boolean useMWD;
 
     public NMEAMeteoTarget(NMEACache cache, String name, QOS qos, StatsWriter w) {
         super(cache, name, qos);
-        this.cache = cache;
         setSourceTarget(false, true);
     	writer = w;
     	useMWD = qos != null && qos.get("useMWD");
@@ -91,10 +89,10 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     
     private void dumpStats() {
         synchronized (series) {
-        	long ts = System.currentTimeMillis();
-            for (int i = 0; i<series.length; i++) {
+            long ts = getCache().getNow();
+            for (int i = 0; i < series.length; i++) {
                 statsPeriodCounter[i]++;
-                if (statsPeriodCounter[i]>=periods[i]) {
+                if (statsPeriodCounter[i] >= periods[i]) {
                     StatsSample series1 = series[i];
                     write(series1, ts);
                     series1.reset();
@@ -114,17 +112,17 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, String source) {
     	try {
-	    	if (cache.isTimeSynced()) {
-		        if (s instanceof MTASentence) {
-		            processTemp((MTASentence)s);
-		        } else if (s instanceof MMBSentence) {
-		            processPressure((MMBSentence)s);
-		        } else if (s instanceof MTWSentence) {
-		            processWaterTemp((MTWSentence)s);
-		        } else if (s instanceof MHUSentence) {
-		            processHumidity((MHUSentence)s);
+            if (Boolean.TRUE.equals(getCache().getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
+                if (s instanceof MTASentence) {
+                    processTemp((MTASentence) s);
+                } else if (s instanceof MMBSentence) {
+                    processPressure((MMBSentence) s);
+                } else if (s instanceof MTWSentence) {
+                    processWaterTemp((MTWSentence) s);
+                } else if (s instanceof MHUSentence) {
+                    processHumidity((MHUSentence) s);
                 } else if (useMWD && s instanceof MWDSentence) {
-                    processWind((MWDSentence)s);
+                    processWind((MWDSentence) s);
                 } else if (!useMWD && s instanceof MWVSentence) {
                     processWind((MWVSentence)s);
 		        }
@@ -162,15 +160,22 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private void processWind(MWVSentence s) {
         if (s.isTrue()) {
-            DataEvent<HeadingSentence> e = cache.getLastHeading();
-            if (e!=null && (System.currentTimeMillis() - e.getTimestamp())<800) {
+            DataEvent<HeadingSentence> e = getCache().getLastHeading();
+            if (e != null && (getCache().getNow() - e.getTimestamp()) < 800) {
                 double windDir = e.getData().getHeading() + s.getAngle();
                 double windSpd;
                 switch (s.getSpeedUnit().toChar()) {
-                    case 'N': windSpd = s.getSpeed(); break;
-                    case 'K': windSpd = s.getSpeed() / 1.852; break;
-                    case 'M': windSpd = s.getSpeed()  * 1.94384; break;
-                    default: windSpd = 0.0;
+                    case 'N':
+                        windSpd = s.getSpeed();
+                        break;
+                    case 'K':
+                        windSpd = s.getSpeed() / 1.852;
+                        break;
+                    case 'M':
+                        windSpd = s.getSpeed() * 1.94384;
+                        break;
+                    default:
+                        windSpd = 0.0;
                 }
                 collect(WIND, windSpd);
                 collect(WIND_D, windDir);

@@ -3,6 +3,7 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -10,33 +11,39 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Units;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Calc true wind
+ *
  * @author aboni
  */
 public class NMEAMWVTrue implements NMEAPostProcess {
 
-	public NMEAMWVTrue(boolean useSOG) {
-		useRMC = useSOG;
-	}
+    public NMEAMWVTrue(@NotNull NMEACache cache, boolean useSOG) {
+        this.useRMC = useSOG;
+        this.cache = cache;
+    }
 
     private static final long AGE_THRESHOLD = 5000;
-    
-	private double lastTrueHeading;
-	private double lastMagHeading;
-	private long lastHeadingTime;
-	private double lastSpeed;
-	private long lastSpeedTime;
 
-	private final boolean useRMC;
+    private NMEACache cache;
+
+    private double lastTrueHeading;
+    private double lastMagHeading;
+    private long lastHeadingTime;
+    private double lastSpeed;
+    private long lastSpeedTime;
+
+    private final boolean useRMC;
 
     private double lastSentTWindSpeed = Double.NaN;
 
 	@Override
 	public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
 		try {
-			long time = System.currentTimeMillis(); 
-			if (sentence instanceof MWVSentence) {
+            long time = cache.getNow();
+            if (sentence instanceof MWVSentence) {
                 return processWind((MWVSentence) sentence, time);
             } else if (!useRMC && sentence instanceof VHWSentence) {
                 double speed = ((VHWSentence) sentence).getSpeedKnots();

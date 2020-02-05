@@ -12,4 +12,6 @@ public interface Sensor {
 
 	void read() throws SensorException;
 
+	long getLastReadingTimestamp();
+
 }

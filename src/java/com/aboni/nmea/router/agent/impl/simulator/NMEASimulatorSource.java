@@ -246,16 +246,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 	private void sendMeteo(double temp, double press) {
 		if (data.isXdrMeteo()) {
-			XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+            XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
 
-			if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press, "B", "Barometer_0"));
-			if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp + 5, "C", "AirTemp_0"));
-			if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_0"));
-			if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press + 150, "B", "Barometer_1"));
-			if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp_1"));
-			if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity_1"));
-			NMEASimulatorSource.this.notify(xdr);
-		}
+            if (data.isXdrMeteoAtm()) xdr.addMeasurement(new Measurement("P", press / 1000, "B", "Barometer"));
+            if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp"));
+            if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp + 1, "C", "CabinTemp"));
+            if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity"));
+            NMEASimulatorSource.this.notify(xdr);
+        }
 	}
 
 	private void sendGyro(double hdg, double roll, double pitch) {
@@ -270,10 +268,10 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 	private void sendDeprecatedMeteo(double hdg, double absoluteWindSpeed, double tWDirection, double temp, double press) {
 		if (data.isMtw()) {
-			MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
-			t.setTemperature(28.5);
-			NMEASimulatorSource.this.notify(t);
-		}
+            MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
+            t.setTemperature(temp - 5);
+            NMEASimulatorSource.this.notify(t);
+        }
 
 		if (data.isMta()) {
 			MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
@@ -282,10 +280,10 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
 
 		if (data.isMbb()) {
-			MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
-			mmb.setBars(press/1000.0);
-			NMEASimulatorSource.this.notify(mmb);
-		}
+            MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
+            mmb.setBars(press / 1000.0);
+            NMEASimulatorSource.this.notify(mmb);
+        }
 
 		if (data.isMhu()) {
 			MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
@@ -294,19 +292,19 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
 
 		if (data.isMda()) {
-			MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
-			mda.setRelativeHumidity(data.getHum());
-			mda.setAirTemperature(temp + 10);
-			mda.setPrimaryBarometricPressure(press * 750.06375541921);
-			mda.setPrimaryBarometricPressureUnit('I');
-			mda.setSecondaryBarometricPressure(press/1000.0);
-			mda.setSecondaryBarometricPressureUnit('B');
-			mda.setWaterTemperature(28.5);
-			mda.setMagneticWindDirection(tWDirection + hdg);
-			mda.setTrueWindDirection(tWDirection + hdg);
-			mda.setWindSpeedKnots(absoluteWindSpeed);
-			NMEASimulatorSource.this.notify(mda);
-		}
+            MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
+            mda.setRelativeHumidity(data.getHum());
+            mda.setAirTemperature(temp);
+            mda.setPrimaryBarometricPressure(press * 750.06375541921);
+            mda.setPrimaryBarometricPressureUnit('I');
+            mda.setSecondaryBarometricPressure(press / 1000.0);
+            mda.setSecondaryBarometricPressureUnit('B');
+            mda.setWaterTemperature(temp - 5);
+            mda.setMagneticWindDirection(tWDirection + hdg);
+            mda.setTrueWindDirection(tWDirection + hdg);
+            mda.setWindSpeedKnots(absoluteWindSpeed);
+            NMEASimulatorSource.this.notify(mda);
+        }
 	}
 
 	private void sendVTG(double hdg, double speed) {
@@ -362,22 +360,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			if (data.isSplitWind()) {
 				sendSplitApparentWind(aWSpeed, aWDirection);
 			} else {
-				MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-				setWindValues(aWSpeed, v);
-				v.setAngle(aWDirection);
-				v.setTrue(false);
-				v.setStatus(DataStatus.ACTIVE);
-				NMEASimulatorSource.this.notify(v);
+				sendApparentWind(aWSpeed, aWDirection, false);
 			}
 		}
 
 		if (data.isMwvT()) {
-			MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-			setWindValues(absoluteWindSpeed, vt);
-			vt.setAngle(tWDirection);
-			vt.setTrue(true);
-			vt.setStatus(DataStatus.ACTIVE);
-			NMEASimulatorSource.this.notify(vt);
+			sendApparentWind(absoluteWindSpeed, tWDirection, true);
 		}
 
 		if (data.isVwr()) {
@@ -391,11 +379,26 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 		if (data.isVwr()) {
 			VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
-			vwt.setWindAngle(tWDirection>180?360-tWDirection:tWDirection);
+			vwt.setWindAngle(tWDirection > 180 ? 360 - tWDirection : tWDirection);
 			vwt.setSpeedKnots(absoluteWindSpeed);
-			vwt.setDirectionLeftRight(tWDirection>180? Direction.LEFT:Direction.RIGHT);
+			vwt.setDirectionLeftRight(tWDirection > 180 ? Direction.LEFT : Direction.RIGHT);
 			NMEASimulatorSource.this.notify(vwt);
 		}
+	}
+
+	private void sendApparentWind(double aWSpeed, double aWDirection, boolean b) {
+		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+		if (data.isWindSpeedInMS()) {
+			v.setSpeedUnit(Units.METER);
+			v.setSpeed(aWSpeed / 1.947);
+		} else {
+			v.setSpeedUnit(Units.KNOT);
+			v.setSpeed(aWSpeed);
+		}
+		v.setAngle(aWDirection);
+		v.setTrue(b);
+		v.setStatus(DataStatus.ACTIVE);
+		NMEASimulatorSource.this.notify(v);
 	}
 
 	private void setWindValues(double aWSpeed, MWVSentence v) {
