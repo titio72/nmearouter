@@ -32,6 +32,10 @@ public enum EngineStatus {
 
     @Override
     public String toString() {
-        return value == 0 ? "Off" : value == 1 ? "On" : "Unknown";
+        switch (value) {
+            case 0: return "Off";
+            case 1: return "On";
+            default: return "Unknown";
+        }
     }
 }

@@ -341,7 +341,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
 	}
 
-	private void sendSplitApparentWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
+	private void sendSplitApparentWind(double aWSpeed, double aWDirection) {
 		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
 		v.setAngle(aWDirection);
 		v.setTrue(false);
@@ -360,16 +360,10 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
 		if (data.isMwvA()) {
 			if (data.isSplitWind()) {
-				sendSplitApparentWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
+				sendSplitApparentWind(aWSpeed, aWDirection);
 			} else {
 				MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-				if (data.isWindSpeedInMS()) {
-					v.setSpeedUnit(Units.METER);
-					v.setSpeed(aWSpeed / 1.947);
-				} else {
-					v.setSpeedUnit(Units.KNOT);
-					v.setSpeed(aWSpeed);
-				}
+				setWindValues(aWSpeed, v);
 				v.setAngle(aWDirection);
 				v.setTrue(false);
 				v.setStatus(DataStatus.ACTIVE);
@@ -379,13 +373,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 		if (data.isMwvT()) {
 			MWVSentence vt = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-			if (data.isWindSpeedInMS()) {
-				vt.setSpeedUnit(Units.METER);
-				vt.setSpeed(absoluteWindSpeed / 1.947);
-			} else {
-				vt.setSpeedUnit(Units.KNOT);
-				vt.setSpeed(absoluteWindSpeed);
-			}
+			setWindValues(absoluteWindSpeed, vt);
 			vt.setAngle(tWDirection);
 			vt.setTrue(true);
 			vt.setStatus(DataStatus.ACTIVE);
@@ -407,6 +395,16 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			vwt.setSpeedKnots(absoluteWindSpeed);
 			vwt.setDirectionLeftRight(tWDirection>180? Direction.LEFT:Direction.RIGHT);
 			NMEASimulatorSource.this.notify(vwt);
+		}
+	}
+
+	private void setWindValues(double aWSpeed, MWVSentence v) {
+		if (data.isWindSpeedInMS()) {
+			v.setSpeedUnit(Units.METER);
+			v.setSpeed(aWSpeed / 1.947);
+		} else {
+			v.setSpeedUnit(Units.KNOT);
+			v.setSpeed(aWSpeed);
 		}
 	}
 

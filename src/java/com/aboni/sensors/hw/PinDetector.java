@@ -35,7 +35,7 @@ public class PinDetector {
             for (PinListener l : listeners) {
                 try {
                     l.engineStateEvent(pinOn);
-                } catch (Throwable t) {
+                } catch (Exception t) {
                     ServerLog.getLogger().error("Error notifying pin status", t);
                 }
             }
@@ -85,8 +85,12 @@ public class PinDetector {
         try (FileReader is = new FileReader(name)) {
             char[] buffer = new char[16];
             int r = is.read(buffer);
-            String v = new String(buffer).trim();
-            pinOn = 1 == (Integer.parseInt(v));
+            if (r>0) {
+                String v = new String(buffer).trim();
+                pinOn = 1 == (Integer.parseInt(v));
+            } else {
+                pinOn = false;
+            }
         } catch (Exception e) {
             pinOn = false;
         }

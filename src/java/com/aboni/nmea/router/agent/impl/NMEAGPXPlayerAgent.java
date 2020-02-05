@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -65,6 +66,8 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 		final Document d;
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 			dbFactory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
 			dbFactory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

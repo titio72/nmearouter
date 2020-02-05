@@ -116,7 +116,6 @@ public class TrackAnalytics {
     }
 
     public Stats run(Calendar from, Calendar to) throws DBException {
-        JSONObject result = new JSONObject();
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(SQL)) {
                 st.setTimestamp(1, new Timestamp(from.getTimeInMillis()));
@@ -127,10 +126,10 @@ public class TrackAnalytics {
                     while (rs.next()) {
                         stats.samples++;
                         MySample sample = new MySample(rs);
-                        calcMovingAverageSpeed(stats, sample, prevSample);
+                        calcMovingAverageSpeed(stats, sample);
                         calcSailAndEngine(stats, sample, prevSample);
                         calcNavAnchorTime(stats, sample, prevSample);
-                        calcMaxSpeed(stats, sample, prevSample);
+                        calcMaxSpeed(stats, sample);
                         prevSample = sample;
                     }
                     return stats;
@@ -142,7 +141,7 @@ public class TrackAnalytics {
         }
     }
 
-    private void calcMaxSpeed(Stats stats, MySample sample, MySample prev) {
+    private void calcMaxSpeed(Stats stats, MySample sample) {
         if (!sample.anchor) {
             if (sample.maxSpeed > stats.maxSpeed) {
                 stats.maxSpeed = sample.maxSpeed;
@@ -176,7 +175,7 @@ public class TrackAnalytics {
         stats.sailEngineTime[sample.eng.getValue()] += (prev == null) ? 0 : (sample.ts - prev.ts);
     }
 
-    private void calcMovingAverageSpeed(Stats stats, MySample sample, MySample prev) {
+    private void calcMovingAverageSpeed(Stats stats, MySample sample) {
         Pair<Long, Double> p = new Pair<>(sample.ts, sample.distance);
         for (MovingAverageMax m : stats.movingAvgMaxes) m.addSample(p);
     }

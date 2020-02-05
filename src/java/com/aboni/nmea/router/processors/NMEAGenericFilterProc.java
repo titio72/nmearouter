@@ -30,6 +30,6 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
 
     @Override
     public void onTimer() {
-
+        /* nothing to do here */
     }
 }

@@ -2,14 +2,14 @@ package com.aboni.sensors.hw;
 
 public class RPIHelper {
 
-    private static final boolean arm;
+    private static final boolean ARM;
 
     public static boolean isRaspberry() {
-        return arm;
+        return ARM;
     }
 
     static {
-        arm = (System.getProperty("os.arch").startsWith("arm"));
+        ARM = (System.getProperty("os.arch").startsWith("arm"));
     }
 
     private RPIHelper() {
