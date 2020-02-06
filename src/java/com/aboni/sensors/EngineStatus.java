@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.sensors;
 
 public enum EngineStatus {
     UNKNOWN(2),
