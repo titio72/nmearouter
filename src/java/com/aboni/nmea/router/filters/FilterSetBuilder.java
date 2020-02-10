@@ -63,8 +63,7 @@ public class FilterSetBuilder {
 		if (jsonFilter!=null && !jsonFilter.isEmpty()) {
 			JSONObject jFs = new JSONObject(jsonFilter);
 			if (jFs.has(FILTERS)) {
-				NMEAFilterSet res = new NMEAFilterSet();
-				res.setType( ("whitelist".equals(jFs.getString("type"))) ?TYPE.WHITELIST:TYPE.BLACKLIST);
+				NMEAFilterSet res = new NMEAFilterSet(("whitelist".equals(jFs.getString("type"))) ? TYPE.WHITELIST : TYPE.BLACKLIST);
 				JSONArray jFa = jFs.getJSONArray(FILTERS);
 				for (Object _fJ : jFa) {
 					NMEASentenceFilter f = getNMEASentenceFilter((JSONObject) _fJ);

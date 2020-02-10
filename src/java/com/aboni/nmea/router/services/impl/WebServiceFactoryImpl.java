@@ -18,6 +18,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
     public WebService getService(String target) {
         WebService s = null;
         switch (target) {
+            case "/trackanalytics":
+                s = new TrackAnalyticsService();
+                break;
             case "/track":
                 s = new TrackService();
                 break;

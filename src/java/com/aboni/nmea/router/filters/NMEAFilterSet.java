@@ -23,14 +23,6 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 		blackList = type==TYPE.BLACKLIST;
 	}
 	
-	public NMEAFilterSet() {
-		this(TYPE.BLACKLIST);
-	}
-
-	public void setType(TYPE t) {
-		blackList = (t==TYPE.BLACKLIST);
-	}
-
 	public TYPE getType() {
 		return (blackList?TYPE.BLACKLIST:TYPE.WHITELIST);
 	}
@@ -42,25 +34,27 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 		}
 	}
 
-	public void dropFilter(NMEASentenceFilter f) {
-		if (filtersSet.contains(f)) {
-			filters.remove(f);
-			filtersSet.remove(f);
-		}
-	}
-	
-	public Iterator<NMEASentenceFilter> getFilters() {
-		return filters.iterator();
-	}
-	
-	public boolean match(Sentence sentence, String src) {
-		if (filters.isEmpty()) {
-			return blackList;
-		} else {
-			for (Iterator<NMEASentenceFilter> i = getFilters(); i.hasNext(); ) {
-				if (i.next().match(sentence, src)) return !blackList;
-			}
-			return blackList;
-		}
-	}
+    public void dropFilter(NMEASentenceFilter f) {
+        if (filtersSet.contains(f)) {
+            filters.remove(f);
+            filtersSet.remove(f);
+        }
+    }
+
+    public Iterator<NMEASentenceFilter> getFilters() {
+        return filters.iterator();
+    }
+
+    public int count() {
+        return filters.size();
+    }
+
+    public boolean match(Sentence sentence, String src) {
+        if (!filters.isEmpty()) {
+            for (Iterator<NMEASentenceFilter> i = getFilters(); i.hasNext(); ) {
+                if (i.next().match(sentence, src)) return !blackList;
+            }
+        }
+        return blackList;
+    }
 }

@@ -94,10 +94,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
     	if (agentFilterable!=null && filterConf!=null) {
     		if (agentFilterable.getFilter()==null) {
-    			NMEAFilterSet ff = new NMEAFilterSet();
-    			ff.setType(filterConf.isWhitelist()?TYPE.WHITELIST:TYPE.BLACKLIST);
-    			agentFilterable.setFilter(ff);
-    		}
+                NMEAFilterSet ff = new NMEAFilterSet(filterConf.isWhitelist() ? TYPE.WHITELIST : TYPE.BLACKLIST);
+                agentFilterable.setFilter(ff);
+            }
     		setFilter(filterConf, agentFilterable.getFilter());
     	}
 	}

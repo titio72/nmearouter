@@ -48,7 +48,7 @@ public class JSONWebService implements WebService {
         response.setContentType(APPLICATION_JSON);
         try {
             if (res!=null) {
-                response.getWriter().append(res.toString());
+                response.getWriter().append(res.toString(1));
                 response.ok();
             } else {
                 response.error("Invalid response detected: something went wrong");
