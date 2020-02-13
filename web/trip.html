@@ -19,6 +19,8 @@
         console.log('GMAP Labels API Lodaded');
       });
     });
+
+
   </script>
 
   <style>
@@ -61,6 +63,9 @@
       left: 20px;
 
     }
+
+
+
   </style>
 
 </head>
@@ -76,8 +81,19 @@
   }
   var tripId = getUrlVars()["trip"];
   var tripObject = httpGetTripAnalytics(tripId);
+  var current = tripObject;
+  var distPieChart;
+  tripObject["startT"] = Date.parse(tripObject.start);
+  tripObject["endT"] = Date.parse(tripObject.end);
+  tripObject.legs.forEach(element => {
+    element["startT"] = Date.parse(element.start);
+    element["endT"] = Date.parse(element.end);
+  });
+  
+
   app.controller("infoController", function ($scope) {
     $scope.trip = tripObject;
+    $scope.current = tripObject;
     loadMe();
   });
 
@@ -105,27 +121,26 @@
       ]
     }
     var ctx = document.getElementById("durationChart");
-      var myDoughnutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: data,
-        options: {
-          title: {
-            display: true,
-            text: 'Time breakdown (H)'
-          },
-          legend: {
-            position: "right"
-          }
-
+    var myDoughnutChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: data,
+      options: {
+        title: {
+          display: true,
+          text: 'Trip Time breakdown (H)'
+        },
+        legend: {
+          position: "right"
         }
+
       }
-    );
+    });
   }
 
   function loadDistChart() {
     var data = {
       datasets: [{
-          data: [Math.round(tripObject.navEngineOffDist * 100)/100, Math.round(tripObject.navEngineOn_Dist * 100)/100],
+          data: [Math.round(current.navEngineOffDist * 100)/100, Math.round(current.navEngineOn_Dist * 100)/100],
           backgroundColor: ["blue", "red"],
          
       }],
@@ -135,66 +150,135 @@
       ]
     }
     var ctx = document.getElementById("distanceChart");
-      var myDoughnutChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: data,
-        options: {
-          title: {
-            display: true,
-            text: 'Distance breakdown (NM)'
-          },
-          legend: {
-            display: false
-          }
+    distPieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: data,
+      options: {
+        title: {
+          display: true,
+          text: 'Leg distance breakdown (NM)'
+        },
+        legend: {
+          display: false
         }
       }
-    );
+    });
   }
 
+  function switchRowStyle(leg){
+
+    for (i = 0; i<=tripObject.legs.length; i++) {
+      sL = "L" + i;
+      var panel = document.getElementById(sL);
+      if (leg.id == sL) { // Check the current class name
+          panel.className = "row alert alert-secondary";   // Set other class name
+          if (i==0) current = tripObject;
+          else current = tripObject.legs[i-1];
+          var controllerElement = document.getElementById('nmearouter');
+          var controllerScope = angular.element(controllerElement).scope();
+          controllerScope.$evalAsync();
+          distPieChart.data.datasets[0].data[0] = Math.round(current.navEngineOffDist * 100)/100;
+          distPieChart.data.datasets[0].data[1] = Math.round(current.navEngineOn_Dist * 100)/100;
+          distPieChart.update();
+      } else {
+          panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
+      }
+    }
+  }
+  
+  function highlight(leg, yesno){
+
+    var panel = document.getElementById(leg);
+    if (yesno) { // Check the current class name
+        panel.className = "row alert alert-secondary";   // Set other class name
+    } else {
+        panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
+    }
+  }
 </script>
 
 <body ng-app="nmearouter">
 
-  <div id="nmearouter" class="container-fluid" ng-controller="infoController">
+<div id="nmearouter" class="container-fluid" ng-controller="infoController">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-      <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
-      <li class="breadcrumb-item active">Trip</li>
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
+        <li class="breadcrumb-item active">Trip</li>
     </ol>
+    <div class="row alert alert-success">
+        <div class="col">Leg</div>
+        <div class="col">Start</div>
+        <div class="col">End</div>
+        <div class="col">Tot. Time</div>
+        <div class="col">Distance</div>
+        <div class="col">Sail Time</div>
+        <div class="col">Sail Dist.</div>
+    </div>
+    <div class="row alert alert-secondary" onclick="switchRowStyle(this)" id="L0">
+        <div class="col">Trip</div>
+        <div class="col">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}</div>
+        <div class="col">{{trip.endT | date:'dd/MM/yyyy HH:mm'}}</div>
+        <div class="col">{{trip.navTime}}</div>
+        <div class="col">{{trip.navDist | number:2}}NM {{trip.speedAverage | number:2}}KN</div>
+        <div class="col">{{trip.navEngineOffTime}}</div>
+        <div class="col">{{trip.navEngineOffDist | number:2}}NM {{trip.speedSailAverage | number:2}}KN</div>
+    </div>
+    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" onclick="switchRowStyle(this)" id="L{{leg.leg}}">
+        <div class="col">Leg {{leg.leg}}</div>
+        <div class="col">{{leg.startT | date:'dd/MM/yyyy HH:mm'}}</div>
+        <div class="col">{{leg.endT | date:'dd/MM/yyyy HH:mm'}}</div>
+        <div class="col">{{leg.navTime}}</div>
+        <div class="col">{{leg.navDist | number:2}}NM {{leg.speedAverage | number:2}}KN</div>
+        <div class="col">{{leg.navEngineOffTime}}</div>
+        <div class="col">{{leg.navEngineOffDist | number:2}}NM {{leg.speedSailAverage | number:2}}KN</div>
+    </div>
     <div class="row">
-      <div class="col-6">
-        <table>
-          <tr>
-            <td width="40%">Start</td>
-            <td width="60%" colspan="2" style="text-align: right;">{{trip.start}}</td>
-          </tr>
-          <tr>
-            <td>End</td>
-            <td colspan="2" style="text-align: right;">{{trip.end}}</td>
+        <div class="col-6">
+            <table>
+                <tr>
+                    <td width="40%">Start</td>
+                    <td width="60%" colspan="2" style="text-align: right;">{{current.start | date:'dd/MM/yyyy HH:mm'}}
+                    </td>
+                </tr>
+                <tr>
+                    <td>End</td>
+                    <td colspan="2" style="text-align: right;">{{current.end | date:'dd/MM/yyyy HH:mm'}}</td>
           </tr>
           <tr>
             <td>Total Time</td>
-            <td style="text-align: right;">{{trip.totalTime}}</td>
+              <td style="text-align: right;">{{current.totalTime}}</td>
             <td style="text-align: right;">&nbsp;</td>
           </tr>
           <tr>
             <td>Anchor Time</td>
-            <td style="text-align: right;">{{trip.anchorTime}}</td>
+              <td style="text-align: right;">{{current.anchorTime}}</td>
             <td style="text-align: right;">&nbsp;</td>
           </tr>
-          <tr>
-            <td>Navigation Time</td>
-            <td style="text-align: right;">{{trip.navTime}}</td>
-            <td style="text-align: right;">{{trip.navDist | number:2}}NM</td>
-          </tr>
+                <tr>
+                    <td>Navigation Time</td>
+                    <td style="text-align: right;">{{current.navTime}}</td>
+                    <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
+                </tr>
         </table>
       </div>
       <div class="col-6">
-        <table>
-          <tr><td>Sail Time</td><td style="text-align: right;">{{trip.navEngineOffTime}}</td><td style="text-align: right;">{{trip.navEngineOffDist | number:2}}NM</td></tr>
-          <tr><td>Engine Time</td><td style="text-align: right;">{{trip.navEngineOn_Time}}</td><td style="text-align: right;">{{trip.navEngineOn_Dist | number:2}}NM</td></tr>
-          <tr><td>Average Speed</td><td style="text-align: right;">{{trip.speedAverage | number:2}}KN</td><td style="text-align: right;">&nbsp;</td></tr>
-        </table>
+          <table>
+              <tr>
+                  <td>Sail Time</td>
+                  <td style="text-align: right;">{{current.navEngineOffTime}}</td>
+                  <td style="text-align: right;">{{current.navEngineOffDist | number:2}}NM</td>
+              </tr>
+              <tr>
+                  <td>Engine Time</td>
+                  <td style="text-align: right;">{{current.navEngineOn_Time}}</td>
+                  <td style="text-align: right;">{{current.navEngineOn_Dist | number:2}}NM</td>
+              </tr>
+              <tr>
+                  <td>Average Speed</td>
+                  <td style="text-align: right;">{{current.speedAverage | number:2}}KN</td>
+                  <td style="text-align: right;">&nbsp;</td>
+              </tr>
+          </table>
       </div>
     </div>
     <div class="row">
@@ -204,28 +288,6 @@
       <div class="col-6" style="padding: 2%;">
         <canvas class="chart-canvas" id="durationChart"></canvas>
       </div>
-    </div>
-    <div class="row alert alert-success">
-      <div class="col">Leg</div>
-      <div class="col">Distance</div>
-      <div class="col">Tot. Time</div>
-      <div class="col">Average Speed</div>
-      <div class="col">Sail Dist.</div>
-      <div class="col">Sail Time</div>
-      <div class="col">Avg Sail Speed</div>
-      <div class="col">Engine Dist.</div>
-      <div class="col">Engine Time</div>
-    </div>  
-    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" >
-      <div class="col">Leg {{leg.leg}}</div>
-      <div class="col">{{leg.navDist | number:2}}NM</div>
-      <div class="col">{{leg.navTime}}</div>
-      <div class="col">{{leg.speedAverage | number:2}}KN</div>
-      <div class="col">{{leg.navEngineOffDist | number:2}}NM</div>
-      <div class="col">{{leg.navEngineOffTime}}</div>
-      <div class="col">{{leg.speedSailAverage | number:2}}KN</div>
-      <div class="col">{{leg.navEngineOffDist | number:2}}NM</div>
-      <div class="col">{{leg.navEngineOn_Time}}</div>
     </div>
           <!--
           {
