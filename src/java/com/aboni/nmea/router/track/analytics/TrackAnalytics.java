@@ -1,21 +1,46 @@
-package com.aboni.utils.db;
+package com.aboni.nmea.router.track.analytics;
 
+import com.aboni.nmea.router.track.TrackSample;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
 
 public class TrackAnalytics {
+
+    static class SpeedDistribution {
+        double[] buckets = new double[] { 0.5, 1.0, 1.5, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5,
+                6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5,
+                11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5};
+
+        double[] distances = new double[buckets.length];
+        long[] times = new long[buckets.length];
+
+        void addSample(long period, double dist, double speed) {
+            int i = Math.min(29, (int)(Math.abs(speed) / 0.5));
+            distances[i] += dist;
+            times[i] += period;
+        }
+
+        JSONArray toJSON() {
+            JSONArray res  = new JSONArray();
+            for (int i = 0; i<buckets.length; i++) {
+                double bucket = buckets[i];
+                double distance = distances[i];
+                long time = times[i];
+                JSONObject sample = new JSONObject();
+                sample.put("speed", bucket);
+                sample.put("distance", distance);
+                sample.put("time", time);
+                res.put(sample);
+            }
+            return res;
+        }
+    }
 
     static class MovingAverageMax {
 
@@ -76,9 +101,13 @@ public class TrackAnalytics {
         }
     }
 
-    private static final String SQL = "select TS, dist, speed, maxSpeed, engine, anchor, dTime from track where TS>=? and TS<?";
+    public static class StatsLeg {
+        private static final DateFormat DF;
+        static {
+            DF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            DF.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
 
-    public class StatsLeg {
         long samples;
         long start;
         long end;
@@ -96,6 +125,8 @@ public class TrackAnalytics {
                 new MovingAverageMax(1.0, "1NM"),
                 new MovingAverageMax(5.0, "5NM"),
                 new MovingAverageMax(10.0, "10NM")};
+        SpeedDistribution speedDistribution = new SpeedDistribution();
+        SpeedDistribution speedDistributionSail = new SpeedDistribution();
 
         public JSONObject toJson() {
             JSONObject j = new JSONObject();
@@ -104,12 +135,14 @@ public class TrackAnalytics {
             j.put("end", formatDate(end));
             j.put("navTime", formatDuration(totalNavigationTime));
             j.put("navDist", totalNavigationDistance);
+            j.put("speedAverage", totalNavigationDistance / (totalNavigationTime/1000/60/60));
             j.put("navEngineOffTime", formatDuration(sailEngineTime[EngineStatus.OFF.getValue()]));
             j.put("navEngineOn_Time", formatDuration(sailEngineTime[EngineStatus.ON.getValue()]));
             j.put("navEngineUnkTime", formatDuration(sailEngineTime[EngineStatus.UNKNOWN.getValue()]));
             j.put("navEngineOffDist", sailEngineDistance[EngineStatus.OFF.getValue()]);
             j.put("navEngineOn_Dist", sailEngineDistance[EngineStatus.ON.getValue()]);
             j.put("navEngineUnkDist", sailEngineDistance[EngineStatus.UNKNOWN.getValue()]);
+            j.put("speedSailAverage", sailEngineDistance[EngineStatus.OFF.getValue()] / (sailEngineTime[EngineStatus.OFF.getValue()]/1000/60/60));
             j.put("maxSpeed", maxSpeed);
             j.put("maxSpeedTime", formatDate(maxSpeedTime));
             j.put("maxAvgSpeed", max30sAverageSpeed);
@@ -125,12 +158,22 @@ public class TrackAnalytics {
             j.put("max10NMSpeed", movingAvgMaxes[2].getMaxSpeed());
             j.put("max10NMSpeedTime0", formatDate(movingAvgMaxes[2].getMaxSpeedT0()));
             j.put("max10NMSpeedTime1", formatDate(movingAvgMaxes[2].getMaxSpeedT1()));
+            j.put("speedDistribution", speedDistribution.toJSON());
+            j.put("speedDistributionSail", speedDistributionSail.toJSON());
             return j;
         }
 
         void addTime(long l) {
             if (start == 0) start = l;
             end = l;
+        }
+
+        protected static String formatDuration(long l) {
+            long s = l / 1000;
+            return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
+        }
+        protected static String formatDate(long l) {
+            return DF.format(new Date(l));
         }
     }
 
@@ -141,6 +184,7 @@ public class TrackAnalytics {
         long totalAnchorTime = 0;
         long totalTime = 0;
 
+        @Override
         public JSONObject toJson() {
             JSONObject j = super.toJson();
             j.put("totalTime", formatDuration(totalTime));
@@ -168,130 +212,98 @@ public class TrackAnalytics {
         }
     }
 
-    private class MySample {
-        long ts;
-        double distance;
-        double speed;
-        double maxSpeed;
-        EngineStatus eng;
-        boolean anchor;
-        int period;
+    private final Stats stats;
+    private TrackSample prevSample;
 
-        MySample(ResultSet rs) throws SQLException {
-            ts = rs.getTimestamp(1).getTime();
-            distance = rs.getDouble(2);
-            speed = rs.getDouble(3);
-            maxSpeed = rs.getDouble(4);
-            eng = EngineStatus.valueOf(rs.getInt(5));
-            anchor = 1 == rs.getInt(6);
-            period = rs.getInt(7);
+    public TrackAnalytics() {
+        stats = new Stats();
+    }
+
+    public Stats getStats() {
+        return stats;
+    }
+
+    public void processSample(TrackSample sample) {
+        if (stats.currentLeg == null && !sample.isAnchor()) {
+            // started moving
+            stats.createLeg();
+        } else if (stats.currentLeg != null && sample.isAnchor()) {
+            // just stopped
+            stats.resetLeg();
+        }
+        stats.samples++;
+        stats.addTime(sample.getTs());
+        calcMovingAverageSpeed(stats, sample);
+        calcSailAndEngine(stats, sample, prevSample);
+        calcTotAndAnchorTime(stats, sample, prevSample);
+        calcNavTime(stats, sample, prevSample);
+        calcMaxSpeed(stats, sample);
+        calcSpeedDistribution(stats, sample, prevSample);
+        if (stats.currentLeg != null) {
+            stats.currentLeg.samples++;
+            stats.currentLeg.addTime(sample.getTs());
+            calcMovingAverageSpeed(stats.currentLeg, sample);
+            calcSailAndEngine(stats.currentLeg, sample, prevSample);
+            calcNavTime(stats.currentLeg, sample, prevSample);
+            calcMaxSpeed(stats.currentLeg, sample);
+            calcSpeedDistribution(stats.currentLeg, sample, prevSample);
+        }
+        prevSample = sample;
+    }
+
+    private static void calcSpeedDistribution(StatsLeg stats, TrackSample sample, TrackSample prev) {
+        long period = (prev==null)?(sample.getPeriod()*1000):(sample.getTs() - prev.getTs());
+        if (!sample.isAnchor()) {
+            stats.speedDistribution.addSample(period, sample.getDistance(), sample.getSpeed());
+            if (sample.getEng()==EngineStatus.OFF) {
+                stats.speedDistributionSail.addSample(period, sample.getDistance(), sample.getSpeed());
+            }
         }
     }
 
-    private static String formatDuration(long l) {
-        long s = l / 1000;
-        return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
-    }
-
-    private static final DateFormat DF;
-
-    static {
-        DF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        DF.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    private static String formatDate(long l) {
-        return DF.format(new Date(l));
-    }
-
-    public Stats run(Instant from, Instant to) throws DBException {
-        try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(SQL)) {
-                st.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-                st.setTimestamp(2, new Timestamp(to.toEpochMilli()));
-                Stats stats = new Stats();
-                MySample prevSample = null;
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        MySample sample = new MySample(rs);
-
-                        if (stats.currentLeg == null && !sample.anchor) {
-                            // started moving
-                            stats.createLeg();
-                        } else if (stats.currentLeg != null && sample.anchor) {
-                            // just stopped
-                            stats.resetLeg();
-                        }
-
-                        stats.samples++;
-                        stats.addTime(sample.ts);
-                        calcMovingAverageSpeed(stats, sample);
-                        calcSailAndEngine(stats, sample, prevSample);
-                        calcTotAndAnchorTime(stats, sample, prevSample);
-                        calcNavTime(stats, sample, prevSample);
-                        calcMaxSpeed(stats, sample);
-                        if (stats.currentLeg != null) {
-                            stats.currentLeg.samples++;
-                            stats.currentLeg.addTime(sample.ts);
-                            calcMovingAverageSpeed(stats.currentLeg, sample);
-                            calcSailAndEngine(stats.currentLeg, sample, prevSample);
-                            calcNavTime(stats.currentLeg, sample, prevSample);
-                            calcMaxSpeed(stats.currentLeg, sample);
-                        }
-                        prevSample = sample;
-                    }
-                    return stats;
-                }
+    private static void calcMaxSpeed(StatsLeg stats, TrackSample sample) {
+        if (!sample.isAnchor()) {
+            if (sample.getMaxSpeed() > stats.maxSpeed) {
+                stats.maxSpeed = sample.getMaxSpeed();
+                stats.maxSpeedTime = sample.getTs();
             }
-        } catch (ClassNotFoundException | SQLException e) {
-            ServerLog.getLogger().error("Error calculating track analytics", e);
-            throw new DBException("Error calculating track analytics", e);
-        }
-    }
-
-    private void calcMaxSpeed(StatsLeg stats, MySample sample) {
-        if (!sample.anchor) {
-            if (sample.maxSpeed > stats.maxSpeed) {
-                stats.maxSpeed = sample.maxSpeed;
-                stats.maxSpeedTime = sample.ts;
+            if (sample.getSpeed() > stats.maxSampleAverageSpeed) {
+                stats.maxSampleAverageSpeed = sample.getSpeed();
+                stats.maxSampleAverageSpeedTime = sample.getTs();
             }
-            if (sample.speed > stats.maxSampleAverageSpeed) {
-                stats.maxSampleAverageSpeed = sample.speed;
-                stats.maxSampleAverageSpeedTime = sample.ts;
-            }
-            double avgSpeed = sample.distance / (sample.period / 60.0 / 60.0);
+            double avgSpeed = sample.getDistance() / (sample.getPeriod() / 60.0 / 60.0);
             if (avgSpeed > stats.max30sAverageSpeed) {
                 stats.max30sAverageSpeed = avgSpeed;
-                stats.max30sAverageSpeedTime = sample.ts;
+                stats.max30sAverageSpeedTime = sample.getTs();
             }
 
         }
     }
 
-    private void calcTotAndAnchorTime(Stats stats, MySample sample, MySample prev) {
-        long deltaTime = (prev == null) ? 0 : (sample.ts - prev.ts);
+    private static void calcTotAndAnchorTime(Stats stats, TrackSample sample, TrackSample prev) {
+        long deltaTime = (prev == null) ? 0 : (sample.getTs() - prev.getTs());
         stats.totalTime += deltaTime;
-        if (sample.anchor)
+        if (sample.isAnchor())
             stats.totalAnchorTime += deltaTime;
     }
 
-    private void calcNavTime(StatsLeg stats, MySample sample, MySample prev) {
-        long deltaTime = (prev == null) ? 0 : (sample.ts - prev.ts);
-        if (!sample.anchor) {
+    private static void calcNavTime(StatsLeg stats, TrackSample sample, TrackSample prev) {
+        long deltaTime = (prev == null) ? 0 : (sample.getTs() - prev.getTs());
+        if (!sample.isAnchor()) {
             stats.totalNavigationTime += deltaTime;
-            stats.totalNavigationDistance += sample.distance;
+            stats.totalNavigationDistance += sample.getDistance();
         }
     }
 
-    private void calcSailAndEngine(StatsLeg stats, MySample sample, MySample prev) {
-        if (!sample.anchor) {
-            stats.sailEngineDistance[sample.eng.getValue()] += sample.distance;
-            stats.sailEngineTime[sample.eng.getValue()] += (prev == null) ? 0 : (sample.ts - prev.ts);
+    private static void calcSailAndEngine(StatsLeg stats, TrackSample sample, TrackSample prev) {
+        if (!sample.isAnchor()) {
+            stats.sailEngineDistance[sample.getEng().getValue()] += sample.getDistance();
+            stats.sailEngineTime[sample.getEng().getValue()] += (prev == null) ? 0 : (sample.getTs() - prev.getTs());
         }
     }
 
-    private void calcMovingAverageSpeed(StatsLeg stats, MySample sample) {
-        Pair<Long, Double> p = new Pair<>(sample.ts, sample.distance);
+    private static void calcMovingAverageSpeed(StatsLeg stats, TrackSample sample) {
+        Pair<Long, Double> p = new Pair<>(sample.getTs(), sample.getDistance());
         for (MovingAverageMax m : stats.movingAvgMaxes) m.addSample(p);
     }
 }

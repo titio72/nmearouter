@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="ISO-8859-1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Andrea Boni NMEARouter</title>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+  <script src="js/nmearouter.js?b14"></script>
+  <link href="css/nmearouter.css" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="nmeasail.png">
+  <script>
+    $.getScript("https://maps.googleapis.com/maps/api/js?key=" + getGKey(), function(data, textStatus, jqxhr) {
+      console.log(data); //data returned
+      console.log(textStatus); //success
+      console.log(jqxhr.status); //200
+      console.log('GMAP API Lodaded');
+      $.getScript("js/maplabel.js", function(d, t, j) {
+        console.log('GMAP Labels API Lodaded');
+      });
+    });
+  </script>
+
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+
+    .documentList {
+      overflow-y: scroll;
+      height: 200px;
+      width: 100%;
+      padding: 5px 5px;
+    }
+
+    .card-router-body {
+      height: 320px;
+      padding: 10px;
+    }
+
+    .card-router {
+      margin-bottom: 10px;
+    }
+
+    .info_cell {
+      padding-bottom: 12px;
+      padding-top: 6px;
+      padding-right: 12px;
+    }
+
+    .chart-canvas {
+      min-height: 100%;
+      min-width: 100%;
+    }
+
+    #mapToolbar {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+
+    }
+  </style>
+
+</head>
+
+<script type="text/javascript">
+
+  function getUrlVars() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  }
+  var tripId = getUrlVars()["trip"];
+  var tripObject = httpGetTripAnalytics(tripId);
+  app.controller("infoController", function ($scope) {
+    $scope.trip = tripObject;
+    loadMe();
+  });
+
+  function getTime(s) {
+    var t = s.split(":");
+    return Math.round((t[0] * 60 * 60 + t[1] * 60 + t[2])/3600)/100;
+  }
+
+  function loadMe() {
+    loadTimeChart();
+    loadDistChart();
+  }
+
+  function loadTimeChart() {
+    var data = {
+      datasets: [{
+          data: [getTime(tripObject.navEngineOffTime), getTime(tripObject.navEngineOn_Time), getTime(tripObject.anchorTime)],
+          backgroundColor: ["blue", "red", "gray"],
+         
+      }],
+      labels: [
+          'Sail',
+          'Engine',
+          'Anchor'
+      ]
+    }
+    var ctx = document.getElementById("durationChart");
+      var myDoughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+          title: {
+            display: true,
+            text: 'Time breakdown (H)'
+          },
+          legend: {
+            position: "right"
+          }
+
+        }
+      }
+    );
+  }
+
+  function loadDistChart() {
+    var data = {
+      datasets: [{
+          data: [Math.round(tripObject.navEngineOffDist * 100)/100, Math.round(tripObject.navEngineOn_Dist * 100)/100],
+          backgroundColor: ["blue", "red"],
+         
+      }],
+      labels: [
+          'Sail',
+          'Engine'
+      ]
+    }
+    var ctx = document.getElementById("distanceChart");
+      var myDoughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+          title: {
+            display: true,
+            text: 'Distance breakdown (NM)'
+          },
+          legend: {
+            display: false
+          }
+        }
+      }
+    );
+  }
+
+</script>
+
+<body ng-app="nmearouter">
+
+  <div id="nmearouter" class="container-fluid" ng-controller="infoController">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+      <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
+      <li class="breadcrumb-item active">Trip</li>
+    </ol>
+    <div class="row">
+      <div class="col-6">
+        <table>
+          <tr>
+            <td width="40%">Start</td>
+            <td width="60%" colspan="2" style="text-align: right;">{{trip.start}}</td>
+          </tr>
+          <tr>
+            <td>End</td>
+            <td colspan="2" style="text-align: right;">{{trip.end}}</td>
+          </tr>
+          <tr>
+            <td>Total Time</td>
+            <td style="text-align: right;">{{trip.totalTime}}</td>
+            <td style="text-align: right;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Anchor Time</td>
+            <td style="text-align: right;">{{trip.anchorTime}}</td>
+            <td style="text-align: right;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Navigation Time</td>
+            <td style="text-align: right;">{{trip.navTime}}</td>
+            <td style="text-align: right;">{{trip.navDist | number:2}}NM</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-6">
+        <table>
+          <tr><td>Sail Time</td><td style="text-align: right;">{{trip.navEngineOffTime}}</td><td style="text-align: right;">{{trip.navEngineOffDist | number:2}}NM</td></tr>
+          <tr><td>Engine Time</td><td style="text-align: right;">{{trip.navEngineOn_Time}}</td><td style="text-align: right;">{{trip.navEngineOn_Dist | number:2}}NM</td></tr>
+          <tr><td>Average Speed</td><td style="text-align: right;">{{trip.speedAverage | number:2}}KN</td><td style="text-align: right;">&nbsp;</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-6" style="padding: 2%;">
+        <canvas class="chart-canvas" id="distanceChart"></canvas>
+      </div>
+      <div class="col-6" style="padding: 2%;">
+        <canvas class="chart-canvas" id="durationChart"></canvas>
+      </div>
+    </div>
+    <div class="row alert alert-success">
+      <div class="col">Leg</div>
+      <div class="col">Distance</div>
+      <div class="col">Tot. Time</div>
+      <div class="col">Average Speed</div>
+      <div class="col">Sail Dist.</div>
+      <div class="col">Sail Time</div>
+      <div class="col">Avg Sail Speed</div>
+      <div class="col">Engine Dist.</div>
+      <div class="col">Engine Time</div>
+    </div>  
+    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" >
+      <div class="col">Leg {{leg.leg}}</div>
+      <div class="col">{{leg.navDist | number:2}}NM</div>
+      <div class="col">{{leg.navTime}}</div>
+      <div class="col">{{leg.speedAverage | number:2}}KN</div>
+      <div class="col">{{leg.navEngineOffDist | number:2}}NM</div>
+      <div class="col">{{leg.navEngineOffTime}}</div>
+      <div class="col">{{leg.speedSailAverage | number:2}}KN</div>
+      <div class="col">{{leg.navEngineOffDist | number:2}}NM</div>
+      <div class="col">{{leg.navEngineOn_Time}}</div>
+    </div>
+          <!--
+          {
+            "max05NMSpeed": 8.241454566666663,
+            "maxAvgSpeed": 8.5121976,
+            -"navTime": "16:01:39",
+            "navEngineUnkDist": 0,
+            -"navEngineOn_Dist": 2.4372826500000007,
+            "anchorTime": "17:30:00",
+            "maxSampledSpeedTime": "2020-02-09T08:35:07Z",
+            -"end": "2020-02-09T15:21:37Z",
+            -"navEngineOffDist": 84.58018385000005,
+            "max10NMSpeedTime1": "2020-02-09T09:07:07Z",
+            "max10NMSpeedTime0": "2020-02-09T07:53:07Z",
+            "navEngineUnkTime": "0:00:00",
+            "maxSampledSpeed": 8.51,
+            -"navEngineOffTime": "14:31:30",
+            -"totalTime": "33:31:39",
+            -"start": "2020-02-08T05:49:58Z",
+            "max01NMSpeedTime0": "2020-02-09T08:28:37Z",
+            "max01NMSpeedTime1": "2020-02-09T08:35:07Z",
+            "maxSpeed": 10.42,
+            "samples": 1916,
+            "max05NMSpeedTime0": "2020-02-09T08:13:37Z",
+            "max05NMSpeedTime1": "2020-02-09T08:49:37Z",
+            "maxSpeedTime": "2020-02-09T08:43:07Z",
+            "max01NMSpeed": 8.940611907692304,
+            "maxAvgSpeedTime": "2020-02-09T08:35:07Z",
+            -"navDist": 87.01746650000001,
+            -"navEngineOn_Time": "1:30:09",
+            "max10NMSpeed": 8.08690639459459,
+            "legs": [
+             {
+              "max05NMSpeed": 7.40482687407407,
+              "maxAvgSpeed": 7.9457352000000006,
+              "navTime": "9:00:55",
+              "navEngineUnkDist": 0,
+              "navEngineOn_Dist": 1.26167104,
+              "leg": 1,
+              "maxSampledSpeedTime": "2020-02-08T06:19:23Z",
+              "end": "2020-02-08T14:50:53Z",
+              "navEngineOffDist": 42.52922850000003,
+              "max10NMSpeedTime1": "2020-02-08T07:45:53Z",
+              "max10NMSpeedTime0": "2020-02-08T06:17:53Z",
+              "navEngineUnkTime": "0:00:00",
+              "maxSampledSpeed": 7.95,
+              "navEngineOffTime": "8:10:30",
+              "start": "2020-02-08T06:07:23Z",
+              "max01NMSpeedTime0": "2020-02-08T06:41:53Z",
+              "max01NMSpeedTime1": "2020-02-08T06:48:53Z",
+              "maxSpeed": 8.36,
+              "samples": 1048,
+              "max05NMSpeedTime0": "2020-02-08T06:24:53Z",
+              "max05NMSpeedTime1": "2020-02-08T07:05:23Z",
+              "maxSpeedTime": "2020-02-08T06:19:23Z",
+              "max01NMSpeed": 8.067878400000001,
+              "maxAvgSpeedTime": "2020-02-08T06:19:23Z",
+              "navDist": 43.79089954000004,
+              "navEngineOn_Time": "0:50:25",
+              "max10NMSpeed": 6.801464843181818
+             },
+             {
+              "max05NMSpeed": 8.241454566666668,
+              "maxAvgSpeed": 8.5121976,
+              "navTime": "7:00:44",
+              "navEngineUnkDist": 0,
+              "navEngineOn_Dist": 1.1756116099999998,
+              "leg": 2,
+              "maxSampledSpeedTime": "2020-02-09T08:35:07Z",
+              "end": "2020-02-09T13:51:37Z",
+              "navEngineOffDist": 42.05095534999999,
+              "max10NMSpeedTime1": "2020-02-09T09:07:07Z",
+              "max10NMSpeedTime0": "2020-02-09T07:53:07Z",
+              "navEngineUnkTime": "0:00:00",
+              "maxSampledSpeed": 8.51,
+              "navEngineOffTime": "6:21:00",
+              "start": "2020-02-09T06:56:07Z",
+              "max01NMSpeedTime0": "2020-02-09T08:28:37Z",
+              "max01NMSpeedTime1": "2020-02-09T08:35:07Z",
+              "maxSpeed": 10.42,
+              "samples": 832,
+              "max05NMSpeedTime0": "2020-02-09T08:13:37Z",
+              "max05NMSpeedTime1": "2020-02-09T08:49:37Z",
+              "maxSpeedTime": "2020-02-09T08:43:07Z",
+              "max01NMSpeed": 8.9406119076923,
+              "maxAvgSpeedTime": "2020-02-09T08:35:07Z",
+              "navDist": 43.22656696,
+              "navEngineOn_Time": "0:39:44",
+              "max10NMSpeed": 8.08690639459459
+             }
+            ],
+
+
+           }
+          -->
+
+
+
+        
+  </div>
+</body>
+
+</html>

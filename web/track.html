@@ -318,7 +318,7 @@
     httpLoadAllMeteoDateRange(dateFrom + "0000" , dateTo + "2359", function(res) {
       //drawMeteoChart(res, "tempChart", "AT0", 1, 1, 1);
       drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
-      drawMeteoChart(res, "windAngleChart", "TWD", 1, 1, 1);
+      drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
       drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
       drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
     });    

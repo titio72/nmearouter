@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.track;
 
 import com.aboni.utils.Pair;
 

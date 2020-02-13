@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.agent.impl.track;
 
+import com.aboni.nmea.router.track.TrackPoint;
 import com.aboni.utils.db.Event;
 
 public class TrackEvent implements Event {

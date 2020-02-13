@@ -1,7 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.geo.PositionHistory.DoWithPoint;
-import com.aboni.nmea.router.agent.impl.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackPoint;
 import org.json.JSONObject;
 
 import java.io.Writer;

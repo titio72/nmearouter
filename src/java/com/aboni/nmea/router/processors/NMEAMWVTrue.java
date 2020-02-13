@@ -46,8 +46,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
             if (sentence instanceof MWVSentence) {
                 return processWind((MWVSentence) sentence, time);
             } else if (!useRMC && sentence instanceof VHWSentence) {
-                double speed = ((VHWSentence) sentence).getSpeedKnots();
-                lastSpeed = speed;
+                lastSpeed = ((VHWSentence) sentence).getSpeedKnots();
                 lastSpeedTime = time;
             } else if (useRMC && sentence instanceof RMCSentence) {
                 lastSpeed = ((RMCSentence) sentence).getSpeed();

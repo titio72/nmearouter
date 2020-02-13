@@ -388,20 +388,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
 	private void sendApparentWind(double aWSpeed, double aWDirection, boolean b) {
 		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-		if (data.isWindSpeedInMS()) {
-			v.setSpeedUnit(Units.METER);
-			v.setSpeed(aWSpeed / 1.947);
-		} else {
-			v.setSpeedUnit(Units.KNOT);
-			v.setSpeed(aWSpeed);
-		}
+		setWindSpeedValues(aWSpeed, v);
 		v.setAngle(aWDirection);
 		v.setTrue(b);
 		v.setStatus(DataStatus.ACTIVE);
 		NMEASimulatorSource.this.notify(v);
 	}
 
-	private void setWindValues(double aWSpeed, MWVSentence v) {
+	private void setWindSpeedValues(double aWSpeed, MWVSentence v) {
 		if (data.isWindSpeedInMS()) {
 			v.setSpeedUnit(Units.METER);
 			v.setSpeed(aWSpeed / 1.947);

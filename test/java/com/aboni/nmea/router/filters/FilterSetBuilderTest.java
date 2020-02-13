@@ -12,7 +12,7 @@ public class FilterSetBuilderTest {
 
 	@Test
 	public void testExportFilterDefault() {
-		NMEAFilterSet fs = new NMEAFilterSet();
+		NMEAFilterSet fs = new NMEAFilterSet(TYPE.BLACKLIST);
 		fs.addFilter(new NMEABasicSentenceFilter("MMB"));
 		fs.addFilter(new NMEABasicSentenceFilter("MTA"));
 		
@@ -25,10 +25,9 @@ public class FilterSetBuilderTest {
 
 	@Test
 	public void testExportFilterWhite() {
-		NMEAFilterSet fs = new NMEAFilterSet();
+		NMEAFilterSet fs = new NMEAFilterSet(TYPE.WHITELIST);
 		fs.addFilter(new NMEABasicSentenceFilter("MMB"));
 		fs.addFilter(new NMEABasicSentenceFilter("MTA"));
-		fs.setType(TYPE.WHITELIST);
 		String s = new FilterSetBuilder().exportFilter(fs);
 		
 		assertNotNull(s);

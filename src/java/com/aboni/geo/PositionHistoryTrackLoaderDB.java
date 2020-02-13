@@ -1,6 +1,6 @@
 package com.aboni.geo;
 
-import com.aboni.nmea.router.agent.impl.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackPoint;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;

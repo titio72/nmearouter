@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.track;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.sensors.EngineStatus;
@@ -15,7 +15,7 @@ public class DBTripManager implements TripManager {
 
     static String sTABLE = "track";
 
-    public List<TrackPoint> loadTrip(int trip) throws TripManagerException  {
+    public List<TrackPoint> loadTrip(int trip) throws TripManagerException {
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement("select * from track where tripId=?")) {
                 st.setTimestamp(1, new Timestamp(trip));

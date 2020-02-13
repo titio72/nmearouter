@@ -11,7 +11,6 @@ public class TestPinDetector {
             while (true) {
                 Thread.sleep(500);
                 e.refresh();
-                ;
                 if (s != e.isEngineOn()) {
                     s = e.isEngineOn();
                     System.out.println(s);

@@ -76,6 +76,16 @@ function httpGetShutdown() {
   });
 }
 
+function httpGetTripAnalytics(trip) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trackanalytics?trip=" + trip,
+      false);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+  return JSON.parse(xmlHttp.responseText);
+}
+
+
 function httpGetAgents() {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/agentsj",
