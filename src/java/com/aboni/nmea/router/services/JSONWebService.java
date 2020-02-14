@@ -37,9 +37,9 @@ public class JSONWebService implements WebService {
         try {
             res = loader.getResult(config);
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error reading trip stats", e);
+            ServerLog.getLogger().error("Error extracting JSON {" + e.getMessage() + "}", e);
             res = new JSONObject();
-            res.put("Error", "Cannot retrieve trips status - check the logs for errors");
+            res.put("Error", "Error extracting JSON {" + e.getMessage() + "}");
         }
         return res;
     }

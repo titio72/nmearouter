@@ -6,6 +6,7 @@ import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import net.sf.marineapi.nmea.sentence.TimeSentence;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -35,14 +36,16 @@ public class SystemTimeChecker {
 
     public void checkAndSetTime(Sentence s) {
         try {
-            OffsetDateTime gpsTime = NMEATimestampExtractor.extractTimestamp(s);
-            if (gpsTime != null && !checkAndSetTimeSkew(cache.getNow(), gpsTime)) {
-                // time skew from GPS is too high - reset time stamp
-                ServerLog.getLogger().info("Changing system time to {" + gpsTime + "}");
-                if (changer != null) {
-                    changer.doChangeTime(gpsTime);
+            if (s instanceof TimeSentence) {
+                OffsetDateTime gpsTime = NMEATimestampExtractor.extractTimestamp(s);
+                if (gpsTime != null && !checkAndSetTimeSkew(cache.getNow(), gpsTime)) {
+                    // time skew from GPS is too high - reset time stamp
+                    ServerLog.getLogger().info("Changing system time to {" + gpsTime + "}");
+                    if (changer != null) {
+                        changer.doChangeTime(gpsTime);
+                    }
+                    checkAndSetTimeSkew(cache.getNow(), gpsTime);
                 }
-                checkAndSetTimeSkew(cache.getNow(), gpsTime);
             }
         } catch (GPSTimeException e) {
             ServerLog.getLogger().warning("Caught invalid GPS time: " + e.getMessage());

@@ -80,9 +80,13 @@
       return vars;
   }
   var tripId = getUrlVars()["trip"];
+  var tripName = getUrlVars()["name"];
   var tripObject = httpGetTripAnalytics(tripId);
   var current = tripObject;
   var distPieChart;
+  var speedDistrChart;
+  var speedChart;
+
   tripObject["startT"] = Date.parse(tripObject.start);
   tripObject["endT"] = Date.parse(tripObject.end);
   tripObject.legs.forEach(element => {
@@ -94,6 +98,7 @@
   app.controller("infoController", function ($scope) {
     $scope.trip = tripObject;
     $scope.current = tripObject;
+    $scope.tripName = tripName;
     loadMe();
   });
 
@@ -105,18 +110,52 @@
   function loadMe() {
     loadTimeChart();
     loadDistChart();
+    loadSpeedDistrChart();
   }
+
+  function loadSpeedDistrChart() {
+    var ctx = document.getElementById("speedDistrChart");
+    res = [];
+    resS = [];
+    for (i = 0; i<current.speedDistribution.length; i++) {
+      res.push(current.speedDistribution[i].distance);
+    }
+    for (i = 0; i<current.speedDistributionSail.length; i++) {
+      resS.push(current.speedDistributionSail[i].distance);
+    }
+    speedDistrChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
+          '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0', 
+          '12.5', '13.0', '12.5', '13.0', '13.5', '14.0', '14.5', '15.0'],
+        datasets: [{
+          data: res,
+          label: "Distance at SOG",
+          backgroundColor: "orange"
+        },
+        {
+          data: resS,
+          label: "Distance at SOG (Sail)",
+          backgroundColor: "blue"
+        }]
+      },
+      options: {}
+    });
+  }
+
 
   function loadTimeChart() {
     var data = {
       datasets: [{
-          data: [getTime(tripObject.navEngineOffTime), getTime(tripObject.navEngineOn_Time), getTime(tripObject.anchorTime)],
-          backgroundColor: ["blue", "red", "gray"],
+          data: [getTime(tripObject.navEngineOffTime), getTime(tripObject.navEngineOn_Time), getTime(tripObject.navEngineUnkTime), getTime(tripObject.anchorTime)],
+          backgroundColor: ["blue", "red", "orange", "gray"],
          
       }],
       labels: [
           'Sail',
           'Engine',
+          'Unknownn',
           'Anchor'
       ]
     }
@@ -140,8 +179,10 @@
   function loadDistChart() {
     var data = {
       datasets: [{
-          data: [Math.round(current.navEngineOffDist * 100)/100, Math.round(current.navEngineOn_Dist * 100)/100],
-          backgroundColor: ["blue", "red"],
+          data: [Math.round(current.navEngineOffDist * 100)/100, 
+            Math.round(current.navEngineOn_Dist * 100)/100,
+            Math.round(current.navEngineUnkDist * 100)/100],
+          backgroundColor: ["blue", "red", "orange"],
          
       }],
       labels: [
@@ -165,27 +206,122 @@
     });
   }
 
-  function switchRowStyle(leg){
-
+  function switchLeg(leg){
+    iLeg = 0;
     for (i = 0; i<=tripObject.legs.length; i++) {
       sL = "L" + i;
-      var panel = document.getElementById(sL);
-      if (leg.id == sL) { // Check the current class name
-          panel.className = "row alert alert-secondary";   // Set other class name
-          if (i==0) current = tripObject;
-          else current = tripObject.legs[i-1];
-          var controllerElement = document.getElementById('nmearouter');
-          var controllerScope = angular.element(controllerElement).scope();
-          controllerScope.$evalAsync();
-          distPieChart.data.datasets[0].data[0] = Math.round(current.navEngineOffDist * 100)/100;
-          distPieChart.data.datasets[0].data[1] = Math.round(current.navEngineOn_Dist * 100)/100;
-          distPieChart.update();
-      } else {
-          panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
+      panel = document.getElementById(sL);
+        if (panel!=null) {
+        panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
       }
+      if (sL==leg.id) iLeg = i;
     }
+    panel = leg;
+    panel.className = "row alert alert-secondary";   // Set other class name
+    if (iLeg==0) current = tripObject;
+    else current = tripObject.legs[iLeg-1];
+
+    distPieChart.data.datasets[0].data[0] = Math.round(current.navEngineOffDist * 100)/100;
+    distPieChart.data.datasets[0].data[1] = Math.round(current.navEngineOn_Dist * 100)/100;
+    distPieChart.data.datasets[0].data[2] = Math.round(current.navEngineUnkDist * 100)/100;
+    distPieChart.update();
+
+    res = []; resS = [];
+    for (i = 0; i<current.speedDistribution.length; i++) { res.push(current.speedDistribution[i].distance); }
+    for (i = 0; i<current.speedDistributionSail.length; i++) { resS.push(current.speedDistributionSail[i].distance); }
+    speedDistrChart.data.datasets[0].data = res;
+    speedDistrChart.data.datasets[1].data = resS;
+    speedDistrChart.update();
+
+    if (iLeg>0) {
+      httpLoadSpeedDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillSpeedChart);
+    } else {
+      resetSpeedChart();
+    }
+
+    var controllerElement = document.getElementById('nmearouter');
+    var controllerScope = angular.element(controllerElement).scope();
+    controllerScope.current = current;
+    controllerScope.$evalAsync();
   }
   
+  function dateToYMD(date) {
+    d = date.getDate();
+    m = date.getMonth() + 1; //Month from 0 to 11
+    y = date.getFullYear();
+    h = date.getHours();
+    mm = date.getMinutes();
+    return '' + y + (m<=9 ? '0' + m : m) + (d <= 9 ? '0' + d : d) + (h <= 9 ? '0' + h : h) + (mm <= 9 ? '0' + mm : mm);
+  }
+
+  function resetSpeedChart() {
+    if (speedChart!=null) {
+      speedChart.data.datasets = [{
+        data: []
+      }];
+      speedChart.update();
+    }
+  }
+
+  function onFillSpeedChart(speedSerie, leg) {
+    var ctx = document.getElementById("speedChart");
+    if (speedChart==null) {
+      var datasets = [];
+      datasets.push(getSerie(speedSerie, "SOG", "v",    "#22FF22"));
+      datasets.push(getSerie(speedSerie, "SOG", "vMin", "#777777"));
+      datasets.push(getSerie(speedSerie, "SOG", "vMax", "#FF2222"));
+      speedChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: datasets
+        },
+        options: {
+          spanGaps: false,
+          legend: { display: false },
+          scales: { xAxes: [{ type: 'time', }] }
+        }
+      });
+    } else {
+      speedChart.data.datasets = [
+        getSerie(speedSerie, "SOG", "v",    "#22FF22"),
+        getSerie(speedSerie, "SOG", "vMin", "#777777"),
+        getSerie(speedSerie, "SOG", "vMax", "#FF2222")
+      ];
+      speedChart.update();
+    }
+  }
+
+  function getSerie(data, serie, attr, color) {
+    return {
+      		data: getDataPoints(data, serie, attr),
+      		borderColor: color,
+          pointRadius: 0,
+          lineTension: 0,
+          fill: false
+      	};
+  }
+
+  function getDataPoints(data, name, attr) {
+    var dt = [];
+    var sr = data[name];
+    var i;
+    var lastT = 0;
+    for (i = 0; i<sr.length; i++) {
+      var item = sr[i];
+      var t = item['time'];
+      if (lastT==0 || lastT<t) {
+        var datapoint = new Object();
+        datapoint.x = new Date(t);
+        datapoint.y = parseFloat(item[attr]);
+        lastT = t;
+      } else {
+        console.log("Out of sync items!")
+      }
+      dt.push(datapoint);
+    }
+    return dt;
+  }
+
   function highlight(leg, yesno){
 
     var panel = document.getElementById(leg);
@@ -201,64 +337,77 @@
 
 <div id="nmearouter" class="container-fluid" ng-controller="infoController">
     <ol class="breadcrumb">
+      <div class="row">
         <li class="breadcrumb-item"><a href="index.html">Home</a></li>
         <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
         <li class="breadcrumb-item active">Trip</li>
     </ol>
-    <div class="row alert alert-success">
-        <div class="col">Leg</div>
-        <div class="col">Start</div>
-        <div class="col">End</div>
-        <div class="col">Tot. Time</div>
-        <div class="col">Distance</div>
-        <div class="col">Sail Time</div>
-        <div class="col">Sail Dist.</div>
+    <div class="row">
+      <div class="col-7">
+        <div class="table-responsive documentList" style="height: 100%">
+          <div class="row alert alert-success">
+              <div class="col">Leg</div>
+              <div class="col">Start</div>
+              <div class="col">End</div>
+              <div class="col">Tot. Time</div>
+              <div class="col">Distance</div>
+              <div class="col">Sail Time</div>
+              <div class="col">Sail Dist.</div>
+          </div>
+          <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
+              <div class="col">Trip</div>
+              <div class="col">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}</div>
+              <div class="col">{{trip.endT | date:'dd/MM/yyyy HH:mm'}}</div>
+              <div class="col">{{trip.navTime}}</div>
+              <div class="col">{{trip.navDist | number:2}}NM {{trip.speedAverage | number:2}}KN</div>
+              <div class="col">{{trip.navEngineOffTime}}</div>
+              <div class="col">{{trip.navEngineOffDist | number:2}}NM {{trip.speedSailAverage | number:2}}KN</div>
+          </div>
+          <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0" onclick="switchLeg(this)" id="L{{leg.leg}}">
+            <div class="col">Leg {{leg.leg}}</div>
+            <div class="col">{{leg.startT | date:'dd/MM/yyyy HH:mm'}}</div>
+            <div class="col">{{leg.endT | date:'dd/MM/yyyy HH:mm'}}</div>
+            <div class="col">{{leg.navTime}}</div>
+            <div class="col">{{leg.navDist | number:2}}NM {{leg.speedAverage | number:2}}KN</div>
+            <div class="col">{{leg.navEngineOffTime}}</div>
+            <div class="col">{{leg.navEngineOffDist | number:2}}NM {{leg.speedSailAverage | number:2}}KN</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="row alert alert-secondary" onclick="switchRowStyle(this)" id="L0">
-        <div class="col">Trip</div>
-        <div class="col">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}</div>
-        <div class="col">{{trip.endT | date:'dd/MM/yyyy HH:mm'}}</div>
-        <div class="col">{{trip.navTime}}</div>
-        <div class="col">{{trip.navDist | number:2}}NM {{trip.speedAverage | number:2}}KN</div>
-        <div class="col">{{trip.navEngineOffTime}}</div>
-        <div class="col">{{trip.navEngineOffDist | number:2}}NM {{trip.speedSailAverage | number:2}}KN</div>
-    </div>
-    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" onclick="switchRowStyle(this)" id="L{{leg.leg}}">
-        <div class="col">Leg {{leg.leg}}</div>
-        <div class="col">{{leg.startT | date:'dd/MM/yyyy HH:mm'}}</div>
-        <div class="col">{{leg.endT | date:'dd/MM/yyyy HH:mm'}}</div>
-        <div class="col">{{leg.navTime}}</div>
-        <div class="col">{{leg.navDist | number:2}}NM {{leg.speedAverage | number:2}}KN</div>
-        <div class="col">{{leg.navEngineOffTime}}</div>
-        <div class="col">{{leg.navEngineOffDist | number:2}}NM {{leg.speedSailAverage | number:2}}KN</div>
     </div>
     <div class="row">
-        <div class="col-6">
-            <table>
-                <tr>
-                    <td width="40%">Start</td>
-                    <td width="60%" colspan="2" style="text-align: right;">{{current.start | date:'dd/MM/yyyy HH:mm'}}
-                    </td>
-                </tr>
-                <tr>
-                    <td>End</td>
-                    <td colspan="2" style="text-align: right;">{{current.end | date:'dd/MM/yyyy HH:mm'}}</td>
+      <div class="col-6">
+          <table>
+            <tr>
+              <td width="40%">Trip</td>
+              <td width="60%" colspan="2" style="text-align: right;">{{tripName}}
+              </td>
           </tr>
           <tr>
-            <td>Total Time</td>
-              <td style="text-align: right;">{{current.totalTime}}</td>
-            <td style="text-align: right;">&nbsp;</td>
+              <td width="40%">Start</td>
+              <td width="60%" colspan="2" style="text-align: right;">{{current.start | date:'dd/MM/yyyy HH:mm'}}
+              </td>
           </tr>
           <tr>
-            <td>Anchor Time</td>
-              <td style="text-align: right;">{{current.anchorTime}}</td>
-            <td style="text-align: right;">&nbsp;</td>
+              <td>End</td>
+              <td colspan="2" style="text-align: right;">{{current.end | date:'dd/MM/yyyy HH:mm'}}</td>
+        </tr>
+        <tr>
+          <td>Total Time</td>
+            <td style="text-align: right;">{{current.totalTime}}</td>
+          <td style="text-align: right;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Anchor Time</td>
+            <td style="text-align: right;">{{current.anchorTime}}</td>
+          <td style="text-align: right;">&nbsp;</td>
+        </tr>
+          <tr>
+              <td>Navigation Time</td>
+              <td style="text-align: right;">{{current.navTime}}</td>
+              <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
           </tr>
-                <tr>
-                    <td>Navigation Time</td>
-                    <td style="text-align: right;">{{current.navTime}}</td>
-                    <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
-                </tr>
         </table>
       </div>
       <div class="col-6">
@@ -282,11 +431,17 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-6" style="padding: 2%;">
+      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
         <canvas class="chart-canvas" id="distanceChart"></canvas>
       </div>
-      <div class="col-6" style="padding: 2%;">
+      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
         <canvas class="chart-canvas" id="durationChart"></canvas>
+      </div>
+      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
+        <canvas class="chart-canvas" id="speedDistrChart"></canvas>
+      </div>
+      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
+        <canvas class="chart-canvas" id="speedChart"></canvas>
       </div>
     </div>
           <!--

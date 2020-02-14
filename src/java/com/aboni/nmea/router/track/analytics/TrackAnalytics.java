@@ -135,14 +135,16 @@ public class TrackAnalytics {
             j.put("end", formatDate(end));
             j.put("navTime", formatDuration(totalNavigationTime));
             j.put("navDist", totalNavigationDistance);
-            j.put("speedAverage", totalNavigationDistance / (totalNavigationTime/1000/60/60));
+            if (totalNavigationTime>1.0)
+                j.put("speedAverage", totalNavigationDistance / (totalNavigationTime/1000.0/60.0/60.0));
             j.put("navEngineOffTime", formatDuration(sailEngineTime[EngineStatus.OFF.getValue()]));
             j.put("navEngineOn_Time", formatDuration(sailEngineTime[EngineStatus.ON.getValue()]));
             j.put("navEngineUnkTime", formatDuration(sailEngineTime[EngineStatus.UNKNOWN.getValue()]));
             j.put("navEngineOffDist", sailEngineDistance[EngineStatus.OFF.getValue()]);
             j.put("navEngineOn_Dist", sailEngineDistance[EngineStatus.ON.getValue()]);
             j.put("navEngineUnkDist", sailEngineDistance[EngineStatus.UNKNOWN.getValue()]);
-            j.put("speedSailAverage", sailEngineDistance[EngineStatus.OFF.getValue()] / (sailEngineTime[EngineStatus.OFF.getValue()]/1000/60/60));
+            if (sailEngineTime[EngineStatus.OFF.getValue()]>1.0)
+                j.put("speedSailAverage", sailEngineDistance[EngineStatus.OFF.getValue()] / (sailEngineTime[EngineStatus.OFF.getValue()]/1000.0/60.0/60.0));
             j.put("maxSpeed", maxSpeed);
             j.put("maxSpeedTime", formatDate(maxSpeedTime));
             j.put("maxAvgSpeed", max30sAverageSpeed);
