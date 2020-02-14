@@ -1,7 +1,8 @@
 @import url("glyphicons.css");
 
 body {
-  margin: 10px;
+  max-width: 1400px;
+  margin: 10px auto;
 }
 
 .switch {

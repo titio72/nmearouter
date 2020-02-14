@@ -32,9 +32,9 @@
 
     .documentList {
       overflow-y: scroll;
-      height: 200px;
+      height: 400px;
       width: 100%;
-      padding: 5px 5px;
+      padding-right: 15px;
     }
 
     .card-router-body {
@@ -343,105 +343,118 @@
         <li class="breadcrumb-item active">Trip</li>
     </ol>
     <div class="row">
-      <div class="col-7">
-        <div class="table-responsive documentList" style="height: 100%">
-          <div class="row alert alert-success">
-              <div class="col">Leg</div>
-              <div class="col">Start</div>
-              <div class="col">End</div>
-              <div class="col">Tot. Time</div>
-              <div class="col">Distance</div>
-              <div class="col">Sail Time</div>
-              <div class="col">Sail Dist.</div>
-          </div>
-          <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
-              <div class="col">Trip</div>
-              <div class="col">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}</div>
-              <div class="col">{{trip.endT | date:'dd/MM/yyyy HH:mm'}}</div>
-              <div class="col">{{trip.navTime}}</div>
-              <div class="col">{{trip.navDist | number:2}}NM {{trip.speedAverage | number:2}}KN</div>
-              <div class="col">{{trip.navEngineOffTime}}</div>
-              <div class="col">{{trip.navEngineOffDist | number:2}}NM {{trip.speedSailAverage | number:2}}KN</div>
-          </div>
-          <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0" onclick="switchLeg(this)" id="L{{leg.leg}}">
-            <div class="col">Leg {{leg.leg}}</div>
-            <div class="col">{{leg.startT | date:'dd/MM/yyyy HH:mm'}}</div>
-            <div class="col">{{leg.endT | date:'dd/MM/yyyy HH:mm'}}</div>
-            <div class="col">{{leg.navTime}}</div>
-            <div class="col">{{leg.navDist | number:2}}NM {{leg.speedAverage | number:2}}KN</div>
-            <div class="col">{{leg.navEngineOffTime}}</div>
-            <div class="col">{{leg.navEngineOffDist | number:2}}NM {{leg.speedSailAverage | number:2}}KN</div>
-          </div>
+        <div style="min-width: 500px;" class="col-5" id="legList">
+            <div class="documentList">
+                <div class="row alert alert-success">
+                    <div class="col-2">Leg</div>
+                    <div class="col-4">Date & time</div>
+                    <div class="col-3">Duration & dist</div>
+                    <div class="col-3">Sail dur & dist</div>
+                </div>
+                <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
+                    <div class="col-2">Trip</div>
+                    <div class="col-4">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}<br>{{trip.endT | date:'dd/MM/yyyy
+                        HH:mm'}}
+                    </div>
+                    <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
+                        number:2}}KN
+                    </div>
+                    <div class="col-3">{{trip.navEngineOffTime}}<br>{{trip.navEngineOffDist | number:2}}NM<br>{{trip.speedSailAverage
+                        | number:2}}KN
+                    </div>
+                </div>
+                <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
+                     onclick="switchLeg(this)" id="L{{leg.leg}}">
+                    <div class="col-2">Leg {{leg.leg}}</div>
+                    <div class="col-4">{{leg.startT | date:'dd/MM/yy HH:mm'}}<br>{{leg.endT | date:'dd/MM/yy HH:mm'}}
+                    </div>
+                    <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
+                        number:2}}KN
+                    </div>
+                    <div class="col-3">{{leg.navEngineOffTime}}<br>{{leg.navEngineOffDist | number:2}}NM<br>{{leg.speedSailAverage
+                        | number:2}}KN
+                    </div>
+                </div>
+            </div>
+            <div id="">
+                <canvas class="chart-canvas" id="durationChart"></canvas>
+            </div>
         </div>
-      </div>
-    </div>
-    </div>
-    <div class="row">
-      <div class="col-6">
-          <table>
-            <tr>
-              <td width="40%">Trip</td>
-              <td width="60%" colspan="2" style="text-align: right;">{{tripName}}
-              </td>
-          </tr>
-          <tr>
-              <td width="40%">Start</td>
-              <td width="60%" colspan="2" style="text-align: right;">{{current.start | date:'dd/MM/yyyy HH:mm'}}
-              </td>
-          </tr>
-          <tr>
-              <td>End</td>
-              <td colspan="2" style="text-align: right;">{{current.end | date:'dd/MM/yyyy HH:mm'}}</td>
-        </tr>
-        <tr>
-          <td>Total Time</td>
-            <td style="text-align: right;">{{current.totalTime}}</td>
-          <td style="text-align: right;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td>Anchor Time</td>
-            <td style="text-align: right;">{{current.anchorTime}}</td>
-          <td style="text-align: right;">&nbsp;</td>
-        </tr>
-          <tr>
-              <td>Navigation Time</td>
-              <td style="text-align: right;">{{current.navTime}}</td>
-              <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
-          </tr>
-        </table>
-      </div>
-      <div class="col-6">
-          <table>
-              <tr>
-                  <td>Sail Time</td>
-                  <td style="text-align: right;">{{current.navEngineOffTime}}</td>
-                  <td style="text-align: right;">{{current.navEngineOffDist | number:2}}NM</td>
-              </tr>
-              <tr>
-                  <td>Engine Time</td>
-                  <td style="text-align: right;">{{current.navEngineOn_Time}}</td>
-                  <td style="text-align: right;">{{current.navEngineOn_Dist | number:2}}NM</td>
-              </tr>
-              <tr>
-                  <td>Average Speed</td>
-                  <td style="text-align: right;">{{current.speedAverage | number:2}}KN</td>
-                  <td style="text-align: right;">&nbsp;</td>
-              </tr>
-          </table>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
-        <canvas class="chart-canvas" id="distanceChart"></canvas>
-      </div>
-      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
-        <canvas class="chart-canvas" id="durationChart"></canvas>
-      </div>
-      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
-        <canvas class="chart-canvas" id="speedDistrChart"></canvas>
-      </div>
-      <div class="col col-lg-6 col-md-6 col-sm-12" style="padding: 2%;">
-        <canvas class="chart-canvas" id="speedChart"></canvas>
+        <div style="min-width: 500px;" class="col-7">
+            <div class="row">
+                <div class="col-5">
+                    <div>
+                        <canvas class="chart-canvas" id="distanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-7">
+                    <div>
+                        <canvas class="chart-canvas" id="speedDistrChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div>
+                        <canvas class="chart-canvas" id="speedChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <table>
+                        <tr>
+                            <td width="40%">Trip</td>
+                            <td width="60%" colspan="2" style="text-align: right;">{{tripName}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="40%">Start</td>
+                            <td width="60%" colspan="2" style="text-align: right;">{{current.start | date:'dd/MM/yyyy
+                                HH:mm'}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>End</td>
+                            <td colspan="2" style="text-align: right;">{{current.end | date:'dd/MM/yyyy HH:mm'}}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Time</td>
+                            <td style="text-align: right;">{{current.totalTime}}</td>
+                            <td style="text-align: right;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>Anchor Time</td>
+                            <td style="text-align: right;">{{current.anchorTime}}</td>
+                            <td style="text-align: right;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>Navigation Time</td>
+                            <td style="text-align: right;">{{current.navTime}}</td>
+                            <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-6">
+                    <table>
+                        <tr>
+                            <td>Sail Time</td>
+                            <td style="text-align: right;">{{current.navEngineOffTime}}</td>
+                            <td style="text-align: right;">{{current.navEngineOffDist | number:2}}NM</td>
+                        </tr>
+                        <tr>
+                            <td>Engine Time</td>
+                            <td style="text-align: right;">{{current.navEngineOn_Time}}</td>
+                            <td style="text-align: right;">{{current.navEngineOn_Dist | number:2}}NM</td>
+                        </tr>
+                        <tr>
+                            <td>Average Speed</td>
+                            <td style="text-align: right;">{{current.speedAverage | number:2}}KN</td>
+                            <td style="text-align: right;">&nbsp;</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
       </div>
     </div>
           <!--
@@ -538,11 +551,6 @@
 
            }
           -->
-
-
-
-        
   </div>
 </body>
-
 </html>
