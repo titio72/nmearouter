@@ -32,8 +32,6 @@
 
     .documentList {
       overflow-y: scroll;
-      height: 400px;
-      width: 100%;
       padding-right: 15px;
     }
 
@@ -83,6 +81,7 @@
   var tripName = getUrlVars()["name"];
   var tripObject = httpGetTripAnalytics(tripId);
   var current = tripObject;
+  var currentLegIx = 0;
   var pieChart;
   var speedDistrChart;
   var speedChart;
@@ -202,22 +201,39 @@
     createOrFillPieChart(data, 'Leg distance breakdown (NM)');
   }
 
+  function nextLeg() {
+    currentLegIx = (currentLegIx + 1) % (tripObject.legs.length+1);
+    _switchLeg();
+  }
+
+  function previousLeg() {
+    currentLegIx = (currentLegIx + tripObject.legs.length) % (tripObject.legs.length+1);
+    _switchLeg();
+  }
+
+  function getLegIx(leg) {
+    return parseInt(leg.id.substring(1));
+  }
+  
   function switchLeg(leg){
-    iLeg = 0;
+    currentLegIx = getLegIx(leg);
+    _switchLeg();
+  }
+
+  function _switchLeg() {
     for (i = 0; i<=tripObject.legs.length; i++) {
       sL = "L" + i;
       panel = document.getElementById(sL);
-        if (panel!=null) {
+      if (panel!=null) {
         panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
       }
-      if (sL==leg.id) iLeg = i;
     }
-    panel = leg;
+    panel = document.getElementById("L"+currentLegIx);
     panel.className = "row alert alert-secondary";   // Set other class name
-    if (iLeg==0) current = tripObject;
-    else current = tripObject.legs[iLeg-1];
+    if (currentLegIx==0) current = tripObject;
+    else current = tripObject.legs[currentLegIx-1];
 
-    if (iLeg==0) {
+    if (currentLegIx==0) {
       loadTimeChart();
     } else {
       loadDistChart();
@@ -230,7 +246,7 @@
     speedDistrChart.data.datasets[1].data = resS;
     speedDistrChart.update();
 
-    if (iLeg>0) {
+    if (currentLegIx>0) {
       httpLoadSpeedDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillSpeedChart);
     } else {
       resetSpeedChart();
@@ -261,6 +277,7 @@
   }
 
   function createSpeedChart() {
+    ctx = document.getElementById('speedChart');
     speedChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -279,9 +296,9 @@
 
   function onFillSpeedChart(speedSerie, leg) {
     speedChart.data.datasets = [
-      getSerie(speedSerie, "SOG", "v",    "#22FF22"),
-      getSerie(speedSerie, "SOG", "vMin", "#777777"),
-      getSerie(speedSerie, "SOG", "vMax", "#FF2222")
+      getSerie(speedSerie, "SOG", "v",    "blue"),
+      getSerie(speedSerie, "SOG", "vMin", "gray"),
+      getSerie(speedSerie, "SOG", "vMax", "red")
     ];
     speedChart.update();
   }
@@ -342,7 +359,9 @@
     <div style="min-width: 500px; min-height: 500px;" class="col" id="legList">
       <div class="documentList">
         <div class="row alert alert-success">
-          <div class="col-2">Leg</div>
+          <div class="col-2">
+            <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a> Leg <a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a> 
+          </div>
           <div class="col-4">Date & time</div>
           <div class="col-3">Duration & dist</div>
           <div class="col-3">Sail dur & dist</div>
@@ -412,6 +431,28 @@
               <td style="text-align: right;">&nbsp;</td>
             </tr>
             <tr>
+              <td>Best 1NM</td>
+              <td style="text-align: right;">{{current.max01NMSpeed| number:2}}NM</td>
+              <td style="text-align: right;">{{current.max01NMSpeedTime0 | date:'dd/MM/yy'}}</td>
+              <td style="text-align: right;">{{current.max01NMSpeedTime0 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">{{current.max01NMSpeedTime1 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Best 5NM</td>
+              <td style="text-align: right;">{{current.max05NMSpeed| number:2}}NM</td>
+              <td style="text-align: right;">{{current.max05NMSpeedTime0 | date:'dd/MM/yy'}}</td>
+              <td style="text-align: right;">{{current.max05NMSpeedTime0 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">{{current.max05NMSpeedTime1 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Best 10NM</td>
+              <td style="text-align: right;">{{current.max10NMSpeed| number:2}}NM</td>
+              <td style="text-align: right;">{{current.max10NMSpeedTime0 | date:'dd/MM/yy'}}</td>
+              <td style="text-align: right;">{{current.max10NMSpeedTime0 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">{{current.max10NMSpeedTime1 | date:'HH:mm'}}</td>
+              <td style="text-align: right;">&nbsp;</td>
             </tr>
           </table>
         </div>
