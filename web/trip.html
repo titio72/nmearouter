@@ -33,6 +33,7 @@
     .documentList {
       overflow-y: scroll;
       padding-right: 15px;
+      height: 400px;
     }
 
     .card-router-body {
@@ -98,6 +99,9 @@
     $scope.trip = tripObject;
     $scope.current = tripObject;
     $scope.tripName = tripName;
+    $scope.currentLegIx = currentLegIx;
+    $scope.legLabel = "Trip";
+    $scope.numberOfLegs = tripObject.legs.length;
     loadMe();
   });
 
@@ -202,13 +206,39 @@
   }
 
   function nextLeg() {
-    currentLegIx = (currentLegIx + 1) % (tripObject.legs.length+1);
-    _switchLeg();
+    do {
+      currentLegIx = (currentLegIx + 1) % (tripObject.legs.length+1);
+    } while (document.getElementById("L" + currentLegIx)==null);
+    panel = _switchLeg();
+    legList = document.getElementById("legList");
+    viewHeight = legList.offsetHeight; 
+    panelBottom = panel.offsetTop;
+    panelTop = panel.offsetTop - panel.offsetHeight;
+    viewBottom = legList.scrollTop + legList.offsetHeight;
+    viewTop = legList.scrollTop;
+    if (panelBottom > viewBottom) {
+      legList.scrollTo(0, panelBottom - viewHeight + 30);
+    } else if (panelTop < viewTop) {
+      legList.scrollTo(0, panelTop);
+    }
   }
 
   function previousLeg() {
-    currentLegIx = (currentLegIx + tripObject.legs.length) % (tripObject.legs.length+1);
-    _switchLeg();
+    do {
+      currentLegIx = (currentLegIx + tripObject.legs.length) % (tripObject.legs.length+1);
+    } while (document.getElementById("L" + currentLegIx)==null);
+    panel = _switchLeg();
+    legList = document.getElementById("legList");
+    viewHeight = legList.offsetHeight; 
+    panelBottom = panel.offsetTop;
+    panelTop = panel.offsetTop - panel.offsetHeight;
+    viewBottom = legList.scrollTop + legList.offsetHeight;
+    viewTop = legList.scrollTop;
+    if (panelBottom > viewBottom) {
+      legList.scrollTo(0, panelBottom - viewHeight + 30);
+    } else if (panelTop < viewTop) {
+      legList.scrollTo(0, panelTop);
+    }
   }
 
   function getLegIx(leg) {
@@ -230,6 +260,7 @@
     }
     panel = document.getElementById("L"+currentLegIx);
     panel.className = "row alert alert-secondary";   // Set other class name
+
     if (currentLegIx==0) current = tripObject;
     else current = tripObject.legs[currentLegIx-1];
 
@@ -255,7 +286,11 @@
     var controllerElement = document.getElementById('nmearouter');
     var controllerScope = angular.element(controllerElement).scope();
     controllerScope.current = current;
+    controllerScope.currentLegIx = currentLegIx;
+    controllerScope.legLabel = (currentLegIx==0)?"Trip":("Leg " + currentLegIx);
     controllerScope.$evalAsync();
+
+    return panel;
   }
   
   function dateToYMD(date) {
@@ -343,6 +378,16 @@
         panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
     }
   }
+
+  function anKeyPress(e) {
+    if (e.code=="ArrowLeft")
+      previousLeg();
+    else if (e.code=="ArrowRight")
+      nextLeg();
+  }
+
+  document.addEventListener('keydown', anKeyPress);
+
 </script>
 
 <body ng-app="nmearouter">
@@ -356,12 +401,16 @@
     </ol>
   </div></div>
   <div class="row">
-    <div style="min-width: 500px; min-height: 500px;" class="col" id="legList">
-      <div class="documentList">
+    <div style="min-width: 500px; min-height: 500px;" class="col">
+      <div class="alert alert-warning">
+        <div class="col2">
+          <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
+          &nbsp;{{legLabel}} of {{numberOfLegs}} Legs&nbsp;<a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a> 
+        </div>
+      </div>
+      <div class="documentList" id="legList">
         <div class="row alert alert-success">
-          <div class="col-2">
-            <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a> Leg <a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a> 
-          </div>
+          <div class="col-2">Leg</div>
           <div class="col-4">Date & time</div>
           <div class="col-3">Duration & dist</div>
           <div class="col-3">Sail dur & dist</div>
