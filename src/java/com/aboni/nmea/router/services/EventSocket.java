@@ -52,8 +52,7 @@ public class EventSocket
     }
     	
     @OnError
-    public void onWebSocketError(Throwable cause)
-    {
+    public void onWebSocketError(Throwable cause) {
 		ServerLog.getLogger().error("Error handling web sockets", cause);
     }
     	
@@ -100,7 +99,6 @@ public class EventSocket
 					}
 				}
 			}
-			
 		}
     }
 }

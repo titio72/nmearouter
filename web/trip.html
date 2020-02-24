@@ -63,7 +63,24 @@
 
     }
 
+    .tile {
+      background-color: darkslategrey;
+      min-width: 180px;
+      height: 180px;
+      width: 100%;
+      margin: 5px;
+      padding: 5px;
+    }
 
+    .tile_value1 {
+      font-size: x-large;
+      text-align: right;
+    }
+
+    .tile_value2 {
+      font-size: x-large;
+      text-align: right;
+    }
 
   </style>
 
@@ -78,6 +95,7 @@
       });
       return vars;
   }
+
   var tripId = getUrlVars()["trip"];
   var tripName = getUrlVars()["name"];
   var tripObject = httpGetTripAnalytics(tripId);
@@ -146,7 +164,6 @@
       options: {}
     });
   }
-
 
   function createOrFillPieChart(data, text) {
     if (pieChart==null) {
@@ -388,6 +405,34 @@
 
   document.addEventListener('keydown', anKeyPress);
 
+  class MyTile extends HTMLElement {
+    static get observedAttributes() {
+      return ['title', 'value1', 'value2'];
+    }
+    
+    get title() {
+      return this.getAttribute('title');
+    }
+
+    get value1() {
+      return this.getAttribute('value1');
+    }
+
+    get value2() {
+      return this.getAttribute('value2');
+    }
+
+    connectedCallback() {
+      this.innerHTML = "<div class='tile'>"+
+        "<H2>" + this.getAttribute('title') + "</H2>" +
+        "<div class='tile_value1'>" + this.getAttribute('value1') + "</div>" +
+        "<div class='tile_value2'>" + this.getAttribute('value2') + "</div>" +
+        "</div>";
+    }
+  }
+
+  customElements.define('my-tile', MyTile);
+
 </script>
 
 <body ng-app="nmearouter">
@@ -403,9 +448,10 @@
   <div class="row">
     <div style="min-width: 500px; min-height: 500px;" class="col">
       <div class="alert alert-warning">
-        <div class="col2">
+        <div class="col">
           <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
-          &nbsp;{{legLabel}} of {{numberOfLegs}} Legs&nbsp;<a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a> 
+          &nbsp;{{legLabel}} of {{numberOfLegs}} Legs&nbsp;<a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+          &nbsp;"{{tripName}}"
         </div>
       </div>
       <div class="documentList" id="legList">
@@ -440,71 +486,12 @@
           </div>
         </div>
       </div>
-      <div>
-        <div class="col">
-          <table style="width: 100%;">
-            <tr>
-              <td width="20%">Trip</td>
-              <td width="15%" style="text-align: right;">{{tripName}}</td>
-              <td width="15%" style="text-align: right;">&nbsp;</td>
-              <td width="20%" >Sail Time</td>
-              <td width="15%" style="text-align: right;">{{current.navEngineOffTime}}</td>
-              <td width="15%" style="text-align: right;">{{current.navEngineOffDist | number:2}}NM</td>
-            </tr>
-            <tr>
-              <td>Start</td>
-              <td style="text-align: right;">{{current.start | date:'dd/MM/yy'}}</td>
-              <td style="text-align: left;">&nbsp;{{current.start | date:'HH:mm'}}</td>
-              <td>Engine Time</td>
-              <td style="text-align: right;">{{current.navEngineOn_Time}}</td>
-              <td style="text-align: right;">{{current.navEngineOn_Dist | number:2}}NM</td>
-            </tr>
-            <tr>
-              <td>End</td>
-              <td style="text-align: right;">{{current.end | date:'dd/MM/yy'}}</td>
-              <td style="text-align: left;">&nbsp;{{current.end | date:'HH:mm'}}</td>
-              <td>Navigation</td>
-              <td style="text-align: right;">{{current.navTime}}</td>
-              <td style="text-align: right;">{{current.navDist | number:2}}NM</td>
-            </tr>
-            <tr>
-              <td>Total Time</td>
-              <td style="text-align: right;">{{current.totalTime}}</td>
-              <td style="text-align: right;">&nbsp;</td>
-              <td>Average Speed</td>
-              <td style="text-align: right;">{{current.speedAverage | number:2}}KN</td>
-            </tr>
-            <tr>
-              <td>Anchor Time</td>
-              <td style="text-align: right;">{{current.anchorTime}}</td>
-              <td style="text-align: right;">&nbsp;</td>
-            </tr>
-            <tr>
-              <td>Best 1NM</td>
-              <td style="text-align: right;">{{current.max01NMSpeed| number:2}}NM</td>
-              <td style="text-align: right;">{{current.max01NMSpeedTime0 | date:'dd/MM/yy'}}</td>
-              <td style="text-align: right;">{{current.max01NMSpeedTime0 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">{{current.max01NMSpeedTime1 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">&nbsp;</td>
-            </tr>
-            <tr>
-              <td>Best 5NM</td>
-              <td style="text-align: right;">{{current.max05NMSpeed| number:2}}NM</td>
-              <td style="text-align: right;">{{current.max05NMSpeedTime0 | date:'dd/MM/yy'}}</td>
-              <td style="text-align: right;">{{current.max05NMSpeedTime0 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">{{current.max05NMSpeedTime1 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">&nbsp;</td>
-            </tr>
-            <tr>
-              <td>Best 10NM</td>
-              <td style="text-align: right;">{{current.max10NMSpeed| number:2}}NM</td>
-              <td style="text-align: right;">{{current.max10NMSpeedTime0 | date:'dd/MM/yy'}}</td>
-              <td style="text-align: right;">{{current.max10NMSpeedTime0 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">{{current.max10NMSpeedTime1 | date:'HH:mm'}}</td>
-              <td style="text-align: right;">&nbsp;</td>
-            </tr>
-          </table>
-        </div>
+      <div style="width: 100%; background-color: darkturquoise;" class="row">
+        <div style="margin: 3px;" class="col-auto"><my-tile title="Trip" value1="{{tripName}}" value2=""></my-tile></div>
+        <div style="margin: 3px;" class="col-auto"><my-tile title="Dates" value1="{{current.start | date:'dd/MM/yy'}}" value2="{{current.end | date:'dd/MM/yy'}}"></my-tile></div>
+        <div style="margin: 3px;" class="col-auto"><my-tile title="Times" value1="Tot {{current.totalTime}}" value2="Nav {{current.NavTime}}"></my-tile></div>
+        <div style="margin: 3px;" class="col-auto"><my-tile title="Sail" value1="{{current.navEngineOffTime}}" value2="{{current.navEngineOffDist | number:2}}NM"></my-tile></div>
+        <div style="margin: 3px;" class="col-auto"><my-tile title="Engine" value1="{{current.navEngineOn_Time}}" value2="{{current.navEngineOn_Dist | number:2}}NM"></my-tile></div>
       </div>
     </div>
     <div class="col">
