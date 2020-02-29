@@ -1,18 +1,88 @@
 <!DOCTYPE html>
 <html>
 
+
+<template id="my-dial">
+    <svg width="210" height="210" style="display: block; margin: auto;">
+        <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
+
+        <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(45 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(135 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(225 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(315 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(0 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(90 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(180 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)"></path>
+        <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(270 105 105)"></path>
+        <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)"></path>
+
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)">
+        </path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(15 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(30 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(45 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(60 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(75 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(90 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(105 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(120 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(135 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(150 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(165 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(180 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(195 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(210 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(225 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(240 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(255 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(270 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(285 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(300 105 105)"></path>
+        <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
+              transform="rotate(315 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(330 105 105)"></path>
+        <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
+              transform="rotate(345 105 105)"></path>
+    </svg>
+</template>
+
+
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Andrea Boni NMEARouter</title>
-	<link href="css/glyphicons.css" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="nmeasail.png">
-  <script src="js/nmearouter.js?l"></script>
-  <!--script src="https://maps.googleapis.com/maps/api/js?v=3.36&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo" async
-    defer></script-->
-  <script type="text/javascript" 
-    src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyB923F46BW5wnvAKd0pztCa37YCUx64ARo"> 
-  </script>
-  <style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+    <link rel="icon" type="image/png" href="nmeasail.png">
+    <script src="js/nmearouter.js?l"></script>
+    <link href="css/nmearouter.css" rel="stylesheet"/>
+    <style>
+
     .panelTable {
       width: 100%;
       font-family: monospace;
@@ -29,13 +99,14 @@
       font-size: 12pt;
     }
 
-    .cardRouterBody {
+    .card-sensor-body {
       height: 300px;
     }
 
-    .cardRouter {
-      width: 100%;
-      margin: 10px 0px 10px 0px;
+    .card-sensor {
+    }
+
+    .card-sensor-header {
     }
   </style>
 </head>
@@ -207,448 +278,327 @@
     return r;
   }
 
+  customElements.define('my-wind-dial', class extends HTMLElement {
+
+    static get observedAttributes() {
+      return ['angle_true', 'angle_app'];
+    }
+
+    get angle_true() { return this.getAttribute('angle_true'); }
+    get angle_app() { return this.getAttribute('angle_app'); }
+
+    connectedCallback() {
+      var aT = this.getAttribute('angle_true'); 
+      var aA = this.getAttribute('angle_app'); 
+      aT = (aT==null)?0:aT;
+      aA = (aA==null)?0:aA;
+      let template = document.getElementById('my-dial');
+      let templateContent = template.content;
+      let newInstance = templateContent.cloneNode(true);
+      
+      let arrowT = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arrowT.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
+      arrowT.setAttributeNS(null, "fill", "blue");
+      arrowT.setAttributeNS(null, "stroke", "gray");
+      arrowT.setAttributeNS(null, "stroke-width", "3");
+      arrowT.setAttributeNS(null, "transform", "rotate(" + aT + " 105 105)");
+      newInstance.firstElementChild.appendChild(arrowT);
+
+      let arrowA = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arrowA.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
+      arrowA.setAttributeNS(null, "fill", "lightblue");
+      arrowA.setAttributeNS(null, "stroke", "gray");
+      arrowA.setAttributeNS(null, "stroke-width", "3");
+      arrowA.setAttributeNS(null, "transform", "rotate(" + aA + " 105 105)");
+      newInstance.firstElementChild.appendChild(arrowA);
+
+      let arcRed = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arcRed.setAttributeNS(null, "d", "M35 105 A70 70 00 0 1 105 35");
+      arcRed.setAttributeNS(null, "fill", "none");
+      arcRed.setAttributeNS(null, "stroke", "red");
+      arcRed.setAttributeNS(null, "stroke-width", "5");
+      arcRed.setAttributeNS(null, "transform", "rotate(0 105 105)");
+      newInstance.firstElementChild.appendChild(arcRed);
+
+      let arcGreen = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arcGreen.setAttributeNS(null, "d", "M35 105 A70 70 00 0 1 105 35");
+      arcGreen.setAttributeNS(null, "fill", "none");
+      arcGreen.setAttributeNS(null, "stroke", "green");
+      arcGreen.setAttributeNS(null, "stroke-width", "5");
+      arcGreen.setAttributeNS(null, "transform", "rotate(90 105 105)");
+      newInstance.firstElementChild.appendChild(arcGreen);
+
+      this.appendChild(newInstance);
+    }
+  });
+
+
+  customElements.define('my-dial', class extends HTMLElement {
+
+    static get observedAttributes() {
+      return ['angle'];
+    }
+
+    get angle() {
+      return this.getAttribute('angle');
+    }
+
+    connectedCallback() {
+      var a = this.getAttribute('angle'); 
+      a = (a==null)?0:a;
+      let template = document.getElementById('my-dial');
+      let templateContent = template.content;
+      let newInstance = templateContent.cloneNode(true);
+      let arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      arrow.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
+      arrow.setAttributeNS(null, "fill", "blue");
+      arrow.setAttributeNS(null, "stroke", "gray");
+      arrow.setAttributeNS(null, "stroke-width", "3");
+      arrow.setAttributeNS(null, "transform", "rotate(" + a + " 105 105)");
+      newInstance.firstElementChild.appendChild(arrow);
+      this.appendChild(newInstance);
+      //<path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{hdg.angle}} 105 105)"></path>
+    }
+  });
+
 </script>
 
-
 <body ng-app="nmearouter">
+<div id="nmearouter" class="container-fluid">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-      <li class="breadcrumb-item active">Sensors</li>
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item active">Sensors</li>
     </ol>
-    <div id="sensorPanel" class="container-fluid" ng-controller="myCtrl">
-    <div class="row">
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Heading</h3>
-          <div class="card-body cardRouterBody">
-            <table width="100%">
-              <tr>
-                <td>
-                  <div class="card-sensor-text-small">{{hdg.angle|numberFixedLen:3:0}}&deg; {{hdg.s_dir}}</div>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <svg width="210" height="210" style="display: block; margin: auto;">
-                    <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
-
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(45 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(135 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(225 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(315 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(0 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(90 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(180 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(270 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)"></path>
-
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)">
-                    </path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(15 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(30 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(45 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(60 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(75 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(90 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(105 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(120 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(135 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(150 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(165 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(180 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(195 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(210 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(225 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(240 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(255 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(270 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(285 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(300 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(315 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(330 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(345 105 105)"></path>
-                    <path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3"
-                      transform="rotate({{hdg.angle}} 105 105)"></path>
-                  </svg>
-                </td>
-              </tr>
-            </table>
-          </div>
+    <div id="sensorPanel" ng-controller="myCtrl">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Heading</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table width="100%">
+                            <tr>
+                                <td>
+                                    <div class="card-sensor-text-small">{{hdg.angle|numberFixedLen:3:0}}&deg;
+                                        {{hdg.s_dir}}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;">
+                                    <my-dial angle="{{hdg.angle}}"></my-dial>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Abs. Wind</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table width="100%">
+                            <tr>
+                                <td>
+                                    <div class="card-sensor-textall">{{wind.speed | number:1}}Kn {{wind.mag_angle |
+                                        numberFixedLen:3:0}}&deg;
+                                        {{wind.s_dir}}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;">
+                                    <my-dial angle="{{wind.mag_angle}}"></my-dial>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Rel. Wind</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table width="100%">
+                            <tr>
+                                <td>
+                                    <div class="card-sensor-text-small">A {{wind_r.speed | number:1}}Kn
+                                        {{wind_r.show_angle | numberFixedLen:3:0}}&deg;
+                                        {{wind_r.tack}}<br>
+                                        T {{wind_t.speed | number:1}}Kn
+                                        {{wind_t.show_angle|numberFixedLen:3:0}}&deg;<br>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center;">
+                                    <my-wind-dial angle_app="{{wind_r.angle}}"
+                                                  angle_true="{{wind_t.angle}}"></my-wind-dial>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">GPS</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Position</td>
+                                <td style="text-align: right">{{rmc.latitude}}</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">{{rmc.longitude}}</td>
+                            </tr>
+                            <tr>
+                                <td>Anchor</td>
+                                <td style="text-align: right">{{xmc.anchor_lat}}</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">{{xmc.anchor_lon}}</td>
+                            </tr>
+                            <tr>
+                                <td>SOG</td>
+                                <td style="text-align: right">{{rmc.SOG | number:1}} Kn</td>
+                            </tr>
+                            <tr>
+                                <td>COG</td>
+                                <td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}&deg;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="text-align: right">{{rmc.s_time}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Navi</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Speed</td>
+                                <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
+                            </tr>
+                            <tr>
+                                <td>Head</td>
+                                <td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}&deg;
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>Depth</td>
+                                <td style="text-align: right">{{depth.depth | number:1}} m</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Diag</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Battery Svc</td>
+                                <td style="text-align: right">{{V0.value | number:1}} V</td>
+                            </tr>
+                            <tr>
+                                <td>Battery Eng</td>
+                                <td style="text-align: right">{{V1.value | number:1}} V</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>CPU</td>
+                                <td style="text-align: right">{{CPUTemp.value | number:1}} &deg;C</td>
+                            </tr>
+                            <tr>
+                                <td>Equipment</td>
+                                <td style="text-align: right">{{AirTemp.value | number:1}} &deg;C</td>
+                            </tr>
+                            <tr>
+                                <td>Engine</td>
+                                <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">{{engine.status}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Meteo</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Cab Temp</td>
+                                <td style="text-align: right">{{CabinTemp.value | number:1}} &deg;C</td>
+                            </tr>
+                            <tr>
+                                <td>Water Temp</td>
+                                <td style="text-align: right">{{WaterTemp | number:1}} &deg;C</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>Press.</td>
+                                <td style="text-align: right">{{Barometer.value | number:3}} MB</td>
+                            </tr>
+                            <tr>
+                                <td>Humidity</td>
+                                <td style="text-align: right">{{Humidity.value | number:1}}%</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Gyro</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Head</td>
+                                <td style="text-align: right">{{HEAD.value | number:1}}&deg;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>Roll</td>
+                                <td style="text-align: right">{{ROLL.value | number:1}}&deg;</td>
+                            </tr>
+                            <tr>
+                                <td>Pitch</td>
+                                <td style="text-align: right">{{PITCH.value | number:1}}&deg;</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Abs. Wind</h3>
-          <div class="card-body cardRouterBody">
-            <table width="100%">
-              <tr>
-                <td>
-                  <div class="card-sensor-textall">{{wind.speed | number:1}}Kn {{wind.mag_angle | numberFixedLen:3:0}}&deg;
-                    {{wind.s_dir}}</div>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <svg width="210" height="210" style="display: block; margin: auto;">
-                    <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
-
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(45 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(135 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(225 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(315 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(0 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(90 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(180 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(270 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)"></path>
-
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)">
-                    </path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(15 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(30 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(45 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(60 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(75 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(90 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(105 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(120 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(135 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(150 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(165 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(180 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(195 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(210 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(225 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(240 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(255 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(270 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(285 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(300 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(315 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(330 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(345 105 105)"></path>
-                    <path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3"
-                      transform="rotate({{wind.mag_angle}} 105 105)"></path>
-                  </svg>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Rel. Wind</h3>
-          <div class="card-body cardRouterBody">
-            <table width="100%">
-              <tr>
-                <td>
-                  <div class="card-sensor-text-small">A {{wind_r.speed | number:1}}Kn {{wind_r.show_angle | numberFixedLen:3:0}}&deg;
-                    {{wind_r.tack}}<br>
-                    T {{wind_t.speed | number:1}}Kn {{wind_t.show_angle|numberFixedLen:3:0}}&deg;<br>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td align="center">
-                  <svg width="210" height="210" style="display: block; margin: auto;">
-                    <circle cx="50%" cy="50%" r="90" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(45 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(45 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(135 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(135 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(225 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(225 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#A0A0A0" transform="rotate(315 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#A0C0C0" transform="rotate(315 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(0 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(0 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(90 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(90 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(180 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(180 105 105)"></path>
-                    <path d="M95 95 L105 20 L105 105 Z" fill="#C0A0A0" transform="rotate(270 105 105)"></path>
-                    <path d="M105 105 L105 20 L115 95 Z" fill="#C0C0C0" transform="rotate(270 105 105)"></path>
-                    <path d="M35 105 A70 70 00 0 1 105 35" stroke="red" fill="none" stroke-width="5"></path>
-                    <path d="M35 105 A70 70 00 0 1 105 35" stroke="green" fill="none" stroke-width="5"
-                      transform="rotate(90 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3" transform="rotate(0 105 105)">
-                    </path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(15 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(30 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(45 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(60 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(75 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(90 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(105 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(120 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(135 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(150 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(165 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(180 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(195 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(210 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(225 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(240 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(255 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(270 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(285 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(300 105 105)"></path>
-                    <path d="M25 105 L45 105" fill="none" stroke="black" stroke-width="3"
-                      transform="rotate(315 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(330 105 105)"></path>
-                    <path d="M30 105 L40 105" fill="none" stroke="black" stroke-width="1"
-                      transform="rotate(345 105 105)"></path>
-                    <path d="M95 105 L105 45 L115 105 Z" fill="lightblue" stroke="gray" stroke-width="3"
-                      transform="rotate({{wind_t.angle}} 105 105)"></path>
-                    <path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3"
-                      transform="rotate({{wind_r.angle}} 105 105)"></path>
-                  </svg>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">GPS</h3>
-          <div class="card-body cardRouterBody">
-            <table class="panelTable">
-              <tr>
-                <td>Position</td>
-                <td style="text-align: right">{{rmc.latitude}}</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">{{rmc.longitude}}</td>
-              </tr>
-              <tr>
-                <td>Anchor</td>
-                <td style="text-align: right">{{xmc.anchor_lat}}</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">{{xmc.anchor_lon}}</td>
-              </tr>
-              <tr>
-                <td>SOG</td>
-                <td style="text-align: right">{{rmc.SOG | number:1}} Kn</td>
-              </tr>
-              <tr>
-                <td>COG</td>
-                <td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td colspan="2" style="text-align: right">{{rmc.s_time}}</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Navi</h3>
-          <div class="card-body cardRouterBody">
-            <table class="panelTable">
-              <tr>
-                <td>Speed</td>
-                <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
-              </tr>
-              <tr>
-                <td>Head</td>
-                <td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                <td>Depth</td>
-                <td style="text-align: right">{{depth.depth | number:1}} m</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Diag</h3>
-          <div class="card-body cardRouterBody">
-            <table class="panelTable">
-              <tr>
-                <td>Battery Svc</td>
-                <td style="text-align: right">{{V0.value | number:1}} V</td>
-              </tr>
-              <tr>
-                <td>Battery Eng</td>
-                <td style="text-align: right">{{V1.value | number:1}} V</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                  <td>CPU</td>
-                  <td style="text-align: right">{{CPUTemp.value | number:1}} &deg;C</td>
-              </tr>
-                <tr>
-                    <td>Equipment</td>
-                    <td style="text-align: right">{{AirTemp.value | number:1}} &deg;C</td>
-                </tr>
-                <tr>
-                    <td>Engine</td>
-                    <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td style="text-align: right">{{engine.status}}</td>
-                </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Meteo</h3>
-          <div class="card-body cardRouterBody">
-            <table class="panelTable">
-              <tr>
-                <td>Cab Temp</td>
-                <td style="text-align: right">{{CabinTemp.value | number:1}} &deg;C</td>
-              </tr>
-              <tr>
-                <td>Water Temp</td>
-                <td style="text-align: right">{{WaterTemp | number:1}} &deg;C</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                <td>Press.</td>
-                <td style="text-align: right">{{Barometer.value | number:3}} MB</td>
-              </tr>
-              <tr>
-                <td>Humidity</td>
-                <td style="text-align: right">{{Humidity.value | number:1}}%</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-        <div class="card cardRouter">
-          <h3 class="card-header">Gyro</h3>
-          <div class="card-body cardRouterBody">
-            <table class="panelTable">
-              <tr>
-                <td>Head</td>
-                <td style="text-align: right">{{HEAD.value | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
-              </tr>
-              <tr>
-                <td>Roll</td>
-                <td style="text-align: right">{{ROLL.value | number:1}}&deg;</td>
-              </tr>
-              <tr>
-                <td>Pitch</td>
-                <td style="text-align: right">{{PITCH.value | number:1}}&deg;</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 </body>
 
 </html>
