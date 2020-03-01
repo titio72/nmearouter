@@ -7,80 +7,66 @@
   <title>Andrea Boni NMEARouter</title>
   <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
   <script src="js/nmearouter.js?b14"></script>
-  <link href="css/nmearouter.css" rel="stylesheet" />
+  <link href="css/nmearouter.css" rel="stylesheet"/>
   <link rel="icon" type="image/png" href="nmeasail.png">
-  <script>
-    $.getScript("https://maps.googleapis.com/maps/api/js?key=" + getGKey(), function(data, textStatus, jqxhr) {
-      console.log(data); //data returned
-      console.log(textStatus); //success
-      console.log(jqxhr.status); //200
-      console.log('GMAP API Lodaded');
-      $.getScript("js/maplabel.js", function(d, t, j) {
-        console.log('GMAP Labels API Lodaded');
-      });
-    });
-
-
-  </script>
 
   <style>
-    /* Always set the map height explicitly to define the size of the div
-         * element that contains the map. */
-    #map {
-      height: 100%;
-    }
 
-    .documentList {
+    .legs-list {
       overflow-y: scroll;
       padding-right: 15px;
+      padding-left: 15px;
       height: 400px;
+      margin-bottom: 5px;
     }
 
-    .card-router-body {
-      height: 320px;
-      padding: 10px;
+    .leg-navigator {
+      border-color: darkslategrey;
+      border-width: 2px; 
+      border-radius: 5px;
+      border-style: solid;
+      padding: 5px;
+      margin-bottom: 5px;
     }
 
-    .card-router {
-      margin-bottom: 10px;
+    .tile_c {
     }
 
-    .info_cell {
-      padding-bottom: 12px;
-      padding-top: 6px;
-      padding-right: 12px;
+    .card-trip-body {
+      height: 85px;
+    }
+
+    .tile-title {
+      font-size: larger;
+      text-align: left;
+    }
+
+    .tile-value1 {
+      font-size: medium;
+      text-align: right;
+    }
+
+    .tile-value2 {
+      font-size: medium;
+      text-align: right;
+    }
+
+    .tile-value3 {
+      font-size: medium;
+      text-align: right;
+    }
+
+    .tile-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-gap: 5px;
     }
 
     .chart-canvas {
-      min-height: 100%;
-      min-width: 100%;
+      margin-top: 5px;
+      min-width: 300px;
     }
 
-    #mapToolbar {
-      position: absolute;
-      bottom: 30px;
-      left: 20px;
-
-    }
-
-    .tile {
-      background-color: darkslategrey;
-      min-width: 180px;
-      height: 180px;
-      width: 100%;
-      margin: 5px;
-      padding: 5px;
-    }
-
-    .tile_value1 {
-      font-size: x-large;
-      text-align: right;
-    }
-
-    .tile_value2 {
-      font-size: x-large;
-      text-align: right;
-    }
 
   </style>
 
@@ -88,30 +74,42 @@
 
 <script type="text/javascript">
 
-  function getUrlVars() {
-      var vars = {};
-      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-          vars[key] = value;
-      });
-      return vars;
-  }
-
   var tripId = getUrlVars()["trip"];
-  var tripName = getUrlVars()["name"];
+  var tripName = decodeURI(getUrlVars()["name"]);
   var tripObject = httpGetTripAnalytics(tripId);
   var current = tripObject;
   var currentLegIx = 0;
   var pieChart;
   var speedDistrChart;
   var speedChart;
+  var listVisible = false;
 
-  tripObject["startT"] = Date.parse(tripObject.start);
-  tripObject["endT"] = Date.parse(tripObject.end);
-  tripObject.legs.forEach(element => {
-    element["startT"] = Date.parse(element.start);
-    element["endT"] = Date.parse(element.end);
-  });
-  
+  document.addEventListener('keydown', anKeyPress);
+
+  {
+    tripObject["startT"] = Date.parse(tripObject.start);
+    tripObject["endT"] = Date.parse(tripObject.end);
+    tripObject["max01NMSpeedTime0T"] = Date.parse(tripObject.max01NMSpeedTime0);
+    tripObject["max01NMSpeedTime1T"] = Date.parse(tripObject.max01NMSpeedTime1);
+    tripObject["max05NMSpeedTime0T"] = Date.parse(tripObject.max05NMSpeedTime0);
+    tripObject["max05NMSpeedTime1T"] = Date.parse(tripObject.max05NMSpeedTime1);
+    tripObject["max10NMSpeedTime0T"] = Date.parse(tripObject.max10NMSpeedTime0);
+    tripObject["max10NMSpeedTime1T"] = Date.parse(tripObject.max10NMSpeedTime1);
+    tripObject["maxAvgSpeedTimeT"] = Date.parse(tripObject.maxAvgSpeedTime);
+    tripObject["maxSampledSpeedTimeT"] = Date.parse(tripObject.maxSampledSpeedTime);
+    tripObject.legs.forEach(element => {
+      element["startT"] = Date.parse(element.start);
+      element["endT"] = Date.parse(element.end);
+      element["max01NMSpeedTime0T"] = Date.parse(element.max01NMSpeedTime0);
+      element["max01NMSpeedTime1T"] = Date.parse(element.max01NMSpeedTime1);
+      element["max05NMSpeedTime0T"] = Date.parse(element.max05NMSpeedTime0);
+      element["max05NMSpeedTime1T"] = Date.parse(element.max05NMSpeedTime1);
+      element["max10NMSpeedTime0T"] = Date.parse(element.max10NMSpeedTime0);
+      element["max10NMSpeedTime1T"] = Date.parse(element.max10NMSpeedTime1);
+      element["maxAvgSpeedTimeT"] = Date.parse(element.maxAvgSpeedTime);
+      element["maxSampledSpeedTimeT"] = Date.parse(element.maxSampledSpeedTime);
+    });
+  }
 
   app.controller("infoController", function ($scope) {
     $scope.trip = tripObject;
@@ -122,6 +120,23 @@
     $scope.numberOfLegs = tripObject.legs.length;
     loadMe();
   });
+
+  function getUrlVars() {
+      var vars = {};
+      var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  }
+
+  function dateToYMD(date) {
+    d = date.getDate();
+    m = date.getMonth() + 1; //Month from 0 to 11
+    y = date.getFullYear();
+    h = date.getHours();
+    mm = date.getMinutes();
+    return '' + y + (m<=9 ? '0' + m : m) + (d <= 9 ? '0' + d : d) + (h <= 9 ? '0' + h : h) + (mm <= 9 ? '0' + mm : mm);
+  }
 
   function getTime(s) {
     var t = s.split(":");
@@ -310,15 +325,6 @@
     return panel;
   }
   
-  function dateToYMD(date) {
-    d = date.getDate();
-    m = date.getMonth() + 1; //Month from 0 to 11
-    y = date.getFullYear();
-    h = date.getHours();
-    mm = date.getMinutes();
-    return '' + y + (m<=9 ? '0' + m : m) + (d <= 9 ? '0' + d : d) + (h <= 9 ? '0' + h : h) + (mm <= 9 ? '0' + mm : mm);
-  }
-
   function resetSpeedChart() {
     if (speedChart!=null) {
       speedChart.data.datasets = [{
@@ -350,7 +356,7 @@
     speedChart.data.datasets = [
       getSerie(speedSerie, "SOG", "v",    "blue"),
       getSerie(speedSerie, "SOG", "vMin", "gray"),
-      getSerie(speedSerie, "SOG", "vMax", "red")
+      getSerie(speedSerie, "SOG", "vMax", "orange")
     ];
     speedChart.update();
   }
@@ -403,11 +409,10 @@
       nextLeg();
   }
 
-  document.addEventListener('keydown', anKeyPress);
-
+  
   class MyTile extends HTMLElement {
     static get observedAttributes() {
-      return ['title', 'value1', 'value2'];
+      return ['title', 'value1', 'value2', 'value3'];
     }
     
     get title() {
@@ -423,97 +428,158 @@
     }
 
     connectedCallback() {
-      this.innerHTML = "<div class='tile'>"+
-        "<H2>" + this.getAttribute('title') + "</H2>" +
-        "<div class='tile_value1'>" + this.getAttribute('value1') + "</div>" +
-        "<div class='tile_value2'>" + this.getAttribute('value2') + "</div>" +
-        "</div>";
+      var v1 = this.getAttribute('value1'); v1 = (v1==null)?"":v1;
+      var v2 = this.getAttribute('value2'); v2 = (v2==null)?"":v2;
+      var v3 = this.getAttribute('value3'); v3 = (v3==null)?"":v3;
+
+      this.innerHTML = "<div class='card-router card-trip'>"
+        + "  <div class='card-router-header card-trip-header'>" + this.getAttribute('title') + "</div>"
+        + "  <div class='card-router-body card-trip-body'>"
+        + "    <div class='tile_value1'>" + v1 + "</div>"
+        + "    <div class='tile_value2'>" + v2 + "</div>"
+        + "    <div class='tile_value3'>" + v3 + "</div>"
+        + "  </div>"
+        + "</div>";
     }
   }
 
   customElements.define('my-tile', MyTile);
+
+  function expandLegList(toggle) {
+    listVisible = !listVisible;
+    if (listVisible)
+      $('#legListContainer').collapse('show');
+    else
+      $('#legListContainer').collapse('hide');
+    toggle.className = listVisible?"glyphicon glyphicon-chevron-up":"glyphicon glyphicon-chevron-down";
+  }
 
 </script>
 
 <body ng-app="nmearouter">
 
 <div id="nmearouter" class="container-fluid" ng-controller="infoController">
-  <div class="row"><div class="col-12">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
-        <li class="breadcrumb-item active">Trip</li>
-    </ol>
-  </div></div>
-  <div class="row">
-    <div style="min-width: 500px; min-height: 500px;" class="col">
-      <div class="alert alert-warning">
+    <div class="row">
+        <div class="col-12">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
+                <li class="breadcrumb-item active">Trip</li>
+            </ol>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col" id="legPanel">
+            <div class="leg-navigator">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left"
+                                                                      aria-hidden="true"></span></a> {{legLabel}} of
+                            {{numberOfLegs}} Legs&nbsp;
+                            <a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right"
+                                                                  aria-hidden="true"></span></a> "{{tripName}}"
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"
+                                  onclick="expandLegList(this);"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="collapse" id="legListContainer">
+                <div class="legs-list" id="legList">
+                    <div class="row alert alert-success">
+                        <div class="col-2">Leg</div>
+                        <div class="col-4">Date & time</div>
+                        <div class="col-3">Duration & dist</div>
+                        <div class="col-3">Sail dur & dist</div>
+                    </div>
+                    <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
+                        <div class="col-2">Trip</div>
+                        <div class="col-4">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}<br>{{trip.endT | date:'dd/MM/yyyy
+                            HH:mm'}}
+                        </div>
+                        <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
+                            number:2}}KN
+                        </div>
+                        <div class="col-3">{{trip.navEngineOffTime}}<br>{{trip.navEngineOffDist | number:2}}NM<br>{{trip.speedSailAverage
+                            | number:2}}KN
+                        </div>
+                    </div>
+                    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
+                         onclick="switchLeg(this)" id="L{{leg.leg}}">
+                        <div class="col-2">Leg {{leg.leg}}</div>
+                        <div class="col-4">{{leg.startT | date:'dd/MM/yy HH:mm'}}<br>{{leg.endT | date:'dd/MM/yy
+                            HH:mm'}}
+                        </div>
+                        <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
+                            number:2}}KN
+                        </div>
+                        <div class="col-3">{{leg.navEngineOffTime}}<br>{{leg.navEngineOffDist | number:2}}NM<br>{{leg.speedSailAverage
+                            | number:2}}KN
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col">
-          <a href="" onclick="previousLeg();"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
-          &nbsp;{{legLabel}} of {{numberOfLegs}} Legs&nbsp;<a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
-          &nbsp;"{{tripName}}"
+            <div class="tile-container">
+                <div class="tile_c">
+                    <my-tile title="Trip" value1="{{tripName}}" value2="{{current.start | date:'dd/MM/yy'}}"
+                             value3="{{current.end | date:'dd/MM/yy'}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Duration" value1="Tot {{current.totalTime}}"
+                             value2="Nav {{current.navTime}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Sail" value1="{{current.navEngineOffTime}}"
+                             value2="{{current.navEngineOffDist | number:2}} NM"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Engine" value1="{{current.navEngineOn_Time}}"
+                             value2="{{current.navEngineOn_Dist | number:2}} NM"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Best 1 NM" value1="{{current.max01NMSpeed | number:2}} NM"
+                             value2="{{current.max01NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
+                             value3="{{current.max01NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Best 5 NM" value1="{{current.max05NMSpeed | number:2}} NM"
+                             value2="{{current.max05NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
+                             value3="{{current.max05NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Best 10 NM" value1="{{current.max10NMSpeed | number:2}} NM"
+                             value2="{{current.max10NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
+                             value3="{{current.max10NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Best 30s Speed" value1="{{current.maxAvgSpeed | number:2}} NM"
+                             value2="{{current.maxAvgSpeedTimeT | date:'dd/MM/yy HH:mm'}}" value3=""></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Best Speed" value1="{{current.maxSampledSpeed | number:2}} NM"
+                             value2="{{current.maxSampledSpeedTimeT | date:'dd/MM/yy HH:mm'}}" value3=""></my-tile>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="documentList" id="legList">
-        <div class="row alert alert-success">
-          <div class="col-2">Leg</div>
-          <div class="col-4">Date & time</div>
-          <div class="col-3">Duration & dist</div>
-          <div class="col-3">Sail dur & dist</div>
-        </div>
-        <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
-          <div class="col-2">Trip</div>
-          <div class="col-4">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}<br>{{trip.endT | date:'dd/MM/yyyy
-              HH:mm'}}
-          </div>
-          <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
-              number:2}}KN
-          </div>
-          <div class="col-3">{{trip.navEngineOffTime}}<br>{{trip.navEngineOffDist | number:2}}NM<br>{{trip.speedSailAverage
-              | number:2}}KN
-          </div>
-        </div>
-        <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
-              onclick="switchLeg(this)" id="L{{leg.leg}}">
-          <div class="col-2">Leg {{leg.leg}}</div>
-          <div class="col-4">{{leg.startT | date:'dd/MM/yy HH:mm'}}<br>{{leg.endT | date:'dd/MM/yy HH:mm'}}
-          </div>
-          <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
-              number:2}}KN
-          </div>
-          <div class="col-3">{{leg.navEngineOffTime}}<br>{{leg.navEngineOffDist | number:2}}NM<br>{{leg.speedSailAverage
-              | number:2}}KN
-          </div>
-        </div>
-      </div>
-      <div style="width: 100%; background-color: darkturquoise;" class="row">
-        <div style="margin: 3px;" class="col-auto"><my-tile title="Trip" value1="{{tripName}}" value2=""></my-tile></div>
-        <div style="margin: 3px;" class="col-auto"><my-tile title="Dates" value1="{{current.start | date:'dd/MM/yy'}}" value2="{{current.end | date:'dd/MM/yy'}}"></my-tile></div>
-        <div style="margin: 3px;" class="col-auto"><my-tile title="Times" value1="Tot {{current.totalTime}}" value2="Nav {{current.NavTime}}"></my-tile></div>
-        <div style="margin: 3px;" class="col-auto"><my-tile title="Sail" value1="{{current.navEngineOffTime}}" value2="{{current.navEngineOffDist | number:2}}NM"></my-tile></div>
-        <div style="margin: 3px;" class="col-auto"><my-tile title="Engine" value1="{{current.navEngineOn_Time}}" value2="{{current.navEngineOn_Dist | number:2}}NM"></my-tile></div>
-      </div>
     </div>
-    <div class="col">
-      <div class="row">
-        <div style="min-width: 300px; min-height: 300px;" class="col">
-          <div>
+    <div class="row">
+        <div class="col-xl-4 col-md-6 col-sm-12">
             <canvas class="chart-canvas" id="pieChart"></canvas>
-          </div>
         </div>
-        <div style="min-width: 400px; min-height: 300px;" class="col">
-          <div>
-              <canvas class="chart-canvas" id="speedDistrChart"></canvas>
-          </div>
+        <div class="col-xl-4 col-md-6 col-sm-12">
+            <canvas class="chart-canvas" id="speedDistrChart"></canvas>
         </div>
-        <div style="min-width: 400px; min-height: 300px;" class="col">
-          <div>
+        <div class="col-xl-4 col-md-12 col-sm-12">
             <canvas class="chart-canvas" id="speedChart"></canvas>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 </body>
 </html>

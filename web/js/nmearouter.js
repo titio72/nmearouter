@@ -118,7 +118,7 @@ function httpLoadSpeedAnalysisDateRange(dt0, dt1, cback) {
       var dataset = new Object();
       
       dataset.label = "Distance";
-      dataset.backgroundColor = "#FF0000";
+      dataset.backgroundColor = "orange";
       dataset.data = [];
       
       var sr = json.serie;
@@ -186,9 +186,9 @@ function onhttpresult(cback) {
 function getDataset(caption, sr, min, avg, max) {
   var data = new Object();
   data.datasets = [];
-  if (min>0) data.datasets.push(fillDataset(caption + "Min", 	sr, "vMin", "#555555", "#777777"));
-  if (avg>0) data.datasets.push(fillDataset(caption, 			sr, "v", 	"#555555", "#22FF22"));
-  if (max>0) data.datasets.push(fillDataset(caption + "Max", 	sr, "vMax", "#FF0000", "#FF2222"));
+  if (min>0) data.datasets.push(fillDataset(caption + "Min", 	sr, "vMin", "gray", "darkgray"));
+  if (avg>0) data.datasets.push(fillDataset(caption, 			    sr, "v", 	  "blue", "darkblue"));
+  if (max>0) data.datasets.push(fillDataset(caption + "Max", 	sr, "vMax", "red", "darkred"));
   return data;
 }
 

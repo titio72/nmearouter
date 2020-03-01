@@ -35,13 +35,14 @@
       padding: 5px 5px;
     }
 
-    .card-router-body {
-      height: 320px;
-      padding: 10px;
+    .card-track-header {
     }
 
-    .card-router {
-      margin-bottom: 10px;
+    .card-track-body {
+      height: 320px;
+    }
+
+    .card-track {
     }
 
     .info_cell {
@@ -229,9 +230,9 @@
         c.destroy();
       }
       var datasets = [];
-      datasets.push(getSerie(data, "SOG", "v",    "#22FF22"));
-      datasets.push(getSerie(data, "SOG", "vMin", "#777777"));
-      datasets.push(getSerie(data, "SOG", "vMax", "#FF2222"));
+      datasets.push(getSerie(data, "SOG", "v",    "blue"));
+      datasets.push(getSerie(data, "SOG", "vMin", "gray"));
+      datasets.push(getSerie(data, "SOG", "vMax", "orange"));
       var c1 = new Chart(ctx, {
         type: 'line',
         data: {
@@ -287,9 +288,9 @@
         c.destroy();
       }
       var datasets = [];
-      if (min!=0) datasets.push(getSerie(data, serie, "vMin", "#777777"));
-      if (avg!=0) datasets.push(getSerie(data, serie, "v",    "#22FF22"));
-      if (max!=0) datasets.push(getSerie(data, serie, "vMax", "#FF2222"));
+      if (min!=0) datasets.push(getSerie(data, serie, "vMin", "gray"));
+      if (avg!=0) datasets.push(getSerie(data, serie, "v",    "blue"));
+      if (max!=0) datasets.push(getSerie(data, serie, "vMax", "orange"));
       var c1 = new Chart(ctx, {
         type: 'line',
         data: {
@@ -465,20 +466,27 @@
       <li class="breadcrumb-item active">Track</li>
     </ol>
     <div class="row">
-      <div class="col-lg-4 col-md-6">
-        <div id="TripsPanel" class="card card-router" ng-controller="myCtrl">
-          <h3 class="card-header">Tracking <span style="float: right" class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="refreshTrips();"></span></h3>
-          <div id="panel_details" class="card-body card-router-body">
-            <div class="table-responsive documentList" style="height: 100%">
-              <table class="table table-sm">
-                <tr ng-repeat="t in days.trips">
-                  <td>
-                    <button id="btnTripIt|{{t.trip}}|{{t.lastDay}}" type="button" class="btn btn-circle btn-secondary" onclick="tripIt(this.id)">
-                      <span class="glyphicon glyphicon-bookmark circle-icon-content" aria-hidden="true"></span>
-                    </button>
-                  </td>
-                  <td>
-                    <button ng-if="t.tripLabel!=''" id="btnTripLabel|{{t.trip}}|{{t.tripLabel}}" type="button" class="btn btn-circle btn-secondary" onclick="editName(this.id);">
+        <div class="col-lg-4 col-md-6">
+            <div id="TripsPanel" class="card-router card-track" ng-controller="myCtrl">
+                <div class="card-router-header card-track-header">Tracking <span style="float: right"
+                                                                                 class="glyphicon glyphicon-refresh"
+                                                                                 aria-hidden="true"
+                                                                                 onclick="refreshTrips();"></span></div>
+                <div id="panel_details" class="card-router-body card-track-body">
+                    <div class="table-responsive documentList" style="height: 100%">
+                        <table class="table table-sm">
+                            <tr ng-repeat="t in days.trips">
+                                <td>
+                                    <button id="btnTripIt|{{t.trip}}|{{t.lastDay}}" type="button"
+                                            class="btn btn-circle btn-secondary" onclick="tripIt(this.id)">
+                                        <span class="glyphicon glyphicon-bookmark circle-icon-content"
+                                              aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button ng-if="t.tripLabel!=''" id="btnTripLabel|{{t.trip}}|{{t.tripLabel}}"
+                                            type="button" class="btn btn-circle btn-secondary"
+                                            onclick="editName(this.id);">
                       <span class="glyphicon glyphicon-pencil circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
@@ -503,36 +511,36 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Map</h3>
-          <div class="card-body card-router-body" style="padding: 0%; margin: 0%">
-            <div id="map" style="width: 100%; height: 100%"></div>
-            <div id="mapToolbar">
-              <button name="dwlGPX" type="button" class="btn btn-info" onclick="downloadGPX()">
-                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>GPX
-              </button>
-              <button name="dwlMKL" type="button" class="btn btn-info" onclick="downloadKML()">
-                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>KML
-              </button>
-            </div>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Map</div>
+                <div class="card-router-body card-track-body" style="padding: 0%; margin: 0%">
+                    <div id="map" style="width: 100%; height: 100%"></div>
+                    <div id="mapToolbar">
+                        <button name="dwlGPX" type="button" class="btn btn-info" onclick="downloadGPX()">
+                            <span class="glyphicon glyphicon-save" aria-hidden="true"></span>GPX
+                        </button>
+                        <button name="dwlMKL" type="button" class="btn btn-info" onclick="downloadKML()">
+                            <span class="glyphicon glyphicon-save" aria-hidden="true"></span>KML
+                        </button>
+                    </div>
+                </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Trip</h3>
-          <div id="panelInfo" class="card-body card-router-body" ng-controller="infoController">
-              <table>
-                  <tr ng-if="trip.name!=''">
-                      <td class="info_cell">Name</td>
-                      <td class="info_cell">{{trip.name}}</td>
-                  </tr>
-                  <tr>
-                      <td class="info_cell">Dates</td>
-                      <td class="info_cell">{{trip.start}} - {{trip.end}}</td>
-                  </tr>
-                  <tr>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Trip</div>
+                <div id="panelInfo" class="card-router-body card-track-body" ng-controller="infoController">
+                    <table>
+                        <tr ng-if="trip.name!=''">
+                            <td class="info_cell">Name</td>
+                            <td class="info_cell">{{trip.name}}</td>
+                        </tr>
+                        <tr>
+                            <td class="info_cell">Dates</td>
+                            <td class="info_cell">{{trip.start}} - {{trip.end}}</td>
+                        </tr>
+                        <tr>
                       <td class="info_cell">Trip</td>
                       <td class="info_cell"><b>{{trip.dist | number:2}}NM ({{trip.distSailing | number:2}}NM)</b></td>
                   </tr>
@@ -567,62 +575,62 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Speed</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="speedChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Speed</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="speedChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Speed Analysis</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="speedAnalysisChart"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Speed Analysis</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="speedAnalysisChart"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Wind</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="windChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Wind</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="windChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Wind Angle</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="windAngleChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Wind Angle</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="windAngleChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
       <!--div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Temperature</h3>
-          <div class="card-body card-router-body">
+        <div class="card-router card-track">
+          <div class="card-router-header card-track-header">Temperature</div>
+          <div class="card-router-body card-track-body">
             <canvas class="chart-canvas" id="tempChart" ondblclick="resetZoom(this.id);"></canvas>
           </div>
         </div>
       </div-->
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Pressure</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="pressChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Pressure</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="pressChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="col-lg-4 col-md-6" >
-        <div class="card card-router">
-          <h3 class="card-header">Humidity</h3>
-          <div class="card-body card-router-body">
-            <canvas class="chart-canvas" id="humChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Humidity</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="humChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   </div>
 </body>
