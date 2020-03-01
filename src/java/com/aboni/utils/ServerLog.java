@@ -133,6 +133,14 @@ public class ServerLog implements LogAdmin {
 	}
 
 	/* (non-Javadoc)
+	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
+	 */
+	@Override
+	public void errorForceStacktrace(final String msg, final Throwable t) {
+		lg.log(Level.SEVERE, msg, t);
+	}
+
+	/* (non-Javadoc)
 	 * @see com.aboni.utils.Log#Warning(java.lang.String)
 	 */
 	@Override

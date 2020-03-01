@@ -148,22 +148,22 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.17.v20190418</version>
+            <version>9.4.27.v20200227</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-client</artifactId>
-            <version>9.4.17.v20190418</version>
+            <version>9.4.27.v20200227</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>javax-websocket-server-impl</artifactId>
-            <version>9.4.17.v20190418</version>
+            <version>9.4.27.v20200227</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>javax-websocket-client-impl</artifactId>
-            <version>9.4.17.v20190418</version>
+            <version>9.4.27.v20200227</version>
         </dependency>
         <dependency>
             <groupId>de.micromata.jak</groupId>

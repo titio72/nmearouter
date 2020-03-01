@@ -162,12 +162,17 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             log.error(getMsg(NMEAAgentImpl.this, msg));
         }
 
-        @Override
-        public void error(String msg, Throwable t) {
-            log.error(getMsg(NMEAAgentImpl.this, msg), t);
-        }
+		@Override
+		public void error(String msg, Throwable t) {
+			log.error(getMsg(NMEAAgentImpl.this, msg), t);
+		}
 
-        @Override
+		@Override
+		public void errorForceStacktrace(String msg, Throwable t) {
+			log.errorForceStacktrace(getMsg(NMEAAgentImpl.this, msg), t);
+		}
+
+		@Override
         public void warning(String msg) {
             log.warning(getMsg(NMEAAgentImpl.this, msg));
         }

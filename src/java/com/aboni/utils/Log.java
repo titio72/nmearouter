@@ -6,6 +6,8 @@ public interface Log {
 
 	void error(String msg, Throwable t);
 
+	void errorForceStacktrace(String msg, Throwable t);
+
 	void warning(String msg);
 
 	void info(String msg);
