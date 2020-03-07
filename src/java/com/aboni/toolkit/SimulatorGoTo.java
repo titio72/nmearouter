@@ -1,18 +1,7 @@
 package com.aboni.toolkit;
 
-import com.aboni.geo.NavSimulator;
-import com.aboni.geo.PositionHistory;
-import com.aboni.geo.Track2GPX;
-import com.aboni.misc.Utils;
-import net.sf.marineapi.nmea.util.Position;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class SimulatorGoTo {
-
+/*
 	private static final Position FROM = new Position(43.051326, 9.839279); // Capraia
 	private static final Position TO = new Position(43.679416, 10.267679); // Marina di Pisa
 	private static final String POLARS = "web/dufour40.csv";
@@ -63,6 +52,6 @@ public class SimulatorGoTo {
 		w = Utils.normalizeDegrees0To360( w + (((double)t/1000d/60d/60d) * 5.0));
 		s.setWind(9.0, w);
 	}
-
+*/
 
 }

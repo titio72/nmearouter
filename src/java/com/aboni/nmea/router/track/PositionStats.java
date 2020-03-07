@@ -43,5 +43,4 @@ public class PositionStats {
             return new Position(avgLat, avgLon);
         }
 	}
-	
 }

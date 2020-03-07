@@ -24,7 +24,8 @@ public class JSONWebService implements WebService {
     }
 
     @Override
-    public void doIt(ServiceConfig config, ServiceOutput response) {
+    public final void doIt(ServiceConfig config, ServiceOutput response) {
+        ServerLog.getLogger().info("JSONWebService invoked {" + this.getClass().getName() + "} " + config.dump());
         try {
             setResponse(response, getJsonObjectResult(config));
         } catch (Exception e) {
@@ -48,7 +49,7 @@ public class JSONWebService implements WebService {
         response.setContentType(APPLICATION_JSON);
         try {
             if (res!=null) {
-                response.getWriter().append(res.toString(1));
+                response.getWriter().append(res.toString(2));
                 response.ok();
             } else {
                 response.error("Invalid response detected: something went wrong");
@@ -58,17 +59,17 @@ public class JSONWebService implements WebService {
         }
     }
 
-    protected static JSONObject getOk() {
+    protected static final JSONObject getOk() {
         return getOk("Ok");
     }
 
-    protected static JSONObject getOk(String msg) {
+    protected static final JSONObject getOk(String msg) {
         JSONObject res = new JSONObject();
         res.put("msg", msg);
         return res;
     }
 
-    protected static JSONObject getError(String message) {
+    protected static final JSONObject getError(String message) {
         JSONObject res = new JSONObject();
         res.put("error", message);
         return res;

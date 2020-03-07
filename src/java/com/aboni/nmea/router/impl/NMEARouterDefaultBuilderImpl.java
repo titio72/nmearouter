@@ -24,7 +24,7 @@ import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.filters.FilterSetBuilder;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
-import com.google.inject.Injector;
+import com.aboni.utils.ThingsFactory;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -34,31 +34,29 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter router;
     private final String confFile;
-    private final Injector injector;
 	private static final boolean ENABLE_GPS_TIME = true;
 	private static final boolean ENABLE_AP = false;
 
-    public NMEARouterDefaultBuilderImpl(Injector injector, String confFile) {
-    	this.confFile = confFile;
-    	this.injector = injector;
+    public NMEARouterDefaultBuilderImpl(String confFile) {
+        this.confFile = confFile;
     }
     
     @Override
     public NMEARouterBuilder init() {
     	Router conf;
 		try {
-			conf = parseConf(confFile);
-	        NMEAAgentBuilder builder = injector.getInstance(NMEAAgentBuilder.class);
-	        router = buildRouter(conf, builder);
-	        return this;
-		} catch (MalformedConfigurationException e) {
+            conf = parseConf(confFile);
+            NMEAAgentBuilder builder = ThingsFactory.getInstance(NMEAAgentBuilder.class);
+            router = buildRouter(conf, builder);
+            return this;
+        } catch (MalformedConfigurationException e) {
 			Logger.getGlobal().log(Level.SEVERE, "Error", e);
 		}
         return null;
     }
 
     private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
-        NMEARouter r = injector.getInstance(NMEARouter.class);
+        NMEARouter r = ThingsFactory.getInstance(NMEARouter.class);
 
 		configureGPSPriority(conf, r);
 
@@ -97,7 +95,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 		com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
 		if (gpsPriorityConf!=null) {
             List<String> gpsPriority = gpsPriorityConf.getGPSSource();
-            NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor(injector.getInstance(NMEACache.class));
+            NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(NMEACache.class));
             proc.addAllGPS();
             for (int i = 0; i < gpsPriority.size(); i++) {
                 proc.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */);
@@ -153,7 +151,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildStreamDump(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEA2FileAgent dumper = new NMEA2FileAgent(
-                injector.getInstance(NMEACache.class),
+                ThingsFactory.getInstance(NMEACache.class),
                 "Log", q);
         r.addAgent(dumper);
         handlePersistentState(dumper, null);
@@ -163,8 +161,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	private void buildDPTStats(NMEARouter r) {
         QOS q = createBuiltInQOS();
         DepthStatsAgent a = new DepthStatsAgent(
-        		injector.getInstance(NMEACache.class), 
-        		"Depth", q);
+                ThingsFactory.getInstance(NMEACache.class),
+                "Depth", q);
         r.addAgent(a);
         a.start();
     }
@@ -173,7 +171,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     	if (System.getProperty("os.arch").startsWith("arm")) {
             QOS q = createBuiltInQOS();
             PowerLedAgent pwrLed = new PowerLedAgent(
-                    injector.getInstance(NMEACache.class),
+                    ThingsFactory.getInstance(NMEACache.class),
                     "PowerLed", q);
             r.addAgent(pwrLed);
             pwrLed.start();
@@ -183,7 +181,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildAutoPilot(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEAAutoPilotAgent ap = new NMEAAutoPilotAgent(
-                injector.getInstance(NMEACache.class),
+                ThingsFactory.getInstance(NMEACache.class),
                 "SmartPilot", q);
         r.addAgent(ap);
         ap.start();
@@ -192,7 +190,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildFanTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
         FanAgent fan = new FanAgent(
-                injector.getInstance(NMEACache.class),
+                ThingsFactory.getInstance(NMEACache.class),
                 "FanManager", q);
         r.addAgent(fan);
         fan.start();
@@ -201,7 +199,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildEngineDetector(NMEARouter r) {
         QOS q = createBuiltInQOS();
         EngineDetectionAgent eng = new EngineDetectionAgent(
-                injector.getInstance(NMEACache.class),
+                ThingsFactory.getInstance(NMEACache.class),
                 "EngineManager", q);
         r.addAgent(eng);
         eng.start();
@@ -210,7 +208,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEASystemTimeGPS gpsTime = new NMEASystemTimeGPS(
-                injector.getInstance(NMEACache.class),
+                ThingsFactory.getInstance(NMEACache.class),
                 "GPSTime", q);
         r.addAgent(gpsTime);
         handleFilter(gpsTime);

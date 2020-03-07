@@ -1,7 +1,5 @@
 package com.aboni.nmea.router.services.impl;
 
-import com.aboni.nmea.router.services.ServletRequestServiceConfig;
-import com.aboni.nmea.router.services.ServletResponseOutput;
 import com.aboni.nmea.router.services.WebService;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import org.eclipse.jetty.server.Request;

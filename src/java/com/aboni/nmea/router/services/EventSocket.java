@@ -15,17 +15,12 @@ import java.util.Map;
 public class EventSocket
 {
 	private static final Map<Session, MySession> sessions = new HashMap<>();
-
 	private static NMEAStream stream;
-	
-	public static void setNMEAStream(NMEAStream stream) {
+
+    public static void setNMEAStream(NMEAStream stream) {
 		EventSocket.stream = stream;
 	}
 	
-	public EventSocket() {
-		ServerLog.getLogger().info("Init web-socket");
-	}
-
     @OnOpen
 	public void onWebSocketConnect(Session session)
     {
@@ -100,7 +95,6 @@ public class EventSocket
 					}
 				}
 			}
-			
 		}
     }
 }

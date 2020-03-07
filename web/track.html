@@ -100,7 +100,6 @@
     $scope.days = days;
   });
 
-
   function showTrip(d) {
     var split = d.name.split("."); 
     dateFrom = split[0];
@@ -171,22 +170,7 @@
   }
 
   function refreshSpeedChart(chart) {
-
-
     var ctx = document.getElementById(chart);
-    /*ctx.onmousemove = function (evt) {
-      if (speedChart != null) {
-        var el = speedChart.getElementsAtEvent(evt);
-        if (el.length > 0) {
-          t = speedChart.data.datasets[0].data[el[0]._index].x;
-          point = binarySearch(path, t, 0, path.length - 1);
-          setMarker(point.lat, point.lng, "Here");
-        }
-      }
-      //do something with the el object to display other information
-      //elsewhere on the page
-    }*/
-
     httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
       drawSpeedChart(res, chart);
     });
@@ -324,7 +308,7 @@
 
   function refreshMeteoCharts() {
     httpLoadAllMeteoDateRange(dateFrom + "0000" , dateTo + "2359", function(res) {
-      //drawMeteoChart(res, "tempChart", "AT0", 1, 1, 1);
+      drawMeteoChart(res, "tempChart", "AT0", 1, 1, 1);
       drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
       drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
       drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
@@ -421,16 +405,6 @@
     window.open("http://" + window.location.hostname + ":1112/track?dateFrom=" + dateFrom +
       "&dateTo=" + dateTo + "&format=kml", "_blank");
   }
-
-  /*
-  function binarySearch(d, t, s, e) {
-    m = Math.floor((s + e) / 2);
-    if (t == d[m].time) return d[m];
-    if ((e - 1) == s) return Math.abs(d[s].time - t) > Math.abs(d[e].time - t) ? d[e] : d[s];
-    if (t > d[m].time) return binarySearch(d, t, m, e);
-    if (t < d[m].time) return binarySearch(d, t, s, m);
-  }
-  */
 
   function refreshTrips() {
     days = httpGetCruisingDays();
@@ -607,14 +581,6 @@
                 </div>
             </div>
         </div>
-      <!--div class="col-lg-4 col-md-6" >
-        <div class="card-router card-track">
-          <div class="card-router-header card-track-header">Temperature</div>
-          <div class="card-router-body card-track-body">
-            <canvas class="chart-canvas" id="tempChart" ondblclick="resetZoom(this.id);"></canvas>
-          </div>
-        </div>
-      </div-->
         <div class="col-lg-4 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Pressure</div>
@@ -628,6 +594,14 @@
                 <div class="card-router-header card-track-header">Humidity</div>
                 <div class="card-router-body card-track-body">
                     <canvas class="chart-canvas" id="humChart" ondblclick="resetZoom(this.id);"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card-router card-track">
+                <div class="card-router-header card-track-header">Temperature</div>
+                <div class="card-router-body card-track-body">
+                    <canvas class="chart-canvas" id="tempChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>

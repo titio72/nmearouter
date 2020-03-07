@@ -88,4 +88,8 @@ public class TrackPoint {
     public EngineStatus getEngine() {
         return engine;
     }
+
+    public long getTs() {
+        return getPosition().getTimestamp();
+    }
 }

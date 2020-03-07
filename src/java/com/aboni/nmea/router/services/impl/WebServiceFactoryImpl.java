@@ -2,6 +2,9 @@ package com.aboni.nmea.router.services.impl;
 
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.services.*;
+import com.aboni.nmea.router.track.impl.DBTrackQueryManager;
+import com.aboni.nmea.router.track.impl.DBTripManager;
+import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
 
@@ -19,7 +22,7 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         WebService s = null;
         switch (target) {
             case "/trackanalytics":
-                s = new TrackAnalyticsService();
+                s = new TrackAnalyticsService(new DBTripManager());
                 break;
             case "/track":
                 s = new TrackService();
@@ -40,16 +43,16 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
                 s = new MeteoService2();
                 break;
             case "/cruisingdays":
-                s = new CruisingDaysService();
+                s = new CruisingDaysService(new DBTrackQueryManager());
                 break;
             case "/dropcruisingday":
-                s = new DropTrackingDayService();
+                s = new DropTrackingDayService(new DBTrackQueryManager());
                 break;
             case "/createtrip":
-                s = new CreateTripService();
+                s = new CreateTripService(new DBTripManager());
                 break;
             case "/changetripdesc":
-                s = new ChangeTripDescService();
+                s = new ChangeTripDescService(new DBTripManager());
                 break;
             case "/tripinfo":
                 s = new TripInfoService();
@@ -79,10 +82,13 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
                 s = new SpeedAnalyticsService();
                 break;
             case "/distanalysis":
-                s = new DistanceAnalyticsService();
+                s = new DistanceAnalyticsService(new DBTrackQueryManager());
                 break;
             default:
                 break;
+        }
+        if (s != null) {
+            ServerLog.getLogger().info("ServiceFactory {" + s + "}");
         }
         return s;
     }

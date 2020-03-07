@@ -68,12 +68,12 @@ public class DBHelper implements AutoCloseable {
     
     private boolean reconnect() {
     	try {
-    		close();
-    		ServerLog.getLogger().info("Establishing connection to DB {" + dburl + "}!");
+            close();
+            ServerLog.getLogger().debug("Establishing connection to DB {" + dburl + "}!");
             conn = DriverManager.getConnection(dburl, user, password);
-    		conn.setAutoCommit(autocommit);
-    		return true;
-    	} catch (Exception e) {
+            conn.setAutoCommit(autocommit);
+            return true;
+        } catch (Exception e) {
     		conn = null;
             ServerLog.getLogger().error("Cannot reset connection!", e);
             return false;

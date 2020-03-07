@@ -1,9 +1,7 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.track;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.track.TrackManager;
-import com.aboni.nmea.router.track.TrackPoint;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,11 +17,6 @@ import static org.junit.Assert.*;
 @SuppressWarnings("ALL")
 public class TrackManagerTest {
 	
-	//private static final long STATIC_DEFAULT_PERIOD = 30 * 60000; // 30 minutes;
-	//private static final long DEFAULT_PERIOD = 60000; // 1 minute
-	//private static final double STATIC_THRESHOLD = 15.0; // meters in the period
-	//private static final double STATIC_THRESHOLD_TIME = 15 * 60000; // if static for more than x minutes set anchor mode
-
 	private final int period = 30; // seocnds
 	private double lat;
 	private double lon;

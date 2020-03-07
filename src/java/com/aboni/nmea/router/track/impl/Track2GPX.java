@@ -1,6 +1,11 @@
-package com.aboni.geo;
+package com.aboni.nmea.router.track.impl;
 
-import com.aboni.geo.PositionHistory.DoWithPoint;
+import com.aboni.geo.Course;
+import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.track.TrackDumper;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
 import com.aboni.utils.ServerLog;
 
 import java.io.IOException;
@@ -11,48 +16,22 @@ import java.util.Date;
 
 public class Track2GPX implements TrackDumper {
 
-    private class PointWriter implements DoWithPoint<Object> {
+    private class PointWriter implements TrackReader.TrackReaderListener {
 
-		private static final boolean TRACK_THEM_ALL = true;
-		final Writer theWriter;
-		private GeoPositionT previous;
-		private GeoPositionT lastTrack;
+        private static final boolean TRACK_THEM_ALL = true;
+        final Writer theWriter;
+        private GeoPositionT previous;
+        private GeoPositionT lastTrack;
 
-		PointWriter(Writer w) {
-			theWriter = w;
-		}
-
-		@Override
-        public void finish() {
-            // do nothing
+        PointWriter(Writer w) {
+            theWriter = w;
         }
-
-        @Override
-        public void doWithPoint(GeoPositionT p, Object notUsed) {
-			try {
-				if (TRACK_THEM_ALL ) {
-					writePoint(p);
-				} else {
-					if (trackIt(p, previous)) {
-						if (lastTrack!=null && (p.getTimestamp()-lastTrack.getTimestamp())>3600000L) {
-							theWriter.write("</trkseg><trkseg>");
-							writePoint(previous);
-						}
-						lastTrack = p;
-						writePoint(p);
-					}
-				}
-				previous = p;
-			} catch (IOException e) {
-                ServerLog.getLogger().error("Error writing GPX", e);
-			}
-		}
 
         private boolean trackIt(GeoPositionT p, GeoPositionT pr) {
             boolean trackIt = true;
-            if (pr!=null) {
+            if (pr != null) {
                 Course c = new Course(pr, p);
-                trackIt = (c.getDistance()>0.0025 /* NMg ~5m*/);
+                trackIt = (c.getDistance() > 0.0025 /* NMg ~5m*/);
             }
             return trackIt;
         }
@@ -64,29 +43,51 @@ public class Track2GPX implements TrackDumper {
                     "</time></trkpt>\n";
             theWriter.write(s);
         }
-	}
 
-	private PositionHistory track;
-	private String trackName = DEFAULT_TRACK_NAME;
-	public static final String DEFAULT_TRACK_NAME = "track";
-	private final DateFormat df;
+        @Override
+        public void onRead(TrackPoint sample) {
+            try {
+                GeoPositionT p = sample.getPosition();
+                if (TRACK_THEM_ALL) {
+                    writePoint(p);
+                } else {
+                    if (trackIt(p, previous)) {
+                        if (lastTrack != null && (p.getTimestamp() - lastTrack.getTimestamp()) > 3600000L) {
+                            theWriter.write("</trkseg><trkseg>");
+                            writePoint(previous);
+                        }
+                        lastTrack = p;
+                        writePoint(p);
+                    }
+                }
+                previous = p;
+            } catch (IOException e) {
+                ServerLog.getLogger().error("Track2GPX Error writing GPX", e);
+            }
+        }
+    }
+
+    private TrackReader track;
+    private String trackName = DEFAULT_TRACK_NAME;
+    public static final String DEFAULT_TRACK_NAME = "track";
+    private final DateFormat df;
 
 
-	public Track2GPX() {
-		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-	}
+    public Track2GPX() {
+        df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.geo.TrackDumper#setTrack(com.aboni.geo.PositionHistory)
-	 */
-	@Override
-	public void setTrack(PositionHistory track) {
-		this.track = track;
-	}
+    /* (non-Javadoc)
+     * @see com.aboni.nmea.router.track.TrackDumper#setTrack(com.aboni.geo.PositionHistory)
+     */
+    @Override
+    public void setTrack(TrackReader track) {
+        this.track = track;
+    }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.geo.TrackDumper#dump(java.io.Writer)
-	 */
+    /* (non-Javadoc)
+     * @see com.aboni.nmea.router.track.TrackDumper#dump(java.io.Writer)
+     */
 	@Override
 	public void dump(Writer w) throws IOException {
 		if (track!=null) {
@@ -102,8 +103,15 @@ public class Track2GPX implements TrackDumper {
 	}
 
 	private void writePoints(Writer w) {
-        if (track != null) track.iterate(new PointWriter(w));
-	}
+        PointWriter pw = new PointWriter(w);
+        if (track != null) {
+            try {
+                track.readTrack(pw);
+            } catch (TrackManagementException e) {
+                ServerLog.getLogger().error("Track2GPX Error reading track", e);
+            }
+        }
+    }
 
 	private void writeHeader(Writer w) throws IOException {
 		String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"MapSource 6.15.5\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\"><trk>\n";
@@ -112,15 +120,25 @@ public class Track2GPX implements TrackDumper {
         w.write(name);
 	}
 
-	@Override
-	public String getTrackName() {
-		return trackName;
-	}
+    @Override
+    public String getTrackName() {
+        return trackName;
+    }
 
-	@Override
-	public void setTrackName(String trackName) {
-		this.trackName = trackName;
-	}
+    @Override
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
+    }
+
+    @Override
+    public String getMime() {
+        return "application/gpx+xml";
+    }
+
+    @Override
+    public String getExtension() {
+        return "gpx";
+    }
 }
 
 /*

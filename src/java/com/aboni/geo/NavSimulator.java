@@ -195,19 +195,6 @@ public class NavSimulator {
 		}
 		calcSpeed();
 	}
-
-	public PositionHistory doSimulate(DoWithSim oncalc) {
-		PositionHistory p = new PositionHistory();
-		long t0 = System.currentTimeMillis();
-		long dTime = 60000L; // 1 minute
-		double distThreshold = (double)dTime/3600000d * getSpeed() * 1.5;
-		while (getDistance()>distThreshold) {
-			doCalc(getTime() + dTime);
-			if (oncalc!=null) oncalc.doIt(this, getTime());
-			p.addPosition(new GeoPositionT(t0 + getTime(), getPos()));
-		}
-		return p;
-	}
 }
 
 

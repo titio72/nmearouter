@@ -1,6 +1,6 @@
-package com.aboni.nmea.router.track;
+package com.aboni.nmea.router.track.impl;
 
-import com.aboni.nmea.router.track.analytics.TrackAnalytics;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +19,11 @@ public class DBTrackAnalyticsByDateTest {
 
     @Test
     public void testRun() throws Exception {
+        // TODO
         DBTrackAnalyticsByDate t = new DBTrackAnalyticsByDate();
         OffsetDateTime from = OffsetDateTime.parse("2020-01-12T00:00:00+01:00");
         OffsetDateTime to = OffsetDateTime.parse("2020-01-13T00:00:00+01:00");
-        TrackAnalytics.Stats res = t.run(from.toInstant(), to.toInstant());
-        System.out.println(res.toJson().toString(2));
+        JSONObject j = t.getAnalysis(from.toInstant(), to.toInstant());
+        System.out.println(j.toString(2));
     }
 }

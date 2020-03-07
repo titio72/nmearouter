@@ -1,40 +1,54 @@
 package com.aboni.geo;
 
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.nmea.router.track.impl.Track2JSON;
+import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import javax.validation.constraints.NotNull;
 import java.io.StringWriter;
 
 import static org.junit.Assert.assertEquals;
 
 public class Track2JSONTest {
 
-	public Track2JSONTest() {
-	}
-	
-	private PositionHistory createPositionHistory() {
-		PositionHistory h = new PositionHistory();
-		h.addPosition(new GeoPositionT(10001000, 43.10000000, 10.08000000));
-		h.addPosition(new GeoPositionT(10061000, 43.10000100, 10.08000100));
-		h.addPosition(new GeoPositionT(10121000, 43.10000200, 10.08000200));
-		h.addPosition(new GeoPositionT(10181000, 43.10000300, 10.08000300));
-		return h;
-	}
-	
-	@Test
-	public void testPath() {
-		Track2JSON j = new Track2JSON();
-		j.setTrack(createPositionHistory());
-		StringWriter w = new StringWriter();
-		j.dump(w);
-		JSONObject jTrack = new JSONObject(w.toString());
-		JSONArray path = jTrack.getJSONObject("track").getJSONArray("path");
+    public Track2JSONTest() {
+    }
 
-		assertEquals(4, path.length());
+    private class MyTrackReader implements TrackReader {
 
-		assertEquals(43.10000000, ((JSONObject)path.get(0)).getDouble("lat"), 0.0000001);
-		assertEquals(10.08000000, ((JSONObject)path.get(0)).getDouble("lng"), 0.0000001);
+        private TrackPoint getSample(long ts, double lat, double lon) {
+            TrackPoint s = TrackPoint.newInstanceBase(new GeoPositionT(ts, new Position(lat, lon)), false, 0.0, 0.0, 0.0, 60);
+            return s;
+        }
+
+        @Override
+        public void readTrack(@NotNull TrackReaderListener target) throws TrackManagementException {
+            target.onRead(getSample(10001000, 43.10000000, 10.08000000));
+            target.onRead(getSample(10061000, 43.10000100, 10.08000100));
+            target.onRead(getSample(10121000, 43.10000200, 10.08000200));
+            target.onRead(getSample(10181000, 43.10000300, 10.08000300));
+        }
+    }
+
+
+    @Test
+    public void testPath() {
+        Track2JSON j = new Track2JSON();
+        j.setTrack(new MyTrackReader());
+        StringWriter w = new StringWriter();
+        j.dump(w);
+        JSONObject jTrack = new JSONObject(w.toString());
+        JSONArray path = jTrack.getJSONObject("track").getJSONArray("path");
+
+        assertEquals(4, path.length());
+
+        assertEquals(43.10000000, ((JSONObject) path.get(0)).getDouble("lat"), 0.0000001);
+        assertEquals(10.08000000, ((JSONObject) path.get(0)).getDouble("lng"), 0.0000001);
 		
 		assertEquals(43.10000100, ((JSONObject)path.get(1)).getDouble("lat"), 0.0000001);
 		assertEquals(10.08000100, ((JSONObject)path.get(1)).getDouble("lng"), 0.0000001);

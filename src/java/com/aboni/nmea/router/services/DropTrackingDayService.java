@@ -1,37 +1,27 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.track.TrackQueryManager;
 import org.json.JSONObject;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Calendar;
 
 public class DropTrackingDayService extends JSONWebService {
 
-    public DropTrackingDayService() {
+    private final TrackQueryManager q;
+
+    public DropTrackingDayService(TrackQueryManager manager) {
         super();
+        q = manager;
         setLoader(this::getResult);
     }
 
-    private JSONObject getResult(ServiceConfig config) {
-        try (DBHelper db = new DBHelper(true)) {
-			try (PreparedStatement stm = db.getConnection().prepareStatement("delete from track where Date(TS)=?")) {
-				Calendar cDate = config.getParamAsCalendar(config, "date", null, "yyyyMMdd");
-				if (cDate != null) {
-					stm.setDate(1, new java.sql.Date(cDate.getTimeInMillis()));
-					stm.executeUpdate();
-				}
-				JSONObject res = new JSONObject();
-				res.put("msg", "Date succesfully deleted");
-				return res;
-			}
-		} catch (SQLException | ClassNotFoundException e) {
-			ServerLog.getLogger().error("Error deleting date", e);
-			JSONObject res = new JSONObject();
-			res.put("error", "Error deleting date");
-			return res;
-		}
-	}
+    private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
+        try {
+            Calendar cDate = config.getParamAsCalendar("date", null, "yyyyMMdd");
+            q.dropDay(cDate);
+            return getOk("Date deleted");
+        } catch (Exception e) {
+            throw new JSONGenerationException("Error deleting track date", e);
+        }
+    }
 }

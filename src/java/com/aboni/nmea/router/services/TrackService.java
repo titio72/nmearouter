@@ -1,9 +1,15 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.geo.*;
+import com.aboni.nmea.router.track.TrackDumper;
+import com.aboni.nmea.router.track.TrackDumperFactory;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.nmea.router.track.impl.DBTrackReader;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBHelper;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.Calendar;
 
 public class TrackService  implements WebService {
@@ -15,50 +21,34 @@ public class TrackService  implements WebService {
 	@Override
 	public void doIt(ServiceConfig config, ServiceOutput response) {
         try {
-        	Calendar cFrom = config.getParamAsDate("dateFrom", 0);
-            Calendar cTo = config.getParamAsDate("dateTo", 1);
-        	String f = config.getParameter("format", "gpx");
-        	boolean download = "1".equals(config.getParameter("download", "0"));
+            final Calendar cFrom = config.getParamAsDate("dateFrom", 0);
+            final Calendar cTo = config.getParamAsDate("dateTo", 1);
+            String f = config.getParameter("format", "gpx");
+            boolean download = "1".equals(config.getParameter("download", "0"));
 
-            PositionHistoryTrackLoader loader = new PositionHistoryTrackLoaderDB();
-			if (loader.load(cFrom, cTo)) {
-				TrackDumper dumper = null;
-				String mime = null;
-				String fileName = null;
+            TrackReader loader = new DBTrackReader((DBHelper db) -> {
 
-				switch (f) {
-					case "gpx":
-						mime = "application/gpx+xml";
-						fileName = "track.gpx";
-						dumper = new Track2GPX();
-						break;
-					case "kml":
-						mime = "application/vnd.google-earth.kml+xml";
-						fileName = "track.kml";
-						dumper = new Track2KML();
-						break;
-					case "json":
-						mime = "application/json";
-						fileName = "track.json";
-						dumper = new Track2JSON();
-						break;
-					default:
-						// do nothing to do
-						break;
-				}
+                PreparedStatement st = db.getConnection().prepareStatement("select * from track where TS>=? and TS<?");
+                st.setTimestamp(1, new Timestamp(cFrom.getTimeInMillis()));
+                st.setTimestamp(2, new Timestamp(cTo.getTimeInMillis()));
+                return st;
+            });
 
-				if (dumper!=null) {
-					response.setContentType(mime);
-					if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-					dumper.setTrack(loader.getTrack());
-					dumper.dump(response.getWriter());
-					response.ok();
+            TrackDumper dumper = TrackDumperFactory.getDumper(f);
 
-				} else {
-					response.setContentType("text/html;charset=utf-8");
-					response.error("Unknown format '" + f + "'");
-				}
-			}
+            if (dumper != null) {
+                String mime = dumper.getMime();
+                String fileName = "track." + dumper.getExtension();
+                response.setContentType(mime);
+                if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+                dumper.setTrack(loader);
+                dumper.dump(response.getWriter());
+                response.ok();
+
+            } else {
+                response.setContentType("text/html;charset=utf-8");
+                response.error("Unknown format '" + f + "'");
+            }
         } catch (IOException e) {
 			ServerLog.getLogger().error("Error downloading track", e);
             response.setContentType("text/html;charset=utf-8");

@@ -1,7 +1,6 @@
-package com.aboni.nmea.router.track;
+package com.aboni.nmea.router.track.impl;
 
 import com.aboni.nmea.router.agent.impl.track.TrackTestTableManager;
-import com.aboni.nmea.router.track.DBTripManager;
 import com.aboni.nmea.router.track.TripManagerException;
 import com.aboni.utils.Pair;
 import com.aboni.utils.db.DBHelper;
@@ -48,7 +47,7 @@ public class DBTripManagerTest {
         TrackTestTableManager.setUp();
 
         m = new DBTripManager();
-        m.sTABLE = "track_test";
+        m.trackTable = "track_test";
         try (DBHelper db = new DBHelper(true)) {
             for (String sql : SQL_CREATE_ROWS) db.getConnection().createStatement().executeUpdate(sql);
         }

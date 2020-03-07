@@ -7,44 +7,42 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.impl.NMEAConsoleTarget;
 import com.aboni.nmea.router.agent.impl.NMEAPlayer;
 import com.aboni.nmea.router.agent.impl.NMEASocketServer;
-import com.google.inject.Injector;
+import com.aboni.utils.ThingsFactory;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
 
     private NMEARouter router;
     private final String playFile;
-    private final Injector injector;
-    
-    public NMEARouterPlayerBuilderImpl(Injector injector, String playFile) {
-    	this.playFile = playFile;
-    	this.injector = injector;
+
+    public NMEARouterPlayerBuilderImpl(String playFile) {
+        this.playFile = playFile;
     }
-    
 
-	@Override
-	public NMEARouter getRouter() {
-		return router;
-	}
 
-	@Override
+    @Override
+    public NMEARouter getRouter() {
+        return router;
+    }
+
+    @Override
 	public NMEARouterBuilder init() {
-        router = injector.getInstance(NMEARouter.class);
+        router = ThingsFactory.getInstance(NMEARouter.class);
         
         NMEAAgent sock = new NMEASocketServer(
-        		injector.getInstance(NMEACache.class), 
-        		"TCP", 1111, null);
+                ThingsFactory.getInstance(NMEACache.class),
+                "TCP", 1111, null);
         router.addAgent(sock);
         sock.start();
 
         NMEAConsoleTarget console = new NMEAConsoleTarget(
-        		injector.getInstance(NMEACache.class), 
-        		"CONSOLE", null);
+                ThingsFactory.getInstance(NMEACache.class),
+                "CONSOLE", null);
         router.addAgent(console);
         console.start();
         
         NMEAPlayer play = new NMEAPlayer(
-        		injector.getInstance(NMEACache.class), 
-        		"PLAYER", null);
+                ThingsFactory.getInstance(NMEACache.class),
+                "PLAYER", null);
         play.setFile(playFile);
         router.addAgent(play);
         play.start();

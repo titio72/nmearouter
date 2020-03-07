@@ -10,6 +10,7 @@ import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
 import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.eclipse.jetty.server.Handler;
@@ -46,19 +47,19 @@ public class StartRouter {
 
     public static void main(@Nonnull String[] args) {
 		Injector injector = Guice.createInjector(new NMEARouterModule());
-		
+        ThingsFactory.setInjector(injector);
 		int ix;
         if (checkFlag(HELP, args)>=0) {
             consoleOut("-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
         } else if ((ix = checkFlag(PLAY, args))>=0) {
-        	startRouter(injector, new NMEARouterPlayerBuilderImpl(injector, args[ix + 1]));
-       } else if (checkFlag(CALIBRATION, args)>=0) {
+            startRouter(injector, new NMEARouterPlayerBuilderImpl(args[ix + 1]));
+        } else if (checkFlag(CALIBRATION, args)>=0) {
             startCalibration();
 	    } else {
-            startRouter(injector, new NMEARouterDefaultBuilderImpl(injector, Constants.ROUTER_CONF));
-    		startWebInterface(injector);
+            startRouter(injector, new NMEARouterDefaultBuilderImpl(Constants.ROUTER_CONF));
+            startWebInterface(injector);
 	    }
 	}
 
