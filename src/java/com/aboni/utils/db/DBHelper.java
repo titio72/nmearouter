@@ -1,7 +1,6 @@
 package com.aboni.utils.db;
 
 import com.aboni.utils.Constants;
-import com.aboni.utils.GDrive;
 import com.aboni.utils.ServerLog;
 
 import java.io.File;
@@ -88,30 +87,10 @@ public class DBHelper implements AutoCloseable {
         Process proc = b.start();
         int retCode = proc.waitFor();
         if (retCode==0) {
-            upload("./web/" + file + ".tgz");
             return file;
         } else {
         	return null;
         }
-    }
-
-    private Thread gDriveThread;
-
-    private void upload(String file) {
-        if (gDriveThread==null) {
-            gDriveThread = new Thread(() -> {
-                try {
-                    GDrive.upload(file, "application/x-gtar");
-                } catch (Exception e) {
-                    ServerLog.getLogger().error("Error uploading backup", e);
-                }
-            }
-            );
-            gDriveThread.setDaemon(true);
-        } else if (gDriveThread.isAlive()) {
-            gDriveThread.interrupt();
-        }
-        gDriveThread.start();
     }
 
     public boolean write(EventWriter writer, Event e) {

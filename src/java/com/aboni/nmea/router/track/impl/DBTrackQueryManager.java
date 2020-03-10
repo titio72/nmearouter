@@ -11,8 +11,9 @@ import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 public class DBTrackQueryManager implements TrackQueryManager {
@@ -63,8 +64,6 @@ public class DBTrackQueryManager implements TrackQueryManager {
 
     private static final String SQL = "select track.tripId, Date(track.TS), (select trip.description from trip where trip.id=track.tripId) as description from track group by track.tripid, Date(track.TS)";
 
-    private final DateFormat shortDateFormatter = new SimpleDateFormat("dd/MM");
-
     private void addToTrip(Map<Integer, TrackQueryManager.Trip> trips, Date d, Integer id, String desc) {
         Trip t = (Trip) trips.getOrDefault(id, null);
         if (t == null) {
@@ -110,12 +109,13 @@ public class DBTrackQueryManager implements TrackQueryManager {
     }
 
     @Override
-    public void dropDay(@NotNull Calendar cDate) throws TrackManagementException {
+    public void dropDay(@NotNull LocalDate cDate) throws TrackManagementException {
         try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement stm = db.getConnection().prepareStatement("delete from track where Date(TS)=?")) {
-                stm.setDate(1, new java.sql.Date(cDate.getTimeInMillis()));
+            try (PreparedStatement stm = db.getConnection().prepareStatement("delete from track where TS>=? and TS<?")) {
+                stm.setTimestamp(1, new Timestamp(cDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                stm.setTimestamp(2, new Timestamp(cDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 int i = stm.executeUpdate();
-                ServerLog.getLogger().info("Removed date from track {" + shortDateFormatter.format(new Date(cDate.getTimeInMillis())) + "} " +
+                ServerLog.getLogger().info("Removed date from track {" + cDate.toString() + "} " +
                         "samples {" + i + "}");
             }
         } catch (SQLException | ClassNotFoundException e) {

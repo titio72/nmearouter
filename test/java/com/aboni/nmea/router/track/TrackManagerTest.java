@@ -2,6 +2,10 @@ package com.aboni.nmea.router.track;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.utils.ThingsFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,24 +18,28 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings("ALL")
 public class TrackManagerTest {
-	
-	private final int period = 30; // seocnds
-	private double lat;
-	private double lon;
-	private long t0;
-	private long lastPosted;
-	private TrackManager m;
-	
-	@Before
-	public void setup() {
-		m = new TrackManager(); 
-		m.setPeriod(period * 1000);
-		lat = 43.67830115349512;
-		lon = 10.266444683074951;
-		t0 = System.currentTimeMillis();
-	}
+
+    static {
+        Injector injector = Guice.createInjector(new NMEARouterModule());
+        ThingsFactory.setInjector(injector);
+    }
+
+    private final int period = 30; // seconds
+    private double lat;
+    private double lon;
+    private long t0;
+    private long lastPosted;
+    private TrackManager m;
+
+    @Before
+    public void setup() {
+        m = new TrackManager();
+        m.setPeriod(period * 1000);
+        lat = 43.67830115349512;
+        lon = 10.266444683074951;
+        t0 = System.currentTimeMillis();
+    }
 
 	private static final SimpleDateFormat fmt = new SimpleDateFormat("dd HH:mm:ss");
 	static {

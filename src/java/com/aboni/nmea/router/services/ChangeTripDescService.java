@@ -4,10 +4,13 @@ import com.aboni.nmea.router.track.TripManager;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+
 public class ChangeTripDescService extends JSONWebService {
 
     private final TripManager manager;
 
+    @Inject
     public ChangeTripDescService(TripManager manager) {
         super();
         this.manager = manager;

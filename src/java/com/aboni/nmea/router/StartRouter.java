@@ -21,7 +21,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 import javax.websocket.server.ServerContainer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,17 +45,17 @@ public class StartRouter {
 	    ServerLog.getConsoleOut().println(s);
     }
 
-    public static void main(@Nonnull String[] args) {
-		Injector injector = Guice.createInjector(new NMEARouterModule());
+    public static void main(@NotNull String[] args) {
+        Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
-		int ix;
-        if (checkFlag(HELP, args)>=0) {
+        int ix;
+        if (checkFlag(HELP, args) >= 0) {
             consoleOut("-sensor : sensor monitor\r\n" +
                     "-play : NMEA file to play\r\n" +
                     "-cal : compass calibration\r\n");
-        } else if ((ix = checkFlag(PLAY, args))>=0) {
+        } else if ((ix = checkFlag(PLAY, args)) >= 0) {
             startRouter(injector, new NMEARouterPlayerBuilderImpl(args[ix + 1]));
-        } else if (checkFlag(CALIBRATION, args)>=0) {
+        } else if (checkFlag(CALIBRATION, args) >= 0) {
             startCalibration();
 	    } else {
             startRouter(injector, new NMEARouterDefaultBuilderImpl(Constants.ROUTER_CONF));

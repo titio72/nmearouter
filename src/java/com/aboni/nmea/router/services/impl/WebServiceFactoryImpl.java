@@ -1,20 +1,16 @@
 package com.aboni.nmea.router.services.impl;
 
-import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.services.*;
-import com.aboni.nmea.router.track.impl.DBTrackQueryManager;
-import com.aboni.nmea.router.track.impl.DBTripManager;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
 
 public class WebServiceFactoryImpl implements WebServiceFactory {
 
-    private final NMEARouter router;
-
     @Inject
-    public WebServiceFactoryImpl(NMEARouter router) {
-        this.router = router;
+    public WebServiceFactoryImpl() {
+        // nothing to initialize
     }
 
     @Override
@@ -22,67 +18,55 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
         WebService s = null;
         switch (target) {
             case "/trackanalytics":
-                s = new TrackAnalyticsService(new DBTripManager());
+                s = ThingsFactory.getInstance(TrackAnalyticsService.class);
                 break;
             case "/track":
-                s = new TrackService();
+                s = ThingsFactory.getInstance(TrackService.class);
                 break;
             case "/agentsj":
-                s = new AgentStatusService(router);
+                s = ThingsFactory.getInstance(AgentStatusService.class);
                 break;
             case "/shutdown":
-                s = new ServiceShutdown();
+                s = ThingsFactory.getInstance(ServiceShutdown.class);
                 break;
             case "/sim":
-                s = new SimulatorService();
+                s = ThingsFactory.getInstance(SimulatorService.class);
                 break;
             case "/meteo":
-                s = new MeteoService();
+                s = ThingsFactory.getInstance(MeteoService.class);
                 break;
             case "/meteo2":
-                s = new MeteoService2();
+                s = ThingsFactory.getInstance(MeteoService2.class);
                 break;
             case "/cruisingdays":
-                s = new CruisingDaysService(new DBTrackQueryManager());
+                s = ThingsFactory.getInstance(CruisingDaysService.class);
                 break;
             case "/dropcruisingday":
-                s = new DropTrackingDayService(new DBTrackQueryManager());
+                s = ThingsFactory.getInstance(DropTrackingDayService.class);
                 break;
             case "/createtrip":
-                s = new CreateTripService(new DBTripManager());
+                s = ThingsFactory.getInstance(CreateTripService.class);
                 break;
             case "/changetripdesc":
-                s = new ChangeTripDescService(new DBTripManager());
-                break;
-            case "/tripinfo":
-                s = new TripInfoService();
+                s = ThingsFactory.getInstance(ChangeTripDescService.class);
                 break;
             case "/dayinfo":
-                s = new DayInfoService();
+                s = ThingsFactory.getInstance(DayInfoService.class);
                 break;
             case "/trips":
-                s = new TripStatService();
+                s = ThingsFactory.getInstance(TripStatService.class);
                 break;
             case "/speed":
-                s = new SpeedService();
+                s = ThingsFactory.getInstance(SpeedService.class);
                 break;
             case "/backup":
-                s = new ServiceDBBackup();
+                s = ThingsFactory.getInstance(ServiceDBBackup.class);
                 break;
-            case "/filterout":
-                s = new AgentFilterService(router, "out");
-                break;
-            case "/filterin":
-                s = new AgentFilterService(router, "in");
+            case "/filter":
+                s = ThingsFactory.getInstance(AgentFilterService.class);
                 break;
             case "/auto":
-                s = new AutoPilotService(router);
-                break;
-            case "/speedanalysis":
-                s = new SpeedAnalyticsService();
-                break;
-            case "/distanalysis":
-                s = new DistanceAnalyticsService(new DBTrackQueryManager());
+                s = ThingsFactory.getInstance(AutoPilotService.class);
                 break;
             default:
                 break;

@@ -1,10 +1,8 @@
 package com.aboni.geo;
 
-import com.aboni.nmea.router.track.TrackDumper;
-import com.aboni.nmea.router.track.TrackManagementException;
-import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.nmea.router.track.*;
 import com.aboni.nmea.router.track.impl.Track2GPX;
+import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -23,12 +21,14 @@ public class Track2GPXTest {
     private class MyTrackReader implements TrackReader {
 
         private TrackPoint getSample(long ts, double lat, double lon) {
-            TrackPoint s = TrackPoint.newInstanceBase(new GeoPositionT(ts, new Position(lat, lon)), false, 0.0, 0.0, 0.0, 60);
+            TrackPoint s = new TrackPointBuilderImpl()
+                    .withPosition(new GeoPositionT(ts, new Position(lat, lon)))
+                    .withPeriod(60).getPoint();
             return s;
         }
 
         @Override
-        public void readTrack(@NotNull TrackReaderListener target) throws TrackManagementException {
+        public void readTrack(@NotNull TrackQuery q, @NotNull TrackReaderListener target) throws TrackManagementException {
             target.onRead(getSample(10001000, 43.10000000, 10.08000000));
             target.onRead(getSample(10061000, 43.10000100, 10.08000100));
             target.onRead(getSample(10121000, 43.10000200, 10.08000200));
@@ -38,10 +38,9 @@ public class Track2GPXTest {
 
     @Test
     public void testTrackDefaultName() throws Exception {
-        TrackDumper g = new Track2GPX();
-        g.setTrack(new MyTrackReader());
+        TrackDumper g = new Track2GPX(new MyTrackReader());
         StringWriter w = new StringWriter();
-        g.dump(w);
+        g.dump(new TrackQueryById(1), w);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document d = builder.parse(new ByteArrayInputStream(w.toString().getBytes()));

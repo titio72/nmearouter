@@ -3,16 +3,15 @@ package com.aboni.nmea.router.agent.impl.track;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.track.TrackManager;
-import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.TripManager;
-import com.aboni.nmea.router.track.TripManagerException;
+import com.aboni.nmea.router.track.*;
 import com.aboni.nmea.router.track.impl.DBTripManager;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
@@ -109,7 +108,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
         if (point != null && media != null) {
-            point = TrackPoint.cloneOverrideEngine(point, getCache().getStatus("Engine", EngineStatus.UNKNOWN));
+            TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
+            point = builder.withPoint(point).withEngine(getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN));
             media.write(point);
             notifyTrackedPoint(point);
             synchronized (this) {

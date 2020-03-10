@@ -1,15 +1,18 @@
 package com.aboni.nmea.router.services;
 
+import com.aboni.nmea.router.track.TrackAnalyticsByDate;
+import com.aboni.nmea.router.track.TrackAnalyticsByTrip;
 import com.aboni.nmea.router.track.TrackManagementException;
 import com.aboni.nmea.router.track.TripManager;
-import com.aboni.nmea.router.track.impl.DBTrackAnalyticsByDate;
-import com.aboni.nmea.router.track.impl.DBTrackAnalyticsByTrip;
+import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
-import java.util.Calendar;
+import javax.inject.Inject;
+import java.time.Instant;
 
 public class TrackAnalyticsService extends JSONWebService {
 
+    @Inject
     public TrackAnalyticsService(final TripManager m) {
         super();
         setLoader((ServiceConfig config) -> {
@@ -17,19 +20,19 @@ public class TrackAnalyticsService extends JSONWebService {
                 JSONObject stats = null;
                 int tripId = config.getInteger("trip", -1);
                 if (tripId != -1) {
-                    DBTrackAnalyticsByTrip an = new DBTrackAnalyticsByTrip(m);
+                    TrackAnalyticsByTrip an = ThingsFactory.getInstance(TrackAnalyticsByTrip.class);
                     stats = an.getAnalysis(tripId);
                 } else {
-                    Calendar cFrom = config.getParamAsDate("dateFrom", 0);
-                    Calendar cTo = config.getParamAsDate("dateTo", 1);
-                    DBTrackAnalyticsByDate an = new DBTrackAnalyticsByDate();
-                    stats = an.getAnalysis(cFrom.toInstant(), cTo.toInstant());
+                    TrackAnalyticsByDate an = ThingsFactory.getInstance(TrackAnalyticsByDate.class);
+                    Instant cFrom = config.getParamAsInstant("dateFrom", Instant.now().minusSeconds(86400L), -1);
+                    Instant cTo = config.getParamAsInstant("dateTo", Instant.now(), 0);
+                    stats = an.getAnalysis(cFrom, cTo);
                 }
                 return stats;
             } catch (TrackManagementException e) {
                 throw new JSONGenerationException("Error generating track stats json", e);
             }
-		});
-	}
+        });
+    }
 
 }

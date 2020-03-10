@@ -4,12 +4,14 @@ import com.aboni.nmea.router.track.TripManager;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
-import java.util.Calendar;
+import javax.inject.Inject;
+import java.time.LocalDate;
 
 public class CreateTripService extends JSONWebService {
 
     private final TripManager manager;
 
+    @Inject
     public CreateTripService(TripManager manager) {
         super();
         this.manager = manager;
@@ -18,7 +20,7 @@ public class CreateTripService extends JSONWebService {
 
     private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
         String strip = config.getParameter("trip");
-        Calendar date = config.getParamAsCalendar("date", null, "yyyyMMdd");
+        LocalDate date = config.getParamAsDate("date", null);
         if (date != null) {
             try {
                 if (strip == null || strip.isEmpty() || strip.trim().charAt(0) == '-') {
@@ -27,8 +29,7 @@ public class CreateTripService extends JSONWebService {
                 } else {
                     int i = Integer.parseInt(strip);
                     // add the adjacent following day
-                    date.add(Calendar.HOUR, 25); // 25 so it adjusts for DST
-                    date.set(Calendar.HOUR, 0);
+                    date = date.plusDays(1);
                     manager.addDateToTrip(i, date);
                 }
                 return getOk();

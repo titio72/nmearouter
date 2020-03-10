@@ -34,6 +34,7 @@
 
     .card-trip-body {
       height: 85px;
+      text-align: right;
     }
 
     .tile-title {
@@ -121,6 +122,12 @@
     loadMe();
   });
 
+  app.filter('percentage', ['$filter', function ($filter) {
+    return function (input, decimals) {
+      return $filter('number')(input * 100, decimals) + '%';
+    };
+  }]);
+
   function getUrlVars() {
       var vars = {};
       var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -198,7 +205,7 @@
       });
     } else {
       pieChart.data = data;
-      pieChart.options.title.text = 'Trip Time breakdown (H)';
+      pieChart.options.title.text = text;
       pieChart.update();
     }
   }
@@ -528,20 +535,25 @@
         <div class="col">
             <div class="tile-container">
                 <div class="tile_c">
-                    <my-tile title="Trip" value1="{{tripName}}" value2="{{current.start | date:'dd/MM/yy'}}"
-                             value3="{{current.end | date:'dd/MM/yy'}}"></my-tile>
+                    <my-tile title="{{tripName}}" value1="{{current.start | date:'dd/MM/yy HH:mm'}}"
+                             value2="{{current.end | date:'dd/MM/yy HH:mm'}}"
+                             value3="{{current.totalTime}}"
+                    "></my-tile>
                 </div>
                 <div class="tile_c">
-                    <my-tile title="Duration" value1="Tot {{current.totalTime}}"
-                             value2="Nav {{current.navTime}}"></my-tile>
+                    <my-tile title="Navigation" value1="{{current.navTime}}"
+                             value2="{{current.navDist | number:2}} NM"
+                             value3="{{current.speedAverage | number:2}} KN"></my-tile>
                 </div>
                 <div class="tile_c">
                     <my-tile title="Sail" value1="{{current.navEngineOffTime}}"
-                             value2="{{current.navEngineOffDist | number:2}} NM"></my-tile>
+                             value2="{{current.navEngineOffDist | number:2}} NM"
+                             value3="{{current.speedSailAverage | number:2}} KN"></my-tile>
                 </div>
                 <div class="tile_c">
                     <my-tile title="Engine" value1="{{current.navEngineOn_Time}}"
-                             value2="{{current.navEngineOn_Dist | number:2}} NM"></my-tile>
+                             value2="{{current.navEngineOn_Dist | number:2}} NM"
+                             value3="{{current.speedEngAverage | number:2}} KN"></my-tile>
                 </div>
                 <div class="tile_c">
                     <my-tile title="Best 1 NM" value1="{{current.max01NMSpeed | number:2}} NM"
@@ -565,6 +577,16 @@
                 <div class="tile_c">
                     <my-tile title="Best Speed" value1="{{current.maxSampledSpeed | number:2}} NM"
                              value2="{{current.maxSampledSpeedTimeT | date:'dd/MM/yy HH:mm'}}" value3=""></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Distance%" value1="Sail {{current.relativeEngOffDist | percentage:1}}"
+                             value2="Engine {{current.relativeEngOn_Dist | percentage:1}}"
+                             value3="Unknown {{current.relativeEngUnkDist | percentage:1}}"></my-tile>
+                </div>
+                <div class="tile_c">
+                    <my-tile title="Time%" value1="Sail {{current.relativeEngOffTime | percentage:1}}"
+                             value2="Engine {{current.relativeEngOn_Time | percentage:1}}"
+                             value3="Unknown {{current.relativeEngUnkTime | percentage:1}}"></my-tile>
                 </div>
             </div>
         </div>

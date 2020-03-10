@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.EngineDetector;
@@ -31,7 +32,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
             ServerLog.getLogger().info("Engine status change {" + localEngineRunning + "}");
         }
         engineRunning = localEngineRunning;
-        getCache().setStatus("Engine", engineRunning);
+        getCache().setStatus(NMEARouterStatuses.ENGINE_STATUS, engineRunning);
         notifyEngineStatus();
     }
 
@@ -51,7 +52,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
     @Override
     protected void onDeactivate() {
         engineRunning = EngineStatus.UNKNOWN;
-        getCache().setStatus("Engine", engineRunning);
+        getCache().setStatus(NMEARouterStatuses.ENGINE_STATUS, engineRunning);
     }
 
     @Override

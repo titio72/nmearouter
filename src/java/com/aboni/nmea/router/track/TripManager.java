@@ -2,7 +2,7 @@ package com.aboni.nmea.router.track;
 
 import com.aboni.utils.Pair;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TripManager {
@@ -52,7 +52,7 @@ public interface TripManager {
      * @param date The date to add to the trip.
      * @throws TripManagerException
      */
-    void addDateToTrip(int trip, Calendar date) throws TripManagerException;
+    void addDateToTrip(int trip, LocalDate date) throws TripManagerException;
 
     /**
      * Update an existing trip's description.

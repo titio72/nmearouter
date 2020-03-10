@@ -1,21 +1,19 @@
 package com.aboni.nmea.router.track;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.Writer;
 
 public interface TrackDumper {
 
-	void setTrack(TrackReader track);
+    void setTrackName(@NotNull String name);
 
-	void dump(Writer w) throws IOException;
+    String getTrackName();
 
-	void setTrackName(String name);
+    String getMime();
 
-	String getTrackName();
+    String getExtension();
 
-	String getMime();
-
-	String getExtension();
-
+    void dump(@NotNull TrackQuery query, @NotNull Writer w) throws TrackManagementException, IOException;
 
 }

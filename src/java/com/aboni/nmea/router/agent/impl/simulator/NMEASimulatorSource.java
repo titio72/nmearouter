@@ -13,7 +13,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigDecimal;
@@ -24,23 +24,23 @@ import java.util.TimeZone;
 
 public class NMEASimulatorSource extends NMEAAgentImpl {
 
-	private int headingAuto = Integer.MIN_VALUE;
-	private double refHeading = Double.NaN;
-	private PolarTable polars;
-	
-	private static NMEASimulatorSource simulator;
+    private int headingAuto = Integer.MIN_VALUE;
+    private double refHeading = Double.NaN;
+    private PolarTable polars;
 
-	@Nonnull
-	private final NMEASimulatorSourceSettings data;
-    
+    private static NMEASimulatorSource simulator;
+
+    @NotNull
+    private final NMEASimulatorSourceSettings data;
+
     private final TalkerId id;
     private final Random r = new Random();
-	private Position pos = new Position(43.9599, 09.7745);
-	private double distance = 0;
-	private double trip = 0;
-	private long lastTS = 0;
+    private Position pos = new Position(43.9599, 09.7745);
+    private double distance = 0;
+    private double trip = 0;
+    private long lastTS = 0;
 
-	public static NMEASimulatorSource getSimulator() {
+    public static NMEASimulatorSource getSimulator() {
 		return simulator;
 	}
 

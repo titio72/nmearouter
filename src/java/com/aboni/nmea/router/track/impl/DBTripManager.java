@@ -2,15 +2,22 @@ package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackPointBuilder;
 import com.aboni.nmea.router.track.TripManager;
 import com.aboni.nmea.router.track.TripManagerException;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
 
 import java.sql.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class DBTripManager implements TripManager {
 
@@ -46,15 +53,15 @@ public class DBTripManager implements TripManager {
                 try (ResultSet rs = st.executeQuery()) {
                     List<TrackPoint> res = new LinkedList<>();
                     while (rs.next()) {
-                        TrackPoint p = TrackPoint.newInstance(
-                                new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon")),
-                                rs.getBoolean("anchor"),
-                                rs.getDouble("dist"),
-                                rs.getDouble("speed"),
-                                rs.getDouble("maxSpeed"),
-                                rs.getInt("dTime"),
-                                EngineStatus.valueOf(rs.getByte("engine")),
-                                trip);
+                        TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
+                        TrackPoint p = builder
+                                .withPosition(new GeoPositionT(rs.getTimestamp("TS").getTime(), rs.getDouble("lat"), rs.getDouble("lon")))
+                                .withAnchor(rs.getBoolean("anchor"))
+                                .withDistance(rs.getDouble("dist"))
+                                .withSpeed(rs.getDouble("speed"), rs.getDouble("maxSpeed"))
+                                .withPeriod(rs.getInt("dTime"))
+                                .withEngine(EngineStatus.valueOf(rs.getByte("engine")))
+                                .withTrip(trip).getPoint();
                         res.add(p);
                     }
                     return res;
@@ -130,11 +137,13 @@ public class DBTripManager implements TripManager {
     }
 
     @Override
-    public void addDateToTrip(int trip, Calendar date) throws TripManagerException {
+    public void addDateToTrip(int trip, LocalDate date) throws TripManagerException {
         try (DBHelper h = new DBHelper(true)) {
-            try (PreparedStatement stm = h.getConnection().prepareStatement("update " + trackTable + " set tripId=? where Date(TS)=?")) {
+            try (PreparedStatement stm = h.getConnection().prepareStatement("update " + trackTable +
+                    " set tripId=? where TS>=? and TS<?")) {
                 stm.setInt(1, trip);
-                stm.setTimestamp(2, new Timestamp(date.getTimeInMillis()));
+                stm.setTimestamp(2, new Timestamp(date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                stm.setTimestamp(3, new Timestamp(date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 stm.executeUpdate();
             }
         } catch (Exception e) {

@@ -3,6 +3,10 @@ package com.aboni.utils;
 import com.google.inject.Injector;
 
 public class ThingsFactory {
+
+    private ThingsFactory() {
+    }
+
     private static Injector injector;
 
     public static void setInjector(Injector injector) {

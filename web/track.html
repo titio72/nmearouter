@@ -164,9 +164,8 @@
   function refreshMap() {
     refreshMeteoCharts()
     refreshSpeedChart("speedChart");
-    refreshSpeedAnalysisChart("speedAnalysisChart");
     refreshInfo();
-    loadMap(dateFrom, dateTo);
+    loadMap();
   }
 
   function refreshSpeedChart(chart) {
@@ -174,27 +173,6 @@
     httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
       drawSpeedChart(res, chart);
     });
-  }
-
-  function refreshSpeedAnalysisChart(chart) {
-    var ctx = document.getElementById(chart);
-    httpLoadSpeedAnalysisDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
-      var c = chartMap.get(chart);
-      if (c != null) {
-        c.destroy();
-      }
-      var c1 = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
-            '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0'],
-          datasets: [res]
-        },
-        options: {}
-      });
-      chartMap.set(chart, c1);
-    });
-
   }
 
   function getSerie(data, serie, attr, color) {
@@ -308,7 +286,7 @@
 
   function refreshMeteoCharts() {
     httpLoadAllMeteoDateRange(dateFrom + "0000" , dateTo + "2359", function(res) {
-      drawMeteoChart(res, "tempChart", "AT0", 1, 1, 1);
+      drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
       drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
       drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
       drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
@@ -344,42 +322,47 @@
     }
   }
 
-  function loadMap(dtF, dtT) {
-    httpGetTrack(dtF, dtT, function(path) {
-      var bounds = new google.maps.LatLngBounds();
-      if (path.length > 0) {
-        for (i = 0; i < path.length; i++) {
-          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng));
-          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng + 0.016));
-          bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng - 0.016));
-        }
+  function loadMap() {
+    if (tripId!=null)
+      httpGetTrackById(tripId, fillMap);
+    else
+      httpGetTrackByDate(dateFrom, dateTo, fillMap);
+  }
+
+  function fillMap(path) {
+    var bounds = new google.maps.LatLngBounds();
+    if (path.length > 0) {
+      for (i = 0; i < path.length; i++) {
+        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng));
+        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng + 0.016));
+        bounds.extend(new google.maps.LatLng(path[i].lat, path[i].lng - 0.016));
       }
-      var mPath = new google.maps.Polyline({
-        path: path,
-        geodesic: true,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-      });
-      map = new google.maps.Map(document.getElementById('map'), {
-        mapTypeId: 'terrain'
-      });
-      var startPoint = { lat: path[0].lat, lng: path[0].lng };
-      var marker = new google.maps.Marker({
-        position: startPoint,
-        title: 'Start'
-      });
-      var endPoint = { lat: path[path.length - 1].lat, lng: path[path.length - 1].lng };
-      var marker1 = new google.maps.Marker({
-        position: endPoint,
-        title: 'End'
-      });
-      mPath.setMap(map);
-      marker.setMap(map);
-      marker1.setMap(map);
-      map.setCenter(bounds.getCenter());
-      map.fitBounds(bounds);
+    }
+    var mPath = new google.maps.Polyline({
+      path: path,
+      geodesic: true,
+      strokeColor: '#FF0000',
+      strokeOpacity: 1.0,
+      strokeWeight: 2
     });
+    map = new google.maps.Map(document.getElementById('map'), {
+      mapTypeId: 'terrain'
+    });
+    var startPoint = { lat: path[0].lat, lng: path[0].lng };
+    var marker = new google.maps.Marker({
+      position: startPoint,
+      title: 'Start'
+    });
+    var endPoint = { lat: path[path.length - 1].lat, lng: path[path.length - 1].lng };
+    var marker1 = new google.maps.Marker({
+      position: endPoint,
+      title: 'End'
+    });
+    mPath.setMap(map);
+    marker.setMap(map);
+    marker1.setMap(map);
+    map.setCenter(bounds.getCenter());
+    map.fitBounds(bounds);
   }
 
   function setMarker(lat, lon, title) {
@@ -554,14 +537,6 @@
                 <div class="card-router-header card-track-header">Speed</div>
                 <div class="card-router-body card-track-body">
                     <canvas class="chart-canvas" id="speedChart" ondblclick="resetZoom(this.id);"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Speed Analysis</div>
-                <div class="card-router-body card-track-body">
-                    <canvas class="chart-canvas" id="speedAnalysisChart"></canvas>
                 </div>
             </div>
         </div>

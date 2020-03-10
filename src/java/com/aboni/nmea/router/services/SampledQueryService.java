@@ -12,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,8 +132,8 @@ public class SampledQueryService implements WebService {
     public void doIt(ServiceConfig config, ServiceOutput response) {
 
         DateRangeParameter fromTo = new DateRangeParameter(config);
-        Calendar cFrom = fromTo.getFrom();
-        Calendar cTo = fromTo.getTo();
+        Instant cFrom = fromTo.getFrom();
+        Instant cTo = fromTo.getTo();
 
         int maxSamples = getMaxSamples(config);
 
@@ -141,7 +141,7 @@ public class SampledQueryService implements WebService {
 
         try (DBHelper db = new DBHelper(true)) {
             Range range = getTimeframe(conf.getTable(), cFrom, cTo);
-            if (range!=null) {
+            if (range != null) {
                 Map<String, TimeSerie> timeSerieMap = getTimeSerie(cFrom, cTo, maxSamples, db, range);
                 for (Map.Entry<String, TimeSerie> e : timeSerieMap.entrySet()) {
                     fillResponse(ctx, e.getKey(), e.getValue().getSamples());
@@ -188,14 +188,14 @@ public class SampledQueryService implements WebService {
         return a;
     }
 
-    private Map<String, TimeSerie> getTimeSerie(Calendar cFrom, Calendar cTo, int maxSamples, DBHelper db, Range range) throws SQLException {
+    private Map<String, TimeSerie> getTimeSerie(Instant cFrom, Instant cTo, int maxSamples, DBHelper db, Range range) throws SQLException {
         Map<String, TimeSerie> res = new HashMap<>();
 
         int sampling = range.getSampling(maxSamples);
         String sql = getTimeSeriesSQL(conf.getTable(), conf.getSeriesNameField(), new String[]{conf.getMaxField(), conf.getAvgField(), conf.getMinField()}, conf.getWhere());
         try (PreparedStatement stm = db.getConnection().prepareStatement(sql)) {
-            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis() ));
-            stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis() ));
+            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.toEpochMilli()));
+            stm.setTimestamp(2, new java.sql.Timestamp(cTo.toEpochMilli()));
             readSamples(res, stm, sampling, maxSamples);
         }
         return res;
@@ -261,12 +261,12 @@ public class SampledQueryService implements WebService {
         return "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
     }
 
-    private synchronized Range getTimeframe(String table, Calendar cFrom, Calendar cTo) {
+    private synchronized Range getTimeframe(String table, Instant cFrom, Instant cTo) {
         try (DBHelper h = new DBHelper(true)) {
             String sql = getTimeFrameSQL(table);
             try (PreparedStatement stm = h.getConnection().prepareStatement(sql)) {
-                stm.setTimestamp(1, new java.sql.Timestamp(cFrom.getTimeInMillis()));
-                stm.setTimestamp(2, new java.sql.Timestamp(cTo.getTimeInMillis()));
+                stm.setTimestamp(1, new java.sql.Timestamp(cFrom.toEpochMilli()));
+                stm.setTimestamp(2, new java.sql.Timestamp(cTo.toEpochMilli()));
                 try (ResultSet rs = stm.executeQuery()) {
                     if (rs.next()) {
                         long count = rs.getLong(1);

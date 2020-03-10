@@ -2,6 +2,7 @@ package com.aboni.nmea.router.track;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.util.Position;
 
 public class TrackManager {
@@ -101,17 +102,19 @@ public class TrackManager {
     }
 
 	private TrackPoint fillPoint(boolean anchor, GeoPositionT prevPos, GeoPositionT p, Integer trip) {
-		Course c = new Course(prevPos, p);
-		double speed = c.getSpeed();
-		speed = Double.isNaN(speed) ? 0.0 : speed;
-		double dist = c.getDistance();
-		dist = Double.isNaN(speed) ? 0.0 : dist;
-		int timePeriod = (int) (c.getInterval() / 1000);
-		if (trip != null)
-			return TrackPoint.newInstanceWithTrip(p, anchor, dist, speed, maxSpeed, timePeriod, trip);
-		else
-			return TrackPoint.newInstanceBase(p, anchor, dist, speed, maxSpeed, timePeriod);
-	}
+        Course c = new Course(prevPos, p);
+        double speed = c.getSpeed();
+        speed = Double.isNaN(speed) ? 0.0 : speed;
+        double dist = c.getDistance();
+        dist = Double.isNaN(speed) ? 0.0 : dist;
+        int timePeriod = (int) (c.getInterval() / 1000);
+        TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
+        builder.withPosition(p).withAnchor(anchor).withDistance(dist).withSpeed(speed, maxSpeed).withPeriod(timePeriod);
+        if (trip != null)
+            return builder.withTrip(trip).getPoint();
+        else
+            return builder.withoutTrip().getPoint();
+    }
     
     /**
      * Set the sampling time in ms.

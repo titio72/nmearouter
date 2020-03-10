@@ -7,10 +7,13 @@ import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
 import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
 
+import javax.inject.Inject;
+
 public class AgentStatusService extends JSONWebService {
 
     private final NMEARouter router;
 
+    @Inject
     public AgentStatusService(NMEARouter router) {
         super();
         this.router = router;

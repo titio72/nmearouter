@@ -16,11 +16,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLInputFactory;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -65,13 +64,11 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 	public boolean play() {
 		final Document d;
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-			dbFactory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-			dbFactory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			d = dBuilder.parse(file);
+			DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
+			df.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			df.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			DocumentBuilder builder = df.newDocumentBuilder();
+			d = builder.parse(new InputSource(file));
 			d.getDocumentElement().normalize();
 		} catch (Exception e) {
 			ServerLog.getLogger().error("Cannot parse GPX file " + file, e);

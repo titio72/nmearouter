@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.track;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -30,14 +31,12 @@ public class TrackAnalyticsTest {
             String l = null;
             while ((l = in.readLine()) != null) {
                 String[] p = l.split(",");
-                TrackPoint tp = TrackPoint.newInstanceBase(
-                        new GeoPositionT(df.parse(p[2].substring(1, 20)).getTime(), Double.parseDouble(p[0]), Double.parseDouble(p[1])),
-                        "1".equalsIgnoreCase(p[4]),
-                        Double.parseDouble(p[6]),
-                        Double.parseDouble(p[7]),
-                        Double.parseDouble(p[9]),
-                        Integer.parseInt(p[5])
-                );
+                TrackPoint tp = new TrackPointBuilderImpl()
+                        .withPosition(new GeoPositionT(df.parse(p[2].substring(1, 20)).getTime(), Double.parseDouble(p[0]), Double.parseDouble(p[1])))
+                        .withAnchor("1".equalsIgnoreCase(p[4]))
+                        .withDistance(Double.parseDouble(p[6]))
+                        .withSpeed(Double.parseDouble(p[7]), Double.parseDouble(p[9]))
+                        .withPeriod(Integer.parseInt(p[5])).getPoint();
                 a.processSample(tp);
             }
             assertEquals(2, a.getStats().legs.size());

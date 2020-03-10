@@ -1,14 +1,12 @@
 package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.TrackDumper;
-import com.aboni.nmea.router.track.TrackManagementException;
-import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.TrackReader;
-import com.aboni.utils.ServerLog;
+import com.aboni.nmea.router.track.*;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.Writer;
 
 public class Track2KML implements TrackDumper {
@@ -33,39 +31,28 @@ public class Track2KML implements TrackDumper {
     private TrackReader track;
     private final Kml kml;
 
-    public Track2KML() {
+    @Inject
+    public Track2KML(@NotNull TrackReader reader) {
         kml = new Kml();
+        track = reader;
     }
 
     @Override
-    public void setTrack(TrackReader track) {
-        this.track = track;
+    public void dump(TrackQuery query, Writer w) throws TrackManagementException {
+        LineString s = createString();
+        writePoints(query, s);
+        kml.marshal(w);
     }
 
-	public void dump(Writer w) {
-		if (track!=null) {
-		    LineString s = createString();
-			writePoints(s);
-			kml.marshal(w);
-		}
-	}
-
-	private void writePoints(LineString w) {
-        PointWriter pw = new PointWriter(w);
-        if (track != null) {
-            try {
-                track.readTrack(pw);
-            } catch (TrackManagementException e) {
-                ServerLog.getLogger().error("Track2KML Error reading track", e);
-            }
-        }
+    private void writePoints(TrackQuery query, LineString w) throws TrackManagementException {
+        track.readTrack(query, new PointWriter(w));
     }
-	
-	private static final boolean TRACK_THEM_ALL = true;
 
-	private LineString createString() {
-		return kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();
-	}
+    private static final boolean TRACK_THEM_ALL = true;
+
+    private LineString createString() {
+        return kml.createAndSetPlacemark().withName("London, UK").withOpen(Boolean.TRUE).createAndSetLineString();
+    }
 
     @Override
     public String getTrackName() {

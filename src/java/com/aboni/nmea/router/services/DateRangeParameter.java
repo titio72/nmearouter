@@ -1,44 +1,22 @@
 package com.aboni.nmea.router.services;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
 
 public class DateRangeParameter {
 
-	private final Calendar cFrom;
-	private final Calendar cTo;
-	
-	
-	public DateRangeParameter(ServiceConfig config) {
+    private final Instant cFrom;
+    private final Instant cTo;
 
-        // set today by default
-        Calendar c0 = Calendar.getInstance();
-        c0.add(Calendar.SECOND, -24 * 60 * 60);
-        cFrom = config.getParamAsCalendar("date", c0, "yyyyMMddHHmm");
-
-        Calendar c1 = Calendar.getInstance();
-        c1.setTimeInMillis(c0.getTimeInMillis() + 24L * 60L * 60L * 1000L);
-        cTo = config.getParamAsCalendar("dateTo", c1, "yyyyMMddHHmm");
-
+    public DateRangeParameter(ServiceConfig config) {
+        cFrom = config.getParamAsInstant("date", Instant.now().minusSeconds(86400), "yyyyMMddHHmm");
+        cTo = config.getParamAsInstant("dateTo", Instant.now(), "yyyyMMddHHmm");
     }
 
-    public Calendar getFrom() {
+    public Instant getFrom() {
         return cFrom;
     }
 
-    public Calendar getTo() {
+    public Instant getTo() {
         return cTo;
     }
-
-    public OffsetDateTime getFromX() {
-        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(cFrom.getTimeInMillis()), ZoneId.systemDefault());
-    }
-
-    public OffsetDateTime getToX() {
-        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(cTo.getTimeInMillis()), ZoneId.systemDefault());
-    }
-
-
 }

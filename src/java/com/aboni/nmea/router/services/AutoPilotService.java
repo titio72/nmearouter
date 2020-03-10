@@ -4,20 +4,23 @@ import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.utils.ServerLog;
 
-public class AutoPilotService  implements WebService {
+import javax.inject.Inject;
 
-	private final AutoPilotDriver auto;
-	
-	public AutoPilotService(NMEARouter router) {
-		this.auto = (AutoPilotDriver)router.getAgent("SmartPilot");
-	}
+public class AutoPilotService implements WebService {
 
-	private static final String CMD_STARBOARD_1 = "S1";
-	private static final String CMD_PORT_1 = "P1";
-	private static final String CMD_STARBOARD_10 = "S10";
-	private static final String CMD_PORT_10 = "P10";
-	private static final String CMD_AUTO  = "Auto";
-	private static final String CMD_STDBY = "Standby";
+    private final AutoPilotDriver auto;
+
+    @Inject
+    public AutoPilotService(NMEARouter router) {
+        this.auto = (AutoPilotDriver) router.getAgent("SmartPilot");
+    }
+
+    private static final String CMD_STARBOARD_1 = "S1";
+    private static final String CMD_PORT_1 = "P1";
+    private static final String CMD_STARBOARD_10 = "S10";
+    private static final String CMD_PORT_10 = "P10";
+    private static final String CMD_AUTO = "Auto";
+    private static final String CMD_STDBY = "Standby";
 	private static final String CMD_WVANE = "Wind";
 	
 	@Override

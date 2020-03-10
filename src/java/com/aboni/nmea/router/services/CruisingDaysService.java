@@ -6,6 +6,7 @@ import com.aboni.utils.ServerLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class CruisingDaysService extends JSONWebService {
 
     private final TrackQueryManager manager;
 
+    @Inject
     public CruisingDaysService(TrackQueryManager q) {
         super();
         manager = q;

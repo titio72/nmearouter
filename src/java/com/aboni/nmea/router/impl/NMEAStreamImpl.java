@@ -8,7 +8,6 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -59,7 +58,6 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	@Nullable
 	private JSONObject sendJsonObject(JSONObject msg, Sentence s, ListenerWrapper i) {
 		if (i.isJSON()) {
 			msg = getJsonObject(msg, s);

@@ -128,16 +128,32 @@ public class TrackAnalytics {
             j.put("end", formatDate(end));
             j.put("navTime", formatDuration(totalNavigationTime));
             j.put("navDist", totalNavigationDistance);
-            if (totalNavigationTime>1.0)
-                j.put("speedAverage", totalNavigationDistance / (totalNavigationTime/1000.0/60.0/60.0));
+            if (totalNavigationTime > 1.0) {
+                j.put("speedAverage", totalNavigationDistance / (totalNavigationTime / 1000.0 / 60.0 / 60.0));
+                j.put("relativeEngOffTime", sailEngineTime[EngineStatus.OFF.getValue()] / (double) totalNavigationTime);
+                j.put("relativeEngOn_Time", sailEngineTime[EngineStatus.ON.getValue()] / (double) totalNavigationTime);
+                j.put("relativeEngUnkTime", sailEngineTime[EngineStatus.UNKNOWN.getValue()] / (double) totalNavigationTime);
+            }
             j.put("navEngineOffTime", formatDuration(sailEngineTime[EngineStatus.OFF.getValue()]));
             j.put("navEngineOn_Time", formatDuration(sailEngineTime[EngineStatus.ON.getValue()]));
             j.put("navEngineUnkTime", formatDuration(sailEngineTime[EngineStatus.UNKNOWN.getValue()]));
+            if (totalNavigationDistance > 1.0) {
+                j.put("relativeEngOffDist", sailEngineDistance[EngineStatus.OFF.getValue()] / totalNavigationDistance);
+                j.put("relativeEngOn_Dist", sailEngineDistance[EngineStatus.ON.getValue()] / totalNavigationDistance);
+                j.put("relativeEngUnkDist", sailEngineDistance[EngineStatus.UNKNOWN.getValue()] / totalNavigationDistance);
+            }
             j.put("navEngineOffDist", sailEngineDistance[EngineStatus.OFF.getValue()]);
             j.put("navEngineOn_Dist", sailEngineDistance[EngineStatus.ON.getValue()]);
             j.put("navEngineUnkDist", sailEngineDistance[EngineStatus.UNKNOWN.getValue()]);
-            if (sailEngineTime[EngineStatus.OFF.getValue()]>1.0)
-                j.put("speedSailAverage", sailEngineDistance[EngineStatus.OFF.getValue()] / (sailEngineTime[EngineStatus.OFF.getValue()]/1000.0/60.0/60.0));
+            if (sailEngineTime[EngineStatus.OFF.getValue()] > 1.0) {
+                j.put("speedSailAverage", sailEngineDistance[EngineStatus.OFF.getValue()] / (sailEngineTime[EngineStatus.OFF.getValue()] / 1000.0 / 60.0 / 60.0));
+            }
+            if (sailEngineTime[EngineStatus.ON.getValue()] > 1.0) {
+                j.put("speedEngAverage", sailEngineDistance[EngineStatus.ON.getValue()] / (sailEngineTime[EngineStatus.ON.getValue()] / 1000.0 / 60.0 / 60.0));
+            }
+            if (sailEngineTime[EngineStatus.UNKNOWN.getValue()] > 1.0) {
+                j.put("speedUnkAverage", sailEngineDistance[EngineStatus.UNKNOWN.getValue()] / (sailEngineTime[EngineStatus.UNKNOWN.getValue()] / 1000.0 / 60.0 / 60.0));
+            }
             j.put("maxSpeed", maxSpeed);
             j.put("maxSpeedTime", formatDate(maxSpeedTime));
             j.put("maxAvgSpeed", max30sAverageSpeed);
@@ -233,19 +249,17 @@ public class TrackAnalytics {
             stats.resetLeg();
         }
         stats.samples++;
-        stats.addTime(sample.getTs());
+        stats.addTime(sample.getPosition().getTimestamp());
         calcMovingAverageSpeed(stats, sample);
-        calcSailEngineTimeAndDist(stats, sample, prevSample);
+        calcTimeAndDist(stats, sample, prevSample);
         calcTotAndAnchorTime(stats, sample, prevSample);
-        calcNavTimeAndDist(stats, sample, prevSample);
         calcMaxSpeed(stats, sample);
         calcSpeedDistribution(stats, sample, prevSample);
         if (stats.currentLeg != null) {
             stats.currentLeg.samples++;
-            stats.currentLeg.addTime(sample.getTs());
+            stats.currentLeg.addTime(sample.getPosition().getTimestamp());
             calcMovingAverageSpeed(stats.currentLeg, sample);
-            calcSailEngineTimeAndDist(stats.currentLeg, sample, prevSample);
-            calcNavTimeAndDist(stats.currentLeg, sample, prevSample);
+            calcTimeAndDist(stats.currentLeg, sample, prevSample);
             calcMaxSpeed(stats.currentLeg, sample);
             calcSpeedDistribution(stats.currentLeg, sample, prevSample);
         }
@@ -253,7 +267,7 @@ public class TrackAnalytics {
     }
 
     private static void calcSpeedDistribution(StatsLeg stats, TrackPoint sample, TrackPoint prev) {
-        long period = (prev == null) ? (sample.getPeriod() * 1000) : (sample.getTs() - prev.getTs());
+        long period = (prev == null) ? (sample.getPeriod() * 1000) : (sample.getPosition().getTimestamp() - prev.getPosition().getTimestamp());
         if (!sample.isAnchor()) {
             stats.speedDistribution.addSample(period, sample.getDistance(), sample.getAverageSpeed());
             if (sample.getEngine() == EngineStatus.OFF) {
@@ -266,45 +280,40 @@ public class TrackAnalytics {
         if (!sample.isAnchor()) {
             if (sample.getMaxSpeed() > stats.maxSpeed) {
                 stats.maxSpeed = sample.getMaxSpeed();
-                stats.maxSpeedTime = sample.getTs();
+                stats.maxSpeedTime = sample.getPosition().getTimestamp();
             }
             if (sample.getAverageSpeed() > stats.maxSampleAverageSpeed) {
                 stats.maxSampleAverageSpeed = sample.getAverageSpeed();
-                stats.maxSampleAverageSpeedTime = sample.getTs();
+                stats.maxSampleAverageSpeedTime = sample.getPosition().getTimestamp();
             }
             double avgSpeed = sample.getDistance() / (sample.getPeriod() / 60.0 / 60.0);
             if (avgSpeed > stats.max30sAverageSpeed) {
                 stats.max30sAverageSpeed = avgSpeed;
-                stats.max30sAverageSpeedTime = sample.getTs();
+                stats.max30sAverageSpeedTime = sample.getPosition().getTimestamp();
             }
 
         }
     }
 
     private static void calcTotAndAnchorTime(Stats stats, TrackPoint sample, TrackPoint prev) {
-        long deltaTime = (prev == null) ? 0 : (sample.getTs() - prev.getTs());
+        long deltaTime = (prev == null) ? 0 : (sample.getPosition().getTimestamp() - prev.getPosition().getTimestamp());
         stats.totalTime += deltaTime;
         if (sample.isAnchor())
             stats.totalAnchorTime += deltaTime;
     }
 
-    private static void calcNavTimeAndDist(StatsLeg stats, TrackPoint sample, TrackPoint prev) {
-        long deltaTime = (prev == null) ? 0 : (sample.getTs() - prev.getTs());
+    private static void calcTimeAndDist(StatsLeg stats, TrackPoint sample, TrackPoint prev) {
+        long deltaTime = (prev == null) ? 0 : (sample.getPosition().getTimestamp() - prev.getPosition().getTimestamp());
         if (!sample.isAnchor()) {
+            stats.sailEngineTime[sample.getEngine().getValue()] += deltaTime;
             stats.totalNavigationTime += deltaTime;
+            stats.sailEngineDistance[sample.getEngine().getValue()] += sample.getDistance();
             stats.totalNavigationDistance += sample.getDistance();
         }
     }
 
-    private static void calcSailEngineTimeAndDist(StatsLeg stats, TrackPoint sample, TrackPoint prev) {
-        if (!sample.isAnchor()) {
-            stats.sailEngineDistance[sample.getEngine().getValue()] += sample.getDistance();
-            stats.sailEngineTime[sample.getEngine().getValue()] += (prev == null) ? 0 : (sample.getTs() - prev.getTs());
-        }
-    }
-
     private static void calcMovingAverageSpeed(StatsLeg stats, TrackPoint sample) {
-        Pair<Long, Double> p = new Pair<>(sample.getTs(), sample.getDistance());
+        Pair<Long, Double> p = new Pair<>(sample.getPosition().getTimestamp(), sample.getDistance());
         for (MovingAverageMax m : stats.movingAvgMaxes) m.addSample(p);
     }
 

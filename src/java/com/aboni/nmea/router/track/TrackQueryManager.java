@@ -2,7 +2,7 @@ package com.aboni.nmea.router.track;
 
 import org.json.JSONObject;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.Set;
 public interface TrackQueryManager {
     List<Trip> getTrips() throws TrackManagementException;
 
-    void dropDay(Calendar cDate) throws TrackManagementException;
+    void dropDay(LocalDate cDate) throws TrackManagementException;
 
     JSONObject getYearlyStats() throws TrackManagementException;
 

@@ -108,33 +108,6 @@ function httpLoadSpeedDateRange(dt0, dt1, cback) {
   xmlHttp.send(null);
 }
 
-function httpLoadSpeedAnalysisDateRange(dt0, dt1, cback) {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speedanalysis?date=" + dt0 + "&dateTo=" + dt1, true);
-  xmlHttp.onreadystatechange = function() {
-    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
-      var json = JSON.parse(xmlHttp.responseText);
-      
-      var dataset = new Object();
-      
-      dataset.label = "Distance";
-      dataset.backgroundColor = "orange";
-      dataset.data = [];
-      
-      var sr = json.serie;
-      var i;
-      for (i = 0; i<sr.length; i++) {
-        var item = sr[i];
-        dataset.data.push(item.distance);
-      }
-      
-      cback(dataset);
-    }
-  };
-  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-  xmlHttp.send(null);
-}
-
 function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
@@ -147,37 +120,6 @@ function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
 }
-
-/*
-function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.onreadystatechange = function() {
-    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
-      var json = JSON.parse(xmlHttp.responseText);
-      var res = getDataset(tp, json.serie, all, 1, all);
-      cback(res);
-    }
-  }
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, true);
-  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-  xmlHttp.send(null);
-}
-*/
-
-/*
-function httpLoadMeteoDateRangeA(tp, all, dt0, dt1, cback) {
-	var xmlHttp = new XMLHttpRequest();
-	xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?date=" + dt0 + "&dateTo=" + dt1 + "&type=" + tp, true);
-	xmlHttp.onreadystatechange = function() {
-		if (this.readyState==4 && this.status==200) {
-			var json = JSON.parse(xmlHttp.responseText);
-			cback(getDataset(tp, json.serie, (all & 1)!=0, (all & 2)!=0, (all & 4)!=0));
-		}
-	}
-	xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	xmlHttp.send(null);
-}
-*/
 
 function onhttpresult(cback) {
 
@@ -403,10 +345,23 @@ function httpGetCruisingDays() {
   return json;
 }
 
-function httpGetTrack(dtF, dtT, cback) {
+function httpGetTrackByDate(dtF, dtT, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/track?format=json&dateFrom=" + dtF +
       "&dateTo=" + dtT, true);
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.readyState==4 && xmlHttp.status==200) {
+      var json = JSON.parse(xmlHttp.responseText);
+      cback(json.track.path);
+    }
+  };
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
+function httpGetTrackById(trip, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/track?format=json&trip=" + trip, true);
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.readyState==4 && xmlHttp.status==200) {
       var json = JSON.parse(xmlHttp.responseText);

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl.track;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.db.DBHelper;
 import org.junit.After;
@@ -37,8 +38,11 @@ public class DBTrackEventWriterTest {
     @Test
     public void write() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = TrackPoint.newInstanceBase(
-                new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30);
+        TrackPoint p = new TrackPointBuilderImpl().
+                withPosition(new GeoPositionT(l, 43.112234, 9.534534))
+                .withDistance(0.0002)
+                .withSpeed(3.4, 5.4)
+                .withPeriod(30).getPoint();
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0));
@@ -47,8 +51,10 @@ public class DBTrackEventWriterTest {
     @Test
     public void writeWithEngineOn() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = TrackPoint.newInstanceWithEngine(
-                new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, EngineStatus.ON);
+        TrackPoint p = new TrackPointBuilderImpl()
+                .withPosition(new GeoPositionT(l, 43.112234, 9.534534))
+                .withDistance(0.0002)
+                .withSpeed(3.4, 5.4).withPeriod(30).withEngine(EngineStatus.ON).getPoint();
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0, EngineStatus.ON));
@@ -57,8 +63,10 @@ public class DBTrackEventWriterTest {
     @Test
     public void writeWithTrip() throws Exception {
         long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = TrackPoint.newInstanceWithTrip(
-                new GeoPositionT(l, 43.112234, 9.534534), false, 0.0002, 3.4, 5.4, 30, 124);
+        TrackPoint p = new TrackPointBuilderImpl()
+                .withPosition(new GeoPositionT(l, 43.112234, 9.534534))
+                .withDistance(0.0002)
+                .withSpeed(3.4, 5.4).withPeriod(30).withTrip(124).getPoint();
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 124));

@@ -8,5 +8,5 @@ public interface TrackReader {
         void onRead(TrackPoint sample);
     }
 
-    void readTrack(@NotNull TrackReaderListener target) throws TrackManagementException;
+    void readTrack(@NotNull TrackQuery query, @NotNull TrackReaderListener target) throws TrackManagementException;
 }

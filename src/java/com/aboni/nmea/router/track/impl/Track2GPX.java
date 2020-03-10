@@ -2,12 +2,11 @@ package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.TrackDumper;
-import com.aboni.nmea.router.track.TrackManagementException;
-import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.nmea.router.track.*;
 import com.aboni.utils.ServerLog;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.DateFormat;
@@ -73,52 +72,34 @@ public class Track2GPX implements TrackDumper {
     private final DateFormat df;
 
 
-    public Track2GPX() {
+    @Inject
+    public Track2GPX(@NotNull TrackReader reader) {
         df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        track = reader;
     }
 
-    /* (non-Javadoc)
-     * @see com.aboni.nmea.router.track.TrackDumper#setTrack(com.aboni.geo.PositionHistory)
-     */
     @Override
-    public void setTrack(TrackReader track) {
-        this.track = track;
+    public void dump(TrackQuery query, Writer w) throws IOException, TrackManagementException {
+        writeHeader(w);
+        writePoints(query, w);
+        writeFooter(w);
     }
 
-    /* (non-Javadoc)
-     * @see com.aboni.nmea.router.track.TrackDumper#dump(java.io.Writer)
-     */
-	@Override
-	public void dump(Writer w) throws IOException {
-		if (track!=null) {
-			writeHeader(w);
-			writePoints(w);
-			writeFooter(w);
-		}
-	}
-
-	private void writeFooter(Writer w) throws IOException {
+    private void writeFooter(Writer w) throws IOException {
         String footer = "</trkseg></trk></gpx>";
         w.write(footer);
-	}
-
-	private void writePoints(Writer w) {
-        PointWriter pw = new PointWriter(w);
-        if (track != null) {
-            try {
-                track.readTrack(pw);
-            } catch (TrackManagementException e) {
-                ServerLog.getLogger().error("Track2GPX Error reading track", e);
-            }
-        }
     }
 
-	private void writeHeader(Writer w) throws IOException {
-		String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"MapSource 6.15.5\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\"><trk>\n";
-		String name = "<name>" + trackName + "</name><trkseg>\n";		
+    private void writePoints(TrackQuery query, Writer w) throws TrackManagementException {
+        track.readTrack(query, new PointWriter(w));
+    }
+
+    private void writeHeader(Writer w) throws IOException {
+        String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><gpx xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"MapSource 6.15.5\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\"><trk>\n";
+        String name = "<name>" + trackName + "</name><trkseg>\n";
         w.write(header);
         w.write(name);
-	}
+    }
 
     @Override
     public String getTrackName() {

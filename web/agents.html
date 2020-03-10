@@ -143,7 +143,7 @@
 	function updateFilter(agent, inout, sentences, tp) {
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", "http://" + window.location.hostname
-				+ ":1112/filter" + inout + "?agent=" + agent + "&sentences="
+				+ ":1112/filter?direction=" + inout + "&agent=" + agent + "&sentences="
 				+ sentences + "&type=" + tp, true);
 		xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 		xmlHttp.onreadystatechange = function() {

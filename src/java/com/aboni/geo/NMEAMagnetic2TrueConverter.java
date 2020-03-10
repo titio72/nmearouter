@@ -1,6 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.misc.Utils;
+import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -15,15 +16,15 @@ public class NMEAMagnetic2TrueConverter {
 	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
-        geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
-        pos = new Position(43.0, 10.0);
+		geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
+		pos = new Position(43.0, 10.0);
 
         OffsetDateTime odt = OffsetDateTime.now();
         this.year = (double) odt.getYear() + ((double) odt.getMonthValue() / 12.0);
     }
 	
 	public NMEAMagnetic2TrueConverter(double year) {
-		geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
+		geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
 		pos = new Position(43.0, 10.0);
 		this.year = year;
 	}
