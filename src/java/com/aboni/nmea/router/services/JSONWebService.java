@@ -59,17 +59,17 @@ public class JSONWebService implements WebService {
         }
     }
 
-    protected static final JSONObject getOk() {
+    protected static JSONObject getOk() {
         return getOk("Ok");
     }
 
-    protected static final JSONObject getOk(String msg) {
+    protected static JSONObject getOk(String msg) {
         JSONObject res = new JSONObject();
         res.put("msg", msg);
         return res;
     }
 
-    protected static final JSONObject getError(String message) {
+    protected static JSONObject getError(String message) {
         JSONObject res = new JSONObject();
         res.put("error", message);
         return res;

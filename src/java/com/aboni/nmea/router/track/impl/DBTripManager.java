@@ -11,6 +11,8 @@ import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -21,11 +23,17 @@ import java.util.Map;
 
 public class DBTripManager implements TripManager {
 
-    static String trackTable = "track";
-    static String tripTable = "trip";
+    private final String trackTable;
+    private final String tripTable;
 
-    static Map<Integer, String> trips = new HashMap<>();
+    static final Map<Integer, String> trips = new HashMap<>();
     static boolean tripsLoaded;
+
+    @Inject
+    public DBTripManager(@Named("TripTableName") String tripTableName, @Named("TrackTableName") String trackTableName) {
+        trackTable = trackTableName;
+        tripTable = tripTableName;
+    }
 
     @Override
     public String getTripName(int tripId) {

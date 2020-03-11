@@ -16,7 +16,6 @@ public class PinDetector {
     private GpioPinDigitalInput pin;
     private boolean pinOn;
     private final Set<PinListener> listener;
-    private InternalPinListener pinListener = new InternalPinListener();
     private final String name;
 
     public interface PinListener {
@@ -49,6 +48,7 @@ public class PinDetector {
             GpioController gpio = GpioFactory.getInstance();
             pin = gpio.provisionDigitalInputPin(p, name, PinPullResistance.PULL_DOWN);
             pin.setShutdownOptions(true);
+            InternalPinListener pinListener = new InternalPinListener();
             if (active) pin.addListener(pinListener);
         }
     }

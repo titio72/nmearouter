@@ -1,23 +1,23 @@
-package com.aboni.nmea.router.agent.impl.meteo;
+package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.utils.AngleStatsSample;
-import com.aboni.utils.DataEvent;
-import com.aboni.utils.ScalarStatsSample;
-import com.aboni.utils.StatsSample;
+import com.aboni.utils.*;
 import net.sf.marineapi.nmea.sentence.*;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
 public class NMEAMeteoTarget extends NMEAAgentImpl {
 
-	private final StatsWriter writer;
-	
+    private final StatsWriter writer;
+
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
     private int timerCount;
 
-    private static final int TEMP = 0; 
+    private static final int TEMP = 0;
     private static final int W_TEMP = 1; 
     private static final int PRESS = 2; 
     private static final int WIND = 3; 
@@ -43,7 +43,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             /*HUM*/ 10
     };
 
-    private int[] statsPeriodCounter = new int[] {
+    private final int[] statsPeriodCounter = new int[]{
             /*AT0*/ 0,
             /*WT_*/ 0,
             /*PR_*/ 0,
@@ -52,19 +52,24 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             /*HUM*/ 0
     };
 
-    private final boolean useMWD;
+    private boolean useMWD;
 
-    public NMEAMeteoTarget(NMEACache cache, String name, QOS qos, StatsWriter w) {
-        super(cache, name, qos);
+    @Inject
+    public NMEAMeteoTarget(@NotNull NMEACache cache, @NotNull @Named("MeteoStatsWriter") StatsWriter w) {
+        super(cache);
         setSourceTarget(false, true);
-    	writer = w;
-    	useMWD = qos != null && qos.get("useMWD");
+        writer = w;
     }
 
     @Override
-	public String getDescription() {
-		return "Meteo data sampling";
-	}
+    protected final void onSetup(String name, QOS qos) {
+        useMWD = qos != null && qos.get("useMWD");
+    }
+
+    @Override
+    public final String getDescription() {
+        return "Meteo data sampling";
+    }
 
     @Override
     protected boolean onActivate() {

@@ -150,9 +150,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     
     private void buildStreamDump(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        NMEA2FileAgent dumper = new NMEA2FileAgent(
-                ThingsFactory.getInstance(NMEACache.class),
-                "Log", q);
+        NMEA2FileAgent dumper = ThingsFactory.getInstance(NMEA2FileAgent.class);
+        dumper.setup("Log", q);
         r.addAgent(dumper);
         handlePersistentState(dumper, null);
         handleFilter(dumper);
@@ -160,9 +159,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
 	private void buildDPTStats(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        DepthStatsAgent a = new DepthStatsAgent(
-                ThingsFactory.getInstance(NMEACache.class),
-                "Depth", q);
+        DepthStatsAgent a = ThingsFactory.getInstance(DepthStatsAgent.class);
+        a.setup("Depth", q);
         r.addAgent(a);
         a.start();
     }
@@ -170,9 +168,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildPowerLedTarget(NMEARouter r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
             QOS q = createBuiltInQOS();
-            PowerLedAgent pwrLed = new PowerLedAgent(
-                    ThingsFactory.getInstance(NMEACache.class),
-                    "PowerLed", q);
+            PowerLedAgent pwrLed = ThingsFactory.getInstance(PowerLedAgent.class);
+            pwrLed.setup("PowerLed", q);
             r.addAgent(pwrLed);
             pwrLed.start();
         }
@@ -180,36 +177,32 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildAutoPilot(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        NMEAAutoPilotAgent ap = new NMEAAutoPilotAgent(
-                ThingsFactory.getInstance(NMEACache.class),
-                "SmartPilot", q);
+        NMEAAutoPilotAgent ap = ThingsFactory.getInstance(NMEAAutoPilotAgent.class);
+        ap.setup("SmartPilot", q);
         r.addAgent(ap);
         ap.start();
     }
 
     private void buildFanTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        FanAgent fan = new FanAgent(
-                ThingsFactory.getInstance(NMEACache.class),
-                "FanManager", q);
+        FanAgent fan = ThingsFactory.getInstance(FanAgent.class);
+        fan.setup("FanManager", q);
         r.addAgent(fan);
         fan.start();
     }
 
     private void buildEngineDetector(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        EngineDetectionAgent eng = new EngineDetectionAgent(
-                ThingsFactory.getInstance(NMEACache.class),
-                "EngineManager", q);
+        EngineDetectionAgent eng = ThingsFactory.getInstance(EngineDetectionAgent.class);
+        eng.setup("EngineManager", q);
         r.addAgent(eng);
         eng.start();
     }
 
     private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
-        NMEASystemTimeGPS gpsTime = new NMEASystemTimeGPS(
-                ThingsFactory.getInstance(NMEACache.class),
-                "GPSTime", q);
+        NMEASystemTimeGPS gpsTime = ThingsFactory.getInstance(NMEASystemTimeGPS.class);
+        gpsTime.setup("GPSTime", q);
         r.addAgent(gpsTime);
         handleFilter(gpsTime);
         gpsTime.start();

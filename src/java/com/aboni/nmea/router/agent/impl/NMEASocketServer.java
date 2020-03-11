@@ -2,9 +2,12 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.net.NetConf;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -19,48 +22,60 @@ import java.util.Map.Entry;
 
 public class NMEASocketServer extends NMEAAgentImpl {
 
-	private final int port;
-	private Selector selector;
-	private ServerSocketChannel serverSocket;
-	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
-	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
-	private final Map<SocketChannel, ClientDescriptor> clients;
+    private int port = -1;
+    private Selector selector;
+    private ServerSocketChannel serverSocket;
+    private final ByteBuffer writeBuffer;
+    private final ByteBuffer readBuffer;
+    private final Map<SocketChannel, ClientDescriptor> clients;
 
-	private static class ClientDescriptor {
-		
-		ClientDescriptor(String ip) {
-			this.ip = ip;
-		}
-		
-		final String ip;
-		
-		int errors = 0;
-		
-		@Override
-		public String toString() {
-			return ip;
-		}
-	}
-	
-	public NMEASocketServer(NMEACache cache, String name, int port, boolean allowReceive, boolean allowTransmit, QOS q) {
-		super(cache, name, q);
-		this.port = port;
-        setSourceTarget(allowReceive, allowTransmit);
+    private static class ClientDescriptor {
+
+        ClientDescriptor(String ip) {
+            this.ip = ip;
+        }
+
+        final String ip;
+
+        int errors = 0;
+
+        @Override
+        public String toString() {
+            return ip;
+        }
+    }
+
+    @Inject
+    public NMEASocketServer(@NotNull NMEACache cache) {
+        super(cache);
+        writeBuffer = ByteBuffer.allocate(16384);
+        readBuffer = ByteBuffer.allocate(16384);
         clients = new HashMap<>();
-	}
-	
-	public NMEASocketServer(NMEACache cache, String name, int port, QOS q) {
-		this(cache, name, port, false, true, q);
-	}
+    }
 
-	public int getPort() {
-		return port;
-	}
-	
+    public void setup(String name, QOS qos, NetConf conf) {
+        if (port == -1) {
+            setup(name, qos);
+            setSourceTarget(conf.isRx(), conf.isTx());
+            port = conf.getPort();
+            getLogger().info(String.format("Setting up TCP server: Port {%d} RX {%b %b}", port, isSource(), isTarget()));
+        } else {
+            getLogger().info("Cannot setup TCP server - already set up");
+        }
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     @Override
     public String getType() {
-    	return "TCP NMEA Server";
+        return "TCP NMEA Server";
     }
 
 	

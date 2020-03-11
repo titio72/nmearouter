@@ -9,14 +9,23 @@ import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 public class EngineDetectionAgent extends NMEAAgentImpl {
 
     private EngineStatus engineRunning;
 
-    public EngineDetectionAgent(NMEACache cache, String name, QOS q) {
-        super(cache, name, q);
+    @Inject
+    public EngineDetectionAgent(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, false);
         engineRunning = EngineStatus.UNKNOWN;
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
     }
 
     @Override

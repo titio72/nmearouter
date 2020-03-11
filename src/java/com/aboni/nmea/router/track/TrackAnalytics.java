@@ -7,17 +7,20 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 public class TrackAnalytics {
 
     private static class SpeedDistribution {
-        double[] buckets = new double[]{0.5, 1.0, 1.5, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5,
+        final double[] buckets = new double[]{0.5, 1.0, 1.5, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5,
                 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5,
                 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5};
 
-        double[] distances = new double[buckets.length];
-        long[] times = new long[buckets.length];
+        final double[] distances = new double[buckets.length];
+        final long[] times = new long[buckets.length];
 
         void addSample(long period, double dist, double speed) {
             int i = Math.min(29, (int) (Math.abs(speed) / 0.5));
@@ -26,8 +29,8 @@ public class TrackAnalytics {
         }
 
         JSONArray toJSON() {
-            JSONArray res  = new JSONArray();
-            for (int i = 0; i<buckets.length; i++) {
+            JSONArray res = new JSONArray();
+            for (int i = 0; i < buckets.length; i++) {
                 double bucket = buckets[i];
                 double distance = distances[i];
                 long time = times[i];
@@ -41,85 +44,34 @@ public class TrackAnalytics {
         }
     }
 
-    private static class MovingAverageMax {
-
-        private double d;
-        private String tag;
-        private List<Pair<Long, Double>> sss = new LinkedList<>();
-        private double distance = 0;
-
-        private long t0Max = 0;
-        private long t1Max = 0;
-        private double speedMax = 0.0;
-
-        MovingAverageMax(double distance, String tag) {
-            d = distance;
-            this.tag = tag;
-        }
-
-        void addSample(Pair<Long, Double> p) {
-            sss.add(p);
-            distance += p.second;
-            if (distance > d) {
-                // pull the first item from the rolling window
-                Pair<Long, Double> p0 = sss.get(0);
-                while (distance > d && !sss.isEmpty()) {
-                    distance -= p0.second;
-                    sss.remove(0);
-                    p0 = sss.get(0);
-                }
-
-                long dT = p.first - p0.first;
-                double speed = distance / ((double) dT / 3600000d);
-                if (speed > speedMax) {
-                    t0Max = p0.first;
-                    t1Max = p.first;
-                    speedMax = speed;
-                }
-            }
-        }
-
-        double getMaxSpeed() {
-            return speedMax;
-        }
-
-        long getMaxSpeedT0() {
-            return t0Max;
-        }
-
-        long getMaxSpeedT1() {
-            return t1Max;
-        }
-
-        void fillRes(JSONObject result) {
-            if (getMaxSpeed() > 0.0) {
-                result.put("max" + tag + "Speed", getMaxSpeed());
-                result.put("max" + tag + "SpeedTime0", formatDate(getMaxSpeedT0()));
-                result.put("max" + tag + "SpeedTime1", formatDate(getMaxSpeedT1()));
-            }
-        }
-    }
-
     static class StatsLeg {
+
+        private static final DateFormat DF_ISO;
+
+        static {
+            DF_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            DF_ISO.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
+
         long samples;
         long start;
         long end;
         long totalNavigationTime = 0;
         double totalNavigationDistance = 0;
-        long[] sailEngineTime = new long[]{0, 0, 0};
-        double[] sailEngineDistance = new double[]{0.0, 0.0, 0.0};
+        final long[] sailEngineTime = new long[]{0, 0, 0};
+        final double[] sailEngineDistance = new double[]{0.0, 0.0, 0.0};
         double maxSpeed = 0.0;
         long maxSpeedTime = 0;
         double max30sAverageSpeed = 0.0;
         long max30sAverageSpeedTime = 0;
         double maxSampleAverageSpeed = 0.0;
         long maxSampleAverageSpeedTime = 0;
-        MovingAverageMax[] movingAvgMaxes = new MovingAverageMax[]{
-                new MovingAverageMax(1.0, "01NM"),
-                new MovingAverageMax(5.0, "05NM"),
-                new MovingAverageMax(10.0, "10NM")};
-        SpeedDistribution speedDistribution = new SpeedDistribution();
-        SpeedDistribution speedDistributionSail = new SpeedDistribution();
+        final BestMileSpeed[] movingAvgMaxes = new BestMileSpeed[]{
+                new BestMileSpeed(1.0, "01NM"),
+                new BestMileSpeed(5.0, "05NM"),
+                new BestMileSpeed(10.0, "10NM")};
+        final SpeedDistribution speedDistribution = new SpeedDistribution();
+        final SpeedDistribution speedDistributionSail = new SpeedDistribution();
 
         public JSONObject toJson() {
             JSONObject j = new JSONObject();
@@ -162,7 +114,7 @@ public class TrackAnalytics {
             j.put("maxSampledSpeedTime", formatDate(maxSampleAverageSpeedTime));
             j.put("speedDistribution", speedDistribution.toJSON());
             j.put("speedDistributionSail", speedDistributionSail.toJSON());
-            for (MovingAverageMax mm : movingAvgMaxes) mm.fillRes(j);
+            for (BestMileSpeed mm : movingAvgMaxes) fillRes(mm, j);
             return j;
         }
 
@@ -175,10 +127,23 @@ public class TrackAnalytics {
             long s = l / 1000;
             return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
         }
+
+
+        private static String formatDate(long l) {
+            return DF_ISO.format(new Date(l));
+        }
+
+        protected static void fillRes(BestMileSpeed m, JSONObject result) {
+            if (m.getMaxSpeed() > 0.0) {
+                result.put("max" + m.getTag() + "Speed", m.getMaxSpeed());
+                result.put("max" + m.getTag() + "SpeedTime0", formatDate(m.getMaxSpeedT0()));
+                result.put("max" + m.getTag() + "SpeedTime1", formatDate(m.getMaxSpeedT1()));
+            }
+        }
     }
 
-    class Stats extends StatsLeg {
-        List<StatsLeg> legs = new ArrayList<>();
+    static class Stats extends StatsLeg {
+        final List<StatsLeg> legs = new ArrayList<>();
         StatsLeg currentLeg;
 
         long totalAnchorTime = 0;
@@ -216,13 +181,6 @@ public class TrackAnalytics {
         void resetLeg() {
             currentLeg = null;
         }
-    }
-
-    private static final DateFormat DF_ISO;
-
-    static {
-        DF_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        DF_ISO.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private final Stats stats;
@@ -314,10 +272,6 @@ public class TrackAnalytics {
 
     private static void calcMovingAverageSpeed(StatsLeg stats, TrackPoint sample) {
         Pair<Long, Double> p = new Pair<>(sample.getPosition().getTimestamp(), sample.getDistance());
-        for (MovingAverageMax m : stats.movingAvgMaxes) m.addSample(p);
-    }
-
-    private static String formatDate(long l) {
-        return DF_ISO.format(new Date(l));
+        for (BestMileSpeed m : stats.movingAvgMaxes) m.addSample(p);
     }
 }

@@ -43,11 +43,8 @@ public class DBTripManagerTest {
 
     @Before
     public void setUp() throws Exception {
-
         TrackTestTableManager.setUp();
-
-        m = new DBTripManager();
-        m.trackTable = "track_test";
+        m = new DBTripManager("trip_test", "track_test");
         try (DBHelper db = new DBHelper(true)) {
             for (String sql : SQL_CREATE_ROWS) db.getConnection().createStatement().executeUpdate(sql);
         }

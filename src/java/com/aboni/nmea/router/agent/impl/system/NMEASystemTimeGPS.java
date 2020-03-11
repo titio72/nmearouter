@@ -5,22 +5,31 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
-	private final SystemTimeChecker systemTimeCHecker;
+    private final SystemTimeChecker systemTimeCHecker;
 
-	public NMEASystemTimeGPS(NMEACache cache, String name, QOS qos) {
-		super(cache, name, qos);
-		setSourceTarget(false, true);
-		systemTimeCHecker = new SystemTimeChecker(cache);
-	}
+    @Inject
+    public NMEASystemTimeGPS(@NotNull NMEACache cache) {
+        super(cache);
+        setSourceTarget(false, true);
+        systemTimeCHecker = new SystemTimeChecker(cache);
+    }
 
-	@Override
-	public String getType() {
-		return "GPSTime";
-	}
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
+    }
 
-	@Override
+    @Override
+    public String getType() {
+        return "GPSTime";
+    }
+
+    @Override
     public String getDescription() {
         return "Sync up system time with GPS UTC time feed [" + (systemTimeCHecker.isSynced() ? "Sync " + systemTimeCHecker.getTimeSkew() : "Not Sync") + "]";
     }

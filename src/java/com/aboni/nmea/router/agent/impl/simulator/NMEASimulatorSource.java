@@ -13,6 +13,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileReader;
@@ -22,7 +23,7 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
-public class NMEASimulatorSource extends NMEAAgentImpl {
+public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDriver {
 
     private int headingAuto = Integer.MIN_VALUE;
     private double refHeading = Double.NaN;
@@ -30,8 +31,15 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 
     private static NMEASimulatorSource simulator;
 
-    @NotNull
-    private final NMEASimulatorSourceSettings data;
+    public static NMEASimulatorSource getSimulator() {
+        return simulator;
+    }
+
+    public static void setSimulator(NMEASimulatorSource s) {
+        simulator = s;
+    }
+
+    private NMEASimulatorSourceSettings data;
 
     private final TalkerId id;
     private final Random r = new Random();
@@ -40,30 +48,19 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
     private double trip = 0;
     private long lastTS = 0;
 
-    public static NMEASimulatorSource getSimulator() {
-		return simulator;
-	}
-
-	public static NMEASimulatorSource create(NMEACache cache, String name, QOS qos) {
-		NMEASimulatorSource sim = new NMEASimulatorSource(cache, name, qos);
-		if (simulator==null) simulator = sim;
-		return sim;
-	}
-
-	private NMEASimulatorSource(NMEACache cache, String name, QOS qos) {
-		super(cache, name, qos);
-		data = new NMEASimulatorSourceSettings("sim_" + name + ".properties");
+    @Inject
+    public NMEASimulatorSource(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, true);
         id = TalkerId.GP;
         polars = null;
-	}
-	
-	private String lastPolarFile;
+    }
 
+    private String lastPolarFile;
 
     @Override
     public String getType() {
-    	return "Simulator";
+        return "Simulator";
     }
 
 	private void loadPolars() {
@@ -72,26 +69,37 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 		}
         try {
         	if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
-				File f = new File(Constants.CONF_DIR, data.getPolars());
-				try (FileReader reader = new FileReader(f)) {
-					polars.load(reader);
-				}
-				lastPolarFile = data.getPolars();
-        	}
-		} catch (Exception e) {
-			getLogger().error("Cannot load polars", e);
-		}		
-	}
-	
-	@Override
-	protected boolean onActivate() {
-		return true;
-	}
+                File f = new File(Constants.CONF_DIR, data.getPolars());
+                try (FileReader reader = new FileReader(f)) {
+                    polars.load(reader);
+                }
+                lastPolarFile = data.getPolars();
+            }
+        } catch (Exception e) {
+            getLogger().error("Cannot load polars", e);
+        }
+    }
+
+    @Override
+    protected void onSetup(String name, QOS qos) {
+        data = new NMEASimulatorSourceSettings("sim_" + name + ".properties");
+        if (simulator == null) setSimulator(this);
+    }
+
+    @Override
+    protected boolean onActivate() {
+        if (data != null) {
+            return true;
+        } else {
+            getLogger().error("Cannot start Simulator - setup missing!");
+            return false;
+        }
+    }
 	    
 	@Override
 	public String getDescription() {
-		return "";
-	}
+        return "Simulator";
+    }
 
     
     /*	
@@ -105,31 +113,37 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 	water temp     | "C" temperature |   2 decimals                    | "C" celsius     | "ENV_WATER_T"
 	-----------------------------------------------------------------------------------------------------
      */
-   
-	public double getHeading() {
-		return refHeading;
-	}
 
+    @Override
+    public double getHeading() {
+        return refHeading;
+    }
+
+    @Override
     public void setHeading(double heading) {
-		this.refHeading = heading;
-	}
+        this.refHeading = heading;
+    }
 
+    @Override
     public double getwSpeed() {
-		return data.getwSpeed();
-	}
+        return data.getwSpeed();
+    }
 
+    @Override
     public void setwSpeed(double wSpeed) {
-		this.data.setwSpeed(wSpeed);
-	}
+        this.data.setwSpeed(wSpeed);
+    }
 
+    @Override
     public double getwDirection() {
-		return data.getwDirection();
-	}
+        return data.getwDirection();
+    }
 
+    @Override
     public void setwDirection(double wDirection) {
-		this.data.setwDirection(wDirection);
-	}
-	
+        this.data.setwDirection(wDirection);
+    }
+
     private static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
@@ -534,21 +548,23 @@ public class NMEASimulatorSource extends NMEAAgentImpl {
 			case "07F8": delta = 1; break;
 			case "08F7": delta = 10; break;
 			default: delta = 0; break;
-		}
-		if (delta!=0) {
-			if (headingAuto != Integer.MIN_VALUE) {
-				headingAuto += delta;
-				sendAutopilotStatus();
-			}
-			refHeading += delta;
-		}
-	}
+        }
+        if (delta != 0) {
+            if (headingAuto != Integer.MIN_VALUE) {
+                headingAuto += delta;
+                sendAutopilotStatus();
+            }
+            refHeading += delta;
+        }
+    }
 
-	public double getSpeed() {
-		return data.getSpeed();
-	}
+    @Override
+    public double getSpeed() {
+        return data.getSpeed();
+    }
 
-	public void setSpeed(double speed) {
-		this.data.setSpeed(speed);
-	}
+    @Override
+    public void setSpeed(double speed) {
+        this.data.setSpeed(speed);
+    }
 }

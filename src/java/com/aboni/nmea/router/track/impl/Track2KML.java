@@ -28,7 +28,7 @@ public class Track2KML implements TrackDumper {
         }
     }
 
-    private TrackReader track;
+    private final TrackReader track;
     private final Kml kml;
 
     @Inject

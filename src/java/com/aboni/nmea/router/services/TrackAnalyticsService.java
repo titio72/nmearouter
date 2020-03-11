@@ -17,7 +17,7 @@ public class TrackAnalyticsService extends JSONWebService {
         super();
         setLoader((ServiceConfig config) -> {
             try {
-                JSONObject stats = null;
+                JSONObject stats;
                 int tripId = config.getInteger("trip", -1);
                 if (tripId != -1) {
                     TrackAnalyticsByTrip an = ThingsFactory.getInstance(TrackAnalyticsByTrip.class);

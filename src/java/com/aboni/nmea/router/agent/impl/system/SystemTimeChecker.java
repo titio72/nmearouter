@@ -18,7 +18,7 @@ public class SystemTimeChecker {
     private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
     private final NMEACache cache;
-    private SystemTimeChanger changer;
+    private final SystemTimeChanger changer;
 
     public interface SystemTimeChanger {
         void doChangeTime(OffsetDateTime timestamp);

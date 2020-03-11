@@ -12,6 +12,8 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public abstract class NMEAAgentImpl implements NMEAAgent {
@@ -50,18 +52,18 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		@Override
 		public void pushSentence(Sentence e, String src) {
 			try {
-				if (isStarted() &&
-						(getFilter()==null || getFilter().match(e,  src))) {
-					doWithSentence(e, src);
-				}
-			} catch (Exception t) {
-				getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
-			}
-		}
-	}
-	
-	private final String name;
-	private NMEAAgentStatusListener sl;
+                if (isStarted() &&
+                        (getFilter() == null || getFilter().match(e, src))) {
+                    doWithSentence(e, src);
+                }
+            } catch (Exception t) {
+                getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
+            }
+        }
+    }
+
+    private String name;
+    private NMEAAgentStatusListener sl;
     private NMEASentenceFilterSet fsetInput;
     private NMEASentenceFilterSet fsetOutput;
     private boolean active;
@@ -74,28 +76,36 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     private final NMEAProcessorSet procs;
     private final NMEACache cache;
 
-    public NMEAAgentImpl(NMEACache cache, String name, QOS qos) {
+    @Inject
+    public NMEAAgentImpl(@NotNull NMEACache cache) {
         this.cache = cache;
         targetIf = new InternalTarget();
         sourceIf = new InternalSource();
-        this.name = name;
         fsetInput = null;
         fsetOutput = null;
         active = false;
         procs = new NMEAProcessorSet();
-        handleQos(cache, name, qos);
         target = true;
         source = true;
     }
 
+    @Override
+    public void setup(String name, QOS qos) {
+        this.name = name;
+        handleQos(cache, name, qos);
+        onSetup(name, qos);
+    }
+
+    protected abstract void onSetup(String name, QOS qos);
+
     private void handleQos(NMEACache cache, String name, QOS qos) {
-        if (qos!=null) {
-        	for (String q: qos.getKeys()) {
-				switch (q) {
-					case "speed_filter":
-						getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
-						addProc(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
-						break;
+        if (qos != null) {
+            for (String q : qos.getKeys()) {
+                switch (q) {
+                    case "speed_filter":
+                        getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
+                        addProc(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
+                        break;
                     case "dpt":
                         getLogger().info("QoS {DPT} Agent {" + name + "}");
                         addProc(new NMEADepthEnricher());
@@ -132,14 +142,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 						break;
 				}
 			}
-
         }
     }
     
-	public NMEAAgentImpl(NMEACache cache, String name) {
-		this(cache, name, null);
-	}
-
 	protected void setSourceTarget(boolean isSource, boolean isTarget) {
 	    target = isTarget;
 	    source = isSource;

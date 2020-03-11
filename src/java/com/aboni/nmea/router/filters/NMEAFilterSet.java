@@ -6,26 +6,26 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import java.util.*;
 
 public class NMEAFilterSet implements NMEASentenceFilterSet {
-	
-	private final List<NMEASentenceFilter> filters;
-	private final Set<NMEASentenceFilter> filtersSet;
-	
-	private boolean blackList;
-	
-	public enum TYPE {
-		BLACKLIST,
-		WHITELIST
-	}
-	
-	public NMEAFilterSet(TYPE type) {
-		filters = new ArrayList<>();
-		filtersSet = new HashSet<>();
-		blackList = type==TYPE.BLACKLIST;
-	}
+
+    private final List<NMEASentenceFilter> filters;
+    private final Set<NMEASentenceFilter> filtersSet;
+
+    private TYPE whiteOrBlackList;
+
+    public enum TYPE {
+        BLACKLIST,
+        WHITELIST
+    }
+
+    public NMEAFilterSet(TYPE type) {
+        filters = new ArrayList<>();
+        filtersSet = new HashSet<>();
+        whiteOrBlackList = type;
+    }
 	
 	public TYPE getType() {
-		return (blackList?TYPE.BLACKLIST:TYPE.WHITELIST);
-	}
+        return whiteOrBlackList;
+    }
 	
 	public void addFilter(NMEASentenceFilter f) {
 		if (!filtersSet.contains(f)) {
@@ -52,9 +52,9 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
     public boolean match(Sentence sentence, String src) {
         if (!filters.isEmpty()) {
             for (Iterator<NMEASentenceFilter> i = getFilters(); i.hasNext(); ) {
-                if (i.next().match(sentence, src)) return !blackList;
+                if (i.next().match(sentence, src)) return whiteOrBlackList == TYPE.WHITELIST;
             }
         }
-        return blackList;
+        return whiteOrBlackList == TYPE.BLACKLIST;
     }
 }

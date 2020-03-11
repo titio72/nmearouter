@@ -68,6 +68,7 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getStatus(String statusKey, T defaultValue) {
         synchronized (statuses) {
             return (T) statuses.getOrDefault(statusKey, defaultValue);

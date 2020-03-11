@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html xml:lang="en">
 
 <head>
-  <meta charset="ISO-8859-1">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Andrea Boni NMEARouter</title>
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="js/nmearouter.js?b13"></script>
-  <link href="css/nmearouter.css" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="nmeasail.png">
-  <script>
+    <link href="css/nmearouter.css" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="nmeasail.png">
+    <script>
     $.getScript("https://maps.googleapis.com/maps/api/js?key=" + getGKey(), function(data, textStatus, jqxhr) {
       console.log(data); //data returned
       console.log(textStatus); //success
@@ -452,7 +452,8 @@
                       <span class="glyphicon glyphicon-info-sign circle-icon-content" aria-hidden="true"></span>
                     </button>
                   </td>
-                  <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}" onclick="showTrip(this)"><b>{{t.tripLabel}}</b></a></td>
+                                <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}" onclick="showTrip(this)"><strong>{{t.tripLabel}}</strong></a>
+                                </td>
                   <td>
                     <div style="float:left;" ng-repeat="d in t.dates">
                       <a name="{{d.ref}}" href="#" onclick="showDay(this)">{{d.dayShort}}</a>
@@ -499,34 +500,35 @@
                         </tr>
                         <tr>
                       <td class="info_cell">Trip</td>
-                      <td class="info_cell"><b>{{trip.dist | number:2}}NM ({{trip.distSailing | number:2}}NM)</b></td>
+                            <td class="info_cell"><strong>{{trip.dist | number:2}}NM ({{trip.distSailing |
+                                number:2}}NM)</strong></td>
                   </tr>
                   <tr>
                       <td class="info_cell">Nav time</td>
-                      <td class="info_cell"><b>{{trip.navigationTime}}</b></td>
+                      <td class="info_cell"><strong>{{trip.navigationTime}}</strong></td>
                   </tr>
-                  <tr>
-                      <td class="info_cell">Speed</td>
-                      <td class="info_cell"><b>{{trip.avgspeed | number:2}}Kn ({{trip.maxspeed |
-                          number:2}}/{{trip.maxspeed30 | number:2}}Kn)</b></td>
-                  </tr>
+                        <tr>
+                            <td class="info_cell">Speed</td>
+                            <td class="info_cell"><strong>{{trip.avgspeed | number:2}}Kn ({{trip.maxspeed |
+                                number:2}}/{{trip.maxspeed30 | number:2}}Kn)</strong></td>
+                        </tr>
                   <tr ng-if="trip.maxspeed1NM>0">
                       <td class="info_cell">1NM Max Speed</td>
-                      <td class="info_cell"><b>{{trip.maxspeed1NM | number:2}}Kn
+                      <td class="info_cell"><strong>{{trip.maxspeed1NM | number:2}}Kn
                           {{trip.maxspeed1N_time_0}}-{{trip.maxspeed1N_time_1}}
-                      </b></td>
+                      </strong></td>
                   </tr>
                   <tr ng-if="trip.maxspeed5NM>0">
                       <td class="info_cell">5NM Max Speed</td>
-                      <td class="info_cell"><b>{{trip.maxspeed5NM | number:2}}Kn
+                      <td class="info_cell"><strong>{{trip.maxspeed5NM | number:2}}Kn
                           {{trip.maxspeed5N_time_0}}-{{trip.maxspeed5N_time_1}}
-                      </b></td>
+                      </strong></td>
                   </tr>
                   <tr ng-if="trip.maxspeed10NM>0">
                       <td class="info_cell">10NM Max Speed</td>
-                      <td class="info_cell"><b>{{trip.maxspeed10NM | number:2}}Kn
+                      <td class="info_cell"><strong>{{trip.maxspeed10NM | number:2}}Kn
                           {{trip.maxspeed10N_time_0}}-{{trip.maxspeed10N_time_1}}
-                      </b></td>
+                      </strong></td>
                   </tr>
               </table>
           </div>

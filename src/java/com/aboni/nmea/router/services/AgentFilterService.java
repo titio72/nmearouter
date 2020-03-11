@@ -8,12 +8,9 @@ import javax.inject.Inject;
 
 public class AgentFilterService extends JSONWebService {
 
-    private final NMEARouter router;
-
     @Inject
     public AgentFilterService(NMEARouter router) {
         super();
-        this.router = router;
         setLoader((ServiceConfig config) -> {
             try {
                 String agentName = config.getParameter("agent");

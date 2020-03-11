@@ -9,6 +9,8 @@ import net.sf.marineapi.nmea.sentence.DPTSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -18,18 +20,24 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         int depth;
         long timestamp;
     }
-    
+
     private final Deque<DepthT> queue;
 
     private int max = Integer.MIN_VALUE;
-    private int min = Integer.MAX_VALUE;    
-    
+    private int min = Integer.MAX_VALUE;
+
     private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
-    public DepthStatsAgent(NMEACache cache, String name, QOS qos) {
-        super(cache, name, qos);
+    @Inject
+    public DepthStatsAgent(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, true);
         queue = new LinkedList<>();
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
     }
 
     @Override
@@ -38,9 +46,9 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     }
 
     @Override
-	public String getDescription() {
-		return "Calculates max and min depth over last hour period";
-	}
+    public String getDescription() {
+        return "Calculates max and min depth over last hour period";
+    }
 
     @Override
     protected void doWithSentence(Sentence s, String source) {

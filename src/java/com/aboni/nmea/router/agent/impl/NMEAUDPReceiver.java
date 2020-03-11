@@ -5,28 +5,47 @@ import com.aboni.nmea.router.agent.QOS;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class NMEAUDPReceiver extends NMEAAgentImpl {
 
-	private DatagramSocket socket;
-	private final int port;
-	private boolean stop;
-	
-	public NMEAUDPReceiver(NMEACache cache, String name, int port, QOS qos) {
-        super(cache, name, qos);
+    private DatagramSocket socket;
+    private int port;
+    private boolean stop;
+    private boolean setup;
+
+    @Inject
+    public NMEAUDPReceiver(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, false);
-        this.port = port;
-	}
-	
-	@Override
-	public String getDescription() {
-		return "UDP Receiver " + port;
-	}
-	
-	@Override
-	protected boolean onActivate() {
+    }
+
+    public void setup(String name, QOS q, int port) {
+        if (!setup) {
+            setup = true;
+            setup(name, q);
+            this.port = port;
+            getLogger().info(String.format("Setting up UDP receiver: Port {%d}", port));
+        } else {
+            getLogger().info("Cannot setup UDP receiver - already set up");
+        }
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return "UDP Receiver " + port;
+    }
+
+    @Override
+    protected boolean onActivate() {
 
 	    synchronized (this) {
 	        if (socket == null) {

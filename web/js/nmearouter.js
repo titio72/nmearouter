@@ -160,24 +160,6 @@ function backup() {
   xmlHttp.send(null);
 }
 
-function tripInfo(tripString) {
-  var ss = tripString.split("|");
-  var trip = ss[1];
-  var json = getTrip(trip);
-
-  bootbox.alert({
-    title: json.name,
-    message: "<p>" + json.start + " - " + json.end + " UTC</p>" +			
-      "<p>Distance <b>" + Math.round(json.dist * 100)/100 + "NM</b> in <b>" + json.totalTime + "</b></p>" +
-      "<p>Sail time <b>" + json.sailTime + "</b></p>" +
-      "<p>Max Speed <b>" + Math.round(json.maxspeed * 100) / 100 + "Kn</b></p>" +
-      "<p>Max 30s Avg Speed <b>" + Math.round(json.maxspeed30 * 100) / 100 + "Kn</b></p>" +
-      "<p>Avg Speed <b>" + Math.round(json.avgspeed * 100) / 100 + "Kn</b></p>"
-  
-  });
-  
-}
-
 function getGKey() {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "gmap.key", false);

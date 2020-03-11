@@ -67,7 +67,8 @@ public class NMEASerial extends NMEAAgentImpl {
 
     public NMEASerial(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran, QOS qos) {
-        super(cache, name, qos);
+        super(cache);
+        setup(name, qos);
         this.portName = portName;
         this.speed = speed;
         this.receive = rec;
@@ -75,6 +76,11 @@ public class NMEASerial extends NMEAAgentImpl {
         fastStats = new StatsSpeed();
         stats = new Stats();
         setSourceTarget(rec, tran);
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
     }
 
     @Override

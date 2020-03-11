@@ -10,6 +10,8 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 
@@ -24,22 +26,27 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private SensorTemp tempSensor;
     private final Map<String, Measurement> xDrMap;
 
-
-    public NMEASourceSensor(NMEACache cache, String name, QOS q) {
-        super(cache, name, q);
+    @Inject
+    public NMEASourceSensor(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, false);
         xDrMap = new HashMap<>();
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
     }
 
     @Override
     public String getType() {
         return "Onboard Sensor";
     }
-    
+
     @Override
     public String getDescription() {
-    	return 
-    			"Temp(" + (tempSensor==null?"-":"*") + ") " + 
+        return
+                "Temp(" + (tempSensor == null ? "-" : "*") + ") " +
     			"Volt(" + (voltageSensor==null?"-":"*") + ") " + 
     			"Atm2(" + (pressureTempSensor1==null?"-":"*") + ")";
     }

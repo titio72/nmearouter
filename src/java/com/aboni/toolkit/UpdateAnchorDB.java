@@ -4,6 +4,7 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.track.TrackManager;
 import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.impl.TrackManagerImpl;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
@@ -25,7 +26,7 @@ public class UpdateAnchorDB {
         boolean anchor;
     }
 
-    private TrackManager trackManager = new TrackManager(true);
+    private TrackManager trackManager = new TrackManagerImpl(true);
 
     private static TrackItem getItem(ResultSet rs) throws SQLException {
         // lat, lon, TS, anchor, id, speed, maxSpeed, dist, dTime

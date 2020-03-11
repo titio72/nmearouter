@@ -66,7 +66,7 @@ public class Track2GPX implements TrackDumper {
         }
     }
 
-    private TrackReader track;
+    private final TrackReader track;
     private String trackName = DEFAULT_TRACK_NAME;
     public static final String DEFAULT_TRACK_NAME = "track";
     private final DateFormat df;

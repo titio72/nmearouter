@@ -7,27 +7,35 @@ import com.aboni.nmea.sentences.NMEASentenceItem;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class NMEAPlayer extends NMEAAgentImpl {
 
-	private String file;
+    private String file;
 
-	public NMEAPlayer(NMEACache cache, String name, QOS qos) {
-		super(cache, /*tream, */name, qos);
-		setSourceTarget(true, false);
-	}
+    @Inject
+    public NMEAPlayer(@NotNull NMEACache cache) {
+        super(cache);
+        setSourceTarget(true, false);
+    }
 
-	@Override
-	public String getDescription() {
-		return "Fille " + getFile();
-	}
-	
-	
-	public void setFile(String file) {
-		this.file = file;
-	}
+    @Override
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return "Fille " + getFile();
+    }
+
+
+    public void setFile(String file) {
+        this.file = file;
+    }
 	
 	public String getFile() {
 		return file;

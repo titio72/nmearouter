@@ -1,7 +1,9 @@
 package com.aboni.nmea.router.agent.impl.track;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.track.TrackEvent;
 import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.impl.DBTrackEventWriter;
 import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.db.DBHelper;
@@ -25,8 +27,7 @@ public class DBTrackEventWriterTest {
     @Before
     public void setUp() throws Exception {
         TrackTestTableManager.setUp();
-        evW = new DBTrackEventWriter();
-        evW.sTABLE = "track_test";
+        evW = new DBTrackEventWriter("track_test");
     }
 
     @After

@@ -1,9 +1,13 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.track.impl;
 
+import com.aboni.nmea.router.track.TrackEvent;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.Event;
 import com.aboni.utils.db.EventWriter;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,17 +15,19 @@ import java.sql.Timestamp;
 
 public class DBTrackEventWriter implements EventWriter {
 
-    static String sTABLE = "track";
+    private final String sTABLE;
 
-	private PreparedStatement stm;
+    private PreparedStatement stm;
     private PreparedStatement stmTrip;
 
-	public DBTrackEventWriter() {
-		// nothing to init
-	}
+    @Inject
+    public DBTrackEventWriter(@NotNull @Named("TrackTableName") String tableName) {
+        sTABLE = tableName;
+        // nothing to init
+    }
 
-	private void prepareStatement(Connection c) throws SQLException {
-		if (stm==null) {
+    private void prepareStatement(Connection c) throws SQLException {
+        if (stm == null) {
             stm = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }

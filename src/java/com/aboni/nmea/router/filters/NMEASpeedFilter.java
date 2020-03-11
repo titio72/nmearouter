@@ -8,12 +8,15 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 public class NMEASpeedFilter implements NMEASentenceFilter {
 
-    private NMEACache cache;
-    private SpeedMovingAverage speedMovingAverage;
-    private boolean useGPS = true;
-    private boolean useAverage = false;
+    private final NMEACache cache;
+    private final SpeedMovingAverage speedMovingAverage;
+    private static final boolean USE_GPS = true;
+    private static final boolean USE_AVERAGE = false;
 
     // check if the speed is within gps*factor
     private static final double SPEED_TOLERANCE_FACTOR = 2.0;
@@ -24,13 +27,14 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
     // below this speed do not use GPS factor
     private static final double SPEED_CHECK_GPS_THRESHOLD = 2.5;
 
-    public NMEASpeedFilter(NMEACache cache) {
+    @Inject
+    public NMEASpeedFilter(@NotNull NMEACache cache) {
         this.cache = cache;
         speedMovingAverage = new SpeedMovingAverage(10000 /* 10 seconds */);
     }
 
     private boolean checkGPS(double speed) {
-        if (useGPS && speed > SPEED_CHECK_GPS_THRESHOLD) {
+        if (USE_GPS && speed > SPEED_CHECK_GPS_THRESHOLD) {
             PositionSentence posSentence = cache.getLastPosition().getData();
             if (posSentence instanceof RMCSentence) {
                 RMCSentence rmc = (RMCSentence) posSentence;
@@ -48,7 +52,7 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
     }
 
     private boolean checkMovingAverage(double speed) {
-        if (useAverage) {
+        if (USE_AVERAGE) {
             double movingAvg = speedMovingAverage.getAvg();
             if (!Double.isNaN(movingAvg)) {
                 return (speed <= (movingAvg * SPEED_TOLERANCE_FACTOR));

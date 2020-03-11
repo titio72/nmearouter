@@ -18,6 +18,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.text.SimpleDateFormat;
@@ -28,27 +30,42 @@ import java.util.TimeZone;
 
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
-	private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private GeoPositionT prevPos;
-	private long t0Play;
-	private long t0;
-	private final String file;
-	private boolean stop;
-	
-	public NMEAGPXPlayerAgent(NMEACache cache, String name, String file, QOS q) {
-		super(cache, name, q);
-		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
-		this.file = file;
-	}
-	
-	@Override
-	public String getDescription() {
-		return (file!=null)?("File " + file):"";
-	}
+    private final SimpleDateFormat fmt;
+    private GeoPositionT prevPos;
+    private long t0Play;
+    private long t0;
+    private String file;
+    private boolean stop;
 
-	@Override
-	protected boolean onActivate() {
-		synchronized (this) {
+    @Inject
+    public NMEAGPXPlayerAgent(@NotNull NMEACache cache) {
+        super(cache);
+        fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public void setFile(@NotNull String file) {
+        if (this.file == null) {
+            getLogger().info("Setting file {" + file + "}");
+            this.file = file;
+        } else {
+            getLogger().info("Cannot set file - already set");
+        }
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return (file != null) ? ("File " + file) : "";
+    }
+
+    @Override
+    protected boolean onActivate() {
+        synchronized (this) {
 			stop = false;
 		}
 		return play();

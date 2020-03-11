@@ -6,6 +6,8 @@ import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -17,26 +19,32 @@ import java.util.List;
 
 public class NMEA2FileAgent extends NMEAAgentImpl {
 
-	private static final long DUMP_PERIOD = 10L * 1000L;
-	private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-	
-	private long lastDump = 0;
-	private final List<NMEASentenceItem> queue = new LinkedList<>();
-	
-	public NMEA2FileAgent(NMEACache cache, String n, QOS q) {
-		super(cache, n, q);
-		setSourceTarget(false, true);
-	}
+    private static final long DUMP_PERIOD = 10L * 1000L;
+    private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
 
-	@Override
-	public String getDescription() {
-		return "Dump the NMEA stream to file";
-	}
+    private long lastDump = 0;
+    private final List<NMEASentenceItem> queue = new LinkedList<>();
 
-	@Override
-	public String getType() {
-		return "StreamDump";
-	}
+    @Inject
+    public NMEA2FileAgent(@NotNull NMEACache cache) {
+        super(cache);
+        setSourceTarget(false, true);
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return "Dump the NMEA stream to file";
+    }
+
+    @Override
+    public String getType() {
+        return "StreamDump";
+    }
 
 	@Override
 	protected void doWithSentence(Sentence s, String source) {

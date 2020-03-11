@@ -1,8 +1,10 @@
-package com.aboni.nmea.router.track;
+package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.track.TrackManager;
+import com.aboni.nmea.router.track.TrackPoint;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -18,7 +20,7 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
-public class TrackManagerTest {
+public class TrackManagerImplTest {
 
     static {
         Injector injector = Guice.createInjector(new NMEARouterModule());
@@ -34,7 +36,7 @@ public class TrackManagerTest {
 
     @Before
     public void setup() {
-        m = new TrackManager();
+        m = new TrackManagerImpl();
         m.setPeriod(period * 1000);
         lat = 43.67830115349512;
         lon = 10.266444683074951;

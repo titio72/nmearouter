@@ -10,6 +10,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,25 +24,31 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final long SEND_HD_IDLE_TIME = 15L * 1000L; //ms
 
     private static final boolean USE_CMPS11 = true;
-    
+
     private ASensorCompass compassSensor;
-    
+
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
-    
-    public NMEASourceGyro(NMEACache cache, String name, QOS q) {
-        super(cache, name, q);
+
+    @Inject
+    public NMEASourceGyro(NMEACache cache) {
+        super(cache);
         setSourceTarget(true, true);
     }
-    
+
+    @Override
+    protected final void onSetup(String name, QOS qos) {
+        // do nothing
+    }
+
     @Override
     public String getType() {
-    	return "Onboard Sensor";
+        return "Onboard Sensor";
     }
-    
+
     @Override
     public String getDescription() {
-    	return "Gyro(" + (compassSensor==null?"-":"*") + ")";
+        return "Gyro(" + (compassSensor == null ? "-" : "*") + ")";
     }
     
     @Override

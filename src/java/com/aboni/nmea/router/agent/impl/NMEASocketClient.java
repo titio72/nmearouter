@@ -2,42 +2,60 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.net.NetConf;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
 public class NMEASocketClient extends NMEAAgentImpl {
 
-	private Socket socket;
-	private final String server;
-	private final int port;
-	private SentenceReader reader;
-    private final boolean receive;
-    private final boolean transmit;
-	
-	public NMEASocketClient(NMEACache cache, String name, String server, int port, boolean rec, boolean trans, QOS qos) {
-        super(cache, name, qos);
-        setSourceTarget(true, false);
-        this.server = server;
-        this.port = port;
-        this.receive = rec;
-        this.transmit = trans;        
-	}
-	
-	@Override
-	public String getDescription() {
-		return "TCP " + server + ":" + port;
-	}
-	
-	@Override
-	protected boolean onActivate() {
+    private Socket socket;
+    private String server;
+    private int port;
+    private SentenceReader reader;
+    private boolean receive;
+    private boolean transmit;
 
-	    synchronized (this) {
+    @Inject
+    public NMEASocketClient(@NotNull NMEACache cache) {
+        super(cache);
+        setSourceTarget(true, false);
+    }
+
+    public void setup(String name, QOS qos, NetConf conf) {
+        if (this.server == null) {
+            setup(name, qos);
+            this.server = conf.getServer();
+            this.port = conf.getPort();
+            this.receive = conf.isRx();
+            this.transmit = conf.isTx();
+            getLogger().info(String.format("Setting up TCP client: Server {%s} Port {%d} RX {%b %b}", server, port, receive, transmit));
+        } else {
+            getLogger().info("Cannot setup TCP client - already set up");
+        }
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return "TCP " + server + ":" + port;
+    }
+
+    @Override
+    protected boolean onActivate() {
+
+        synchronized (this) {
 	        if (socket == null) {
     	        try {
                     getLogger().info("Creating Socket {" + server + ":" + port + "}");

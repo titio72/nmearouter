@@ -41,7 +41,7 @@ public interface TripManager {
      * Create a new trip.
      *
      * @return The id of newly created trip.
-     * @throws TripManagerException
+     * @throws TripManagerException in case an unexpected problem.
      */
     int createTrip() throws TripManagerException;
 
@@ -50,17 +50,17 @@ public interface TripManager {
      *
      * @param trip The trip id.
      * @param date The date to add to the trip.
-     * @throws TripManagerException
+     * @throws TripManagerException in case an unexpected problem.
      */
     void addDateToTrip(int trip, LocalDate date) throws TripManagerException;
 
     /**
      * Update an existing trip's description.
      *
-     * @param trip
-     * @param description
+     * @param trip        The id of trip
+     * @param description The new description of the trip.
      * @return True is a trip has been updated, false if no trip matching the given id ws found.
-     * @throws TripManagerException
+     * @throws TripManagerException in case an unexpected problem.
      */
     boolean setDescription(int trip, String description) throws TripManagerException;
 }

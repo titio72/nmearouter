@@ -1,12 +1,11 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.track.*;
-import com.aboni.nmea.router.track.impl.DBTripManager;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
@@ -17,53 +16,38 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
     private static final long CHECK_TRIP_TIMEOUT = 60000L;
     private static final int CONTINUE_TRIP_THRESHOLD = 3 * 60 * 60 * 1000;  /* 3 hours */
-    private TrackWriter media;
-    private String mediaFile;
+    private final TrackWriter media;
     private final TrackManager tracker;
     private final TripManager tripManager;
     private Integer tripId;
 
-    public NMEATrackAgent(NMEACache cache, String name) {
-        super(cache, name);
+    @Inject
+    public NMEATrackAgent(@NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManager tripManager,
+                          @NotNull TrackWriter mediaWriter) {
+        super(cache);
         setSourceTarget(true, true);
-        this.tracker = new TrackManager();
-        this.tripManager = new DBTripManager();
-        this.media = null;
+        this.tracker = trackManager;
+        this.tripManager = tripManager;
+        this.media = mediaWriter;
         this.tripId = null;
-    }
-
-    /**
-     * Set "" for DB.
-     * @param file WHen not empty redirect tracking info to the specified file
-     */
-    public void setFile(String file) {
-    	mediaFile = file;
     }
 
     @Override
     protected boolean onActivate() {
-    	if (media==null) {
-	    	if ("".equals(mediaFile) || mediaFile==null) { 
-	    		media = new DBTrackWriter();
-	    	} else {
-	    		media = new FileTrackWriter(mediaFile);
-	    	}
-    	}
         return media.init();
     }
     
     @Override
     protected void onDeactivate() {
-        if (media!=null) {
-            media.dispose();
-        }
-        media = null;
+        // nothing to do
     }
 
     /**
@@ -196,24 +180,29 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             }
         }
     }
-    
+
     private double avgTime = 0;
     private int samples = 0;
     private int writes = 0;
-    
+
     @Override
     public String getType() {
         return "Tracker";
     }
-    
+
+    @Override
+    protected void onSetup(String name, QOS qos) {
+        // do nothing
+    }
+
     @Override
     public String toString() {
         return "{Tracker}";
     }
-    
+
     @Override
     public String getDescription() {
-    	GeoPositionT pos = tracker.getLastTrackedPosition();
-    	return "Tracking position " + ((pos==null)?"":("<br>" + pos));
+        GeoPositionT pos = tracker.getLastTrackedPosition();
+        return "Tracking position " + ((pos == null) ? "" : ("<br>" + pos));
     }
 }

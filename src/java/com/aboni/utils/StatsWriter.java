@@ -1,6 +1,4 @@
-package com.aboni.nmea.router.agent.impl.meteo;
-
-import com.aboni.utils.StatsSample;
+package com.aboni.utils;
 
 public interface StatsWriter {
 	void write(StatsSample s, long ts);

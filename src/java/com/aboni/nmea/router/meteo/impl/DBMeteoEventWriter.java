@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.agent.impl.meteo;
+package com.aboni.nmea.router.meteo.impl;
 
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.Event;

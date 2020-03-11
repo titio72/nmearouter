@@ -72,7 +72,7 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
                 break;
         }
         if (s != null) {
-            ServerLog.getLogger().info("ServiceFactory {" + s + "}");
+            ServerLog.getLogger().info("ServiceFactory: created {" + s + "}");
         }
         return s;
     }

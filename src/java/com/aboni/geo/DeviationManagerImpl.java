@@ -1,5 +1,6 @@
 package com.aboni.geo;
 
+import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 
 import javax.validation.constraints.NotNull;
@@ -100,36 +101,37 @@ public class DeviationManagerImpl implements DeviationManager {
      * Clear the deviation table.
      */
     public void reset() {
-    	synchronized (this) {
-    		deviationMap.clear();
-    		reverseDeviationMap.clear();
-    	}
+        synchronized (this) {
+            deviationMap.clear();
+            reverseDeviationMap.clear();
+        }
     }
-    
+
+    public int size() {
+        return deviationMap.size();
+    }
+
     /**
      * Add a sample.
-     * @param reading The compass reading in decimal degrees.
+     *
+     * @param reading  The compass reading in decimal degrees.
      * @param magnetic The magnetic reading (reading of a compensated compass).
      */
     public void add(double reading, double magnetic) {
         synchronized (this) {
-        	add(reading, magnetic, deviationMap);
-        	add(magnetic, reading, reverseDeviationMap);
+            add(reading, magnetic, deviationMap);
+            add(magnetic, reading, reverseDeviationMap);
         }
     }
     
     private static void add(double key, double value, List<Pair> l) {
-    	if (Math.abs(key)>360.0 || Math.abs(value)>360.0) {
-            throw new IllegalArgumentException();
+        Pair sample = new Pair((int) normalize(key), normalize(value));
+        int p = Collections.binarySearch(l, sample);
+        if (p >= 0) {
+            l.get(p).output = sample.output;
         } else {
-            Pair sample = new Pair(((int)key)%360, normalize(value));
-            int p = Collections.binarySearch(l, sample);
-            if (p>=0) { 
-                l.get(p).output = sample.output;
-            } else {
-                p = -(p+1);
-                l.add(p, sample);
-            }
+            p = -(p + 1);
+            l.add(p, sample);
         }
     }
     
@@ -201,12 +203,6 @@ public class DeviationManagerImpl implements DeviationManager {
     }
 
     private static double normalize(double m) {
-        if (m>360.0) {
-            return m - (360*((int)(m/360)));
-        }
-        else if (m<0.0) {
-            return m + (360*((int)(-m/360))) + 360;
-        }
-        return m;
+        return Utils.normalizeDegrees0To360(m);
     }
 }

@@ -5,6 +5,8 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -15,26 +17,43 @@ import java.util.Set;
 
 public class NMEAUDPSender extends NMEAAgentImpl {
 
-	private DatagramSocket serverSocket;
-	private final int portTarget;
-	private final Set<InetAddress> targets;
+    private DatagramSocket serverSocket;
+    private int portTarget = 1113;
+    private final Set<InetAddress> targets;
+    private boolean setup = false;
 
-	public NMEAUDPSender(NMEACache cache, String name, QOS qos, int portTarget) {
-		super(cache, name, qos);
-		this.portTarget = portTarget;
+    @Inject
+    public NMEAUDPSender(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(false, true);
         targets = new HashSet<>();
-	}
+    }
+
+    public void setup(String name, QOS qos, int port) {
+        if (!setup) {
+            setup = true;
+            setup(name, qos);
+            portTarget = port;
+            getLogger().info(String.format("Setting up UDP sender: Port {%d}", portTarget));
+        } else {
+            getLogger().info("Cannot setup UDP sender - already set up");
+        }
+    }
+
+    @Override
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
+    }
 
     @Override
     public String getType() {
-    	return "UDP Server";
+        return "UDP Server";
     }
-	
+
     @Override
     public String getDescription() {
-    	StringBuilder res = new StringBuilder("UDP Sender Port " + getPort() + "<br>");
-    	for (InetAddress a: targets) res.append(a.getHostName()).append(" ");
+        StringBuilder res = new StringBuilder("UDP Sender Port " + getPort() + "<br>");
+        for (InetAddress a : targets) res.append(a.getHostName()).append(" ");
     	return res.toString();
     }
     

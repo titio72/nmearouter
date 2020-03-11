@@ -9,15 +9,18 @@ import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 /**
- * 
+ *
  * @author aboni
  *
  * 86  X1  YY  yy  Keystroke 
-                 X=1: Sent by Z101 remote control to increment/decrement 
-                      course of autopilot 
-     11  05  FA     -1 
-     11  06  F9    -10 
+X=1: Sent by Z101 remote control to increment/decrement
+course of autopilot
+11  05  FA     -1
+11  06  F9    -10
      11  07  F8     +1 
      11  08  F7    +10 
      11  20  DF     +1 &  -1 
@@ -61,28 +64,34 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
      X1  68  97    +10 & -10 pressed longer (in auto mode) 
      X1  6E  91     +1 & -1 pressed longer (Rudder Gain Display) 
      X1  80  7F     -1 pressed (repeated 1x per second) 
-     X1  81  7E     +1 pressed (repeated 1x per second) 
-     X1  82  7D    -10 pressed (repeated 1x per second) 
-     X1  83  7C    +10 pressed (repeated 1x per second) 
-     X1  84  7B     +1, -1, +10 or -10 released
+X1  81  7E     +1 pressed (repeated 1x per second)
+X1  82  7D    -10 pressed (repeated 1x per second)
+X1  83  7C    +10 pressed (repeated 1x per second)
+X1  84  7B     +1, -1, +10 or -10 released
  *
  *
  */
 
 public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver {
 
-	public NMEAAutoPilotAgent(NMEACache cache, String name, QOS qos) {
-		super(cache, name, qos);
-	}
-
-    @Override
-    public String getType() {
-    	return "SmartPilot";
+    @Inject
+    public NMEAAutoPilotAgent(@NotNull NMEACache cache) {
+        super(cache);
     }
 
     @Override
-	public String getDescription() {
-		return "Raymarine SeaTalk autopilot driver";
+    protected final void onSetup(String name, QOS q) {
+        // do nothing
+    }
+
+    @Override
+    public String getType() {
+        return "SmartPilot";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Raymarine SeaTalk autopilot driver";
 	}
 
     @Override
