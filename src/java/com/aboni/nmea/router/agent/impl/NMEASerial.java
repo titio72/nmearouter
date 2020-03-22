@@ -63,7 +63,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private final int speed;
     private SerialPort port;
     private final boolean receive;
-    private final boolean trasmit;
+    private final boolean transmit;
 
     public NMEASerial(NMEACache cache, String name, String portName, int speed, boolean rec,
             boolean tran, QOS qos) {
@@ -72,7 +72,7 @@ public class NMEASerial extends NMEAAgentImpl {
         this.portName = portName;
         this.speed = speed;
         this.receive = rec;
-        this.trasmit = tran;
+        this.transmit = tran;
         fastStats = new StatsSpeed();
         stats = new Stats();
         setSourceTarget(rec, tran);
@@ -90,14 +90,14 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return String.format("Device %s %dbps (%s) In %dbps Out %dbps", portName, speed,
-                (receive ? "R" : "") + (trasmit ? "X" : ""), bps * 8, bpsOut * 8);
+        return String.format("Device %s %d bps (%s) In %d bps Out %d bps", portName, speed,
+                (receive ? "R" : "") + (transmit ? "X" : ""), bps * 8, bpsOut * 8);
     }
 
     @Override
     public String toString() {
         return "{Serial port " + portName + " " + speed + " " + (receive ? "R" : "")
-                + (trasmit ? "X" : "") + "}";
+                + (transmit ? "X" : "") + "}";
     }
 
     @Override
@@ -105,7 +105,7 @@ public class NMEASerial extends NMEAAgentImpl {
         if (port == null) {
             try {
                 getLogger().info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive ? "R" : "")
-                        + (trasmit ? "X" : "") + "}");
+                        + (transmit ? "X" : "") + "}");
                 port = SerialPort.getCommPort(portName);
                 port.setComPortParameters(speed, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 port.openPort();
@@ -201,7 +201,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     protected void doWithSentence(Sentence s, String src) {
-        if (isStarted() && trasmit) {
+        if (isStarted() && transmit) {
             try {
                 String strSentence = s.toSentence() + "\r\n";
                 byte[] b = strSentence.getBytes();

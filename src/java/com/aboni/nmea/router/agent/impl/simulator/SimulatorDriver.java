@@ -5,13 +5,13 @@ public interface SimulatorDriver {
 
     void setHeading(double heading);
 
-    double getwSpeed();
+    double getWindSpeed();
 
-    void setwSpeed(double wSpeed);
+    void setWindSpeed(double wSpeed);
 
-    double getwDirection();
+    double getWindDirection();
 
-    void setwDirection(double wDirection);
+    void setWindDirection(double wDirection);
 
     double getSpeed();
 

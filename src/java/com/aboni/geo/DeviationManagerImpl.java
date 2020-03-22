@@ -135,9 +135,6 @@ public class DeviationManagerImpl implements DeviationManager {
         }
     }
     
-    /* (non-Javadoc)
-	 * @see com.aboni.geo.DeviationManager#getCompass(double)
-	 */
     @Override
     public double getCompass(double magnetic) {
     	synchronized (this) {
@@ -145,9 +142,6 @@ public class DeviationManagerImpl implements DeviationManager {
     	}	
     }
 
-    /* (non-Javadoc)
-	 * @see com.aboni.geo.DeviationManager#getMagnetic(double)
-	 */
     @Override
 	public double getMagnetic(double reading) {
     	synchronized (this) {

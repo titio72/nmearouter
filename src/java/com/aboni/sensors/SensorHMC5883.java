@@ -24,12 +24,12 @@ public class SensorHMC5883 extends I2CSensor {
 
     @Override
     protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-    	hmc5883l = new HMC5883L(new I2CInterface(bus, HMC5883L.HMC5883_I2CADDR));
-    	int i = 0;
-    	while (i<3 && !doInit()) { 
-    	    i++;
+        hmc5883l = new HMC5883L(new I2CInterface(bus, HMC5883L.HMC5883_I2C_ADDRESS));
+        int i = 0;
+        while (i < 3 && !doInit()) {
+            i++;
             Utils.pause(5000);
-    	}
+        }
     }
 
     private boolean doInit() {

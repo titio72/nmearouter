@@ -1,9 +1,7 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.TimeSerie;
-import com.aboni.utils.TimeSerieSample;
+import com.aboni.utils.*;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +78,7 @@ public class SampledQueryService implements WebService {
     }
 
     interface SampleWriter {
-        JSONObject[] getSampleNode(TimeSerieSample sample);
+        JSONObject[] getSampleNode(TimeSeriesSample sample);
     }
 
     interface SampleWriterFactory {
@@ -90,12 +87,12 @@ public class SampledQueryService implements WebService {
 
     static class DefaultSampleWriter implements SampleWriter {
         @Override
-        public JSONObject[] getSampleNode(TimeSerieSample sample) {
+        public JSONObject[] getSampleNode(TimeSeriesSample sample) {
             JSONObject s = new JSONObject();
             s.put("time", sample.getT0());
-            s.put("vMin", Utils.round(sample.getvMin(), 2));
-            s.put("v", Utils.round(sample.getV(), 2));
-            s.put("vMax", Utils.round(sample.getvMax(), 2));
+            s.put("vMin", Utils.round(sample.getValueMin(), 2));
+            s.put("v", Utils.round(sample.getValue(), 2));
+            s.put("vMax", Utils.round(sample.getValueMax(), 2));
             return new JSONObject[]{s};
         }
     }
@@ -131,19 +128,17 @@ public class SampledQueryService implements WebService {
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
 
-        DateRangeParameter fromTo = new DateRangeParameter(config);
-        Instant cFrom = fromTo.getFrom();
-        Instant cTo = fromTo.getTo();
+        Query q = QueryFactory.getQuery(config);
 
         int maxSamples = getMaxSamples(config);
 
         ResultContext ctx = new ResultContext();
 
         try (DBHelper db = new DBHelper(true)) {
-            Range range = getTimeframe(conf.getTable(), cFrom, cTo);
+            Range range = getTimeFrame(conf.getTable(), q);
             if (range != null) {
-                Map<String, TimeSerie> timeSerieMap = getTimeSerie(cFrom, cTo, maxSamples, db, range);
-                for (Map.Entry<String, TimeSerie> e : timeSerieMap.entrySet()) {
+                Map<String, TimeSeries> timeSeriesMap = getTimeSeries(range.min, range.max, maxSamples, db, range);
+                for (Map.Entry<String, TimeSeries> e : timeSeriesMap.entrySet()) {
                     fillResponse(ctx, e.getKey(), e.getValue().getSamples());
                 }
             } else {
@@ -162,10 +157,10 @@ public class SampledQueryService implements WebService {
         }
     }
 
-    private void fillResponse(ResultContext ctx, String type, List<TimeSerieSample> samples) {
+    private void fillResponse(ResultContext ctx, String type, List<TimeSeriesSample> samples) {
         SampleWriter w = ctx.getWriter(type);
         if (w != null) {
-            for (TimeSerieSample sample : samples) {
+            for (TimeSeriesSample sample : samples) {
                 JSONArray a = getOrCreateSamplesArray(ctx, type);
                 JSONObject[] res = w.getSampleNode(sample);
                 if (res != null) {
@@ -188,20 +183,20 @@ public class SampledQueryService implements WebService {
         return a;
     }
 
-    private Map<String, TimeSerie> getTimeSerie(Instant cFrom, Instant cTo, int maxSamples, DBHelper db, Range range) throws SQLException {
-        Map<String, TimeSerie> res = new HashMap<>();
+    private Map<String, TimeSeries> getTimeSeries(Timestamp cFrom, Timestamp cTo, int maxSamples, DBHelper db, Range range) throws SQLException {
+        Map<String, TimeSeries> res = new HashMap<>();
 
         int sampling = range.getSampling(maxSamples);
         String sql = getTimeSeriesSQL(conf.getTable(), conf.getSeriesNameField(), new String[]{conf.getMaxField(), conf.getAvgField(), conf.getMinField()}, conf.getWhere());
         try (PreparedStatement stm = db.getConnection().prepareStatement(sql)) {
-            stm.setTimestamp(1, new java.sql.Timestamp(cFrom.toEpochMilli()));
-            stm.setTimestamp(2, new java.sql.Timestamp(cTo.toEpochMilli()));
+            stm.setTimestamp(1, cFrom);
+            stm.setTimestamp(2, cTo);
             readSamples(res, stm, sampling, maxSamples);
         }
         return res;
     }
 
-    private void readSamples(Map<String, TimeSerie> res, PreparedStatement stm, int sampling, int maxSamples) throws SQLException {
+    private void readSamples(Map<String, TimeSeries> res, PreparedStatement stm, int sampling, int maxSamples) throws SQLException {
         try (ResultSet rs = stm.executeQuery()) {
             while (rs.next()) {
                 Timestamp ts = rs.getTimestamp(1);
@@ -209,18 +204,18 @@ public class SampledQueryService implements WebService {
                 double vMax = rs.getDouble(3);
                 double v = rs.getDouble(4);
                 double vMin = rs.getDouble(5);
-                TimeSerie timeSerie = res.getOrDefault(type, null);
-                if (timeSerie == null) {
-                    timeSerie = new TimeSerie(sampling, maxSamples);
-                    res.put(type, timeSerie);
+                TimeSeries timeSeries = res.getOrDefault(type, null);
+                if (timeSeries == null) {
+                    timeSeries = new TimeSeries(sampling, maxSamples);
+                    res.put(type, timeSeries);
                 }
-                timeSerie.doSampling(ts.getTime(), vMax, v, vMin);
+                timeSeries.doSampling(ts.getTime(), vMax, v, vMin);
             }
         }
     }
 
-    private static String getTimeSeriesSQL(String table, String serieName, String[] fields, String where) {
-        StringBuilder sqlBuilder = new StringBuilder("select TS, " + serieName);
+    private static String getTimeSeriesSQL(String table, String seriesName, String[] fields, String where) {
+        StringBuilder sqlBuilder = new StringBuilder("select TS, " + seriesName);
         for (String f : fields) {
             sqlBuilder.append(", ").append(f);
         }
@@ -257,29 +252,44 @@ public class SampledQueryService implements WebService {
         }
     }
 
-    private static String getTimeFrameSQL(String table) {
-        return "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
+    private static PreparedStatement getTimeFrameSQL(String table, Query q, DBHelper h) throws SQLException {
+        if (q instanceof QueryByDate) {
+            String sql = "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
+            PreparedStatement stm = h.getConnection().prepareStatement(sql);
+            stm.setTimestamp(1, new java.sql.Timestamp(((QueryByDate) q).getFrom().toEpochMilli()));
+            stm.setTimestamp(2, new java.sql.Timestamp(((QueryByDate) q).getTo().toEpochMilli()));
+            return stm;
+        } else if (q instanceof QueryById) {
+            String sql = "select count(TS), max(TS), min(TS) from " + table + " where TS>=(select fromTS from trip where id=?) and TS<=(select toTS from trip where id=?)";
+            PreparedStatement stm = h.getConnection().prepareStatement(sql);
+            stm.setInt(1, ((QueryById) q).getId());
+            stm.setInt(2, ((QueryById) q).getId());
+            return stm;
+        } else {
+            return null;
+        }
     }
 
-    private synchronized Range getTimeframe(String table, Instant cFrom, Instant cTo) {
+    private synchronized Range getTimeFrame(String table, Query q) {
         try (DBHelper h = new DBHelper(true)) {
-            String sql = getTimeFrameSQL(table);
-            try (PreparedStatement stm = h.getConnection().prepareStatement(sql)) {
-                stm.setTimestamp(1, new java.sql.Timestamp(cFrom.toEpochMilli()));
-                stm.setTimestamp(2, new java.sql.Timestamp(cTo.toEpochMilli()));
-                try (ResultSet rs = stm.executeQuery()) {
-                    if (rs.next()) {
-                        long count = rs.getLong(1);
-                        Timestamp tMax = rs.getTimestamp(2);
-                        Timestamp tMin = rs.getTimestamp(3);
-                        if (tMax != null && tMin != null) {
-                            return new Range(tMax, tMin, count);
+            try (PreparedStatement stm = getTimeFrameSQL(table, q, h)) {
+                if (stm != null) {
+                    try (ResultSet rs = stm.executeQuery()) {
+                        if (rs.next()) {
+                            long count = rs.getLong(1);
+                            Timestamp tMax = rs.getTimestamp(2);
+                            Timestamp tMin = rs.getTimestamp(3);
+                            if (tMax != null && tMin != null) {
+                                return new Range(tMax, tMin, count);
+                            }
                         }
                     }
+                } else {
+                    ServerLog.getLogger().error("SampledQuery: Unsupported query type " + q);
                 }
             }
         } catch (SQLException | ClassNotFoundException e) {
-            ServerLog.getLogger().error("Cannot create time range for {" + table + "} because connection is not established!", e);
+            ServerLog.getLogger().error("SampledQuery: Cannot create time range for {" + table + "} because connection is not established!", e);
         }
         return null;
     }

@@ -35,26 +35,14 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
             case "/meteo":
                 s = ThingsFactory.getInstance(MeteoService.class);
                 break;
-            case "/meteo2":
-                s = ThingsFactory.getInstance(MeteoService2.class);
-                break;
-            case "/cruisingdays":
-                s = ThingsFactory.getInstance(CruisingDaysService.class);
-                break;
-            case "/dropcruisingday":
-                s = ThingsFactory.getInstance(DropTrackingDayService.class);
-                break;
-            case "/createtrip":
-                s = ThingsFactory.getInstance(CreateTripService.class);
-                break;
             case "/changetripdesc":
                 s = ThingsFactory.getInstance(ChangeTripDescService.class);
                 break;
-            case "/dayinfo":
-                s = ThingsFactory.getInstance(DayInfoService.class);
+            case "/droptrip":
+                s = ThingsFactory.getInstance(DropTripService.class);
                 break;
             case "/trips":
-                s = ThingsFactory.getInstance(TripStatService.class);
+                s = ThingsFactory.getInstance(TripListService.class);
                 break;
             case "/speed":
                 s = ThingsFactory.getInstance(SpeedService.class);
@@ -67,6 +55,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
                 break;
             case "/auto":
                 s = ThingsFactory.getInstance(AutoPilotService.class);
+                break;
+            case "/distanalysis":
+                s = ThingsFactory.getInstance(YearlyAnalyticsService.class);
                 break;
             default:
                 break;

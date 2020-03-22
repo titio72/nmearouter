@@ -65,8 +65,8 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 								Sentence s = SentenceFactory.getInstance().createParser(sSentence);
 								onSentenceRead(s);
 							} catch (Exception e) {
-								getLogger().warning("Error receiveing sentence {" + e.getMessage() + "}");
-							}
+                                getLogger().warning("Error receiving sentence {" + e.getMessage() + "}");
+                            }
 						}
 						socket.close();
 					});

@@ -13,18 +13,18 @@ import java.util.*;
 
 public class NMEAStreamImpl implements NMEAStream {
 
-	private final Map<Object, ListenerWrapper> annotatedListeners;
-	private final NMEA2JSONb jsonConv;
-	
-	public NMEAStreamImpl() {
-		annotatedListeners = new HashMap<>();
-		jsonConv = new NMEA2JSONb();
-	}
+    private final Map<Object, ListenerWrapper> annotatedListeners;
+    private final NMEA2JSONb jsonConverter;
 
-	@Override
-	public void pushSentence(RouterMessage msg) {
-		synchronized (this) {
-			push(msg);
+    public NMEAStreamImpl() {
+        annotatedListeners = new HashMap<>();
+        jsonConverter = new NMEA2JSONb();
+    }
+
+    @Override
+    public void pushSentence(RouterMessage msg) {
+        synchronized (this) {
+            push(msg);
 		}
 	}
 
@@ -76,8 +76,8 @@ public class NMEAStreamImpl implements NMEAStream {
 
 	private JSONObject getJsonObject(JSONObject msg, Sentence s) {
 		if (msg==null && s!=null) {
-			msg = jsonConv.convert(s);
-		}
+            msg = jsonConverter.convert(s);
+        }
 		return msg;
 	}
 

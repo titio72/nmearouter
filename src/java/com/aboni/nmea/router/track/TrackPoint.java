@@ -17,7 +17,5 @@ public interface TrackPoint {
 
     int getPeriod();
 
-    Integer getTrip();
-
     EngineStatus getEngine();
 }

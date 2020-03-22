@@ -1,10 +1,8 @@
-package com.aboni.nmea.router.agent.impl.track;
+package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.track.TrackEvent;
 import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.impl.DBTrackEventWriter;
-import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.db.DBHelper;
 import org.junit.After;
@@ -19,7 +17,7 @@ import java.text.SimpleDateFormat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class DBTrackEventWriterTest {
+public class DBTrackDBEventWriterTest {
 
     private DBTrackEventWriter evW;
     private SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -43,10 +41,10 @@ public class DBTrackEventWriterTest {
                 withPosition(new GeoPositionT(l, 43.112234, 9.534534))
                 .withDistance(0.0002)
                 .withSpeed(3.4, 5.4)
-                .withPeriod(30).getPoint();
+                .withPeriod(30).withEngine(EngineStatus.OFF).getPoint();
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
-        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0));
+        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.OFF));
     }
 
     @Test
@@ -58,27 +56,11 @@ public class DBTrackEventWriterTest {
                 .withSpeed(3.4, 5.4).withPeriod(30).withEngine(EngineStatus.ON).getPoint();
         DBHelper h = new DBHelper(true);
         evW.write(new TrackEvent(p), h.getConnection());
-        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 0, EngineStatus.ON));
+        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.ON));
     }
 
-    @Test
-    public void writeWithTrip() throws Exception {
-        long l = f.parse("2019-10-15 15:54:12").getTime();
-        TrackPoint p = new TrackPointBuilderImpl()
-                .withPosition(new GeoPositionT(l, 43.112234, 9.534534))
-                .withDistance(0.0002)
-                .withSpeed(3.4, 5.4).withPeriod(30).withTrip(124).getPoint();
-        DBHelper h = new DBHelper(true);
-        evW.write(new TrackEvent(p), h.getConnection());
-        assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, 124));
-    }
-
-    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, int trip) throws Exception {
-        return check(h, ts, lat, lon, dist, speed, maxSpeed, dTime, anchor, trip, EngineStatus.UNKNOWN);
-    }
-
-    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, int trip, EngineStatus engine) throws Exception {
-        PreparedStatement st = h.getConnection().prepareStatement("select id, TS, lat, lon, dist, speed, maxSpeed, dTime, anchor, engine, tripId from track_test where TS=?");
+    private boolean check(DBHelper h, long ts, double lat, double lon, double dist, double speed, double maxSpeed, int dTime, boolean anchor, EngineStatus engine) throws Exception {
+        PreparedStatement st = h.getConnection().prepareStatement("select id, TS, lat, lon, dist, speed, maxSpeed, dTime, anchor, engine from track_test where TS=?");
         st.setTimestamp(1, new Timestamp(ts));
         ResultSet rs = st.executeQuery();
         assertTrue(rs.next());
@@ -91,7 +73,6 @@ public class DBTrackEventWriterTest {
         assertEquals(dTime, rs.getInt(8));
         assertEquals(anchor ? 1 : 0, rs.getInt(9));
         assertEquals(engine.toByte(), rs.getByte(10));
-        assertEquals(trip, rs.getInt(11));
         return true;
     }
 }

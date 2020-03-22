@@ -21,7 +21,7 @@ public class MeteoService2 extends JSONWebService {
         Meteo m = ThingsFactory.getInstance(Meteo.class);
         if (m != null) {
             try {
-                return m.getMeteoSerie(from, to);
+                return m.getMeteoSeries(from, to);
             } catch (MeteoManagementException e) {
                 throw new JSONGenerationException("Error loading meteo data", e);
             }

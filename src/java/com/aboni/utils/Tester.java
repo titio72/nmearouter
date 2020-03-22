@@ -48,12 +48,19 @@ public class Tester {
             t.setDaemon(true);
             t.start();
 
-            try {
-                System.in.read();
-            } catch (IOException e) {
-                // do nothing
-            }
+            waitForEnterPressed();
             goon.set(false);
+        }
+    }
+
+    private void waitForEnterPressed() {
+        try {
+            int ch;
+            do {
+                ch = System.in.read();
+            } while (ch != 13);
+        } catch (IOException e) {
+            // do nothing
         }
     }
 }

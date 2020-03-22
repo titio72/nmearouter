@@ -24,30 +24,30 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	private final FilterStats stats;
 
     private static class FilterStats {
-		int totProcessed;
-		int totSkippedReverseTime;
-		int totSkippedExceedDistance;
-		int totSkippedExceedSpeed;
-		int totInvalid;
-		int medianRecalc;
-		int q;
-		
-		void reset() {
-			totInvalid = 0;
-			totProcessed = 0;
-			totSkippedReverseTime = 0;
-			totSkippedExceedDistance = 0;
-			totSkippedExceedSpeed = 0;
-			medianRecalc = 0;
-		}
+        int totProcessed;
+        int totSkippedReverseTime;
+        int totSkippedExceedDistance;
+        int totSkippedExceedSpeed;
+        int totInvalid;
+        int medianRecalculation;
+        int q;
+
+        void reset() {
+            totInvalid = 0;
+            totProcessed = 0;
+            totSkippedReverseTime = 0;
+            totSkippedExceedDistance = 0;
+            totSkippedExceedSpeed = 0;
+            medianRecalculation = 0;
+        }
 		
 		@Override
 		public String toString() {
-			return String.format("Ok {%d} Q {%d} XInv {%d} Xtime {%d} Xdist {%d} Xspeed {%d} MCalc {%d}", 
-					totProcessed, q, totInvalid, totSkippedReverseTime, 
-					totSkippedExceedDistance, totSkippedExceedSpeed,
-					medianRecalc);
-		}
+            return String.format("Ok {%d} Q {%d} XInv {%d} XTime {%d} XDist {%d} XSpeed {%d} MCalc {%d}",
+                    totProcessed, q, totInvalid, totSkippedReverseTime,
+                    totSkippedExceedDistance, totSkippedExceedSpeed,
+                    medianRecalculation);
+        }
 	}
 	
 	public NMEAPositionFilter() {
@@ -144,9 +144,9 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
 	
 	private Position getMedian() {
 		if (ready()) {
-			stats.medianRecalc++;
-	 		return new Position(getMedian(true), getMedian(false));
-		} else {
+            stats.medianRecalculation++;
+            return new Position(getMedian(true), getMedian(false));
+        } else {
 			return null;
 		}
 	}

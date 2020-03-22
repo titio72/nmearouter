@@ -196,21 +196,21 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	protected void doWithSentence(Sentence s, String src) {
 		synchronized (clients) {
 		    if (isTarget() && !clients.isEmpty()) {
-				String output = getOutSentence(s);
-				writeBuffer.clear();
-				writeBuffer.put(output.getBytes());
-				writeBuffer.put("\r\n".getBytes());
-				int p = writeBuffer.position();
-				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
-				while (iter.hasNext()) {
-					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
-					SocketChannel sc = itm.getKey();
-					ClientDescriptor cd = itm.getValue();
-					if (!sendMessageToClient(output, p, sc, cd)) {
-						iter.remove();
-					}
-				}
-		    }
+                String output = getOutSentence(s);
+                writeBuffer.clear();
+                writeBuffer.put(output.getBytes());
+                writeBuffer.put("\r\n".getBytes());
+                int p = writeBuffer.position();
+                Iterator<Entry<SocketChannel, ClientDescriptor>> iterator = clients.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<SocketChannel, ClientDescriptor> itm = iterator.next();
+                    SocketChannel sc = itm.getKey();
+                    ClientDescriptor cd = itm.getValue();
+                    if (!sendMessageToClient(output, p, sc, cd)) {
+                        iterator.remove();
+                    }
+                }
+            }
 		}
 	}
 

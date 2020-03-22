@@ -125,22 +125,22 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     }
 
     @Override
-    public double getwSpeed() {
+    public double getWindSpeed() {
         return data.getwSpeed();
     }
 
     @Override
-    public void setwSpeed(double wSpeed) {
+    public void setWindSpeed(double wSpeed) {
         this.data.setwSpeed(wSpeed);
     }
 
     @Override
-    public double getwDirection() {
+    public double getWindDirection() {
         return data.getwDirection();
     }
 
     @Override
-    public void setwDirection(double wDirection) {
+    public void setWindDirection(double wDirection) {
         this.data.setwDirection(wDirection);
     }
 

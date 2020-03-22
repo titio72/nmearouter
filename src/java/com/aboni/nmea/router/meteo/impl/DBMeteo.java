@@ -18,7 +18,7 @@ public class DBMeteo implements Meteo {
     }
 
     @Override
-    public JSONObject getMeteoSerie(@NotNull Instant from, @NotNull Instant to) throws MeteoManagementException {
+    public JSONObject getMeteoSeries(@NotNull Instant from, @NotNull Instant to) throws MeteoManagementException {
         MeteoReader m = ThingsFactory.getInstance(MeteoReader.class);
         JSONObject res = new JSONObject();
         m.readMeteo(from, to, (MeteoSample sample) -> addSample(sample.getTag(), sample.getTs(), sample.getMinValue(), sample.getValue(), sample.getMaxValue(), res));

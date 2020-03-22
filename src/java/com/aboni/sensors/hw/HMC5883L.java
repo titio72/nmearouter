@@ -13,7 +13,7 @@ public class HMC5883L {
 		scale = Scale.Gauss_1_30;
 	}
 	
-    public static final int  HMC5883_I2CADDR = 0x1e;
+    public static final int HMC5883_I2C_ADDRESS = 0x1e;
 
     @SuppressWarnings("unused")
     public static class Scale {

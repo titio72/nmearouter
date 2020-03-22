@@ -1,8 +1,12 @@
 package com.aboni.geo;
 
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
 import com.aboni.nmea.router.track.impl.Track2JSON;
 import com.aboni.nmea.router.track.impl.TrackPointBuilderImpl;
+import com.aboni.utils.Query;
+import com.aboni.utils.QueryById;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,7 +32,7 @@ public class Track2JSONTest {
         }
 
         @Override
-        public void readTrack(@NotNull TrackQuery q, @NotNull TrackReaderListener target) throws TrackManagementException {
+        public void readTrack(@NotNull Query q, @NotNull TrackReaderListener target) throws TrackManagementException {
             target.onRead(getSample(10001000, 43.10000000, 10.08000000));
             target.onRead(getSample(10061000, 43.10000100, 10.08000100));
             target.onRead(getSample(10121000, 43.10000200, 10.08000200));
@@ -41,7 +45,7 @@ public class Track2JSONTest {
     public void testPath() throws Exception {
         Track2JSON j = new Track2JSON(new MyTrackReader());
         StringWriter w = new StringWriter();
-        j.dump(new TrackQueryById(1), w);
+        j.dump(new QueryById(1), w);
         JSONObject jTrack = new JSONObject(w.toString());
         JSONArray path = jTrack.getJSONObject("track").getJSONArray("path");
 

@@ -68,6 +68,8 @@
 
 <script type="text/javascript">
 
+  var chartMap = new Map();
+
   var dateFrom = null;
   var dateTo = null;
   var tripId = null;
@@ -76,8 +78,9 @@
   var map = null;
   var markerPos = null;
 
-  var days;
-  days = httpGetCruisingDays();
+  var days = httpGetCruisingDays();
+  expandTripDays();
+
   app.controller("infoController", function ($scope) {
     $scope.days = days;
   });
@@ -101,18 +104,20 @@
   });
 
   function showTrip(d) {
-    var split = d.name.split("."); 
-    dateFrom = split[0];
-    dateTo = split[1];
-    tripId = split[2];
-    refreshMap();
+    trip = searchTrip(d.name);
+    if (trip!=null) {
+      dateFrom = new moment(trip.startTS).format("YYYYMMDDHHmmss");
+      dateTo = new moment(trip.endTS).format("YYYYMMDDHHmmss");
+      tripId = trip.id;
+      refresh();
+    }
   }
 
   function showDay(d) {
-    dateFrom = d.name;
-    dateTo = d.name;
+    dateFrom = d.name + "000000";
+    dateTo = d.name + "235959";
     tripId = null;
-    refreshMap();
+    refresh();
   }
 
   function showAnalytics(s) {
@@ -132,15 +137,18 @@
       value: ss[2],
       callback: function (result) {
         if (result != null) {
-          changeName(trip, result);
+          changeName(trip, result, refreshTrips);
         }
       }
     });
   }
 
-  function askDeleteDay(d) {
+  function askDeleteTrip(d) {
+    var ss = d.split("|");
+    tripId = ss[1];
+    trip = searchTrip(tripId);
     bootbox.confirm({
-      message: "Confirm deleting track for " + d.name + "?",
+      message: "Confirm deleting track for " + trip.description + "?",
       buttons: {
         confirm: {
           label: 'Yes',
@@ -153,15 +161,13 @@
       },
       callback: function (result) {
         if (result) {
-          deleteDay(d);
+          dropTrip(tripId, refreshTrips);
         }
       }
     });
   }
 
-  var chartMap = new Map();
-
-  function refreshMap() {
+  function refresh() {
     refreshMeteoCharts()
     refreshSpeedChart("speedChart");
     refreshInfo();
@@ -170,9 +176,14 @@
 
   function refreshSpeedChart(chart) {
     var ctx = document.getElementById(chart);
-    httpLoadSpeedDateRange(dateFrom + "0000", dateTo + "2359", function(res) {
-      drawSpeedChart(res, chart);
-    });
+    if (tripId!=null) 
+      httpLoadSpeedById(tripId, function(res) {
+        drawSpeedChart(res, chart);
+      });
+    else
+      httpLoadSpeedDateRange(dateFrom, dateTo, function(res) {
+        drawSpeedChart(res, chart);
+      });
   }
 
   function getSerie(data, serie, attr, color) {
@@ -210,18 +221,18 @@
               type: 'time',
             }]
           },
-					plugins: {
-						zoom: {
-							pan: {
-								enabled: true,
-								mode: 'x'
-							},
-							zoom: {
-								enabled: true,
-								mode: 'x'
-							}
-						}
-					},
+		  /*plugins: {
+			zoom: {
+				pan: {
+					enabled: true,
+					mode: 'x'
+				},
+				zoom: {
+					enabled: true,
+					mode: 'x'
+				}
+			}
+		  },*/
           tooltips: {
             callbacks: {
               label: function (tooltipItem, data) {
@@ -266,32 +277,41 @@
             xAxes: [{
               type: 'time',
             }]
-          },
-					plugins: {
-						zoom: {
-							pan: {
-								enabled: true,
-								mode: 'x'
-							},
-							zoom: {
-								enabled: true,
-								mode: 'x'
-							}
-						}
-					}          
+          }/*,
+		  plugins: {
+			zoom: {
+					pan: {
+						enabled: true,
+						mode: 'x'
+					},
+					zoom: {
+						enabled: true,
+						mode: 'x'
+					}
+				}
+			}*/
         }
       });
       chartMap.set(chart, c1);
   }
 
   function refreshMeteoCharts() {
-    httpLoadAllMeteoDateRange(dateFrom + "0000" , dateTo + "2359", function(res) {
-      drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
-      drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
-      drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
-      drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
-      drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
-    });    
+    if (tripId!=null) 
+    httpLoadAllMeteoById(tripId, function(res) {
+        drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
+        drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
+        drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
+        drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
+        drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
+      });
+    else
+    httpLoadAllMeteoDateRange(dateFrom, dateTo, function(res) {
+        drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
+        drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
+        drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
+        drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
+        drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
+      });    
   }
 
   function getDataPoints(data, name, attr) {
@@ -299,18 +319,20 @@
     var sr = data[name];
     var i;
     var lastT = 0;
-    for (i = 0; i<sr.length; i++) {
-      var item = sr[i];
-      var t = item['time'];
-      if (lastT==0 || lastT<t) {
-        var datapoint = new Object();
-        datapoint.x = new Date(t);
-        datapoint.y = parseFloat(item[attr]);
-        lastT = t;
-      } else {
-        console.log("Out of sync items!")
-      }
-      dt.push(datapoint);
+    if (sr!=null) {
+		for (i = 0; i<sr.length; i++) {
+		  var item = sr[i];
+		  var t = item['time'];
+		  if (lastT==0 || lastT<t) {
+			var datapoint = new Object();
+			datapoint.x = new Date(t);
+			datapoint.y = parseFloat(item[attr]);
+			lastT = t;
+		  } else {
+			console.log("Out of sync items!")
+		  }
+		  dt.push(datapoint);
+		}
     }
     return dt;
   }
@@ -391,39 +413,67 @@
 
   function refreshTrips() {
     days = httpGetCruisingDays();
+    expandTripDays();
     var controllerElement = document.getElementById('TripsPanel');
     var controllerScope = angular.element(controllerElement).scope();
     controllerScope.days = days;
     controllerScope.$evalAsync();
   }
-  
-  function refreshInfo() {
-    if (tripId!=null) {
-      getTripA(tripId, applyInfo);
-    } else {
-      getInfoA(dateFrom, dateTo, applyInfo);
+
+  function expandTripDays() {
+    tripArray = days.trips;
+    for (i = 0; i<tripArray.length; i++) {
+      t = tripArray[i];
+      dates = [ 
+        {
+          dateLabel:  new moment(t.startTS).format("l"), 
+          dateRef:  new moment(t.startTS).format("YYYYMMDD")
+        }
+      ];
+      for (j = 1; j<t.nOfDays; j++) {
+        dates.push({
+          dateLabel: new moment(t.startTS).add(j, 'days').format("D"),
+          dateRef: new moment(t.startTS).add(j, 'days').format("YYYYMMDD")
+        });
+      }
+      t["dates"] = dates;
     }
   }
 
-  function applyInfo(info) {
+  function refreshInfo() {
+    info = null;
+    if (tripId!=null) {
+      info = httpGetTripAnalytics(tripId);
+    } else {
+      info = httpGetTripAnalyticsByDate(dateFrom, dateTo);
+    }
     var controllerElement = document.getElementById('panelInfo');
     var controllerScope = angular.element(controllerElement).scope();
     controllerScope.trip = info;
     controllerScope.$evalAsync();
   }
 
+  function searchTrip(id) {
+    var tripToReturn = null;
+    var tripArray = days.trips;
+    for (i = 0; i<tripArray.length; i++) {
+      if (tripArray[i].id==id) {
+        return tripArray[i];
+      }
+    }
+    return null;
+  }
 
 </script>
 
 <body ng-app="nmearouter">
-
-  <div id="nmearouter" class="container-fluid">
+<div id="nmearouter" class="container-fluid">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-      <li class="breadcrumb-item active">Track</li>
+        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+        <li class="breadcrumb-item active">Track</li>
     </ol>
     <div class="row">
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div id="TripsPanel" class="card-router card-track" ng-controller="myCtrl">
                 <div class="card-router-header card-track-header">Tracking <span style="float: right"
                                                                                  class="glyphicon glyphicon-refresh"
@@ -434,42 +484,44 @@
                         <table class="table table-sm">
                             <tr ng-repeat="t in days.trips">
                                 <td>
-                                    <button id="btnTripIt|{{t.trip}}|{{t.lastDay}}" type="button"
-                                            class="btn btn-circle btn-secondary" onclick="tripIt(this.id)">
-                                        <span class="glyphicon glyphicon-bookmark circle-icon-content"
+                                    <button id="btnDropTrip|{{t.id}}" type="button" class="btn btn-circle btn-secondary"
+                                            onclick="askDeleteTrip(this.id)">
+                                        <span class="glyphicon glyphicon-trash circle-icon-content"
                                               aria-hidden="true"></span>
                                     </button>
                                 </td>
                                 <td>
-                                    <button ng-if="t.tripLabel!=''" id="btnTripLabel|{{t.trip}}|{{t.tripLabel}}"
-                                            type="button" class="btn btn-circle btn-secondary"
-                                            onclick="editName(this.id);">
-                      <span class="glyphicon glyphicon-pencil circle-icon-content" aria-hidden="true"></span>
-                    </button>
-                  </td>
-                  <td>
-                    <button ng-if="t.tripLabel!=''" id="btnTripAnalytics|{{t.trip}}|{{t.tripLabel}}" type="button" class="btn btn-circle btn-secondary" onclick="showAnalytics(this.id);">
-                      <span class="glyphicon glyphicon-info-sign circle-icon-content" aria-hidden="true"></span>
-                    </button>
-                  </td>
-                                <td><a href="#" name="{{t.firstDay}}.{{t.lastDay}}.{{t.trip}}" onclick="showTrip(this)"><strong>{{t.tripLabel}}</strong></a>
+                                    <button ng-if="t.description!=''" id="btnTripLabel|{{t.id}}|{{t.description}}"
+                                            type="button"
+                                            class="btn btn-circle btn-secondary" onclick="editName(this.id);">
+                                        <span class="glyphicon glyphicon-pencil circle-icon-content"
+                                              aria-hidden="true"></span>
+                                    </button>
                                 </td>
-                  <td>
-                    <div style="float:left;" ng-repeat="d in t.dates">
-                      <a name="{{d.ref}}" href="#" onclick="showDay(this)">{{d.dayShort}}</a>
-                      <button ng-if="t.tripLabel==''" name="{{d.ref}}" type="button" class="btn btn-xs" onclick="askDeleteDay(this)">
-                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                      </button>
-                      &nbsp;&nbsp;
+                                <td>
+                                    <button ng-if="t.description!=''" id="btnTripAnalytics|{{t.id}}|{{t.description}}"
+                                            type="button"
+                                            class="btn btn-circle btn-secondary" onclick="showAnalytics(this.id);">
+                                        <span class="glyphicon glyphicon-info-sign circle-icon-content"
+                                              aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href="#" name="{{t.id}}"
+                                       onclick="showTrip(this)"><strong>{{t.description}}</strong></a>
+                                </td>
+                                <td>
+                                    <div style="float:left;" ng-repeat="d in t.dates">
+                                        <a name="{{d.dateRef}}" href="#" onclick="showDay(this)">{{d.dateLabel}}</a>&nbsp;
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                  </td>
-                </tr>
-              </table>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Map</div>
                 <div class="card-router-body card-track-body" style="padding: 0%; margin: 0%">
@@ -483,9 +535,9 @@
                         </button>
                     </div>
                 </div>
+            </div>
         </div>
-      </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Trip</div>
                 <div id="panelInfo" class="card-router-body card-track-body" ng-controller="infoController">
@@ -499,42 +551,42 @@
                             <td class="info_cell">{{trip.start}} - {{trip.end}}</td>
                         </tr>
                         <tr>
-                      <td class="info_cell">Trip</td>
-                            <td class="info_cell"><strong>{{trip.dist | number:2}}NM ({{trip.distSailing |
+                            <td class="info_cell">Trip</td>
+                            <td class="info_cell"><strong>{{trip.navDist | number:2}}NM ({{trip.navEngineOffDist |
                                 number:2}}NM)</strong></td>
-                  </tr>
-                  <tr>
-                      <td class="info_cell">Nav time</td>
-                      <td class="info_cell"><strong>{{trip.navigationTime}}</strong></td>
-                  </tr>
+                        </tr>
+                        <tr>
+                            <td class="info_cell">Nav time</td>
+                            <td class="info_cell"><strong>{{trip.navTime}}</strong></td>
+                        </tr>
                         <tr>
                             <td class="info_cell">Speed</td>
-                            <td class="info_cell"><strong>{{trip.avgspeed | number:2}}Kn ({{trip.maxspeed |
-                                number:2}}/{{trip.maxspeed30 | number:2}}Kn)</strong></td>
+                            <td class="info_cell"><strong>{{trip.speedAverage | number:2}}Kn ({{trip.maxSpeed |
+                                number:2}}/{{trip.maxSampledSpeed | number:2}}Kn)</strong></td>
                         </tr>
-                  <tr ng-if="trip.maxspeed1NM>0">
-                      <td class="info_cell">1NM Max Speed</td>
-                      <td class="info_cell"><strong>{{trip.maxspeed1NM | number:2}}Kn
-                          {{trip.maxspeed1N_time_0}}-{{trip.maxspeed1N_time_1}}
-                      </strong></td>
-                  </tr>
-                  <tr ng-if="trip.maxspeed5NM>0">
-                      <td class="info_cell">5NM Max Speed</td>
-                      <td class="info_cell"><strong>{{trip.maxspeed5NM | number:2}}Kn
-                          {{trip.maxspeed5N_time_0}}-{{trip.maxspeed5N_time_1}}
-                      </strong></td>
-                  </tr>
-                  <tr ng-if="trip.maxspeed10NM>0">
-                      <td class="info_cell">10NM Max Speed</td>
-                      <td class="info_cell"><strong>{{trip.maxspeed10NM | number:2}}Kn
-                          {{trip.maxspeed10N_time_0}}-{{trip.maxspeed10N_time_1}}
-                      </strong></td>
-                  </tr>
-              </table>
-          </div>
+                        <tr ng-if="trip.max01NMSpeed>0">
+                            <td class="info_cell">1NM Max Speed</td>
+                            <td class="info_cell"><strong>{{trip.max01NMSpeed | number:2}}Kn
+                                {{trip.max01NMSpeedTime0}}
+                            </strong></td>
+                        </tr>
+                        <tr ng-if="trip.max05NMSpeed>0">
+                            <td class="info_cell">5NM Max Speed</td>
+                            <td class="info_cell"><strong>{{trip.max05NMSpeed | number:2}}Kn
+                                {{trip.max05NMSpeedTime0}}
+                            </strong></td>
+                        </tr>
+                        <tr ng-if="trip.max10NMSpeed>0">
+                            <td class="info_cell">10NM Max Speed</td>
+                            <td class="info_cell"><strong>{{trip.max10NMSpeed | number:2}}Kn
+                                {{trip.max10NMSpeedTime0}}
+                            </strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Speed</div>
                 <div class="card-router-body card-track-body">
@@ -542,7 +594,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Wind</div>
                 <div class="card-router-body card-track-body">
@@ -550,7 +602,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Wind Angle</div>
                 <div class="card-router-body card-track-body">
@@ -558,7 +610,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Pressure</div>
                 <div class="card-router-body card-track-body">
@@ -566,7 +618,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Humidity</div>
                 <div class="card-router-body card-track-body">
@@ -574,7 +626,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+        <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
                 <div class="card-router-header card-track-header">Temperature</div>
                 <div class="card-router-body card-track-body">
@@ -583,7 +635,7 @@
             </div>
         </div>
     </div>
-  </div>
+</div>
 </body>
 
 </html>

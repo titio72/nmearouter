@@ -95,12 +95,12 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 		com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
 		if (gpsPriorityConf!=null) {
             List<String> gpsPriority = gpsPriorityConf.getGPSSource();
-            NMEASourcePriorityProcessor proc = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(NMEACache.class));
-            proc.addAllGPS();
+            NMEASourcePriorityProcessor processor = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(NMEACache.class));
+            processor.addAllGPS();
             for (int i = 0; i < gpsPriority.size(); i++) {
-                proc.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */);
+                processor.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */);
             }
-            r.addProcessor(proc);
+            r.addProcessor(processor);
         }
 	}
 

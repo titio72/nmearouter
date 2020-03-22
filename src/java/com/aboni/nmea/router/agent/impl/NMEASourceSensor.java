@@ -40,7 +40,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-        return "Onboard Sensor";
+        return "OnBoard Sensor";
     }
 
     @Override
@@ -225,7 +225,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 double t = sensor.getTemperatureCelsius();
                 double pr = sensor.getPressureMB();
                 double h = sensor.getHumidity();
-                addXDR(xdr, new Measurement("B", Math.round(pr) / 1000d, "B", "Barometer"));
+                addXDR(xdr, new Measurement("B", Math.round(pr * 10) / 10000d, "B", "Barometer"));
                 addXDR(xdr, new Measurement("C", round(t, 1), "C", "AirTemp"));
                 addXDR(xdr, new Measurement("P", round(h, 2), "H", "Humidity"));
                 notify(xdr);

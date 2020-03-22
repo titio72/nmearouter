@@ -8,16 +8,16 @@ import java.io.IOException;
 /*
  * Altitude, Pressure, Temperature
  */
-public class BMP180 implements Atmo {
+public class BMP180 implements Atmospheric {
 
-	private static final I2CInterface.Endianness BMP180_ENDIANNESS = I2CInterface.Endianness.BIG_ENDIAN;
-	// This next addresses is returned by "sudo i2cdetect -y 1", see above.
-	public static final int BMP180_ADDRESS = 0x77;
-	// Operating Modes
-	private static final int BMP180_ULTRALOWPOWER     = 0;
-	private static final int BMP180_STANDARD          = 1;
-	private static final int BMP180_HIGHRES           = 2;
-	private static final int BMP180_ULTRAHIGHRES      = 3;
+    private static final I2CInterface.Endianness BMP180_ENDIANNESS = I2CInterface.Endianness.BIG_ENDIAN;
+    // This next addresses is returned by "sudo i2cdetect -y 1", see above.
+    public static final int BMP180_ADDRESS = 0x77;
+    // Operating Modes
+    private static final int BMP180_ULTRALOWPOWER = 0;
+    private static final int BMP180_STANDARD = 1;
+    private static final int BMP180_HIGHRES = 2;
+    private static final int BMP180_ULTRAHIGHRES = 3;
 
 	// BMP180 Registers
 	private static final int BMP180_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)

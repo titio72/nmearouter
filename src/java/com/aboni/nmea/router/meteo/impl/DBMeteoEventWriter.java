@@ -1,25 +1,25 @@
 package com.aboni.nmea.router.meteo.impl;
 
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.Event;
-import com.aboni.utils.db.EventWriter;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class DBMeteoEventWriter implements EventWriter {
+public class DBMeteoEventWriter implements DBEventWriter {
 
-	private PreparedStatement stm;
-	
-	public DBMeteoEventWriter() {
-		// nothing to initialize
-	}
-	
-	private void prepareStatement(Connection c) throws SQLException {
-		if (stm==null) {
-			stm = c.prepareStatement("insert into meteo (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
+    private PreparedStatement stm;
+
+    public DBMeteoEventWriter() {
+        // nothing to initialize
+    }
+
+    private void prepareStatement(Connection c) throws SQLException {
+        if (stm == null) {
+            stm = c.prepareStatement("insert into meteo (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
         }
 	}
 	

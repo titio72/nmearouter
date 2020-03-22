@@ -9,7 +9,19 @@
     <script src="js/nmearouter.js?b14"></script>
     <link href="css/nmearouter.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="nmeasail.png">
+    <script>
+    $.getScript("https://maps.googleapis.com/maps/api/js?key=" + getGKey(), function(data, textStatus, jqxhr) {
+      console.log(data); //data returned
+      console.log(textStatus); //success
+      console.log(jqxhr.status); //200
+      console.log('GMAP API Lodaded');
+      $.getScript("js/maplabel.js", function(d, t, j) {
+        console.log('GMAP Labels API Lodaded');
+        loadMap();
+      });
+    });      
 
+    </script>
     <style>
 
     .legs-list {
@@ -29,7 +41,7 @@
       margin-bottom: 5px;
     }
 
-    .tile_c {
+    .tile-wrapper {
     }
 
     .card-trip-body {
@@ -59,13 +71,27 @@
 
     .tile-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       grid-gap: 5px;
     }
 
-    .chart-canvas {
+    .chart-wrapper {
+      position: relative;
       margin-top: 5px;
       min-width: 300px;
+      min-height: 300px;
+    }
+
+    .chart-canvas {
+    }
+
+    .map {
+      margin-top: 5px;
+      min-width: 300px;
+      min-height: 300px;
+      width: 100%;
+      height: 100%;      
+      border-radius: 5px;
     }
 
 
@@ -84,6 +110,10 @@
   var speedDistrChart;
   var speedChart;
   var listVisible = false;
+  var map;
+  var paths;
+  var markerStart;
+  var markerEnd;
 
   document.addEventListener('keydown', anKeyPress);
 
@@ -137,12 +167,7 @@
   }
 
   function dateToYMD(date) {
-    d = date.getDate();
-    m = date.getMonth() + 1; //Month from 0 to 11
-    y = date.getFullYear();
-    h = date.getHours();
-    mm = date.getMinutes();
-    return '' + y + (m<=9 ? '0' + m : m) + (d <= 9 ? '0' + d : d) + (h <= 9 ? '0' + h : h) + (mm <= 9 ? '0' + mm : mm);
+    return new moment(date).format("YYYYMMDDHHmmss");
   }
 
   function getTime(s) {
@@ -183,7 +208,10 @@
           backgroundColor: "blue"
         }]
       },
-      options: {}
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
     });
   }
 
@@ -194,6 +222,8 @@
         type: 'doughnut',
         data: data,
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           title: {
             display: true,
             text: text
@@ -329,6 +359,8 @@
     controllerScope.legLabel = (currentLegIx==0)?"Trip":("Leg " + currentLegIx);
     controllerScope.$evalAsync();
 
+    loadMap();
+
     return panel;
   }
   
@@ -351,6 +383,8 @@
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           spanGaps: false,
           legend: { display: false },
           scales: { xAxes: [{ type: 'time', }] }
@@ -416,7 +450,6 @@
       nextLeg();
   }
 
-  
   class MyTile extends HTMLElement {
     static get observedAttributes() {
       return ['title', 'value1', 'value2', 'value3'];
@@ -459,6 +492,128 @@
     else
       $('#legListContainer').collapse('hide');
     toggle.className = listVisible?"glyphicon glyphicon-chevron-up":"glyphicon glyphicon-chevron-down";
+  }
+
+  function loadMap() {
+
+    var s = moment(current.startT).format("YYYYMMDDHHmmss");
+    var e = moment(current.endT).format("YYYYMMDDHHmmss")
+    httpGetTrackByDate(s, e, fillMap);
+  }
+
+  function getState(pp) {
+    if (pp.anchor) return 3;
+    else return pp.eng;
+  }
+
+  function navAnalysis(p) {
+    var ss = new Array();
+    if (p.length>0) {
+      lastPoint = null;
+      lastState = -1;
+      currStint = null;
+      for (i = 0; i < p.length; i++) {
+        pp = p[i];
+        state = getState(pp);
+        if (state!=lastState) {
+          lastState = state;
+          if (currStint!=null && currStint.dur>0) {
+            currStint.durS = formatTime(currStint.end-currStint.start);
+            ss.push(currStint);
+          }
+          currStint = {
+            eng: state, 
+            start: pp.time, 
+            end: pp.time,
+            dur: 0,
+            durS: '00:00:00',
+            points: [ ]
+          };
+          if (lastPoint!=null) currStint.points.push(lastPoint);
+          currStint.points.push(pp);
+        } else {
+          currStint.end = pp.time;
+          currStint.dur = currStint.end - currStint.start;
+          currStint.points.push(pp);
+        }
+        lastPoint = pp;
+      }
+      currStint.durS = formatTime(currStint.end-currStint.start);
+      ss.push(currStint);
+    }
+    return ss;
+  }
+
+  function formatTime(millisecs) {
+    d = millisecs
+    ss = d % 60000;
+    d = Math.floor(d / 60000);
+    mm = d % 60;
+    d = Math.floor(d / 60);
+    hh = d;
+    return "" + hh + ":" + ("00" + mm).slice(-2) + ":" + ("00" + ss).slice(-2);
+  }
+
+
+  function fillMap(p) {
+    var bounds = new google.maps.LatLngBounds();
+    if (p.length > 0) {
+      for (i = 0; i < p.length; i++) {
+        bounds.extend(new google.maps.LatLng(p[i].lat, p[i].lng));
+        bounds.extend(new google.maps.LatLng(p[i].lat, p[i].lng + 0.016));
+        bounds.extend(new google.maps.LatLng(p[i].lat, p[i].lng - 0.016));
+      }
+    }
+    var stints = navAnalysis(p);
+
+    var _paths = [];
+    for (i = 0; i < stints.length; i++) {
+      stint = stints[i];
+      if (stint.eng!=3) {
+        color = (stint.eng==0)?'blue':((stint.eng==1)?'red':'orange');
+        _path = new google.maps.Polyline({
+          path: stint.points,
+          geodesic: true,
+          strokeColor: color,
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        _paths.push(_path);
+      }
+    }
+
+    if (map==null) {
+      map = new google.maps.Map(document.getElementById('map'), {
+        mapTypeId: 'terrain'
+      });
+    }
+    var startPoint = { lat: p[0].lat, lng: p[0].lng };
+    var marker = new google.maps.Marker({
+      position: startPoint,
+      label: 'Start',
+      title: 'Start'
+    });
+    var endPoint = { lat: p[p.length - 1].lat, lng: p[p.length - 1].lng };
+    var marker1 = new google.maps.Marker({
+      position: endPoint,
+      label: 'End',
+      title: 'End'
+    });
+
+
+    if (paths!=null) {
+      paths.forEach(function (path) { path.setMap(null); });
+      markerEnd.setMap(null);
+      markerStart.setMap(null);
+    }
+    _paths.forEach(function (path) { path.setMap(map); });
+    marker.setMap(map);
+    marker1.setMap(map);
+    paths = _paths;
+    markerStart = marker;
+    markerEnd = marker1;
+    map.setCenter(bounds.getCenter());
+    map.fitBounds(bounds);
   }
 
 </script>
@@ -504,8 +659,7 @@
                     </div>
                     <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
                         <div class="col-2">Trip</div>
-                        <div class="col-4">{{trip.startT | date:'dd/MM/yyyy HH:mm'}}<br>{{trip.endT | date:'dd/MM/yyyy
-                            HH:mm'}}
+                        <div class="col-4">{{trip.startT | date:'short'}}<br>{{trip.endT | date:'short'}}
                         </div>
                         <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
                             number:2}}KN
@@ -517,8 +671,7 @@
                     <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
                          onclick="switchLeg(this)" id="L{{leg.leg}}">
                         <div class="col-2">Leg {{leg.leg}}</div>
-                        <div class="col-4">{{leg.startT | date:'dd/MM/yy HH:mm'}}<br>{{leg.endT | date:'dd/MM/yy
-                            HH:mm'}}
+                        <div class="col-4">{{leg.startT | date:'short'}}<br>{{leg.endT | date:'short'}}
                         </div>
                         <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
                             number:2}}KN
@@ -534,56 +687,56 @@
     <div class="row">
         <div class="col">
             <div class="tile-container">
-                <div class="tile_c">
-                    <my-tile title="{{tripName}}" value1="{{current.start | date:'dd/MM/yy HH:mm'}}"
-                             value2="{{current.end | date:'dd/MM/yy HH:mm'}}"
+                <div class="tile-wrapper">
+                    <my-tile title="Trip" value1="{{current.start | date:'short'}}"
+                             value2="{{current.end | date:'short'}}"
                              value3="{{current.totalTime}}"
-                    "></my-tile>
+                    ></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Navigation" value1="{{current.navTime}}"
                              value2="{{current.navDist | number:2}} NM"
-                             value3="{{current.speedAverage | number:2}} KN"></my-tile>
+                             value3="Avg {{current.speedAverage | number:2}} KN"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Sail" value1="{{current.navEngineOffTime}}"
                              value2="{{current.navEngineOffDist | number:2}} NM"
-                             value3="{{current.speedSailAverage | number:2}} KN"></my-tile>
+                             value3="Avg {{current.speedSailAverage | number:2}} KN"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Engine" value1="{{current.navEngineOn_Time}}"
                              value2="{{current.navEngineOn_Dist | number:2}} NM"
-                             value3="{{current.speedEngAverage | number:2}} KN"></my-tile>
+                             value3="Avg {{current.speedEngAverage | number:2}} KN"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Best 1 NM" value1="{{current.max01NMSpeed | number:2}} NM"
-                             value2="{{current.max01NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
-                             value3="{{current.max01NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                             value2="{{current.max01NMSpeedTime0T | date:'short'}}"
+                             value3="{{current.max01NMSpeedTime1T | date:'short'}}"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Best 5 NM" value1="{{current.max05NMSpeed | number:2}} NM"
-                             value2="{{current.max05NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
-                             value3="{{current.max05NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                             value2="{{current.max05NMSpeedTime0T | date:'short'}}"
+                             value3="{{current.max05NMSpeedTime1T | date:'short'}}"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Best 10 NM" value1="{{current.max10NMSpeed | number:2}} NM"
-                             value2="{{current.max10NMSpeedTime0T | date:'dd/MM/yy HH:mm'}}"
-                             value3="{{current.max10NMSpeedTime1T | date:'dd/MM/yy HH:mm'}}"></my-tile>
+                             value2="{{current.max10NMSpeedTime0T | date:'short'}}"
+                             value3="{{current.max10NMSpeedTime1T | date:'short'}}"></my-tile>
                 </div>
-                <div class="tile_c">
-                    <my-tile title="Best 30s Speed" value1="{{current.maxAvgSpeed | number:2}} NM"
-                             value2="{{current.maxAvgSpeedTimeT | date:'dd/MM/yy HH:mm'}}" value3=""></my-tile>
+                <div class="tile-wrapper">
+                    <my-tile title="30s Speed" value1="Max {{current.maxAvgSpeed | number:2}} NM"
+                             value2="{{current.maxAvgSpeedTimeT | date:'short'}}" value3=""></my-tile>
                 </div>
-                <div class="tile_c">
-                    <my-tile title="Best Speed" value1="{{current.maxSampledSpeed | number:2}} NM"
-                             value2="{{current.maxSampledSpeedTimeT | date:'dd/MM/yy HH:mm'}}" value3=""></my-tile>
+                <div class="tile-wrapper">
+                    <my-tile title="Speed" value1="Max {{current.maxSampledSpeed | number:2}} NM"
+                             value2="{{current.maxSampledSpeedTimeT | date:'short'}}" value3=""></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Distance%" value1="Sail {{current.relativeEngOffDist | percentage:1}}"
                              value2="Engine {{current.relativeEngOn_Dist | percentage:1}}"
                              value3="Unknown {{current.relativeEngUnkDist | percentage:1}}"></my-tile>
                 </div>
-                <div class="tile_c">
+                <div class="tile-wrapper">
                     <my-tile title="Time%" value1="Sail {{current.relativeEngOffTime | percentage:1}}"
                              value2="Engine {{current.relativeEngOn_Time | percentage:1}}"
                              value3="Unknown {{current.relativeEngUnkTime | percentage:1}}"></my-tile>
@@ -592,14 +745,23 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xl-4 col-md-6 col-sm-12">
-            <canvas class="chart-canvas" id="pieChart"></canvas>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="pieChart"></canvas>
+            </div>
         </div>
-        <div class="col-xl-4 col-md-6 col-sm-12">
-            <canvas class="chart-canvas" id="speedDistrChart"></canvas>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="speedDistrChart"></canvas>
+            </div>
         </div>
-        <div class="col-xl-4 col-md-12 col-sm-12">
-            <canvas class="chart-canvas" id="speedChart"></canvas>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="speedChart"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+            <div class="map card-router" id="map"></div>
         </div>
     </div>
 </div>

@@ -10,17 +10,16 @@ import java.io.IOException;
  * Adapted from https://github.com/adafruit/Adafruit_Python_BME280
  */
 @SuppressWarnings("unused")
-public class BME280 implements Atmo
-{
-	// This next addresses is returned by "sudo i2cdetect -y 1", see above.
-	public static final int BME280_I2CADDR = 0x76;
+public class BME280 implements Atmospheric {
+    // This next addresses is returned by "sudo i2cdetect -y 1", see above.
+    public static final int BME280_I2CADDR = 0x76;
 
-	// Operating Modes
-	public static final int BME280_OSAMPLE_1  = 1;
-	public static final int BME280_OSAMPLE_2  = 2;
-	public static final int BME280_OSAMPLE_4  = 3;
-	public static final int BME280_OSAMPLE_8  = 4;
-	public static final int BME280_OSAMPLE_16 = 5;
+    // Operating Modes
+    public static final int BME280_OSAMPLE_1 = 1;
+    public static final int BME280_OSAMPLE_2 = 2;
+    public static final int BME280_OSAMPLE_4 = 3;
+    public static final int BME280_OSAMPLE_8 = 4;
+    public static final int BME280_OSAMPLE_16 = 5;
 
 	// BME280 Registers
 	public static final int BME280_REGISTER_DIG_T1 = 0x88;  // Trimming parameter registers

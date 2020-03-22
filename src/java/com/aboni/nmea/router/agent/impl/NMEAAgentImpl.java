@@ -22,12 +22,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		@Override
 		public NMEASentenceFilterSet getFilter() {
-		    return fsetOutput;
-		}
+            return filterSetOutput;
+        }
 
 		@Override
 		public void setFilter(NMEASentenceFilterSet s) {
-            fsetOutput = s;
+            filterSetOutput = s;
         }
 
 		@Override
@@ -41,12 +41,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		@Override
 		public NMEASentenceFilterSet getFilter() {
-		    return fsetInput;
-		}
+            return filterSetInput;
+        }
 
 		@Override
 		public void setFilter(NMEASentenceFilterSet s) {
-            fsetInput = s;
+            filterSetInput = s;
 		}
 
 		@Override
@@ -64,8 +64,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
     private String name;
     private NMEAAgentStatusListener sl;
-    private NMEASentenceFilterSet fsetInput;
-    private NMEASentenceFilterSet fsetOutput;
+    private NMEASentenceFilterSet filterSetInput;
+    private NMEASentenceFilterSet filterSetOutput;
     private boolean active;
     private NMEASentenceListener listener;
     private boolean builtin;
@@ -73,7 +73,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     private boolean source;
     private final InternalTarget targetIf;
     private final InternalSource sourceIf;
-    private final NMEAProcessorSet procs;
+    private final NMEAProcessorSet processorSet;
     private final NMEACache cache;
 
     @Inject
@@ -81,10 +81,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         this.cache = cache;
         targetIf = new InternalTarget();
         sourceIf = new InternalSource();
-        fsetInput = null;
-        fsetOutput = null;
+        filterSetInput = null;
+        filterSetOutput = null;
         active = false;
-        procs = new NMEAProcessorSet();
+        processorSet = new NMEAProcessorSet();
         target = true;
         source = true;
     }
@@ -104,43 +104,43 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                 switch (q) {
                     case "speed_filter":
                         getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
-                        addProc(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
+                        addProcessor(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
                         break;
                     case "dpt":
                         getLogger().info("QoS {DPT} Agent {" + name + "}");
-                        addProc(new NMEADepthEnricher());
+                        addProcessor(new NMEADepthEnricher());
                         break;
                     case "rmc2vtg":
                         getLogger().info("QoS {RMC2VTG} Agent {" + name + "}");
-                        addProc(new NMEARMC2VTGProcessor());
+                        addProcessor(new NMEARMC2VTGProcessor());
                         break;
                     case "truewind_sog":
                         getLogger().info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
-                        addProc(new NMEAMWVTrue(cache, true));
+                        addProcessor(new NMEAMWVTrue(cache, true));
                         break;
                     case "truewind":
                         getLogger().info("QoS {TRUEWIND} Agent {" + name + "}");
-                        addProc(new NMEAMWVTrue(cache, false));
+                        addProcessor(new NMEAMWVTrue(cache, false));
                         break;
                     case "enrich_hdg":
                         getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
-                        addProc(new NMEAHDGEnricher(cache));
+                        addProcessor(new NMEAHDGEnricher(cache));
                         break;
                     case "enrich_hdm":
                         getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
-                        addProc(new NMEAHDMEnricher(cache));
+                        addProcessor(new NMEAHDMEnricher(cache));
                         break;
                     case "rmc_filter":
-						getLogger().info("QoS {RMC filter} Agent {" + name + "}");
-						addProc(new NMEARMCFilter());
-						break;
-					case "builtin":
-						getLogger().info("QoS {BuiltIn} Agent {" + name + "}");
-						builtin = true;
-						break;
-					default:
-						break;
-				}
+                        getLogger().info("QoS {RMC filter} Agent {" + name + "}");
+                        addProcessor(new NMEARMCFilter());
+                        break;
+                    case "builtin":
+                        getLogger().info("QoS {BuiltIn} Agent {" + name + "}");
+                        builtin = true;
+                        break;
+                    default:
+                        break;
+                }
 			}
         }
     }
@@ -276,15 +276,16 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         return true;
     }
 
-	/**
-	 * Used by "sources" to push sentences into the stream
-	 * @param sentence The sentemce to be notified to agents
-	 */
+    /**
+     * Used by "sources" to push sentences into the stream
+     *
+     * @param sentence The sentence to be notified to agents
+     */
 	protected final void notify(Sentence sentence) {
 
 		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
-            List<Sentence> toSend = procs.getSentences(sentence, getName());
+            List<Sentence> toSend = processorSet.getSentences(sentence, getName());
             for (Sentence s : toSend)
                 listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
         }
@@ -299,14 +300,15 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             getLogger().debug("Notify Sentence {" + m + "}");
             listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
         }
-	}
+    }
 
-	/**
-	 * Sources can use post-proc delegates to add additional elaboration to the sentences they pushes into the stream.
-	 * @param f The post processor to be added (sequence is important)
-	 */
-	protected final void addProc(NMEAPostProcess f) {
-		procs.addProcessor(f);
+    /**
+     * Sources can use post-process delegates to add additional elaboration to the sentences they pushes into the stream.
+     *
+     * @param f The post processor to be added (sequence is important)
+     */
+    protected final void addProcessor(NMEAPostProcess f) {
+        processorSet.addProcessor(f);
 	}
 
 	/**
@@ -351,7 +353,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     @Override
     public void onTimer() {
         if (isStarted()) {
-            procs.onTimer();
+            processorSet.onTimer();
         }
     }
 

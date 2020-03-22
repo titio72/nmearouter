@@ -27,25 +27,28 @@ public abstract class ASensorCompass extends I2CSensor {
 	}
 
 	/**
-	 * Get pitch in degrees without any wmoothing.
-	 * @return The pitch value in degrees
-	 * @throws SensorNotInititalizedException When the sensot has not been initialized
-	 */
-	public abstract double getUnfilteredPitch() throws SensorNotInititalizedException;
-	
-	/**
-	 * Get the roll in degrees without smoothing.
-	 * @return The valkue in degrees
-	 * @throws SensorNotInititalizedException When the sensot has not been initialized
-	 */
-	public abstract double getUnfilteredRoll() throws SensorNotInititalizedException;
-	
-	/**
-	 * Get the the heading in degrees [0..360].
-	 * @return The heading in degrees
-	 * @throws SensorNotInititalizedException When the sensot has not been initialized
-	 */
-	public abstract double getUnfilteredSensorHeading() throws SensorNotInititalizedException;
+     * Get pitch in degrees without any smoothing.
+     *
+     * @return The pitch value in degrees
+     * @throws SensorNotInitializedException When the sensor has not been initialized
+     */
+    public abstract double getUnfilteredPitch() throws SensorNotInitializedException;
+
+    /**
+     * Get the roll in degrees without smoothing.
+     *
+     * @return The value in degrees
+     * @throws SensorNotInitializedException When the sensor has not been initialized
+     */
+    public abstract double getUnfilteredRoll() throws SensorNotInitializedException;
+
+    /**
+     * Get the the heading in degrees [0..360].
+     *
+     * @return The heading in degrees
+     * @throws SensorNotInitializedException When the sensor has not been initialized
+     */
+    public abstract double getUnfilteredSensorHeading() throws SensorNotInitializedException;
 
 	@SuppressWarnings("unused")
 	public double getPitch() {
@@ -56,14 +59,14 @@ public abstract class ASensorCompass extends I2CSensor {
 	public double getRoll() {
 		return roll;
 	}
-	
-	public double getSensorHeading() {
-		return head;
-	}
-	
-	/**
-	 * Get the the heading in degrees compensated with the deviation table[0..360].
-	 * @return the heading in dgrees
+
+    public double getSensorHeading() {
+        return head;
+    }
+
+    /**
+     * Get the the heading in degrees compensated with the deviation table[0..360].
+	 * @return the heading in degrees
 	 */
 	public double getHeading() {
 	    return devManager.getMagnetic(getSensorHeading());

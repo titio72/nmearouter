@@ -100,6 +100,14 @@ public class ServiceConfigTest {
     }
 
     @Test
+    public void testGetParamAsInstantWithTime() {
+        config.setValue("p", "20200308074629");
+        Instant i0 = config.getParamAsInstant("p", null, 0);
+        Instant i = LocalDateTime.parse("2020-03-08T07:46:29").atZone(ZoneId.systemDefault()).toInstant();
+        assertEquals(i, i0);
+    }
+
+    @Test
     public void testGetParamAsInstantFormatOnlyDate() {
         config.setValue("p", "20200309");
         Instant i = LocalDateTime.parse("2020-03-09T00:00:00").atZone(ZoneId.systemDefault()).toInstant();

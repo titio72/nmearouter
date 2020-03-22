@@ -56,28 +56,50 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		this.cache = cache;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.aboni.nmea.router.agent.NMEAAgentBuilder#createAgent(com.aboni.nmea.router.conf.AgentBase, com.aboni.nmea.router.NMEARouter)
-	 */
 	@Override
 	public NMEAAgent createAgent(AgentBase a) {
 		NMEAAgent agent = null;
 		QOS q = getQos(a.getQos());
 		switch (getType(a)) {
-			case "Simulator": agent = buildSimulator((SimulatorAgent)a, q); break;
-            case "Sensor": agent = buildSensor((SensorAgent)a, q); break;
-            case "Gyro": agent = buildGyro((GyroAgent)a, q); break;
-			case "Serial": agent = buildSerial((SerialAgent)a, q); break;
-			case "TCP": agent = buildSocket((TcpAgent)a, q); break;
-			case "JSON": agent = buildSocketJSON((JSONAgent)a, q); break;
-			case "UDP": agent = buildUDP((UdpAgent)a, q); break;
-			case "Console": agent = buildConsoleTarget((ConsoleAgent)a, q); break;
-		    case "Track": agent = buildTrackTarget((TrackAgent)a); break;
-		    case "Meteo": agent = buildMeteoTarget((MeteoAgent)a, q); break;
-		    case "MWDSynthetizer": agent = buildMWDSynt(q); break;
-		    case "GPXPlayer": agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent)a, q); break;
-			default: break;
-		}
+            case "Simulator":
+                agent = buildSimulator((SimulatorAgent) a, q);
+                break;
+            case "Sensor":
+                agent = buildSensor((SensorAgent) a, q);
+                break;
+            case "Gyro":
+                agent = buildGyro((GyroAgent) a, q);
+                break;
+            case "Serial":
+                agent = buildSerial((SerialAgent) a, q);
+                break;
+            case "TCP":
+                agent = buildSocket((TcpAgent) a, q);
+                break;
+            case "JSON":
+                agent = buildSocketJSON((JSONAgent) a, q);
+                break;
+            case "UDP":
+                agent = buildUDP((UdpAgent) a, q);
+                break;
+            case "Console":
+                agent = buildConsoleTarget((ConsoleAgent) a, q);
+                break;
+            case "Track":
+                agent = buildTrackTarget((TrackAgent) a);
+                break;
+            case "Meteo":
+                agent = buildMeteoTarget((MeteoAgent) a, q);
+                break;
+            case "MWDSynthetizer":
+                agent = buildMWDSyntesizer(q);
+                break;
+            case "GPXPlayer":
+                agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent) a, q);
+                break;
+            default:
+                break;
+        }
         if (agent!=null) {
         	NMEAFilterable src = agent.getSource();
         	FilterSet srcFilterConf = a.getFilterSource();
@@ -161,15 +183,15 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             a.setup(conf.getName(), q, conf.getPort());
             return a;
         }
-	}
-	
-	private NMEAAgent buildMWDSynt(QOS q) {
+    }
+
+    private NMEAAgent buildMWDSyntesizer(QOS q) {
         NMEAAgent mwd = ThingsFactory.getInstance(NMEAMWDSentenceCalculator.class);
         mwd.setup("MWD", q);
         return mwd;
     }
 
-	private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
+    private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
         NMEAAgent meteo = ThingsFactory.getInstance(NMEAMeteoTarget.class);
         meteo.setup(a.getName(), q);
         return meteo;

@@ -2,8 +2,8 @@ package com.aboni.nmea.router.track.impl;
 
 import com.aboni.nmea.router.track.TrackEvent;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.Event;
-import com.aboni.utils.db.EventWriter;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -13,28 +13,21 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class DBTrackEventWriter implements EventWriter {
+public class DBTrackEventWriter implements DBEventWriter {
 
     private final String sTABLE;
 
     private PreparedStatement stm;
-    private PreparedStatement stmTrip;
+    private Connection lastUsedConnection;
 
     @Inject
     public DBTrackEventWriter(@NotNull @Named("TrackTableName") String tableName) {
         sTABLE = tableName;
-        // nothing to init
     }
 
     private void prepareStatement(Connection c) throws SQLException {
         if (stm == null) {
             stm = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        }
-    }
-
-    private void prepareStatementWithTrip(Connection c) throws SQLException {
-        if (stmTrip == null) {
-            stmTrip = c.prepareStatement("insert into " + sTABLE + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine, tripId) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
@@ -52,35 +45,26 @@ public class DBTrackEventWriter implements EventWriter {
     @Override
     public void reset() {
         stm = closeStatement(stm);
-        stmTrip = closeStatement(stmTrip);
 	}
 	
 	@Override
 	public void write(Event e, Connection conn) throws SQLException{
 		if (conn!=null && e instanceof TrackEvent) {
-            PreparedStatement s;
-            if (((TrackEvent) e).getPoint().getTrip() == null) {
-                prepareStatement(conn);
-                s = stm;
-            } else {
-                prepareStatementWithTrip(conn);
-                s = stmTrip;
-            }
-        	TrackEvent t = (TrackEvent)e;
-            s.setDouble(1, t.getPoint().getPosition().getLatitude());
-            s.setDouble(2, t.getPoint().getPosition().getLongitude());
+            if (conn != lastUsedConnection) reset();
+            lastUsedConnection = conn;
+            prepareStatement(conn);
+            TrackEvent t = (TrackEvent) e;
+            stm.setDouble(1, t.getPoint().getPosition().getLatitude());
+            stm.setDouble(2, t.getPoint().getPosition().getLongitude());
             Timestamp x = new Timestamp(e.getTime());
-            s.setTimestamp(3, x);
-            s.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
-            s.setInt(5, t.getPoint().getPeriod());
-            s.setDouble(6, t.getPoint().getAverageSpeed());
-            s.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
-            s.setDouble(8, t.getPoint().getDistance());
-            s.setByte(9, t.getPoint().getEngine().toByte());
-            if (((TrackEvent) e).getPoint().getTrip() != null) {
-                s.setInt(10, t.getPoint().getTrip());
-            }
-            s.execute();
-	    }
+            stm.setTimestamp(3, x);
+            stm.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
+            stm.setInt(5, t.getPoint().getPeriod());
+            stm.setDouble(6, t.getPoint().getAverageSpeed());
+            stm.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
+            stm.setDouble(8, t.getPoint().getDistance());
+            stm.setByte(9, t.getPoint().getEngine().toByte());
+            stm.execute();
+        }
 	}
 }

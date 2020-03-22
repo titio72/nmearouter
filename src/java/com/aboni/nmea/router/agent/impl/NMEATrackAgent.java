@@ -6,9 +6,9 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.impl.FileTrackWriter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -18,31 +18,28 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
-    private static final long CHECK_TRIP_TIMEOUT = 60000L;
-    private static final int CONTINUE_TRIP_THRESHOLD = 3 * 60 * 60 * 1000;  /* 3 hours */
-    private final TrackWriter media;
     private final TrackManager tracker;
-    private final TripManager tripManager;
+    private final TripManagerX tripManager;
     private Integer tripId;
+    private TrackWriter backupWriter;
+
 
     @Inject
-    public NMEATrackAgent(@NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManager tripManager,
-                          @NotNull TrackWriter mediaWriter) {
+    public NMEATrackAgent(@NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
         super(cache);
         setSourceTarget(true, true);
         this.tracker = trackManager;
         this.tripManager = tripManager;
-        this.media = mediaWriter;
         this.tripId = null;
+        this.backupWriter = new FileTrackWriter("track.csv");
     }
 
     @Override
     protected boolean onActivate() {
-        return media.init();
+        return true;
     }
     
     @Override
@@ -88,13 +85,17 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void processPosition(GeoPositionT posT, double sog) {
         long t0 = getCache().getNow();
 
-        checkTrip(posT.getTimestamp());
         TrackPoint point = tracker.processPosition(posT, sog, tripId);
         notifyAnchorStatus();
-        if (point != null && media != null) {
+        if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
             point = builder.withPoint(point).withEngine(getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN));
-            media.write(point);
+            try {
+                tripManager.onTrackPoint(new TrackEvent(point));
+            } catch (TripManagerException e) {
+                getLogger().error("Cannot write point!", e);
+                backupWriter.write(point);
+            }
             notifyTrackedPoint(point);
             synchronized (this) {
                 writes++;
@@ -118,9 +119,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             msg.put("lonDec", avgPos.getLongitude());
             msg.put("lat", Utils.formatLatitude(avgPos.getLatitude()));
             msg.put("lon", Utils.formatLongitude(avgPos.getLongitude()));
-            if (tripId!=null) {
-                msg.put("trip", tripId);
-            }
             notify(msg);
         }
     }
@@ -135,37 +133,10 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         msg.put("period", point.getPeriod());
         msg.put("lon", point.getPosition().getLongitude());
         msg.put("lat", point.getPosition().getLatitude());
-        if (tripId != null) {
-            msg.put("trip", point.getTrip());
-        }
         notify(msg);
     }
 
     private long lastStats = 0;
-
-    private long lastTripCheckTs = 0;
-
-    private void checkTrip(long now) {
-        if (tripId == null && (now - lastTripCheckTs) > CHECK_TRIP_TIMEOUT) {
-            getLogger().info("Checking trip");
-            try {
-                Pair<Integer, Long> tripInfo = tripManager.getCurrentTrip(now);
-                if (tripInfo != null) {
-                    long lastTripTs = tripInfo.second;
-                    int lastTrip = tripInfo.first;
-                    getLogger().info(String.format("Last trip {%d} {%s}", lastTrip, new Date(lastTripTs).toString()));
-                    if ((now - lastTripTs) < CONTINUE_TRIP_THRESHOLD) {
-                        getLogger().info("Setting current trip {" + lastTrip + "}");
-                        tripId = lastTrip;
-                        tripManager.setTrip(lastTripTs - 1, now + 1, tripId);
-                    }
-                }
-            } catch (TripManagerException e) {
-                getLogger().error("Error detecting current trip", e);
-            }
-            lastTripCheckTs = now;
-        }
-    }
 
     @Override
     public void onTimer() {

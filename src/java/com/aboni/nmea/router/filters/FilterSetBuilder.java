@@ -85,14 +85,14 @@ public class FilterSetBuilder {
 				String cmd = sentence.substring(STALK.length());
 				f = new STalkFilter(cmd, false);
 		} else {
-			String stid =  filter.optString(TALKER);
-			if (stid==null || "".equals(stid)) {
-				f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), filter.getString(SOURCE));
-			} else {
-				TalkerId tid = TalkerId.parse(stid);
-				f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), tid, filter.getString(SOURCE));
-			}
-		}
+            String id = filter.optString(TALKER);
+            if (id == null || "".equals(id)) {
+                f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), filter.getString(SOURCE));
+            } else {
+                TalkerId tid = TalkerId.parse(id);
+                f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), tid, filter.getString(SOURCE));
+            }
+        }
 		return f;
 	}
 

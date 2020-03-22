@@ -18,10 +18,10 @@ public class CPUTemp {
 	private static final CPUTemp instance = new CPUTemp();
 	
 	private CPUTemp() {
-		String name = System.getProperty("os.name");
-		String arch = System.getProperty("os.arch");
-    	arm = (arch.startsWith("arm") || name.contains("inux"));
-	}
+        String name = System.getProperty("os.name");
+        String arch = System.getProperty("os.arch");
+        arm = (arch.startsWith("arm") || name.toUpperCase().contains("LINUX"));
+    }
 	
 	public static CPUTemp getInstance() {
 		return instance;

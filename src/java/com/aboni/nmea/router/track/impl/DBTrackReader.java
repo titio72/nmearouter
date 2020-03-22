@@ -1,10 +1,12 @@
 package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackPointBuilder;
+import com.aboni.nmea.router.track.TrackReader;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.utils.*;
 import com.aboni.utils.db.DBHelper;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -23,14 +25,15 @@ public class DBTrackReader implements TrackReader {
         // nothing to initialize
     }
 
-    private static final String SQL_BY_TRIP = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon from track where tripid=?";
+    private static final String SQL_BY_TRIP = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon from track " +
+            "where TS>=(select fromTS from trip where id=?) and TS<=(select toTS from trip where id=?)";
     private static final String SQL_BY_DATE = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon from track where TS>=? and TS<?";
 
-    public void readTrack(@NotNull TrackQuery query, @NotNull TrackReaderListener target) throws TrackManagementException {
-        if (query instanceof TrackQueryById) {
-            readTrack(((TrackQueryById) query).getTrackId(), target);
-        } else if (query instanceof TrackQueryByDate) {
-            readTrack(((TrackQueryByDate) query).getFrom(), ((TrackQueryByDate) query).getTo(), target);
+    public void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException {
+        if (query instanceof QueryById) {
+            readTrack(((QueryById) query).getId(), target);
+        } else if (query instanceof QueryByDate) {
+            readTrack(((QueryByDate) query).getFrom(), ((QueryByDate) query).getTo(), target);
         } else {
             throw new TrackManagementException("Unknown query " + query);
         }
@@ -41,6 +44,7 @@ public class DBTrackReader implements TrackReader {
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(SQL_BY_TRIP)) {
                 st.setInt(1, tripId);
+                st.setInt(2, tripId);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
                         target.onRead(getSample(rs));

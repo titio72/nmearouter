@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.track;
 
+import com.aboni.utils.Query;
+
 import javax.validation.constraints.NotNull;
 
 public interface TrackReader {
@@ -8,5 +10,5 @@ public interface TrackReader {
         void onRead(TrackPoint sample);
     }
 
-    void readTrack(@NotNull TrackQuery query, @NotNull TrackReaderListener target) throws TrackManagementException;
+    void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException;
 }

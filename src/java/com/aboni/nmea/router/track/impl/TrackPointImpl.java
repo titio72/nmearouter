@@ -12,7 +12,6 @@ public class TrackPointImpl implements TrackPoint {
     private final double averageSpeed;
     private final double maxSpeed;
     private final int period;
-    private final Integer tripId;
     private final EngineStatus engine;
 
     TrackPointImpl(TrackPoint point) {
@@ -23,7 +22,6 @@ public class TrackPointImpl implements TrackPoint {
         this.maxSpeed = point.getMaxSpeed();
         this.period = point.getPeriod();
         this.engine = point.getEngine();
-        this.tripId = point.getTrip();
     }
 
     @Override
@@ -54,11 +52,6 @@ public class TrackPointImpl implements TrackPoint {
     @Override
     public int getPeriod() {
         return period;
-    }
-
-    @Override
-    public Integer getTrip() {
-        return tripId;
     }
 
     @Override

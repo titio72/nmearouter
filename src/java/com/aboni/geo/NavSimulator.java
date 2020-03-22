@@ -9,27 +9,27 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class NavSimulator {
-	
-	public interface DoWithSim {
-		void doIt(NavSimulator sim, long t);
-	}
 
-	private long time;
-	
-	private Position pos;
-	private Position posTo;
-	
-	private int side = 0; // 0.UNKN -1.PORT 1.STARBOARD
-	
-	private double windSpeed;
-	private double windDir;
-	
-	private double heading;
+    public interface DoWithSim {
+        void doIt(NavSimulator sim, long t);
+    }
 
-	private double brg;
-	private double dist;
-	
-	private double speed = 5.0;
+    private long time;
+
+    private Position pos;
+    private Position posTo;
+
+    private int side = 0; // 0.UNKNOWN -1.PORT 1.STARBOARD
+
+    private double windSpeed;
+    private double windDir;
+
+    private double heading;
+
+    private double brg;
+    private double dist;
+
+    private double speed = 5.0;
 	
 	private long lastTack;
 	

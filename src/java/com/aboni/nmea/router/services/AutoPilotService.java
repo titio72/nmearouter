@@ -20,38 +20,38 @@ public class AutoPilotService implements WebService {
     private static final String CMD_STARBOARD_10 = "S10";
     private static final String CMD_PORT_10 = "P10";
     private static final String CMD_AUTO = "Auto";
-    private static final String CMD_STDBY = "Standby";
-	private static final String CMD_WVANE = "Wind";
-	
-	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
-		try {
-			String command = config.getParameter("command");
-			switch (command) {
-			case CMD_PORT_10:
-				auto.port10();
-				break;
-			case CMD_PORT_1:
+    private static final String CMD_STANDBY = "Standby";
+    private static final String CMD_WIND_VANE = "Wind";
+
+    @Override
+    public void doIt(ServiceConfig config, ServiceOutput response) {
+        try {
+            String command = config.getParameter("command");
+            switch (command) {
+                case CMD_PORT_10:
+                    auto.port10();
+                    break;
+                case CMD_PORT_1:
 				auto.port1();
-				break;
-			case CMD_STARBOARD_10:
-				auto.starboard10();
-				break;
-			case CMD_STARBOARD_1:
-				auto.starboard1();
-				break;
-			case CMD_AUTO:
-				auto.enable();
-				break;
-			case CMD_STDBY:
-				auto.standBy();
-				break;
-			case CMD_WVANE:
-				auto.windVane();
-				break;
-			default:
-				break;
-			}
+                    break;
+                case CMD_STARBOARD_10:
+                    auto.starboard10();
+                    break;
+                case CMD_STARBOARD_1:
+                    auto.starboard1();
+                    break;
+                case CMD_AUTO:
+                    auto.enable();
+                    break;
+                case CMD_STANDBY:
+                    auto.standBy();
+                    break;
+                case CMD_WIND_VANE:
+                    auto.windVane();
+                    break;
+                default:
+                    break;
+            }
 	        response.setContentType("application/json");
 	        response.getWriter().println("{}");
 	        response.ok();

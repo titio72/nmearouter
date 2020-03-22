@@ -3,13 +3,13 @@ package com.aboni.nmea.router.meteo.impl;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.StatsSample;
 import com.aboni.utils.StatsWriter;
+import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
-import com.aboni.utils.db.EventWriter;
 
 public class DBMeteoWriter implements StatsWriter {
-	
+
     private DBHelper db;
-    private final EventWriter ee;
+    private final DBEventWriter ee;
 
     public DBMeteoWriter() {
     	ee = new DBMeteoEventWriter();

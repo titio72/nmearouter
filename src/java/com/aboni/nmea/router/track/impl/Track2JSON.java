@@ -2,7 +2,11 @@ package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.TrackDumper;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.utils.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -18,34 +22,36 @@ public class Track2JSON implements TrackDumper {
 
         private static final boolean TRACK_THEM_ALL = true;
 
-        private GeoPositionT previous;
+        private TrackPoint previous;
 
         PointWriter() {
         }
 
         @Override
         public void onRead(TrackPoint sample) {
-            handlePoint(sample.getPosition());
+            handlePoint(sample);
         }
 
-		private void handlePoint(GeoPositionT p) {
-			if (TRACK_THEM_ALL ) {
-				writePoint(p);
-			} else {
-				if (trackIt(p, previous)) {
-					writePoint(p);
-				}
-			}
-			previous = p;
-		}
+        private void handlePoint(TrackPoint p) {
+            if (TRACK_THEM_ALL) {
+                writePoint(p);
+            } else {
+                if (trackIt(p.getPosition(), previous.getPosition())) {
+                    writePoint(p);
+                }
+            }
+            previous = p;
+        }
 
-		private void writePoint(GeoPositionT p) {
-			JSONObject pt = new JSONObject();
-			pt.put("lat", p.getLatitude());
-			pt.put("lng", p.getLongitude());
-			pt.put("time", p.getTimestamp());
-			getPath().add(pt);
-		}
+        private void writePoint(TrackPoint p) {
+            JSONObject pt = new JSONObject();
+            pt.put("lat", p.getPosition().getLatitude());
+            pt.put("lng", p.getPosition().getLongitude());
+            pt.put("time", p.getPosition().getTimestamp());
+            pt.put("eng", p.getEngine().getValue());
+            pt.put("anchor", p.isAnchor());
+            getPath().add(pt);
+        }
 
         private boolean trackIt(GeoPositionT p, GeoPositionT pr) {
             boolean trackIt = true;
@@ -72,7 +78,7 @@ public class Track2JSON implements TrackDumper {
     }
 
     @Override
-    public void dump(@NotNull TrackQuery query, @NotNull Writer w) throws IOException, TrackManagementException {
+    public void dump(@NotNull Query query, @NotNull Writer w) throws IOException, TrackManagementException {
         createPath();
         writePoints(query);
         writeIt(w);
@@ -82,7 +88,7 @@ public class Track2JSON implements TrackDumper {
         jsonTrack.write(w);
     }
 
-    private void writePoints(TrackQuery query) throws TrackManagementException {
+    private void writePoints(Query query) throws TrackManagementException {
         PointWriter pw = new PointWriter();
         trackReader.readTrack(query, pw);
         ((JSONObject) jsonTrack.get(JSON_TRACK_TAG)).put("path", getPath());

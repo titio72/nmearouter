@@ -34,26 +34,26 @@ public class SensorCompass extends ASensorCompass {
 	}
 
     /**
-	 * Get the bearing compensated with the tilt data and deviation.
-	 * @return Non-smoothed tilt-compensated compass heading
-	 */
+     * Get the bearing compensated with the tilt data and deviation.
+     * @return Non-smoothed tilt-compensated compass heading
+     */
     @Override
-	public double getUnfilteredSensorHeading() {
-	    double[] magRaw = magnetometer.getMagVector();
-	    double[] accRaw = gyro.readRawAccel();
-	    return compass.getTiltCompensatedHeading(magRaw, accRaw);
-	}
-    
-	public double[] getRotationDegrees() throws SensorNotInititalizedException {
-		double[] r = gyro.readAccel();
-		return new double[] {Math.toDegrees(r[0]), 
-				Math.toDegrees(r[1]), Math.toDegrees(r[2])};
-	}
+    public double getUnfilteredSensorHeading() {
+        double[] magRaw = magnetometer.getMagVector();
+        double[] accRaw = gyro.readRawAccel();
+        return compass.getTiltCompensatedHeading(magRaw, accRaw);
+    }
+
+    public double[] getRotationDegrees() throws SensorNotInitializedException {
+        double[] r = gyro.readAccel();
+        return new double[]{Math.toDegrees(r[0]),
+                Math.toDegrees(r[1]), Math.toDegrees(r[2])};
+    }
 
     @Override
     protected void onLoadCompassConfiguration() {
-    	super.onLoadCompassConfiguration();
-    	updateCalibration();
+        super.onLoadCompassConfiguration();
+        updateCalibration();
     }
 
     private void updateCalibration() {
@@ -73,15 +73,15 @@ public class SensorCompass extends ASensorCompass {
         magnetometer.read();
     }
 
-	@Override
-	public double getUnfilteredPitch() throws SensorNotInititalizedException {
-		double[] rot = getRotationDegrees();
-		return rot[1];
-	}
+    @Override
+    public double getUnfilteredPitch() throws SensorNotInitializedException {
+        double[] rot = getRotationDegrees();
+        return rot[1];
+    }
 
-	@Override
-	public double getUnfilteredRoll() throws SensorNotInititalizedException {
-		double[] rot = getRotationDegrees();
-		return rot[0];
-	}
+    @Override
+    public double getUnfilteredRoll() throws SensorNotInitializedException {
+        double[] rot = getRotationDegrees();
+        return rot[0];
+    }
 }

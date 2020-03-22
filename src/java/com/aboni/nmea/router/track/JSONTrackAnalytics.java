@@ -1,23 +1,23 @@
 package com.aboni.nmea.router.track;
 
+import com.aboni.utils.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 
-public class TrackAnalyticsByDate {
+public class JSONTrackAnalytics {
 
     private final TrackReader reader;
 
     @Inject
-    public TrackAnalyticsByDate(@NotNull TrackReader reader) {
+    public JSONTrackAnalytics(@NotNull TrackReader reader) {
         this.reader = reader;
     }
 
-    public JSONObject getAnalysis(Instant from, Instant to) throws TrackManagementException {
+    public JSONObject getAnalysis(@NotNull Query query) throws TrackManagementException {
         TrackAnalytics analytics = new TrackAnalytics("");
-        reader.readTrack(new TrackQueryByDate(from, to), analytics::processSample);
+        reader.readTrack(query, analytics::processSample);
         return analytics.getJSONStats();
     }
 

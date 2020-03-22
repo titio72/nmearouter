@@ -29,7 +29,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return "Fille " + getFile();
+        return "File " + getFile();
     }
 
 

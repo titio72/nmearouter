@@ -1,7 +1,11 @@
 package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.TrackDumper;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.utils.Query;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 
@@ -38,13 +42,13 @@ public class Track2KML implements TrackDumper {
     }
 
     @Override
-    public void dump(TrackQuery query, Writer w) throws TrackManagementException {
+    public void dump(Query query, Writer w) throws TrackManagementException {
         LineString s = createString();
         writePoints(query, s);
         kml.marshal(w);
     }
 
-    private void writePoints(TrackQuery query, LineString w) throws TrackManagementException {
+    private void writePoints(Query query, LineString w) throws TrackManagementException {
         track.readTrack(query, new PointWriter(w));
     }
 
@@ -74,35 +78,3 @@ public class Track2KML implements TrackDumper {
         return "kml";
     }
 }
-
-/*
-<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2"
- xmlns:gx="http://www.google.com/kml/ext/2.2">   <!-- required when using gx-prefixed elements -->
-
-<Placemark>
-  <name>gx:altitudeMode Example</name>
-  <LookAt>
-    <longitude>146.806</longitude>
-    <latitude>12.219</latitude>
-    <heading>-60</heading>
-    <tilt>70</tilt>
-    <range>6300</range>
-    <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
-  </LookAt>
-  <LineString>
-    <extrude>1</extrude>
-    <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
-    <coordinates>
-      146.825,12.233,400
-      146.820,12.222,400
-      146.812,12.212,400
-      146.796,12.209,400
-      146.788,12.205,400
-    </coordinates>
-  </LineString>
-</Placemark>
-
-</kml>
-
-*/

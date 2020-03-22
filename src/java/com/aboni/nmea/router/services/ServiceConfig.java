@@ -83,7 +83,9 @@ public interface ServiceConfig {
         } else {
             try {
                 DateTimeFormatter p = new DateTimeFormatterBuilder()
-                        .appendPattern("yyyyMMdd")
+                        .appendValue(ChronoField.YEAR, 4)
+                        .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+                        .appendValue(ChronoField.DAY_OF_MONTH, 2)
                         .optionalStart()
                         .appendPattern("HHmmss")
                         .optionalEnd()

@@ -2,7 +2,11 @@ package com.aboni.nmea.router.track.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.TrackDumper;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.utils.Query;
 import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
@@ -79,7 +83,7 @@ public class Track2GPX implements TrackDumper {
     }
 
     @Override
-    public void dump(TrackQuery query, Writer w) throws IOException, TrackManagementException {
+    public void dump(Query query, Writer w) throws IOException, TrackManagementException {
         writeHeader(w);
         writePoints(query, w);
         writeFooter(w);
@@ -90,7 +94,7 @@ public class Track2GPX implements TrackDumper {
         w.write(footer);
     }
 
-    private void writePoints(TrackQuery query, Writer w) throws TrackManagementException {
+    private void writePoints(Query query, Writer w) throws TrackManagementException {
         track.readTrack(query, new PointWriter(w));
     }
 
@@ -121,56 +125,3 @@ public class Track2GPX implements TrackDumper {
         return "gpx";
     }
 }
-
-/*
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-
-<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" creator="Oregon 400t" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd">
-  <metadata>
-    <link href="http://www.garmin.com">
-      <text>Garmin International</text>
-    </link>
-    <time>2009-10-17T22:58:43Z</time>
-  </metadata>
-  <trk>
-    <name>Example GPX Document</name>
-    <trkseg>
-      <trkpt lat="47.644548" lon="-122.326897">
-        <ele>4.46</ele>
-        <time>2009-10-17T18:37:26Z</time>
-      </trkpt>
-      <trkpt lat="47.644548" lon="-122.326897">
-        <ele>4.94</ele>
-        <time>2009-10-17T18:37:31Z</time>
-      </trkpt>
-      <trkpt lat="47.644548" lon="-122.326897">
-        <ele>6.87</ele>
-        <time>2009-10-17T18:37:34Z</time>
-      </trkpt>
-    </trkseg>
-  </trk>
-</gpx>*/
-
-
-/*
-
-      <LineString>
-        <extrude>1</extrude>
-        <tessellate>1</tessellate>
-        <altitudeMode>absolute</altitudeMode>
-        <coordinates> -112.2550785337791,36.07954952145647,2357
-          -112.2549277039738,36.08117083492122,2357
-          -112.2552505069063,36.08260761307279,2357
-          -112.2564540158376,36.08395660588506,2357
-          -112.2580238976449,36.08511401044813,2357
-          -112.2595218489022,36.08584355239394,2357
-          -112.2608216347552,36.08612634548589,2357
-          -112.262073428656,36.08626019085147,2357
-          -112.2633204928495,36.08621519860091,2357
-          -112.2644963846444,36.08627897945274,2357
-          -112.2656969554589,36.08649599090644,2357 
-        </coordinates>
-      </LineString>
-
-
-*/

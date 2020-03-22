@@ -1,10 +1,10 @@
 package com.aboni.sensors;
 
-public class SensorNotInititalizedException extends SensorException {
+public class SensorNotInitializedException extends SensorException {
 
     private static final long serialVersionUID = -5584485460132915583L;
 
-    public SensorNotInititalizedException(String message) {
+    public SensorNotInitializedException(String message) {
         super(message);
     }
 }

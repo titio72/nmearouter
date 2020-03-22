@@ -58,9 +58,6 @@ public abstract class I2CSensor implements Sensor {
         maxFailures = MAX_FAILURES;
     }
 
-    /* (non-Javadoc)
-	 * @see com.aboni.sensors.Sensor#init()
-	 */
     @Override
 	public final void init() throws IOException, UnsupportedBusNumberException {
         init(getBus());
@@ -81,9 +78,6 @@ public abstract class I2CSensor implements Sensor {
 
     protected abstract void readSensor() throws SensorException;
 
-    /* (non-Javadoc)
-	 * @see com.aboni.sensors.Sensor#read()
-	 */
     @Override
 	public final void read() throws SensorException {
         if (isInitialized() && (failures<maxFailures)) {
@@ -101,8 +95,8 @@ public abstract class I2CSensor implements Sensor {
         return smoothingAlpha;
     }
 
-    public void setDefaultSmoothingAlpha(double smootingAlpha) {
-        this.smoothingAlpha = smootingAlpha;
+    public void setDefaultSmoothingAlpha(double smoothingAlpha) {
+        this.smoothingAlpha = smoothingAlpha;
     }
 
     protected int getBus() {

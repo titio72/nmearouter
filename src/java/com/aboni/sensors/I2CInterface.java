@@ -10,23 +10,23 @@ import java.io.IOException;
 
 public class I2CInterface {
 
-	public enum Endianness {
-		LITTLE_ENDIAN,
-		BIG_ENDIAN
-	}
+    public enum Endianness {
+        LITTLE_ENDIAN,
+        BIG_ENDIAN
+    }
 
-	private final I2CDevice device;
+    private final I2CDevice device;
 
-	public I2CInterface(int busId, int deviceAddr) throws IOException, UnsupportedBusNumberException {
-		I2CBus bus = I2CFactory.getInstance(busId);
-		device = bus.getDevice(deviceAddr);
-	}
+    public I2CInterface(int busId, int deviceAddress) throws IOException, UnsupportedBusNumberException {
+        I2CBus bus = I2CFactory.getInstance(busId);
+        device = bus.getDevice(deviceAddress);
+    }
 
-	public int read(int reg, byte[] data, int from, int to) throws IOException {
-	    synchronized (device) {
-	        return device.read(reg, data, from, to);
-	    }
-	}
+    public int read(int reg, byte[] data, int from, int to) throws IOException {
+        synchronized (device) {
+            return device.read(reg, data, from, to);
+        }
+    }
 	
 	public int readWord(int add) throws IOException {
 		synchronized (device) {

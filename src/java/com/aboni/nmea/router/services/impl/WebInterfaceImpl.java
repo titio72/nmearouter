@@ -19,9 +19,6 @@ public class WebInterfaceImpl extends AbstractHandler
         this.factory = factory;
     }
     
-    /* (non-Javadoc)
-     * @see com.aboni.nmea.router.services.WebInterface#handle(java.lang.String, org.eclipse.jetty.server.Request, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     public void handle(String target,
                        Request baseRequest,

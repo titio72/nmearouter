@@ -25,7 +25,6 @@ public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
         this.maxSpeed = point.getMaxSpeed();
         this.period = point.getPeriod();
         this.engine = point.getEngine();
-        this.tripId = point.getTrip();
         return this;
     }
 
@@ -112,11 +111,6 @@ public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
     @Override
     public int getPeriod() {
         return period;
-    }
-
-    @Override
-    public Integer getTrip() {
-        return tripId;
     }
 
     @Override

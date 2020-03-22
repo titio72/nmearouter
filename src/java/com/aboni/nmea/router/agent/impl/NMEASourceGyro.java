@@ -43,7 +43,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-        return "Onboard Sensor";
+        return "OnBoard Sensor";
     }
 
     @Override

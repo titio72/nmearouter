@@ -123,11 +123,10 @@ public class TrackAnalytics {
             end = l;
         }
 
-        protected static String formatDuration(long l) {
-            long s = l / 1000;
+        protected static String formatDuration(long milliSeconds) {
+            long s = milliSeconds / 1000;
             return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
         }
-
 
         private static String formatDate(long l) {
             return DF_ISO.format(new Date(l));

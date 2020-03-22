@@ -19,8 +19,8 @@ public class DBHelper implements AutoCloseable {
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
 
-    private String jdbc = JDBC_DRIVER;  
-    private String dburl = DB_URL;
+    private String jdbc = JDBC_DRIVER;
+    private String dbUrl = DB_URL;
     private String user = DEFAULT_USER;
     private String password;
 
@@ -38,13 +38,13 @@ public class DBHelper implements AutoCloseable {
         try {
             File f = new File(Constants.DB);
             try (FileInputStream propInput = new FileInputStream(f)) {
-				Properties p = new Properties();
-				p.load(propInput);
-				jdbc = p.getProperty("jdbc.driver.class");
-				dburl = p.getProperty("jdbc.url");
-				user = p.getProperty("user");
-				password = p.getProperty("pwd");
-			}
+                Properties p = new Properties();
+                p.load(propInput);
+                jdbc = p.getProperty("jdbc.driver.class");
+                dbUrl = p.getProperty("jdbc.url");
+                user = p.getProperty("user");
+                password = p.getProperty("pwd");
+            }
         } catch (Exception e) {
             ServerLog.getLogger().debug("Cannot read db configuration!");
         }
@@ -57,19 +57,20 @@ public class DBHelper implements AutoCloseable {
     @Override
     public void close() {
 		if (conn != null) {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				ServerLog.getLogger().error("Error closing connection!", e);
-			}
-		}
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                ServerLog.getLogger().error("Error closing connection!", e);
+            }
+            conn = null;
+        }
     }
     
     private boolean reconnect() {
     	try {
             close();
-            ServerLog.getLogger().debug("Establishing connection to DB {" + dburl + "}!");
-            conn = DriverManager.getConnection(dburl, user, password);
+            ServerLog.getLogger().debug("Establishing connection to DB {" + dbUrl + "}!");
+            conn = DriverManager.getConnection(dbUrl, user, password);
             conn.setAutoCommit(autocommit);
             return true;
         } catch (Exception e) {
@@ -80,32 +81,32 @@ public class DBHelper implements AutoCloseable {
     }
 
     public synchronized String backup() throws IOException, InterruptedException {
-    	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         ServerLog.getLogger().info("DB Backup");
         String file = df.format(new Date()) + ".sql";
         ProcessBuilder b = new ProcessBuilder("./dbBck.sh", user, password, file);
-        Process proc = b.start();
-        int retCode = proc.waitFor();
-        if (retCode==0) {
+        Process process = b.start();
+        int retCode = process.waitFor();
+        if (retCode == 0) {
             return file;
         } else {
-        	return null;
+            return null;
         }
     }
 
-    public boolean write(EventWriter writer, Event e) {
-    	return write(writer, e, 0);
+    public boolean write(DBEventWriter writer, Event e) {
+        return write(writer, e, 0);
     }
 
-    private boolean write(EventWriter writer, Event e, int count) {
-    	boolean retry = false;
-    	if (writer!=null && e!=null) {
+    private boolean write(DBEventWriter writer, Event e, int count) {
+        boolean retry = false;
+        if (writer != null && e != null) {
             try {
                 writer.write(e, getConnection());
                 return true;
             } catch (Exception ex) {
-            	writer.reset();
-            	retry = true;
+                writer.reset();
+                retry = true;
                 ServerLog.getLogger().error("Cannot write {" + e + "} (" + count + ")!", ex);
             }
         }

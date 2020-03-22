@@ -1,6 +1,10 @@
 package com.aboni.nmea.router.track.impl;
 
-import com.aboni.nmea.router.track.*;
+import com.aboni.nmea.router.track.JSONTrackAnalytics;
+import com.aboni.nmea.router.track.TrackManagementException;
+import com.aboni.nmea.router.track.TrackReader;
+import com.aboni.utils.Query;
+import com.aboni.utils.QueryByDate;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,10 +30,10 @@ public class DBTrackAnalyticsByDateTest {
         }
 
         @Override
-        public void readTrack(@NotNull TrackQuery query, @NotNull TrackReaderListener target) throws TrackManagementException {
-            assertTrue(query instanceof TrackQueryByDate);
-            assertEquals(from, ((TrackQueryByDate) query).getFrom());
-            assertEquals(to, ((TrackQueryByDate) query).getTo());
+        public void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException {
+            assertTrue(query instanceof QueryByDate);
+            assertEquals(from, ((QueryByDate) query).getFrom());
+            assertEquals(to, ((QueryByDate) query).getTo());
         }
     }
 
@@ -46,8 +50,8 @@ public class DBTrackAnalyticsByDateTest {
         // TODO
         OffsetDateTime from = OffsetDateTime.parse("2020-01-12T00:00:00+01:00");
         OffsetDateTime to = OffsetDateTime.parse("2020-01-13T00:00:00+01:00");
-        TrackAnalyticsByDate t = new TrackAnalyticsByDate(new MyTrackReader(from.toInstant(), to.toInstant()));
-        JSONObject j = t.getAnalysis(from.toInstant(), to.toInstant());
+        JSONTrackAnalytics t = new JSONTrackAnalytics(new MyTrackReader(from.toInstant(), to.toInstant()));
+        JSONObject j = t.getAnalysis(new QueryByDate(from.toInstant(), to.toInstant()));
         System.out.println(j.toString(2));
     }
 }

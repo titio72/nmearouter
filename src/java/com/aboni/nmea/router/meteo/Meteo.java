@@ -6,6 +6,6 @@ import java.time.Instant;
 
 public interface Meteo {
 
-    JSONObject getMeteoSerie(Instant from, Instant to) throws MeteoManagementException;
+    JSONObject getMeteoSeries(Instant from, Instant to) throws MeteoManagementException;
 
 }

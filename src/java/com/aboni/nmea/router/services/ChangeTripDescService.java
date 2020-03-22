@@ -1,17 +1,19 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.track.TripManager;
+import com.aboni.nmea.router.track.TripManagerException;
+import com.aboni.nmea.router.track.TripManagerX;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class ChangeTripDescService extends JSONWebService {
 
-    private final TripManager manager;
+    private final TripManagerX manager;
 
     @Inject
-    public ChangeTripDescService(TripManager manager) {
+    public ChangeTripDescService(@NotNull TripManagerX manager) {
         super();
         this.manager = manager;
         setLoader(this::getResult);
@@ -22,10 +24,10 @@ public class ChangeTripDescService extends JSONWebService {
         if (trip != -1) {
             String desc = config.getParameter("desc", "Unknown");
             try (DBHelper db = new DBHelper(true)) {
-                if (manager.setDescription(trip, desc))
-                    return getOk("Trip description updated!");
-                else
-                    return getError("No trip matching the id was found!");
+                manager.setTripDescription(trip, desc);
+                return getOk("Trip description updated!");
+            } catch (TripManagerException e) {
+                return getOk(e.getMessage());
             } catch (Exception e) {
                 throw new JSONGenerationException(e);
             }

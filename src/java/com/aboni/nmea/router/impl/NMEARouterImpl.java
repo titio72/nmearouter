@@ -120,9 +120,9 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 
 	@Override
-	public void addProcessor(NMEAPostProcess proc) {
-		processors.addProcessor(proc);
-	}
+    public void addProcessor(NMEAPostProcess processor) {
+        processors.addProcessor(processor);
+    }
 
 	@Override
 	public void addAgent(NMEAAgent agent) {

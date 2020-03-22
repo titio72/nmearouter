@@ -1,14 +1,14 @@
-package com.aboni.nmea.router.track;
+package com.aboni.utils;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-public class TrackQueryByDate implements TrackQuery {
+public class QueryByDate implements Query {
 
     private final Instant from;
     private final Instant to;
 
-    public TrackQueryByDate(@NotNull Instant from, @NotNull Instant to) {
+    public QueryByDate(@NotNull Instant from, @NotNull Instant to) {
         this.from = from;
         this.to = to;
     }

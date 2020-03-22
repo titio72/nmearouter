@@ -113,17 +113,11 @@ public class ServerLog implements LogAdmin {
         debug = false;
     }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String)
-	 */
 	@Override
 	public void error(String msg) {
 		lg.log(Level.SEVERE, msg);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
-	 */
 	@Override
 	public void error(final String msg, final Throwable t) {
 		if (debug)
@@ -132,41 +126,26 @@ public class ServerLog implements LogAdmin {
 			lg.severe( () -> String.format("{%s} error {%s}", msg, t.getMessage()) );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
-	 */
 	@Override
 	public void errorForceStacktrace(final String msg, final Throwable t) {
 		lg.log(Level.SEVERE, msg, t);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Warning(java.lang.String)
-	 */
 	@Override
 	public void warning(String msg) {
 		lg.log(Level.WARNING, msg);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Info(java.lang.String)
-	 */
 	@Override
 	public void info(String msg) {
 		lg.log(Level.INFO, msg);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Debug(java.lang.String)
-	 */
 	@Override
 	public void debug(String msg) {
 		lg.log(Level.FINER, msg);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Debug(java.lang.String)
-	 */
 	@Override
 	public void console(String msg) {
 		lgConsole.log(Level.INFO, msg);

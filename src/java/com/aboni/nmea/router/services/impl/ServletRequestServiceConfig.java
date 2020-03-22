@@ -14,13 +14,13 @@ public class ServletRequestServiceConfig implements ServiceConfig {
     }
 
     @Override
-    public String getParameter(String pnamne) {
-        return r.getParameter(pnamne);
+    public String getParameter(String name) {
+        return r.getParameter(name);
     }
 
     @Override
-    public String getParameter(String pnamne, String d) {
-        String res = r.getParameter(pnamne);
+    public String getParameter(String name, String d) {
+        String res = r.getParameter(name);
         return (res == null) ? d : res;
     }
 
