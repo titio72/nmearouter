@@ -1,5 +1,7 @@
 package com.aboni.utils;
 
+import com.aboni.nmea.router.Constants;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -11,14 +13,16 @@ import java.util.logging.*;
 
 public class ServerLog implements LogAdmin {
 
-	public static PrintStream getConsoleOut() {
-		return System.out;
-	}
+    private static final PrintStream CONSOLE = System.out;
 
-	private static class MyFormatter extends Formatter {
+    public static PrintStream getConsoleOut() {
+        return CONSOLE;
+    }
+
+    private static class MyFormatter extends Formatter {
 
         final DateFormat df;
-        
+
         MyFormatter() {
             df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
         }

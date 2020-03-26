@@ -7,37 +7,35 @@ import java.io.PrintStream;
 
 public class TestPinDetector {
 
+    static boolean s = false;
+    static final EngineDetector e = EngineDetector.getInstance();
+
     public static void main(String[] args) {
         new Tester(500).start(new Tester.TestingProc() {
 
-            EngineDetector e = EngineDetector.getInstance();
-            boolean s = false;
-
-
             @Override
             public boolean doIt(PrintStream out) {
-                try {
-                    e.refresh();
-                    if (s != e.isEngineOn()) {
-                        s = e.isEngineOn();
-                        out.println(s);
-                    }
-                    return true;
-                } catch (Exception ex) {
-                    ex.printStackTrace(out);
-                    return false;
-                }
+                return traceEngineChanges(out);
             }
 
             @Override
             public boolean init(PrintStream out) {
                 return true;
             }
-
-            @Override
-            public void shutdown(PrintStream out) {
-                // nothing to bring down
-            }
         });
+    }
+
+    private static boolean traceEngineChanges(PrintStream out) {
+        try {
+            e.refresh();
+            if (s != e.isEngineOn()) {
+                s = e.isEngineOn();
+                out.println(s);
+            }
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace(out);
+            return false;
+        }
     }
 }

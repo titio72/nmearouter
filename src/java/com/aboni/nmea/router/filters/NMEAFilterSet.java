@@ -10,7 +10,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
     private final List<NMEASentenceFilter> filters;
     private final Set<NMEASentenceFilter> filtersSet;
 
-    private TYPE whiteOrBlackList;
+    private final TYPE whiteOrBlackList;
 
     public enum TYPE {
         BLACKLIST,

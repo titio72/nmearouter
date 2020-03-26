@@ -24,9 +24,7 @@ public class TrackToDB {
 	    String latE;
 	    double lon;
 	    String lonE;
-	    long t;
 	    Calendar timestamp;
-	    boolean anchor = false;
 	}
 
     private final SimpleDateFormat dfParser;
@@ -58,9 +56,10 @@ public class TrackToDB {
 									db.getConnection().commit();
 								}
 							} catch (Exception e) {
-								Logger.getGlobal().log(Level.SEVERE, "Error", e);
-								System.in.read();
-							}
+                                Logger.getGlobal().log(Level.SEVERE, "Error", e);
+                                //noinspection ResultOfMethodCallIgnored
+                                System.in.read();
+                            }
 						}
 						db.getConnection().commit();
 					}
@@ -84,12 +83,10 @@ public class TrackToDB {
 		t.setTime(ts);
 
 		PPP p = new PPP();
-		p.anchor = false;
 		p.lat = Double.parseDouble(lat);
 		p.latE = latNS;
 		p.lon = Double.parseDouble(lon);
 		p.lonE = lonEW;
-		p.t = t.getTimeInMillis();
 		p.timestamp = t;
 		
 		return p;

@@ -10,13 +10,13 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 
-    private final NMEAMWDConverter conv;
+    private final NMEAMWDConverter converter;
     private long threshold;
 
     @Inject
     public NMEAMWDSentenceCalculator(@NotNull NMEACache cache) {
         super(cache);
-        conv = new NMEAMWDConverter(TalkerId.II);
+        converter = new NMEAMWDConverter(TalkerId.II);
         setSourceTarget(true, true);
     }
 
@@ -32,17 +32,17 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
     @Override
     protected void doWithSentence(Sentence s, String source) {
         if (s instanceof HDGSentence) {
-            conv.setHeading((HDGSentence) s, getCache().getNow());
+            converter.setHeading((HDGSentence) s, getCache().getNow());
         } else if (s instanceof MWVSentence && ((MWVSentence) s).isTrue()) {
-            conv.setWind((MWVSentence) s, getCache().getNow());
+            converter.setWind((MWVSentence) s, getCache().getNow());
         } else {
             return;
-		}
-		MWDSentence outSentence = (threshold==-1)?conv.getMWDSentence():conv.getMWDSentence(threshold);
-		if (outSentence!=null) {
-			notify(outSentence);
-		}
-	}
+        }
+        MWDSentence outSentence = (threshold == -1) ? converter.getMWDSentence() : converter.getMWDSentence(threshold);
+        if (outSentence != null) {
+            notify(outSentence);
+        }
+    }
 
 	@Override
 	public String getDescription() {

@@ -152,8 +152,8 @@
 <xs:complexType name="MWDAgent">
 	<xs:complexContent>
 	    <xs:extension base="AgentBase">
-	    	<xs:attribute name="type" type="xs:string" fixed="MWDSynthetizer"/>
-	    </xs:extension>
+            <xs:attribute name="type" type="xs:string" fixed="MWDSynthesizer"/>
+        </xs:extension>
 	</xs:complexContent>
 </xs:complexType>
 

@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
-import com.aboni.utils.Constants;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 
 import java.io.File;

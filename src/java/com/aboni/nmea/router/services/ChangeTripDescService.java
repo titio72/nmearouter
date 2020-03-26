@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.track.TripManagerException;
-import com.aboni.nmea.router.track.TripManagerX;
+import com.aboni.nmea.router.data.track.TripManagerException;
+import com.aboni.nmea.router.data.track.TripManagerX;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 

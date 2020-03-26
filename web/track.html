@@ -78,7 +78,7 @@
   var map = null;
   var markerPos = null;
 
-  var days = httpGetCruisingDays();
+  var days = httpGetTrips();
   expandTripDays();
 
   app.controller("infoController", function ($scope) {
@@ -412,7 +412,7 @@
   }
 
   function refreshTrips() {
-    days = httpGetCruisingDays();
+    days = httpGetTrips();
     expandTripDays();
     var controllerElement = document.getElementById('TripsPanel');
     var controllerScope = angular.element(controllerElement).scope();

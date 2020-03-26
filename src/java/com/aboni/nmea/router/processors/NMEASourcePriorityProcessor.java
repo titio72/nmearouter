@@ -4,6 +4,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 
@@ -20,12 +21,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     private final NMEACache cache;
 
-    long timeStamp = -1;
-
-    private long getNow() {
-        return timeStamp == -1 ? cache.getNow() : timeStamp;
-    }
-
+    @Inject
     public NMEASourcePriorityProcessor(@NotNull NMEACache cache) {
         this.cache = cache;
         priorities = new HashMap<>();
@@ -53,7 +49,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     private void recordInput(@NotNull Sentence sentence, @NotNull String source) {
         if (sentences.contains(sentence.getSentenceId())) {
-            lastSourceTimestamp.put(source, getNow());
+            lastSourceTimestamp.put(source, cache.getNow());
 
             if (currentSource == null) {
                 currentSource = source;
@@ -65,7 +61,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
                     currentSource = source;
                     currentPriority = priority;
                 } else {
-                    long now = getNow();
+                    long now = cache.getNow();
                     long currentLastSourceTimestamp = lastSourceTimestamp.getOrDefault(currentSource, 0L);
                     if ((now - currentLastSourceTimestamp) > THRESHOLD) {
                         // switch to a lower priority source because the higher priority has not been available for a while

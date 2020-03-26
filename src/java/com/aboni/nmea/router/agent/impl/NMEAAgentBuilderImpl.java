@@ -12,8 +12,10 @@ import com.aboni.nmea.router.filters.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
+import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 import javax.inject.Inject;
@@ -91,8 +93,8 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             case "Meteo":
                 agent = buildMeteoTarget((MeteoAgent) a, q);
                 break;
-            case "MWDSynthetizer":
-                agent = buildMWDSyntesizer(q);
+            case "MWDSynthesizer":
+                agent = buildMWDSynthesizer(q);
                 break;
             case "GPXPlayer":
                 agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent) a, q);
@@ -185,7 +187,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         }
     }
 
-    private NMEAAgent buildMWDSyntesizer(QOS q) {
+    private NMEAAgent buildMWDSynthesizer(QOS q) {
         NMEAAgent mwd = ThingsFactory.getInstance(NMEAMWDSentenceCalculator.class);
         mwd.setup("MWD", q);
         return mwd;
@@ -200,8 +202,16 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 	private NMEAAgent buildSocketJSON(JSONAgent s, QOS q) {
         String name = s.getName();
         int port = s.getPort();
-        NMEASocketServerJSON c = ThingsFactory.getInstance(NMEASocketServerJSON.class);
-        c.setup(name, q, new NetConf(null, port, false, true));
+        NMEASocketServer c = ThingsFactory.getInstance(NMEASocketServer.class);
+        c.setup(name, q, new NetConf(null, port, false, true),
+                new NMEASocketServer.SentenceSerializer() {
+                    final NMEA2JSONb js = new NMEA2JSONb();
+
+                    @Override
+                    public String getOutSentence(Sentence s) {
+                        return js.convert(s).toString();
+                    }
+                });
         return c;
     }
 
@@ -266,7 +276,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
                 break;
         }
         NMEASocketServer c = ThingsFactory.getInstance(NMEASocketServer.class);
-        c.setup(name, q, new NetConf(null, port, r, t));
+        c.setup(name, q, new NetConf(null, port, r, t), Sentence::toSentence);
         return c;
     }
 

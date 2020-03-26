@@ -57,12 +57,15 @@ public class SensorMPU6050 extends I2CSensor {
     }
     
     @Override
-    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-        device = new I2CInterface(bus, MPU6050_I2CADDR);
-        device.write(BypassMode.BYPASS_MODE_ADDR, BypassMode.BYPASS_MODE_ON);
-        device.write(PowerManagement.POWER_MGMT_ADDR_2, PowerManagement.POWER_MGMT_OFF);
-        device.write(PowerManagement.POWER_MGMT_ADDR_1, PowerManagement.POWER_MGMT_OFF);
-
+    protected void initSensor(int bus) throws SensorException {
+        try {
+            device = new I2CInterface(bus, MPU6050_I2CADDR);
+            device.write(BypassMode.BYPASS_MODE_ADDR, BypassMode.BYPASS_MODE_ON);
+            device.write(PowerManagement.POWER_MGMT_ADDR_2, PowerManagement.POWER_MGMT_OFF);
+            device.write(PowerManagement.POWER_MGMT_ADDR_1, PowerManagement.POWER_MGMT_OFF);
+        } catch (IOException | UnsupportedBusNumberException e) {
+            throw new SensorException("Error initializing MPU60050", e);
+        }
     }
    
     private void readA() throws IOException {
@@ -112,7 +115,7 @@ public class SensorMPU6050 extends I2CSensor {
             readA();
             readG();
         } catch (IOException e) {
-            throw new SensorException("Error readinng gyro", e);
+            throw new SensorException("Error reading gyro", e);
         }
     }
     

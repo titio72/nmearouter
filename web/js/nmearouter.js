@@ -209,19 +209,6 @@ function dropTrip(id, cback) {
   xmlHttp.send(null);
 }
 
-function tripIt(d, cback) {
-  var xmlHttp = new XMLHttpRequest();
-  var ss = d.split("|");
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/createtrip?trip=" + ss[1] + "&date=" + ss[2]);
-  xmlHttp.onreadystatechange = function() {
-    if (xmlHttp.readyState==4 && xmlHttp.status==200) {
-      cback();
-    }
-  };
-  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-  xmlHttp.send(null);
-}
-
 function changeName(trip, name, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + 
@@ -235,9 +222,9 @@ function changeName(trip, name, cback) {
   xmlHttp.send(null);
 }
 
-function httpGetCruisingDays() {
+function httpGetTrips() {
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trips?year=2020", false);
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trips?year=0", false);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
   var json = JSON.parse(xmlHttp.responseText);

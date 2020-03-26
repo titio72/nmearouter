@@ -16,20 +16,18 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for MWDAgent complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="MWDAgent">
  *   &lt;complexContent>
  *     &lt;extension base="{}AgentBase">
- *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="MWDSynthetizer" />
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="MWDSynthesizer" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "MWDAgent")
@@ -50,7 +48,7 @@ public class MWDAgent
      */
     public String getType() {
         if (type == null) {
-            return "MWDSynthetizer";
+            return "MWDSynthesizer";
         } else {
             return type;
         }

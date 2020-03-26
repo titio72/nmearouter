@@ -53,11 +53,6 @@ public class TestLed implements Tester.TestingProc {
         return true;
     }
 
-    @Override
-    public void shutdown(PrintStream out) {
-		// nothing to shutdown
-	}
-
     public static void main(String[] args) {
 	    TestLed l = new TestLed();
 		new Tester(0).start(l);

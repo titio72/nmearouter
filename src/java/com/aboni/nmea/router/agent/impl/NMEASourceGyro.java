@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.geo.DeviationManagerImpl;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
@@ -25,7 +26,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private static final boolean USE_CMPS11 = true;
 
-    private ASensorCompass compassSensor;
+    private SensorCompass compassSensor;
 
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
@@ -60,31 +61,33 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     }
 
     private void doLF() {
-    	synchronized (this) {
-	        if (isStarted()) {
-	        	readSensors();
-	            sendHDx();
-	            sendXDR();
-	        }
-	    }
+        synchronized (this) {
+            if (isStarted()) {
+                readSensors();
+                sendHDx();
+                sendXDR();
+            }
+        }
     }
-    
-	private ASensorCompass createCompass() {
-		try {
-			ASensorCompass r = USE_CMPS11? new SensorCMPS11() : new SensorCompass();
-			r.init();
-			return r;
-		} catch (Exception e) {
-			getLogger().error("Error creating compass sensor ", e);
-			return null;
-		}
+
+    private SensorCompass createCompass() {
+        try {
+            SensorCompass r = new SensorCompass(
+                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(),
+                    new DeviationManagerImpl());
+            r.init();
+            return r;
+        } catch (Exception e) {
+            getLogger().error("Error creating compass sensor ", e);
+            return null;
+        }
 	}
 
     private void readSensors() {
         try {
             if (compassSensor!=null) {
                 compassSensor.loadConfiguration();
-                compassSensor = (ASensorCompass)readSensor(compassSensor);
+                compassSensor = (SensorCompass) readSensor(compassSensor);
             }
         } catch (Exception e) {
             getLogger().error("Error reading sensor data", e);

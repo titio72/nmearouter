@@ -2,9 +2,9 @@ package com.aboni.toolkit;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.TrackManager;
-import com.aboni.nmea.router.track.TrackPoint;
-import com.aboni.nmea.router.track.impl.TrackManagerImpl;
+import com.aboni.nmea.router.data.track.TrackManager;
+import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
@@ -16,17 +16,16 @@ import java.util.Date;
 
 public class UpdateAnchorDB {
 
+    public static final long AGE_THRESHOLD = 6L * 60L * 60L * 1000L; //6h
+
     private static class TrackItem {
         int id;
         GeoPositionT position;
         double speed;
-        double maxSpeed;
-        double distance;
-        int deltaTime;
         boolean anchor;
     }
 
-    private TrackManager trackManager = new TrackManagerImpl(true);
+    private final TrackManager trackManager = new TrackManagerImpl(true);
 
     private static TrackItem getItem(ResultSet rs) throws SQLException {
         // lat, lon, TS, anchor, id, speed, maxSpeed, dist, dTime
@@ -36,9 +35,6 @@ public class UpdateAnchorDB {
         itm.position = new GeoPositionT(rs.getTimestamp(3).getTime(), rs.getDouble(1), rs.getDouble(2));
         itm.anchor = (rs.getInt(4) == 1);
         itm.speed = rs.getDouble(6);
-        itm.maxSpeed = rs.getDouble(7);
-        itm.distance = rs.getDouble(8);
-        itm.deltaTime = rs.getInt(9);
         return itm;
     }
 
@@ -66,7 +62,7 @@ public class UpdateAnchorDB {
                             while (rs.next()) {
                                 i++;
                                 TrackItem item = getItem(rs);
-                                TrackPoint tp = trackManager.processPosition(item.position, item.speed, -1);
+                                TrackPoint tp = trackManager.processPosition(item.position, item.speed);
 
                                 processPoint(item, tp, stUpd);
 
@@ -79,7 +75,7 @@ public class UpdateAnchorDB {
                             final int count = i;
                             ServerLog.getConsoleOut().println("Processed %d points " + count);
                             ServerLog.getConsoleOut().println("wrong ids   " + idDiscrepancies);
-                            ServerLog.getConsoleOut().println("anchor xxxx " + anchorDiscrepancies);
+                            ServerLog.getConsoleOut().println("anchor      " + anchorDiscrepancies);
                         }
                     }
                 }
@@ -93,8 +89,8 @@ public class UpdateAnchorDB {
         return (last != null && last.position.getTimestamp() > item.position.getTimestamp());
     }
 
-    private boolean isMoreRecentThan(TrackItem item, long age) {
-        return (last != null && (item.position.getTimestamp() - last.position.getTimestamp()) < (age) /*6 hours*/);
+    private boolean isRecent(TrackItem item) {
+        return (last != null && (item.position.getTimestamp() - last.position.getTimestamp()) < AGE_THRESHOLD);
     }
 
     private void processPoint(TrackItem item, TrackPoint tp, PreparedStatement stUpd) throws SQLException {
@@ -105,7 +101,7 @@ public class UpdateAnchorDB {
                 ServerLog.getConsoleOut().println("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
                 ServerLog.getConsoleOut().println("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
                 idDiscrepancies++;
-            } else if (isMoreRecentThan(item, 6L * 60L * 60L * 1000L) /*6 hours*/) {
+            } else if (isRecent(item)) {
                 updateSameLeg(item, tp, stUpd);
             } else {
                 startNewLeg(item, stUpd);

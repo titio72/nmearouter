@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
@@ -55,7 +56,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private boolean useMWD;
 
     @Inject
-    public NMEAMeteoTarget(@NotNull NMEACache cache, @NotNull @Named("MeteoStatsWriter") StatsWriter w) {
+    public NMEAMeteoTarget(@NotNull NMEACache cache, @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
         super(cache);
         setSourceTarget(false, true);
         writer = w;
@@ -133,8 +134,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 		        }
 	    	}
     	} catch (Exception e) {
-    		getLogger().warning("Error processing meteo stats {" + s + "} erro {" + e + "}");
-    	}
+            getLogger().warning("Error processing meteo stats {" + s + "} error {" + e + "}");
+        }
     }
 
 	private void collect(int id, double d) {

@@ -18,36 +18,40 @@ import java.util.List;
 
 public abstract class NMEAAgentImpl implements NMEAAgent {
 
-	private class InternalSource implements NMEASource {
+    private static class InternalSource implements NMEASource {
 
-		@Override
-		public NMEASentenceFilterSet getFilter() {
-            return filterSetOutput;
+        NMEASentenceFilterSet filterSet;
+        NMEASentenceListener listener;
+
+        @Override
+        public NMEASentenceFilterSet getFilter() {
+            return filterSet;
         }
 
-		@Override
-		public void setFilter(NMEASentenceFilterSet s) {
-            filterSetOutput = s;
+        @Override
+        public void setFilter(NMEASentenceFilterSet s) {
+            filterSet = s;
         }
 
 		@Override
 		public void setSentenceListener(NMEASentenceListener listener) {
-            NMEAAgentImpl.this.listener = listener;
+            this.listener = listener;
 		}
-
 	}
-	
-	private class InternalTarget implements NMEATarget {
 
-		@Override
-		public NMEASentenceFilterSet getFilter() {
-            return filterSetInput;
+    private class InternalTarget implements NMEATarget {
+
+        NMEASentenceFilterSet filterSet;
+
+        @Override
+        public NMEASentenceFilterSet getFilter() {
+            return filterSet;
         }
 
-		@Override
-		public void setFilter(NMEASentenceFilterSet s) {
-            filterSetInput = s;
-		}
+        @Override
+        public void setFilter(NMEASentenceFilterSet s) {
+            filterSet = s;
+        }
 
 		@Override
 		public void pushSentence(Sentence e, String src) {
@@ -62,36 +66,33 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         }
     }
 
-    private String name;
+    private static class AgentAttributes {
+        private String name;
+        private boolean active;
+        private boolean builtin;
+        private boolean target;
+        private boolean source;
+    }
+
     private NMEAAgentStatusListener sl;
-    private NMEASentenceFilterSet filterSetInput;
-    private NMEASentenceFilterSet filterSetOutput;
-    private boolean active;
-    private NMEASentenceListener listener;
-    private boolean builtin;
-    private boolean target;
-    private boolean source;
     private final InternalTarget targetIf;
     private final InternalSource sourceIf;
     private final NMEAProcessorSet processorSet;
     private final NMEACache cache;
+    private final AgentAttributes attributes;
 
     @Inject
     public NMEAAgentImpl(@NotNull NMEACache cache) {
         this.cache = cache;
         targetIf = new InternalTarget();
         sourceIf = new InternalSource();
-        filterSetInput = null;
-        filterSetOutput = null;
-        active = false;
+        attributes = new AgentAttributes();
         processorSet = new NMEAProcessorSet();
-        target = true;
-        source = true;
     }
 
     @Override
     public void setup(String name, QOS qos) {
-        this.name = name;
+        attributes.name = name;
         handleQos(cache, name, qos);
         onSetup(name, qos);
     }
@@ -136,7 +137,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                         break;
                     case "builtin":
                         getLogger().info("QoS {BuiltIn} Agent {" + name + "}");
-                        builtin = true;
+                        attributes.builtin = true;
                         break;
                     default:
                         break;
@@ -146,9 +147,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
     }
     
 	protected void setSourceTarget(boolean isSource, boolean isTarget) {
-	    target = isTarget;
-	    source = isSource;
-	}
+        attributes.target = isTarget;
+        attributes.source = isSource;
+    }
 	
 	protected class PrivateLog implements Log {
 
@@ -205,34 +206,34 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 	@Override
 	public boolean isBuiltIn() {
-	    return builtin;
-	}
+        return attributes.builtin;
+    }
 	
 	@Override
 	public String getName() {
-		return name;
-	}
+        return attributes.name;
+    }
 
 	@Override
 	public boolean isStarted() {
 		synchronized (this) {
-			return active;
-		}
+            return attributes.active;
+        }
 	}
 
 	@Override
 	public void start() {
 		synchronized (this) {
-			if (!active) {
-				getLogger().info("Activating agent {" + getName() + "}");
-				if (onActivate()) {
-					active = true;
-					notifyStatus();
-				} else {
-					getLogger().error("Cannot activate agent {" + getName() + "}");
-				}
-			}
-		}	
+            if (!attributes.active) {
+                getLogger().info("Activating agent {" + getName() + "}");
+                if (onActivate()) {
+                    attributes.active = true;
+                    notifyStatus();
+                } else {
+                    getLogger().error("Cannot activate agent {" + getName() + "}");
+                }
+            }
+        }
 	}
 	
 	private void notifyStatus() {
@@ -242,13 +243,13 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	@Override
 	public void stop() {
 		synchronized (this) {
-			if (active) {
-				getLogger().info("Deactivating {" + getName() + "}");
-				onDeactivate();
-				active = false;
-				notifyStatus();
-			}
-		}
+            if (attributes.active) {
+                getLogger().info("Deactivating {" + getName() + "}");
+                onDeactivate();
+                attributes.active = false;
+                notifyStatus();
+            }
+        }
 	}
 
     @Override
@@ -283,13 +284,13 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
      */
 	protected final void notify(Sentence sentence) {
 
-		if (isStarted() && checkSourceFilter(sentence) && listener!=null) {
+        if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
             List<Sentence> toSend = processorSet.getSentences(sentence, getName());
             for (Sentence s : toSend)
-                listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
+                sourceIf.listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
         }
-	}
+    }
 	/**
 	 * Used by "sources" to push sentences into the stream
 	 * @param m The message to be notified to agents
@@ -298,7 +299,7 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
 		if (isStarted()) {
             getLogger().debug("Notify Sentence {" + m + "}");
-            listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
+            sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
         }
     }
 
@@ -320,12 +321,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 
     @Override
     public final NMEASource getSource() {
-        return (source?sourceIf:null);
+        return (attributes.source ? sourceIf : null);
     }
     
     @Override
     public final NMEATarget getTarget() {
-        return (target?targetIf:null);
+        return (attributes.target ? targetIf : null);
     }
 
     protected final boolean isSource() {

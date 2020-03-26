@@ -36,25 +36,16 @@ public class NMEACacheImpl implements NMEACache {
     	}
     }
 
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#getLastHeading()
-	 */
     @Override
 	public DataEvent<HeadingSentence> getLastHeading() {
         return lastHeading;
     }
 
-    /* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#getLastPosition()
-	 */
     @Override
 	public DataEvent<PositionSentence> getLastPosition() {
         return lastPosition;
     }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.nmea.router.NMEACache#isHeadingOlderThan(long, long)
-     */
     @Override
     public boolean isHeadingOlderThan(long time, long threshold) {
         return (time - lastHeading.getTimestamp()) > threshold;

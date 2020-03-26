@@ -1,6 +1,6 @@
 package com.aboni.utils.db;
 
-import com.aboni.utils.Constants;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 
 import java.io.File;
@@ -94,16 +94,15 @@ public class DBHelper implements AutoCloseable {
         }
     }
 
-    public boolean write(DBEventWriter writer, Event e) {
-        return write(writer, e, 0);
+    public void write(DBEventWriter writer, Event e) {
+        write(writer, e, 0);
     }
 
-    private boolean write(DBEventWriter writer, Event e, int count) {
+    private void write(DBEventWriter writer, Event e, int count) {
         boolean retry = false;
         if (writer != null && e != null) {
             try {
                 writer.write(e, getConnection());
-                return true;
             } catch (Exception ex) {
                 writer.reset();
                 retry = true;
@@ -116,6 +115,5 @@ public class DBHelper implements AutoCloseable {
 				write(writer, e, count);
 	    	}
     	}
-    	return false;
     }
 }

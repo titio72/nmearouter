@@ -1,7 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.misc.Utils;
-import com.aboni.utils.Constants;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -65,11 +65,11 @@ public class NMEAMagnetic2TrueConverter {
 	}
 	
 	public HDTSentence getTrueSentence(TalkerId tid, double magBearing) {
-		double trueheading = getTrue(magBearing, getPosition());
-		HDTSentence s = (HDTSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
-		s.setHeading(trueheading);
-		return s;
-	}
+        double trueHeading = getTrue(magBearing, getPosition());
+        HDTSentence s = (HDTSentence) SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
+        s.setHeading(trueHeading);
+        return s;
+    }
 	
 	public HDGSentence getSentence(TalkerId tid, double bearing, double deviation) {
 		HDGSentence s = (HDGSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDG);

@@ -5,8 +5,8 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.track.*;
-import com.aboni.nmea.router.track.impl.FileTrackWriter;
+import com.aboni.nmea.router.data.track.*;
+import com.aboni.nmea.router.data.track.impl.FileTrackWriter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ServerLog;
@@ -23,8 +23,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private final TrackManager tracker;
     private final TripManagerX tripManager;
-    private Integer tripId;
-    private TrackWriter backupWriter;
+    private final TrackWriter backupWriter;
 
 
     @Inject
@@ -33,18 +32,12 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         setSourceTarget(true, true);
         this.tracker = trackManager;
         this.tripManager = tripManager;
-        this.tripId = null;
         this.backupWriter = new FileTrackWriter("track.csv");
     }
 
     @Override
     protected boolean onActivate() {
         return true;
-    }
-    
-    @Override
-    protected void onDeactivate() {
-        // nothing to do
     }
 
     /**
@@ -85,7 +78,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private void processPosition(GeoPositionT posT, double sog) {
         long t0 = getCache().getNow();
 
-        TrackPoint point = tracker.processPosition(posT, sog, tripId);
+        TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
         if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);

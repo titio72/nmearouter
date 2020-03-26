@@ -60,7 +60,7 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
 				return new Pair<>(Boolean.FALSE, new Sentence[]{});
 			}
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
         }
         return new Pair<>(Boolean.TRUE, null);
     }

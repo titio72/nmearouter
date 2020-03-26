@@ -13,7 +13,6 @@ public class Tester {
     public interface TestingProc {
         boolean doIt(PrintStream out);
         boolean init(PrintStream out);
-        void shutdown(PrintStream out);
     }
 
     private final AtomicBoolean goon;
@@ -43,7 +42,6 @@ public class Tester {
                 } catch (Exception e) {
                     Logger.getGlobal().log(Level.SEVERE, "Error", e);
                 }
-                runnable.shutdown(getOut());
             });
             t.setDaemon(true);
             t.start();

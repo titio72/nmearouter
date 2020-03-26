@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.meteo.Meteo;
-import com.aboni.nmea.router.meteo.MeteoManagementException;
+import com.aboni.nmea.router.data.meteo.Meteo;
+import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 

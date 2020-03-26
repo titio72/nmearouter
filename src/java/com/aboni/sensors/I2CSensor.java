@@ -2,29 +2,15 @@ package com.aboni.sensors;
 
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
-
-import java.io.IOException;
 
 public abstract class I2CSensor implements Sensor {
 
     private String getMessage(String message) {
-        return String.format("Sensor {%s} instance {%d} %s", getSensorName(), instance, message);
+        return String.format("Sensor: name {%s} instance {%d} %s", getSensorName(), instance, message);
     }
 
-    protected void debug(String msg) {
-        ServerLog.getLogger().debug(getMessage(msg));
-    }
-    
     protected void log(String msg) {
         ServerLog.getLogger().info(getMessage(msg));
-    }
-    
-    protected void warning(String msg, Throwable t) {
-        if (t==null) 
-            ServerLog.getLogger().warning(getMessage(msg));
-        else 
-            ServerLog.getLogger().error(getMessage(msg),  t);
     }
     
     protected void error(String msg, Throwable t) {
@@ -59,18 +45,18 @@ public abstract class I2CSensor implements Sensor {
     }
 
     @Override
-	public final void init() throws IOException, UnsupportedBusNumberException {
+    public final void init() throws SensorException {
         init(getBus());
     }
 
-    public final void init(int bus) throws IOException, UnsupportedBusNumberException {
+    public final void init(int bus) throws SensorException {
         log("Initializing bus {" + bus + "}");
         initSensor(bus);
         log("Initialized!");
         initialized = true;
     }
 
-    protected abstract void initSensor(int bus) throws IOException, UnsupportedBusNumberException;
+    protected abstract void initSensor(int bus) throws SensorException;
 
     protected final boolean isInitialized() {
         return initialized;

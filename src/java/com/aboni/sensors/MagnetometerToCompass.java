@@ -55,10 +55,11 @@ public class MagnetometerToCompass {
 
        double pitch = Math.asin(accX);
 
+       double yAngle = Math.asin(accY / Math.cos(pitch));
        double magXComp = mag[0] * Math.cos(Math.asin(accX)) + mag[2] * Math.sin(pitch);
-       double magYComp = mag[0] * Math.sin(Math.asin(accY / Math.cos(pitch))) * Math.sin(Math.asin(accX)) +
-               mag[1] * Math.cos(Math.asin(accY / Math.cos(pitch))) -
-               mag[2] * Math.sin(Math.asin(accY / Math.cos(pitch))) * Math.cos(Math.asin(accX));
+       double magYComp = mag[0] * Math.sin(yAngle) * Math.sin(Math.asin(accX)) +
+               mag[1] * Math.cos(yAngle) -
+               mag[2] * Math.sin(yAngle) * Math.cos(Math.asin(accX));
 
        double heading = 180 * Math.atan2(magYComp, magXComp) / Math.PI;
 

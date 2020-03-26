@@ -23,6 +23,29 @@ public class NMEASocketClient extends NMEAAgentImpl {
     private boolean receive;
     private boolean transmit;
 
+    private class InternalSentenceReader implements SentenceListener {
+
+        @Override
+        public void readingPaused() {
+            // not needed
+        }
+
+        @Override
+        public void readingStarted() {
+            // not needed
+        }
+
+        @Override
+        public void readingStopped() {
+            // not needed
+        }
+
+        @Override
+        public void sentenceRead(SentenceEvent event) {
+            NMEASocketClient.this.notify(event.getSentence());
+        }
+    }
+
     @Inject
     public NMEASocketClient(@NotNull NMEACache cache) {
         super(cache);
@@ -65,21 +88,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     
                     if (receive) {
                         reader = new SentenceReader(iStream);
-                        reader.addSentenceListener(new SentenceListener() {
-        
-                            @Override
-                            public void readingPaused() { /* not needed */ }
-        
-                            @Override
-                            public void readingStarted() { /* not needed */ }
-        
-                            @Override
-                            public void readingStopped() { /* not needed */ }
-        
-                            @Override
-                            public void sentenceRead(SentenceEvent event) { onSentenceRead(event.getSentence()); }
-                            
-                        });
+                        reader.addSentenceListener(new InternalSentenceReader());
                         reader.start();
                     }
                     
@@ -109,10 +118,6 @@ public class NMEASocketClient extends NMEAAgentImpl {
 	    }
 	}
 
-	private void onSentenceRead(Sentence e) {
-		notify(e);
-	}
-	
     @Override
     public String toString() {
         return " {TCP " + server + ":" + port+ " " + (receive ? "R" : "")

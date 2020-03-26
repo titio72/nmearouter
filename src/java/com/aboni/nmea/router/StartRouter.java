@@ -8,7 +8,6 @@ import com.aboni.nmea.router.services.impl.WebInterfaceImpl;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
-import com.aboni.utils.Constants;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
@@ -87,9 +86,9 @@ public class StartRouter {
             handlers.setHandlers(new Handler[] { resourceHandler, new WebInterfaceImpl(svcFactory), context });
             server.setHandler(handlers);
 
-            ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
+            ServerContainer webSocketContainer = WebSocketServerContainerInitializer.configureContext(context);
             EventSocket.setNMEAStream(injector.getInstance(NMEAStream.class));
-            wscontainer.addEndpoint(EventSocket.class);
+            webSocketContainer.addEndpoint(EventSocket.class);
 
             server.start();
             server.join();

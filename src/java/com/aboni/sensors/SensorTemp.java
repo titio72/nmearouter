@@ -73,7 +73,7 @@ public class SensorTemp implements Sensor {
                 }
             }
         } else {
-            throw new SensorNotInitializedException("Temp sensor notr initialized!");
+            throw new SensorNotInitializedException("Temp sensor not initialized!");
         }
 	}
 

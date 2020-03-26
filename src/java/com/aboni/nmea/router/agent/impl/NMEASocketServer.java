@@ -28,6 +28,11 @@ public class NMEASocketServer extends NMEAAgentImpl {
     private final ByteBuffer writeBuffer;
     private final ByteBuffer readBuffer;
     private final Map<SocketChannel, ClientDescriptor> clients;
+    private SentenceSerializer serializer;
+
+    public interface SentenceSerializer {
+        String getOutSentence(Sentence s);
+    }
 
     private static class ClientDescriptor {
 
@@ -53,12 +58,13 @@ public class NMEASocketServer extends NMEAAgentImpl {
         clients = new HashMap<>();
     }
 
-    public void setup(String name, QOS qos, NetConf conf) {
+    public void setup(String name, QOS qos, NetConf conf, @NotNull SentenceSerializer serializer) {
         if (port == -1) {
             setup(name, qos);
             setSourceTarget(conf.isRx(), conf.isTx());
             port = conf.getPort();
             getLogger().info(String.format("Setting up TCP server: Port {%d} RX {%b %b}", port, isSource(), isTarget()));
+            this.serializer = serializer;
         } else {
             getLogger().info("Cannot setup TCP server - already set up");
         }
@@ -195,8 +201,8 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	@Override
 	protected void doWithSentence(Sentence s, String src) {
 		synchronized (clients) {
-		    if (isTarget() && !clients.isEmpty()) {
-                String output = getOutSentence(s);
+            if (serializer != null && isTarget() && !clients.isEmpty()) {
+                String output = serializer.getOutSentence(s);
                 writeBuffer.clear();
                 writeBuffer.put(output.getBytes());
                 writeBuffer.put("\r\n".getBytes());
@@ -239,12 +245,8 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		}
 		return false;
 	}
-	
-	protected String getOutSentence(Sentence s) {
-		return s.toSentence();
-	}
-	
-	private void createServerSocket() {
+
+    private void createServerSocket() {
 		try {
 		    selector = Selector.open();
 		    getLogger().info("Selector Open {" + selector.isOpen() + "}");

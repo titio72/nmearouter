@@ -44,7 +44,7 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 				return new Pair<>(Boolean.FALSE, new Sentence[] {});
 			}
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} erro {" + e.getLocalizedMessage() + "}");
+            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
         }
         return null;
     }
@@ -52,10 +52,10 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 	private boolean fillVariation(HDGSentence hdg, Position lastPosition) {
 		boolean variationAvailable = false;
 		try {
-			// if the variaion is already presnt skip the enrichment
-		    hdg.getVariation();
-		    variationAvailable = true;
-		} catch (DataNotAvailableException e) {
+            // if the variation is already present skip the enrichment
+            hdg.getVariation();
+            variationAvailable = true;
+        } catch (DataNotAvailableException e) {
 		    if (lastPosition!=null) {
 		        double d = m.getDeclination(lastPosition);
 		        d = Utils.normalizeDegrees180To180(d);
