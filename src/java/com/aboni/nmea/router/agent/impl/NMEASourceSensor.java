@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
 import com.aboni.sensors.*;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
@@ -30,11 +29,6 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         super(cache);
         setSourceTarget(true, false);
         xDrMap = new HashMap<>();
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     @Override

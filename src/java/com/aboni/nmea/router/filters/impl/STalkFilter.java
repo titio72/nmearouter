@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.sentences.NMEASentenceFilter;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
@@ -8,20 +8,20 @@ public class STalkFilter implements NMEASentenceFilter {
 
 	private final String command;
 	private final boolean negate;
-	
+
 	public STalkFilter(String command, boolean negate) {
 		this.command = command;
 		this.negate = negate;
 	}
-	
-	public String getCOmmand() {
+
+	public String getCommand() {
 		return command;
 	}
-	
+
 	public boolean isNegate() {
 		return negate;
 	}
-	
+
 	@Override
 	public boolean match(Sentence s, String src) {
 		if (s instanceof STALKSentence) {

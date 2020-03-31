@@ -1,14 +1,15 @@
-package com.aboni.geo;
+package com.aboni.geo.impl;
 
+import com.aboni.geo.DeviationManager;
 import com.aboni.misc.Utils;
 import com.aboni.utils.ServerLog;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 
 public class DeviationManagerImpl implements DeviationManager {
 
@@ -40,24 +41,26 @@ public class DeviationManagerImpl implements DeviationManager {
             }
             return false;
         }
-        
+
         @Override
         public int compareTo(@NotNull Pair o) {
             return Integer.compare(input, o.input);
         }
     }
-    
+
     private final List<Pair> deviationMap;
     private final List<Pair> reverseDeviationMap;
-    
+
+    @Inject
     public DeviationManagerImpl() {
         deviationMap = new ArrayList<>();
         reverseDeviationMap = new ArrayList<>();
     }
-    
+
     /**
      * Load an existing deviation map.
      * Each line is a sample in the form compass,magnetic
+     *
      * @param stream An InputStream for the deviation map.
      */
     @Override

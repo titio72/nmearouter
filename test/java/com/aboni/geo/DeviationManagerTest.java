@@ -1,5 +1,6 @@
 package com.aboni.geo;
 
+import com.aboni.geo.impl.DeviationManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 

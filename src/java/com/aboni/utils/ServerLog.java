@@ -26,7 +26,7 @@ public class ServerLog implements LogAdmin {
         MyFormatter() {
             df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
         }
-        
+
         @Override
         public String format(LogRecord record) {
             Date d = new Date(record.getMillis());
@@ -135,28 +135,42 @@ public class ServerLog implements LogAdmin {
 		lg.log(Level.SEVERE, msg, t);
 	}
 
-	@Override
-	public void warning(String msg) {
-		lg.log(Level.WARNING, msg);
-	}
+    @Override
+    public void warning(String msg) {
+        lg.log(Level.WARNING, msg);
+    }
 
-	@Override
-	public void info(String msg) {
-		lg.log(Level.INFO, msg);
-	}
+    @Override
+    public void info(String msg) {
+        lg.log(Level.INFO, msg);
+    }
 
-	@Override
-	public void debug(String msg) {
-		lg.log(Level.FINER, msg);
-	}
+    @Override
+    public void infoFill(String msg) {
+        lg.log(Level.INFO, () -> fill(msg));
+    }
 
-	@Override
-	public void console(String msg) {
-		lgConsole.log(Level.INFO, msg);
-	}
+    @Override
+    public void debug(String msg) {
+        lg.log(Level.FINER, msg);
+    }
 
-	@Override
-	public Logger getBaseLogger() {
-		return lg;
-	}
+    @Override
+    public void console(String msg) {
+        lgConsole.log(Level.INFO, msg);
+    }
+
+    @Override
+    public Logger getBaseLogger() {
+        return lg;
+    }
+
+    private static final String FILLER = "--------------------------------------------------------------------------------";
+    private static final String FILLER_LEFT = "---";
+
+    private static String fill(String msg) {
+        if (msg == null || msg.isEmpty()) return FILLER;
+        return (FILLER_LEFT + " " + msg + " " + FILLER).substring(0, 80);
+    }
+
 }

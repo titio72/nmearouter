@@ -4,7 +4,7 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.data.track.impl.FileTrackWriter;
 import com.aboni.nmea.sentences.NMEAUtils;
@@ -50,24 +50,25 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     /**
      * Set the sampling time in ms.
+     *
      * @param period Period in milliseconds when at anchor
      */
     public void setStaticPeriod(long period) {
         tracker.setStaticPeriod(period);
     }
-    
-	@Override
-	protected void doWithSentence(Sentence s, String src) {
-		if (isStarted()) {
-			try {
-	            if (s instanceof RMCSentence) {
-	                RMCSentence rmc = (RMCSentence)s;
-	                Position pos = NMEAUtils.getPosition((RMCSentence)s);
-	                if (pos!=null) {
-		                GeoPositionT posT = new GeoPositionT(
-		                		NMEAUtils.getTimestampOptimistic(rmc).getTimeInMillis(), pos);
+
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
+        if (isStarted()) {
+            try {
+                if (s instanceof RMCSentence) {
+                    RMCSentence rmc = (RMCSentence) s;
+                    Position pos = NMEAUtils.getPosition((RMCSentence) s);
+                    if (pos != null) {
+                        GeoPositionT posT = new GeoPositionT(
+                                NMEAUtils.getTimestampOptimistic(rmc).getTimeInMillis(), pos);
                         processPosition(posT, rmc.getSpeed());
-	                }
+                    }
 	            }
 			} catch (Exception e) {
 				ServerLog.getLogger().error("Error processing position {" + s + "}", e);
@@ -152,11 +153,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     @Override
     public String getType() {
         return "Tracker";
-    }
-
-    @Override
-    protected void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     @Override

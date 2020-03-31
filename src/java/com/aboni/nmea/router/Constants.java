@@ -19,5 +19,7 @@ public class Constants {
     public static final String TAG_METEO = "meteo";
     public static final String TAG_AGENT = "agent";
 
+    public static final String TAG_UI_STRING = "ui";
+    public static final String TAG_JSON = "json";
 
 }

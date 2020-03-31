@@ -5,6 +5,7 @@ import com.aboni.misc.PolarTable;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.sentences.VWRSentence;
@@ -100,19 +101,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 	public String getDescription() {
         return "Simulator";
     }
-
-    
-    /*	
-	------------------------------------------------------------------------------------------------------
-	Measured Value | Transducer Type | Measured Data                   | Unit of measure | Transducer Name
-	------------------------------------------------------------------------------------------------------
-	barometric     | "P" pressure    | 0.8..1.1 or 800..1100           | "B" bar         | "Barometer"
-	air temperature| "C" temperature |   2 decimals                    | "C" celsius     | "TempAir" or "ENV_OUTAIR_T"
-	pitch          | "A" angle       |-180..0 nose down 0..180 nose up | "D" degrees     | "PTCH"
-	rolling        | "A" angle       |-180..0 L         0..180 R       | "D" degrees     | "ROLL"
-	water temp     | "C" temperature |   2 decimals                    | "C" celsius     | "ENV_WATER_T"
-	-----------------------------------------------------------------------------------------------------
-     */
 
     @Override
     public double getHeading() {
@@ -211,8 +199,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 	private double getSpeed(float absoluteWindSpeed, int tWDirection) {
 		double speed;
 		if (data.isUsePolars()) {
-			speed = polars.getSpeed(tWDirection, absoluteWindSpeed) * data.getPolarCoeff();
-		} else {
+            speed = polars.getSpeed(tWDirection, absoluteWindSpeed) * data.getPolarCoefficient();
+        } else {
             speed = Utils.round(data.getSpeed() * (1.0 + r.nextDouble() / 10.0), 1);
         }
 		return speed;
@@ -467,29 +455,29 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             s.setTripUnits('N');
             NMEASimulatorSource.this.notify(s);
         }
-	}
+    }
 
-	private void sendAutopilotStatus() {
-		Stalk84 s84 = new Stalk84(
+    private void sendAutopilotStatus() {
+        Stalk84 s84 = new Stalk84(
                 (int) navData.refHeading, (navData.headingAuto == Integer.MIN_VALUE) ? 0 : navData.headingAuto, 0,
                 (navData.headingAuto == Integer.MIN_VALUE) ? Stalk84.STATUS.STATUS_STANDBY : Stalk84.STATUS.STATUS_AUTO,
                 Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);
-		STALKSentence stalk = (STALKSentence)SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
-		NMEASimulatorSource.this.notify(stalk);
-	}
-	
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
-    	if (!source.equals(getName()) && s instanceof STALKSentence) {
-			STALKSentence t = (STALKSentence) s;
-			if ("86".equals(t.getCommand())) {
-				String[] p = t.getParameters();
-				if ("21".equals(p[0])) {
-					handleAPStatusCommands(p);
-				} else if ("11".equals(p[0])) {
-					handleAPDirectionCommands(p);
-				}
-			}
+        STALKSentence stalk = (STALKSentence) SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
+        NMEASimulatorSource.this.notify(stalk);
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
+        if (!source.equals(getName()) && s instanceof STALKSentence) {
+            STALKSentence t = (STALKSentence) s;
+            if ("86".equals(t.getCommand())) {
+                String[] p = t.getParameters();
+                if ("21".equals(p[0])) {
+                    handleAPStatusCommands(p);
+                } else if ("11".equals(p[0])) {
+                    handleAPDirectionCommands(p);
+                }
+            }
 
 		}
     		

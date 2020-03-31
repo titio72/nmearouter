@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -20,11 +20,6 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
-    }
-
-    @Override
     public String getType() {
         return "GPSTime";
     }
@@ -33,19 +28,14 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     public String getDescription() {
         return "Sync up system time with GPS UTC time feed [" + (systemTimeCHecker.isSynced() ? "Sync " + systemTimeCHecker.getTimeSkew() : "Not Sync") + "]";
     }
-    
-	@Override
-	protected void doWithSentence(Sentence s, String src) {
-		systemTimeCHecker.checkAndSetTime(s);
-	}
 
-	@Override
-	protected boolean onActivate() {
-		return true;
-	}
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
+        systemTimeCHecker.checkAndSetTime(s);
+    }
 
     @Override
-    public boolean isUserCanStartAndStop() {
-    	return false;
+    protected boolean onActivate() {
+        return true;
     }
 }

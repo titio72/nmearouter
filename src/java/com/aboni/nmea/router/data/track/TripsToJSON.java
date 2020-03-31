@@ -1,6 +1,5 @@
-package com.aboni.nmea.router.services;
+package com.aboni.nmea.router.data.track;
 
-import com.aboni.nmea.router.data.track.Trip;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -9,12 +8,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 
-class TripsToJSON {
+public class TripsToJSON {
     private final List<Trip> tripList;
     private LocalDate minDate;
     private LocalDate maxDate;
 
-    TripsToJSON(List<Trip> trips) {
+    public TripsToJSON(List<Trip> trips) {
         this.tripList = trips;
     }
 

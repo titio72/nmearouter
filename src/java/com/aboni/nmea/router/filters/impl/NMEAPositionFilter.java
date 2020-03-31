@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.sentences.NMEASentenceFilter;
 import com.aboni.nmea.sentences.NMEAUtils;
@@ -7,6 +7,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 
+import javax.inject.Inject;
 import java.util.*;
 
 public class NMEAPositionFilter implements NMEASentenceFilter {
@@ -40,26 +41,27 @@ public class NMEAPositionFilter implements NMEASentenceFilter {
             totSkippedExceedSpeed = 0;
             medianRecalculation = 0;
         }
-		
-		@Override
-		public String toString() {
+
+        @Override
+        public String toString() {
             return String.format("Ok {%d} Q {%d} XInv {%d} XTime {%d} XDist {%d} XSpeed {%d} MCalc {%d}",
                     totProcessed, q, totInvalid, totSkippedReverseTime,
                     totSkippedExceedDistance, totSkippedExceedSpeed,
                     medianRecalculation);
         }
-	}
-	
-	public NMEAPositionFilter() {
-		stats = new FilterStats();
-	}
-	
-	private boolean ready() {
-		return positions.size()==SIZE;
-	}
-	
-	private boolean acceptPoint(RMCSentence rmc) {
-		synchronized (stats) {
+    }
+
+    @Inject
+    public NMEAPositionFilter() {
+        stats = new FilterStats();
+    }
+
+    private boolean ready() {
+        return positions.size() == SIZE;
+    }
+
+    private boolean acceptPoint(RMCSentence rmc) {
+        synchronized (stats) {
 			if (rmc.isValid()) {
 				Position pos = NMEAUtils.getPosition(rmc);
 		        if (pos!=null) {

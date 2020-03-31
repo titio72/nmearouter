@@ -1,10 +1,9 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.agent.AgentStatusManager;
+import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.conf.db.AgentStatus;
-import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
-import com.aboni.nmea.router.conf.db.AgentStatusProvider;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
 
 import javax.inject.Inject;
@@ -12,15 +11,17 @@ import javax.inject.Inject;
 public class AgentStatusService extends JSONWebService {
 
     private final NMEARouter router;
+    private final AgentStatusManager agentStatusManager;
 
     @Inject
-    public AgentStatusService(NMEARouter router) {
+    public AgentStatusService(NMEARouter router, AgentStatusManager agentStatusManager) {
         super();
         this.router = router;
+        this.agentStatusManager = agentStatusManager;
         setLoader((ServiceConfig config) -> {
             try {
                 String msg = doActivate(config);
-                return new AgentListSerializer(router).getJSON(msg);
+                return new AgentListSerializer(agentStatusManager).getJSON(router, msg);
             } catch (Exception e) {
                 throw new JSONGenerationException(e);
             }
@@ -40,8 +41,7 @@ public class AgentStatusService extends JSONWebService {
 				} 
 				
 				if (auto!=null) {
-                    AgentStatus as = AgentStatusProvider.getAgentStatus();
-                    as.setStartMode(agent, "1".equals(auto) ? STATUS.AUTO : STATUS.MANUAL);
+                    agentStatusManager.setStartMode(agent, "1".equals(auto) ? STATUS.AUTO : STATUS.MANUAL);
                 }
             } else {
                 msg = "Cannot change status of agent '" + agent + "'. Agent unknown.";

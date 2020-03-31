@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
@@ -21,11 +20,6 @@ public class FanAgent extends NMEAAgentImpl {
         super(cache);
         setSourceTarget(false, false);
         fan = new Fan();
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     @Override
@@ -60,10 +54,4 @@ public class FanAgent extends NMEAAgentImpl {
 		getLogger().info("Switch fan {" + on + "}");
 		fan.switchFan(on);
 	}
-	
-    @Override
-    public boolean isUserCanStartAndStop() {
-    	return false;
-    }
-
 }

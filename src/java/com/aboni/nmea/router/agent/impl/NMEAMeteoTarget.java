@@ -3,6 +3,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.*;
 import net.sf.marineapi.nmea.sentence.*;
@@ -110,14 +111,14 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     @Override
     protected void onDeactivate() {
-        if (isStarted() && writer!=null) {
-        	writer.dispose();
+        if (isStarted() && writer != null) {
+            writer.dispose();
         }
-    }    
-    
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
-    	try {
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
+        try {
             if (Boolean.TRUE.equals(getCache().getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
                 if (s instanceof MTASentence) {
                     processTemp((MTASentence) s);

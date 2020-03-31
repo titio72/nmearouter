@@ -22,28 +22,26 @@ public class EventSocket
 	}
 	
     @OnOpen
-	public void onWebSocketConnect(Session session)
-    {
-    	synchronized (sessions) {
-			ServerLog.getLogger().info("Started web-socket session {" + session.getId() + "}");
-			MySession s = new MySession(session);
-			sessions.put(session, s);
-	        s.start(stream);
-    	}
+    public void onWebSocketConnect(Session session) {
+        synchronized (sessions) {
+            ServerLog.getLogger().info("Started web-socket session {" + session.getId() + "}");
+            MySession s = new MySession(session);
+            sessions.put(session, s);
+            s.start(stream);
+        }
     }
 
     @OnClose
-	public void onWebSocketClose(Session session)
-    {
-    	synchronized (sessions) {
-			ServerLog.getLogger().info("Closed web-socket session {" + session.getId() + "}");
-			if (sessions.containsKey(session)) {
-				MySession s = sessions.get(session);
-	    		ServerLog.getLogger().info("Stopping updates for web-socket id {" + s.id + "}");
-	    		s.stop(stream);
-				sessions.remove(session);
-	    	}
-    	}
+    public void onWebSocketClose(Session session) {
+        synchronized (sessions) {
+            ServerLog.getLogger().info("Closed web-socket session {" + session.getId() + "}");
+            if (sessions.containsKey(session)) {
+                MySession s = sessions.get(session);
+                ServerLog.getLogger().info("Stopping updates for web-socket id {" + s.id + "}");
+                s.stop(stream);
+                sessions.remove(session);
+            }
+        }
     }
     	
     @OnError

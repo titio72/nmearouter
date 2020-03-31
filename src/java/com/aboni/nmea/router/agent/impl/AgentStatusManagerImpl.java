@@ -1,8 +1,10 @@
-package com.aboni.nmea.router.conf.db;
+package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
+import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,24 +12,25 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AgentStatusImpl implements AgentStatus {
+public class AgentStatusManagerImpl implements AgentStatusManager {
 
-	private static final String ERROR_MSG = "Cannot persist status for Agent";
+    private static final String ERROR_MSG = "Cannot persist status for Agent";
 
-	private final Map<String, AgentStatus.STATUS> status;
-	private final Map<String, String> filterOut;
-	private final Map<String, String> filterIn;
+    private final Map<String, AgentStatusManager.STATUS> status;
+    private final Map<String, String> filterOut;
+    private final Map<String, String> filterIn;
 
-	public AgentStatusImpl() {
-		status = new HashMap<>();
-		filterOut = new HashMap<>();
-		filterIn = new HashMap<>();
-		try {
-			loadAll();
-		} catch (Exception e) {
-			ServerLog.getLogger().error("Error loading agents status", e);
-		}
-	}
+    @Inject
+    public AgentStatusManagerImpl() {
+        status = new HashMap<>();
+        filterOut = new HashMap<>();
+        filterIn = new HashMap<>();
+        try {
+            loadAll();
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Error loading agents status", e);
+        }
+    }
 
 	private void loadAll() throws SQLException, ClassNotFoundException {
 		try (DBHelper db = new DBHelper(true)) {

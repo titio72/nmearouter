@@ -1,6 +1,9 @@
 package com.aboni.nmea.router.filters;
 
-import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSet.TYPE;
+import com.aboni.nmea.router.filters.impl.STalkFilter;
+import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;

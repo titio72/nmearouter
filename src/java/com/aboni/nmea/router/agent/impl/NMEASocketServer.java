@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.net.NetConf;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -63,16 +64,11 @@ public class NMEASocketServer extends NMEAAgentImpl {
             setup(name, qos);
             setSourceTarget(conf.isRx(), conf.isTx());
             port = conf.getPort();
-            getLogger().info(String.format("Setting up TCP server: Port {%d} RX {%b %b}", port, isSource(), isTarget()));
+            getLogger().info(String.format("Setting up TCP server: Port {%d} RX {%b %b}", port, conf.isRx(), conf.isTx()));
             this.serializer = serializer;
         } else {
             getLogger().info("Cannot setup TCP server - already set up");
         }
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     public int getPort() {
@@ -188,19 +184,18 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				serverSocket.close();
 			} catch (Exception e) {
 				getLogger().error("Error trying to close server socket", e);
-			}
-			try {
-				selector.close();
-			} catch (Exception e)
-			{
-				getLogger().error("Error trying to close selector", e);
-			}
-		}
-	}
-	
-	@Override
-	protected void doWithSentence(Sentence s, String src) {
-		synchronized (clients) {
+            }
+            try {
+                selector.close();
+            } catch (Exception e) {
+                getLogger().error("Error trying to close selector", e);
+            }
+        }
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
+        synchronized (clients) {
             if (serializer != null && isTarget() && !clients.isEmpty()) {
                 String output = serializer.getOutSentence(s);
                 writeBuffer.clear();

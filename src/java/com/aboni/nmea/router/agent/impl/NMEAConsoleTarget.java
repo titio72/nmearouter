@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -18,13 +18,8 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
         setSourceTarget(false, true);
     }
 
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
-    }
-
-    @Override
-    protected void doWithSentence(Sentence s, String src) {
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
         ServerLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
                 " [" + src + "] " + s);
     }
@@ -32,7 +27,7 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
     @Override
     public String getDescription() {
         return "Console monitor";
-	}
+    }
 
     @Override
     public String getType() {

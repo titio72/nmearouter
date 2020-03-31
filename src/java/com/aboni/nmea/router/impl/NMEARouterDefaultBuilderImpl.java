@@ -1,99 +1,102 @@
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAFilterable;
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEARouterBuilder;
+import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.agent.AgentStatusManager;
+import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
 import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
-import com.aboni.nmea.router.agent.impl.system.EngineDetectionAgent;
-import com.aboni.nmea.router.agent.impl.system.FanAgent;
-import com.aboni.nmea.router.agent.impl.system.NMEASystemTimeGPS;
-import com.aboni.nmea.router.agent.impl.system.PowerLedAgent;
+import com.aboni.nmea.router.agent.impl.QOSKeys;
+import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.AgentBase;
 import com.aboni.nmea.router.conf.ConfParser;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.conf.Router;
-import com.aboni.nmea.router.conf.db.AgentStatus;
-import com.aboni.nmea.router.conf.db.AgentStatus.STATUS;
-import com.aboni.nmea.router.conf.db.AgentStatusProvider;
-import com.aboni.nmea.router.filters.FilterSetBuilder;
+import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
+import javax.inject.Inject;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
-    private NMEARouter router;
-    private final String confFile;
-	private static final boolean ENABLE_GPS_TIME = true;
-	private static final boolean ENABLE_AP = false;
+    private static final boolean ENABLE_GPS_TIME = true;
+    private static final boolean ENABLE_AP = false;
+    private final AgentStatusManager agentStatusManager;
 
-    public NMEARouterDefaultBuilderImpl(String confFile) {
-        this.confFile = confFile;
+    @Inject
+    public NMEARouterDefaultBuilderImpl(AgentStatusManager agentStatusManager) {
+        this.agentStatusManager = agentStatusManager;
     }
-    
+
     @Override
-    public NMEARouterBuilder init() {
-    	Router conf;
-		try {
-            conf = parseConf(confFile);
+    public void init(NMEARouter router, Properties unused) {
+        Router conf;
+        try {
+            conf = parseConf();
             NMEAAgentBuilder builder = ThingsFactory.getInstance(NMEAAgentBuilder.class);
-            router = buildRouter(conf, builder);
-            return this;
+            buildRouter(conf, builder);
         } catch (MalformedConfigurationException e) {
-			Logger.getGlobal().log(Level.SEVERE, "Error", e);
-		}
-        return null;
+            Logger.getGlobal().log(Level.SEVERE, "Error", e);
+        }
     }
 
-    private NMEARouter buildRouter(Router conf, NMEAAgentBuilder builder) {
+    private void buildRouter(Router conf, NMEAAgentBuilder builder) {
         NMEARouter r = ThingsFactory.getInstance(NMEARouter.class);
-
-		configureGPSPriority(conf, r);
-
-		switch (conf.getLog().getLevel()) {
-			case DEBUG: 
-				ServerLog.getLoggerAdmin().setDebug(); break;
-			case WARNING: 
-	        	ServerLog.getLoggerAdmin().setWarning(); break;
-			case ERROR: 
-	        	ServerLog.getLoggerAdmin().setError(); break;
-			case NONE: 
-	        	ServerLog.getLoggerAdmin().setNone(); break;
-	    	default:
-	        	ServerLog.getLoggerAdmin().setInfo(); break;
-		}
-        
-        for (AgentBase a: conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
-        	NMEAAgent agent = builder.createAgent(a);
-            if (agent!=null) {
-            	r.addAgent(agent);
-            	handlePersistentState(agent, a);
-            }
-        }
-        
+        configureGPSPriority(conf, r);
+        configureLog(conf);
         if (ENABLE_GPS_TIME) buildGPSTimeTarget(r);
         buildStreamDump(r);
         buildPowerLedTarget(r);
         buildFanTarget(r);
         buildDPTStats(r);
         buildEngineDetector(r);
+        buildWebUI(r);
         if (ENABLE_AP) buildAutoPilot(r);
-        return r;
+        buildAgents(conf, builder, r);
     }
 
-	private void configureGPSPriority(Router conf, NMEARouter r) {
-		com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
-		if (gpsPriorityConf!=null) {
+    private void buildAgents(Router conf, NMEAAgentBuilder builder, NMEARouter r) {
+        for (AgentBase a : conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
+            NMEAAgent agent = builder.createAgent(a);
+            if (agent != null) {
+                r.addAgent(agent);
+                handlePersistentState(agent, a);
+            }
+        }
+    }
+
+    private void configureLog(Router conf) {
+        switch (conf.getLog().getLevel()) {
+            case DEBUG:
+                ServerLog.getLoggerAdmin().setDebug();
+                break;
+            case WARNING:
+                ServerLog.getLoggerAdmin().setWarning();
+                break;
+            case ERROR:
+                ServerLog.getLoggerAdmin().setError();
+                break;
+            case NONE:
+                ServerLog.getLoggerAdmin().setNone();
+                break;
+            default:
+                ServerLog.getLoggerAdmin().setInfo();
+                break;
+        }
+    }
+
+    private void configureGPSPriority(Router conf, NMEARouter r) {
+        com.aboni.nmea.router.conf.List gpsPriorityConf = conf.getGPSPriority();
+        if (gpsPriorityConf != null) {
             List<String> gpsPriority = gpsPriorityConf.getGPSSource();
             NMEASourcePriorityProcessor processor = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(NMEACache.class));
             processor.addAllGPS();
@@ -111,36 +114,32 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 	}
 
 	private void handleFilter(NMEAAgent agent) {
-    	AgentStatus s = AgentStatusProvider.getAgentStatus();
-    	if (s!=null) {
-    		NMEAFilterable tgt = agent.getTarget();
-    		if (tgt!=null) {
-	    		String data = s.getFilterOutData(agent.getName());  
-	    		if (data==null)  {
-	    			s.setFilterOutData(agent.getName(), new FilterSetBuilder().exportFilter(tgt.getFilter()));
-	    		} else {
-	    			tgt.setFilter(new FilterSetBuilder().importFilter(data));
-	    		}
-    		}
-    		NMEAFilterable src = agent.getSource();
-    		if (src!=null) {
-	    		String data = s.getFilterInData(agent.getName());  
-	    		if (data==null)  {
-	    			s.setFilterInData(agent.getName(), new FilterSetBuilder().exportFilter(src.getFilter()));
-	    		} else {
-	    			src.setFilter(new FilterSetBuilder().importFilter(data));
-	    		}
-    		}
-    	}
-	}
+        NMEAFilterable tgt = agent.getTarget();
+        if (tgt != null) {
+            String data = agentStatusManager.getFilterOutData(agent.getName());
+            if (data == null) {
+                agentStatusManager.setFilterOutData(agent.getName(), new JSONFilterSetSerializer().exportFilter(tgt.getFilter()));
+            } else {
+                tgt.setFilter(new JSONFilterSetSerializer().importFilter(data));
+            }
+        }
+        NMEAFilterable src = agent.getSource();
+        if (src != null) {
+            String data = agentStatusManager.getFilterInData(agent.getName());
+            if (data == null) {
+                agentStatusManager.setFilterInData(agent.getName(), new JSONFilterSetSerializer().exportFilter(src.getFilter()));
+            } else {
+                src.setFilter(new JSONFilterSetSerializer().importFilter(data));
+            }
+        }
+    }
 
 	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
-        AgentStatus s = AgentStatusProvider.getAgentStatus();
         boolean active = (a != null) && a.isActive();
-        if (s != null) {
-            AgentStatus.STATUS requestedStatus = s.getStartMode(agent.getName());
+        if (agentStatusManager != null) {
+            AgentStatusManager.STATUS requestedStatus = agentStatusManager.getStartMode(agent.getName());
             if (requestedStatus == STATUS.UNKNOWN) {
-                s.setStartMode(agent.getName(), active ? STATUS.AUTO : STATUS.MANUAL);
+                agentStatusManager.setStartMode(agent.getName(), active ? STATUS.AUTO : STATUS.MANUAL);
             } else {
                 active = (requestedStatus == STATUS.AUTO);
             }
@@ -168,6 +167,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     private void buildPowerLedTarget(NMEARouter r) {
     	if (System.getProperty("os.arch").startsWith("arm")) {
             QOS q = createBuiltInQOS();
+            q.addProp(QOSKeys.CANNOT_START_STOP);
             PowerLedAgent pwrLed = ThingsFactory.getInstance(PowerLedAgent.class);
             pwrLed.setup("PowerLed", q);
             r.addAgent(pwrLed);
@@ -185,6 +185,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildFanTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
+        q.addProp(QOSKeys.CANNOT_START_STOP);
         FanAgent fan = ThingsFactory.getInstance(FanAgent.class);
         fan.setup("FanManager", q);
         r.addAgent(fan);
@@ -193,6 +194,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildEngineDetector(NMEARouter r) {
         QOS q = createBuiltInQOS();
+        q.addProp(QOSKeys.CANNOT_START_STOP);
         EngineDetectionAgent eng = ThingsFactory.getInstance(EngineDetectionAgent.class);
         eng.setup("EngineManager", q);
         r.addAgent(eng);
@@ -201,6 +203,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildGPSTimeTarget(NMEARouter r) {
         QOS q = createBuiltInQOS();
+        q.addProp(QOSKeys.CANNOT_START_STOP);
         NMEASystemTimeGPS gpsTime = ThingsFactory.getInstance(NMEASystemTimeGPS.class);
         gpsTime.setup("GPSTime", q);
         r.addAgent(gpsTime);
@@ -208,19 +211,23 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         gpsTime.start();
     }
 
-    private Router parseConf(String file) throws MalformedConfigurationException {
-        ConfParser parser = new ConfParser();
-		return parser.init(file).getConf();
+    private void buildWebUI(NMEARouter r) {
+        QOS q = createBuiltInQOS();
+        q.addProp(QOSKeys.CANNOT_START_STOP);
+        WebInterfaceAgent web = ThingsFactory.getInstance(WebInterfaceAgent.class);
+        web.setup("UI", q);
+        r.addAgent(web);
+        web.start();
     }
 
-	private QOS createBuiltInQOS() {
-		QOS q = new QOS();
-        q.addProp("builtin");
-		return q;
-	}
-	
-	@Override
-	public NMEARouter getRouter() {
-		return router;
-	}
+    private Router parseConf() throws MalformedConfigurationException {
+        ConfParser parser = new ConfParser();
+        return parser.init(Constants.ROUTER_CONF).getConf();
+    }
+
+    private QOS createBuiltInQOS() {
+        QOS q = new QOS();
+        q.addProp(QOSKeys.BUILT_IN);
+        return q;
+    }
 }

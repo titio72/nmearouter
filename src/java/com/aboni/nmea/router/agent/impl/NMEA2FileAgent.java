@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -32,11 +32,6 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
-    }
-
-    @Override
     public String getDescription() {
         return "Dump the NMEA stream to file";
     }
@@ -46,8 +41,8 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
         return "StreamDump";
     }
 
-	@Override
-	protected void doWithSentence(Sentence s, String source) {
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
         NMEASentenceItem e = new NMEASentenceItem(s, getCache().getNow(), "  ");
         synchronized (queue) {
             if (isStarted()) {

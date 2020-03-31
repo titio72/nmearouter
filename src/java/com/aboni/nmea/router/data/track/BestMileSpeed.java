@@ -27,7 +27,7 @@ class BestMileSpeed {
         if (distance > d) {
             // pull the first item from the rolling window
             Pair<Long, Double> p0 = sss.get(0);
-            while (distance > d && !sss.isEmpty()) {
+            while ((distance - p0.second) > d) {
                 distance -= p0.second;
                 sss.remove(0);
                 p0 = sss.get(0);

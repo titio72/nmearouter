@@ -30,7 +30,7 @@ public class SensorPressureTemp extends I2CSensor {
         if (sensor == Sensor.BMP180)
             return new BMP180(new I2CInterface(bus, BMP180.BMP180_ADDRESS));
         else
-            return new BME280(new I2CInterface(bus, BME280.BME280_I2CADDR));
+            return new BME280(new I2CInterface(bus, BME280.BME280_I2C_ADDRESS));
     }
 
     @Override

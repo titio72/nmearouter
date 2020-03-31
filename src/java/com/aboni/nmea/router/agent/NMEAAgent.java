@@ -10,11 +10,11 @@ public interface NMEAAgent extends Startable {
 
     String getDescription();
 
-    void setup(String name, QOS qos);
-
     boolean isBuiltIn();
 
     boolean isUserCanStartAndStop();
+
+    void setup(String name, QOS qos);
 
     void setStatusListener(NMEAAgentStatusListener listener);
 
@@ -23,5 +23,6 @@ public interface NMEAAgent extends Startable {
     NMEATarget getTarget();
 
     void onTimer();
-	void onTimerHR();
+
+    void onTimerHR();
 }

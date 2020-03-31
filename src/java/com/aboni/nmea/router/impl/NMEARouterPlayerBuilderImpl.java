@@ -10,24 +10,20 @@ import com.aboni.nmea.router.conf.net.NetConf;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.Properties;
+
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
 
-    private NMEARouter router;
-    private final String playFile;
-
-    public NMEARouterPlayerBuilderImpl(String playFile) {
-        this.playFile = playFile;
-    }
-
-
-    @Override
-    public NMEARouter getRouter() {
-        return router;
+    @Inject
+    public NMEARouterPlayerBuilderImpl() {
+        // do nothing
     }
 
     @Override
-	public NMEARouterBuilder init() {
-        router = ThingsFactory.getInstance(NMEARouter.class);
+    public void init(@NotNull NMEARouter router, Properties props) {
+        String playFile = props.getProperty("file");
 
         NMEASocketServer sock = new NMEASocketServer(ThingsFactory.getInstance(NMEACache.class));
         sock.setup("TCP", null, new NetConf(null, 1111, false, true), Sentence::toSentence);
@@ -44,8 +40,6 @@ public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
         play.setFile(playFile);
         router.addAgent(play);
         play.start();
-
-        return this;
     }
 
 

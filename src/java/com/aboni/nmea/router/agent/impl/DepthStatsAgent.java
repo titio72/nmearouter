@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.sentences.XDPParser;
 import com.aboni.nmea.sentences.XDPSentence;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -36,11 +36,6 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
-    }
-
-    @Override
     public String getType() {
         return "DepthStats";
     }
@@ -50,15 +45,15 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         return "Calculates max and min depth over last hour period";
     }
 
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
         if (s instanceof DPTSentence) {
             DepthT d = handleDepth(((DPTSentence) s).getDepth(), getCache().getNow());
-            
-            XDPSentence x = (XDPSentence)SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
-            x.setDepth((float)d.depth/10f);
-            if (min!=Integer.MAX_VALUE) x.setMinDepth1h((float)min/10f);
-            if (min!=Integer.MIN_VALUE) x.setMaxDepth1h((float)max/10f);
+
+            XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
+            x.setDepth((float) d.depth / 10f);
+            if (min != Integer.MAX_VALUE) x.setMinDepth1h((float) min / 10f);
+            if (min != Integer.MIN_VALUE) x.setMaxDepth1h((float) max / 10f);
             notify(x);
         }
     }
@@ -68,7 +63,6 @@ public class DepthStatsAgent extends NMEAAgentImpl {
      * @param d The value of the depth
      * @param ts The timestamp (unix time) of the reading
      */
-    @SuppressWarnings("unused")
     public void privatePushDepth(double d, long ts) {
         handleDepth(d, ts);
     }
@@ -116,10 +110,4 @@ public class DepthStatsAgent extends NMEAAgentImpl {
             }
         }
     }
-
-    @Override
-    public boolean isUserCanStartAndStop() {
-    	return true;
-    }
-    
 }

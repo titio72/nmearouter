@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.conf.net.NetConf;
 import net.sf.marineapi.nmea.event.SentenceEvent;
@@ -66,11 +67,6 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS q) {
-        // do nothing
-    }
-
-    @Override
     public String getDescription() {
         return "TCP " + server + ":" + port;
     }
@@ -114,25 +110,25 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 } finally {
                     socket = null;
                 }
-    	    }
-	    }
-	}
-
-    @Override
-    public String toString() {
-        return " {TCP " + server + ":" + port+ " " + (receive ? "R" : "")
-                + (transmit ? "X" : "") + "}";
+            }
+        }
     }
 
     @Override
-    protected void doWithSentence(Sentence s, String source) {
-    	try {
-    	    if (socket!=null && transmit) {
-    	        socket.getOutputStream().write(s.toSentence().getBytes());
-    	        socket.getOutputStream().write("\r".getBytes());
-    	    }
-    	} catch (Exception e) {
+    public String toString() {
+        return " {TCP " + server + ":" + port + " " + (receive ? "R" : "")
+                + (transmit ? "X" : "") + "}";
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
+        try {
+            if (socket != null && transmit) {
+                socket.getOutputStream().write(s.toSentence().getBytes());
+                socket.getOutputStream().write("\r".getBytes());
+            }
+        } catch (Exception e) {
             getLogger().info("Error sending data {" + e.getMessage() + "}");
-    	}
+        }
     }
 }

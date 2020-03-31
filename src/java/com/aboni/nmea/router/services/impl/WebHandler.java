@@ -8,17 +8,17 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 
-public class WebInterfaceImpl extends AbstractHandler
-{
+public class WebHandler extends AbstractHandler {
 
     private final WebServiceFactory factory;
 
     @Inject
-    public WebInterfaceImpl(WebServiceFactory factory) {
+    public WebHandler(@NotNull WebServiceFactory factory) {
         this.factory = factory;
     }
-    
+
     @Override
     public void handle(String target,
                        Request baseRequest,

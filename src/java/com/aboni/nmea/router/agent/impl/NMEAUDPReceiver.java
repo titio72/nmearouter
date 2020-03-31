@@ -35,11 +35,6 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS q) {
-        // do nothing
-    }
-
-    @Override
     public String getDescription() {
         return "UDP Receiver " + port;
     }
@@ -52,8 +47,6 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     	        try {
                     socket = new DatagramSocket(port);
                     getLogger().info("Opened Datagram socket {" + port + "}");
-                    
-                    //$GPRMC,054922.00,A,4337.80466,N,01017.61149,E,0.767,,051018,,*1D
                     
                     Thread t = new Thread(() -> {
 						byte[] buffer = new byte[256];

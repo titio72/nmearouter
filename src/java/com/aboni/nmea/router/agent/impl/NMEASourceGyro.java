@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.geo.DeviationManagerImpl;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
+import com.aboni.geo.impl.DeviationManagerImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -35,11 +35,6 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     public NMEASourceGyro(NMEACache cache) {
         super(cache);
         setSourceTarget(true, true);
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     @Override
@@ -165,26 +160,26 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("A", round(roll), "D", "ROLL"));
                 xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
                 notify(xdr);
-	        } catch (Exception e) {
-	            getLogger().error("Cannot post XDR data", e);
-	        }
+            } catch (Exception e) {
+                getLogger().error("Cannot post XDR data", e);
+            }
         }
-	}
-	
-	private double round(double d) {
-		return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
-	}
-	
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
-        if (HWSettings.getPropertyAsInteger("compass.dump", 0)>0 && s instanceof HDMSentence && compassSensor!=null) {
-        	try {
-        		double headingBoat = ((HDMSentence)s).getHeading();
-        		double headingSens = compassSensor.getUnfilteredSensorHeading();
-        		dump(headingSens, headingBoat);
-        	} catch (Exception e) {
-        		getLogger().error("Error dumping compass readings", e);
-			}
+    }
+
+    private double round(double d) {
+        return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
+        if (HWSettings.getPropertyAsInteger("compass.dump", 0) > 0 && s instanceof HDMSentence && compassSensor != null) {
+            try {
+                double headingBoat = ((HDMSentence) s).getHeading();
+                double headingSens = compassSensor.getUnfilteredSensorHeading();
+                dump(headingSens, headingBoat);
+            } catch (Exception e) {
+                getLogger().error("Error dumping compass readings", e);
+            }
         }
     }
 

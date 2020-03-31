@@ -4,7 +4,6 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -51,11 +50,6 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
         } else {
             getLogger().info("Cannot set file - already set");
         }
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        // do nothing
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
@@ -9,6 +10,8 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -49,38 +52,36 @@ public class NMEASerial extends NMEAAgentImpl {
         @Override
         void reset(long time) {
         	super.reset(time);
-        	sentenceErrs = 0;
-        	sentences = 0;
+            sentenceErrs = 0;
+            sentences = 0;
         }
     }
-    
+
     private final StatsSpeed fastStats;
-    private final Stats      stats;
-    
+    private final Stats stats;
+
     private final AtomicBoolean run = new AtomicBoolean(false);
 
-    private final String portName;
-    private final int speed;
+    private String portName;
+    private int speed;
     private SerialPort port;
-    private final boolean receive;
-    private final boolean transmit;
+    private boolean receive;
+    private boolean transmit;
 
-    public NMEASerial(NMEACache cache, String name, String portName, int speed, boolean rec,
-            boolean tran, QOS qos) {
+    @Inject
+    public NMEASerial(@NotNull NMEACache cache) {
         super(cache);
+        fastStats = new StatsSpeed();
+        stats = new Stats();
+    }
+
+    public void setup(String name, String portName, int speed, boolean rec, boolean tran, QOS qos) {
         setup(name, qos);
         this.portName = portName;
         this.speed = speed;
         this.receive = rec;
         this.transmit = tran;
-        fastStats = new StatsSpeed();
-        stats = new Stats();
         setSourceTarget(rec, tran);
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS q) {
-        // do nothing
     }
 
     @Override
@@ -199,8 +200,8 @@ public class NMEASerial extends NMEAAgentImpl {
         notify(e);
     }
 
-    @Override
-    protected void doWithSentence(Sentence s, String src) {
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
         if (isStarted() && transmit) {
             try {
                 String strSentence = s.toSentence() + "\r\n";

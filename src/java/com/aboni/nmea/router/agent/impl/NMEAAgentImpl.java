@@ -2,11 +2,13 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-import com.aboni.nmea.router.filters.NMEASpeedFilter;
+import com.aboni.nmea.router.impl.ListenerWrapper;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
-import com.aboni.nmea.router.processors.*;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.Log;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -16,7 +18,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-public abstract class NMEAAgentImpl implements NMEAAgent {
+public class NMEAAgentImpl implements NMEAAgent {
 
     private static class InternalSource implements NMEASource {
 
@@ -53,114 +55,45 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             filterSet = s;
         }
 
-		@Override
-		public void pushSentence(Sentence e, String src) {
-			try {
-                if (isStarted() &&
-                        (getFilter() == null || getFilter().match(e, src))) {
-                    doWithSentence(e, src);
+        @Override
+        public void pushMessage(RouterMessage mm) {
+            try {
+                if (mm.getPayload() instanceof Sentence) {
+                    Sentence s = (Sentence) mm.getPayload();
+                    if (isStarted() && (getFilter() == null || getFilter().match(s, mm.getSource()))) {
+                        if (listenerWrapper == null) {
+                            listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
+                        }
+                        if (listenerWrapper.isNMEA()) {
+                            listenerWrapper.onSentence(s, mm.getSource());
+                        }
+                    }
                 }
             } catch (Exception t) {
-                getLogger().warning("Error delivering sentence to agent {" + e + "} error {" + t.getMessage() + "}");
+                getLogger().warning("Error delivering message to agent {" + mm.getPayload() + "} error {" + t.getMessage() + "}");
             }
         }
     }
 
     private static class AgentAttributes {
-        private String name;
-        private boolean active;
-        private boolean builtin;
-        private boolean target;
-        private boolean source;
+        String name;
+        boolean active;
+        boolean builtin;
+        boolean target;
+        boolean source;
+        boolean canStartStop;
     }
 
-    private NMEAAgentStatusListener sl;
-    private final InternalTarget targetIf;
-    private final InternalSource sourceIf;
-    private final NMEAProcessorSet processorSet;
-    private final NMEACache cache;
-    private final AgentAttributes attributes;
+    protected class PrivateLog implements Log {
 
-    @Inject
-    public NMEAAgentImpl(@NotNull NMEACache cache) {
-        this.cache = cache;
-        targetIf = new InternalTarget();
-        sourceIf = new InternalSource();
-        attributes = new AgentAttributes();
-        processorSet = new NMEAProcessorSet();
-    }
+        private final Log log;
 
-    @Override
-    public void setup(String name, QOS qos) {
-        attributes.name = name;
-        handleQos(cache, name, qos);
-        onSetup(name, qos);
-    }
-
-    protected abstract void onSetup(String name, QOS qos);
-
-    private void handleQos(NMEACache cache, String name, QOS qos) {
-        if (qos != null) {
-            for (String q : qos.getKeys()) {
-                switch (q) {
-                    case "speed_filter":
-                        getLogger().info("QoS {SPEED_FILTER} Agent {" + name + "}");
-                        addProcessor(new NMEAGenericFilterProc(new NMEASpeedFilter(cache)));
-                        break;
-                    case "dpt":
-                        getLogger().info("QoS {DPT} Agent {" + name + "}");
-                        addProcessor(new NMEADepthEnricher());
-                        break;
-                    case "rmc2vtg":
-                        getLogger().info("QoS {RMC2VTG} Agent {" + name + "}");
-                        addProcessor(new NMEARMC2VTGProcessor());
-                        break;
-                    case "truewind_sog":
-                        getLogger().info("QoS {TRUEWIND_SOG} Agent {" + name + "}");
-                        addProcessor(new NMEAMWVTrue(cache, true));
-                        break;
-                    case "truewind":
-                        getLogger().info("QoS {TRUEWIND} Agent {" + name + "}");
-                        addProcessor(new NMEAMWVTrue(cache, false));
-                        break;
-                    case "enrich_hdg":
-                        getLogger().info("QoS {ENRICH_HDG} Agent {" + name + "}");
-                        addProcessor(new NMEAHDGEnricher(cache));
-                        break;
-                    case "enrich_hdm":
-                        getLogger().info("QoS {ENRICH_HDM} Agent {" + name + "}");
-                        addProcessor(new NMEAHDMEnricher(cache));
-                        break;
-                    case "rmc_filter":
-                        getLogger().info("QoS {RMC filter} Agent {" + name + "}");
-                        addProcessor(new NMEARMCFilter());
-                        break;
-                    case "builtin":
-                        getLogger().info("QoS {BuiltIn} Agent {" + name + "}");
-                        attributes.builtin = true;
-                        break;
-                    default:
-                        break;
-                }
-			}
+        private PrivateLog() {
+            log = ServerLog.getLogger();
         }
-    }
-    
-	protected void setSourceTarget(boolean isSource, boolean isTarget) {
-        attributes.target = isTarget;
-        attributes.source = isSource;
-    }
-	
-	protected class PrivateLog implements Log {
 
-	    private final Log log;
-	    
-	    private PrivateLog() {
-	        log = ServerLog.getLogger();
-	    }
-
-	    private String getMsg(NMEAAgentImpl a, String msg) {
-	        return String.format("Agent {%s} Name {%s} %s", a.toString(), a.getName(), msg);
+        private String getMsg(NMEAAgentImpl a, String msg) {
+            return String.format("Agent {%s} Name {%s} %s", a.toString(), a.getName(), msg);
         }
 
         @Override
@@ -168,17 +101,17 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
             log.error(getMsg(NMEAAgentImpl.this, msg));
         }
 
-		@Override
-		public void error(String msg, Throwable t) {
-			log.error(getMsg(NMEAAgentImpl.this, msg), t);
-		}
+        @Override
+        public void error(String msg, Throwable t) {
+            log.error(getMsg(NMEAAgentImpl.this, msg), t);
+        }
 
-		@Override
-		public void errorForceStacktrace(String msg, Throwable t) {
-			log.errorForceStacktrace(getMsg(NMEAAgentImpl.this, msg), t);
-		}
+        @Override
+        public void errorForceStacktrace(String msg, Throwable t) {
+            log.errorForceStacktrace(getMsg(NMEAAgentImpl.this, msg), t);
+        }
 
-		@Override
+        @Override
         public void warning(String msg) {
             log.warning(getMsg(NMEAAgentImpl.this, msg));
         }
@@ -189,41 +122,91 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         }
 
         @Override
+        public void infoFill(String msg) {
+            log.infoFill(getMsg(NMEAAgentImpl.this, msg));
+        }
+
+        @Override
         public void debug(String msg) {
             log.debug(getMsg(NMEAAgentImpl.this, msg));
         }
 
         @Override
-		public void console(String msg) { throw new UnsupportedOperationException(); }
-	}
-	
-	private Log internalLog;
-	
-	protected Log getLogger() {
-	    if (internalLog ==null) internalLog = new PrivateLog();
-		return internalLog;
-	}
+        public void console(String msg) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	@Override
-	public boolean isBuiltIn() {
+    private NMEAAgentStatusListener sl;
+    private final InternalTarget targetIf;
+    private final InternalSource sourceIf;
+    private final NMEAProcessorSet processorSet;
+    private final NMEACache cache;
+    private final AgentAttributes attributes;
+    private final Log internalLog;
+    private ListenerWrapper listenerWrapper;
+
+    @Inject
+    public NMEAAgentImpl(@NotNull NMEACache cache) {
+        this.cache = cache;
+        targetIf = new InternalTarget();
+        sourceIf = new InternalSource();
+        attributes = new AgentAttributes();
+        processorSet = new NMEAProcessorSet();
+        internalLog = new PrivateLog();
+        attributes.canStartStop = true;
+    }
+
+    @Override
+    public void setup(String name, QOS qos) {
+        attributes.name = name;
+        handleQos(qos);
+        onSetup(name, qos);
+    }
+
+    protected void onSetup(String name, QOS qos) {
+        // override if necessary
+    }
+
+    private void handleQos(QOS qos) {
+        if (qos != null) {
+            attributes.builtin = qos.get(QOSKeys.BUILT_IN);
+            attributes.canStartStop = !qos.get(QOSKeys.CANNOT_START_STOP);
+            for (NMEAPostProcess p : LoadProcessors.load(qos, getLogger())) {
+                addProcessor(p);
+            }
+        }
+    }
+
+    protected void setSourceTarget(boolean isSource, boolean isTarget) {
+        attributes.target = isTarget;
+        attributes.source = isSource;
+    }
+
+    protected Log getLogger() {
+        return internalLog;
+    }
+
+    @Override
+    public final boolean isBuiltIn() {
         return attributes.builtin;
     }
-	
-	@Override
-	public String getName() {
+
+    @Override
+    public final String getName() {
         return attributes.name;
     }
 
-	@Override
-	public boolean isStarted() {
-		synchronized (this) {
+    @Override
+    public final boolean isStarted() {
+        synchronized (this) {
             return attributes.active;
         }
-	}
+    }
 
-	@Override
-	public void start() {
-		synchronized (this) {
+    @Override
+    public final void start() {
+        synchronized (this) {
             if (!attributes.active) {
                 getLogger().info("Activating agent {" + getName() + "}");
                 if (onActivate()) {
@@ -240,9 +223,9 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 		if (sl!=null) sl.onStatusChange(this);
 	}
 
-	@Override
-	public void stop() {
-		synchronized (this) {
+    @Override
+    public final void stop() {
+        synchronized (this) {
             if (attributes.active) {
                 getLogger().info("Deactivating {" + getName() + "}");
                 onDeactivate();
@@ -250,10 +233,10 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                 notifyStatus();
             }
         }
-	}
+    }
 
     @Override
-    public void setStatusListener(NMEAAgentStatusListener listener) {
+    public final void setStatusListener(NMEAAgentStatusListener listener) {
         sl = listener;
     }
 
@@ -267,8 +250,8 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
 	}
 	
 	protected void onDeactivate() {
-	    
-	}
+        // override if necessary
+    }
 
 	private boolean checkSourceFilter(Sentence sentence) {
         NMEASource s = getSource();
@@ -283,7 +266,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
      * @param sentence The sentence to be notified to agents
      */
 	protected final void notify(Sentence sentence) {
-
         if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
             List<Sentence> toSend = processorSet.getSentences(sentence, getName());
@@ -291,12 +273,12 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
                 sourceIf.listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
         }
     }
+
 	/**
 	 * Used by "sources" to push sentences into the stream
 	 * @param m The message to be notified to agents
 	 */
 	protected final void notify(JSONObject m) {
-
 		if (isStarted()) {
             getLogger().debug("Notify Sentence {" + m + "}");
             sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
@@ -312,13 +294,6 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         processorSet.addProcessor(f);
 	}
 
-	/**
-	 * Must be overridden by targets. They will receive here the stream. 
-	 * @param s The sentence just received
-	 * @param source The source that originated the sentence
-	 */
-	protected void doWithSentence(Sentence s, String source) {}
-
     @Override
     public final NMEASource getSource() {
         return (attributes.source ? sourceIf : null);
@@ -329,26 +304,32 @@ public abstract class NMEAAgentImpl implements NMEAAgent {
         return (attributes.target ? targetIf : null);
     }
 
-    protected final boolean isSource() {
-    	return getSource()!=null;
+    public final boolean isSource() {
+        return getSource() != null;
     }
 
-    protected final boolean isTarget() {
-    	return getTarget()!=null;
+    public final boolean isTarget() {
+        return getTarget() != null;
     }
-    
+
     @Override
-    public boolean isUserCanStartAndStop() {
-    	return true;
+    public final boolean isUserCanStartAndStop() {
+        return attributes.canStartStop;
     }
-    
+
     @Override
-    public String getType() { 
-    	return getClass().getSimpleName();
+    public String getType() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Agent \"" + getType() + "\"";
     }
 
     @Override
     public void onTimerHR() {
+        // override if necessary
     }
 
     @Override

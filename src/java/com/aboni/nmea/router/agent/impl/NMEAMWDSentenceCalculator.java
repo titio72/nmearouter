@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.NMEAMWDConverter;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import net.sf.marineapi.nmea.sentence.*;
 
@@ -29,8 +30,8 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
         }
     }
 
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
         if (s instanceof HDGSentence) {
             converter.setHeading((HDGSentence) s, getCache().getNow());
         } else if (s instanceof MWVSentence && ((MWVSentence) s).isTrue()) {

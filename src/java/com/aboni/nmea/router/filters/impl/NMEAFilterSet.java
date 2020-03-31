@@ -1,5 +1,6 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.nmea.sentences.NMEASentenceFilter;
 import net.sf.marineapi.nmea.sentence.Sentence;
 

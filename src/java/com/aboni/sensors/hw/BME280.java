@@ -10,15 +10,16 @@ import java.io.IOException;
  * Adapted from https://github.com/adafruit/Adafruit_Python_BME280
  */
 public class BME280 implements Atmospheric {
+
     // This next addresses is returned by "sudo i2cdetect -y 1", see above.
-    public static final int BME280_I2CADDR = 0x76;
+    public static final int BME280_I2C_ADDRESS = 0x76;
 
     // Operating Modes
-    public static final int BME280_OSAMPLE_1 = 1;
-    public static final int BME280_OSAMPLE_2 = 2;
-    public static final int BME280_OSAMPLE_4 = 3;
-    public static final int BME280_OSAMPLE_8 = 4;
-    public static final int BME280_OSAMPLE_16 = 5;
+    public static final int BME280_O_SAMPLE_1 = 1;
+    public static final int BME280_O_SAMPLE_2 = 2;
+    public static final int BME280_O_SAMPLE_4 = 3;
+    public static final int BME280_O_SAMPLE_8 = 4;
+    public static final int BME280_O_SAMPLE_16 = 5;
 
     // BME280 Registers
     protected static final int[] BME280_REGISTER_DIG_T = new int[]{0x88, 0x8A, 0x8C};
@@ -32,9 +33,9 @@ public class BME280 implements Atmospheric {
     public static final int BME280_REGISTER_DIG_H6 = 0xE6;
     public static final int BME280_REGISTER_DIG_H7 = 0xE7;
 
-    public static final int BME280_REGISTER_CHIPID = 0xD0;
+    public static final int BME280_REGISTER_CHIP_ID = 0xD0;
     public static final int BME280_REGISTER_VERSION = 0xD1;
-    public static final int BME280_REGISTER_SOFTRESET = 0xE0;
+    public static final int BME280_REGISTER_SOFT_RESET = 0xE0;
 
     public static final int BME280_REGISTER_CONTROL_HUM = 0xF2;
     public static final int BME280_REGISTER_CONTROL = 0xF4;
@@ -66,77 +67,55 @@ public class BME280 implements Atmospheric {
         tFine = 0.0f;
     }
 
-	private int readU8(int register) throws IOException
-	{
-		return i2cdevice.readU8(register);
-	}
-
-	private int readS8(int register) throws IOException
-	{
-		return i2cdevice.readS8(register);
-	}
-
-	private int readU16LE(int register) throws IOException
-	{
-		return i2cdevice.readU16LE(register);
-	}
-
-	private int readS16LE(int register) throws IOException
-	{
-		return i2cdevice.readS16LE(register);
-	}
-
 	public void readCalibrationData() throws IOException {
         // Reads the calibration data from the IC
-        for (int j = 0; j < 9; j++) digT[j] = readU16LE(BME280_REGISTER_DIG_T[j]);
-        for (int j = 0; j < 9; j++) digP[0] = readU16LE(BME280_REGISTER_DIG_P[j]);
+        for (int j = 0; j < 9; j++) digT[j] = i2cdevice.readU16LE(BME280_REGISTER_DIG_T[j]);
+        for (int j = 0; j < 9; j++) digP[0] = i2cdevice.readU16LE(BME280_REGISTER_DIG_P[j]);
 
-        digH.digH1 = readU8(BME280_REGISTER_DIG_H1);
-        digH.digH2 = readS16LE(BME280_REGISTER_DIG_H2);
-        digH.digH3 = readU8(BME280_REGISTER_DIG_H3);
-        digH.digH6 = readS8(BME280_REGISTER_DIG_H7);
+        digH.digH1 = i2cdevice.readU8(BME280_REGISTER_DIG_H1);
+        digH.digH2 = i2cdevice.readS16LE(BME280_REGISTER_DIG_H2);
+        digH.digH3 = i2cdevice.readU8(BME280_REGISTER_DIG_H3);
+        digH.digH6 = i2cdevice.readS8(BME280_REGISTER_DIG_H7);
 
-        int h4 = readS8(BME280_REGISTER_DIG_H4);
+        int h4 = i2cdevice.readS8(BME280_REGISTER_DIG_H4);
         h4 = (h4 << 24) >> 20;
-        digH.digH4 = h4 | (readU8(BME280_REGISTER_DIG_H5) & 0x0F);
+        digH.digH4 = h4 | (i2cdevice.readU8(BME280_REGISTER_DIG_H5) & 0x0F);
 
-        int h5 = readS8(BME280_REGISTER_DIG_H6);
+        int h5 = i2cdevice.readS8(BME280_REGISTER_DIG_H6);
         h5 = (h5 << 24) >> 20;
-        digH.digH5 = h5 | (readU8(BME280_REGISTER_DIG_H5) >> 4 & 0x0F);
+        digH.digH5 = h5 | (i2cdevice.readU8(BME280_REGISTER_DIG_H5) >> 4 & 0x0F);
     }
 
 	private int readRawTemp() throws IOException {
         // Reads the raw (uncompensated) temperature from the sensor
-        int meas = BME280_OSAMPLE_8;
+        int meas = BME280_O_SAMPLE_8;
         i2cdevice.write(BME280_REGISTER_CONTROL_HUM, (byte) meas); // HUM ?
-        meas = BME280_OSAMPLE_8 << 5 | BME280_OSAMPLE_8 << 2 | 1;
+        meas = BME280_O_SAMPLE_8 << 5 | BME280_O_SAMPLE_8 << 2 | 1;
         i2cdevice.write(BME280_REGISTER_CONTROL, (byte) meas);
 
-        double sleepTime = 0.00125 + 0.0023 * (1 << BME280_OSAMPLE_8);
-        sleepTime = sleepTime + 0.0023 * (1 << BME280_OSAMPLE_8) + 0.000575;
-        sleepTime = sleepTime + 0.0023 * (1 << BME280_OSAMPLE_8) + 0.000575;
+        double sleepTime = 0.00125 + 0.0023 * (1 << BME280_O_SAMPLE_8);
+        sleepTime = sleepTime + 0.0023 * (1 << BME280_O_SAMPLE_8) + 0.000575;
+        sleepTime = sleepTime + 0.0023 * (1 << BME280_O_SAMPLE_8) + 0.000575;
         waitFor((int) (sleepTime * 1000));
-        int msb = readU8(BME280_REGISTER_TEMP_DATA);
-        int lsb = readU8(BME280_REGISTER_TEMP_DATA + 1);
-        int xlsb = readU8(BME280_REGISTER_TEMP_DATA + 2);
+        int msb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA);
+        int lsb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA + 1);
+        int xlsb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA + 2);
         return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
     }
 
-	private int readRawPressure() throws IOException
-	{
-		// Reads the raw (uncompensated) pressure level from the sensor
-		int msb  = readU8(BME280_REGISTER_PRESSURE_DATA);
-		int lsb  = readU8(BME280_REGISTER_PRESSURE_DATA + 1);
-		int xlsb = readU8(BME280_REGISTER_PRESSURE_DATA + 2);
-		return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
-	}
+	private int readRawPressure() throws IOException {
+        // Reads the raw (uncompensated) pressure level from the sensor
+        int msb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA);
+        int lsb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA + 1);
+        int xlsb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA + 2);
+        return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
+    }
 
-	private int readRawHumidity() throws IOException
-	{
-		int msb = readU8(BME280_REGISTER_HUMIDITY_DATA);
-		int lsb = readU8(BME280_REGISTER_HUMIDITY_DATA + 1);
-		return (msb << 8) | lsb;
-	}
+	private int readRawHumidity() throws IOException {
+        int msb = i2cdevice.readU8(BME280_REGISTER_HUMIDITY_DATA);
+        int lsb = i2cdevice.readU8(BME280_REGISTER_HUMIDITY_DATA + 1);
+        return (msb << 8) | lsb;
+    }
 
 	/* (non-Javadoc)
 	 * @see com.aboni.sensors.hw.AtmoSensor#readTemperature()

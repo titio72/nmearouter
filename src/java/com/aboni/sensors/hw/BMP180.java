@@ -11,31 +11,41 @@ import java.io.IOException;
 public class BMP180 implements Atmospheric {
 
     private static final I2CInterface.Endianness BMP180_ENDIANNESS = I2CInterface.Endianness.BIG_ENDIAN;
+
     // This next addresses is returned by "sudo i2cdetect -y 1", see above.
     public static final int BMP180_ADDRESS = 0x77;
+
     // Operating Modes
-    private static final int BMP180_ULTRALOWPOWER = 0;
-    private static final int BMP180_STANDARD = 1;
-    private static final int BMP180_HIGHRES = 2;
-    private static final int BMP180_ULTRAHIGHRES = 3;
+    public enum OperatingMode {
+        BMP180_ULTRA_LOW_POWER(0),
+        BMP180_STANDARD(1),
+        BMP180_HIGH_RES(2),
+        BMP180_ULTRA_HIGH_RES(3);
+
+        final int value;
+
+        OperatingMode(int i) {
+            value = i;
+        }
+    }
 
 	// BMP180 Registers
 	private static final int BMP180_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)
 	private static final int BMP180_CAL_AC2           = 0xAC;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_AC3           = 0xAE;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_AC4           = 0xB0;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_AC5           = 0xB2;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_AC6           = 0xB4;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_B1            = 0xB6;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_AC3 = 0xAE;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_AC4 = 0xB0;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_AC5 = 0xB2;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_AC6 = 0xB4;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_B1 = 0xB6;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_B2 = 0xB8;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_MC = 0xBC;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_MD = 0xBE;  // R   Calibration data (16 bits)
 
     private static final int BMP180_CONTROL = 0xF4;
-    private static final int BMP180_TEMPDATA = 0xF6;
-    private static final int BMP180_PRESSUREDATA = 0xF6;
-    private static final int BMP180_READTEMPCMD = 0x2E;
-    private static final int BMP180_READPRESSURECMD = 0x34;
+    private static final int BMP180_TEMP_DATA = 0xF6;
+    private static final int BMP180_PRESSURE_DATA = 0xF6;
+    private static final int BMP180_READ_TEMP_CMD = 0x2E;
+    private static final int BMP180_READ_PRESSURE_CMD = 0x34;
 
     private static class CalibrationAC {
         private int calAC1 = 0;
@@ -56,11 +66,16 @@ public class BMP180 implements Atmospheric {
     private final I2CInterface i2cDevice;
     private final CalibrationAC calibrationAC = new CalibrationAC();
     private final CalibrationBM calibrationBM = new CalibrationBM();
-    private static final int MODE = BMP180_STANDARD;
+    private final OperatingMode mode;
 
-    public BMP180(I2CInterface i2cDevice) throws IOException {
+    public BMP180(I2CInterface i2cDevice, OperatingMode mode) throws IOException {
+        this.mode = mode;
         this.i2cDevice = i2cDevice;
         readCalibrationData();
+    }
+
+    public BMP180(I2CInterface i2cDevice) throws IOException {
+        this(i2cDevice, OperatingMode.BMP180_STANDARD);
     }
 
     private int readU16(int register) throws IOException {
@@ -68,10 +83,10 @@ public class BMP180 implements Atmospheric {
     }
 
     private int readS16(int register) throws IOException {
-		return getI2CBus().readS16(register, BMP180_ENDIANNESS);
-	}
+        return getI2CBus().readS16(register, BMP180_ENDIANNESS);
+    }
 
-	private void readCalibrationData() throws IOException {
+    private void readCalibrationData() throws IOException {
         // Reads the calibration data from the IC
         calibrationAC.calAC1 = readS16(BMP180_CAL_AC1);   // INT16
         calibrationAC.calAC2 = readS16(BMP180_CAL_AC2);   // INT16
@@ -85,37 +100,36 @@ public class BMP180 implements Atmospheric {
         calibrationBM.calMD = readS16(BMP180_CAL_MD);    // INT16
     }
 
-	private int readRawTemp() throws IOException
-	{
-		// Reads the raw (uncompensated) temperature from the sensor
-		getI2CBus().write(BMP180_CONTROL, (byte)BMP180_READTEMPCMD);
-		waitfor(5);  // Wait 5ms
-		return readU16(BMP180_TEMPDATA);
-	}
+	private int readRawTemp() throws IOException {
+        // Reads the raw (uncompensated) temperature from the sensor
+        getI2CBus().write(BMP180_CONTROL, (byte) BMP180_READ_TEMP_CMD);
+        waitfor(5);  // Wait 5ms
+        return readU16(BMP180_TEMP_DATA);
+    }
 
 	private int readRawPressure() throws IOException {
         // Reads the raw (uncompensated) pressure level from the sensor
-        getI2CBus().write(BMP180_CONTROL, (byte) (BMP180_READPRESSURECMD + (BMP180_STANDARD << 6)));
+        getI2CBus().write(BMP180_CONTROL, (byte) (BMP180_READ_PRESSURE_CMD + (mode.value << 6)));
 
-        switch (MODE) {
-            case BMP180_ULTRALOWPOWER:
+        switch (mode) {
+            case BMP180_ULTRA_LOW_POWER:
                 waitfor(5);
                 break;
-            case BMP180_HIGHRES:
+            case BMP180_HIGH_RES:
                 waitfor(14);
                 break;
-            case BMP180_ULTRAHIGHRES:
+            case BMP180_ULTRA_HIGH_RES:
                 waitfor(26);
                 break;
             default:
                 waitfor(8);
                 break;
-		}
-		int msb  = getI2CBus().readU8(BMP180_PRESSUREDATA);
-		int lsb  = getI2CBus().readU8(BMP180_PRESSUREDATA + 1);
-		int xlsb = getI2CBus().readU8(BMP180_PRESSUREDATA + 2);
-		return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - BMP180_STANDARD);
-	}
+        }
+        int msb = getI2CBus().readU8(BMP180_PRESSURE_DATA);
+        int lsb = getI2CBus().readU8(BMP180_PRESSURE_DATA + 1);
+        int xlsb = getI2CBus().readU8(BMP180_PRESSURE_DATA + 2);
+        return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - mode.value);
+    }
 
 	public float readTemperature() {
 		try {
@@ -165,12 +179,12 @@ public class BMP180 implements Atmospheric {
             iX1 = (calibrationBM.calB2 * (iB6 * iB6) >> 12) >> 11;
             iX2 = (calibrationAC.calAC2 * iB6) >> 11;
             iX3 = iX1 + iX2;
-            iB3 = (((calibrationAC.calAC1 * 4 + iX3) << BMP180_STANDARD) + 2) / 4;
+            iB3 = (((calibrationAC.calAC1 * 4 + iX3) << mode.value) + 2) / 4;
             iX1 = (calibrationAC.calAC3 * iB6) >> 13;
             iX2 = (calibrationBM.calB1 * ((iB6 * iB6) >> 12)) >> 16;
             iX3 = ((iX1 + iX2) + 2) >> 2;
             iB4 = (calibrationAC.calAC4 * (iX3 + 32768)) >> 15;
-            iB7 = (iUP - iB3) * (50000 >> BMP180_STANDARD);
+            iB7 = (iUP - iB3) * (50000 >> mode.value);
             p = (iB7 / iB4) * 2;
 
             iX1 = (p >> 8) * (p >> 8);

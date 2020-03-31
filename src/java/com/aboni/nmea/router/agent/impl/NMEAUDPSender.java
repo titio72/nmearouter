@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -38,11 +39,6 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         } else {
             getLogger().info("Cannot setup UDP sender - already set up");
         }
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS q) {
-        // do nothing
     }
 
     @Override
@@ -86,29 +82,29 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 	}
 	
 	@Override
-	protected void onDeactivate() {
-		try {
-			serverSocket.close();
-		} catch (Exception e) {
-			ServerLog.getLogger().error("Cannot close datagram server", e);
-		}
-	}
-	
-	private String sending = "";
-	private int nSentences = 0;
-	
-	@Override
-	protected void doWithSentence(Sentence s, String src) {
-		String toSend = getOutSentence(s);
-		
-		if (nSentences==3) {
-			try {
-				for (InetAddress i: targets) {
-					DatagramPacket packet = new DatagramPacket(sending.getBytes(), sending.length(), i, portTarget);
-					serverSocket.send(packet);
-				}
-			} catch (IOException e) {
-				ServerLog.getLogger().error("Error sending datagram packet", e);
+    protected void onDeactivate() {
+        try {
+            serverSocket.close();
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Cannot close datagram server", e);
+        }
+    }
+
+    private String sending = "";
+    private int nSentences = 0;
+
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
+        String toSend = getOutSentence(s);
+
+        if (nSentences == 3) {
+            try {
+                for (InetAddress i : targets) {
+                    DatagramPacket packet = new DatagramPacket(sending.getBytes(), sending.length(), i, portTarget);
+                    serverSocket.send(packet);
+                }
+            } catch (IOException e) {
+                ServerLog.getLogger().error("Error sending datagram packet", e);
 			}
 			nSentences = 0;
 			sending = "";

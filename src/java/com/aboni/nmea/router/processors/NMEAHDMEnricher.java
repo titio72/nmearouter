@@ -11,28 +11,32 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 /**
  * To be used when there's only HDM in the stream and one needs to enrich it with variation and deviation.
  * Enrich HDM heading information and produces additional HDT & HDG sentences
- * @author aboni
  *
+ * @author aboni
  */
 public class NMEAHDMEnricher implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
 
-	private final NMEACache cache;
-    
-    public NMEAHDMEnricher(NMEACache cache) {
+    private final NMEACache cache;
+
+    @Inject
+    public NMEAHDMEnricher(@NotNull NMEACache cache) {
         m = new NMEAMagnetic2TrueConverter();
         this.cache = cache;
     }
 
-	@Override
+    @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
             if (sentence instanceof HDMSentence) {
-                HDMSentence hdm = (HDMSentence)sentence;
+                HDMSentence hdm = (HDMSentence) sentence;
                 HDGSentence hdg = getHDG(hdm);
 				if (fillVariation(hdg, getLastPosition())) {
                 	return new Pair<>(Boolean.TRUE, new Sentence[] {hdg, getHDT(hdg)});

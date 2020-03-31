@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;

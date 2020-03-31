@@ -2,7 +2,6 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -23,15 +22,9 @@ public class NMEAPlayer extends NMEAAgentImpl {
     }
 
     @Override
-    protected final void onSetup(String name, QOS q) {
-        // do nothing
-    }
-
-    @Override
     public String getDescription() {
         return "File " + getFile();
     }
-
 
     public void setFile(String file) {
         this.file = file;
