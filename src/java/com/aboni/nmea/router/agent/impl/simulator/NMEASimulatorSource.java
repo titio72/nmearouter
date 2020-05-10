@@ -2,6 +2,7 @@ package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
 import com.aboni.misc.PolarTable;
+import com.aboni.misc.PolarTableImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
@@ -66,8 +67,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 
 	private void loadPolars() {
 		if (polars == null) {
-			polars = new PolarTable();
-		}
+            polars = new PolarTableImpl();
+        }
         try {
         	if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
                 File f = new File(Constants.CONF_DIR, data.getPolars());
