@@ -96,6 +96,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             case "GPXPlayer":
                 agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent) a, q);
                 break;
+            case "Voltage":
+                agent = buildVoltage((VoltageAgent) a, q);
+                break;
             default:
                 break;
         }
@@ -111,15 +114,15 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
 		return agent;
 	}
 
-	private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
-    	if (agentFilterable!=null && filterConf!=null) {
-    		if (agentFilterable.getFilter()==null) {
+    private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
+        if (agentFilterable != null && filterConf != null) {
+            if (agentFilterable.getFilter() == null) {
                 NMEAFilterSet ff = new NMEAFilterSet(filterConf.isWhitelist() ? TYPE.WHITELIST : TYPE.BLACKLIST);
                 agentFilterable.setFilter(ff);
             }
-    		setFilter(filterConf, agentFilterable.getFilter());
-    	}
-	}
+            setFilter(filterConf, agentFilterable.getFilter());
+        }
+    }
 	
 	private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
     	if (conf!=null && dest!=null) {
@@ -317,4 +320,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return a;
     }
 
+    private NMEAAgent buildVoltage(VoltageAgent s, QOS q) {
+        NMEAAgent a = ThingsFactory.getInstance(NMEAVoltageSensor.class);
+        a.setup(s.getName(), q);
+        return a;
+    }
 }

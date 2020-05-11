@@ -13,8 +13,9 @@
 			<xs:element name="UdpAgent" type="UdpAgent"/>
 			<xs:element name="ConsoleAgent" type="ConsoleAgent"/>
 			<xs:element name="TrackAgent" type="TrackAgent"/>
-            <xs:element name="SensorAgent" type="SensorAgent"/>
-            <xs:element name="GyroAgent" type="GyroAgent"/>
+			<xs:element name="SensorAgent" type="SensorAgent"/>
+			<xs:element name="VoltageAgent" type="VoltageAgent"/>
+			<xs:element name="GyroAgent" type="GyroAgent"/>
 			<xs:element name="SimulatorAgent" type="SimulatorAgent"/>
 			<xs:element name="MeteoAgent" type="MeteoAgent"/>
 			<xs:element name="MWDAgent" type="MWDAgent"/>
@@ -109,31 +110,39 @@
 	</xs:complexContent>
 </xs:complexType>
 
-<xs:complexType name="ConsoleAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="Console"/>
-	    </xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+	<xs:complexType name="ConsoleAgent">
+		<xs:complexContent>
+			<xs:extension base="AgentBase">
+				<xs:attribute name="type" type="xs:string" fixed="Console"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 
-<xs:complexType name="SensorAgent">
-    <xs:complexContent>
-        <xs:extension base="AgentBase">
-            <xs:attribute name="type" type="xs:string" fixed="Sensor"/>
-        </xs:extension>
-    </xs:complexContent>
-</xs:complexType>
+	<xs:complexType name="SensorAgent">
+		<xs:complexContent>
+			<xs:extension base="AgentBase">
+				<xs:attribute name="type" type="xs:string" fixed="Sensor"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 
-<xs:complexType name="GyroAgent">
-    <xs:complexContent>
-        <xs:extension base="AgentBase">
-            <xs:attribute name="type" type="xs:string" fixed="Gyro"/>
-        </xs:extension>
-    </xs:complexContent>
-</xs:complexType>
+	<xs:complexType name="VoltageAgent">
+		<xs:complexContent>
+			<xs:extension base="AgentBase">
+				<xs:attribute name="type" type="xs:string" fixed="Voltage"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
 
-<xs:complexType name="SimulatorAgent">
+	<xs:complexType name="GyroAgent">
+		<xs:complexContent>
+			<xs:extension base="AgentBase">
+				<xs:attribute name="type" type="xs:string" fixed="Gyro"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="SimulatorAgent">
 	<xs:complexContent>
 	    <xs:extension base="AgentBase">
 			<xs:attribute name="type" type="xs:string" fixed="Simulator"/>

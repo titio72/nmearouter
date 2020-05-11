@@ -15,42 +15,37 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for MeteoAgent complex type.
- * 
+ * <p>Java class for VoltageAgent complex type.
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
- * &lt;complexType name="MeteoAgent">
+ * &lt;complexType name="VoltageAgent">
  *   &lt;complexContent>
  *     &lt;extension base="{}AgentBase">
- *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="Meteo" />
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" fixed="Voltage" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "MeteoAgent")
-public class MeteoAgent
-    extends AgentBase
-{
+@XmlType(name = "VoltageAgent")
+public class VoltageAgent
+        extends AgentBase {
 
     @XmlAttribute(name = "type")
     protected String type;
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getType() {
         if (type == null) {
-            return "Meteo";
+            return "Voltage";
         } else {
             return type;
         }
@@ -58,11 +53,9 @@ public class MeteoAgent
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
