@@ -57,12 +57,15 @@ public class SensorMPU6050 extends I2CSensor {
     }
     
     @Override
-    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-        device = new I2CInterface(bus, MPU6050_I2CADDR);
-        device.write(BypassMode.BYPASS_MODE_ADDR, BypassMode.BYPASS_MODE_ON);
-        device.write(PowerManagement.POWER_MGMT_ADDR_2, PowerManagement.POWER_MGMT_OFF);
-        device.write(PowerManagement.POWER_MGMT_ADDR_1, PowerManagement.POWER_MGMT_OFF);
-
+    protected void initSensor(int bus) throws SensorException {
+        try {
+            device = new I2CInterface(bus, MPU6050_I2CADDR);
+            device.write(BypassMode.BYPASS_MODE_ADDR, BypassMode.BYPASS_MODE_ON);
+            device.write(PowerManagement.POWER_MGMT_ADDR_2, PowerManagement.POWER_MGMT_OFF);
+            device.write(PowerManagement.POWER_MGMT_ADDR_1, PowerManagement.POWER_MGMT_OFF);
+        } catch (IOException | UnsupportedBusNumberException e) {
+            throw new SensorException("Error initializing MPU60050", e);
+        }
     }
    
     private void readA() throws IOException {
@@ -112,7 +115,7 @@ public class SensorMPU6050 extends I2CSensor {
             readA();
             readG();
         } catch (IOException e) {
-            throw new SensorException("Error readinng gyro", e);
+            throw new SensorException("Error reading gyro", e);
         }
     }
     
@@ -120,16 +123,16 @@ public class SensorMPU6050 extends I2CSensor {
         return scaledAccel;
     }
     
-    public double[] readAccel() throws SensorNotInititalizedException {
+    public double[] readAccel() throws SensorNotInitializedException {
         if (isInitialized()) {
             double aXScaled = scaledAccel[X];
             double aYScaled = scaledAccel[Y];
             double aZScaled = scaledAccel[Z];
-            return new double[] {getXRotation(aXScaled, aYScaled, aZScaled),
+            return new double[]{getXRotation(aXScaled, aYScaled, aZScaled),
                     getYRotation(aXScaled, aYScaled, aZScaled),
                     getZRotation(aXScaled, aYScaled, aZScaled)};
         } else {
-            throw new SensorNotInititalizedException("Error reading accelerometer: sensor not initialized");
+            throw new SensorNotInitializedException("Error reading accelerometer: sensor not initialized");
         }
     }
     
@@ -137,41 +140,41 @@ public class SensorMPU6050 extends I2CSensor {
         return scaledGyro;
     }
 
-    public double[] readGyro() throws SensorNotInititalizedException {
+    public double[] readGyro() throws SensorNotInitializedException {
         if (isInitialized()) {
             double gXScaled = scaledGyro[X];
             double gYScaled = scaledGyro[Y];
             double gZScaled = scaledGyro[Z];
-            return new double[] {getXRotation(gXScaled, gYScaled, gZScaled),
+            return new double[]{getXRotation(gXScaled, gYScaled, gZScaled),
                     getYRotation(gXScaled, gYScaled, gZScaled),
                     getZRotation(gXScaled, gYScaled, gZScaled)};
         } else {
-            throw new SensorNotInititalizedException("Error reading gyro: sensor not initialized");
+            throw new SensorNotInitializedException("Error reading gyro: sensor not initialized");
         }
     }
 
-    public double[] readAccelDegrees() throws SensorNotInititalizedException {
+    public double[] readAccelDegrees() throws SensorNotInitializedException {
         double[] r = readAccel();
-        return new double[] {
-                Math.toDegrees(r[X]), 
-                Math.toDegrees(r[Y]), 
+        return new double[]{
+                Math.toDegrees(r[X]),
+                Math.toDegrees(r[Y]),
                 Math.toDegrees(r[Z])
         };
     }
 
-    public double getPitch() throws SensorNotInititalizedException {
+    public double getPitch() throws SensorNotInitializedException {
         return readAccel()[X];
     }
 
-    public double getRoll() throws SensorNotInititalizedException {
+    public double getRoll() throws SensorNotInitializedException {
         return readAccel()[Y];
     }
 
-    public double getPitchDegrees() throws SensorNotInititalizedException {
+    public double getPitchDegrees() throws SensorNotInitializedException {
         return Math.toDegrees(readAccel()[X]);
     }
 
-    public double getRollDegrees() throws SensorNotInititalizedException {
+    public double getRollDegrees() throws SensorNotInitializedException {
         return Math.toDegrees(readAccel()[Y]);
     }
 

@@ -62,19 +62,19 @@ public class SensorTemp implements Sensor {
 	}
 
     @Override
-	public void read() throws SensorNotInititalizedException {
-		lastRead = System.currentTimeMillis();
-		if (sensor!=null) {
-			synchronized (readings) {
-				Map<String, Double> m = sensor.getValues();
-				for (String k : m.keySet()) {
-					Reading r = new Reading(k, lastRead, sensor.getTemp(k));
-					readings.put(k, r);
-				}
-			}
-		} else {
-			throw new SensorNotInititalizedException("Temp sensor notr initialized!");
-		}
+    public void read() throws SensorNotInitializedException {
+        lastRead = System.currentTimeMillis();
+        if (sensor != null) {
+            synchronized (readings) {
+                Map<String, Double> m = sensor.getValues();
+                for (String k : m.keySet()) {
+                    Reading r = new Reading(k, lastRead, sensor.getTemp(k));
+                    readings.put(k, r);
+                }
+            }
+        } else {
+            throw new SensorNotInitializedException("Temp sensor not initialized!");
+        }
 	}
 
 	public Collection<Reading> getReadings() {

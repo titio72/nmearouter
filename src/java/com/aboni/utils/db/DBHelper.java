@@ -1,7 +1,6 @@
 package com.aboni.utils.db;
 
-import com.aboni.utils.Constants;
-import com.aboni.utils.GDrive;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 
 import java.io.File;
@@ -20,8 +19,8 @@ public class DBHelper implements AutoCloseable {
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
 
-    private String jdbc = JDBC_DRIVER;  
-    private String dburl = DB_URL;
+    private String jdbc = JDBC_DRIVER;
+    private String dbUrl = DB_URL;
     private String user = DEFAULT_USER;
     private String password;
 
@@ -39,13 +38,13 @@ public class DBHelper implements AutoCloseable {
         try {
             File f = new File(Constants.DB);
             try (FileInputStream propInput = new FileInputStream(f)) {
-				Properties p = new Properties();
-				p.load(propInput);
-				jdbc = p.getProperty("jdbc.driver.class");
-				dburl = p.getProperty("jdbc.url");
-				user = p.getProperty("user");
-				password = p.getProperty("pwd");
-			}
+                Properties p = new Properties();
+                p.load(propInput);
+                jdbc = p.getProperty("jdbc.driver.class");
+                dbUrl = p.getProperty("jdbc.url");
+                user = p.getProperty("user");
+                password = p.getProperty("pwd");
+            }
         } catch (Exception e) {
             ServerLog.getLogger().debug("Cannot read db configuration!");
         }
@@ -58,22 +57,23 @@ public class DBHelper implements AutoCloseable {
     @Override
     public void close() {
 		if (conn != null) {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				ServerLog.getLogger().error("Error closing connection!", e);
-			}
-		}
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                ServerLog.getLogger().error("Error closing connection!", e);
+            }
+            conn = null;
+        }
     }
     
     private boolean reconnect() {
     	try {
-    		close();
-    		ServerLog.getLogger().info("Establishing connection to DB {" + dburl + "}!");
-            conn = DriverManager.getConnection(dburl, user, password);
-    		conn.setAutoCommit(autocommit);
-    		return true;
-    	} catch (Exception e) {
+            close();
+            ServerLog.getLogger().debug("Establishing connection to DB {" + dbUrl + "}!");
+            conn = DriverManager.getConnection(dbUrl, user, password);
+            conn.setAutoCommit(autocommit);
+            return true;
+        } catch (Exception e) {
     		conn = null;
             ServerLog.getLogger().error("Cannot reset connection!", e);
             return false;
@@ -81,52 +81,31 @@ public class DBHelper implements AutoCloseable {
     }
 
     public synchronized String backup() throws IOException, InterruptedException {
-    	SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
         ServerLog.getLogger().info("DB Backup");
         String file = df.format(new Date()) + ".sql";
         ProcessBuilder b = new ProcessBuilder("./dbBck.sh", user, password, file);
-        Process proc = b.start();
-        int retCode = proc.waitFor();
-        if (retCode==0) {
-            upload("./web/" + file + ".tgz");
+        Process process = b.start();
+        int retCode = process.waitFor();
+        if (retCode == 0) {
             return file;
         } else {
-        	return null;
+            return null;
         }
     }
 
-    private Thread gDriveThread;
-
-    private void upload(String file) {
-        if (gDriveThread==null) {
-            gDriveThread = new Thread(() -> {
-                try {
-                    GDrive.upload(file, "application/x-gtar");
-                } catch (Exception e) {
-                    ServerLog.getLogger().error("Error uploading backup", e);
-                }
-            }
-            );
-            gDriveThread.setDaemon(true);
-        } else if (gDriveThread.isAlive()) {
-            gDriveThread.interrupt();
-        }
-        gDriveThread.start();
+    public void write(DBEventWriter writer, Event e) {
+        write(writer, e, 0);
     }
 
-    public boolean write(EventWriter writer, Event e) {
-    	return write(writer, e, 0);
-    }
-
-    private boolean write(EventWriter writer, Event e, int count) {
-    	boolean retry = false;
-    	if (writer!=null && e!=null) {
+    private void write(DBEventWriter writer, Event e, int count) {
+        boolean retry = false;
+        if (writer != null && e != null) {
             try {
                 writer.write(e, getConnection());
-                return true;
             } catch (Exception ex) {
-            	writer.reset();
-            	retry = true;
+                writer.reset();
+                retry = true;
                 ServerLog.getLogger().error("Cannot write {" + e + "} (" + count + ")!", ex);
             }
         }
@@ -136,6 +115,5 @@ public class DBHelper implements AutoCloseable {
 				write(writer, e, count);
 	    	}
     	}
-    	return false;
     }
 }

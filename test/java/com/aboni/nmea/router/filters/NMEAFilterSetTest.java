@@ -1,15 +1,15 @@
 package com.aboni.nmea.router.filters;
 
-import static org.junit.Assert.*;
-
-
-import org.junit.Test;
-
-import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
-
+import com.aboni.nmea.router.filters.impl.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSet.TYPE;
+import com.aboni.nmea.router.filters.impl.STalkFilter;
+import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class NMEAFilterSetTest {
 
@@ -56,25 +56,70 @@ public class NMEAFilterSetTest {
 		set.addFilter(f1);
 		set.addFilter(f2);
 
-		Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-		assertFalse(set.match(test, "WHATEVER"));
-		
-		test = SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		assertFalse(set.match(test, "WHATEVER"));
-		
-		test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
-		assertTrue(set.match(test, "WHATEVER"));
-	}
-	
-	@Test
-	public void testBlackListSTalk() {
-		STalkFilter f1 = new STalkFilter("84", true);
-		NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
-		set.addFilter(f1);
+        Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
+        assertFalse(set.match(test, "WHATEVER"));
 
-		//should pass any sentence not-STALK and STALK:84
-		
-		Sentence test = SentenceFactory.getInstance().createParser("$STALK,84,36,85,88,40,00,0A,02,08*16");
+        test = SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
+        assertFalse(set.match(test, "WHATEVER"));
+
+        test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
+        assertTrue(set.match(test, "WHATEVER"));
+    }
+
+    @Test
+    public void testCount() {
+        NMEABasicSentenceFilter f1 = new NMEABasicSentenceFilter("GLL");
+        NMEABasicSentenceFilter f2 = new NMEABasicSentenceFilter("HDG");
+        NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
+        assertEquals(0, set.count());
+        set.addFilter(f1);
+        set.addFilter(f2);
+        assertEquals(2, set.count());
+    }
+
+    @Test
+    public void testDrop1() {
+        NMEABasicSentenceFilter f1 = new NMEABasicSentenceFilter("GLL");
+        NMEABasicSentenceFilter f2 = new NMEABasicSentenceFilter("HDG");
+        NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
+        assertEquals(0, set.count());
+        set.addFilter(f1);
+        set.addFilter(f2);
+        set.dropFilter(f1);
+        assertEquals(1, set.count());
+        assertEquals(f2, set.getFilters().next());
+    }
+
+    @Test
+    public void testDrop2() {
+        NMEABasicSentenceFilter f1 = new NMEABasicSentenceFilter("GLL");
+        NMEABasicSentenceFilter f2 = new NMEABasicSentenceFilter("HDG");
+        NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
+        assertEquals(0, set.count());
+        set.addFilter(f1);
+        set.addFilter(f2);
+        set.dropFilter(f2);
+        assertEquals(1, set.count());
+        assertEquals(f1, set.getFilters().next());
+    }
+
+    @Test
+    public void testDrop0() {
+        NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
+        assertEquals(0, set.count());
+        set.dropFilter(new NMEABasicSentenceFilter("GLL"));
+        assertEquals(0, set.count());
+    }
+
+    @Test
+    public void testBlackListSTalk() {
+        STalkFilter f1 = new STalkFilter("84", true);
+        NMEAFilterSet set = new NMEAFilterSet(TYPE.BLACKLIST);
+        set.addFilter(f1);
+
+        //should pass any sentence not-STALK and STALK:84
+
+        Sentence test = SentenceFactory.getInstance().createParser("$STALK,84,36,85,88,40,00,0A,02,08*16");
 		assertTrue(set.match(test, "WHATEVER"));
 		
 		test = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");

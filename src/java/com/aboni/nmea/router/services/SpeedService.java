@@ -1,34 +1,42 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
-import com.aboni.utils.TimeSerieSample;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.sampledquery.SampleWriter;
+import com.aboni.nmea.router.data.sampledquery.SampleWriterFactory;
+import com.aboni.nmea.router.data.sampledquery.SampledQuery;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
+import com.aboni.utils.Query;
+import com.aboni.utils.ThingsFactory;
+import com.aboni.utils.TimeSeriesSample;
 import org.json.JSONObject;
 
-public class SpeedService extends SampledQueryService {
+import javax.inject.Inject;
+import javax.inject.Named;
 
-	private static SampledQueryConf getConf() {
-		SampledQueryService.SampledQueryConf conf = new SampledQueryConf();
-		conf.setAvgField("speed");
-		conf.setMaxField("maxSpeed");
-		conf.setMinField("speed");
-		conf.setWhere(null);
-		conf.setSeriesNameField("'SOG' as type");
-		conf.setTable("track");
-		return conf;
-	}
+public class SpeedService extends JSONWebService {
 
-	private static class SpeedSampleWriter implements SampleWriter {
+    private static final int DEFAULT_MAX_SAMPLES = 500;
 
-		private long lastTS = 0;
-		private double lastV = 0.0;
-		private boolean lastSkipped = true;
-		private boolean lastNull = false;
-		private int count = 0;
+    private @Inject
+    @Named(Constants.TAG_SPEED)
+    SampledQueryConf conf;
+    private @Inject
+    QueryFactory queryFactory;
+    private SampledQuery sampledQuery;
 
-		@Override
-		public JSONObject[] getSampleNode(TimeSerieSample s) {
+    private static class SpeedSampleWriter implements SampleWriter {
+
+        private long lastTS = 0;
+        private double lastV = 0.0;
+        private boolean lastSkipped = true;
+        private boolean lastNull = false;
+        private int count = 0;
+
+        @Override
+		public JSONObject[] getSampleNode(TimeSeriesSample s) {
 			JSONObject[] ret;
-			if (s.getV() <= 0.1 && lastV <= 0.1) {
+			if (s.getValue() <= 0.1 && lastV <= 0.1) {
 				if (count > 0) {
 					if (!lastSkipped) {
 						// speed is 0 but last sample was not skipped so write a 0 to bring chart to 0
@@ -60,13 +68,13 @@ public class SpeedService extends SampledQueryService {
 				lastSkipped = false;
 				lastNull = false;
 			}
-			lastV = s.getV();
+			lastV = s.getValue();
 			lastTS = s.getLastTs();
 			return ret;
 		}
 
-		private JSONObject writeValue(TimeSerieSample s) {
-			return write(s.getT0(), Utils.round(s.getvMin(), 2), Utils.round(s.getV(), 2), Utils.round(s.getvMax(), 2));
+		private JSONObject writeValue(TimeSeriesSample s) {
+			return write(s.getT0(), Utils.round(s.getValueMin(), 2), Utils.round(s.getValue(), 2), Utils.round(s.getValueMax(), 2));
 		}
 
 		private JSONObject writeNull(long ts) {
@@ -85,18 +93,37 @@ public class SpeedService extends SampledQueryService {
 			s.put("vMax", max);
 			return s;
 		}
-	}
+    }
 
-	private static class SpeedSampleWriterFactory implements SampleWriterFactory {
+    private static class SpeedSampleWriterFactory implements SampleWriterFactory {
 
-		@Override
-		public SampleWriter getWriter(String type) {
-			return new SpeedSampleWriter();
-		}
-	}
+        @Override
+        public SampleWriter getWriter(String type) {
+            return new SpeedSampleWriter();
+        }
+    }
 
-	public SpeedService() {
-		super(getConf(), new SpeedSampleWriterFactory());
-	}
+    @Inject
+    public SpeedService() {
+        super();
+        setLoader(this::getResult);
+    }
 
+    private JSONObject getResult(ServiceConfig config) {
+        Query q = queryFactory.getQuery(config);
+        if (q != null) {
+            SampledQuery sq = getSampledQuery();
+            return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
+        } else {
+            return getError("No valid query specified!");
+        }
+    }
+
+    private SampledQuery getSampledQuery() {
+        if (sampledQuery == null) {
+            sampledQuery = ThingsFactory.getInstance(SampledQuery.class);
+            sampledQuery.init(conf, new SpeedSampleWriterFactory());
+        }
+        return sampledQuery;
+    }
 }

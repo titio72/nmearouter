@@ -9,4 +9,8 @@ public class JSONGenerationException extends Exception {
     public JSONGenerationException(String msg, Throwable t) {
         super(msg, t);
     }
+
+    public JSONGenerationException(Throwable t) {
+        super(t);
+    }
 }

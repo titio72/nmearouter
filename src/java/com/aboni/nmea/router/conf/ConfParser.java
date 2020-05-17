@@ -13,13 +13,13 @@ public class ConfParser {
 		// nothing to initialize
 	}
 	
-	@SuppressWarnings("unchecked")
 	public ConfParser init(String f) throws MalformedConfigurationException {
 		try {
-			File file = new File(f);
-			JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
-			r = ((JAXBElement<Router>) jaxbContext.createUnmarshaller().unmarshal(file)).getValue();
-		} catch (JAXBException e) {
+            File file = new File(f);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
+            //noinspection unchecked
+            r = ((JAXBElement<Router>) jaxbContext.createUnmarshaller().unmarshal(file)).getValue();
+        } catch (JAXBException e) {
 		  	throw new MalformedConfigurationException(e);
 	  	}
 		return this;

@@ -2,8 +2,9 @@ package com.aboni.toolkit;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.track.TrackManager;
-import com.aboni.nmea.router.track.TrackPoint;
+import com.aboni.nmea.router.data.track.TrackManager;
+import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
@@ -15,17 +16,16 @@ import java.util.Date;
 
 public class UpdateAnchorDB {
 
+    public static final long AGE_THRESHOLD = 6L * 60L * 60L * 1000L; //6h
+
     private static class TrackItem {
         int id;
         GeoPositionT position;
         double speed;
-        double maxSpeed;
-        double distance;
-        int deltaTime;
         boolean anchor;
     }
 
-    private TrackManager trackManager = new TrackManager(true);
+    private final TrackManager trackManager = new TrackManagerImpl(true);
 
     private static TrackItem getItem(ResultSet rs) throws SQLException {
         // lat, lon, TS, anchor, id, speed, maxSpeed, dist, dTime
@@ -35,9 +35,6 @@ public class UpdateAnchorDB {
         itm.position = new GeoPositionT(rs.getTimestamp(3).getTime(), rs.getDouble(1), rs.getDouble(2));
         itm.anchor = (rs.getInt(4) == 1);
         itm.speed = rs.getDouble(6);
-        itm.maxSpeed = rs.getDouble(7);
-        itm.distance = rs.getDouble(8);
-        itm.deltaTime = rs.getInt(9);
         return itm;
     }
 
@@ -65,7 +62,7 @@ public class UpdateAnchorDB {
                             while (rs.next()) {
                                 i++;
                                 TrackItem item = getItem(rs);
-                                TrackPoint tp = trackManager.processPosition(item.position, item.speed, -1);
+                                TrackPoint tp = trackManager.processPosition(item.position, item.speed);
 
                                 processPoint(item, tp, stUpd);
 
@@ -78,7 +75,7 @@ public class UpdateAnchorDB {
                             final int count = i;
                             ServerLog.getConsoleOut().println("Processed %d points " + count);
                             ServerLog.getConsoleOut().println("wrong ids   " + idDiscrepancies);
-                            ServerLog.getConsoleOut().println("anchor xxxx " + anchorDiscrepancies);
+                            ServerLog.getConsoleOut().println("anchor      " + anchorDiscrepancies);
                         }
                     }
                 }
@@ -86,60 +83,72 @@ public class UpdateAnchorDB {
         } catch (Exception e) {
             e.printStackTrace(ServerLog.getConsoleOut());
         }
-	}
+    }
 
-	private void processPoint(TrackItem item, TrackPoint tp, PreparedStatement stUpd) throws SQLException {
+    private boolean isLastValid(TrackItem item) {
+        return (last != null && last.position.getTimestamp() > item.position.getTimestamp());
+    }
 
+    private boolean isRecent(TrackItem item) {
+        return (last != null && (item.position.getTimestamp() - last.position.getTimestamp()) < AGE_THRESHOLD);
+    }
+
+    private void processPoint(TrackItem item, TrackPoint tp, PreparedStatement stUpd) throws SQLException {
         if (filter(item)) {
-
-            if (last != null && last.position.getTimestamp() > item.position.getTimestamp()) {
+            if (isLastValid(item)) {
                 // very bad issue... consecutive points are not ordered with time
                 ServerLog.getConsoleOut().println("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
                 ServerLog.getConsoleOut().println("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
                 ServerLog.getConsoleOut().println("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
                 idDiscrepancies++;
+            } else if (isRecent(item)) {
+                updateSameLeg(item, tp, stUpd);
             } else {
-                if (last != null && (item.position.getTimestamp() - last.position.getTimestamp()) < (6L * 60L * 60L * 1000L) /*6 hours*/) {
-                    Course c = new Course(last.position, item.position);
-                    double dist = c.getDistance();
-                    int interval = (int) (c.getInterval() / 1000);
-
-                    boolean anchor;
-                    if (tp == null) {
-                        // track manager says that this sample should not be tracked (so you're moored)
-                        // speed check should not be necessary but...
-                        anchor = item.speed < 1.0;
-                    } else {
-                        anchor = tp.isAnchor();
-                    }
-
-                    if (anchor != item.anchor) {
-                        logItem(item, anchor);
-                        anchorDiscrepancies++;
-                    }
-                    stUpd.setInt(1, anchor ? 1 : 0);
-                    stUpd.setDouble(2, dist);
-                    stUpd.setInt(3, interval);
-                    stUpd.setInt(4, item.id);
-                    stUpd.execute();
-                } else {
-                    if ((item.speed < 1.0) != item.anchor) {
-                        logItem(item, true);
-                    }
-                    stUpd.setInt(1, item.speed < 0.1 ? 1 : 0);
-                    stUpd.setDouble(2, 0);
-                    stUpd.setInt(3, 0);
-                    stUpd.setInt(4, item.id);
-                    stUpd.execute();
-                }
+                startNewLeg(item, stUpd);
             }
         }
+    }
+
+    private void startNewLeg(TrackItem item, PreparedStatement stUpd) throws SQLException {
+        if ((item.speed < 1.0) != item.anchor) {
+            logItem(item, true);
+        }
+        stUpd.setInt(1, item.speed < 0.1 ? 1 : 0);
+        stUpd.setDouble(2, 0);
+        stUpd.setInt(3, 0);
+        stUpd.setInt(4, item.id);
+        stUpd.execute();
+    }
+
+    private void updateSameLeg(TrackItem item, TrackPoint tp, PreparedStatement stUpd) throws SQLException {
+        Course c = new Course(last.position, item.position);
+        double dist = c.getDistance();
+        int interval = (int) (c.getInterval() / 1000);
+
+        boolean anchor;
+        if (tp == null) {
+            // track manager says that this sample should not be tracked (so you're moored)
+            // speed check should not be necessary but...
+            anchor = item.speed < 1.0;
+        } else {
+            anchor = tp.isAnchor();
+        }
+
+        if (anchor != item.anchor) {
+            logItem(item, anchor);
+            anchorDiscrepancies++;
+        }
+        stUpd.setInt(1, anchor ? 1 : 0);
+        stUpd.setDouble(2, dist);
+        stUpd.setInt(3, interval);
+        stUpd.setInt(4, item.id);
+        stUpd.execute();
     }
 
 
     private void logItem(TrackItem item, boolean expectedAnchor) {
         ServerLog.getConsoleOut().format("Discrepancy: %s %s %d %s Speed %f.2 %n",
-                item.anchor ? "Y" : "N", expectedAnchor?"Y":"N", item.id,
+                item.anchor ? "Y" : "N", expectedAnchor ? "Y" : "N", item.id,
                 new Date(item.position.getTimestamp()), item.speed);
     }
 

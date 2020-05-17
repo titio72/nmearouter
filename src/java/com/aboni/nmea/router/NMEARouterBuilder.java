@@ -1,9 +1,8 @@
 package com.aboni.nmea.router;
 
+import java.util.Properties;
+
 public interface NMEARouterBuilder {
 
-	NMEARouter getRouter();
-
-	NMEARouterBuilder init();
-
+    void init(NMEARouter router, Properties props);
 }

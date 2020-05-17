@@ -6,7 +6,7 @@ import com.pi4j.wiringpi.GpioUtil;
 
 public class DHT11 {
 
-    private static final int MAXTIMINGS = 85;
+    private static final int MAX_TIMINGS = 85;
     private float h;
     private float c;
     private final int[] dht11Dat;
@@ -29,8 +29,8 @@ public class DHT11 {
     }
 
     public void read() {
-       int laststate = Gpio.HIGH;
-       int j = 0;
+        int lastState = Gpio.HIGH;
+        int j = 0;
        dht11Dat[0] = dht11Dat[1] = dht11Dat[2] = dht11Dat[3] = dht11Dat[4] = 0;
 
        Gpio.pinMode(3, Gpio.OUTPUT);
@@ -39,18 +39,18 @@ public class DHT11 {
     
        Gpio.digitalWrite(3, Gpio.HIGH);        
        Gpio.pinMode(3, Gpio.INPUT);
-    
-       for (int i = 0; i < MAXTIMINGS; i++) {
-          int counter = 0;
-          while (Gpio.digitalRead(3) == laststate) {
-              counter++;
-              Gpio.delayMicroseconds(1);
-              if (counter == 255) {
-                  break;
-              }
-          }
-    
-          laststate = Gpio.digitalRead(3);
+
+        for (int i = 0; i < MAX_TIMINGS; i++) {
+            int counter = 0;
+            while (Gpio.digitalRead(3) == lastState) {
+                counter++;
+                Gpio.delayMicroseconds(1);
+                if (counter == 255) {
+                    break;
+                }
+            }
+
+            lastState = Gpio.digitalRead(3);
     
           if (counter == 255) {
               break;

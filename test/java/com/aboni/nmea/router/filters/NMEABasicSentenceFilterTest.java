@@ -1,49 +1,54 @@
 package com.aboni.nmea.router.filters;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
+import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class NMEABasicSentenceFilterTest {
 
 	@Test
 	public void testSentenceType() {
-		NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL", null, "");
-		
-		Sentence sMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
-		assertTrue(f.match(sMatch, "whatever"));
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL");
+        assertEquals("GLL", f.getSentenceId());
 
-		Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
+        Sentence sMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
+        assertTrue(f.match(sMatch, "whatever"));
+
+        Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
         assertFalse(f.match(sNoMatch, "whatever"));
-	}
+    }
 
 	@Test
 	public void testSentenceTypeAndSource() {
-		NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL", null, "SRC");
-		
-		Sentence sMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
-		assertTrue(f.match(sMatch, "SRC"));
-		assertFalse(f.match(sMatch, "ANOTHERSRC"));
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL", "SRC");
+        assertEquals("SRC", f.getSource());
+        assertEquals("GLL", f.getSentenceId());
 
-		Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
-		assertFalse(f.match(sNoMatch, "SRC"));
-		assertFalse(f.match(sNoMatch, "ANOTHERSRC"));
-	}
+        Sentence sMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
+        assertTrue(f.match(sMatch, "SRC"));
+        assertFalse(f.match(sMatch, "ANOTHERSRC"));
+
+        Sentence sNoMatch = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GGA);
+        assertFalse(f.match(sNoMatch, "SRC"));
+        assertFalse(f.match(sNoMatch, "ANOTHERSRC"));
+    }
 
 	@Test
 	public void testTalkerId() {
-		NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("", TalkerId.II, "");
-		Sentence s = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
-		assertTrue(f.match(s, "whatever"));
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("", TalkerId.II, "");
+        assertEquals(TalkerId.II, f.getTalkerId());
 
-		Sentence s1 = SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
-		assertFalse(f.match(s1, "whatever"));
-	}
+        Sentence s = SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
+        assertTrue(f.match(s, "whatever"));
+
+        Sentence s1 = SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.GLL);
+        assertFalse(f.match(s1, "whatever"));
+    }
 
 	@Test
 	public void testSource() {

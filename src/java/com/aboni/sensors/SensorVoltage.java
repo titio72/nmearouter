@@ -3,7 +3,6 @@ package com.aboni.sensors;
 import com.aboni.misc.DataFilter;
 import com.aboni.sensors.hw.ADS1115;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class SensorVoltage extends I2CSensor {
             try {
                 smoothing = Double.parseDouble(sSmoothing);
             } catch (Exception e) {
-                ServerLog.getLogger().error("Cannot parse voltage smoothing factor " + sSmoothing, e);
+                error("Cannot parse voltage smoothing factor " + sSmoothing, e);
             }
         }
 
@@ -74,10 +73,14 @@ public class SensorVoltage extends I2CSensor {
     public double getVoltage3() {
         return v[3] * adj[3];
     }
-    
+
     @Override
-    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-        ads = new ADS1115(new I2CInterface(bus, address), MULTIPLIER);
+    protected void initSensor(int bus) throws SensorException {
+        try {
+            ads = new ADS1115(new I2CInterface(bus, address), MULTIPLIER);
+        } catch (IOException | UnsupportedBusNumberException e) {
+            throw new SensorException("Error initializing ADS1115", e);
+        }
     }
 
     @Override

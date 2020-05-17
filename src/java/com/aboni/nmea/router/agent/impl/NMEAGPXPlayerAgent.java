@@ -4,7 +4,6 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -16,11 +15,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
-import javax.xml.XMLConstants;
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLInputFactory;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,27 +29,37 @@ import java.util.TimeZone;
 
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
-	private final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private GeoPositionT prevPos;
-	private long t0Play;
-	private long t0;
-	private final String file;
-	private boolean stop;
-	
-	public NMEAGPXPlayerAgent(NMEACache cache, String name, String file, QOS q) {
-		super(cache, name, q);
-		fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
-		this.file = file;
-	}
-	
-	@Override
-	public String getDescription() {
-		return (file!=null)?("File " + file):"";
-	}
+    private final SimpleDateFormat fmt;
+    private GeoPositionT prevPos;
+    private long t0Play;
+    private long t0;
+    private String file;
+    private boolean stop;
 
-	@Override
-	protected boolean onActivate() {
-		synchronized (this) {
+    @Inject
+    public NMEAGPXPlayerAgent(@NotNull NMEACache cache) {
+        super(cache);
+        fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public void setFile(@NotNull String file) {
+        if (this.file == null) {
+            getLogger().info("Setting file {" + file + "}");
+            this.file = file;
+        } else {
+            getLogger().info("Cannot set file - already set");
+        }
+    }
+
+    @Override
+    public String getDescription() {
+        return (file != null) ? ("File " + file) : "";
+    }
+
+    @Override
+    protected boolean onActivate() {
+        synchronized (this) {
 			stop = false;
 		}
 		return play();
@@ -65,13 +75,11 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 	public boolean play() {
 		final Document d;
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			dbFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-			dbFactory.setAttribute(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-			dbFactory.setAttribute(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			d = dBuilder.parse(file);
+			DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
+			df.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			df.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			DocumentBuilder builder = df.newDocumentBuilder();
+			d = builder.parse(new InputSource(file));
 			d.getDocumentElement().normalize();
 		} catch (Exception e) {
 			ServerLog.getLogger().error("Cannot parse GPX file " + file, e);

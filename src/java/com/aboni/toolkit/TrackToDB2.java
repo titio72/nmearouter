@@ -63,9 +63,10 @@ public class TrackToDB2 {
 								last = p;
 							}
 						} catch (Exception e) {
-							Logger.getGlobal().log(Level.SEVERE, "Error", e);
-							System.in.read();
-						}
+                            Logger.getGlobal().log(Level.SEVERE, "Error", e);
+                            //noinspection ResultOfMethodCallIgnored
+                            System.in.read();
+                        }
 					}
 				}
 			}

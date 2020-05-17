@@ -3,7 +3,6 @@ package com.aboni.sensors;
 import com.aboni.misc.DataFilter;
 import com.aboni.misc.Utils;
 import com.aboni.sensors.hw.HMC5883L;
-import com.aboni.utils.ServerLog;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import java.io.IOException;
@@ -23,13 +22,17 @@ public class SensorHMC5883 extends I2CSensor {
     }
 
     @Override
-    protected void initSensor(int bus) throws IOException, UnsupportedBusNumberException {
-    	hmc5883l = new HMC5883L(new I2CInterface(bus, HMC5883L.HMC5883_I2CADDR));
-    	int i = 0;
-    	while (i<3 && !doInit()) { 
-    	    i++;
-            Utils.pause(5000);
-    	}
+    protected void initSensor(int bus) throws SensorException {
+        try {
+            hmc5883l = new HMC5883L(new I2CInterface(bus, HMC5883L.HMC5883_I2C_ADDRESS));
+            int i = 0;
+            while (i < 3 && !doInit()) {
+                i++;
+                Utils.pause(5000);
+            }
+        } catch (IOException | UnsupportedBusNumberException e) {
+            throw new SensorException("Error initializing HCM5883", e);
+        }
     }
 
     private boolean doInit() {
@@ -42,7 +45,7 @@ public class SensorHMC5883 extends I2CSensor {
             hmc5883l.setScale(HMC5883L.Scale.Gauss_1_30);
             return true;
         } catch (Exception e) {
-            ServerLog.getLogger().error("Failed initialization HMC5883L", e);
+            error("Failed initialization HMC5883L", e);
             return false;
         }
     }

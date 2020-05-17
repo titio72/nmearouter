@@ -1,6 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -15,15 +16,15 @@ public class NMEAMagnetic2TrueConverter {
 	private final double year;
 
 	public NMEAMagnetic2TrueConverter() {
-        geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
-        pos = new Position(43.0, 10.0);
+		geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
+		pos = new Position(43.0, 10.0);
 
         OffsetDateTime odt = OffsetDateTime.now();
         this.year = (double) odt.getYear() + ((double) odt.getMonthValue() / 12.0);
     }
 	
 	public NMEAMagnetic2TrueConverter(double year) {
-		geo = new TSAGeoMag(ServerLog.getLoggerAdmin().getBaseLogger());
+		geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
 		pos = new Position(43.0, 10.0);
 		this.year = year;
 	}
@@ -64,11 +65,11 @@ public class NMEAMagnetic2TrueConverter {
 	}
 	
 	public HDTSentence getTrueSentence(TalkerId tid, double magBearing) {
-		double trueheading = getTrue(magBearing, getPosition());
-		HDTSentence s = (HDTSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
-		s.setHeading(trueheading);
-		return s;
-	}
+        double trueHeading = getTrue(magBearing, getPosition());
+        HDTSentence s = (HDTSentence) SentenceFactory.getInstance().createParser(tid, SentenceId.HDT);
+        s.setHeading(trueHeading);
+        return s;
+    }
 	
 	public HDGSentence getSentence(TalkerId tid, double bearing, double deviation) {
 		HDGSentence s = (HDGSentence)SentenceFactory.getInstance().createParser(tid, SentenceId.HDG);

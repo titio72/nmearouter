@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html xml:lang="en">
 <head>
-    <meta charset="ISO-8859-1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Andrea Boni NMEARouter</title>
+	<meta charset="ISO-8859-1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Andrea Boni NMEARouter</title>
 	<script src="js/nmearouter.js?g2"></script>
-	<link href="css/nmearouter.css" rel="stylesheet" />
+	<link href="css/nmearouter.css" rel="stylesheet"/>
 	<link rel="icon" type="image/png" href="nmeasail.png">
 	<style>
 		.tile-button {
@@ -15,11 +15,6 @@
 			padding: 0px;
 			height: 150px;
 		}
-		
-		.no-gutters-ab {
-			margin-right: -30px;
-			margin-left: -30px;
-  		}
 	</style>
 </head>
 <body ng-app="nmearouter">
@@ -36,19 +31,27 @@
 			$scope.trips = tripList  
 			$scope.total = total;
 		});
+
+		function showAnalytics(s) {
+			var ss = s.split("|");
+			var trip = ss[1];
+			var name = ss[2];
+			window.location.href = "trip.html?trip=" + trip + "&name=" + encodeURI(name);
+		}
 	</script>
 
 	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-        <div class="row no-gutters-ab">
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
-            	<button type="button" class="btn btn-secondary tile-button" 
-            		onclick="window.open('sensors.html', '_self');">
-            		<span class="glyphicon-lg glyphicon-equalizer" aria-hidden="true"></span><br>
-            		Sensors</button>
-			</div>                    
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
-				<button type="button" class="btn btn-secondary tile-button" 
-					onclick="window.open('index.html', '_self');">
+		<div class="row">
+			<div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
+				<button type="button" class="btn btn-secondary tile-button"
+						onclick="window.open('sensors.html', '_self');">
+					<span class="glyphicon-lg glyphicon-equalizer" aria-hidden="true"></span><br>
+					Sensors
+				</button>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
+				<button type="button" class="btn btn-secondary tile-button"
+						onclick="window.open('index.html', '_self');">
 					<span class="glyphicon-lg glyphicon-flag" aria-hidden="true"></span><br>
 					Meteo</button>						
 			</div>
@@ -86,43 +89,52 @@
             	<button type="button" class="btn btn-secondary tile-button" 
 					onclick="httpGetShutdown();">
 					<span class="glyphiconlg glyphicon glyphicon-stop" aria-hidden="true"></span><br>
-					Shutdown</button>						
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
-            	<button type="button" class="btn btn-secondary tile-button"
-                        onclick="info();">
+					Shutdown
+				</button>
+			</div>
+			<div class="col-lg-4 col-md-4 col-sm-6 col-xs-6 ">
+				<button type="button" class="btn btn-secondary tile-button"
+						onclick="info();">
 					<span class="glyphiconlg glyphicon glyphicon-info-sign" aria-hidden="true"></span><br>
-					Info</button>						
+					Info
+				</button>
+			</div>
+		</div>
+		<div class="row alert alert-primary" style="margin-left: 0px; margin-right: 0px;">
+            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+                <strong>{{total.end}}</strong>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                <strong>Total</strong>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="text-align: right">
+                <strong>{{total.nOfDays}}</strong>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
+                <strong>{{total.duration}}</strong>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" style="text-align: right">
+                <strong>{{total.distance}}NM</strong>
             </div>
         </div>
-    	<div class="row alert alert-secondary">
-			<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
-				<b>{{total.end}}</b>
-			</div>
-			<div class="col-lg-5 col-md-5 col-sm-4 col-xs-12">
-				<b>Total</b>
-			</div>
-			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
-				<b>{{total.duration}}</b> 
-			</div>
-			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
-				<b>{{total.distance}}NM</b>
-			</div>
-		</div>
-		<div class="row alert alert-primary" ng-repeat="t in trips">
-			<div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
-				{{t.start}}
-			</div>
-			<div class="col-lg-5 col-md-5 col-sm-4 col-xs-12">
-				<a id="linkTrip|{{t.id}}" href="#" onclick="tripInfo(this.id)">{{t.description}}</a>
-			</div>
-			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
-					{{t.duration}} 
-			</div>
-			<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " style="text-align: right">
-				{{t.distance}}NM
-			</div>
-		</div>
+        <div class="row alert" ng-repeat="t in trips">
+            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+                {{t.start}}
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                <a id="linkTrip|{{t.id}}|{{t.description}}" href="#"
+                   onclick="showAnalytics(this.id)">{{t.description}}</a>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="text-align: right">
+                {{t.nOfDays}}
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
+                {{t.duration}}
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" style="text-align: right">
+                {{t.distance}}NM
+            </div>
+        </div>
 	</div>
 </body>
 </html>

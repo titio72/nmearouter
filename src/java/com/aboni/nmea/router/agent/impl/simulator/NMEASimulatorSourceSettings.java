@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.agent.impl.simulator;
 
-import com.aboni.utils.Constants;
+import com.aboni.nmea.router.Constants;
 import com.aboni.utils.ServerLog;
 
 import java.io.File;
@@ -41,25 +41,25 @@ public class NMEASimulatorSourceSettings {
 	private boolean xdrMeteoAtm = true;
 	private boolean xdrMeteoHum = true;
 	private boolean xdrMeteoTmp = true;
-	private boolean xdrGYR = true;
-	private boolean autoPilot = false;
-	private double rudder = 6.0;
-	private double speed = 5.7;
-	private double wSpeed = 9.6;
-	private double wDirection = 270;
-	private double heading = 345;
-	private double temp = 21.5;
-	private double press = 1013;
-	private double hum = 58;
-	private double polarCoeff = 0.85;
-	private double depth = 8.0;
-	private double depthOffset = 0.0;
-	private double depthRange = 2.0;
-	private String polars = "dufour40.csv";
+    private boolean xdrGYR = true;
+    private boolean autoPilot = false;
+    private double rudder = 6.0;
+    private double speed = 5.7;
+    private double wSpeed = 9.6;
+    private double wDirection = 270;
+    private double heading = 345;
+    private double temp = 21.5;
+    private double press = 1013;
+    private double hum = 58;
+    private double polarCoefficient = 0.85;
+    private double depth = 8.0;
+    private double depthOffset = 0.0;
+    private double depthRange = 2.0;
+    private String polars = "dufour40.csv";
 
     private boolean splitWind = false;
 
-	private boolean usePolars;
+    private boolean usePolars;
     private boolean windSpeedInMS;
 
 	public boolean isVhw() {
@@ -332,31 +332,31 @@ public class NMEASimulatorSourceSettings {
 
 	public void setPress(double press) {
 		this.press = press;
-	}
+    }
 
-	public double getHum() {
-		return hum;
-	}
+    public double getHum() {
+        return hum;
+    }
 
-	public void setHum(double hum) {
-		this.hum = hum;
-	}
+    public void setHum(double hum) {
+        this.hum = hum;
+    }
 
-	public double getPolarCoeff() {
-		return polarCoeff;
-	}
+    public double getPolarCoefficient() {
+        return polarCoefficient;
+    }
 
-	public void setPolarCoeff(double polarCoeff) {
-		this.polarCoeff = polarCoeff;
-	}
+    public void setPolarCoefficient(double polarCoefficient) {
+        this.polarCoefficient = polarCoefficient;
+    }
 
-	public double getDepth() {
-		return depth;
-	}
+    public double getDepth() {
+        return depth;
+    }
 
-	public void setDepth(double depth) {
-		this.depth = depth;
-	}
+    public void setDepth(double depth) {
+        this.depth = depth;
+    }
 
 	public double getDepthOffset() {
 		return depthOffset;
@@ -407,8 +407,8 @@ public class NMEASimulatorSourceSettings {
     				readConf(p);
     		}
     	} catch (Exception e) {
-			ServerLog.getLogger().error("Error reading smulator conf", e);
-		}
+            ServerLog.getLogger().error("Error reading simulator conf", e);
+        }
     }
     
 	private void readConf(Properties p) {
@@ -447,8 +447,8 @@ public class NMEASimulatorSourceSettings {
 		polars = p.getProperty("simulate.polars.file", "dufour35c.csv");
 
 		try {
-			polarCoeff = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85"));
-		} catch (Exception ignored) { /* optional data */ }
+            polarCoefficient = Double.parseDouble(p.getProperty("simulate.use.polars.coeff", "0.85"));
+        } catch (Exception ignored) { /* optional data */ }
 		try {
 			speed = Double.parseDouble(p.getProperty("simulate.speed", "5.9"));
 		} catch (Exception ignored) { /* optional data */ }

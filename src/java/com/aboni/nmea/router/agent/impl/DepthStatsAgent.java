@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.sentences.XDPParser;
 import com.aboni.nmea.sentences.XDPSentence;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -9,6 +9,8 @@ import net.sf.marineapi.nmea.sentence.DPTSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -18,16 +20,17 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         int depth;
         long timestamp;
     }
-    
+
     private final Deque<DepthT> queue;
 
     private int max = Integer.MIN_VALUE;
-    private int min = Integer.MAX_VALUE;    
-    
+    private int min = Integer.MAX_VALUE;
+
     private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
-    public DepthStatsAgent(NMEACache cache, String name, QOS qos) {
-        super(cache, name, qos);
+    @Inject
+    public DepthStatsAgent(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, true);
         queue = new LinkedList<>();
     }
@@ -38,19 +41,19 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     }
 
     @Override
-	public String getDescription() {
-		return "Calculates max and min depth over last hour period";
-	}
+    public String getDescription() {
+        return "Calculates max and min depth over last hour period";
+    }
 
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
         if (s instanceof DPTSentence) {
             DepthT d = handleDepth(((DPTSentence) s).getDepth(), getCache().getNow());
-            
-            XDPSentence x = (XDPSentence)SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
-            x.setDepth((float)d.depth/10f);
-            if (min!=Integer.MAX_VALUE) x.setMinDepth1h((float)min/10f);
-            if (min!=Integer.MIN_VALUE) x.setMaxDepth1h((float)max/10f);
+
+            XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
+            x.setDepth((float) d.depth / 10f);
+            if (min != Integer.MAX_VALUE) x.setMinDepth1h((float) min / 10f);
+            if (min != Integer.MIN_VALUE) x.setMaxDepth1h((float) max / 10f);
             notify(x);
         }
     }
@@ -60,7 +63,6 @@ public class DepthStatsAgent extends NMEAAgentImpl {
      * @param d The value of the depth
      * @param ts The timestamp (unix time) of the reading
      */
-    @SuppressWarnings("unused")
     public void privatePushDepth(double d, long ts) {
         handleDepth(d, ts);
     }
@@ -108,10 +110,4 @@ public class DepthStatsAgent extends NMEAAgentImpl {
             }
         }
     }
-
-    @Override
-    public boolean isUserCanStartAndStop() {
-    	return true;
-    }
-    
 }

@@ -1,25 +1,28 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.pi4j.io.gpio.*;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class PowerLedAgent extends NMEAAgentImpl {
 
-	private static final Pin GPS = RaspiPin.GPIO_23;
-	private static final Pin PWR = RaspiPin.GPIO_02;
+    private static final Pin GPS = RaspiPin.GPIO_23;
+    private static final Pin PWR = RaspiPin.GPIO_02;
     private final GpioPinDigitalOutput pin;
     private final GpioPinDigitalOutput pinGps;
     private long lastGps;
 
-    public PowerLedAgent(NMEACache cache, String name, QOS qos) {
-        super(cache, name, qos);
+    @Inject
+    public PowerLedAgent(@NotNull NMEACache cache) {
+        super(cache);
         lastGps = 0;
         GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
@@ -33,7 +36,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     public String getDescription() {
         return ((getCache().getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
     }
-    
+
     @Override
     protected boolean onActivate() {
         powerUp();
@@ -66,9 +69,9 @@ public class PowerLedAgent extends NMEAAgentImpl {
     private void powerUp() {
         pin.high();
     }
-    
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
         if (s instanceof PositionSentence) {
             lastGps = getCache().getNow();
             powerGPSUp();
@@ -76,11 +79,6 @@ public class PowerLedAgent extends NMEAAgentImpl {
     }
 
     private void powerGPSUp() {
-       pinGps.high();
-    }
-
-    @Override
-    public boolean isUserCanStartAndStop() {
-    	return false;
+        pinGps.high();
     }
 }

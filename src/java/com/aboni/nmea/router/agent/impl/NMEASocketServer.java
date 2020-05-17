@@ -1,10 +1,14 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.net.NetConf;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -19,48 +23,61 @@ import java.util.Map.Entry;
 
 public class NMEASocketServer extends NMEAAgentImpl {
 
-	private final int port;
-	private Selector selector;
-	private ServerSocketChannel serverSocket;
-	private final ByteBuffer writeBuffer = ByteBuffer.allocate(16384);
-	private final ByteBuffer readBuffer = ByteBuffer.allocate(16384);
-	private final Map<SocketChannel, ClientDescriptor> clients;
+    private int port = -1;
+    private Selector selector;
+    private ServerSocketChannel serverSocket;
+    private final ByteBuffer writeBuffer;
+    private final ByteBuffer readBuffer;
+    private final Map<SocketChannel, ClientDescriptor> clients;
+    private SentenceSerializer serializer;
 
-	private static class ClientDescriptor {
-		
-		ClientDescriptor(String ip) {
-			this.ip = ip;
-		}
-		
-		final String ip;
-		
-		int errors = 0;
-		
-		@Override
-		public String toString() {
-			return ip;
-		}
-	}
-	
-	public NMEASocketServer(NMEACache cache, String name, int port, boolean allowReceive, boolean allowTransmit, QOS q) {
-		super(cache, name, q);
-		this.port = port;
-        setSourceTarget(allowReceive, allowTransmit);
+    public interface SentenceSerializer {
+        String getOutSentence(Sentence s);
+    }
+
+    private static class ClientDescriptor {
+
+        ClientDescriptor(String ip) {
+            this.ip = ip;
+        }
+
+        final String ip;
+
+        int errors = 0;
+
+        @Override
+        public String toString() {
+            return ip;
+        }
+    }
+
+    @Inject
+    public NMEASocketServer(@NotNull NMEACache cache) {
+        super(cache);
+        writeBuffer = ByteBuffer.allocate(16384);
+        readBuffer = ByteBuffer.allocate(16384);
         clients = new HashMap<>();
-	}
-	
-	public NMEASocketServer(NMEACache cache, String name, int port, QOS q) {
-		this(cache, name, port, false, true, q);
-	}
+    }
 
-	public int getPort() {
-		return port;
-	}
-	
+    public void setup(String name, QOS qos, NetConf conf, @NotNull SentenceSerializer serializer) {
+        if (port == -1) {
+            setup(name, qos);
+            setSourceTarget(conf.isRx(), conf.isTx());
+            port = conf.getPort();
+            getLogger().info(String.format("Setting up TCP server: Port {%d} RX {%b %b}", port, conf.isRx(), conf.isTx()));
+            this.serializer = serializer;
+        } else {
+            getLogger().info("Cannot setup TCP server - already set up");
+        }
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     @Override
     public String getType() {
-    	return "TCP NMEA Server";
+        return "TCP NMEA Server";
     }
 
 	
@@ -167,35 +184,34 @@ public class NMEASocketServer extends NMEAAgentImpl {
 				serverSocket.close();
 			} catch (Exception e) {
 				getLogger().error("Error trying to close server socket", e);
-			}
-			try {
-				selector.close();
-			} catch (Exception e)
-			{
-				getLogger().error("Error trying to close selector", e);
-			}
-		}
-	}
-	
-	@Override
-	protected void doWithSentence(Sentence s, String src) {
-		synchronized (clients) {
-		    if (isTarget() && !clients.isEmpty()) {
-				String output = getOutSentence(s);
-				writeBuffer.clear();
-				writeBuffer.put(output.getBytes());
-				writeBuffer.put("\r\n".getBytes());
-				int p = writeBuffer.position();
-				Iterator<Entry<SocketChannel, ClientDescriptor>> iter = clients.entrySet().iterator();
-				while (iter.hasNext()) {
-					Entry<SocketChannel, ClientDescriptor> itm = iter.next();
-					SocketChannel sc = itm.getKey();
-					ClientDescriptor cd = itm.getValue();
-					if (!sendMessageToClient(output, p, sc, cd)) {
-						iter.remove();
-					}
-				}
-		    }
+            }
+            try {
+                selector.close();
+            } catch (Exception e) {
+                getLogger().error("Error trying to close selector", e);
+            }
+        }
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String src) {
+        synchronized (clients) {
+            if (serializer != null && isTarget() && !clients.isEmpty()) {
+                String output = serializer.getOutSentence(s);
+                writeBuffer.clear();
+                writeBuffer.put(output.getBytes());
+                writeBuffer.put("\r\n".getBytes());
+                int p = writeBuffer.position();
+                Iterator<Entry<SocketChannel, ClientDescriptor>> iterator = clients.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<SocketChannel, ClientDescriptor> itm = iterator.next();
+                    SocketChannel sc = itm.getKey();
+                    ClientDescriptor cd = itm.getValue();
+                    if (!sendMessageToClient(output, p, sc, cd)) {
+                        iterator.remove();
+                    }
+                }
+            }
 		}
 	}
 
@@ -224,12 +240,8 @@ public class NMEASocketServer extends NMEAAgentImpl {
 		}
 		return false;
 	}
-	
-	protected String getOutSentence(Sentence s) {
-		return s.toSentence();
-	}
-	
-	private void createServerSocket() {
+
+    private void createServerSocket() {
 		try {
 		    selector = Selector.open();
 		    getLogger().info("Selector Open {" + selector.isOpen() + "}");

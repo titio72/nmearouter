@@ -11,6 +11,7 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Units;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -20,6 +21,7 @@ import javax.validation.constraints.NotNull;
  */
 public class NMEAMWVTrue implements NMEAPostProcess {
 
+    @Inject
     public NMEAMWVTrue(@NotNull NMEACache cache, boolean useSOG) {
         this.useRMC = useSOG;
         this.cache = cache;
@@ -27,7 +29,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 
     private static final long AGE_THRESHOLD = 5000;
 
-    private NMEACache cache;
+    private final NMEACache cache;
 
     private double lastTrueHeading;
     private double lastMagHeading;

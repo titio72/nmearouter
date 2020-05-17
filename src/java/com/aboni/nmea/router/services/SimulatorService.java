@@ -22,25 +22,25 @@ public class SimulatorService extends JSONWebService {
 
 			double windSpeed = config.getDouble("wspeed", Double.NaN);
 			if (!Double.isNaN(windSpeed)) {
-				sim.setwSpeed(windSpeed);
-			}
+                sim.setWindSpeed(windSpeed);
+            }
 
 			double windDir = config.getDouble("wdir", Double.NaN);
-			if (!Double.isNaN(windDir)) {
-				sim.setwDirection(Utils.normalizeDegrees0To360(windDir));
-			}
+            if (!Double.isNaN(windDir)) {
+                sim.setWindDirection(Utils.normalizeDegrees0To360(windDir));
+            }
 
-			double heading = config.getDouble("head", Double.NaN);
-			if (!Double.isNaN(heading)) {
-				sim.setHeading(Utils.normalizeDegrees0To360(heading));
-			}
-			JSONObject res = new JSONObject();
-			res.put("speed", sim.getSpeed());
-			res.put("wspeed", sim.getwSpeed());
-			res.put("wdir", sim.getwDirection());
-			res.put("heading", sim.getHeading());
-			return res;
-		} else {
+            double heading = config.getDouble("head", Double.NaN);
+            if (!Double.isNaN(heading)) {
+                sim.setHeading(Utils.normalizeDegrees0To360(heading));
+            }
+            JSONObject res = new JSONObject();
+            res.put("speed", sim.getSpeed());
+            res.put("wspeed", sim.getWindSpeed());
+            res.put("wdir", sim.getWindDirection());
+            res.put("heading", sim.getHeading());
+            return res;
+        } else {
             return getError("Simulator is not configured in this system");
 		}
 	}

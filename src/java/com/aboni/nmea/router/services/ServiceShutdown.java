@@ -12,10 +12,10 @@ public class ServiceShutdown extends JSONWebService {
 
     private JSONObject getResult(ServiceConfig config) {
 	    try {
-	        ServerLog.getLogger().info("Shutdown");
-	        ProcessBuilder b = new ProcessBuilder("./shutdown");
-            Process proc = b.start();
-            int retCode = proc.waitFor();
+            ServerLog.getLogger().info("Shutdown");
+            ProcessBuilder b = new ProcessBuilder("./shutdown");
+            Process process = b.start();
+            int retCode = process.waitFor();
             ServerLog.getLogger().info("Shutdown Return code {" + retCode + "}");
             return getOk();
         } catch (Exception e) {

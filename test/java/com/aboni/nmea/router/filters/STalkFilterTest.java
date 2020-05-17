@@ -1,11 +1,12 @@
 package com.aboni.nmea.router.filters;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-
+import com.aboni.nmea.router.filters.impl.STalkFilter;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class STalkFilterTest {
 

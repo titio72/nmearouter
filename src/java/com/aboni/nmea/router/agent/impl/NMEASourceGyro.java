@@ -1,15 +1,17 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
+import com.aboni.geo.impl.DeviationManagerImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.OnSentence;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,25 +25,26 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final long SEND_HD_IDLE_TIME = 15L * 1000L; //ms
 
     private static final boolean USE_CMPS11 = true;
-    
-    private ASensorCompass compassSensor;
-    
+
+    private SensorCompass compassSensor;
+
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
-    
-    public NMEASourceGyro(NMEACache cache, String name, QOS q) {
-        super(cache, name, q);
+
+    @Inject
+    public NMEASourceGyro(NMEACache cache) {
+        super(cache);
         setSourceTarget(true, true);
     }
-    
+
     @Override
     public String getType() {
-    	return "Onboard Sensor";
+        return "OnBoard Sensor";
     }
-    
+
     @Override
     public String getDescription() {
-    	return "Gyro(" + (compassSensor==null?"-":"*") + ")";
+        return "Gyro(" + (compassSensor == null ? "-" : "*") + ")";
     }
     
     @Override
@@ -53,31 +56,33 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     }
 
     private void doLF() {
-    	synchronized (this) {
-	        if (isStarted()) {
-	        	readSensors();
-	            sendHDx();
-	            sendXDR();
-	        }
-	    }
+        synchronized (this) {
+            if (isStarted()) {
+                readSensors();
+                sendHDx();
+                sendXDR();
+            }
+        }
     }
-    
-	private ASensorCompass createCompass() {
-		try {
-			ASensorCompass r = USE_CMPS11? new SensorCMPS11() : new SensorCompass();
-			r.init();
-			return r;
-		} catch (Exception e) {
-			getLogger().error("Error creating compass sensor ", e);
-			return null;
-		}
+
+    private SensorCompass createCompass() {
+        try {
+            SensorCompass r = new SensorCompass(
+                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(),
+                    new DeviationManagerImpl());
+            r.init();
+            return r;
+        } catch (Exception e) {
+            getLogger().error("Error creating compass sensor ", e);
+            return null;
+        }
 	}
 
     private void readSensors() {
         try {
             if (compassSensor!=null) {
                 compassSensor.loadConfiguration();
-                compassSensor = (ASensorCompass)readSensor(compassSensor);
+                compassSensor = (SensorCompass) readSensor(compassSensor);
             }
         } catch (Exception e) {
             getLogger().error("Error reading sensor data", e);
@@ -155,26 +160,26 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("A", round(roll), "D", "ROLL"));
                 xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
                 notify(xdr);
-	        } catch (Exception e) {
-	            getLogger().error("Cannot post XDR data", e);
-	        }
+            } catch (Exception e) {
+                getLogger().error("Cannot post XDR data", e);
+            }
         }
-	}
-	
-	private double round(double d) {
-		return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
-	}
-	
-    @Override
-    protected void doWithSentence(Sentence s, String source) {
-        if (HWSettings.getPropertyAsInteger("compass.dump", 0)>0 && s instanceof HDMSentence && compassSensor!=null) {
-        	try {
-        		double headingBoat = ((HDMSentence)s).getHeading();
-        		double headingSens = compassSensor.getUnfilteredSensorHeading();
-        		dump(headingSens, headingBoat);
-        	} catch (Exception e) {
-        		getLogger().error("Error dumping compass readings", e);
-			}
+    }
+
+    private double round(double d) {
+        return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
+    }
+
+    @OnSentence
+    public void onSentence(Sentence s, String source) {
+        if (HWSettings.getPropertyAsInteger("compass.dump", 0) > 0 && s instanceof HDMSentence && compassSensor != null) {
+            try {
+                double headingBoat = ((HDMSentence) s).getHeading();
+                double headingSens = compassSensor.getUnfilteredSensorHeading();
+                dump(headingSens, headingBoat);
+            } catch (Exception e) {
+                getLogger().error("Error dumping compass readings", e);
+            }
         }
     }
 

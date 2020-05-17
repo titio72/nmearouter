@@ -1,72 +1,58 @@
 package com.aboni.nmea.router.services;
 
-import com.aboni.geo.*;
+import com.aboni.nmea.router.data.track.TrackDumper;
+import com.aboni.nmea.router.data.track.TrackDumperFactory;
+import com.aboni.nmea.router.data.track.TrackManagementException;
+import com.aboni.utils.Query;
 import com.aboni.utils.ServerLog;
 
+import javax.inject.Inject;
 import java.io.IOException;
-import java.util.Calendar;
 
-public class TrackService  implements WebService {
+public class TrackService implements WebService {
 
-	public TrackService() {
-		// nothing to initialize
-	}
+    private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
+    private static final String ERROR_DOWNLOADING_TRACK = "Error downloading track";
 
-	@Override
-	public void doIt(ServiceConfig config, ServiceOutput response) {
+    private @Inject
+    QueryFactory queryFactory;
+
+    @Inject
+    public TrackService() {
+        // nothing to initialize
+    }
+
+    @Override
+    public void doIt(ServiceConfig config, ServiceOutput response) {
         try {
-        	Calendar cFrom = config.getParamAsDate("dateFrom", 0);
-            Calendar cTo = config.getParamAsDate("dateTo", 1);
-        	String f = config.getParameter("format", "gpx");
-        	boolean download = "1".equals(config.getParameter("download", "0"));
-
-            PositionHistoryTrackLoader loader = new PositionHistoryTrackLoaderDB();
-			if (loader.load(cFrom, cTo)) {
-				TrackDumper dumper = null;
-				String mime = null;
-				String fileName = null;
-
-				switch (f) {
-					case "gpx":
-						mime = "application/gpx+xml";
-						fileName = "track.gpx";
-						dumper = new Track2GPX();
-						break;
-					case "kml":
-						mime = "application/vnd.google-earth.kml+xml";
-						fileName = "track.kml";
-						dumper = new Track2KML();
-						break;
-					case "json":
-						mime = "application/json";
-						fileName = "track.json";
-						dumper = new Track2JSON();
-						break;
-					default:
-						// do nothing to do
-						break;
-				}
-
-				if (dumper!=null) {
-					response.setContentType(mime);
-					if (download) response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-					dumper.setTrack(loader.getTrack());
-					dumper.dump(response.getWriter());
-					response.ok();
-
-				} else {
-					response.setContentType("text/html;charset=utf-8");
-					response.error("Unknown format '" + f + "'");
-				}
-			}
-        } catch (IOException e) {
-			ServerLog.getLogger().error("Error downloading track", e);
-            response.setContentType("text/html;charset=utf-8");
-            try {
-            	response.error(e.getMessage());
-            } catch (Exception ee) {
-				ServerLog.getLogger().error("Error downloading track", ee);
-			}
+            Query q = queryFactory.getQuery(config);
+            String f = config.getParameter("format", "gpx");
+            boolean download = "1".equals(config.getParameter("download", "0"));
+            TrackDumper dumper = TrackDumperFactory.getDumper(f);
+            if (dumper != null) {
+                String mime = dumper.getMime();
+                String fileName = "track." + dumper.getExtension();
+                response.setContentType(mime);
+                if (download)
+                    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+                dumper.dump(q, response.getWriter());
+                response.ok();
+            } else {
+                response.setContentType(TEXT_HTML_CHARSET_UTF_8);
+                response.error("Unknown format '" + f + "'");
+            }
+        } catch (IOException | TrackManagementException e) {
+            ServerLog.getLogger().error(ERROR_DOWNLOADING_TRACK, e);
+            response.setContentType(TEXT_HTML_CHARSET_UTF_8);
+            sendError(response, e.getMessage());
         }
-	}
+    }
+
+    private void sendError(ServiceOutput response, String s) {
+        try {
+            response.error(s);
+        } catch (Exception ee) {
+            ServerLog.getLogger().error(ERROR_DOWNLOADING_TRACK, ee);
+        }
+    }
 }

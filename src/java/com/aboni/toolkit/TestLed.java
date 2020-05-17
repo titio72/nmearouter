@@ -10,13 +10,12 @@ public class TestLed implements Tester.TestingProc {
     private static final GpioPinDigitalOutput[] pins = new GpioPinDigitalOutput[30];
 	
 	private static GpioPinDigitalOutput getPin(int i) {
-		if (pins[i]!=null) return pins[i];
-		else {
-	        GpioController gpio = GpioFactory.getInstance();
-			pins[i] = gpio.provisionDigitalOutputPin(RaspiPin.getPinByName("GPIO " + i), "p" + i, PinState.LOW);
-			return pins[i];
-		}
-	}
+        if (pins[i] == null) {
+            GpioController gpio = GpioFactory.getInstance();
+            pins[i] = gpio.provisionDigitalOutputPin(RaspiPin.getPinByName("GPIO " + i), "p" + i, PinState.LOW);
+        }
+        return pins[i];
+    }
 
     @Override
     public boolean doIt(PrintStream out) {
@@ -53,11 +52,6 @@ public class TestLed implements Tester.TestingProc {
 		}
         return true;
     }
-
-    @Override
-    public void shutdown(PrintStream out) {
-		// nothing to shutdown
-	}
 
     public static void main(String[] args) {
 	    TestLed l = new TestLed();

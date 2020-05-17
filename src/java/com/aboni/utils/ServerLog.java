@@ -1,5 +1,7 @@
 package com.aboni.utils;
 
+import com.aboni.nmea.router.Constants;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -11,18 +13,20 @@ import java.util.logging.*;
 
 public class ServerLog implements LogAdmin {
 
-	public static PrintStream getConsoleOut() {
-		return System.out;
-	}
+    private static final PrintStream CONSOLE = System.out;
 
-	private static class MyFormatter extends Formatter {
+    public static PrintStream getConsoleOut() {
+        return CONSOLE;
+    }
+
+    private static class MyFormatter extends Formatter {
 
         final DateFormat df;
-        
+
         MyFormatter() {
             df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
         }
-        
+
         @Override
         public String format(LogRecord record) {
             Date d = new Date(record.getMillis());
@@ -113,17 +117,11 @@ public class ServerLog implements LogAdmin {
         debug = false;
     }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String)
-	 */
 	@Override
 	public void error(String msg) {
 		lg.log(Level.SEVERE, msg);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
-	 */
 	@Override
 	public void error(final String msg, final Throwable t) {
 		if (debug)
@@ -132,48 +130,47 @@ public class ServerLog implements LogAdmin {
 			lg.severe( () -> String.format("{%s} error {%s}", msg, t.getMessage()) );
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Error(java.lang.String, java.lang.Throwable)
-	 */
 	@Override
 	public void errorForceStacktrace(final String msg, final Throwable t) {
 		lg.log(Level.SEVERE, msg, t);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Warning(java.lang.String)
-	 */
-	@Override
-	public void warning(String msg) {
-		lg.log(Level.WARNING, msg);
-	}
+    @Override
+    public void warning(String msg) {
+        lg.log(Level.WARNING, msg);
+    }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Info(java.lang.String)
-	 */
-	@Override
-	public void info(String msg) {
-		lg.log(Level.INFO, msg);
-	}
+    @Override
+    public void info(String msg) {
+        lg.log(Level.INFO, msg);
+    }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Debug(java.lang.String)
-	 */
-	@Override
-	public void debug(String msg) {
-		lg.log(Level.FINER, msg);
-	}
+    @Override
+    public void infoFill(String msg) {
+        lg.log(Level.INFO, () -> fill(msg));
+    }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.utils.Log#Debug(java.lang.String)
-	 */
-	@Override
-	public void console(String msg) {
-		lgConsole.log(Level.INFO, msg);
-	}
+    @Override
+    public void debug(String msg) {
+        lg.log(Level.FINER, msg);
+    }
 
-	@Override
-	public Logger getBaseLogger() {
-		return lg;
-	}
+    @Override
+    public void console(String msg) {
+        lgConsole.log(Level.INFO, msg);
+    }
+
+    @Override
+    public Logger getBaseLogger() {
+        return lg;
+    }
+
+    private static final String FILLER = "--------------------------------------------------------------------------------";
+    private static final String FILLER_LEFT = "---";
+
+    private static String fill(String msg) {
+        if (msg == null || msg.isEmpty()) return FILLER;
+        return (FILLER_LEFT + " " + msg + " " + FILLER).substring(0, 80);
+    }
+
 }

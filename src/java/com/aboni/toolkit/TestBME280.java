@@ -28,11 +28,6 @@ public class TestBME280 {
 			public boolean init(PrintStream out) {
 				return true;
 			}
-
-			@Override
-			public void shutdown(PrintStream out) {
-				// nothing to bring down
-			}
 		});
 	}
 }

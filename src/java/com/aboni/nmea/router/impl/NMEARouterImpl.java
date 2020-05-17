@@ -120,9 +120,9 @@ public class NMEARouterImpl implements NMEARouter {
 	}
 
 	@Override
-	public void addProcessor(NMEAPostProcess proc) {
-		processors.addProcessor(proc);
-	}
+    public void addProcessor(NMEAPostProcess processor) {
+        processors.addProcessor(processor);
+    }
 
 	@Override
 	public void addAgent(NMEAAgent agent) {
@@ -168,23 +168,24 @@ public class NMEARouterImpl implements NMEARouter {
 				Sentence s = (Sentence)m.getPayload();
 				Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
 				for (Sentence ss : toSend) {
-                    cache.onSentence(ss, m.getSource());
-                    routeToTarget(ss, m.getSource());
-                    stream.pushSentence(RouterMessageImpl.createMessage(ss, m.getSource(), cache.getNow()));
-                }
+					cache.onSentence(ss, m.getSource());
+					RouterMessage mm = RouterMessageImpl.createMessage(ss, m.getSource(), m.getTimestamp());
+					routeToTarget(mm);
+					stream.pushSentence(mm);
+				}
 			} else if (m.getPayload() instanceof JSONObject) {
 				stream.pushSentence(m);
 			}
 		}
 	}
 
-	private void routeToTarget(Sentence s, String src) {
+	private void routeToTarget(RouterMessage mm) {
 		synchronized (agents) {
 			for (NMEAAgent nmeaAgent : agents.values()) {
 				try {
 					NMEATarget target = nmeaAgent.getTarget();
-					if (target != null && !src.equals(nmeaAgent.getName())) {
-						exec.execute(() -> target.pushSentence(s, src));
+					if (target != null && !mm.getSource().equals(nmeaAgent.getName())) {
+						exec.execute(() -> target.pushMessage(mm));
 					}
 				} catch (Exception e) {
 					ServerLog.getLogger().error("Error dispatching to target!", e);

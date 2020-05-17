@@ -1,47 +1,48 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.sensors.*;
+import com.aboni.sensors.Sensor;
+import com.aboni.sensors.SensorException;
+import com.aboni.sensors.SensorPressureTemp;
+import com.aboni.sensors.SensorTemp;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
-import com.pi4j.io.i2c.I2CFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
-import java.io.IOException;
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class NMEASourceSensor extends NMEAAgentImpl {
 
     private static final String ERROR_POST_XDR_DATA = "Cannot post XDR data";
+    private static final long READING_AGE_TIMEOUT = 600;
     private boolean started;
     private int readCounter;
 
-    private SensorVoltage voltageSensor;
-    private SensorPressureTemp pressureTempSensor1;
+    private SensorPressureTemp pressureTempSensor;
     private SensorTemp tempSensor;
     private final Map<String, Measurement> xDrMap;
 
-
-    public NMEASourceSensor(NMEACache cache, String name, QOS q) {
-        super(cache, name, q);
+    @Inject
+    public NMEASourceSensor(@NotNull NMEACache cache) {
+        super(cache);
         setSourceTarget(true, false);
         xDrMap = new HashMap<>();
     }
 
     @Override
     public String getType() {
-        return "Onboard Sensor";
+        return "OnBoard Sensor";
     }
-    
+
     @Override
     public String getDescription() {
-    	return 
-    			"Temp(" + (tempSensor==null?"-":"*") + ") " + 
-    			"Volt(" + (voltageSensor==null?"-":"*") + ") " + 
-    			"Atm2(" + (pressureTempSensor1==null?"-":"*") + ")";
+        return "Temp(" + (tempSensor == null ? "-" : "*") + ") " +
+                "Atm2(" + (pressureTempSensor == null ? "-" : "*") + ")";
     }
     
     @Override
@@ -50,15 +51,13 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
         List<Sensor> sensors = new ArrayList<>();
         tempSensor = createTempSensor();
-        pressureTempSensor1 = createTempPressure(1);
+        pressureTempSensor = createTempPressure();
         sensors.add(tempSensor);
-        sensors.add(pressureTempSensor1);
-        voltageSensor = createVoltage();
-        sensors.add(voltageSensor);
+        sensors.add(pressureTempSensor);
         for (Sensor s: sensors) {
             try {
-                if (s!=null) s.init();
-            } catch (IOException | I2CFactory.UnsupportedBusNumberException e) {
+                if (s != null) s.init();
+            } catch (SensorException e) {
                 getLogger().error("Error initializing sensor {" + s.getSensorName() + "}", e);
             }
         }
@@ -79,13 +78,16 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private synchronized void doLF() {
         if (started) {
             resetXDR();
-            readSensors();
-            sendPressure();
-            sendTemperature();
-            sendVoltage();
-            sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp"));
-            sendMMB("Barometer");
-            sendMHU("Humidity");
+
+            readCounter = (readCounter + 1) % 10; // wait 10 seconds between readings
+            if (readCounter == 0) {
+                readSensors();
+                sendAtmo();
+                sendTemperature();
+                sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp"));
+                sendMMB();
+                sendMHU();
+            }
             sendCPUTemp();
         }
     }
@@ -98,40 +100,24 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         try {
             return new SensorTemp();
         } catch (Exception e) {
-            getLogger().error("Error creating temp sensor ", e);
+            getLogger().errorForceStacktrace("Error creating temp sensor ", e);
             return null;
         }
     }
 
-    private SensorVoltage createVoltage() {
+    private SensorPressureTemp createTempPressure() {
         try {
-            return new SensorVoltage();
+            return new SensorPressureTemp(SensorPressureTemp.Sensor.BME280);
         } catch (Exception e) {
-            getLogger().error("Error creating voltage sensor ", e);
+            getLogger().errorForceStacktrace("Error creating temp/press sensor", e);
             return null;
         }
     }
 
-	private SensorPressureTemp createTempPressure(int i) {
-		try {
-            return new SensorPressureTemp(
-                    (i==0)?SensorPressureTemp.Sensor.BMP180:SensorPressureTemp.Sensor.BME280
-            );
-		} catch (Exception e) {
-			getLogger().error("Error creating temp/press sensor", e);
-			return null;
-		}
-	}
-    
-	private void readSensors() {
+    private void readSensors() {
         try {
-            readCounter = (readCounter + 1) % 10;
-
-            voltageSensor = (SensorVoltage) readSensor(voltageSensor);
-            if (readCounter == 0) {
-                tempSensor = (SensorTemp) readSensor(tempSensor);
-                pressureTempSensor1 = (SensorPressureTemp) readSensor(pressureTempSensor1);
-            }
+            tempSensor = (SensorTemp) readSensor(tempSensor);
+            pressureTempSensor = (SensorPressureTemp) readSensor(pressureTempSensor);
         } catch (Exception e) {
             getLogger().error("Error reading sensor data", e);
         }
@@ -149,27 +135,27 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         return s;
     }
 
-    private boolean checkReadingAge(Sensor sensor, long timeout) {
-        return sensor != null && (getCache().getNow() - sensor.getLastReadingTimestamp()) < timeout;
+    private boolean checkReadingAge(Sensor sensor) {
+        return sensor != null && (getCache().getNow() - sensor.getLastReadingTimestamp()) < READING_AGE_TIMEOUT;
     }
 
-    private void sendMMB(String xdrName) {
+    private void sendMMB() {
         try {
-            Measurement m = xDrMap.getOrDefault(xdrName, null);
+            Measurement m = xDrMap.getOrDefault("Barometer", null);
             if (m != null) {
                 double pr = m.getValue();
                 MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
                 mmb.setBars(pr);
                 notify(mmb);
-		    }
-		} catch (Exception e) {
-			getLogger().error("Cannot post pressure data", e);
-		}
+            }
+        } catch (Exception e) {
+            getLogger().error("Cannot post pressure data", e);
+        }
     }
 
-	private void sendMHU(String xdrName) {
-		try {
-            Measurement m = xDrMap.getOrDefault(xdrName, null);
+    private void sendMHU() {
+        try {
+            Measurement m = xDrMap.getOrDefault("Humidity", null);
             if (m != null) {
                 double hum = m.getValue();
                 MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
@@ -198,7 +184,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 	private void sendCPUTemp() {
 		try {
 			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-            addXDR(xdr, new Measurement("C", round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
+            addXDR(xdr, new Measurement("C", Utils.round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
             notify(xdr);
 		} catch (Exception e) {
             getLogger().error(ERROR_POST_XDR_DATA, e);
@@ -210,17 +196,17 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         xDrMap.put(m.getName(), m);
     }
 
-    private void sendPressure() {
-        SensorPressureTemp sensor = pressureTempSensor1;
-        if (checkReadingAge(sensor, 600)) {
+    private void sendAtmo() {
+        SensorPressureTemp sensor = pressureTempSensor;
+        if (checkReadingAge(sensor)) {
             try {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
                 double t = sensor.getTemperatureCelsius();
                 double pr = sensor.getPressureMB();
                 double h = sensor.getHumidity();
-                addXDR(xdr, new Measurement("B", Math.round(pr) / 1000d, "B", "Barometer"));
-                addXDR(xdr, new Measurement("C", round(t, 1), "C", "AirTemp"));
-                addXDR(xdr, new Measurement("P", round(h, 2), "H", "Humidity"));
+                addXDR(xdr, new Measurement("B", Math.round(pr * 10) / 10000d, "B", "Barometer"));
+                addXDR(xdr, new Measurement("C", Utils.round(t, 1), "C", "AirTemp"));
+                addXDR(xdr, new Measurement("P", Utils.round(h, 2), "H", "Humidity"));
                 notify(xdr);
             } catch (Exception e) {
                 getLogger().error(ERROR_POST_XDR_DATA, e);
@@ -249,24 +235,4 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             }
         }
     }
-
-    private void sendVoltage() {
-        if (voltageSensor!=null) {
-            try {
-                XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage0(), 3), "V", "V0"));
-                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage1(), 3), "V", "V1"));
-                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage2(), 3), "V", "V2"));
-                addXDR(xdr, new Measurement("V", round(voltageSensor.getVoltage3(), 3), "V", "V3"));
-                notify(xdr);
-            } catch (Exception e) {
-                getLogger().error(ERROR_POST_XDR_DATA, e);
-            }
-        }
-    }
-
-    private double round(double d, int precision) {
-        return Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision);
-	}
-
 }
