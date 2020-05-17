@@ -5,8 +5,6 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
-import com.fazecast.jSerialComm.SerialPortDataListener;
-import com.fazecast.jSerialComm.SerialPortEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -18,9 +16,12 @@ import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEASerial extends NMEAAgentImpl {
-    
+
     private static final int FAST_STATS_PERIOD = 1000;
     private static final int STATS_PERIOD = 60000;
+
+    private static final int PORT_TIMEOUT = 1000;
+    private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
 
     private long bps;
     private long bpsOut;
@@ -29,7 +30,7 @@ public class NMEASerial extends NMEAAgentImpl {
         long bytes = 0;
         long bytesOut = 0;
         long resetTime = 0;
-        
+
         long getBps(long time) {
         	return (bytes * 1000) / (time - resetTime);
         }
@@ -51,36 +52,77 @@ public class NMEASerial extends NMEAAgentImpl {
 
         @Override
         void reset(long time) {
-        	super.reset(time);
+            super.reset(time);
             sentenceErrs = 0;
             sentences = 0;
         }
     }
 
+    private static class Config {
+        private String portName;
+        private int speed;
+        private boolean receive;
+        private boolean transmit;
+
+        String getPortName() {
+            return portName;
+        }
+
+        void setPortName(String portName) {
+            this.portName = portName;
+        }
+
+        int getSpeed() {
+            return speed;
+        }
+
+        void setSpeed(int speed) {
+            this.speed = speed;
+        }
+
+        boolean isReceive() {
+            return receive;
+        }
+
+        void setReceive(boolean receive) {
+            this.receive = receive;
+        }
+
+        boolean isTransmit() {
+            return transmit;
+        }
+
+        void setTransmit(boolean transmit) {
+            this.transmit = transmit;
+        }
+    }
+
     private final StatsSpeed fastStats;
     private final Stats stats;
+    private final Config config;
 
     private final AtomicBoolean run = new AtomicBoolean(false);
 
-    private String portName;
-    private int speed;
+
     private SerialPort port;
-    private boolean receive;
-    private boolean transmit;
+    private BufferedReader bufferedReader;
+
+    private long lastPortRetryTime;
 
     @Inject
     public NMEASerial(@NotNull NMEACache cache) {
         super(cache);
+        config = new Config();
         fastStats = new StatsSpeed();
         stats = new Stats();
     }
 
     public void setup(String name, String portName, int speed, boolean rec, boolean tran, QOS qos) {
         setup(name, qos);
-        this.portName = portName;
-        this.speed = speed;
-        this.receive = rec;
-        this.transmit = tran;
+        config.setPortName(portName);
+        config.setSpeed(speed);
+        config.setReceive(rec);
+        config.setTransmit(tran);
         setSourceTarget(rec, tran);
     }
 
@@ -91,89 +133,104 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return String.format("Device %s %d bps (%s) In %d bps Out %d bps", portName, speed,
-                (receive ? "R" : "") + (transmit ? "X" : ""), bps * 8, bpsOut * 8);
+        return String.format("Device %s %d bps (%s) In %d bps Out %d bps", config.getPortName(), config.getSpeed(),
+                (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : ""), bps * 8, bpsOut * 8);
     }
 
     @Override
     public String toString() {
-        return "{Serial port " + portName + " " + speed + " " + (receive ? "R" : "")
-                + (transmit ? "X" : "") + "}";
+        return "{Serial port " + config.getPortName() + " " + config.getSpeed() + " " + (config.isReceive() ? "R" : "")
+                + (config.isTransmit() ? "X" : "") + "}";
     }
 
     @Override
     protected boolean onActivate() {
-        if (port == null) {
-            try {
-                getLogger().info("Creating Port {" + portName + "} Speed {" + speed + "} Mode {" + (receive ? "R" : "")
-                        + (transmit ? "X" : "") + "}");
-                port = SerialPort.getCommPort(portName);
-                port.setComPortParameters(speed, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-                port.openPort();
-                port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 500, 0);
-                getLogger().info("Port Opened");
-                run.set(true);
-                if (receive) {
-                	port.addDataListener(new SerialPortDataListener() {
-						
-						@Override
-						public void serialEvent(SerialPortEvent event) {
-						    // do nothing
-						}
-						
-						@Override
-						public int getListeningEvents() {
-							return SerialPort.LISTENING_EVENT_DATA_AVAILABLE |
-									/*SerialPort.LISTENING_EVENT_DATA_RECEIVED |*/
-									SerialPort.LISTENING_EVENT_DATA_WRITTEN;
-						}
-					});
-                    startReader();
-                }
-                return true;
-            } catch (Exception e) {
-                getLogger().error("Error initializing serial {" + portName + "}", e);
-                port = null;
+        try {
+            getLogger().info("Port Opened");
+            run.set(true);
+            if (config.isReceive()) {
+                startReader();
             }
+            return true;
+        } catch (Exception e) {
+            getLogger().error("Error initializing serial agent {" + config.getPortName() + "}", e);
+            port = null;
+            bufferedReader = null;
         }
         return false;
     }
 
-    private void startReader() {
-        Thread thread = new Thread(() -> {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
-            while (run.get()) {
-                String s = "";
-                try {
-                    s = reader.readLine();
-                    if (s != null) {
-                        updateReadStats(s);
-                        Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                        onSentenceRead(sentence);
-                    }
-                } catch (IOException e) {
-                    Utils.pause(100);
-                } catch (Exception e) {
-                    getLogger().warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
+    private SerialPort getPort() {
+        synchronized (this) {
+            long now = getCache().getNow();
+            if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
+                resetPortAndReader();
+                getLogger().info("Creating Port {" + config.getPortName() + "} " +
+                        "Speed {" + config.getSpeed() + "} " +
+                        "Mode {" + (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : "") + "}");
+                SerialPort p = SerialPort.getCommPort(config.getPortName());
+                p.setComPortParameters(config.getSpeed(), 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+                p.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, PORT_TIMEOUT, PORT_TIMEOUT);
+                if (!p.openPort()) {
+                    lastPortRetryTime = now;
+                } else {
+                    lastPortRetryTime = 0;
+                    port = p;
                 }
             }
-            try {
-                reader.close();
-            } catch (IOException e) {
-                getLogger().warning("Error serial reader " + e.getMessage());
+            return port;
+        }
+    }
+
+    private BufferedReader getBufferedReader() {
+        synchronized (this) {
+            if (bufferedReader == null && getPort() != null) {
+                getLogger().info("Port {" + port + "} open, creating reader");
+                bufferedReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+            }
+            return bufferedReader;
+        }
+    }
+
+    private void startReader() {
+        Thread thread = new Thread(() -> {
+            while (run.get()) {
+                BufferedReader reader;
+                if ((reader = getBufferedReader()) != null) {
+                    readLIneFromBuffer(reader);
+                } else {
+                    Utils.pause(5000);
+                }
             }
         });
         thread.start();
     }
 
+    private void readLIneFromBuffer(BufferedReader reader) {
+        String s = "";
+        try {
+            s = reader.readLine();
+            if (s != null) {
+                updateReadStats(s);
+                Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                onSentenceRead(sentence);
+            }
+        } catch (IOException e) {
+            getLogger().warning("Port {" + config.getPortName() + "} read failure {" + e.getMessage() + "}, resetting");
+            resetPortAndReader();
+        } catch (Exception e) {
+            getLogger().warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
+        }
+    }
+
     private void updateReadStats(String s) {
-		synchronized (stats) {
-			int l = s.length() + 2;
-		    fastStats.bytes += l;
-		    stats.bytes += l;
-		    stats.sentences++;
-		}
-	}
+        synchronized (stats) {
+            int l = s.length() + 2;
+            fastStats.bytes += l;
+            stats.bytes += l;
+            stats.sentences++;
+        }
+    }
 	
 	private void updateWriteStats(byte[] b) {
 		synchronized (stats) {
@@ -184,15 +241,15 @@ public class NMEASerial extends NMEAAgentImpl {
 	
     @Override
     protected void onDeactivate() {
-        if (port != null) {
-            run.set(false);
-            try {
+        run.set(false);
+        try {
+            if (port != null && port.isOpen()) {
                 port.closePort();
-            } catch (Exception e) {
-                getLogger().error("Error closing serial {" + portName + "}", e);
-            } finally {
-                port = null;
             }
+        } catch (Exception e) {
+            getLogger().error("Error closing serial {" + config.getPortName() + "}", e);
+        } finally {
+            resetPortAndReader();
         }
     }
 
@@ -202,28 +259,38 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @OnSentence
     public void onSentence(Sentence s, String src) {
-        if (isStarted() && transmit) {
-            try {
-                String strSentence = s.toSentence() + "\r\n";
-                byte[] b = strSentence.getBytes();
-                port.writeBytes(b, b.length);
-                updateWriteStats(b);
-            } catch (Exception e) {
-                getLogger().error("ERROR: cannot write on port " + portName, e);
-                stop();
+        if (run.get() && config.isTransmit()) {
+            String strSentence = s.toSentence() + "\r\n";
+            byte[] b = strSentence.getBytes();
+            SerialPort p = getPort();
+            if (p != null) {
+                if (p.writeBytes(b, b.length) != -1) {
+                    updateWriteStats(b);
+                } else {
+                    getLogger().warning("Port {" + config.getPortName() + "} write failure, resetting");
+                    resetPortAndReader();
+                }
             }
         }
+    }
+
+    private void resetPortAndReader() {
+        if (port != null) {
+            port.closePort();
+        }
+        port = null;
+        bufferedReader = null;
     }
 
     @Override
     public void onTimer() {
         long t = getCache().getNow();
         synchronized (stats) {
-	        if (fastStats.resetTime == 0) {
-	            fastStats.reset(t);
-	            stats.reset(t); 
-	        } else {
-		        if ((t - fastStats.resetTime) > FAST_STATS_PERIOD) {
+            if (fastStats.resetTime == 0) {
+                fastStats.reset(t);
+                stats.reset(t);
+            } else {
+                if ((t - fastStats.resetTime) > FAST_STATS_PERIOD) {
 	                bps = fastStats.getBps(t);
 	                bpsOut = fastStats.getBpsOut(t);
 	                fastStats.reset(t);

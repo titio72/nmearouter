@@ -41,9 +41,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return
-                "Temp(" + (tempSensor == null ? "-" : "*") + ") " +
-                        "Atm2(" + (pressureTempSensor == null ? "-" : "*") + ")";
+        return "Temp(" + (tempSensor == null ? "-" : "*") + ") " +
+                "Atm2(" + (pressureTempSensor == null ? "-" : "*") + ")";
     }
     
     @Override
@@ -83,7 +82,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             readCounter = (readCounter + 1) % 10; // wait 10 seconds between readings
             if (readCounter == 0) {
                 readSensors();
-                sendPressure();
+                sendAtmo();
                 sendTemperature();
                 sendMTA(HWSettings.getProperty("mta.sensor", "AirTemp"));
                 sendMMB();
@@ -197,7 +196,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         xDrMap.put(m.getName(), m);
     }
 
-    private void sendPressure() {
+    private void sendAtmo() {
         SensorPressureTemp sensor = pressureTempSensor;
         if (checkReadingAge(sensor)) {
             try {
