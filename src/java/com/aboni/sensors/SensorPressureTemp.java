@@ -36,11 +36,12 @@ public class SensorPressureTemp extends I2CSensor {
     @Override
     protected void initSensor(int bus) throws SensorException {
         try {
-            pressurePA = 0.0;
-            temperatureC = 0.0;
-            humidity = 0.0;
+            pressurePA = Double.NaN;
+            temperatureC = Double.NaN;
+            humidity = Double.NaN;
             setDefaultSmoothingAlpha(0.4);
             atmospheric = createAtmo(bus);
+            readSensor();
         } catch (IOException | UnsupportedBusNumberException e) {
             throw new SensorException("Error initializing MPU60050", e);
         }

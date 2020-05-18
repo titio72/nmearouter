@@ -5,210 +5,220 @@ import com.aboni.sensors.I2CInterface;
 
 import java.io.IOException;
 
-/*
- * Pressure, Altitude, Temperature, Humidity
- * Adapted from https://github.com/adafruit/Adafruit_Python_BME280
- */
 public class BME280 implements Atmospheric {
 
-    // This next addresses is returned by "sudo i2cdetect -y 1", see above.
     public static final int BME280_I2C_ADDRESS = 0x76;
 
-    // Operating Modes
-    public static final int BME280_O_SAMPLE_1 = 1;
-    public static final int BME280_O_SAMPLE_2 = 2;
-    public static final int BME280_O_SAMPLE_4 = 3;
-    public static final int BME280_O_SAMPLE_8 = 4;
-    public static final int BME280_O_SAMPLE_16 = 5;
+    private I2CInterface device;
 
-    // BME280 Registers
-    protected static final int[] BME280_REGISTER_DIG_T = new int[]{0x88, 0x8A, 0x8C};
-    protected static final int[] BME280_REGISTER_DIG_P = new int[]{0x8E, 0x90, 0x92, 0x94, 0x96, 0x98, 0x9A, 0x9C, 0x9E};
+    private int digT1;
+    private int digT2;
+    private int digT3;
 
-    public static final int BME280_REGISTER_DIG_H1 = 0xA1;
-    public static final int BME280_REGISTER_DIG_H2 = 0xE1;
-    public static final int BME280_REGISTER_DIG_H3 = 0xE3;
-    public static final int BME280_REGISTER_DIG_H4 = 0xE4;
-    public static final int BME280_REGISTER_DIG_H5 = 0xE5;
-    public static final int BME280_REGISTER_DIG_H6 = 0xE6;
-    public static final int BME280_REGISTER_DIG_H7 = 0xE7;
+    private int digP1;
+    private int digP2;
+    private int digP3;
+    private int digP4;
+    private int digP5;
+    private int digP6;
+    private int digP7;
+    private int digP8;
+    private int digP9;
 
-    public static final int BME280_REGISTER_CHIP_ID = 0xD0;
-    public static final int BME280_REGISTER_VERSION = 0xD1;
-    public static final int BME280_REGISTER_SOFT_RESET = 0xE0;
+    private int digH1;
+    private int digH2;
+    private int digH3;
+    private int digH4;
+    private int digH5;
+    private int digH6;
 
-    public static final int BME280_REGISTER_CONTROL_HUM = 0xF2;
-    public static final int BME280_REGISTER_CONTROL = 0xF4;
-    public static final int BME280_REGISTER_CONFIG = 0xF5;
-    public static final int BME280_REGISTER_PRESSURE_DATA = 0xF7;
-    public static final int BME280_REGISTER_TEMP_DATA = 0xFA;
-    public static final int BME280_REGISTER_HUMIDITY_DATA = 0xFD;
+    private long lastRead;
+    private double cTemp;
+    private double pressure;
+    private double humidity;
+    private double standardSeaLevelPressure;
 
-    private static class DigH {
-        private int digH1 = 0;
-        private int digH2 = 0;
-        private int digH3 = 0;
-        private int digH4 = 0;
-        private int digH5 = 0;
-        private int digH6 = 0;
+    public BME280(I2CInterface i2cDevice) throws IOException {
+        device = i2cDevice;
+        init();
+        read();
+        lastRead = 1;
     }
 
-    private float tFine;
-    private final DigH digH = new DigH();
-    private final int[] digT = new int[3];
-    private final int[] digP = new int[9];
+    private void init() throws IOException {
+        // Read 24 bytes of data from address 0x88(136)
+        byte[] b1 = new byte[24];
+        device.read(0x88, b1, 0, 24);
+        // Convert the data
+        // temp coefficients
+        digT1 = (b1[0] & 0xFF) + ((b1[1] & 0xFF) * 256);
+        digT2 = (b1[2] & 0xFF) + ((b1[3] & 0xFF) * 256);
+        if (digT2 > 32767) {
+            digT2 -= 65536;
+        }
+        digT3 = (b1[4] & 0xFF) + ((b1[5] & 0xFF) * 256);
+        if (digT3 > 32767) {
+            digT3 -= 65536;
+        }
+        // pressure coefficients
+        digP1 = (b1[6] & 0xFF) + ((b1[7] & 0xFF) * 256);
+        digP2 = (b1[8] & 0xFF) + ((b1[9] & 0xFF) * 256);
+        if (digP2 > 32767) {
+            digP2 -= 65536;
+        }
+        digP3 = (b1[10] & 0xFF) + ((b1[11] & 0xFF) * 256);
+        if (digP3 > 32767) {
+            digP3 -= 65536;
+        }
+        digP4 = (b1[12] & 0xFF) + ((b1[13] & 0xFF) * 256);
+        if (digP4 > 32767) {
+            digP4 -= 65536;
+        }
+        digP5 = (b1[14] & 0xFF) + ((b1[15] & 0xFF) * 256);
+        if (digP5 > 32767) {
+            digP5 -= 65536;
+        }
+        digP6 = (b1[16] & 0xFF) + ((b1[17] & 0xFF) * 256);
+        if (digP6 > 32767) {
+            digP6 -= 65536;
+        }
+        digP7 = (b1[18] & 0xFF) + ((b1[19] & 0xFF) * 256);
+        if (digP7 > 32767) {
+            digP7 -= 65536;
+        }
+        digP8 = (b1[20] & 0xFF) + ((b1[21] & 0xFF) * 256);
+        if (digP8 > 32767) {
+            digP8 -= 65536;
+        }
+        digP9 = (b1[22] & 0xFF) + ((b1[23] & 0xFF) * 256);
+        if (digP9 > 32767) {
+            digP9 -= 65536;
+        }
 
-    private final I2CInterface i2cdevice;
+        // Read 1 byte of data from address 0xA1(161)
+        digH1 = ((byte) device.readU8(0xA1) & 0xFF);
 
-    public BME280(I2CInterface i2cdevice) throws IOException {
-        this.i2cdevice = i2cdevice;
-        readCalibrationData();
-        this.i2cdevice.write(BME280_REGISTER_CONTROL, (byte) 0x3F);
-        tFine = 0.0f;
+        // Read 7 bytes of data from address 0xE1(225)
+        device.read(0xE1, b1, 0, 7);
+
+        // Convert the data
+        // humidity coefficients
+        digH2 = (b1[0] & 0xFF) + (b1[1] * 256);
+        if (digH2 > 32767) {
+            digH2 -= 65536;
+        }
+        digH3 = b1[2] & 0xFF;
+        digH4 = ((b1[3] & 0xFF) * 16) + (b1[4] & 0xF);
+        if (digH4 > 32767) {
+            digH4 -= 65536;
+        }
+        digH5 = ((b1[4] & 0xFF) / 16) + ((b1[5] & 0xFF) * 16);
+        if (digH5 > 32767) {
+            digH5 -= 65536;
+        }
+        digH6 = b1[6] & 0xFF;
+        if (digH6 > 127) {
+            digH6 -= 256;
+        }
+
+        // Select control humidity register
+        // Humidity over sampling rate = 1
+        device.write(0xF2, (byte) 0x01);
+        // Select control measurement register
+        // Normal mode, temp and pressure over sampling rate = 1
+        device.write(0xF4, (byte) 0x27);
+        // Select config register
+        // Stand_by time = 1000 ms
+        device.write(0xF5, (byte) 0xA0);
     }
 
-	public void readCalibrationData() throws IOException {
-        // Reads the calibration data from the IC
-        for (int j = 0; j < 9; j++) digT[j] = i2cdevice.readU16LE(BME280_REGISTER_DIG_T[j]);
-        for (int j = 0; j < 9; j++) digP[0] = i2cdevice.readU16LE(BME280_REGISTER_DIG_P[j]);
+    private boolean read() {
+        try {
+            long now = System.currentTimeMillis();
+            if (Utils.isOlderThan(lastRead, now, 1000)) {
 
-        digH.digH1 = i2cdevice.readU8(BME280_REGISTER_DIG_H1);
-        digH.digH2 = i2cdevice.readS16LE(BME280_REGISTER_DIG_H2);
-        digH.digH3 = i2cdevice.readU8(BME280_REGISTER_DIG_H3);
-        digH.digH6 = i2cdevice.readS8(BME280_REGISTER_DIG_H7);
+                // Read 8 bytes of data from address 0xF7(247)
+                // pressure msb1, pressure msb, pressure lsb, temp msb1, temp msb, temp lsb, humidity lsb, humidity msb
+                byte[] data = new byte[8];
+                device.read(0xF7, data, 0, 8);
 
-        int h4 = i2cdevice.readS8(BME280_REGISTER_DIG_H4);
-        h4 = (h4 << 24) >> 20;
-        digH.digH4 = h4 | (i2cdevice.readU8(BME280_REGISTER_DIG_H5) & 0x0F);
+                // Convert pressure and temperature data to 19-bits
+                long adcP = (((long) (data[0] & 0xFF) * 65536) + ((long) (data[1] & 0xFF) * 256) + (long) (data[2] & 0xF0)) / 16;
+                long adcT = (((long) (data[3] & 0xFF) * 65536) + ((long) (data[4] & 0xFF) * 256) + (long) (data[5] & 0xF0)) / 16;
+                // Convert the humidity data
+                long adcH = ((long) (data[6] & 0xFF) * 256 + (long) (data[7] & 0xFF));
 
-        int h5 = i2cdevice.readS8(BME280_REGISTER_DIG_H6);
-        h5 = (h5 << 24) >> 20;
-        digH.digH5 = h5 | (i2cdevice.readU8(BME280_REGISTER_DIG_H5) >> 4 & 0x0F);
+                // Temperature offset calculations
+                double var1 = (((double) adcT) / 16384.0 - ((double) digT1) / 1024.0) * ((double) digT2);
+                double var2 = ((((double) adcT) / 131072.0 - ((double) digT1) / 8192.0) *
+                        (((double) adcT) / 131072.0 - ((double) digT1) / 8192.0)) * ((double) digT3);
+                double tFine = (long) (var1 + var2);
+                cTemp = (var1 + var2) / 5120.0;
+
+                // Pressure offset calculations
+                var1 = (tFine / 2.0) - 64000.0;
+                var2 = var1 * var1 * ((double) digP6) / 32768.0;
+                var2 = var2 + var1 * ((double) digP5) * 2.0;
+                var2 = (var2 / 4.0) + (((double) digP4) * 65536.0);
+                var1 = (((double) digP3) * var1 * var1 / 524288.0 + ((double) digP2) * var1) / 524288.0;
+                var1 = (1.0 + var1 / 32768.0) * ((double) digP1);
+                double p = 1048576.0 - (double) adcP;
+                p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+                var1 = ((double) digP9) * p * p / 2147483648.0;
+                var2 = p * ((double) digP8) / 32768.0;
+                pressure = (p + (var1 + var2 + ((double) digP7)) / 16.0);
+
+                // Humidity offset calculations
+                double varH = tFine - 76800.0;
+                varH = (adcH - (digH4 * 64.0 + digH5 / 16384.0 * varH)) * (digH2 / 65536.0 * (1.0 + digH6 / 67108864.0 * varH * (1.0 + digH3 / 67108864.0 * varH)));
+                humidity = varH * (1.0 - digH1 * varH / 524288.0);
+                if (humidity > 100.0) {
+                    humidity = 100.0;
+                } else if (humidity < 0.0) {
+                    humidity = 0.0;
+                }
+                lastRead = now;
+            }
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
-	private int readRawTemp() throws IOException {
-        // Reads the raw (uncompensated) temperature from the sensor
-        int meas = BME280_O_SAMPLE_8;
-        i2cdevice.write(BME280_REGISTER_CONTROL_HUM, (byte) meas); // HUM ?
-        meas = BME280_O_SAMPLE_8 << 5 | BME280_O_SAMPLE_8 << 2 | 1;
-        i2cdevice.write(BME280_REGISTER_CONTROL, (byte) meas);
-
-        double sleepTime = 0.00125 + 0.0023 * (1 << BME280_O_SAMPLE_8);
-        sleepTime = sleepTime + 0.0023 * (1 << BME280_O_SAMPLE_8) + 0.000575;
-        sleepTime = sleepTime + 0.0023 * (1 << BME280_O_SAMPLE_8) + 0.000575;
-        waitFor((int) (sleepTime * 1000));
-        int msb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA);
-        int lsb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA + 1);
-        int xlsb = i2cdevice.readU8(BME280_REGISTER_TEMP_DATA + 2);
-        return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
+    @Override
+    public float readTemperature() {
+        if (read())
+            return (float) cTemp;
+        else
+            return 0.0f;
     }
 
-	private int readRawPressure() throws IOException {
-        // Reads the raw (uncompensated) pressure level from the sensor
-        int msb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA);
-        int lsb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA + 1);
-        int xlsb = i2cdevice.readU8(BME280_REGISTER_PRESSURE_DATA + 2);
-        return ((msb << 16) | (lsb << 8) | xlsb) >> 4;
+    @Override
+    public float readPressure() {
+        if (read())
+            return (float) pressure;
+        else
+            return 0.0f;
     }
 
-	private int readRawHumidity() throws IOException {
-        int msb = i2cdevice.readU8(BME280_REGISTER_HUMIDITY_DATA);
-        int lsb = i2cdevice.readU8(BME280_REGISTER_HUMIDITY_DATA + 1);
-        return (msb << 8) | lsb;
+    @Override
+    public float readHumidity() {
+        if (read())
+            return (float) humidity;
+        else
+            return 0.0f;
     }
 
-	/* (non-Javadoc)
-	 * @see com.aboni.sensors.hw.AtmoSensor#readTemperature()
-	 */
-	@Override
-	public float readTemperature() 
-	{
-		try {
-            // Gets the compensated temperature in degrees celcius
-            float ut = readRawTemp();
-            float var1;
-            float var2;
-            float temp;
-
-            // Read raw temp before aligning it with the calibration values
-            var1 = (ut / 16384.0f - digT[0] / 1024.0f) * (float) digT[1];
-            var2 = ((ut / 131072.0f - digT[0] / 8192.0f) * (ut / 131072.0f - digT[0] / 8192.0f)) * (float) digT[2];
-            tFine = (int) (var1 + var2);
-            temp = (var1 + var2) / 5120.0f;
-            return temp;
-        } catch (Exception e) {
-			return 0f;
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see com.aboni.sensors.hw.AtmoSensor#readPressure()
-	 */
-	@Override
-	public float readPressure() 
-	{
-		try {
-            // Gets the compensated pressure in pascal
-            int adc = readRawPressure();
-            float var1 = (tFine / 2.0f) - 64000.0f;
-            float var2 = var1 * var1 * (digP[5] / 32768.0f);
-            var2 = var2 + var1 * digP[4] * 2.0f;
-            var2 = (var2 / 4.0f) + (digP[3] * 65536.0f);
-            var1 = (digP[2] * var1 * var1 / 524288.0f + digP[1] * var1) / 524288.0f;
-            var1 = (1.0f + var1 / 32768.0f) * digP[0];
-            if (var1 == 0f)
-                return 0f;
-            float p = 1048576.0f - adc;
-            p = ((p - var2 / 4096.0f) * 6250.0f) / var1;
-            var1 = digP[8] * p * p / 2147483648.0f;
-            var2 = p * digP[7] / 32768.0f;
-            p = p + (var1 + var2 + digP[6]) / 16.0f;
-            return p;
-        } catch (Exception e) {
-			return 0f;
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see com.aboni.sensors.hw.AtmoSensor#readHumidity()
-	 */
-	@Override
-	public float readHumidity() 
-	{
-		try {
-            int adc = readRawHumidity();
-            float h = tFine - 76800.0f;
-            h = (adc - (digH.digH4 * 64.0f + digH.digH5 / 16384.8f * h)) *
-                    (digH.digH2 / 65536.0f * (1.0f + digH.digH6 / 67108864.0f * h * (1.0f + digH.digH3 / 67108864.0f * h)));
-            h = h * (1.0f - digH.digH1 * h / 524288.0f);
-            if (h > 100)
-                h = 100;
-            else if (h < 0)
-                h = 0;
-            return h;
-        } catch (Exception e) {
-			return 0f;
-		}
-	}
-
-	private int standardSeaLevelPressure = 101325;
-
-	@Override
-	public void setStandardSeaLevelPressure(int standardSeaLevelPressure)
-	{
-		this.standardSeaLevelPressure = standardSeaLevelPressure;
-	}
+    @Override
+    public void setStandardSeaLevelPressure(int standardSeaLevelPressure) {
+        this.standardSeaLevelPressure = standardSeaLevelPressure;
+    }
 
     @Override
     public double readAltitude() {
-        // "Calculates the altitude in meters"
         double altitude;
-        float pressure = readPressure();
-        altitude = 44330.0 * (1.0 - Math.pow(pressure / standardSeaLevelPressure, 0.1903));
+        float p = readPressure();
+        altitude = 44330.0 * (1.0 - Math.pow(p / standardSeaLevelPressure, 0.1903));
         return altitude;
-    }
-
-    protected static void waitFor(int howMuch) {
-        Utils.pause(howMuch);
     }
 }
