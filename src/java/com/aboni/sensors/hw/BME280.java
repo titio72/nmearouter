@@ -42,7 +42,6 @@ public class BME280 implements Atmospheric {
         device = i2cDevice;
         init();
         read();
-        lastRead = 1;
     }
 
     private void init() throws IOException {

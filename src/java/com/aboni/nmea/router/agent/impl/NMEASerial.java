@@ -133,8 +133,14 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return String.format("Device %s %d bps (%s) In %d bps Out %d bps", config.getPortName(), config.getSpeed(),
-                (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : ""), bps * 8, bpsOut * 8);
+        synchronized (this) {
+            if (port != null)
+                return String.format("Device %s %d bps (%s) In %d bps Out %d bps", config.getPortName(), config.getSpeed(),
+                        (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : ""), bps * 8, bpsOut * 8);
+            else
+                return String.format("Device %s %d bps (%s) Disconnected", config.getPortName(), config.getSpeed(),
+                        (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : ""));
+        }
     }
 
     @Override
@@ -185,7 +191,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private BufferedReader getBufferedReader() {
         synchronized (this) {
             if (bufferedReader == null && getPort() != null) {
-                getLogger().info("Port {" + port + "} open, creating reader");
+                getLogger().info("Port {" + config.getPortName() + "} open, creating reader");
                 bufferedReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
             }
             return bufferedReader;
