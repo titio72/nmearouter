@@ -5,13 +5,14 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortIOException;
+import com.fazecast.jSerialComm.SerialPortTimeoutException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,6 +23,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
+    private static final int PORT_WAIT_FOR_DATA = 500;
 
     private long bps;
     private long bpsOut;
@@ -103,11 +105,12 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private final AtomicBoolean run = new AtomicBoolean(false);
 
-
     private SerialPort port;
     private BufferedReader bufferedReader;
 
     private long lastPortRetryTime;
+
+    private String logTag = "";
 
     @Inject
     public NMEASerial(@NotNull NMEACache cache) {
@@ -124,6 +127,7 @@ public class NMEASerial extends NMEAAgentImpl {
         config.setReceive(rec);
         config.setTransmit(tran);
         setSourceTarget(rec, tran);
+        logTag = "Port {" + config.getPortName() + "}";
     }
 
     @Override
@@ -152,14 +156,13 @@ public class NMEASerial extends NMEAAgentImpl {
     @Override
     protected boolean onActivate() {
         try {
-            getLogger().info("Port Opened");
             run.set(true);
             if (config.isReceive()) {
                 startReader();
             }
             return true;
         } catch (Exception e) {
-            getLogger().error("Error initializing serial agent {" + config.getPortName() + "}", e);
+            getLogger().error(logTag + " error initializing serial agent {" + config.getPortName() + "}", e);
             port = null;
             bufferedReader = null;
         }
@@ -171,8 +174,7 @@ public class NMEASerial extends NMEAAgentImpl {
             long now = getCache().getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
                 resetPortAndReader();
-                getLogger().info("Creating Port {" + config.getPortName() + "} " +
-                        "Speed {" + config.getSpeed() + "} " +
+                getLogger().info(logTag + " creating with params Speed {" + config.getSpeed() + "} " +
                         "Mode {" + (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : "") + "}");
                 SerialPort p = SerialPort.getCommPort(config.getPortName());
                 p.setComPortParameters(config.getSpeed(), 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
@@ -191,7 +193,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private BufferedReader getBufferedReader() {
         synchronized (this) {
             if (bufferedReader == null && getPort() != null) {
-                getLogger().info("Port {" + config.getPortName() + "} open, creating reader");
+                getLogger().info(logTag + " open, creating reader");
                 bufferedReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
             }
             return bufferedReader;
@@ -205,7 +207,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 if ((reader = getBufferedReader()) != null) {
                     readLIneFromBuffer(reader);
                 } else {
-                    Utils.pause(5000);
+                    Utils.pause(PORT_OPEN_RETRY_TIMEOUT);
                 }
             }
         });
@@ -219,13 +221,22 @@ public class NMEASerial extends NMEAAgentImpl {
             if (s != null) {
                 updateReadStats(s);
                 Sentence sentence = SentenceFactory.getInstance().createParser(s);
-                onSentenceRead(sentence);
+                if (sentence != null) {
+                    notify(sentence);
+                } else {
+                    getLogger().warning(logTag + " not a sentence {" + s + "}");
+                }
             }
-        } catch (IOException e) {
-            getLogger().warning("Port {" + config.getPortName() + "} read failure {" + e.getMessage() + "}, resetting");
+        } catch (SerialPortTimeoutException e) {
+            getLogger().debug(logTag + " read timeout, waiting");
+            Utils.pause(PORT_WAIT_FOR_DATA);
+        } catch (SerialPortIOException e) {
+            getLogger().warning(logTag + " read error {" + e.getMessage() + "}, resetting");
             resetPortAndReader();
+        } catch (IllegalArgumentException e) {
+            getLogger().error(logTag + " read error {" + e.getMessage() + "} string {" + s + "}", e);
         } catch (Exception e) {
-            getLogger().warning("Error reading from serial {" + e.getMessage() + "} {" + s + "}");
+            getLogger().errorForceStacktrace(logTag + " read error {" + e.getMessage() + "}", e);
         }
     }
 
@@ -253,14 +264,10 @@ public class NMEASerial extends NMEAAgentImpl {
                 port.closePort();
             }
         } catch (Exception e) {
-            getLogger().error("Error closing serial {" + config.getPortName() + "}", e);
+            getLogger().error(logTag + " error closing", e);
         } finally {
             resetPortAndReader();
         }
-    }
-
-    private void onSentenceRead(Sentence e) {
-        notify(e);
     }
 
     @OnSentence
@@ -273,7 +280,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 if (p.writeBytes(b, b.length) != -1) {
                     updateWriteStats(b);
                 } else {
-                    getLogger().warning("Port {" + config.getPortName() + "} write failure, resetting");
+                    getLogger().warning(logTag + " write failure, resetting");
                     resetPortAndReader();
                 }
             }
@@ -302,12 +309,12 @@ public class NMEASerial extends NMEAAgentImpl {
 	                fastStats.reset(t);
 		        } 
 		        if ((t - stats.resetTime) > STATS_PERIOD) {
-	            	getLogger().info(String.format("BIn {%d} bpsIn {%d} bpsOut {%d} BOut {%d} Msg {%d} Err {%d}", 
-	            			stats.bytes, (stats.bytes*8*1000)/(t - stats.resetTime), 
-	            			stats.bytesOut, (stats.bytesOut*8*1000)/(t - stats.resetTime), 
-	            			stats.sentences, stats.sentenceErrs));
-	                stats.reset(t);
-		        }
+                    getLogger().info(logTag + String.format("BIn {%d} bpsIn {%d} bpsOut {%d} BOut {%d} Msg {%d} Err {%d}",
+                            stats.bytes, (stats.bytes * 8 * 1000) / (t - stats.resetTime),
+                            stats.bytesOut, (stats.bytesOut * 8 * 1000) / (t - stats.resetTime),
+                            stats.sentences, stats.sentenceErrs));
+                    stats.reset(t);
+                }
 	        }
         }
         super.onTimer();
