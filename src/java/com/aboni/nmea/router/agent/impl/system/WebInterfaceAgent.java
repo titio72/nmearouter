@@ -81,6 +81,6 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return "Web interface";
+        return "Web interface - sessions " + EventSocket.getSessions();
     }
 }

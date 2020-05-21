@@ -11,25 +11,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ClientEndpoint
-@ServerEndpoint(value="/events")
-public class EventSocket
-{
+@ServerEndpoint(value = "/events")
+public class EventSocket {
 	private static final Map<Session, MySession> sessions = new HashMap<>();
 	private static NMEAStream stream;
 
-    public static void setNMEAStream(NMEAStream stream) {
+	public static void setNMEAStream(NMEAStream stream) {
 		EventSocket.stream = stream;
 	}
-	
-    @OnOpen
-    public void onWebSocketConnect(Session session) {
-        synchronized (sessions) {
-            ServerLog.getLogger().info("Started web-socket session {" + session.getId() + "}");
-            MySession s = new MySession(session);
-            sessions.put(session, s);
-            s.start(stream);
-        }
-    }
+
+	public static int getSessions() {
+		synchronized (sessions) {
+			return sessions.size();
+		}
+	}
+
+	@OnOpen
+	public void onWebSocketConnect(Session session) {
+		synchronized (sessions) {
+			ServerLog.getLogger().info("Started web-socket session {" + session.getId() + "}");
+			MySession s = new MySession(session);
+			sessions.put(session, s);
+			s.start(stream);
+		}
+	}
 
     @OnClose
     public void onWebSocketClose(Session session) {

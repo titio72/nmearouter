@@ -51,13 +51,15 @@
 <script type="text/javascript">
 
 
-	var agentList = httpGetAgents();
-	var msg = "-";
-	setColors(agentList);
-	agentList.sort(compare);
+	var agentList;
+	var msg;
 
 	var filterDlg = document.getElementById('filterDialog');
 	var closeBtn = document.getElementById('closeFilterDialog');
+
+	loadAgents();
+
+	setInterval(loadAndUpdate, 5000);
 
 	app.controller("myCtrl", function($scope, $sce) {
 		$scope.agents = agentList
@@ -66,6 +68,22 @@
 		    return $sce.trustAsHtml(html_code);
 		}
 	});
+
+	function loadAgents() {
+		agentList = httpGetAgents();
+		msg = "-";
+		setColors(agentList);
+		agentList.sort(compare);
+	}
+
+	function loadAndUpdate() {
+		loadAgents();
+        controllerElement = document.getElementById('nmearouter');
+        var controllerScope = angular.element(controllerElement).scope();
+		controllerScope.agents = agentList
+		controllerScope.message = msg;
+        controllerScope.$evalAsync();
+	}
 
 	function setColors(agentList) {
 		for (var i = 0; i < agentList.length; i++) {

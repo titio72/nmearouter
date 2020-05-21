@@ -83,7 +83,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
 	
 	@Override
 	public String getDescription() {
-		return "Port " + getPort();
+		synchronized (clients) {
+			return "Port " + getPort() + " - number of clients " + clients.size();
+		}
 	}
 	
 	@Override
