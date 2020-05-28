@@ -172,7 +172,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         if (qos != null) {
             attributes.builtin = qos.get(QOSKeys.BUILT_IN);
             attributes.canStartStop = !qos.get(QOSKeys.CANNOT_START_STOP);
-            for (NMEAPostProcess p : LoadProcessors.load(qos, getLogger())) {
+            for (NMEAPostProcess p : ProcessorsBuilder.load(qos, getLogger())) {
                 addProcessor(p);
             }
         }

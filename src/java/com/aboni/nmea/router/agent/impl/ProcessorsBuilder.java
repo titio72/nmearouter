@@ -10,9 +10,9 @@ import com.aboni.utils.ThingsFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoadProcessors {
+public class ProcessorsBuilder {
 
-    private LoadProcessors() {
+    private ProcessorsBuilder() {
     }
 
     static List<NMEAPostProcess> load(QOS qos, Log log) {

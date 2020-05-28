@@ -106,16 +106,16 @@
   function showTrip(d) {
     trip = searchTrip(d.name);
     if (trip!=null) {
-      dateFrom = new moment(trip.startTS).format("YYYYMMDDHHmmss");
-      dateTo = new moment(trip.endTS).format("YYYYMMDDHHmmss");
+      dateFrom = new moment(trip.startTS).format("YYYYMMDDHHmmssZZ");
+      dateTo = new moment(trip.endTS).format("YYYYMMDDHHmmssZZ");
       tripId = trip.id;
       refresh();
     }
   }
 
   function showDay(d) {
-    dateFrom = d.name + "000000";
-    dateTo = d.name + "235959";
+    dateFrom = new moment(d.name, "YYYYMMDD").format("YYYYMMDDHHmmssZZ");
+    dateTo = new moment(d.name, "YYYYMMDD").add(1, "days").format("YYYYMMDDHHmmssZZ");
     tripId = null;
     refresh();
   }
@@ -402,13 +402,13 @@
   }
 
   function downloadGPX() {
-    window.open("http://" + window.location.hostname + ":1112/track?dateFrom=" + dateFrom +
-      "&dateTo=" + dateTo + "&format=gpx", "_blank");
+    window.open("http://" + window.location.hostname + ":1112/track?from=" + encodeURIComponent(dateFrom) +
+      "&to=" + encodeURIComponent(dateTo) + "&format=gpx", "_blank");
   }
 
   function downloadKML() {
-    window.open("http://" + window.location.hostname + ":1112/track?dateFrom=" + dateFrom +
-      "&dateTo=" + dateTo + "&format=kml", "_blank");
+    window.open("http://" + window.location.hostname + ":1112/track?from=" + encodeURIComponent(dateFrom) +
+      "&to=" + encodeURIComponent(dateTo) + "&format=kml", "_blank");
   }
 
   function refreshTrips() {

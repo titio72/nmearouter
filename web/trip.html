@@ -128,6 +128,7 @@
     tripObject["max10NMSpeedTime1T"] = Date.parse(tripObject.max10NMSpeedTime1);
     tripObject["maxAvgSpeedTimeT"] = Date.parse(tripObject.maxAvgSpeedTime);
     tripObject["maxSampledSpeedTimeT"] = Date.parse(tripObject.maxSampledSpeedTime);
+    tripObject["maxSpeedTimeT"] = Date.parse(tripObject.maxSpeedTime);
     tripObject.legs.forEach(element => {
       element["startT"] = Date.parse(element.start);
       element["endT"] = Date.parse(element.end);
@@ -139,6 +140,7 @@
       element["max10NMSpeedTime1T"] = Date.parse(element.max10NMSpeedTime1);
       element["maxAvgSpeedTimeT"] = Date.parse(element.maxAvgSpeedTime);
       element["maxSampledSpeedTimeT"] = Date.parse(element.maxSampledSpeedTime);
+      element["maxSpeedTimeT"] = Date.parse(element.maxSpeedTime);
     });
   }
 
@@ -167,7 +169,7 @@
   }
 
   function dateToYMD(date) {
-    return new moment(date).format("YYYYMMDDHHmmss");
+    return new moment(date).format("YYYYMMDDHHmmssZZ");
   }
 
   function getTime(s) {
@@ -496,8 +498,8 @@
 
   function loadMap() {
 
-    var s = moment(current.startT).format("YYYYMMDDHHmmss");
-    var e = moment(current.endT).format("YYYYMMDDHHmmss")
+    var s = moment(current.startT).format("YYYYMMDDHHmmssZZ");
+    var e = moment(current.endT).format("YYYYMMDDHHmmssZZ")
     httpGetTrackByDate(s, e, fillMap);
   }
 
@@ -727,9 +729,13 @@
                     <my-tile title="30s Speed" value1="Max {{current.maxAvgSpeed | number:2}} NM"
                              value2="{{current.maxAvgSpeedTimeT | date:'short'}}" value3=""></my-tile>
                 </div>
-                <div class="tile-wrapper">
+                <!--div class="tile-wrapper">
                     <my-tile title="Speed" value1="Max {{current.maxSampledSpeed | number:2}} NM"
                              value2="{{current.maxSampledSpeedTimeT | date:'short'}}" value3=""></my-tile>
+                </div-->
+                <div class="tile-wrapper">
+                    <my-tile title="Max Speed" value1="Max {{current.maxSpeed | number:2}} NM"
+                             value2="{{current.maxSpeedTimeT | date:'short'}}" value3=""></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Distance%" value1="Sail {{current.relativeEngOffDist | percentage:1}}"

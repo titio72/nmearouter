@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +79,7 @@ public class ServiceConfigTest {
         assertEquals(1.0, config.getDouble("p", 1.0), 0.00001);
     }
 
+    /*
     @Test
     public void testGetParamAsInstant() {
         config.setValue("p", "20200309");
@@ -91,26 +93,21 @@ public class ServiceConfigTest {
         Instant i = LocalDateTime.parse("2020-03-10T00:00:00").atZone(ZoneId.systemDefault()).toInstant();
         assertEquals(i, config.getParamAsInstant("p", null, 1));
     }
+*/
 
     @Test
-    public void testGetParamAsInstantFormatWithTime() {
-        config.setValue("p", "20200309103000");
-        Instant i = LocalDateTime.parse("2020-03-09T10:30:00").atZone(ZoneId.systemDefault()).toInstant();
-        assertEquals(i, config.getParamAsInstant("p", Instant.now(), "yyyyMMddHHmmss"));
-    }
-
-    @Test
-    public void testGetParamAsInstantWithTime() {
-        config.setValue("p", "20200308074629");
+    public void testGetParamAsInstantWithTimeAndOffset1() {
+        config.setValue("p", "20200308074629+0200");
         Instant i0 = config.getParamAsInstant("p", null, 0);
-        Instant i = LocalDateTime.parse("2020-03-08T07:46:29").atZone(ZoneId.systemDefault()).toInstant();
+        Instant i = OffsetDateTime.parse("2020-03-08T07:46:29+02:00").toInstant();
         assertEquals(i, i0);
     }
 
     @Test
-    public void testGetParamAsInstantFormatOnlyDate() {
-        config.setValue("p", "20200309");
-        Instant i = LocalDateTime.parse("2020-03-09T00:00:00").atZone(ZoneId.systemDefault()).toInstant();
-        assertEquals(i, config.getParamAsInstant("p", Instant.now(), "yyyyMMdd"));
+    public void testGetParamAsInstantWithTimeAndOffset2() {
+        config.setValue("p", "20200308064629+0000");
+        Instant i0 = config.getParamAsInstant("p", null, 0);
+        Instant i = LocalDateTime.parse("2020-03-08T07:46:29").atZone(ZoneId.systemDefault()).toInstant();
+        assertEquals(i, i0);
     }
 }

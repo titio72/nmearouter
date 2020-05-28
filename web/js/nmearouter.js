@@ -86,7 +86,7 @@ function httpGetTripAnalytics(trip) {
 
 function httpGetTripAnalyticsByDate(ts0, ts1) {
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trackanalytics?from=" + ts0 + "&to=" + ts1,
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trackanalytics?from=" + encodeURIComponent(ts0) + "&to=" + encodeURIComponent(ts1),
       false);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
@@ -104,7 +104,7 @@ function httpGetAgents() {
 
 function httpLoadSpeedDateRange(dt0, dt1, cback) {
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?from=" + dt0 + "&to=" + dt1, true);
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1), true);
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.status==200 && xmlHttp.readyState==4) {
       var json = JSON.parse(xmlHttp.responseText);
@@ -136,7 +136,7 @@ function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
       cback(json);
     }
   }
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?from=" + dt0 + "&to=" + dt1, true);
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1), true);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
 }
@@ -233,8 +233,8 @@ function httpGetTrips() {
 
 function httpGetTrackByDate(dtF, dtT, cback) {
   var xmlHttp = new XMLHttpRequest();
-  var url = "http://" + window.location.hostname + ":1112/track?format=json&from=" + dtF + 
-    "&to=" + dtT;
+  var url = "http://" + window.location.hostname + ":1112/track?format=json&from=" + encodeURIComponent(dtF) + 
+    "&to=" + encodeURIComponent(dtT);
   xmlHttp.open("GET", url, true);
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.readyState==4 && xmlHttp.status==200) {

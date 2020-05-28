@@ -2,8 +2,7 @@ package com.aboni.nmea.router.services;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -56,26 +55,6 @@ public interface ServiceConfig {
         }
     }
 
-    default Instant getParamAsInstant(String param, Instant def, String format) {
-        String f = getParameter(param);
-        if (f == null || f.length() == 0) {
-            return def;
-        } else {
-            try {
-                DateTimeFormatter p = new DateTimeFormatterBuilder()
-                        .appendPattern(format)
-                        .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                        .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                        .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-                        .toFormatter();
-                LocalDateTime d = LocalDateTime.parse(f, p);
-                return d.atZone(ZoneId.systemDefault()).toInstant();
-            } catch (DateTimeParseException e) {
-                return def;
-            }
-        }
-    }
-
     default Instant getParamAsInstant(String param, Instant def, int offset) {
         String f = getParameter(param);
         if (f == null || f.length() == 0) {
@@ -86,15 +65,10 @@ public interface ServiceConfig {
                         .appendValue(ChronoField.YEAR, 4)
                         .appendValue(ChronoField.MONTH_OF_YEAR, 2)
                         .appendValue(ChronoField.DAY_OF_MONTH, 2)
-                        .optionalStart()
-                        .appendPattern("HHmmss")
-                        .optionalEnd()
-                        .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                        .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                        .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                        .appendPattern("HHmmssZZ")
                         .toFormatter();
-                LocalDateTime d = LocalDateTime.parse(f, p);
-                return d.plusDays(offset).atZone(ZoneId.systemDefault()).toInstant();
+                OffsetDateTime d = OffsetDateTime.parse(f, p);
+                return d.plusDays(offset).toInstant();
             } catch (DateTimeParseException ignored) {
                 return def;
             }
