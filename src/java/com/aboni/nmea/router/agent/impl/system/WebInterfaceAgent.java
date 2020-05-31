@@ -13,20 +13,23 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 import javax.inject.Inject;
+import javax.servlet.ServletContext;
 import javax.validation.constraints.NotNull;
-import javax.websocket.server.ServerContainer;
 
 public class WebInterfaceAgent extends NMEAAgentImpl {
 
     private boolean webStarted;
     private Server server;
+    private final NMEAStream stream;
 
     @Inject
-    public WebInterfaceAgent(@NotNull NMEACache cache) {
+    public WebInterfaceAgent(@NotNull NMEACache cache, @NotNull NMEAStream stream) {
         super(cache);
+        this.stream = stream;
         setSourceTarget(false, false);
     }
 
@@ -46,10 +49,11 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 HandlerList handlers = new HandlerList();
                 handlers.setHandlers(new Handler[]{resourceHandler, ThingsFactory.getInstance(AbstractHandler.class), context});
                 server.setHandler(handlers);
+                EventSocket.setNMEAStream(stream);
                 try {
-                    ServerContainer webSocketContainer = WebSocketServerContainerInitializer.configureContext(context);
-                    EventSocket.setNMEAStream(ThingsFactory.getInstance(NMEAStream.class));
-                    webSocketContainer.addEndpoint(EventSocket.class);
+                    WebSocketServerContainerInitializer.configure(context,
+                            (ServletContext servletContext, ServerContainer serverContainer) -> serverContainer.addEndpoint(EventSocket.class)
+                    );
                     server.start();
                     webStarted = true;
                     getLogger().info("Started web interface");
@@ -81,6 +85,6 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return "Web interface";
+        return "Web interface - sessions " + EventSocket.getSessions();
     }
 }

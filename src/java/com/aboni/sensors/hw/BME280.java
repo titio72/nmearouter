@@ -9,7 +9,7 @@ public class BME280 implements Atmospheric {
 
     public static final int BME280_I2C_ADDRESS = 0x76;
 
-    private I2CInterface device;
+    private final I2CInterface device;
 
     private int digT1;
     private int digT2;

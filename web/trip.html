@@ -169,7 +169,7 @@
   }
 
   function dateToYMD(date) {
-    return new moment(date).format("YYYYMMDDHHmmss");
+    return new moment(date).format("YYYYMMDDHHmmssZZ");
   }
 
   function getTime(s) {
@@ -498,8 +498,8 @@
 
   function loadMap() {
 
-    var s = moment(current.startT).format("YYYYMMDDHHmmss");
-    var e = moment(current.endT).format("YYYYMMDDHHmmss")
+    var s = moment(current.startT).format("YYYYMMDDHHmmssZZ");
+    var e = moment(current.endT).format("YYYYMMDDHHmmssZZ")
     httpGetTrackByDate(s, e, fillMap);
   }
 
