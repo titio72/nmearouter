@@ -275,7 +275,8 @@ public class CANBOATDecoder {
     }
 
     private Sentence handleWind(JSONObject jsonObject) {
-        double windSpeed = jsonObject.getDouble("Wind Speed");
+        // mind that speed in m/s
+        double windSpeed = jsonObject.getDouble("Wind Speed") * 1.94384;
         double windAngle = jsonObject.getDouble("Wind Angle");
         String ref = jsonObject.getString("Reference");
         MWVSentence mwv = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
