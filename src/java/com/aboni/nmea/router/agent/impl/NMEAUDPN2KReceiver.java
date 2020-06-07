@@ -67,7 +67,7 @@ public class NMEAUDPN2KReceiver extends NMEAAgentImpl {
                                             onSentenceRead(s);
                                         }
                                     } catch (Exception e) {
-                                        getLogger().errorForceStacktrace("Can't read N2K sentence {" + sSentence + "}", e);
+                                        getLogger().debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");
                                     }
                                 } else {
                                     Sentence s = SentenceFactory.getInstance().createParser(sSentence);
