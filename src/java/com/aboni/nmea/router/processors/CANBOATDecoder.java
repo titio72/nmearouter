@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.processors;
 
+import com.aboni.misc.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
@@ -140,17 +141,28 @@ public class CANBOATDecoder {
         int pgn = canboatSentence.getInt("pgn");
         JSONObject fields = canboatSentence.getJSONObject("fields");
         switch (pgn) {
-            case 130036: return handleWind(fields);
-            case 128267: return handleDepth(fields);
-            case 128259: return handleSpeed(fields);
-            case 130310: return handleWaterTemp(fields);
-            case 127250: return handleHeading(fields);
-            case 129026: return handleSOGCOG(fields);
-            case 129025: return handlePosition(fields);
-            case 126992: return handeSystemTime(fields);
-            case 127245: return handleRudder(fields);
-            case 127257: return handleAttitude(fields);
-            default: return null;
+            case 130306:
+                return handleWind(fields);
+            case 128267:
+                return handleDepth(fields);
+            case 128259:
+                return handleSpeed(fields);
+            case 130310:
+                return handleWaterTemp(fields);
+            case 127250:
+                return handleHeading(fields);
+            case 129026:
+                return handleSOGCOG(fields);
+            case 129025:
+                return handlePosition(fields);
+            case 126992:
+                return handeSystemTime(fields);
+            case 127245:
+                return handleRudder(fields);
+            case 127257:
+                return handleAttitude(fields);
+            default:
+                return null;
         }
     }
 
@@ -171,7 +183,7 @@ public class CANBOATDecoder {
         if (fields.getInt("Instance")==0) {
             RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
             double angle = fields.getDouble("Position");
-            rsa.setRudderAngle(angle>=0 ? Side.STARBOARD:Side.PORT, Math.abs(angle));
+            rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
             return rsa;
         } else {
             return null;
