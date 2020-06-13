@@ -10,9 +10,10 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        JSONObject o = new CANBOATStream().getMessage(ss[0]);
+        CANBOATStream.PGN o = new CANBOATStream().getMessage(ss[0]);
         assertNotNull(o);
-        assertEquals(277.9, o.getDouble("Heading"), 0.001);
+        assertEquals(127250, o.getPgn());
+        assertEquals(277.9, o.getFields().getDouble("Heading"), 0.001);
     }
 
     @Test

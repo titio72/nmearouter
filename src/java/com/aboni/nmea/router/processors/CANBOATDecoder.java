@@ -11,8 +11,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+@Deprecated
 public class CANBOATDecoder {
-
 
     @Inject
     public CANBOATDecoder() {
@@ -283,7 +283,7 @@ public class CANBOATDecoder {
         mwv.setAngle(windAngle);
         mwv.setSpeed(windSpeed);
         mwv.setSpeedUnit(Units.KNOT);
-        mwv.setTrue(false);
+        mwv.setTrue(!ref.equalsIgnoreCase("Apparent"));
         mwv.setStatus(DataStatus.ACTIVE);
         return mwv;
     }
