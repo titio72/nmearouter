@@ -42,9 +42,9 @@ public class CANBOATStream {
         JSONObject fields;
     }
 
-    private Log logger;
+    private Log logger = null;
 
-    public CANBOATStream(@NotNull Log logger) {
+    public CANBOATStream(Log logger) {
         this.logger = logger;
         payloadMap = new HashMap<>();
         pgnSources = new HashMap<>();
@@ -62,11 +62,11 @@ public class CANBOATStream {
                     int src = Integer.parseInt(c[1]);
                     pgnSources.put(pgn, src);
                 } catch (Exception e) {
-                    logger.error("Error reading pgn source mapping {" + l + "}");
+                    if (logger!=null) logger.error("Error reading pgn source mapping {" + l + "}");
                 }
             }
         } catch (IOException e) {
-            logger.error("Error reading pgn source mapping", e);
+            if (logger!=null) logger.error("Error reading pgn source mapping", e);
         }
     }
 
