@@ -20,6 +20,10 @@ public class N2KLightParser {
         return pgn;
     }
 
+    public int getSource() {
+        return source;
+    }
+
     public String getFields() {
         return sFields;
     }
@@ -27,14 +31,23 @@ public class N2KLightParser {
     private long ts = 0L;
     private int pgn = 0;
     private String sFields = null;
+    private int source = 0;
 
     private static final DateTimeFormatter timestampFormatter =
             DateTimeFormatter.ofPattern("uuuu-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
 
+    //{"timestamp":"2020-06-05-20:36:32.435","prio":2,"src":2,"dst":255,"pgn":129025,"description":"Position, Rapid Update","fields":{"Latitude":43.6774763,"Longitude":10.2739919}}
 
     public N2KLightParser(String ss) {
         ts = ZonedDateTime.parse(ss.substring(14, 37), timestampFormatter).toInstant().toEpochMilli();
         int i = 40;
+        for (; i < ss.length() - 4; i++) {
+            if (ss.charAt(i) == ',' && ss.regionMatches(i + 2, "src\"", 0, 3)) {
+                source = Integer.parseInt(ss.substring(i + 7, ss.indexOf(',', i + 5)));
+                i += 5;  // arbitrary...
+                break;
+            }
+        }
         for (; i < ss.length() - 4; i++) {
             if (ss.charAt(i) == ',' && ss.regionMatches(i + 2, "pgn\"", 0, 3)) {
                 pgn = Integer.parseInt(ss.substring(i + 7, ss.indexOf(',', i + 5)));

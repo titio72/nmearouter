@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.n2k;
 
-import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,7 +9,7 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        CANBOATStream.PGN o = new CANBOATStream().getMessage(ss[0]);
+        CANBOATStream.PGN o = new CANBOATStream(getLogger()).getMessage(ss[0]);
         assertNotNull(o);
         assertEquals(127250, o.getPgn());
         assertEquals(277.9, o.getFields().getDouble("Heading"), 0.001);
@@ -18,7 +17,7 @@ public class CANBOATStreamTest {
 
     @Test
     public void skipNewMessageTooSoon() {
-        CANBOATStream stream = new CANBOATStream();
+        CANBOATStream stream = new CANBOATStream(getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[1]));
     }
@@ -26,7 +25,7 @@ public class CANBOATStreamTest {
     @Test
     public void skipNewMessageUnchanged() {
         // skip the second because the long timeout (1000ms) is not expired and the values are the same
-        CANBOATStream stream = new CANBOATStream();
+        CANBOATStream stream = new CANBOATStream(getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[2]));
     }
@@ -34,7 +33,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageBecauseChanged() {
         // send second because the short timeout is expired (350ms) and the value is different
-        CANBOATStream stream = new CANBOATStream();
+        CANBOATStream stream = new CANBOATStream(getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[3]));
     }
@@ -42,7 +41,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageTimeout() {
         // send second because the long timeout is expired (so no matter the values are changed or not
-        CANBOATStream stream = new CANBOATStream();
+        CANBOATStream stream = new CANBOATStream(getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[4]));
     }

@@ -7,7 +7,6 @@ import com.aboni.nmea.router.n2k.CANBOATStream;
 import com.aboni.nmea.router.n2k.CANBOATDecoder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -63,7 +62,7 @@ public class NMEAUDPN2KReceiver extends NMEAAgentImpl {
         super(cache);
         setSourceTarget(true, false);
         decoder = n2kDecoder;
-        n2kStream = new CANBOATStream();
+        n2kStream = new CANBOATStream(getLogger());
         fastStats = new Stats();
         stats = new Stats();
     }
