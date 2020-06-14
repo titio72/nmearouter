@@ -6,7 +6,6 @@ import com.aboni.nmea.router.n2k.CANBOATStream;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 
@@ -18,7 +17,7 @@ public class NMEAInputManager {
 
     public NMEAInputManager(@NotNull Log logger) {
         decoder = new CANBOATDecoderImpl();
-        n2kStream = new CANBOATStream();
+        n2kStream = new CANBOATStream(logger);
         this.logger = logger;
     }
 
@@ -45,12 +44,14 @@ public class NMEAInputManager {
 
     private Sentence handleN2K(String sSentence) {
         try {
-            JSONObject m = n2kStream.getMessage(sSentence);
-            Sentence s = decoder.getSentence(m);
-            return s;
+            CANBOATStream.PGNMessage msg = n2kStream.getMessage(sSentence);
+            if (msg != null && msg.getFields() != null) {
+                Sentence s = decoder.getSentence(msg.getFields());
+                return s;
+            }
         } catch (Exception e) {
             logger.debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");
-            return null;
         }
+        return null;
     }
 }

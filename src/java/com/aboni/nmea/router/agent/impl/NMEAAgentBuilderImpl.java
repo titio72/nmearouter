@@ -195,7 +195,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             }
             return a;
         } else {
-            NMEAUDPN2KReceiver a = ThingsFactory.getInstance(NMEAUDPN2KReceiver.class);
+            NMEAUDPReceiver a = ThingsFactory.getInstance(NMEAUDPReceiver.class);
             a.setup(conf.getName(), q, conf.getPort());
             return a;
         }
