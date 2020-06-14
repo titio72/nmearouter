@@ -7,7 +7,6 @@ import com.aboni.nmea.router.agent.QOS;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -112,12 +111,15 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private String logTag = "";
 
+    private final NMEAInputManager input;
+
     @Inject
     public NMEASerial(@NotNull NMEACache cache) {
         super(cache);
         config = new Config();
         fastStats = new StatsSpeed();
         stats = new Stats();
+        input = new NMEAInputManager(getLogger());
     }
 
     public void setup(String name, String portName, int speed, boolean rec, boolean tran, QOS qos) {
@@ -220,11 +222,9 @@ public class NMEASerial extends NMEAAgentImpl {
             s = reader.readLine();
             if (s != null) {
                 updateReadStats(s);
-                Sentence sentence = SentenceFactory.getInstance().createParser(s);
+                Sentence sentence = input.getSentence(s);
                 if (sentence != null) {
                     notify(sentence);
-                } else {
-                    getLogger().warning(logTag + " not a sentence {" + s + "}");
                 }
             }
         } catch (SerialPortTimeoutException e) {
