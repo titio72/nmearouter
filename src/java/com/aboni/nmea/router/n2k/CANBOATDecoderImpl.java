@@ -52,6 +52,12 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         return c.getSentence(fields);
     }
 
+    @Override
+    public Sentence getSentence(int pgn, JSONObject fields) {
+        Converter c = converterMap.getOrDefault(pgn, (JSONObject f) -> null);
+        return c.getSentence(fields);
+    }
+
     private Sentence handleRateOfTurn(JSONObject fields) {
         double r = fields.getDouble("Rate");
         ROTSentence rot = (ROTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ROT);
@@ -61,8 +67,8 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
     }
 
     private Sentence handleAttitude(JSONObject fields) {
-        double roll = fields.getDouble("Roll") - HWSettings.getPropertyAsDouble("gyro.roll", 0.0);
-        double pitch = fields.getDouble("Pitch") - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0);
+        double roll = Utils.round(fields.getDouble("Roll") - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), 1);
+        double pitch = Utils.round(fields.getDouble("Pitch") - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0), 1);
         double yaw = fields.getDouble("Yaw");
         XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
         xdr.addMeasurement(new Measurement("A", yaw, "D", "YAW"));
