@@ -132,7 +132,7 @@ public class NMEAUDPN2KReceiver extends NMEAAgentImpl {
 
     private void loopReadN2k(String sSentence) {
         try {
-            CANBOATStream.PGN m = n2kStream.getMessage(sSentence);
+            CANBOATStream.PGNMessage m = n2kStream.getMessage(sSentence);
             if (m!=null) {
                 Sentence s = decoder.getSentence(m.getPgn(), m.getFields());
                 if (s != null) {

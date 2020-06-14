@@ -3,7 +3,6 @@ package com.aboni.nmea.router.n2k;
 import com.aboni.utils.Log;
 import org.json.JSONObject;
 
-import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,6 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CANBOATStream {
+
+    private static final boolean WHITE_LIST = false;
+    private static final int ACCEPT_ALL = -1;
+    private static final int REJECT_ALL = -99;
 
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
@@ -24,7 +27,7 @@ public class CANBOATStream {
 
     private final Map<Integer, Payload> payloadMap;
 
-    public class PGN {
+    public class PGNMessage {
         public int getPgn() {
             return pgn;
         }
@@ -56,27 +59,31 @@ public class CANBOATStream {
             BufferedReader bf = new BufferedReader(r);
             String l;
             while ((l=bf.readLine())!=null) {
-                String[] c = l.split(",");
-                try {
-                    int pgn = Integer.parseInt(c[0]);
-                    int src = Integer.parseInt(c[1]);
-                    pgnSources.put(pgn, src);
-                } catch (Exception e) {
-                    if (logger!=null) logger.error("Error reading pgn source mapping {" + l + "}");
-                }
+                loadSourceLine(l, pgnSources, logger);
             }
         } catch (IOException e) {
             if (logger!=null) logger.error("Error reading pgn source mapping", e);
         }
     }
 
-    public PGN getMessage(String sMessage) {
+    private static void loadSourceLine(String l, Map<Integer, Integer> pgnSources, Log logger) {
+        try {
+            String[] c = l.split(",");
+            int pgn = Integer.parseInt(c[0]);
+            int src = Integer.parseInt(c[1]);
+            pgnSources.put(pgn, src);
+        } catch (Exception e) {
+            if (logger!=null) logger.error("Error reading pgn source mapping {" + l + "}");
+        }
+    }
+
+    public PGNMessage getMessage(String sMessage) {
         try {
             N2KLightParser p = new N2KLightParser(sMessage);
             int pgn = p.getPgn();
-            int src = pgnSources.getOrDefault(pgn, -1);
+            int src = pgnSources.getOrDefault(pgn, WHITE_LIST?ACCEPT_ALL:REJECT_ALL);
             if ((src==p.getSource() || src==-1) && (p.getPgn()==129025 || isSend(p.getPgn(), p.getTs(), p.getFields()))) {
-                PGN res = new PGN();
+                PGNMessage res = new PGNMessage();
                 res.pgn = p.getPgn();
                 res.source = p.getSource();
                 res.fields = new JSONObject(p.getFields());
