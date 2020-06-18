@@ -99,7 +99,7 @@ function httpGetAgents() {
       false);
   xmlHttp.setRequestHeader('Content-Type', 'text/plain');
   xmlHttp.send(null);
-  return JSON.parse(xmlHttp.responseText).agents;
+  return JSON.parse(xmlHttp.responseText);
 }
 
 function httpLoadSpeedDateRange(dt0, dt1, cback) {

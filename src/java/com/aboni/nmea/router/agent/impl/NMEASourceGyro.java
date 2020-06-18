@@ -39,17 +39,22 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-        return "OnBoard Sensor";
+        return "OnBoard Gyro";
+    }
+
+    @Override
+    public String toString() {
+        return getType();
     }
 
     @Override
     public String getDescription() {
         return "Gyro(" + (compassSensor == null ? "-" : "*") + ")";
     }
-    
+
     @Override
     protected boolean onActivate() {
-    	synchronized (this) {
+        synchronized (this) {
 			compassSensor = createCompass();
 	        return true;
     	}

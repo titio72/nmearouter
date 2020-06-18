@@ -1,7 +1,9 @@
-package com.aboni.nmea.router.n2k;
+package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.n2k.CANBOATDecoder;
 import com.aboni.utils.HWSettings;
+import net.sf.marineapi.ais.message.AISMessage01;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
@@ -108,6 +110,7 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
             try {
                 rmc.setCourse(lastSOGCOG.getDouble("COG"));
             } catch (JSONException ignored) {
+                // do nothing
             }
             rmc.setSpeed(lastSOGCOG.getDouble("SOG"));
         }
@@ -182,5 +185,59 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         mwv.setTrue(!"Apparent".equals(ref));
         mwv.setStatus(DataStatus.ACTIVE);
         return mwv;
+    }
+
+    private Sentence handleAISTargetClassB(JSONObject fields) {
+        //"pgn":129810,
+        // "description":"AIS Class B static data (msg 24 Part B)",
+        // -----------------------------------------------
+        // "Message ID":24,
+        // "Repeat indicator":
+        // "Initial",
+        // "User ID":247329560,
+        // "Type of ship":"Sailing",
+        // "Vendor ID":"f* I",
+        // "Callsign":"IN4752",
+        // "Length":11.0,
+        // "Beam":4.0,
+        // "Position reference from Starboard":4.0,
+        // "Position reference from Bow":5.0,
+        // "Mothership User ID":0,"Spare":0
+
+        //"pgn":129039,
+        // "description":"AIS Class B Position Report",
+        // -----------------------------------------------
+        // "Message ID":18,
+        // "Repeat Indicator":"Initial",
+        // "User ID":247329560,
+        // "Longitude":10.2729654,
+        // "Latitude":43.6788368,
+        // "Position Accuracy":"High",
+        // "RAIM":"in use",
+        // "Time Stamp":"25",
+        // "SOG":0.00,
+        // "Communication State":"0",
+        // "AIS Transceiver information":
+        // "Channel A VDL reception",
+        // "Regional Application":0,
+        // "Regional Application":0,
+        // "Unit type":"CS",
+        // "Integrated Display":"Yes",
+        // "DSC":"Yes",
+        // "Band":"entire marine band",
+        // "Can handle Msg 22":"Yes",
+        // "AIS mode":"Assigned",
+        // "AIS communication state":"ITDMA"
+
+        AISMessage01 m;
+
+
+        return null;
+    }
+
+    private Sentence handleAISTargetClassA(JSONObject fields) {
+        //{"timestamp":"2020-06-13-16:25:03.836","prio":4,"src":0,"dst":255,"pgn":129038,"description":"AIS Class A Position Report",
+        // "fields":{"Message ID":1,"User ID":247272700,"Longitude":10.3190336,"Latitude":43.5820159,"Position Accuracy":"Low","RAIM":"not in use","Time Stamp":"2","COG":56.0,"SOG":0.00,"Communication State":"0","AIS Transceiver information":"Channel A VDL reception","Heading":195.0,"Rate of Turn":0.00,"Nav Status":"Under way using engine","AIS Spare":"6"}}
+        return null;
     }
 }

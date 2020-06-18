@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.utils.ServerLog;
@@ -18,16 +19,46 @@ import java.util.Set;
 
 public class NMEAUDPSender extends NMEAAgentImpl {
 
+    private static final int FAST_STATS_PERIOD = 1; //number of timer ticks
+    private static final int STATS_PERIOD = 60;
+
     private DatagramSocket serverSocket;
     private int portTarget = 1113;
     private final Set<InetAddress> targets;
     private boolean setup = false;
+
+    private final NMEATrafficStats fastStats;
+    private final NMEATrafficStats stats;
+    private String description;
+    private String baseDescription;
 
     @Inject
     public NMEAUDPSender(@NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(false, true);
         targets = new HashSet<>();
+        baseDescription = "UDP Sender";
+        description = baseDescription;
+        fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, false, true);
+        stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, false, true);
+    }
+
+    private void onFastStatsExpired(NMEATrafficStats s, long time) {
+        if (isStarted()) {
+            synchronized (this) {
+                description = baseDescription + "<br>" + s.toString(time);
+            }
+        } else {
+            synchronized (this) {
+                description = baseDescription;
+            }
+        }
+    }
+
+    private void onStatsExpired(NMEATrafficStats s, long time) {
+        synchronized (this) {
+            getLogger().info(s.toString(time));
+        }
     }
 
     public void setup(String name, QOS qos, int port) {
@@ -35,6 +66,10 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             setup = true;
             setup(name, qos);
             portTarget = port;
+
+            baseDescription = "UDP Sender Port " + getPort() + "<br>";
+            description = baseDescription;
+
             getLogger().info(String.format("Setting up UDP sender: Port {%d}", portTarget));
         } else {
             getLogger().info("Cannot setup UDP sender - already set up");
@@ -43,19 +78,17 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-        return "UDP Server";
+        return "UDP Sender";
     }
 
     @Override
     public String getDescription() {
-        StringBuilder res = new StringBuilder("UDP Sender Port " + getPort() + "<br>");
-        for (InetAddress a : targets) res.append(a.getHostName()).append(" ");
-    	return res.toString();
+        return description;
     }
     
     @Override
     public String toString() {
-        return "{UDP " + getPort() + " T}";
+        return "UDP " + getPort() + " T";
     }
     
 	public int getPort() {
@@ -63,11 +96,14 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 	}
 
 	public void addTarget(String target) {
-		try {
-			targets.add(InetAddress.getByName(target));
-		} catch (UnknownHostException e) {
-			getLogger().error("Invalid target {" + target + "}");
-		}
+        try {
+            InetAddress address = InetAddress.getByName(target);
+            targets.add(address);
+            baseDescription += " " + address.getHostName();
+            description = baseDescription;
+        } catch (UnknownHostException e) {
+            getLogger().error("Invalid target {" + target + "}");
+        }
 	}
 	
 	@Override
@@ -90,35 +126,48 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         }
     }
 
-    private String sending = "";
-    private int nSentences = 0;
-
     @OnSentence
     public void onSentence(Sentence s, String src) {
         String toSend = getOutSentence(s);
+        try {
+            updateStats(toSend);
+            for (InetAddress i : targets) {
+                byte[] bytes = toSend.getBytes();
+                DatagramPacket packet = new DatagramPacket(bytes, bytes.length, i, portTarget);
+                serverSocket.send(packet);
+            }
+            updateStats(false);
+        } catch (IOException e) {
+            updateStats(true);
+            ServerLog.getLogger().error("Error sending datagram packet", e);
+        }
+    }
 
-        if (nSentences == 3) {
-            try {
-                for (InetAddress i : targets) {
-                    DatagramPacket packet = new DatagramPacket(sending.getBytes(), sending.length(), i, portTarget);
-                    serverSocket.send(packet);
-                }
-            } catch (IOException e) {
-                ServerLog.getLogger().error("Error sending datagram packet", e);
-			}
-			nSentences = 0;
-			sending = "";
-		} else {
-			if (toSend!=null) {
-				if(!sending.isEmpty()) sending += "\r\n";
-				sending += toSend;
-				nSentences++;
-			}
-		}
-		
-	}
-	
-	protected String getOutSentence(Sentence s) {
-		return s.toSentence();
-	}
+    private void updateStats(boolean fail) {
+        synchronized (stats) {
+            fastStats.updateWriteStats(fail);
+            stats.updateWriteStats(fail);
+        }
+    }
+
+    private void updateStats(String toSend) {
+        synchronized (stats) {
+            fastStats.updateWriteStats(toSend);
+            stats.updateWriteStats(toSend);
+        }
+    }
+
+    protected String getOutSentence(Sentence s) {
+        return s.toSentence() + "\r\n";
+    }
+
+    @Override
+    public void onTimer() {
+        long t = getCache().getNow();
+        synchronized (stats) {
+            stats.onTimer(t);
+            fastStats.onTimer(t);
+        }
+        super.onTimer();
+    }
 }

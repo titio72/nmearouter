@@ -30,6 +30,11 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
     }
 
     @Override
+    public String toString() {
+        return getType();
+    }
+
+    @Override
     public String getDescription() {
         return "Volt(" + (voltageSensor == null ? "-" : "*") + ")";
     }

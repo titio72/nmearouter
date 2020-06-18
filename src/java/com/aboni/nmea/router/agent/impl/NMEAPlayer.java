@@ -26,17 +26,28 @@ public class NMEAPlayer extends NMEAAgentImpl {
         return "File " + getFile();
     }
 
+    @Override
+    public String getType() {
+        return "NMEA log player";
+    }
+
+    @Override
+    public String toString() {
+        return getType();
+    }
+
+
     public void setFile(String file) {
         this.file = file;
     }
-	
-	public String getFile() {
-		return file;
-	}
 
-	@Override
-	public void onDeactivate() {
-		if (isStarted() && !stop)
+    public String getFile() {
+        return file;
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (isStarted() && !stop)
 			stop = true;
 	}
 	

@@ -74,9 +74,19 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     @Override
+    public String getType() {
+        return "Meteo data tracker";
+    }
+
+    @Override
+    public String toString() {
+        return getType();
+    }
+
+    @Override
     protected boolean onActivate() {
         try {
-            if (writer!=null) writer.init();
+            if (writer != null) writer.init();
             return true;
         } catch (Exception e) {
             getLogger().error("Error connecting db Agent {Meteo}", e);

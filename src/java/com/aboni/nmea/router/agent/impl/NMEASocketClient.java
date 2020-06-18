@@ -116,8 +116,8 @@ public class NMEASocketClient extends NMEAAgentImpl {
 
     @Override
     public String toString() {
-        return " {TCP " + server + ":" + port + " " + (receive ? "R" : "")
-                + (transmit ? "X" : "") + "}";
+        return " TCP " + server + ":" + port + " " + (receive ? "R" : "")
+                + (transmit ? "X" : "");
     }
 
     @OnSentence

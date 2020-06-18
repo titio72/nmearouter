@@ -58,16 +58,27 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     }
 
     @Override
+    public String getType() {
+        return "GPS Player";
+    }
+
+    @Override
+    public String toString() {
+        return getType();
+    }
+
+
+    @Override
     protected boolean onActivate() {
         synchronized (this) {
-			stop = false;
-		}
-		return play();
-	}
-	
-	@Override
-	protected void onDeactivate() {
-		synchronized (this) {
+            stop = false;
+        }
+        return play();
+    }
+
+    @Override
+    protected void onDeactivate() {
+        synchronized (this) {
 			stop = true;
 		}
 	}

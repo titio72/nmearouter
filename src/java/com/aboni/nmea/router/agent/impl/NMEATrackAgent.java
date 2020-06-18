@@ -157,7 +157,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     public String toString() {
-        return "{Tracker}";
+        return "Tracker";
     }
 
     @Override

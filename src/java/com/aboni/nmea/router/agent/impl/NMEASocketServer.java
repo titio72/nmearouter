@@ -80,7 +80,6 @@ public class NMEASocketServer extends NMEAAgentImpl {
         return "TCP NMEA Server";
     }
 
-	
 	@Override
 	public String getDescription() {
 		synchronized (clients) {
@@ -260,7 +259,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     
     @Override
     public String toString() {
-        return "{TCP " + port+ " " + (isSource() ? "R" : "")
-                + (isTarget() ? "X" : "") + "}";
+        return "TCP " + port + " " + (isSource() ? "R" : "")
+                + (isTarget() ? "X" : "");
     }
 }

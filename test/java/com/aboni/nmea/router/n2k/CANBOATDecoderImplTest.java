@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.n2k;
 
+import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Date;

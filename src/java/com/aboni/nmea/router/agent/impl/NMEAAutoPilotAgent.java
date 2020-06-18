@@ -73,22 +73,27 @@ X1  84  7B     +1, -1, +10 or -10 released
 
 public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver {
 
-    @Inject
-    public NMEAAutoPilotAgent(@NotNull NMEACache cache) {
-        super(cache);
-    }
-
-    @Override
-    public String getType() {
-        return "SmartPilot";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Raymarine SeaTalk autopilot driver";
+	@Inject
+	public NMEAAutoPilotAgent(@NotNull NMEACache cache) {
+		super(cache);
 	}
 
-    @Override
+	@Override
+	public String getType() {
+		return "SmartPilot";
+	}
+
+	@Override
+	public String toString() {
+		return getType();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Raymarine SeaTalk autopilot driver";
+	}
+
+	@Override
 	protected boolean onActivate() {
 		return true;
 	}

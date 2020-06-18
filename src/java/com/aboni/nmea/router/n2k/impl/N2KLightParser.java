@@ -1,4 +1,8 @@
-package com.aboni.nmea.router.n2k;
+package com.aboni.nmea.router.n2k.impl;
+
+import com.aboni.nmea.router.n2k.PGNMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -10,33 +14,54 @@ import java.time.format.DateTimeFormatter;
  * It just extracts the timestamp, the pgn and the substring with the fields in the most efficient way.
  * Used to avoid parsing the entire JSON when the application does not need to process it.
  */
-public class N2KLightParser {
+public class N2KLightParser implements PGNMessage {
+
+    public boolean isValid() {
+        if (jFields == null && sFields != null && !invalid) {
+            try {
+                jFields = new JSONObject(sFields);
+                invalid = false;
+            } catch (JSONException e) {
+                jFields = null;
+                invalid = true;
+            }
+        }
+        return !invalid;
+    }
 
     public long getTs() {
         return ts;
     }
 
+    @Override
     public int getPgn() {
         return pgn;
     }
 
+    @Override
     public int getSource() {
         return source;
     }
 
-    public String getFields() {
+    public String getFieldsAsString() {
         return sFields;
+    }
+
+    @Override
+    public JSONObject getFields() {
+        if (isValid()) return jFields;
+        else return null;
     }
 
     private long ts = 0L;
     private int pgn = 0;
     private String sFields = null;
     private int source = 0;
+    private JSONObject jFields = null;
+    private boolean invalid = false;
 
     private static final DateTimeFormatter timestampFormatter =
             DateTimeFormatter.ofPattern("uuuu-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
-
-    //{"timestamp":"2020-06-05-20:36:32.435","prio":2,"src":2,"dst":255,"pgn":129025,"description":"Position, Rapid Update","fields":{"Latitude":43.6774763,"Longitude":10.2739919}}
 
     public N2KLightParser(String ss) {
         ts = ZonedDateTime.parse(ss.substring(14, 37), timestampFormatter).toInstant().toEpochMilli();

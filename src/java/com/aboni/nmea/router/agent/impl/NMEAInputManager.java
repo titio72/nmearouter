@@ -1,8 +1,10 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.n2k.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.CANBOATDecoderImpl;
 import com.aboni.nmea.router.n2k.CANBOATStream;
+import com.aboni.nmea.router.n2k.PGNMessage;
+import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
+import com.aboni.nmea.router.n2k.impl.CANBOATStreamImpl;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -17,7 +19,7 @@ public class NMEAInputManager {
 
     public NMEAInputManager(@NotNull Log logger) {
         decoder = new CANBOATDecoderImpl();
-        n2kStream = new CANBOATStream(logger);
+        n2kStream = new CANBOATStreamImpl(logger);
         this.logger = logger;
     }
 
@@ -34,20 +36,18 @@ public class NMEAInputManager {
 
     private Sentence handleN0183(String sSentence) {
         try {
-            Sentence s = SentenceFactory.getInstance().createParser(sSentence);
-            return s;
+            return SentenceFactory.getInstance().createParser(sSentence);
         } catch (Exception e) {
             logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
-            return null;
         }
+        return null;
     }
 
     private Sentence handleN2K(String sSentence) {
         try {
-            CANBOATStream.PGNMessage msg = n2kStream.getMessage(sSentence);
+            PGNMessage msg = n2kStream.getMessage(sSentence);
             if (msg != null && msg.getFields() != null) {
-                Sentence s = decoder.getSentence(msg.getFields());
-                return s;
+                return decoder.getSentence(msg.getFields());
             }
         } catch (Exception e) {
             logger.debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");

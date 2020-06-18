@@ -31,7 +31,11 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-    	return "Console";
+        return "Console";
     }
 
+    @Override
+    public String toString() {
+        return getType();
+    }
 }

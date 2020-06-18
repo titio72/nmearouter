@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.n2k;
 
+import com.aboni.nmea.router.n2k.impl.N2KLightParser;
 import org.junit.Test;
 
 import java.time.Instant;

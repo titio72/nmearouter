@@ -37,12 +37,19 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 
     @Override
     public String getType() {
-        return "DepthStats";
+        return "Depth stats";
+    }
+
+    @Override
+    public String toString() {
+        return getType();
     }
 
     @Override
     public String getDescription() {
-        return "Calculates max and min depth over last hour period";
+        return "Max and min depth over the last hour" +
+                ((min == Integer.MAX_VALUE) ? "" : String.format(" %.1f", +min / 10f)) +
+                ((max == Integer.MIN_VALUE) ? "" : String.format(" %.1f", max / 10f));
     }
 
     @OnSentence
@@ -53,7 +60,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
             XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
             x.setDepth((float) d.depth / 10f);
             if (min != Integer.MAX_VALUE) x.setMinDepth1h((float) min / 10f);
-            if (min != Integer.MIN_VALUE) x.setMaxDepth1h((float) max / 10f);
+            if (max != Integer.MIN_VALUE) x.setMaxDepth1h((float) max / 10f);
             notify(x);
         }
     }

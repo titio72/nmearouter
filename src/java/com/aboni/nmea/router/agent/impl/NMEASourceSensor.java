@@ -40,11 +40,16 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     }
 
     @Override
+    public String toString() {
+        return getType();
+    }
+
+    @Override
     public String getDescription() {
         return "Temp(" + (tempSensor == null ? "-" : "*") + ") " +
                 "Atm2(" + (pressureTempSensor == null ? "-" : "*") + ")";
     }
-    
+
     @Override
     protected boolean onActivate() {
         started = true;

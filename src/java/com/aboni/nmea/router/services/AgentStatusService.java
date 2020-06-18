@@ -5,8 +5,10 @@ import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
+import java.time.Instant;
 
 public class AgentStatusService extends JSONWebService {
 
@@ -21,7 +23,9 @@ public class AgentStatusService extends JSONWebService {
         setLoader((ServiceConfig config) -> {
             try {
                 String msg = doActivate(config);
-                return new AgentListSerializer(agentStatusManager).getJSON(router, msg);
+                JSONObject res = new AgentListSerializer(agentStatusManager).getJSON(router, msg);
+                res.put("time", Instant.now().toString());
+                return res;
             } catch (Exception e) {
                 throw new JSONGenerationException(e);
             }

@@ -22,7 +22,7 @@ import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.impl.*;
 import com.aboni.nmea.router.n2k.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.CANBOATDecoderImpl;
+import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;

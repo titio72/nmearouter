@@ -53,6 +53,7 @@
 
 	var agentList;
 	var msg;
+	var time;
 
 	var filterDlg = document.getElementById('filterDialog');
 	var closeBtn = document.getElementById('closeFilterDialog');
@@ -64,14 +65,17 @@
 	app.controller("myCtrl", function($scope, $sce) {
 		$scope.agents = agentList
 		$scope.message = msg;
+		$scope.time = time;
 		$scope.to_trusted = function(html_code) {
 		    return $sce.trustAsHtml(html_code);
 		}
 	});
 
 	function loadAgents() {
-		agentList = httpGetAgents();
-		msg = "-";
+		res = httpGetAgents();
+		agentList = res.agents;
+		msg = res.message;
+		time = res.time;
 		setColors(agentList);
 		agentList.sort(compare);
 	}
@@ -82,6 +86,7 @@
         var controllerScope = angular.element(controllerElement).scope();
 		controllerScope.agents = agentList
 		controllerScope.message = msg;
+		controllerScope.time = time;
         controllerScope.$evalAsync();
 	}
 
@@ -191,13 +196,15 @@
             if (xmlHttp.readyState == XMLHttpRequest.DONE) {
                 var json = JSON.parse(xmlHttp.responseText);
                 agentList = json.agents;
-                var msg = json.message;
+				var msg = json.message;
+				var tm = json.time;
                 var controllerElement = document.getElementById('nmearouter');
                 var controllerScope = angular.element(controllerElement).scope();
                 setColors(agentList);
                 agentList.sort(compare);
                 controllerScope.agents = agentList;
                 controllerScope.message = msg;
+                controllerScope.time = tm;
                 controllerScope.$evalAsync();
             }
         }
@@ -228,21 +235,21 @@
 	}
 </script>
 
-<body ng-app="nmearouter">
-	<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="index.html">Home</a></li>
-				<li class="breadcrumb-item active">Agents</li>
-			</ol>
-	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-		<div class="row alert alert-primary" ng-repeat="a in agents" >
-			<div class="col-1" style="min-width:260px">
-				<table style="float: left">
-					<tr>
-                        <td>
-                            <div ng-if="a.source">
-                                <div ng-if="a.hasFilterIn">
-                                    <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
-                                            onclick="showFilter(this, 'in')">
+<body ng-app="nmearouter" ng-controller="myCtrl">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+    <li class="breadcrumb-item active">Agents as of {{time}}</li>
+</ol>
+<div id="nmearouter" class="container-fluid">
+    <div class="row alert alert-primary" ng-repeat="a in agents">
+        <div class="col-1" style="min-width:260px">
+            <table style="float: left">
+                <tr>
+                    <td>
+                        <div ng-if="a.source">
+                            <div ng-if="a.hasFilterIn">
+                                <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
+                                        onclick="showFilter(this, 'in')">
                                         <span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on"
                                               aria-hidden="true"></span>
                                     </button>
