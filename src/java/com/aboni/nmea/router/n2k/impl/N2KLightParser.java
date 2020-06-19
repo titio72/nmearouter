@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.PGNMessage;
+import com.aboni.nmea.router.n2k.CANBOATPGNMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
  * It just extracts the timestamp, the pgn and the substring with the fields in the most efficient way.
  * Used to avoid parsing the entire JSON when the application does not need to process it.
  */
-public class N2KLightParser implements PGNMessage {
+public class N2KLightParser implements CANBOATPGNMessage {
 
     public boolean isValid() {
         if (jFields == null && sFields != null && !invalid) {

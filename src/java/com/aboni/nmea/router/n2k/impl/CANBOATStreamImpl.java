@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.PGNMessage;
+import com.aboni.nmea.router.n2k.CANBOATPGNMessage;
 import com.aboni.utils.Log;
 
 import java.io.BufferedReader;
@@ -58,7 +58,7 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
     }
 
     @Override
-    public PGNMessage getMessage(String sMessage) {
+    public CANBOATPGNMessage getMessage(String sMessage) {
         try {
             N2KLightParser p = new N2KLightParser(sMessage);
             int pgn = p.getPgn();

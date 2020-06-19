@@ -1,8 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.n2k.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.CANBOATStream;
-import com.aboni.nmea.router.n2k.PGNMessage;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
 import com.aboni.nmea.router.n2k.impl.CANBOATStreamImpl;
 import com.aboni.utils.Log;
@@ -13,6 +12,7 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAInputManager {
 
+    private PGNs pgnDefs;
     private final CANBOATDecoder decoder;
     private final CANBOATStream n2kStream;
     private final Log logger;
@@ -20,16 +20,34 @@ public class NMEAInputManager {
     public NMEAInputManager(@NotNull Log logger) {
         decoder = new CANBOATDecoderImpl();
         n2kStream = new CANBOATStreamImpl(logger);
+        try {
+            pgnDefs = new PGNs(Constants.CONF_DIR + "/pgns.json", logger);
+        } catch (PGNDefParseException e) {
+            logger.error("Cannot load pgns definitions", e);
+            pgnDefs = null;
+        }
         this.logger = logger;
     }
 
     public Sentence getSentence(String sSentence) {
         if (sSentence.startsWith("{\"timestamp\":\"")) {
-            return handleN2K(sSentence);
+            return handleN2KCanboat(sSentence);
         } else if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
             return handleN0183(sSentence);
+        } else if (pgnDefs != null && sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
+            return handleN2K(sSentence);
         } else {
             logger.debug("Unknown sentence {" + sSentence + "}");
+            return null;
+        }
+    }
+
+    private Sentence handleN2K(String sSentence) {
+        try {
+            PGNParser p = new PGNParser(pgnDefs, sSentence.trim());
+            return decoder.getSentence(p.getCanBoatJson());
+        } catch (Exception e) {
+            logger.warning("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
             return null;
         }
     }
@@ -43,11 +61,11 @@ public class NMEAInputManager {
         return null;
     }
 
-    private Sentence handleN2K(String sSentence) {
+    private Sentence handleN2KCanboat(String sSentence) {
         try {
-            PGNMessage msg = n2kStream.getMessage(sSentence);
+            CANBOATPGNMessage msg = n2kStream.getMessage(sSentence);
             if (msg != null && msg.getFields() != null) {
-                return decoder.getSentence(msg.getFields());
+                return decoder.getSentence(msg.getPgn(), msg.getFields());
             }
         } catch (Exception e) {
             logger.debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");

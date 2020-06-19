@@ -10,7 +10,7 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        PGNMessage o = new CANBOATStreamImpl(null).getMessage(ss[0]);
+        CANBOATPGNMessage o = new CANBOATStreamImpl(null).getMessage(ss[0]);
         assertNotNull(o);
         assertEquals(127250, o.getPgn());
         assertEquals(277.9, o.getFields().getDouble("Heading"), 0.001);

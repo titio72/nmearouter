@@ -52,7 +52,7 @@ public class NMEAStreamImpl implements NMEAStream {
 					msg = sendJsonObject(msg, s, i);
 				} catch (Exception e) {
 					ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
-				} catch (Throwable t) {
+				} catch (Error t) {
 					ServerLog.getLogger().errorForceStacktrace("Error dispatching event to listener", t);
 				}
 			}
