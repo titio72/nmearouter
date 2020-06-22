@@ -28,6 +28,4 @@ public class N2KLightParserTest {
         assertEquals(t.toEpochMilli(), p.getTs());
         assertEquals("{\"COG Reference\":\"True\",\"COG\":90.0,\"SOG\":0.09}", p.getFields());
     }
-
-
 }

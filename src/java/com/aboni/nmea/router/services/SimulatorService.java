@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
@@ -12,20 +27,20 @@ public class SimulatorService extends JSONWebService {
     }
 
     private JSONObject getResult(ServiceConfig config) {
-		NMEASimulatorSource sim = NMEASimulatorSource.getSimulator();
-		if (sim!=null) {
+        NMEASimulatorSource sim = NMEASimulatorSource.getSimulator();
+        if (sim!=null) {
 
-			double speed = config.getDouble("speed", Double.NaN);
-			if (!Double.isNaN(speed)) {
-				sim.setSpeed(speed);
-			}
+            double speed = config.getDouble("speed", Double.NaN);
+            if (!Double.isNaN(speed)) {
+                sim.setSpeed(speed);
+            }
 
-			double windSpeed = config.getDouble("wspeed", Double.NaN);
-			if (!Double.isNaN(windSpeed)) {
+            double windSpeed = config.getDouble("wspeed", Double.NaN);
+            if (!Double.isNaN(windSpeed)) {
                 sim.setWindSpeed(windSpeed);
             }
 
-			double windDir = config.getDouble("wdir", Double.NaN);
+            double windDir = config.getDouble("wdir", Double.NaN);
             if (!Double.isNaN(windDir)) {
                 sim.setWindDirection(Utils.normalizeDegrees0To360(windDir));
             }
@@ -42,6 +57,6 @@ public class SimulatorService extends JSONWebService {
             return res;
         } else {
             return getError("Simulator is not configured in this system");
-		}
-	}
+        }
+    }
 }

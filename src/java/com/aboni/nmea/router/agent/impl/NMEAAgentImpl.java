@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
@@ -35,11 +50,11 @@ public class NMEAAgentImpl implements NMEAAgent {
             filterSet = s;
         }
 
-		@Override
-		public void setSentenceListener(NMEASentenceListener listener) {
+        @Override
+        public void setSentenceListener(NMEASentenceListener listener) {
             this.listener = listener;
-		}
-	}
+        }
+    }
 
     private class InternalTarget implements NMEATarget {
 
@@ -217,11 +232,11 @@ public class NMEAAgentImpl implements NMEAAgent {
                 }
             }
         }
-	}
-	
-	private void notifyStatus() {
-		if (sl!=null) sl.onStatusChange(this);
-	}
+    }
+
+    private void notifyStatus() {
+        if (sl!=null) sl.onStatusChange(this);
+    }
 
     @Override
     public final void stop() {
@@ -240,20 +255,20 @@ public class NMEAAgentImpl implements NMEAAgent {
         sl = listener;
     }
 
-	@Override
-	public String toString() {
-		return "{" + getType() + "}";
-	}
-	
-	protected boolean onActivate() {
-		return true;
-	}
-	
-	protected void onDeactivate() {
+    @Override
+    public String toString() {
+        return "{" + getType() + "}";
+    }
+
+    protected boolean onActivate() {
+        return true;
+    }
+
+    protected void onDeactivate() {
         // override if necessary
     }
 
-	private boolean checkSourceFilter(Sentence sentence) {
+    private boolean checkSourceFilter(Sentence sentence) {
         NMEASource s = getSource();
         if (s!=null && s.getFilter()!=null)
             return s.getFilter().match(sentence, getName());
@@ -265,7 +280,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      *
      * @param sentence The sentence to be notified to agents
      */
-	protected final void notify(Sentence sentence) {
+    protected final void notify(Sentence sentence) {
         if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
             getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
             List<Sentence> toSend = processorSet.getSentences(sentence, getName());
@@ -274,12 +289,12 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
     }
 
-	/**
-	 * Used by "sources" to push sentences into the stream
-	 * @param m The message to be notified to agents
-	 */
-	protected final void notify(JSONObject m) {
-		if (isStarted()) {
+    /**
+     * Used by "sources" to push sentences into the stream
+     * @param m The message to be notified to agents
+     */
+    protected final void notify(JSONObject m) {
+        if (isStarted()) {
             getLogger().debug("Notify Sentence {" + m + "}");
             sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
         }
@@ -292,13 +307,13 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void addProcessor(NMEAPostProcess f) {
         processorSet.addProcessor(f);
-	}
+    }
 
     @Override
     public final NMEASource getSource() {
         return (attributes.source ? sourceIf : null);
     }
-    
+
     @Override
     public final NMEATarget getTarget() {
         return (attributes.target ? targetIf : null);

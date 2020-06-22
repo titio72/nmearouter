@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEAFilterable;
@@ -22,44 +37,44 @@ import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 
 public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
-    
+
     private static String getType(AgentBase a) {
-    	Method m;
-		try {
-			m = a.getClass().getMethod("getType");
-	    	return (String)m.invoke(a);
-		} catch (Exception e) {
-			return "";
-		}
+        Method m;
+        try {
+            m = a.getClass().getMethod("getType");
+            return (String)m.invoke(a);
+        } catch (Exception e) {
+            return "";
+        }
     }
-	
-	private static QOS getQos(String par) {
-		QOS q = new QOS();
-		if (par!=null) {
-			StringTokenizer t = new StringTokenizer(par, ";");
-			while (t.hasMoreTokens()) {
-				StringTokenizer t1 = new StringTokenizer(t.nextToken(), "=");
-				if (t1.countTokens()==1) {
-					String token = t1.nextToken();
-					q.addProp(token);
-				} else {
-					q.addProp(t1.nextToken(), t1.nextToken());
-				}
-			}
-		}
-		return q;
-	}
+
+    private static QOS getQos(String par) {
+        QOS q = new QOS();
+        if (par!=null) {
+            StringTokenizer t = new StringTokenizer(par, ";");
+            while (t.hasMoreTokens()) {
+                StringTokenizer t1 = new StringTokenizer(t.nextToken(), "=");
+                if (t1.countTokens()==1) {
+                    String token = t1.nextToken();
+                    q.addProp(token);
+                } else {
+                    q.addProp(t1.nextToken(), t1.nextToken());
+                }
+            }
+        }
+        return q;
+    }
 
     @Inject
     public NMEAAgentBuilderImpl() {
         // do nothing
     }
-	
-	@Override
-	public NMEAAgent createAgent(AgentBase a) {
-		NMEAAgent agent = null;
-		QOS q = getQos(a.getQos());
-		switch (getType(a)) {
+
+    @Override
+    public NMEAAgent createAgent(AgentBase a) {
+        NMEAAgent agent = null;
+        QOS q = getQos(a.getQos());
+        switch (getType(a)) {
             case "Simulator":
                 agent = buildSimulator((SimulatorAgent) a, q);
                 break;
@@ -103,16 +118,16 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
                 break;
         }
         if (agent!=null) {
-        	NMEAFilterable src = agent.getSource();
-        	FilterSet srcFilterConf = a.getFilterSource();
-        	loadFilters(src, srcFilterConf);
+            NMEAFilterable src = agent.getSource();
+            FilterSet srcFilterConf = a.getFilterSource();
+            loadFilters(src, srcFilterConf);
 
-        	NMEAFilterable tgt = agent.getTarget();
-        	FilterSet tgtFilterConf = a.getFilterTarget();
-        	loadFilters(tgt, tgtFilterConf);
+            NMEAFilterable tgt = agent.getTarget();
+            FilterSet tgtFilterConf = a.getFilterTarget();
+            loadFilters(tgt, tgtFilterConf);
         }
-		return agent;
-	}
+        return agent;
+    }
 
     private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
         if (agentFilterable != null && filterConf != null) {
@@ -123,18 +138,18 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             setFilter(filterConf, agentFilterable.getFilter());
         }
     }
-	
-	private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
-    	if (conf!=null && dest!=null) {
-    		for (Filter fConf: conf.getFilter()) {
-    			NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(
-    					"*".equals(fConf.getSentence())?"":fConf.getSentence(),
-    					"*".equals(fConf.getTalker())?null:TalkerId.parse(fConf.getTalker()),
-    					"*".equals(fConf.getSource())?"":fConf.getSource()
-    					);
-    			dest.addFilter(sF);
-    		}
-    	}
+
+    private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
+        if (conf!=null && dest!=null) {
+            for (Filter fConf: conf.getFilter()) {
+                NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(
+                        "*".equals(fConf.getSentence())?"":fConf.getSentence(),
+                        "*".equals(fConf.getTalker())?null:TalkerId.parse(fConf.getTalker()),
+                        "*".equals(fConf.getSource())?"":fConf.getSource()
+                );
+                dest.addFilter(sF);
+            }
+        }
     }
 
     private NMEAAgent buildGPXPlayer(GPXPlayerAgent g, QOS q) {
@@ -148,16 +163,16 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             ServerLog.getLogger().error("Cannot create GPX reader", e);
         }
         return gpx;
-	}
-    
-	private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
+    }
+
+    private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleTarget.class);
         a.setup(c.getName(), q);
         return a;
     }
 
-	private NMEAAgent buildSerial(SerialAgent s, QOS q) {
-		String name = s.getName();
+    private NMEAAgent buildSerial(SerialAgent s, QOS q) {
+        String name = s.getName();
         String portName = s.getDevice();
         int speed = s.getBps();
         boolean t;
@@ -185,9 +200,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         serial.setup(name, portName, speed, r, t, q);
         return serial;
     }
-	
-	private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
-		if (conf.getInout()==InOut.OUT) {
+
+    private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
+        if (conf.getInout()==InOut.OUT) {
             NMEAUDPSender a = ThingsFactory.getInstance(NMEAUDPSender.class);
             a.setup(conf.getName(), q, conf.getPort());
             for (String s : conf.getTo()) {
@@ -213,7 +228,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return meteo;
     }
 
-	private NMEAAgent buildSocketJSON(JSONAgent s, QOS q) {
+    private NMEAAgent buildSocketJSON(JSONAgent s, QOS q) {
         String name = s.getName();
         int port = s.getPort();
         NMEASocketServer c = ThingsFactory.getInstance(NMEASocketServer.class);
@@ -229,14 +244,14 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return c;
     }
 
-	private NMEAAgent buildSocket(TcpAgent s, QOS q) {
-	    if (s.getHost()==null || s.getHost().isEmpty()) {
-	        return buildServerSocket(s, q);
-	    } else {
-	        return buildClientSocket(s, q);
-	    }
-	}
-	
+    private NMEAAgent buildSocket(TcpAgent s, QOS q) {
+        if (s.getHost()==null || s.getHost().isEmpty()) {
+            return buildServerSocket(s, q);
+        } else {
+            return buildClientSocket(s, q);
+        }
+    }
+
     private NMEAAgent buildClientSocket(TcpAgent s, QOS q) {
         String name = s.getName();
         String server = s.getHost();

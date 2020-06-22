@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
@@ -65,12 +80,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         return "Simulator";
     }
 
-	private void loadPolars() {
-		if (polars == null) {
+    private void loadPolars() {
+        if (polars == null) {
             polars = new PolarTableImpl();
         }
         try {
-        	if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
+            if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
                 File f = new File(Constants.CONF_DIR, data.getPolars());
                 try (FileReader reader = new FileReader(f)) {
                     polars.load(reader);
@@ -97,9 +112,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             return false;
         }
     }
-	    
-	@Override
-	public String getDescription() {
+
+    @Override
+    public String getDescription() {
         return "Simulator";
     }
 
@@ -135,7 +150,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 
     @Override
     public void onTimer() {
-		if (isStarted()) {
+        if (isStarted()) {
             data.loadConf();
             loadPolars();
 
@@ -183,43 +198,43 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             sendAP();
             sendRSA();
         }
-	}
+    }
 
-	private void addGpsNoise(Position posOut) {
-		if (data.isGpsOut()) {
-			int x = r.nextInt(25);
-			if (x == 0) {
+    private void addGpsNoise(Position posOut) {
+        if (data.isGpsOut()) {
+            int x = r.nextInt(25);
+            if (x == 0) {
                 if (r.nextBoolean())
                     posOut.setLongitude(navData.pos.getLongitude() + 1.0);
                 else
                     posOut.setLatitude(navData.pos.getLatitude() + 1.0);
-			}
-		}
-	}
+            }
+        }
+    }
 
-	private double getSpeed(float absoluteWindSpeed, int tWDirection) {
-		double speed;
-		if (data.isUsePolars()) {
+    private double getSpeed(float absoluteWindSpeed, int tWDirection) {
+        double speed;
+        if (data.isUsePolars()) {
             speed = polars.getSpeed(tWDirection, absoluteWindSpeed) * data.getPolarCoefficient();
         } else {
             speed = Utils.round(data.getSpeed() * (1.0 + r.nextDouble() / 10.0), 1);
         }
-		return speed;
-	}
+        return speed;
+    }
 
-	private void sendAP() {
-		if (data.isAutoPilot()) {
-			sendAutopilotStatus();
-		}
-	}
+    private void sendAP() {
+        if (data.isAutoPilot()) {
+            sendAutopilotStatus();
+        }
+    }
 
-	private void sendRSA() {
-		if (data.isRsa()){
-			RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
-			rsa.setRudderAngle(Side.STARBOARD, data.getRudder());
-			NMEASimulatorSource.this.notify(rsa);
-		}
-	}
+    private void sendRSA() {
+        if (data.isRsa()){
+            RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
+            rsa.setRudderAngle(Side.STARBOARD, data.getRudder());
+            NMEASimulatorSource.this.notify(rsa);
+        }
+    }
 
     private void sendVoltage() {
         if (data.isXdrDiag()) {
@@ -241,31 +256,31 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             NMEASimulatorSource.this.notify(xdr);
         }
 
-		if (data.isMtw()) {
+        if (data.isMtw()) {
             MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
             t.setTemperature(temp - 5);
             NMEASimulatorSource.this.notify(t);
         }
 
-		if (data.isMta()) {
-			MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
-			mta.setTemperature(temp);
-			NMEASimulatorSource.this.notify(mta);
-		}
+        if (data.isMta()) {
+            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
+            mta.setTemperature(temp);
+            NMEASimulatorSource.this.notify(mta);
+        }
 
-		if (data.isMbb()) {
+        if (data.isMbb()) {
             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
             mmb.setBars(press / 1000.0);
             NMEASimulatorSource.this.notify(mmb);
         }
 
-		if (data.isMhu()) {
-			MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
-			mhu.setRelativeHumidity(data.getHum());
-			NMEASimulatorSource.this.notify(mhu);
-		}
+        if (data.isMhu()) {
+            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
+            mhu.setRelativeHumidity(data.getHum());
+            NMEASimulatorSource.this.notify(mhu);
+        }
 
-		if (data.isMda()) {
+        if (data.isMda()) {
             MDASentence mda = (MDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MDA");
             mda.setRelativeHumidity(data.getHum());
             mda.setAirTemperature(temp);
@@ -320,77 +335,77 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         }
     }
 
-	private void sendSplitApparentWind(double aWSpeed, double aWDirection) {
-		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-		v.setAngle(aWDirection);
-		v.setTrue(false);
-		v.setSpeedUnit(Units.KNOT);
-		v.setStatus(DataStatus.ACTIVE);
-		NMEASimulatorSource.this.notify(v);
+    private void sendSplitApparentWind(double aWSpeed, double aWDirection) {
+        MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+        v.setAngle(aWDirection);
+        v.setTrue(false);
+        v.setSpeedUnit(Units.KNOT);
+        v.setStatus(DataStatus.ACTIVE);
+        NMEASimulatorSource.this.notify(v);
 
-		v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-		v.setTrue(false);
-		v.setSpeedUnit(Units.KMH);
-		v.setSpeed(aWSpeed * 1.852);
-		v.setStatus(DataStatus.ACTIVE);
-		NMEASimulatorSource.this.notify(v);
-	}
+        v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+        v.setTrue(false);
+        v.setSpeedUnit(Units.KMH);
+        v.setSpeed(aWSpeed * 1.852);
+        v.setStatus(DataStatus.ACTIVE);
+        NMEASimulatorSource.this.notify(v);
+    }
 
-	private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
-		if (data.isMwvA()) {
-			if (data.isSplitWind()) {
-				sendSplitApparentWind(aWSpeed, aWDirection);
-			} else {
-				sendApparentWind(aWSpeed, aWDirection, false);
-			}
-		}
+    private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
+        if (data.isMwvA()) {
+            if (data.isSplitWind()) {
+                sendSplitApparentWind(aWSpeed, aWDirection);
+            } else {
+                sendApparentWind(aWSpeed, aWDirection, false);
+            }
+        }
 
-		if (data.isMwvT()) {
-			sendApparentWind(absoluteWindSpeed, tWDirection, true);
-		}
+        if (data.isMwvT()) {
+            sendApparentWind(absoluteWindSpeed, tWDirection, true);
+        }
 
-		if (data.isVwr()) {
-			VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWR");
-			vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
-			vwr.setSpeed(aWSpeed);
-			vwr.setSide(Side.PORT);
-			vwr.setStatus(DataStatus.ACTIVE);
-			NMEASimulatorSource.this.notify(vwr);
-		}
+        if (data.isVwr()) {
+            VWRSentence vwr = (VWRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWR");
+            vwr.setAngle(aWDirection>180?360-aWDirection:aWDirection);
+            vwr.setSpeed(aWSpeed);
+            vwr.setSide(Side.PORT);
+            vwr.setStatus(DataStatus.ACTIVE);
+            NMEASimulatorSource.this.notify(vwr);
+        }
 
-		if (data.isVwr()) {
-			VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
-			vwt.setWindAngle(tWDirection > 180 ? 360 - tWDirection : tWDirection);
-			vwt.setSpeedKnots(absoluteWindSpeed);
-			vwt.setDirectionLeftRight(tWDirection > 180 ? Direction.LEFT : Direction.RIGHT);
-			NMEASimulatorSource.this.notify(vwt);
-		}
-	}
+        if (data.isVwr()) {
+            VWTSentence vwt = (VWTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "VWT");
+            vwt.setWindAngle(tWDirection > 180 ? 360 - tWDirection : tWDirection);
+            vwt.setSpeedKnots(absoluteWindSpeed);
+            vwt.setDirectionLeftRight(tWDirection > 180 ? Direction.LEFT : Direction.RIGHT);
+            NMEASimulatorSource.this.notify(vwt);
+        }
+    }
 
-	private void sendApparentWind(double aWSpeed, double aWDirection, boolean b) {
-		MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-		setWindSpeedValues(aWSpeed, v);
-		v.setAngle(aWDirection);
-		v.setTrue(b);
-		v.setStatus(DataStatus.ACTIVE);
-		NMEASimulatorSource.this.notify(v);
-	}
+    private void sendApparentWind(double aWSpeed, double aWDirection, boolean b) {
+        MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
+        setWindSpeedValues(aWSpeed, v);
+        v.setAngle(aWDirection);
+        v.setTrue(b);
+        v.setStatus(DataStatus.ACTIVE);
+        NMEASimulatorSource.this.notify(v);
+    }
 
-	private void setWindSpeedValues(double aWSpeed, MWVSentence v) {
-		if (data.isWindSpeedInMS()) {
-			v.setSpeedUnit(Units.METER);
-			v.setSpeed(aWSpeed / 1.947);
-		} else {
-			v.setSpeedUnit(Units.KNOT);
-			v.setSpeed(aWSpeed);
-		}
-	}
+    private void setWindSpeedValues(double aWSpeed, MWVSentence v) {
+        if (data.isWindSpeedInMS()) {
+            v.setSpeedUnit(Units.METER);
+            v.setSpeed(aWSpeed / 1.947);
+        } else {
+            v.setSpeedUnit(Units.KNOT);
+            v.setSpeed(aWSpeed);
+        }
+    }
 
-	private void sendDepth(double depth) {
-		if (data.isDpt()) {
-			DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
-			d.setDepth(depth);
-			d.setOffset(data.getDepthOffset());
+    private void sendDepth(double depth) {
+        if (data.isDpt()) {
+            DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
+            d.setDepth(depth);
+            d.setOffset(data.getDepthOffset());
             NMEASimulatorSource.this.notify(d);
         }
 
@@ -412,19 +427,19 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             Date ddd = new Date();
             ddd.setDay(c.get(Calendar.DAY_OF_MONTH));
             ddd.setMonth(c.get(Calendar.MONTH) + 1);
-			ddd.setYear(c.get(Calendar.YEAR));
-			rmc.setDate(ddd);
-			Time ttt = new Time();
-			ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
-			ttt.setMinutes(c.get(Calendar.MINUTE));
-			ttt.setSeconds(c.get(Calendar.SECOND));
-			rmc.setTime(ttt);
+            ddd.setYear(c.get(Calendar.YEAR));
+            rmc.setDate(ddd);
+            Time ttt = new Time();
+            ttt.setHour(c.get(Calendar.HOUR_OF_DAY));
+            ttt.setMinutes(c.get(Calendar.MINUTE));
+            ttt.setSeconds(c.get(Calendar.SECOND));
+            rmc.setTime(ttt);
 
-			rmc.setVariation(0.0);
-			rmc.setMode(FaaMode.AUTOMATIC);
-			rmc.setDirectionOfVariation(CompassPoint.WEST);
-			rmc.setSpeed(speed);
-			rmc.setPosition(posOut);
+            rmc.setVariation(0.0);
+            rmc.setMode(FaaMode.AUTOMATIC);
+            rmc.setDirectionOfVariation(CompassPoint.WEST);
+            rmc.setSpeed(speed);
+            rmc.setPosition(posOut);
             NMEASimulatorSource.this.notify(rmc);
         }
 
@@ -447,8 +462,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         }
     }
 
-	private void sendVLW() {
-		if (data.isVlw()) {
+    private void sendVLW() {
+        if (data.isVlw()) {
             VLWSentence s = (VLWSentence) SentenceFactory.getInstance().createParser(id, SentenceId.VLW);
             s.setTotal(navData.distance);
             s.setTotalUnits('N');
@@ -480,13 +495,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
                 }
             }
 
-		}
-    		
+        }
+
     }
 
-	private void handleAPStatusCommands(String[] p) {
-		String disc = p[1] + p[2];
-		switch (disc) {
+    private void handleAPStatusCommands(String[] p) {
+        String disc = p[1] + p[2];
+        switch (disc) {
             case "01FE":
                 if (navData.headingAuto == Integer.MIN_VALUE) {
                     navData.headingAuto = (int) navData.refHeading;
@@ -502,17 +517,17 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             default:
                 break;
         }
-	}
+    }
 
-	private void  handleAPDirectionCommands(String[] p) {
-		String disc = p[1] + p[2];
-		int delta;
-		switch (disc) {
-			case "05FA": delta = -1; break;
-			case "06F9": delta = -10; break;
-			case "07F8": delta = 1; break;
-			case "08F7": delta = 10; break;
-			default: delta = 0; break;
+    private void  handleAPDirectionCommands(String[] p) {
+        String disc = p[1] + p[2];
+        int delta;
+        switch (disc) {
+            case "05FA": delta = -1; break;
+            case "06F9": delta = -10; break;
+            case "07F8": delta = 1; break;
+            case "08F7": delta = 10; break;
+            default: delta = 0; break;
         }
         if (delta != 0) {
             if (navData.headingAuto != Integer.MIN_VALUE) {

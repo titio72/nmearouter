@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.sensors.hw;
 
 import com.aboni.misc.Utils;
@@ -29,9 +44,9 @@ public class BMP180 implements Atmospheric {
         }
     }
 
-	// BMP180 Registers
-	private static final int BMP180_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)
-	private static final int BMP180_CAL_AC2           = 0xAC;  // R   Calibration data (16 bits)
+    // BMP180 Registers
+    private static final int BMP180_CAL_AC1           = 0xAA;  // R   Calibration data (16 bits)
+    private static final int BMP180_CAL_AC2           = 0xAC;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_AC3 = 0xAE;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_AC4 = 0xB0;  // R   Calibration data (16 bits)
     private static final int BMP180_CAL_AC5 = 0xB2;  // R   Calibration data (16 bits)
@@ -100,14 +115,14 @@ public class BMP180 implements Atmospheric {
         calibrationBM.calMD = readS16(BMP180_CAL_MD);    // INT16
     }
 
-	private int readRawTemp() throws IOException {
+    private int readRawTemp() throws IOException {
         // Reads the raw (uncompensated) temperature from the sensor
         getI2CBus().write(BMP180_CONTROL, (byte) BMP180_READ_TEMP_CMD);
         waitfor(5);  // Wait 5ms
         return readU16(BMP180_TEMP_DATA);
     }
 
-	private int readRawPressure() throws IOException {
+    private int readRawPressure() throws IOException {
         // Reads the raw (uncompensated) pressure level from the sensor
         getI2CBus().write(BMP180_CONTROL, (byte) (BMP180_READ_PRESSURE_CMD + (mode.value << 6)));
 
@@ -131,8 +146,8 @@ public class BMP180 implements Atmospheric {
         return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - mode.value);
     }
 
-	public float readTemperature() {
-		try {
+    public float readTemperature() {
+        try {
             // Gets the compensated temperature in degrees celsius
             int iUT;
             int iX1;
@@ -148,19 +163,19 @@ public class BMP180 implements Atmospheric {
             temp = ((iB5 + 8) >> 4) / 10.0f;
             return temp;
         } catch (Exception e) {
-			return 0.0f;
-		}
-	}
+            return 0.0f;
+        }
+    }
 
-	public float readPressure() {
-		try {
-			// Gets the compensated pressure in pascal
-			int iUT;
-			int iUP;
-			int iB3;
-			int iB5;
-			int iB6;
-			int iX1;
+    public float readPressure() {
+        try {
+            // Gets the compensated pressure in pascal
+            int iUT;
+            int iUP;
+            int iB3;
+            int iB5;
+            int iB6;
+            int iX1;
             int iX2;
             int iX3;
             int p;
@@ -194,40 +209,37 @@ public class BMP180 implements Atmospheric {
 
             return p;
         } catch (Exception e) {
-			return 0.0f;
-		}
-	}
+            return 0.0f;
+        }
+    }
 
-	private static void waitfor(int howMuch)
-	{
-		Utils.pause(howMuch);
-	}
+    private static void waitfor(int howMuch) {
+        Utils.pause(howMuch);
+    }
 
-	private I2CInterface getI2CBus() {
+    private I2CInterface getI2CBus() {
         return i2cDevice;
     }
 
-	private int standardSeaLevelPressure = 101325;
+    private int standardSeaLevelPressure = 101325;
 
-	@Override
-	public void setStandardSeaLevelPressure(int standardSeaLevelPressure)
-	{
-		this.standardSeaLevelPressure = standardSeaLevelPressure;
-	}
+    @Override
+    public void setStandardSeaLevelPressure(int standardSeaLevelPressure) {
+        this.standardSeaLevelPressure = standardSeaLevelPressure;
+    }
 
-	@Override
-	public double readAltitude()
-	{
-		// "Calculates the altitude in meters"
-		double altitude;
-		float pressure = readPressure();
-		altitude = 44330.0 * (1.0 - Math.pow(pressure / standardSeaLevelPressure, 0.1903));
-		return altitude;
-	}
-	
-	@Override
-	public float readHumidity() {
-		return 0;
-	}
+    @Override
+    public double readAltitude() {
+        // "Calculates the altitude in meters"
+        double altitude;
+        float pressure = readPressure();
+        altitude = 44330.0 * (1.0 - Math.pow(pressure / standardSeaLevelPressure, 0.1903));
+        return altitude;
+    }
+
+    @Override
+    public float readHumidity() {
+        return 0;
+    }
 
 }

@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
@@ -75,38 +90,38 @@ public class NMEASocketClient extends NMEAAgentImpl {
     protected boolean onActivate() {
 
         synchronized (this) {
-	        if (socket == null) {
-    	        try {
+            if (socket == null) {
+                try {
                     getLogger().info("Creating Socket {" + server + ":" + port + "}");
                     socket = new Socket(server, port);
                     InputStream iStream = socket.getInputStream();
                     getLogger().info("Opened Socket {" + server + ":" + port + "}");
-    
+
                     if (receive) {
                         reader = new SentenceReader(iStream);
                         reader.addSentenceListener(new InternalSentenceReader());
                         reader.start();
                     }
-                    
+
                     return true;
                 } catch (Exception e) {
                     getLogger().error("Error initializing socket {" + server + ":" + port + "} ", e);
                     socket = null;
                 }
             }
-	    }
+        }
         return false;
-	}
-	
-	@Override
-	protected void onDeactivate() {
-	    synchronized (this) {
-    	    if (socket!=null) {
-    	        reader.stop();
-    	        try {
+    }
+
+    @Override
+    protected void onDeactivate() {
+        synchronized (this) {
+            if (socket!=null) {
+                reader.stop();
+                try {
                     socket.close();
                 } catch (IOException e) {
-    	            getLogger().error("Error trying to close socket", e);
+                    getLogger().error("Error trying to close socket", e);
                 } finally {
                     socket = null;
                 }

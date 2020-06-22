@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.sensors;
 
 import com.aboni.misc.DataFilter;
@@ -9,10 +24,10 @@ import java.io.IOException;
 
 public class SensorHMC5883 extends I2CSensor {
 
-    private static final int X = 0; 
-    private static final int Y = 1; 
-    private static final int Z = 2; 
-    
+    private static final int X = 0;
+    private static final int Y = 1;
+    private static final int Z = 2;
+
     private HMC5883L hmc5883l;
     private double[] mag;
 
@@ -52,28 +67,28 @@ public class SensorHMC5883 extends I2CSensor {
 
     @Override
     protected void readSensor() throws SensorException {
-    	synchronized (this) {
-    	    if (hmc5883l != null) {
-    	        try {
-    	            setMagReading(hmc5883l.getScaledMag());
+        synchronized (this) {
+            if (hmc5883l != null) {
+                try {
+                    setMagReading(hmc5883l.getScaledMag());
                 } catch (IOException e) {
-    	            throw new SensorException("Error reading compass", e);
+                    throw new SensorException("Error reading compass", e);
                 }
-    	    }
-    	}
+            }
+        }
     }
 
     private void setMagReading(double[] m) {
-		if (mag==null) {
-		    mag = m; 
-		} else {
-		    mag = new double[]{
+        if (mag==null) {
+            mag = m;
+        } else {
+            mag = new double[]{
                     DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[X], m[X]),
                     DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Y], m[Y]),
                     DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Z], m[Z])
             };
-		}
-	}
+        }
+    }
 
     public double[] getMagVector() {
         return mag;

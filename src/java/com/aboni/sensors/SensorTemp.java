@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.sensors;
 
 import com.aboni.sensors.hw.DS18B20;
@@ -10,56 +25,56 @@ import java.util.Map;
 
 public class SensorTemp implements Sensor {
 
-	public static class Reading {
+    public static class Reading {
 
-		private Reading(String key, long timestamp, double value) {
-			k = key;
-			ts = timestamp;
-			v = value;
-		}
+        private Reading(String key, long timestamp, double value) {
+            k = key;
+            ts = timestamp;
+            v = value;
+        }
 
-		private final String k;
-		private final long ts;
-		private final double v;
+        private final String k;
+        private final long ts;
+        private final double v;
 
-		public String getKey() {
-			return k;
-		}
+        public String getKey() {
+            return k;
+        }
 
-		public double getValue() {
-			return v;
-		}
+        public double getValue() {
+            return v;
+        }
 
-		public long getTimestamp() {
-			return ts;
-		}
-	}
-	
-	private final Map<String, Reading> readings;
-	
-	private long lastRead;
-	private DS18B20 sensor;
-	
-	public SensorTemp() {
-		readings = new HashMap<>();
-		lastRead = 0;
-		sensor = null;
-	}
-	
-	@Override
-	public void init() {
-		try {
-			sensor = new DS18B20();
-		} catch (Exception e) {
-			ServerLog.getLogger().error("Cannot initialize temp W1 sensor", e);
-			sensor = null;
-		}
-	}
+        public long getTimestamp() {
+            return ts;
+        }
+    }
 
-	@Override
-	public String getSensorName() {
-		return "W1TEMP";
-	}
+    private final Map<String, Reading> readings;
+
+    private long lastRead;
+    private DS18B20 sensor;
+
+    public SensorTemp() {
+        readings = new HashMap<>();
+        lastRead = 0;
+        sensor = null;
+    }
+
+    @Override
+    public void init() {
+        try {
+            sensor = new DS18B20();
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Cannot initialize temp W1 sensor", e);
+            sensor = null;
+        }
+    }
+
+    @Override
+    public String getSensorName() {
+        return "W1TEMP";
+    }
 
     @Override
     public void read() throws SensorNotInitializedException {
@@ -75,16 +90,16 @@ public class SensorTemp implements Sensor {
         } else {
             throw new SensorNotInitializedException("Temp sensor not initialized!");
         }
-	}
+    }
 
-	public Collection<Reading> getReadings() {
-		synchronized (readings) {
-			return new ArrayList<>(readings.values());
-		}
-	}
+    public Collection<Reading> getReadings() {
+        synchronized (readings) {
+            return new ArrayList<>(readings.values());
+        }
+    }
 
-	@Override
-	public long getLastReadingTimestamp() {
-		return lastRead;
-	}
+    @Override
+    public long getLastReadingTimestamp() {
+        return lastRead;
+    }
 }

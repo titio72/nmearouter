@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.Constants;
@@ -20,19 +35,19 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private int timerCount;
 
     private static final int TEMP = 0;
-    private static final int W_TEMP = 1; 
-    private static final int PRESS = 2; 
-    private static final int WIND = 3; 
-    private static final int WIND_D = 4; 
-    private static final int HUM = 5; 
+    private static final int W_TEMP = 1;
+    private static final int PRESS = 2;
+    private static final int WIND = 3;
+    private static final int WIND_D = 4;
+    private static final int HUM = 5;
 
     private final StatsSample[] series = new StatsSample[] {
-    		new ScalarStatsSample("AT0", -20.0, 50.0),
-    		new ScalarStatsSample("WT_", -20.0, 50.0),
-    		new ScalarStatsSample("PR_", 800.0, 1100.0),
-    		new ScalarStatsSample("TW_", 0.0, 100.0),
-    		new AngleStatsSample("TWD"),
-    		new ScalarStatsSample("HUM", 0.0, 150.0)
+            new ScalarStatsSample("AT0", -20.0, 50.0),
+            new ScalarStatsSample("WT_", -20.0, 50.0),
+            new ScalarStatsSample("PR_", 800.0, 1100.0),
+            new ScalarStatsSample("TW_", 0.0, 100.0),
+            new AngleStatsSample("TWD"),
+            new ScalarStatsSample("HUM", 0.0, 150.0)
     };
 
     /* Cycles of timer*/
@@ -93,17 +108,16 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             return false;
         }
     }
-    
-    
-    
+
+
     @Override
     public void onTimer() {
-    	timerCount = (timerCount+1) % SAMPLING_FACTOR;
-    	if (timerCount==0) dumpStats();
-    	super.onTimer();
+        timerCount = (timerCount+1) % SAMPLING_FACTOR;
+        if (timerCount==0) dumpStats();
+        super.onTimer();
     }
-    
-    
+
+
     private void dumpStats() {
         synchronized (series) {
             long ts = getCache().getNow();
@@ -142,28 +156,28 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
                     processWind((MWDSentence) s);
                 } else if (!useMWD && s instanceof MWVSentence) {
                     processWind((MWVSentence)s);
-		        }
-	    	}
-    	} catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
             getLogger().warning("Error processing meteo stats {" + s + "} error {" + e + "}");
         }
     }
 
-	private void collect(int id, double d) {
+    private void collect(int id, double d) {
         synchronized (series) {
-        	StatsSample s = series[id];
+            StatsSample s = series[id];
             s.add(d);
         }
     }
 
     private void write(StatsSample s, long ts) {
-    	if (writer!=null && s!=null && s.getSamples()>0) {
+        if (writer!=null && s!=null && s.getSamples()>0) {
             if ("TW_".equals(s.getTag()) && s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)) {
                 // skip anomalous reading (like 80kn of max with avg of 4kn)
                 return;
             }
-    	    writer.write(s, ts);
-    	}
+            writer.write(s, ts);
+        }
     }
 
     private void processWind(MWDSentence s) {

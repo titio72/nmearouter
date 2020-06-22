@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.utils;
 
 import com.aboni.nmea.router.Constants;
@@ -32,108 +47,108 @@ public class ServerLog implements LogAdmin {
             Date d = new Date(record.getMillis());
             String s = df.format(d) + " " + record.getLevel() + " " + record.getMessage() + "\n";
             if (record.getThrown()!=null) {
-            	StringWriter sw = new StringWriter();
-            	PrintWriter pw = new PrintWriter(sw);
-            	record.getThrown().printStackTrace(pw);
-            	s += sw.toString() + "\n";
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                record.getThrown().printStackTrace(pw);
+                s += sw.toString() + "\n";
             }
             return s;
         }
     }
-    
-	private boolean debug = false;
-	
-    private final Logger lg;
-	
-	private final Logger lgConsole;
 
-	private ServerLog() {
+    private boolean debug = false;
+
+    private final Logger lg;
+
+    private final Logger lgConsole;
+
+    private ServerLog() {
         lg = Logger.getLogger("NMEARouter");
         lg.setLevel(Level.INFO);
-	    
-	    FileHandler fh;  
-	    try {  
+
+        FileHandler fh;
+        try {
             lg.setUseParentHandlers(false);
 
             fh = new FileHandler(Constants.LOG, 0, 1, true);
             lg.addHandler(fh);
 
             Formatter formatter = new MyFormatter();
-	        fh.setFormatter(formatter);  
-	    } catch (SecurityException | IOException e) {
-	        Logger.getGlobal().log(Level.SEVERE, "Error", e);
-	    }
+            fh.setFormatter(formatter);
+        } catch (SecurityException | IOException e) {
+            Logger.getGlobal().log(Level.SEVERE, "Error", e);
+        }
 
-		lgConsole = Logger.getLogger("NMEAConsole");
-		lgConsole.setLevel(Level.INFO);
-		lgConsole.setUseParentHandlers(false);
-		ConsoleHandler c = new ConsoleHandler();
-		lgConsole.addHandler(c);
-		c.setFormatter(new Formatter() {
-			@Override
-			public String format(LogRecord logRecord) {
-				return logRecord.getMessage() + "\n";
-			}
-		});
-	}
-	
-	private static final ServerLog logger = new ServerLog();
+        lgConsole = Logger.getLogger("NMEAConsole");
+        lgConsole.setLevel(Level.INFO);
+        lgConsole.setUseParentHandlers(false);
+        ConsoleHandler c = new ConsoleHandler();
+        lgConsole.addHandler(c);
+        c.setFormatter(new Formatter() {
+            @Override
+            public String format(LogRecord logRecord) {
+                return logRecord.getMessage() + "\n";
+            }
+        });
+    }
 
-	public static Log getLogger() {
-		return getLoggerAdmin();
-	}
+    private static final ServerLog logger = new ServerLog();
 
-	public static LogAdmin getLoggerAdmin() {
-		return logger;
-	}
+    public static Log getLogger() {
+        return getLoggerAdmin();
+    }
+
+    public static LogAdmin getLoggerAdmin() {
+        return logger;
+    }
 
     @Override
     public void setDebug() {
         lg.setLevel(Level.FINEST);
         debug = true;
     }
-    
+
     @Override
     public void setError() {
         lg.setLevel(Level.SEVERE);
         debug = false;
     }
-    
+
     @Override
     public void setWarning() {
         lg.setLevel(Level.WARNING);
         debug = false;
     }
-    
+
     @Override
     public void setNone() {
         lg.setLevel(Level.OFF);
         debug = false;
     }
-    
+
     @Override
     public void setInfo() {
         lg.setLevel(Level.INFO);
         debug = false;
     }
 
-	@Override
-	public void error(String msg) {
-		lg.log(Level.SEVERE, msg);
-	}
+    @Override
+    public void error(String msg) {
+        lg.log(Level.SEVERE, msg);
+    }
 
-	@Override
-	public void error(final String msg, final Throwable t) {
-		if (debug)
-			lg.log(Level.SEVERE, msg, t);
-		else
-			lg.severe( () -> String.format("{%s} error {%s}", msg, t.getMessage()) );
-	}
+    @Override
+    public void error(final String msg, final Throwable t) {
+        if (debug)
+            lg.log(Level.SEVERE, msg, t);
+        else
+            lg.severe( () -> String.format("{%s} error {%s}", msg, t.getMessage()) );
+    }
 
-	@Override
-	public void errorForceStacktrace(final String msg, final Throwable t) {
-		lg.log(Level.SEVERE, msg, t);
-	}
+    @Override
+    public void errorForceStacktrace(final String msg, final Throwable t) {
+        lg.log(Level.SEVERE, msg, t);
+    }
 
     @Override
     public void warning(String msg) {

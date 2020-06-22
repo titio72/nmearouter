@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
@@ -22,49 +37,49 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
 
-	private Timer timer;
-	private final AtomicBoolean started;
-	private final ExecutorService exec;
+    private Timer timer;
+    private final AtomicBoolean started;
+    private final ExecutorService exec;
 
-	private final Map<String, NMEAAgent> agents;
-	private final BlockingQueue<RouterMessage> sentenceQueue;
-	private final NMEAProcessorSet processors;
-	private final NMEACache cache;
-	private final NMEAStream stream;
+    private final Map<String, NMEAAgent> agents;
+    private final BlockingQueue<RouterMessage> sentenceQueue;
+    private final NMEAProcessorSet processors;
+    private final NMEACache cache;
+    private final NMEAStream stream;
 
-	private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
-	private static final int TIMER_HR		= 250;
-	private int timerCount = 0;
-	
-	private long lastStatsTime;
-	private static final long STATS_PERIOD = 60; // seconds
-	
-	@Inject
-	public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
-	    agents = new HashMap<>();
-		sentenceQueue = new LinkedBlockingQueue<>();
-		processors = new NMEAProcessorSet();
-		started  = new AtomicBoolean(false);
-		this.cache = cache;
-		this.stream = stream;
-		exec = Executors.newFixedThreadPool(4);
-		timer = null;
-	}
+    private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
+    private static final int TIMER_HR		= 250;
+    private int timerCount = 0;
 
-	private void onTimerHR() {
-		synchronized (agents) {
-			timerCount = (timerCount +1) % TIMER_FACTOR;
-			for (NMEAAgent a: agents.values()) {
-				exec.execute(a::onTimerHR);
-				if (timerCount ==0) {
-					exec.execute(a::onTimer);
-					dumpStats();
-				}
-			}
-		}
-	}
-	
-	private void dumpStats() {
+    private long lastStatsTime;
+    private static final long STATS_PERIOD = 60; // seconds
+
+    @Inject
+    public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
+        agents = new HashMap<>();
+        sentenceQueue = new LinkedBlockingQueue<>();
+        processors = new NMEAProcessorSet();
+        started  = new AtomicBoolean(false);
+        this.cache = cache;
+        this.stream = stream;
+        exec = Executors.newFixedThreadPool(4);
+        timer = null;
+    }
+
+    private void onTimerHR() {
+        synchronized (agents) {
+            timerCount = (timerCount +1) % TIMER_FACTOR;
+            for (NMEAAgent a: agents.values()) {
+                exec.execute(a::onTimerHR);
+                if (timerCount ==0) {
+                    exec.execute(a::onTimer);
+                    dumpStats();
+                }
+            }
+        }
+    }
+
+    private void dumpStats() {
         long t = cache.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
@@ -72,125 +87,125 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-	@Override
-	public void start() {
-		synchronized (this) {
-			if (!started.get()) {
-				started.set(true);
-				initProcessingThread();
-				
-				if (timer==null) {
-					timer = new Timer(true);
-					timer.scheduleAtFixedRate(new TimerTask() {
-						
-						@Override
-						public void run() {
-							onTimerHR();
-						}
-					}, 0, TIMER_HR);
-				}
-			}
-		}
-	}
+    @Override
+    public void start() {
+        synchronized (this) {
+            if (!started.get()) {
+                started.set(true);
+                initProcessingThread();
 
-	@Override
-	public void stop() {
-		synchronized (this) {
-			timer.cancel();
-			timer.purge();
-			started.set(false);
-		}
-	}
-	
-	@Override
-	public boolean isStarted() {
-		return started.get();
-	}
-	
-	private void initProcessingThread() {
-		exec.execute(()->{
-				while (started.get()) {
-					try { 
-						routeSentence(sentenceQueue.take());
-					} catch (InterruptedException e1) {
-						Thread.currentThread().interrupt();
-					}
-				}
-			});
-	}
+                if (timer==null) {
+                    timer = new Timer(true);
+                    timer.scheduleAtFixedRate(new TimerTask() {
 
-	@Override
+                        @Override
+                        public void run() {
+                            onTimerHR();
+                        }
+                    }, 0, TIMER_HR);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void stop() {
+        synchronized (this) {
+            timer.cancel();
+            timer.purge();
+            started.set(false);
+        }
+    }
+
+    @Override
+    public boolean isStarted() {
+        return started.get();
+    }
+
+    private void initProcessingThread() {
+        exec.execute(()->{
+            while (started.get()) {
+                try {
+                    routeSentence(sentenceQueue.take());
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+    }
+
+    @Override
     public void addProcessor(NMEAPostProcess processor) {
         processors.addProcessor(processor);
     }
 
-	@Override
-	public void addAgent(NMEAAgent agent) {
-		synchronized (agents) {
-			ServerLog.getLogger().info("Adding Agent {" + agent.getName() + "}");
-			agents.put(agent.getName(), agent);
-			agent.setStatusListener(this::privateOnStatusChange);
-			if (agent.getSource()!=null) {
-			    agent.getSource().setSentenceListener(this::privateQueueUpSentence);
-			}
-		}
-	}
-	
-	@Override
-	public NMEAAgent getAgent(String name) {
-		synchronized (agents) {
-			return agents.get(name);
-		}
-	}
-	
-	@Override
-	public Collection<String> getAgents() {
-		synchronized (agents) {
-			return new TreeSet<>(agents.keySet());
-		}
-	}
-	
-	private void privateOnStatusChange(NMEAAgent src) {
-		ServerLog.getLogger().debug("New status received for {" + src + "}");
-	}
+    @Override
+    public void addAgent(NMEAAgent agent) {
+        synchronized (agents) {
+            ServerLog.getLogger().info("Adding Agent {" + agent.getName() + "}");
+            agents.put(agent.getName(), agent);
+            agent.setStatusListener(this::privateOnStatusChange);
+            if (agent.getSource()!=null) {
+                agent.getSource().setSentenceListener(this::privateQueueUpSentence);
+            }
+        }
+    }
+
+    @Override
+    public NMEAAgent getAgent(String name) {
+        synchronized (agents) {
+            return agents.get(name);
+        }
+    }
+
+    @Override
+    public Collection<String> getAgents() {
+        synchronized (agents) {
+            return new TreeSet<>(agents.keySet());
+        }
+    }
+
+    private void privateOnStatusChange(NMEAAgent src) {
+        ServerLog.getLogger().debug("New status received for {" + src + "}");
+    }
 
     private void privateQueueUpSentence(RouterMessage s) {
         try {
-			sentenceQueue.put(s);
-		} catch (InterruptedException e1) {
-			Thread.currentThread().interrupt();
-		}
+            sentenceQueue.put(s);
+        } catch (InterruptedException e1) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void routeSentence(RouterMessage m) {
-		if (started.get()) {
-			if (m.getPayload() instanceof Sentence) {
-				Sentence s = (Sentence)m.getPayload();
-				Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
-				for (Sentence ss : toSend) {
-					cache.onSentence(ss, m.getSource());
-					RouterMessage mm = RouterMessageImpl.createMessage(ss, m.getSource(), m.getTimestamp());
-					routeToTarget(mm);
-					stream.pushSentence(mm);
-				}
-			} else if (m.getPayload() instanceof JSONObject) {
-				stream.pushSentence(m);
-			}
-		}
-	}
+        if (started.get()) {
+            if (m.getPayload() instanceof Sentence) {
+                Sentence s = (Sentence)m.getPayload();
+                Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
+                for (Sentence ss : toSend) {
+                    cache.onSentence(ss, m.getSource());
+                    RouterMessage mm = RouterMessageImpl.createMessage(ss, m.getSource(), m.getTimestamp());
+                    routeToTarget(mm);
+                    stream.pushSentence(mm);
+                }
+            } else if (m.getPayload() instanceof JSONObject) {
+                stream.pushSentence(m);
+            }
+        }
+    }
 
-	private void routeToTarget(RouterMessage mm) {
-		synchronized (agents) {
-			for (NMEAAgent nmeaAgent : agents.values()) {
-				try {
-					NMEATarget target = nmeaAgent.getTarget();
-					if (target != null && !mm.getSource().equals(nmeaAgent.getName())) {
-						exec.execute(() -> target.pushMessage(mm));
-					}
-				} catch (Exception e) {
-					ServerLog.getLogger().error("Error dispatching to target!", e);
-				}
-			}
-		}
-	}
+    private void routeToTarget(RouterMessage mm) {
+        synchronized (agents) {
+            for (NMEAAgent nmeaAgent : agents.values()) {
+                try {
+                    NMEATarget target = nmeaAgent.getTarget();
+                    if (target != null && !mm.getSource().equals(nmeaAgent.getName())) {
+                        exec.execute(() -> target.pushMessage(mm));
+                    }
+                } catch (Exception e) {
+                    ServerLog.getLogger().error("Error dispatching to target!", e);
+                }
+            }
+        }
+    }
 }

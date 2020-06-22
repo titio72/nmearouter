@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
@@ -31,27 +46,27 @@ public class FanAgent extends NMEAAgentImpl {
     @Override
     protected boolean onActivate() {
         return true;
-	}
+    }
 
-	@Override
-	public void onTimer() {
-		if (isStarted()) {
-			double temp = CPUTemp.getInstance().getTemp();
-			if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
-			else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
-		}
-	}
-	
-	private double getThresholdOff() {
-		return HWSettings.getPropertyAsDouble("fan.off", FAN_THRESHOLD_OFF);
-	}
-	
-	private double getThresholdOn() {
-		return HWSettings.getPropertyAsDouble("fan.on", FAN_THRESHOLD_ON);
-	}
+    @Override
+    public void onTimer() {
+        if (isStarted()) {
+            double temp = CPUTemp.getInstance().getTemp();
+            if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
+            else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
+        }
+    }
 
-	private void fan(boolean on) {
-		getLogger().info("Switch fan {" + on + "}");
-		fan.switchFan(on);
-	}
+    private double getThresholdOff() {
+        return HWSettings.getPropertyAsDouble("fan.off", FAN_THRESHOLD_OFF);
+    }
+
+    private double getThresholdOn() {
+        return HWSettings.getPropertyAsDouble("fan.on", FAN_THRESHOLD_ON);
+    }
+
+    private void fan(boolean on) {
+        getLogger().info("Switch fan {" + on + "}");
+        fan.switchFan(on);
+    }
 }

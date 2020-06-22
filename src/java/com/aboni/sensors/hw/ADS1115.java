@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.sensors.hw;
 
 import com.aboni.sensors.I2CInterface;
@@ -8,7 +23,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class ADS1115 {
 
-    
+
     // =======================================================================
     // ADS1115 I2C ADDRESS
     // =======================================================================
@@ -16,18 +31,18 @@ public class ADS1115 {
     public static final int ADS1115_ADDRESS_0X49 = 0x49; // ADDRESS 2 : 0x49 (1001001) ADR -> VDD
     public static final int ADS1115_ADDRESS_0X4A = 0x4A; // ADDRESS 3 : 0x4A (1001010) ADR -> SDA
     public static final int ADS1115_ADDRESS_0X4B = 0x4B; // ADDRESS 4 : 0x4B (1001011) ADR -> SCL
-    
+
     // =======================================================================
     // ADS1115 VALUE RANGES
     // =======================================================================
     public static final int ADS1115_RANGE_MAX_VALUE =  32767; //0x7FFF (16 bits)
     public static final int ADS1115_RANGE_MIN_VALUE = -32768; //0xFFFF (16 bits)
-    
+
     // =======================================================================
     // CONVERSION DELAY (in mS)
     // =======================================================================
     protected static final int ADS1115_CONVERSIONDELAY       = 0x08;
-    
+
     // =======================================================================
     // POINTER REGISTER
     // =======================================================================
@@ -109,19 +124,19 @@ public class ADS1115 {
         PGA_1_024V(1.024,ADS1X15_REG_CONFIG_PGA_1_024V),  // +/-1.024V range
         PGA_0_512V(0.512,ADS1X15_REG_CONFIG_PGA_0_512V),  // +/-0.512V range
         PGA_0_256V(0.256,ADS1X15_REG_CONFIG_PGA_0_256V);   // +/-0.256V range
-        
+
         private final double voltage;
         private final int configValue;
-        
+
         ProgrammableGainAmplifierValue(double voltage, int configValue){
-          this.voltage = voltage;
-          this.configValue = configValue;
-        }       
-        
+            this.voltage = voltage;
+            this.configValue = configValue;
+        }
+
         public double getVoltage(){
             return this.voltage;
         }
-        
+
         public int getConfigValue(){
             return this.configValue;
         }
@@ -130,7 +145,7 @@ public class ADS1115 {
     private final ProgrammableGainAmplifierValue pga;
     private final double multiplier;
     private final I2CInterface device;
-    
+
     public ADS1115(I2CInterface device) {
         this(device, 1.0);
     }
@@ -142,14 +157,14 @@ public class ADS1115 {
     }
 
     private double getImmediateValue(int pin) throws IOException {
-        
+
         // Start with default values
         int config = ADS1X15_REG_CONFIG_CQUE_NONE    | // Disable the comparator (default val)
-                     ADS1X15_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
-                     ADS1X15_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
-                     ADS1X15_REG_CONFIG_CMODE_TRAD   | // Traditional comparator (default val)
-                     ADS1X15_REG_CONFIG_DR_3300SPS   | // 1600 samples per second (default)
-                     ADS1X15_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
+                ADS1X15_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
+                ADS1X15_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
+                ADS1X15_REG_CONFIG_CMODE_TRAD   | // Traditional comparator (default val)
+                ADS1X15_REG_CONFIG_DR_3300SPS   | // 1600 samples per second (default)
+                ADS1X15_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
 
         config |= pga.getConfigValue();
         switch (pin) {
@@ -177,19 +192,19 @@ public class ADS1115 {
     public double getVoltage0() throws IOException {
         return getVoltage(0);
     }
-    
+
     public double getVoltage1() throws IOException {
         return getVoltage(1);
     }
-    
+
     public double getVoltage2() throws IOException {
         return getVoltage(2);
     }
-    
+
     public double getVoltage3() throws IOException {
         return getVoltage(3);
     }
-    
+
     public double getVoltage(int pin) throws IOException {
         double v = getImmediateValue(pin);
         double p =  ((v * 100) / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE);
@@ -204,13 +219,13 @@ public class ADS1115 {
      * @throws IOException When the writing on the device fails
      */
     static void writeRegister(I2CInterface device, int register, int value) throws IOException {
-      
+
         // create packet in data buffer
         byte[] packet = new byte[3];
         packet[0] = (byte)(register);     // register byte
         packet[1] = (byte)(value>>8);     // value MSB 
         packet[2] = (byte)(value & 0xFF); // value LSB 
-        
+
         // write data to I2C device
         device.write(packet, 0, 3);
     }
@@ -222,11 +237,10 @@ public class ADS1115 {
         int byteCount = device.read(buffer, 0, 2);
         if(byteCount == 2){
             return getShort(buffer, 0);
-        }
-        else{
+        } else{
             return 0;
         }
-    }    
+    }
 
     private static short getShort(byte[] arr, int off) {
         return (short) (arr[off]<<8 & 0xFF00 | arr[off+1] & 0xFF);

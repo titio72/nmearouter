@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
@@ -55,9 +70,9 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     @Override
     protected boolean onActivate() {
         synchronized (this) {
-			compassSensor = createCompass();
-	        return true;
-    	}
+            compassSensor = createCompass();
+            return true;
+        }
     }
 
     private void doLF() {
@@ -81,7 +96,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
             getLogger().error("Error creating compass sensor ", e);
             return null;
         }
-	}
+    }
 
     private void readSensors() {
         try {
@@ -93,7 +108,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
             getLogger().error("Error reading sensor data", e);
         }
     }
-    
+
     private Sensor readSensor(Sensor s) {
         if (s!=null) {
             try {
@@ -105,19 +120,19 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         }
         return s;
     }
-    
+
     private boolean headingNotPresentOnStream() {
-    	return (
+        return (
                 /* another source may have provided a heading but it's too old, presumably the source is down*/
                 getCache().isHeadingOlderThan(getCache().getNow(), SEND_HD_IDLE_TIME) ||
 
                         /* there is a heading but it's mine (so no other sources are providing a heading  */
                         getName().equals(getCache().getLastHeading().getSource()));
     }
-    
+
     private void sendHDx() {
-    	try {
-    	    if (compassSensor!=null && headingNotPresentOnStream()) {
+        try {
+            if (compassSensor!=null && headingNotPresentOnStream()) {
 
                 double b = compassSensor.getHeading();
 
@@ -139,28 +154,28 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                     HDGSentence hdg = m.getSentence(TalkerId.II, b, 0.0);
                     notify(hdg);
                 } else {
-	                HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
+                    HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
                     hdg.setHeading(Utils.normalizeDegrees0To360(b));
                     hdg.setDeviation(0.0);
                     // do not set variation
-	                notify(hdg);
-	                
-	            }
-	        }	
-		} catch (Exception e) {
-			getLogger().error("Cannot post heading data", e);
-		}
+                    notify(hdg);
+
+                }
+            }
+        } catch (Exception e) {
+            getLogger().error("Cannot post heading data", e);
+        }
 
     }
 
 
-	private void sendXDR() {
-	    if (compassSensor!=null) {
-	        try {
-	            XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-	        	double roll = compassSensor.getUnfilteredRoll();
-	        	double pitch = compassSensor.getUnfilteredPitch();
-	        	double hd = compassSensor.getHeading();
+    private void sendXDR() {
+        if (compassSensor!=null) {
+            try {
+                XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+                double roll = compassSensor.getUnfilteredRoll();
+                double pitch = compassSensor.getUnfilteredPitch();
+                double hd = compassSensor.getHeading();
                 xdr.addMeasurement(new Measurement("A", round(hd), "D", "HEAD"));
                 xdr.addMeasurement(new Measurement("A", round(roll), "D", "ROLL"));
                 xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
@@ -188,20 +203,20 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         }
     }
 
-	private void dump(double headingSens, double headingBoat) throws IOException {
-		int hdg = (int)headingSens;
-		try (FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true)) {
-			stream.write(String.format("%d%n", (int)headingBoat).getBytes());
-		}
-	}
-	
-	private static final int TIMER_FACTOR = 2;
-	private int timerCount = 0;
-	
-	@Override
-	public void onTimerHR() {
-		timerCount = (timerCount + 1) % TIMER_FACTOR;
-		if (timerCount==0) doLF();
-		super.onTimer();
-	}
+    private void dump(double headingSens, double headingBoat) throws IOException {
+        int hdg = (int)headingSens;
+        try (FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true)) {
+            stream.write(String.format("%d%n", (int)headingBoat).getBytes());
+        }
+    }
+
+    private static final int TIMER_FACTOR = 2;
+    private int timerCount = 0;
+
+    @Override
+    public void onTimerHR() {
+        timerCount = (timerCount + 1) % TIMER_FACTOR;
+        if (timerCount==0) doLF();
+        super.onTimer();
+    }
 }

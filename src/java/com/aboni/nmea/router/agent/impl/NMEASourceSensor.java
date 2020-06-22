@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
@@ -71,10 +86,10 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-    	super.onTimer();
+        super.onTimer();
         doLF();
     }
-    
+
     @Override
     protected synchronized void onDeactivate() {
         started = false;
@@ -127,7 +142,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             getLogger().error("Error reading sensor data", e);
         }
     }
-    
+
     private Sensor readSensor(Sensor s) {
         if (s!=null) {
             try {
@@ -183,15 +198,15 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             }
         } catch (Exception e) {
             getLogger().error("Cannot post temperature data", e);
-		}
-	}
-	
-	private void sendCPUTemp() {
-		try {
-			XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+        }
+    }
+
+    private void sendCPUTemp() {
+        try {
+            XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             addXDR(xdr, new Measurement("C", Utils.round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
             notify(xdr);
-		} catch (Exception e) {
+        } catch (Exception e) {
             getLogger().error(ERROR_POST_XDR_DATA, e);
         }
     }
@@ -224,7 +239,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             try {
                 boolean empty = true;
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-            	Collection<SensorTemp.Reading> r = tempSensor.getReadings();
+                Collection<SensorTemp.Reading> r = tempSensor.getReadings();
                 for (SensorTemp.Reading tr : r) {
                     if ((getCache().getNow() - tr.getTimestamp()) < 1000) {
                         String name = tr.getKey().substring(tr.getKey().length() - 4, tr.getKey().length() - 1);

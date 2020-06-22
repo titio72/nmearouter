@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.filters.FilterSetSerializer;
@@ -68,28 +83,28 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
         return fJ;
     }
 
-	private JSONObject getJSONFilter(NMEABasicSentenceFilter f) {
-		JSONObject fJ = new JSONObject();
-		if (f.getTalkerId()==null) {
-			fJ.put(TALKER, f.getTalkerId());
-		} else {
-			fJ.put(TALKER, f.getTalkerId().toString());
-		}
-		fJ.put(SENTENCE, f.getSentenceId());
-		fJ.put(SOURCE, f.getSource());
-		return fJ;
-	}
+    private JSONObject getJSONFilter(NMEABasicSentenceFilter f) {
+        JSONObject fJ = new JSONObject();
+        if (f.getTalkerId()==null) {
+            fJ.put(TALKER, f.getTalkerId());
+        } else {
+            fJ.put(TALKER, f.getTalkerId().toString());
+        }
+        fJ.put(SENTENCE, f.getSentenceId());
+        fJ.put(SOURCE, f.getSource());
+        return fJ;
+    }
 
-	private NMEASentenceFilter getNMEASentenceFilter(JSONObject filter) {
-		NMEASentenceFilter f;
-		String sentence = filter.optString(SENTENCE);
-		if (sentence.startsWith(STALK_NEGATE)) {
-			String cmd = sentence.substring(STALK_NEGATE.length());
-			f = new STalkFilter(cmd, true);
-		} else if (sentence.startsWith(STALK)) {
-				String cmd = sentence.substring(STALK.length());
-				f = new STalkFilter(cmd, false);
-		} else {
+    private NMEASentenceFilter getNMEASentenceFilter(JSONObject filter) {
+        NMEASentenceFilter f;
+        String sentence = filter.optString(SENTENCE);
+        if (sentence.startsWith(STALK_NEGATE)) {
+            String cmd = sentence.substring(STALK_NEGATE.length());
+            f = new STalkFilter(cmd, true);
+        } else if (sentence.startsWith(STALK)) {
+            String cmd = sentence.substring(STALK.length());
+            f = new STalkFilter(cmd, false);
+        } else {
             String id = filter.optString(TALKER);
             if (id == null || "".equals(id)) {
                 f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), filter.getString(SOURCE));
@@ -98,7 +113,7 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
                 f = new NMEABasicSentenceFilter(filter.getString(SENTENCE), tid, filter.getString(SOURCE));
             }
         }
-		return f;
-	}
+        return f;
+    }
 
 }

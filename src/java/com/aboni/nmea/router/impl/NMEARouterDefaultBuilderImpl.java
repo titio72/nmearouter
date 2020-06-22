@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.*;
@@ -105,15 +120,15 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
             }
             r.addProcessor(processor);
         }
-	}
+    }
 
-	private void handlePersistentState(NMEAAgent agent, AgentBase a) {
-    	boolean activate = handleActivation(agent, a);
-    	handleFilter(agent);
-		if (activate) agent.start();
-	}
+    private void handlePersistentState(NMEAAgent agent, AgentBase a) {
+        boolean activate = handleActivation(agent, a);
+        handleFilter(agent);
+        if (activate) agent.start();
+    }
 
-	private void handleFilter(NMEAAgent agent) {
+    private void handleFilter(NMEAAgent agent) {
         NMEAFilterable tgt = agent.getTarget();
         if (tgt != null) {
             String data = agentStatusManager.getFilterOutData(agent.getName());
@@ -134,7 +149,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
     }
 
-	private boolean handleActivation(NMEAAgent agent, AgentBase a) {
+    private boolean handleActivation(NMEAAgent agent, AgentBase a) {
         boolean active = (a != null) && a.isActive();
         if (agentStatusManager != null) {
             AgentStatusManager.STATUS requestedStatus = agentStatusManager.getStartMode(agent.getName());
@@ -146,7 +161,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
         return active;
     }
-    
+
     private void buildStreamDump(NMEARouter r) {
         QOS q = createBuiltInQOS();
         NMEA2FileAgent dumper = ThingsFactory.getInstance(NMEA2FileAgent.class);
@@ -156,7 +171,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         handleFilter(dumper);
     }
 
-	private void buildDPTStats(NMEARouter r) {
+    private void buildDPTStats(NMEARouter r) {
         QOS q = createBuiltInQOS();
         DepthStatsAgent a = ThingsFactory.getInstance(DepthStatsAgent.class);
         a.setup("Depth", q);
@@ -165,7 +180,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     }
 
     private void buildPowerLedTarget(NMEARouter r) {
-    	if (System.getProperty("os.arch").startsWith("arm")) {
+        if (System.getProperty("os.arch").startsWith("arm")) {
             QOS q = createBuiltInQOS();
             q.addProp(QOSKeys.CANNOT_START_STOP);
             PowerLedAgent pwrLed = ThingsFactory.getInstance(PowerLedAgent.class);

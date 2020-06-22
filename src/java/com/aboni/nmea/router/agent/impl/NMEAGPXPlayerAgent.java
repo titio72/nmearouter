@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.Course;
@@ -79,69 +94,69 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     @Override
     protected void onDeactivate() {
         synchronized (this) {
-			stop = true;
-		}
-	}
-	
-	public boolean play() {
-		final Document d;
-		try {
-			DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
-			df.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-			df.setFeature("http://xml.org/sax/features/external-general-entities", false);
-			DocumentBuilder builder = df.newDocumentBuilder();
-			d = builder.parse(new InputSource(file));
-			d.getDocumentElement().normalize();
-		} catch (Exception e) {
-			ServerLog.getLogger().error("Cannot parse GPX file " + file, e);
-			return false;
-		}
-	
-		Thread t = new Thread(() -> {
-			Element gpx = d.getDocumentElement();
-			NodeList tracks = gpx.getElementsByTagName("trk");
-			Element track = (Element)tracks.item(0);
-			NodeList segments = track.getElementsByTagName("trkseg");
-			for (int i = 0; i<segments.getLength(); i++) {
-				if (isStop()) break;
-				Element segment = (Element)segments.item(i);
-				NodeList points = segment.getElementsByTagName("trkpt");
-				for (int j = 1; j<points.getLength(); j++) {
-					try {
-						Element p = (Element)points.item(j);
-						Node t1 = p.getElementsByTagName("time").item(0);
-						String sTime = t1.getTextContent();
-						Date dPos = fmt.parse(sTime);
-						GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
-						doIt(pos);
-					} catch (Exception e) {
-						ServerLog.getLogger().error("Error reading gpx", e);
-					}
-				}
-			}
-			if (!isStop()) {
-				stop();
-			}
-		});
-		t.setDaemon(true);
-		t.start();
+            stop = true;
+        }
+    }
 
-		return true;
-	}
-	
+    public boolean play() {
+        final Document d;
+        try {
+            DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();
+            df.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            df.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            DocumentBuilder builder = df.newDocumentBuilder();
+            d = builder.parse(new InputSource(file));
+            d.getDocumentElement().normalize();
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Cannot parse GPX file " + file, e);
+            return false;
+        }
 
-	protected boolean isStop() {
-		synchronized (this) {
-			return stop;
-		}
-	}
+        Thread t = new Thread(() -> {
+            Element gpx = d.getDocumentElement();
+            NodeList tracks = gpx.getElementsByTagName("trk");
+            Element track = (Element)tracks.item(0);
+            NodeList segments = track.getElementsByTagName("trkseg");
+            for (int i = 0; i<segments.getLength(); i++) {
+                if (isStop()) break;
+                Element segment = (Element)segments.item(i);
+                NodeList points = segment.getElementsByTagName("trkpt");
+                for (int j = 1; j<points.getLength(); j++) {
+                    try {
+                        Element p = (Element)points.item(j);
+                        Node t1 = p.getElementsByTagName("time").item(0);
+                        String sTime = t1.getTextContent();
+                        Date dPos = fmt.parse(sTime);
+                        GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
+                        doIt(pos);
+                    } catch (Exception e) {
+                        ServerLog.getLogger().error("Error reading gpx", e);
+                    }
+                }
+            }
+            if (!isStop()) {
+                stop();
+            }
+        });
+        t.setDaemon(true);
+        t.start();
 
-	private void doIt(GeoPositionT pos) {
-		if (t0==0) {
+        return true;
+    }
+
+
+    protected boolean isStop() {
+        synchronized (this) {
+            return stop;
+        }
+    }
+
+    private void doIt(GeoPositionT pos) {
+        if (t0==0) {
             t0 = getCache().getNow();
             t0Play = pos.getTimestamp();
         }
-		if (prevPos!=null) {
+        if (prevPos!=null) {
             long dt = pos.getTimestamp() - t0Play;
             long elapsed = getCache().getNow() - t0;
             Utils.pause((int) (dt - elapsed));
@@ -154,14 +169,14 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
                     cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH)));
             s.setTime(new net.sf.marineapi.nmea.util.Time(
                     cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND)));
-			s.setMode(FaaMode.AUTOMATIC);
-			s.setSpeed(c.getSpeed());
-			s.setPosition(pos);
-			s.setVariation(0.0);
-			s.setDirectionOfVariation(CompassPoint.EAST);
-			notify(s);
-		}
-		prevPos = pos;
-	}
+            s.setMode(FaaMode.AUTOMATIC);
+            s.setSpeed(c.getSpeed());
+            s.setPosition(pos);
+            s.setVariation(0.0);
+            s.setDirectionOfVariation(CompassPoint.EAST);
+            notify(s);
+        }
+        prevPos = pos;
+    }
 
 }

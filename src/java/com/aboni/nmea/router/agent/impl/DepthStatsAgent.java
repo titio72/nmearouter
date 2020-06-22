@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
@@ -73,19 +88,19 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     public void privatePushDepth(double d, long ts) {
         handleDepth(d, ts);
     }
-    
+
     private DepthT handleDepth(double depth, long ts) {
         DepthT d = new DepthT();
         d.depth = (int)(depth*10f);
         d.timestamp = ts;
-        
+
         if (depth>0.1) {
             queue.add(d);
-    
-            
+
+
             max = Math.max(d.depth, max);
             min = Math.min(d.depth, min);
-    
+
             boolean dirty = false;
             boolean goon = true;
             synchronized (this) {
@@ -99,16 +114,16 @@ public class DepthStatsAgent extends NMEAAgentImpl {
                     }
                 }
             }
-    
+
             if (dirty) {
                 calcMinMax();
             }
         }
         return d;
     }
-    
+
     private void calcMinMax() {
-        synchronized (this) { 
+        synchronized (this) {
             max = Integer.MIN_VALUE;
             min = Integer.MAX_VALUE;
             for (DepthT d : queue) {

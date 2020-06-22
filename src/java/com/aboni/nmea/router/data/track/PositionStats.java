@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.data.track;
 
 import com.aboni.geo.GeoPositionT;
@@ -9,18 +24,18 @@ import java.util.List;
 public class PositionStats {
 
     private final List<GeoPositionT> positions;
-	
-	private int samples;
-	private double avgLat;
-	private double avgLon;
-	
-	private static final long PERIOD = 5L * 60000L; //5 minutes
-	
-	public PositionStats() {
+
+    private int samples;
+    private double avgLat;
+    private double avgLon;
+
+    private static final long PERIOD = 5L * 60000L; //5 minutes
+
+    public PositionStats() {
         positions = new LinkedList<>();
-	}
-	
-	public void addPosition(GeoPositionT pos) {
+    }
+
+    public void addPosition(GeoPositionT pos) {
         synchronized (this) {
             positions.add(pos);
             avgLat = (avgLat * samples + pos.getLatitude()) / (samples + 1);
@@ -35,12 +50,12 @@ public class PositionStats {
                 positions.remove(0);
                 samples = positions.size();
             }
-		}
-	}
+        }
+    }
 
-	public Position getAveragePosition() {
+    public Position getAveragePosition() {
         synchronized (this) {
             return new Position(avgLat, avgLon);
         }
-	}
+    }
 }

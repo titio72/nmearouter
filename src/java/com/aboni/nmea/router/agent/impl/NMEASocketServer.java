@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
@@ -80,111 +95,111 @@ public class NMEASocketServer extends NMEAAgentImpl {
         return "TCP NMEA Server";
     }
 
-	@Override
-	public String getDescription() {
-		synchronized (clients) {
-			return "Port " + getPort() + " - number of clients " + clients.size();
-		}
-	}
-	
-	@Override
-	protected boolean onActivate() {
-		createServerSocket();
-		startServer();
-		return true;
-	}
+    @Override
+    public String getDescription() {
+        synchronized (clients) {
+            return "Port " + getPort() + " - number of clients " + clients.size();
+        }
+    }
 
-	private boolean isSelectorOpen() {
-		return selector.isOpen();
-	}
-	
-	private void startServer() {
-		Thread t = new Thread(() -> {
-			if (selector!=null && serverSocket!=null) {
-				while (isSelectorOpen()) {
-					try {
-						selector.select();
-						for (SelectionKey ky: selector.selectedKeys()) { handleSelectionKey(ky); }
-						selector.selectedKeys().clear();
-					} catch (IOException e) {
-						getLogger().error("Unexpected exception", e);
-					}
-				}
-			}
-		});
-		t.setDaemon(true);
-		t.start();
-	}
+    @Override
+    protected boolean onActivate() {
+        createServerSocket();
+        startServer();
+        return true;
+    }
 
-	private void handleSelectionKey(SelectionKey ky) {
-		if (ky.isValid()) {
-			if (ky.isAcceptable()) {
-				handleConnection();
-			} else if (ky.isReadable()) {
-				handleRead(ky);
-			}
-		}
-	}
+    private boolean isSelectorOpen() {
+        return selector.isOpen();
+    }
 
-	private void handleRead(SelectionKey ky) {
-		SocketChannel client = (SocketChannel) ky.channel();
-		readBuffer.clear();
-		try {
-			int readBytes = client.read(readBuffer);
-			if (readBytes>2) {
-				String sentence = new String(readBuffer.array(), 0, readBytes).trim();
-				NMEASocketServer.this.notify(SentenceFactory.getInstance().createParser(sentence));
-			} else if (readBytes==0) {
-				handleDisconnection(client);
-			}
-		} catch (IOException e) {
-			handleDisconnection(client);
-		}
-	}
+    private void startServer() {
+        Thread t = new Thread(() -> {
+            if (selector!=null && serverSocket!=null) {
+                while (isSelectorOpen()) {
+                    try {
+                        selector.select();
+                        for (SelectionKey ky: selector.selectedKeys()) { handleSelectionKey(ky); }
+                        selector.selectedKeys().clear();
+                    } catch (IOException e) {
+                        getLogger().error("Unexpected exception", e);
+                    }
+                }
+            }
+        });
+        t.setDaemon(true);
+        t.start();
+    }
 
-	private void handleDisconnection(SocketChannel client) {
-		try {
-			getLogger().info("Disconnection {" + clients.getOrDefault(client, null) + "}");
-			synchronized (clients) {
-				clients.remove(client);
-			}
-			client.close();
-		} catch (Exception e) {
-			getLogger().error("Error accepting disconnection", e);
-		}
-	}
+    private void handleSelectionKey(SelectionKey ky) {
+        if (ky.isValid()) {
+            if (ky.isAcceptable()) {
+                handleConnection();
+            } else if (ky.isReadable()) {
+                handleRead(ky);
+            }
+        }
+    }
 
-	private void handleConnection() {
-		try {
-		    SocketChannel client = serverSocket.accept();
-		    	
-		    client.configureBlocking(false);
-		    client.register(selector, SelectionKey.OP_READ);
-		    synchronized (clients) {
-			    clients.put(client, new ClientDescriptor(client.getRemoteAddress().toString()));
-			}
-			getLogger().info("Connecting {" + client.getRemoteAddress() + "}");
+    private void handleRead(SelectionKey ky) {
+        SocketChannel client = (SocketChannel) ky.channel();
+        readBuffer.clear();
+        try {
+            int readBytes = client.read(readBuffer);
+            if (readBytes>2) {
+                String sentence = new String(readBuffer.array(), 0, readBytes).trim();
+                NMEASocketServer.this.notify(SentenceFactory.getInstance().createParser(sentence));
+            } else if (readBytes==0) {
+                handleDisconnection(client);
+            }
+        } catch (IOException e) {
+            handleDisconnection(client);
+        }
+    }
 
-		} catch (Exception ee) {
-			getLogger().error("Error accepting connection", ee);
-		}
-	}
+    private void handleDisconnection(SocketChannel client) {
+        try {
+            getLogger().info("Disconnection {" + clients.getOrDefault(client, null) + "}");
+            synchronized (clients) {
+                clients.remove(client);
+            }
+            client.close();
+        } catch (Exception e) {
+            getLogger().error("Error accepting disconnection", e);
+        }
+    }
 
-	@Override
-	protected void onDeactivate() {
-		synchronized (clients) {
-			for (SocketChannel c: clients.keySet()) {
-				try {
-					c.close();
-				} catch (Exception e) {
-					getLogger().error("Error trying to close socket with client", e);
-				}
-			}
-			clients.clear();
-			try {
-				serverSocket.close();
-			} catch (Exception e) {
-				getLogger().error("Error trying to close server socket", e);
+    private void handleConnection() {
+        try {
+            SocketChannel client = serverSocket.accept();
+
+            client.configureBlocking(false);
+            client.register(selector, SelectionKey.OP_READ);
+            synchronized (clients) {
+                clients.put(client, new ClientDescriptor(client.getRemoteAddress().toString()));
+            }
+            getLogger().info("Connecting {" + client.getRemoteAddress() + "}");
+
+        } catch (Exception ee) {
+            getLogger().error("Error accepting connection", ee);
+        }
+    }
+
+    @Override
+    protected void onDeactivate() {
+        synchronized (clients) {
+            for (SocketChannel c: clients.keySet()) {
+                try {
+                    c.close();
+                } catch (Exception e) {
+                    getLogger().error("Error trying to close socket with client", e);
+                }
+            }
+            clients.clear();
+            try {
+                serverSocket.close();
+            } catch (Exception e) {
+                getLogger().error("Error trying to close server socket", e);
             }
             try {
                 selector.close();
@@ -213,50 +228,50 @@ public class NMEASocketServer extends NMEAAgentImpl {
                     }
                 }
             }
-		}
-	}
+        }
+    }
 
-	private boolean sendMessageToClient(String output, int p, SocketChannel sc, ClientDescriptor cd) {
-		writeBuffer.position(0);
-		writeBuffer.limit(p);
-		try {
-			int written = sc.write(writeBuffer);
-			if (written==0) {
-				cd.errors++;
-				getLogger().warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
-			} else {
-				cd.errors = 0;
-			}
-			return cd.errors < 10 /* allow a max of 10 failure, then close the channel */;
-		} catch (IOException e) {
-			try { 
-				getLogger().info("Disconnection {" + sc.getRemoteAddress() + "} "
-						+ "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
-				sc.close(); 
-			} catch (IOException e1) {
-				getLogger().error("Error closing socket with client", e1);
-			}
-		} catch (Exception e) {
-			getLogger().error("Error sending {" + output + "} to client", e);
-		}
-		return false;
-	}
+    private boolean sendMessageToClient(String output, int p, SocketChannel sc, ClientDescriptor cd) {
+        writeBuffer.position(0);
+        writeBuffer.limit(p);
+        try {
+            int written = sc.write(writeBuffer);
+            if (written==0) {
+                cd.errors++;
+                getLogger().warning("Couldn't write {" + output + "} to {" + sc.getRemoteAddress() + "} p {" + p + "} e {" + cd.errors + "}" );
+            } else {
+                cd.errors = 0;
+            }
+            return cd.errors < 10 /* allow a max of 10 failure, then close the channel */;
+        } catch (IOException e) {
+            try {
+                getLogger().info("Disconnection {" + sc.getRemoteAddress() + "} "
+                        + "Agent {" + getName() + "} Reason {" + e.getMessage() + "}");
+                sc.close();
+            } catch (IOException e1) {
+                getLogger().error("Error closing socket with client", e1);
+            }
+        } catch (Exception e) {
+            getLogger().error("Error sending {" + output + "} to client", e);
+        }
+        return false;
+    }
 
     private void createServerSocket() {
-		try {
-		    selector = Selector.open();
-		    getLogger().info("Selector Open {" + selector.isOpen() + "}");
-		    serverSocket = ServerSocketChannel.open();
-		    InetSocketAddress hostAddress = new InetSocketAddress(getPort());
-		    serverSocket.bind(hostAddress);
-		    serverSocket.configureBlocking(false);
-		    int ops = serverSocket.validOps();
-		    serverSocket.register(selector, ops, null);
-		} catch (Exception e) {
-			getLogger().error("Cannot open server socket", e);
-		}
-	}
-    
+        try {
+            selector = Selector.open();
+            getLogger().info("Selector Open {" + selector.isOpen() + "}");
+            serverSocket = ServerSocketChannel.open();
+            InetSocketAddress hostAddress = new InetSocketAddress(getPort());
+            serverSocket.bind(hostAddress);
+            serverSocket.configureBlocking(false);
+            int ops = serverSocket.validOps();
+            serverSocket.register(selector, ops, null);
+        } catch (Exception e) {
+            getLogger().error("Cannot open server socket", e);
+        }
+    }
+
     @Override
     public String toString() {
         return "TCP " + port + " " + (isSource() ? "R" : "")

@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
@@ -48,61 +63,61 @@ public class NMEAPlayer extends NMEAAgentImpl {
     @Override
     public void onDeactivate() {
         if (isStarted() && !stop)
-			stop = true;
-	}
-	
-	@Override
-	public boolean onActivate() {
-		if (file!=null) {
-			Thread t = new Thread(this::go);
-			t.setDaemon(true);
-			t.start();
-			return true;
-		} else {
-			return false;
-		}
-	}
+            stop = true;
+    }
 
-	private boolean stop = false;
-	
-	private void go() {
-		while (!stop) {
-			try (FileReader fr = new FileReader(getFile())) {
-				try (BufferedReader r = new BufferedReader(fr)) {
-					String line;
-					long logT0 = 0;
-					long t0 = 0;
-					while ((line = r.readLine()) != null) {
-						if (line.startsWith("[")) {
+    @Override
+    public boolean onActivate() {
+        if (file!=null) {
+            Thread t = new Thread(this::go);
+            t.setDaemon(true);
+            t.start();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean stop = false;
+
+    private void go() {
+        while (!stop) {
+            try (FileReader fr = new FileReader(getFile())) {
+                try (BufferedReader r = new BufferedReader(fr)) {
+                    String line;
+                    long logT0 = 0;
+                    long t0 = 0;
+                    while ((line = r.readLine()) != null) {
+                        if (line.startsWith("[")) {
                             long logT = readLineWithTimestamp(line, logT0, t0);
                             t0 = getCache().getNow();
                             logT0 = logT;
                         } else {
-							readLine(line);
-						}
-					}
-				}
-			} catch (Exception e) {
-				getLogger().error("Error playing file", e);
-				Utils.pause(10000);
-			}
-		} 
-		stop = false;
-	}
+                            readLine(line);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                getLogger().error("Error playing file", e);
+                Utils.pause(10000);
+            }
+        }
+        stop = false;
+    }
 
-	private void readLine(String line) {
-		try {
-			Sentence s = SentenceFactory.getInstance().createParser(line);
-			Thread.sleep(55);
-			notify(s);
-		} catch (Exception e) {
-			getLogger().error("Error playing sentence {" + line + "}", e);
-		}
-	}
+    private void readLine(String line) {
+        try {
+            Sentence s = SentenceFactory.getInstance().createParser(line);
+            Thread.sleep(55);
+            notify(s);
+        } catch (Exception e) {
+            getLogger().error("Error playing sentence {" + line + "}", e);
+        }
+    }
 
-	private long readLineWithTimestamp(String line, long logT0, long t0) {
-		long logT = logT0;
-		try {
+    private long readLineWithTimestamp(String line, long logT0, long t0) {
+        long logT = logT0;
+        try {
             NMEASentenceItem itm = new NMEASentenceItem(line);
             long t = getCache().getNow();
             logT = itm.getTimestamp();
@@ -113,8 +128,8 @@ public class NMEAPlayer extends NMEAAgentImpl {
             }
             notify(itm.getSentence());
         } catch (Exception e) {
-			getLogger().error("Error playing sentence {" + line + "}", e);
-		}
-		return logT;
-	}
+            getLogger().error("Error playing sentence {" + line + "}", e);
+        }
+        return logT;
+    }
 }

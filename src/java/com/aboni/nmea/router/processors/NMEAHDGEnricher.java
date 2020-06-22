@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
@@ -24,11 +39,11 @@ import java.util.List;
 public class NMEAHDGEnricher implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
-    
+
     private final boolean doHDM;
     private final boolean doHDT;
     private final NMEACache cache;
-    
+
     public NMEAHDGEnricher(NMEACache cache) {
         this(cache, true, true);
     }
@@ -56,59 +71,59 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
 
                 return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
             } else if ((doHDM && sentence instanceof HDMSentence) || (doHDT && sentence instanceof HDTSentence)) {
-            	// skip HDT & HDM if they are supposed to be produced by the enricher
-				return new Pair<>(Boolean.FALSE, new Sentence[]{});
-			}
+                // skip HDT & HDM if they are supposed to be produced by the enricher
+                return new Pair<>(Boolean.FALSE, new Sentence[]{});
+            }
         } catch (Exception e) {
             ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
         }
         return new Pair<>(Boolean.TRUE, null);
     }
 
-	private boolean fillVariation(HDGSentence hdg, Position lastPosition) {
-		boolean canDoT = false;
-		try {
-		    hdg.getVariation();
-		    canDoT = true;
-		} catch (DataNotAvailableException e) {
-		    if (lastPosition!=null) {
-		        double d = m.getDeclination(lastPosition);
-		        d = Utils.normalizeDegrees180To180(d);
-		        hdg.setVariation(d);
-		        canDoT = true;
-		    }
-		}
-		return canDoT;
-	}
-
-	private Position getLastPosition() {
-		Position lastPosition = null;
-		DataEvent<PositionSentence> ev = cache.getLastPosition();
-		if (ev!=null && ev.getData()!=null) {
-		    lastPosition = ev.getData().getPosition();
-		}
-		return lastPosition;
-	}
-
-	private HDMSentence getHDM(HDGSentence hdg) {
-		HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDM);
-		hdm.setHeading(hdg.getHeading());
-		return hdm;
-	}
-
-	private HDTSentence getHDT(HDGSentence hdg) {
-		HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
-		double var;
-		double dev;
-		try { var = hdg.getVariation(); } catch (DataNotAvailableException e) { var = 0.0; }
-		try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) { dev = 0.0; }
-		hdt.setHeading(Utils.normalizeDegrees0To360(hdg.getHeading() + var + dev));
-		return hdt;
-	}
-
-	@Override
-	public void onTimer() {
-		// nothing to do
+    private boolean fillVariation(HDGSentence hdg, Position lastPosition) {
+        boolean canDoT = false;
+        try {
+            hdg.getVariation();
+            canDoT = true;
+        } catch (DataNotAvailableException e) {
+            if (lastPosition!=null) {
+                double d = m.getDeclination(lastPosition);
+                d = Utils.normalizeDegrees180To180(d);
+                hdg.setVariation(d);
+                canDoT = true;
+            }
+        }
+        return canDoT;
     }
-    
+
+    private Position getLastPosition() {
+        Position lastPosition = null;
+        DataEvent<PositionSentence> ev = cache.getLastPosition();
+        if (ev!=null && ev.getData()!=null) {
+            lastPosition = ev.getData().getPosition();
+        }
+        return lastPosition;
+    }
+
+    private HDMSentence getHDM(HDGSentence hdg) {
+        HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDM);
+        hdm.setHeading(hdg.getHeading());
+        return hdm;
+    }
+
+    private HDTSentence getHDT(HDGSentence hdg) {
+        HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
+        double var;
+        double dev;
+        try { var = hdg.getVariation(); } catch (DataNotAvailableException e) { var = 0.0; }
+        try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) { dev = 0.0; }
+        hdt.setHeading(Utils.normalizeDegrees0To360(hdg.getHeading() + var + dev));
+        return hdt;
+    }
+
+    @Override
+    public void onTimer() {
+        // nothing to do
+    }
+
 }

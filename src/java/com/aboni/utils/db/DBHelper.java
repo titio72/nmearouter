@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.utils.db;
 
 import com.aboni.nmea.router.Constants;
@@ -14,7 +29,7 @@ import java.util.Date;
 import java.util.Properties;
 
 public class DBHelper implements AutoCloseable {
-	
+
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
@@ -26,14 +41,14 @@ public class DBHelper implements AutoCloseable {
 
     private final boolean autocommit;
     private Connection conn;
-    
+
     public DBHelper(boolean autocommit) throws ClassNotFoundException {
-    	readConf();
+        readConf();
         this.autocommit = autocommit;
         Class.forName(jdbc);
         reconnect();
     }
-    
+
     private void readConf() {
         try {
             File f = new File(Constants.DB);
@@ -49,14 +64,14 @@ public class DBHelper implements AutoCloseable {
             ServerLog.getLogger().debug("Cannot read db configuration!");
         }
     }
-    
+
     public Connection getConnection() {
         return conn;
     }
 
     @Override
     public void close() {
-		if (conn != null) {
+        if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
@@ -65,19 +80,19 @@ public class DBHelper implements AutoCloseable {
             conn = null;
         }
     }
-    
+
     private boolean reconnect() {
-    	try {
+        try {
             close();
             ServerLog.getLogger().debug("Establishing connection to DB {" + dbUrl + "}!");
             conn = DriverManager.getConnection(dbUrl, user, password);
             conn.setAutoCommit(autocommit);
             return true;
         } catch (Exception e) {
-    		conn = null;
+            conn = null;
             ServerLog.getLogger().error("Cannot reset connection!", e);
             return false;
-    	}
+        }
     }
 
     public synchronized String backup() throws IOException, InterruptedException {
@@ -109,11 +124,11 @@ public class DBHelper implements AutoCloseable {
                 ServerLog.getLogger().error("Cannot write {" + e + "} (" + count + ")!", ex);
             }
         }
-    	if (retry) {
-	    	count++;
-	    	if (count<3 && reconnect()) {
-				write(writer, e, count);
-	    	}
-    	}
+        if (retry) {
+            count++;
+            if (count<3 && reconnect()) {
+                write(writer, e, count);
+            }
+        }
     }
 }
