@@ -51,8 +51,8 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         super(cache);
         setSourceTarget(true, false);
         input = new NMEAInputManager(getLogger());
-        fastStats = new NMEATrafficStats(this::onFastStatsExpired, STATS_PERIOD, true, false);
-        stats = new NMEATrafficStats(this::onStatsExpired, FAST_STATS_PERIOD, true, false);
+        fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, true, false);
+        stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, true, false);
         description = "UDP Receiver";
     }
 
