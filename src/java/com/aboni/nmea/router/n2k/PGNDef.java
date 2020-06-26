@@ -18,6 +18,9 @@ package com.aboni.nmea.router.n2k;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PGNDef {
 
     private static final String S_SINGLE = "Single";
@@ -93,9 +96,9 @@ public class PGNDef {
         private final int bitLength;
         private final int bitOffset;
         private final int bitStart;
-        private final PGNFieldType type;
+        private final String type;
         private final boolean signed;
-        private final String[] values;
+        private final Map<Integer, String> values;
         private final String units;
         private final double resolution;
 
@@ -107,17 +110,18 @@ public class PGNDef {
             bitLength = definition.getInt("BitLength");
             bitStart = definition.getInt("BitStart");
             bitOffset = definition.has("BitOffset") ? definition.getInt("BitOffset") : 0;
-            type = check(definition, "Type") ? PGNFieldType.ofValue(definition.getString("Type")) : PGNFieldType.VALUE;
+            type = check(definition, "Type") ? definition.getString("Type") : "Unknown";
             units = check(definition, "Units") ? definition.getString("Units") : null;
             resolution = check(definition, "Resolution") ? definition.getDouble("Resolution") : 1.0;
+            values = new HashMap<>();
             if (definition.has("EnumValues")) {
                 JSONArray jValues = definition.getJSONArray("EnumValues");
-                values = new String[jValues.length()];
                 for (int i = 0; i < jValues.length(); i++) {
-                    values[i] = jValues.getJSONObject(i).getString("name");
+                    values.put(
+                            Integer.parseInt(jValues.getJSONObject(i).getString("value")),
+                            jValues.getJSONObject(i).getString("name")
+                    );
                 }
-            } else {
-                values = null;
             }
             signed = definition.has("Signed") && definition.getBoolean("Signed");
         }
@@ -150,7 +154,7 @@ public class PGNDef {
             return bitStart;
         }
 
-        public PGNFieldType getType() {
+        public String getType() {
             return type;
         }
 
@@ -158,8 +162,12 @@ public class PGNDef {
             return signed;
         }
 
-        public String[] getValues() {
+        public Map<Integer, String> getValues() {
             return values;
+        }
+
+        public String getENumValue(int i) {
+            return values.getOrDefault(i, null);
         }
 
         public String getUnits() {

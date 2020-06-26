@@ -222,10 +222,14 @@ public class NMEASerial extends NMEAAgentImpl {
             s = reader.readLine();
             if (s != null) {
                 updateReadStats(s);
-                Sentence sentence = input.getSentence(s);
-                if (sentence != null) {
-                    updateReadStats(false);
-                    notify(sentence);
+                Sentence[] sentences = input.getSentence(s);
+                if (sentences != null) {
+                    for (Sentence sentence : sentences) {
+                        if (sentence != null) {
+                            updateReadStats(false);
+                            notify(sentence);
+                        }
+                    }
                 }
             }
         } catch (SerialPortTimeoutException e) {

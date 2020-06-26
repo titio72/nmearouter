@@ -17,13 +17,82 @@ package com.aboni.nmea.router.n2k.impl;
 
 public class BitUtils {
 
-    public static class BitUtilsException extends RuntimeException {
-        BitUtilsException(String msg) {
-            super(msg);
-        }
+    private BitUtils() {
     }
 
-    private BitUtils() {
+    public static class Res {
+
+        private Res(long[] r) {
+            v = r[0];
+            m = r[1];
+        }
+
+        public final long v;
+        public final long m;
+    }
+
+    public static Res extractBits(byte[] data, int start, int off, int len, boolean signed) {
+        long[] res = new long[]{extractBits(data, off, len, signed), 0};
+        //long[] res = extractNumber(data, off, start, len, signed);
+        return new Res(res);
+    }
+
+    public static long[] extractNumber(byte[] data, int offset, int startBit, int bits, boolean hasSign) {
+        long value = 0;
+        long maxValue = 0;
+
+        int dataIndex = offset / 8;
+
+        int firstBit = startBit;
+        int bitsRemaining = bits;
+        int magnitude = 0;
+        int bitsInThisByte;
+        long bitMask;
+        long allOnes;
+        long valueInThisByte;
+
+
+        while (bitsRemaining > 0) {
+            bitsInThisByte = Math.min(8 - firstBit, bitsRemaining);
+            allOnes = ((1L << bitsInThisByte) - 1);
+
+            // How are bits ordered in bytes for bit fields? There are two ways, first field at LSB or first
+            // field as MSB.
+            // Experimentation, using the 129026 PGN, has shown that the most likely candidate is LSB.
+            bitMask = allOnes << firstBit;
+            valueInThisByte = (data[dataIndex] & bitMask) >> firstBit;
+
+            value |= valueInThisByte << magnitude;
+            maxValue |= allOnes << magnitude;
+
+            magnitude += bitsInThisByte;
+            bitsRemaining -= bitsInThisByte;
+            firstBit += bitsInThisByte;
+            if (firstBit >= 8) {
+                firstBit -= 8;
+                dataIndex++;
+            }
+        }
+        if (hasSign) {
+            maxValue >>= 1;
+            /*if (offset>0) { // J1939 Excess-K notation
+                value += offset;
+            } else */
+            {
+                // check if the first bit is 1
+                boolean negative = (value & (1L << (bits - 1))) > 0;
+
+                if (negative) {
+                    /* Sign extend value for cases where bits < 64 */
+                    /* Assume we have bits = 16 and value = -2 then we do: */
+                    /* 0000.0000.0000.0000.0111.1111.1111.1101 value    */
+                    /* 0000.0000.0000.0000.0111.1111.1111.1111 maxvalue */
+                    /* 1111.1111.1111.1111.1000.0000.0000.0000 ~maxvalue */
+                    value |= ~maxValue;
+                }
+            }
+        }
+        return new long[]{value, maxValue};
     }
 
     private static int uByte(byte val) {
@@ -73,7 +142,7 @@ public class BitUtils {
         int offB = off / 8;
         int endOffB = (off + len + 7) / 8;
         if (endOffB > data.length) {
-            throw new BitUtilsException("End byte after data length");
+            return 0x7fffffffffffffffL;
         }
         int lenB = endOffB - offB;
         switch (lenB) {
@@ -93,7 +162,7 @@ public class BitUtils {
                 res = BitUtils.extractInt(data, offB);
                 break;
             default:
-                throw new BitUtilsException("Zero length integer");
+                return 0x7fffffffffffffffL;
         }
         int shift = off % 8;
         int maskShift = 32 - len;
@@ -109,7 +178,7 @@ public class BitUtils {
     private static long extractEntireBytes(byte[] data, int offB, int lenB, boolean signed) {
         long res;
         if (lenB > 8) {
-            throw new BitUtilsException("End byte after data length");
+            return 0x7fffffffffffffffL;
         }
         switch (lenB) {
             case 1:
@@ -132,3 +201,6 @@ public class BitUtils {
         return res;
     }
 }
+
+
+

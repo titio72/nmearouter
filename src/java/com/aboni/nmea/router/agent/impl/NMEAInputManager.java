@@ -44,11 +44,11 @@ public class NMEAInputManager {
         this.logger = logger;
     }
 
-    public Sentence getSentence(String sSentence) {
+    public Sentence[] getSentence(String sSentence) {
         if (sSentence.startsWith("{\"timestamp\":\"")) {
             return handleN2KCanboat(sSentence);
         } else if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
-            return handleN0183(sSentence);
+            return new Sentence[]{handleN0183(sSentence)};
         } else if (pgnDefs != null && sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
             return handleN2K(sSentence);
         } else {
@@ -57,7 +57,7 @@ public class NMEAInputManager {
         }
     }
 
-    private Sentence handleN2K(String sSentence) {
+    private Sentence[] handleN2K(String sSentence) {
         try {
             PGNParser p = new PGNParser(pgnDefs, sSentence.trim());
             return decoder.getSentence(p.getCanBoatJson());
@@ -76,7 +76,7 @@ public class NMEAInputManager {
         return null;
     }
 
-    private Sentence handleN2KCanboat(String sSentence) {
+    private Sentence[] handleN2KCanboat(String sSentence) {
         try {
             CANBOATPGNMessage msg = n2kStream.getMessage(sSentence);
             if (msg != null && msg.getFields() != null) {

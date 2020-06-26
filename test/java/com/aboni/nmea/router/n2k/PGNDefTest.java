@@ -90,7 +90,7 @@ public class PGNDefTest {
         assertEquals(40, windDef.getFields()[3].getBitOffset());
         assertEquals(0, windDef.getFields()[3].getBitStart());
         assertEquals(PGNDef.PGNFieldType.ENUM, windDef.getFields()[3].getType());
-        assertEquals(5, windDef.getFields()[3].getValues().length);
+        assertEquals(5, windDef.getFields()[3].getValues().size());
 
         assertEquals("Wind Speed", windDef.getFields()[1].getName());
         assertEquals("windSpeed", windDef.getFields()[1].getId());

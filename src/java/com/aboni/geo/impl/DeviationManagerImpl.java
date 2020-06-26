@@ -1,3 +1,18 @@
+/*
+(C) 2020, Andrea Boni
+This file is part of NMEARouter.
+NMEARouter is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+NMEARouter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.aboni.geo.impl;
 
 import com.aboni.geo.DeviationManager;
@@ -14,18 +29,18 @@ import java.util.List;
 public class DeviationManagerImpl implements DeviationManager {
 
     static class Pair implements Comparable<Pair> {
-        
+
         Pair() {}
-        
+
         Pair(int r, double a) {
             input = r;
             output = a;
         }
-        
+
         Pair(Pair p) {
             this(p.input, p.output);
         }
-        
+
         int input;
         double output;
 
@@ -65,9 +80,9 @@ public class DeviationManagerImpl implements DeviationManager {
      */
     @Override
     public boolean load(InputStream stream) {
-    
-    	synchronized (this) {
-    	    try {
+
+        synchronized (this) {
+            try {
                 BufferedReader r = new BufferedReader(new InputStreamReader(stream));
                 String line;
                 while ((line = r.readLine()) != null) {
@@ -82,7 +97,7 @@ public class DeviationManagerImpl implements DeviationManager {
                 ServerLog.getLogger().error("DeviationManager cannot read deviation table", e);
                 return false;
             }
-    	}
+        }
     }
 
     /**
@@ -91,13 +106,13 @@ public class DeviationManagerImpl implements DeviationManager {
      * @throws IOException In case writing fails. 
      */
     public void dump(OutputStream stream) throws IOException {
-    	synchronized (this) {
-	    	Pair p;
+        synchronized (this) {
+            Pair p;
             for (Pair pair : deviationMap) {
                 p = pair;
                 stream.write((p.input + "," + p.output + "\r\n").getBytes());
             }
-    	}
+        }
     }
 
     /**
@@ -126,7 +141,7 @@ public class DeviationManagerImpl implements DeviationManager {
             add(magnetic, reading, reverseDeviationMap);
         }
     }
-    
+
     private static void add(double key, double value, List<Pair> l) {
         Pair sample = new Pair((int) normalize(key), normalize(value));
         int p = Collections.binarySearch(l, sample);
@@ -137,30 +152,30 @@ public class DeviationManagerImpl implements DeviationManager {
             l.add(p, sample);
         }
     }
-    
+
     @Override
     public double getCompass(double magnetic) {
-    	synchronized (this) {
-    		return get(magnetic, reverseDeviationMap);
-    	}	
+        synchronized (this) {
+            return get(magnetic, reverseDeviationMap);
+        }
     }
 
     @Override
-	public double getMagnetic(double reading) {
-    	synchronized (this) {
-    		return get(reading, deviationMap);
-    	}
+    public double getMagnetic(double reading) {
+        synchronized (this) {
+            return get(reading, deviationMap);
+        }
     }
-    
+
     private static double get(double input, List<Pair> l) {
-    	input = normalize(input);
-    	
+        input = normalize(input);
+
         double res = input;
-        
+
         Pair sample = new Pair();
-        sample.input = (int)input; 
+        sample.input = (int)input;
         sample.output = 0;
-        
+
         int p = Collections.binarySearch(l, sample);
         if (p>=0) {
             res = (input - (int)input) + l.get(p).output;
@@ -171,32 +186,32 @@ public class DeviationManagerImpl implements DeviationManager {
 
             double[] readings = spreadThem(p0.input, normalize(input), p1.input);
             double[] actual = spreadThem(p0.output, p1.output);
-            
+
             double dSamples = readings[2] - readings[0];
             double dReading = readings[1] - readings[0];
             double dActual = actual[1] - actual[0];
             res = actual[0] + dActual * dReading / dSamples;
             if (res>360.0) res -= 360;
         }
-        
+
         return res;
     }
-    
+
     private static double[] spreadThem(double low, double mid, double high) {
-    	if (low>mid) low = low - 360.0;
-    	if (high<mid) high = high + 360.0;
-    	
-    	return new double[] {low, mid, high};
+        if (low>mid) low = low - 360.0;
+        if (high<mid) high = high + 360.0;
+
+        return new double[] {low, mid, high};
     }
-    
+
     private static double[] spreadThem(double low, double high) {
-    	if (low>high) low = low - 360.0;
-    	if (low<0.0) {
-    		low += 360.0;
-    		high += 360.0;
-    	}
-    	
-    	return new double[] {low, high};
+        if (low>high) low = low - 360.0;
+        if (low<0.0) {
+            low += 360.0;
+            high += 360.0;
+        }
+
+        return new double[] {low, high};
     }
 
     private static double normalize(double m) {

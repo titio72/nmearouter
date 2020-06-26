@@ -19,7 +19,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 public interface CANBOATDecoder {
-    Sentence getSentence(JSONObject canBoatSentence);
+    Sentence[] getSentence(JSONObject canBoatSentence);
 
-    Sentence getSentence(int pgn, JSONObject canBoatFields);
+    Sentence[] getSentence(int pgn, JSONObject canBoatFields);
 }

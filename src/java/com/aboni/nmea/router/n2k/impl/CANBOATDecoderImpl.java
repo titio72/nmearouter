@@ -18,6 +18,7 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.CANBOATDecoder;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.ServerLog;
 import net.sf.marineapi.ais.message.AISMessage01;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -29,13 +30,15 @@ import javax.inject.Inject;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CANBOATDecoderImpl implements CANBOATDecoder {
 
     private interface Converter {
-        Sentence getSentence(JSONObject fields);
+        Sentence[] getSentence(JSONObject fields);
     }
 
     private final Map<Integer, Converter> converterMap;
@@ -58,62 +61,125 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         converterMap.put(127245, this::handleRudder);
         converterMap.put(127257, this::handleAttitude);
         converterMap.put(127251, this::handleRateOfTurn);
+        converterMap.put(130311, this::handleEnvironment);
     }
 
     @Override
-    public Sentence getSentence(JSONObject canBoatSentence) {
+    public Sentence[] getSentence(JSONObject canBoatSentence) {
         int pgn = canBoatSentence.getInt("pgn");
         JSONObject fields = canBoatSentence.getJSONObject("fields");
         Converter c = converterMap.getOrDefault(pgn, (JSONObject f) -> null);
-        return c.getSentence(fields);
+        try {
+            return c.getSentence(fields);
+        } catch (JSONException e) {
+            ServerLog.getLogger().error(String.format("CANBOAT Decoder error {%s}", canBoatSentence), e);
+            return null;
+        }
     }
 
     @Override
-    public Sentence getSentence(int pgn, JSONObject fields) {
+    public Sentence[] getSentence(int pgn, JSONObject fields) {
         Converter c = converterMap.getOrDefault(pgn, (JSONObject f) -> null);
         return c.getSentence(fields);
     }
 
-    private Sentence handleRateOfTurn(JSONObject fields) {
-        double r = fields.getDouble("Rate");
-        ROTSentence rot = (ROTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ROT);
-        rot.setStatus(DataStatus.ACTIVE);
-        rot.setRateOfTurn(r);
-        return rot;
+    private static Sentence[] TEMPLATE = new Sentence[]{null};
+
+    private Sentence[] handleEnvironment(JSONObject jsonObject) {
+        // "SID":0,
+        // "Temperature Source":"Main Cabin Temperature",
+        // "Humidity Source":"Inside",
+        // "Temperature":26.00,
+        // "Humidity":46.000,
+        // "Atmospheric Pressure":101900
+        List<Sentence> res = new ArrayList<>();
+        if (jsonObject.has("Temperature Source")
+                && "Main Cabin Temperature".equals(jsonObject.get("Temperature Source"))
+                && jsonObject.has("Temperature")) {
+            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTA);
+            mta.setTemperature(jsonObject.getDouble("Temperature"));
+            res.add(mta);
+        }
+        if (jsonObject.has("Humidity Source")
+                && jsonObject.has("Humidity")) {
+            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MHU);
+            mhu.setRelativeHumidity(jsonObject.getDouble("Humidity"));
+            res.add(mhu);
+        }
+        if (jsonObject.has("Atmospheric Pressure")) {
+            MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MMB);
+            mmb.setBars(jsonObject.getDouble("Atmospheric Pressure") / 100000.0);
+            res.add(mmb);
+        }
+        return res.toArray(TEMPLATE);
     }
 
-    private Sentence handleAttitude(JSONObject fields) {
-        double roll = Utils.round(fields.getDouble("Roll") - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), 1);
-        double pitch = Utils.round(fields.getDouble("Pitch") - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0), 1);
-        double yaw = fields.getDouble("Yaw");
+    private Sentence[] handleRateOfTurn(JSONObject fields) {
+        if (fields.has("Rate")) {
+            double r = fields.getDouble("Rate");
+            ROTSentence rot = (ROTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ROT);
+            rot.setStatus(DataStatus.ACTIVE);
+            rot.setRateOfTurn(r);
+            return new Sentence[]{rot};
+        } else {
+            return null;
+        }
+    }
+
+    private Sentence[] handleAttitude(JSONObject fields) {
         XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
-        xdr.addMeasurement(new Measurement("A", yaw, "D", "YAW"));
-        xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
-        xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
-        return xdr;
+        boolean send = false;
+        if (fields.has("Yaw")) {
+            double yaw = fields.getDouble("Yaw");
+            xdr.addMeasurement(new Measurement("A", yaw, "D", "YAW"));
+            send = true;
+        }
+        if (fields.has("Roll")) {
+            double roll = Utils.round(fields.getDouble("Roll") - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), 1);
+            xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
+            send = true;
+        }
+        if (fields.has("Pitch")) {
+            double pitch = Utils.round(fields.getDouble("Pitch") - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0), 1);
+            xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
+            send = true;
+        }
+        if (send)
+            return new Sentence[]{xdr};
+        else
+            return null;
     }
 
-    private Sentence handleRudder(JSONObject fields) {
+    private Sentence[] handleRudder(JSONObject fields) {
         if (fields.getInt("Instance") == 0) {
             RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
             double angle = fields.getDouble("Position");
             rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
-            return rsa;
+            rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
+            return new Sentence[]{rsa};
         } else {
             return null;
         }
 
     }
 
-    private Sentence handleSystemTime(JSONObject fields) {
+    private Sentence[] handleSystemTime(JSONObject fields) {
         String sDate = fields.getString("Date").replace(".", "-");
         String sTime = fields.getString("Time");
         lastTime = Instant.parse(sDate + "T" + sTime + "Z");
         lastLocalTime = System.currentTimeMillis();
-        return null;
+
+        ZDASentence zda = (ZDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ZDA);
+        zda.setTimeAndLocalZone(new Time(Integer.parseInt(sTime.substring(0, 2)),
+                Integer.parseInt(sTime.substring(3, 5)),
+                Integer.parseInt(sTime.substring(6, 8)), 0, 0));
+        zda.setDate(new Date(Integer.parseInt(sDate.substring(0, 4)),
+                Integer.parseInt(sDate.substring(5, 7)),
+                Integer.parseInt(sDate.substring(8, 10))));
+        return new Sentence[]{zda};
     }
 
-    private Sentence handlePosition(JSONObject fields) {
+    private Sentence[] handlePosition(JSONObject fields) {
         RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RMC);
         rmc.setPosition(new Position(fields.getDouble("Latitude"), fields.getDouble("Longitude")));
         rmc.setVariation(0.0);
@@ -135,21 +201,21 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
             rmc.setDate(new Date(fmDate.format(ts)));
             rmc.setTime(new Time(fmTime.format(ts)));
         }
-        return rmc;
+        return new Sentence[]{rmc};
     }
 
-    private Sentence handleSOGCOG(JSONObject fields) {
+    private Sentence[] handleSOGCOG(JSONObject fields) {
         lastSOGCOG = fields;
         return null;
     }
 
-    private Sentence handleWaterTemp(JSONObject fields) {
+    private Sentence[] handleWaterTemp(JSONObject fields) {
         MTWSentence mtw = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
         mtw.setTemperature(fields.getDouble("Water Temperature"));
-        return mtw;
+        return new Sentence[]{mtw};
     }
 
-    private Sentence handleHeading(JSONObject fields) {
+    private Sentence[] handleHeading(JSONObject fields) {
         double heading = fields.getDouble("Heading");
         String ref = fields.getString("Reference");
         switch (ref) {
@@ -157,17 +223,17 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
                 lastHeading = fields;
                 HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
                 hdm.setHeading(heading);
-                return hdm;
+                return new Sentence[]{hdm};
             case "True":
                 HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
                 hdt.setHeading(heading);
-                return hdt;
+                return new Sentence[]{hdt};
             default:
                 return null;
         }
     }
 
-    private Sentence handleSpeed(JSONObject fields) {
+    private Sentence[] handleSpeed(JSONObject fields) {
         VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
         if (lastHeading != null) {
             vhw.setMagneticHeading(lastHeading.getDouble("Heading"));
@@ -175,19 +241,19 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         double speed = fields.getDouble("Speed Water Referenced");
         vhw.setSpeedKnots(speed);
         vhw.setSpeedKmh(speed * 1.852);
-        return vhw;
+        return new Sentence[]{vhw};
     }
 
-    private Sentence handleDepth(JSONObject fields) {
+    private Sentence[] handleDepth(JSONObject fields) {
         double depth = fields.getDouble("Depth");
         double offset = fields.getDouble("Offset");
         DPTSentence dpt = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
         dpt.setOffset(offset);
         dpt.setDepth(depth);
-        return dpt;
+        return new Sentence[]{dpt};
     }
 
-    private Sentence handleWind(JSONObject jsonObject) {
+    private Sentence[] handleWind(JSONObject jsonObject) {
         // mind that speed in m/s
         double windSpeed = jsonObject.getDouble("Wind Speed") * 1.94384;
         double windAngle = jsonObject.getDouble("Wind Angle");
@@ -198,10 +264,10 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         mwv.setSpeedUnit(Units.KNOT);
         mwv.setTrue(!"Apparent".equals(ref));
         mwv.setStatus(DataStatus.ACTIVE);
-        return mwv;
+        return new Sentence[]{mwv};
     }
 
-    private Sentence handleAISTargetClassB(JSONObject fields) {
+    private Sentence[] handleAISTargetClassB(JSONObject fields) {
         //"pgn":129810,
         // "description":"AIS Class B static data (msg 24 Part B)",
         // -----------------------------------------------
@@ -249,7 +315,7 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         return null;
     }
 
-    private Sentence handleAISTargetClassA(JSONObject fields) {
+    private Sentence[] handleAISTargetClassA(JSONObject fields) {
         //{"timestamp":"2020-06-13-16:25:03.836","prio":4,"src":0,"dst":255,"pgn":129038,"description":"AIS Class A Position Report",
         // "fields":{"Message ID":1,"User ID":247272700,"Longitude":10.3190336,"Latitude":43.5820159,"Position Accuracy":"Low","RAIM":"not in use","Time Stamp":"2","COG":56.0,"SOG":0.00,"Communication State":"0","AIS Transceiver information":"Channel A VDL reception","Heading":195.0,"Rate of Turn":0.00,"Nav Status":"Under way using engine","AIS Spare":"6"}}
         return null;

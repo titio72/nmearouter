@@ -17,22 +17,59 @@ package com.aboni.nmea.router.n2k;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.impl.BitUtils;
+import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class PGNParser {
 
-    public static class PGNDataParseException extends Exception {
-        PGNDataParseException(String msg) {
-            super(msg);
-        }
+    private static final Set<Long> SUPPORTED = new HashSet<>();
+    private static boolean experimental = false;
 
-        PGNDataParseException(String msg, Throwable cause) {
-            super(msg, cause);
+    static {
+        SUPPORTED.add(130306L); // Wind Data
+        SUPPORTED.add(127245L); // Rudder
+        SUPPORTED.add(127250L); // Vessel Heading
+        SUPPORTED.add(127251L); // Rate of turn
+        SUPPORTED.add(127257L); // Attitude
+        SUPPORTED.add(129025L); // Position, Rapid update
+        SUPPORTED.add(129026L); // COG & SOG, Rapid Update
+        SUPPORTED.add(130310L); // Environmental Parameters (water temp)
+        SUPPORTED.add(129033L); // Time & Date
+        SUPPORTED.add(126992L); // System time
+        SUPPORTED.add(129291L); // Set & Drift, Rapid Update
+        SUPPORTED.add(128267L); // Water Depth
+        SUPPORTED.add(128259L); // Speed
+        SUPPORTED.add(130312L); // Temperature (does not work)
+    }
+
+    private static final DateTimeFormatter tsFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
+    private boolean debug;
+
+    public static class PGNDataParseException extends RuntimeException {
+        PGNDataParseException(long pgn) {
+            super(String.format("PGN %d is unsupported", pgn));
         }
+    }
+
+    public void setDebug() {
+        debug = true;
+    }
+
+    public static void setExperimental() {
+        experimental = true;
+    }
+
+    public static boolean isSupported(long pgn) {
+        return SUPPORTED.contains(pgn);
     }
 
     static class PGNDecoded {
@@ -47,6 +84,7 @@ public class PGNParser {
     }
 
     private PGNDecoded pgnData;
+    private PGNDef definition;
 
     public PGNParser(@NotNull PGNs pgnDefinitions, String pgnString) {
         parse(pgnDefinitions, pgnString);
@@ -80,8 +118,52 @@ public class PGNParser {
         return pgnData.data;
     }
 
+    public boolean needMore() {
+        if (definition != null) {
+            PGNDef.PGNFieldDef lastField = definition.getFields()[definition.getFields().length - 1];
+            return (lastField.getBitOffset() + lastField.getBitLength()) > (pgnData.data.length * 8);
+        } else {
+            return false;
+        }
+    }
+
     public JSONObject getCanBoatJson() {
+        if (definition == null) throw new PGNDataParseException(pgnData.pgn);
+        if (pgnData.canBoatJson == null && !needMore() && (experimental || isSupported(pgnData.pgn))) {
+            JSONObject res = new JSONObject();
+            res.put("pgn", pgnData.pgn);
+            res.put("prio", pgnData.priority);
+            res.put("src", pgnData.source);
+            res.put("dst", pgnData.dest);
+            res.put("timestamp", tsFormatter.format(pgnData.ts));
+            res.put("description", definition.getDescription());
+            PGNDef.PGNFieldDef[] fieldDefinitions = definition.getFields();
+            if (fieldDefinitions != null) {
+                JSONObject jF = parse(fieldDefinitions, pgnData.data);
+                res.put("fields", jF);
+            }
+            pgnData.canBoatJson = res;
+        }
         return pgnData.canBoatJson;
+    }
+
+    public void addMore(String s) {
+        StringTokenizer tok = new StringTokenizer(s, ",", false);
+        tok.nextToken(); // skip timestamp
+        tok.nextToken(); // skip priority
+        tok.nextToken(); // skip pgn
+        tok.nextToken(); // skip src
+        tok.nextToken(); // skip dst
+        int moreLen = Integer.parseInt(tok.nextToken());
+        byte[] newData = new byte[pgnData.data.length + moreLen];
+        System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
+        for (int i = 0; i < moreLen; i++) {
+            String v = tok.nextToken();
+            int c = Integer.parseInt(v, 16);
+            newData[i + pgnData.length] = (byte) (c & 0xFF);
+        }
+        pgnData.data = newData;
+        pgnData.length += moreLen;
     }
 
     private void parse(PGNs pgnDefinitions, String s) {
@@ -100,22 +182,11 @@ public class PGNParser {
             p.data[i] = (byte) (c & 0xFF);
         }
 
-        JSONObject res = new JSONObject();
-        res.put("pgn", p.pgn);
-        res.put("prio", p.priority);
-        res.put("src", p.source);
-        res.put("dst", p.dest);
         PGNDef def = pgnDefinitions.getPGN(p.pgn);
-
         if (def != null) {
-            res.put("description", def.getDescription());
-            PGNDef.PGNFieldDef[] fieldDefinitions = def.getFields();
-            if (fieldDefinitions != null) {
-                JSONObject jF = parse(fieldDefinitions, p.data);
-                res.put("fields", jF);
-            }
+            definition = def;
         }
-        p.canBoatJson = res;
+
         this.pgnData = p;
     }
 
@@ -125,50 +196,103 @@ public class PGNParser {
         return Instant.parse(sTs);
     }
 
-    private static JSONObject parse(PGNDef.PGNFieldDef[] fields, byte[] data) {
+    private JSONObject parse(PGNDef.PGNFieldDef[] fields, byte[] data) {
         JSONObject json = new JSONObject();
         for (PGNDef.PGNFieldDef def : fields) {
+            if (debug) ServerLog.getConsoleOut().print("Parsing " + def.getName() + " [" + def.getType() + "]");
+            String res = null;
             if (!"reserved".equals(def.getId())) {
                 switch (def.getType()) {
-                    case VALUE:
-                        parseValue(data, json, def);
+                    case "Lookup table":
+                        res = parseEnum(data, json, def);
                         break;
-                    case ENUM:
-                        parseEnum(data, json, def);
+                    case "Binary data":
+                        res = parseBin(data, json, def);
                         break;
-                    case BINARY:
                     default:
+                        res = parseValue(data, json, def);
                 }
             }
+            if (debug) ServerLog.getConsoleOut().println("[" + res + "]");
         }
         return json;
     }
 
-    private static void parseEnum(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
+    private static String parseBin(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
         int offset = def.getBitOffset();
         int length = def.getBitLength();
         int start = def.getBitStart();
-        long e = BitUtils.extractBits(data, offset + start, length, def.isSigned());
-        String desc = def.getValues()[(int) e];
-        json.put(def.getName(), desc);
+        byte[] b = new byte[length / 8];
+        for (int i = 0; i < length; i += 8) {
+            long e = BitUtils.extractBits(data, start, offset + i, 8, false).v;
+            b[i / 8] = (byte) e;
+        }
+        String res = new String(b);
+        json.put(def.getName(), res);
+        return res;
     }
 
-    private static void parseValue(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
+    private static String parseEnum(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
         int offset = def.getBitOffset();
         int length = def.getBitLength();
         int start = def.getBitStart();
-        long v = BitUtils.extractBits(data, offset + start, length, def.isSigned());
-        if (def.getResolution() == 1) {
-            json.put(def.getName(), v);
+        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, def.isSigned());
+        String ret = null;
+        //if (e.v!=e.m) {
+        String enumDesc = def.getENumValue((int) e.v);
+        if (enumDesc != null) {
+            json.put(def.getName(), enumDesc);
+            ret = enumDesc;
         } else {
-            double vv = v * def.getResolution();
-            if ("rad".equals(def.getUnits())) {
-                json.put(def.getName(), Utils.round(Math.toDegrees(vv), 1));
+            json.put(def.getName(), "" + e.v);
+            ret = "" + e.v;
+        }
+        //}
+        return ret;
+    }
+
+    private static String parseValue(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
+        int offset = def.getBitOffset();
+        int length = def.getBitLength();
+        int start = def.getBitStart();
+        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, def.isSigned());
+        //if (e.v!=e.m) {
+            /*if (def.getResolution() == 1) {
+                json.put(def.getName(), e.v);
+            } else {*/
+        double vv = e.v / ((int) 1.0 / def.getResolution());
+        if ("rad".equals(def.getUnits())) {
+            vv = Utils.round(Math.toDegrees(vv), 1);
+            json.put(def.getName(), vv);
+            return "" + vv;
+        } else if ("days".equals(def.getUnits())) {
+            long l = e.v * 24 * 60 * 60 * 1000;
+            OffsetDateTime dt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.of("UTC"));
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String dateString = fmt.withZone(ZoneId.of("UTC")).format(dt);
+            json.put(def.getName(), dateString);
+            return dateString;
+        } else if ("s".equals(def.getUnits())) {
+            long vvv = (long) vv;
+            String timeString = String.format("%02d:%02d:%02d", vvv / 3600, (vvv % 3600) / 60, vvv % 60);
+            json.put(def.getName(), timeString);
+            return timeString;
+        } else if ("K".equals(def.getUnits())) {
+            // transform Kelvin to Celsius
+            vv = Utils.round(vv - 273.15, 1);
+            json.put(def.getName(), vv);
+            return "" + vv;
+        } else {
+            if (def.getResolution() == 1) {
+                json.put(def.getName(), e.v);
+                return "" + e.v;
             } else {
                 json.put(def.getName(), vv);
+                return "" + vv;
             }
-
         }
+        //    }
+        //}
+        //return null;
     }
-
 }

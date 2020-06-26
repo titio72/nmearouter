@@ -12,13 +12,13 @@ public class BitUtilsTest {
 
     @Test
     public void extractShort() {
-        long v = BitUtils.extractBits(b, 8, 16, false);
+        long v = BitUtils.extractBits(b, 0, 8, 16, false).v;
         assertEquals(92, v);
     }
 
     @Test
     public void extractLessThanOneByte() {
-        long v1 = BitUtils.extractBits(b, 40, 3, false);
+        long v1 = BitUtils.extractBits(b, 0, 40, 3, false).v;
         assertEquals(2, v1);
     }
 
