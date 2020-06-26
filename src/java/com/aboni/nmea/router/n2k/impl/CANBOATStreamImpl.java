@@ -78,10 +78,13 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
             N2KLightParser p = new N2KLightParser(sMessage);
             int pgn = p.getPgn();
             int src = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
-            if ((src == p.getSource() || src == -1) && (p.getPgn() == 129025 || isSend(p.getPgn(), p.getTs(), p.getFieldsAsString()))) {
+            if (p.getFieldsAsString() != null &&
+                    (src == p.getSource() || src == -1) &&
+                    isSend(p.getPgn(), p.getTs(), p.getFieldsAsString())) {
                 return p;
             } else return null;
         } catch (Exception e) {
+            if (logger != null) logger.error("CANBOATStream error for {" + sMessage + "} {" + e.toString() + "}", e);
             return null;
         }
     }
@@ -97,7 +100,8 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
         } else {
             int hash = fields.hashCode();
             // check for minimum age (active throttling) then check for maximum age or some changes
-            if ((ts - MIN_AGE) > p.timestamp && ((ts - MAX_AGE) > p.timestamp || hash != p.hashcode)) {
+            if ((ts - MIN_AGE) > p.timestamp &&
+                    ((ts - MAX_AGE) > p.timestamp || hash != p.hashcode)) {
                 p.timestamp = ts;
                 p.hashcode = hash;
                 return true;
