@@ -92,23 +92,38 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         // "Humidity":46.000,
         // "Atmospheric Pressure":101900
         List<Sentence> res = new ArrayList<>();
+        XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
+        boolean send = false;
         if (jsonObject.has("Temperature Source")
                 && "Main Cabin Temperature".equals(jsonObject.get("Temperature Source"))
                 && jsonObject.has("Temperature")) {
             MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTA);
-            mta.setTemperature(jsonObject.getDouble("Temperature"));
+            double t = jsonObject.getDouble("Temperature");
+            mta.setTemperature(t);
+            xdr.addMeasurement(new Measurement("C", Utils.round(t, 1), "C", "CabinTemp"));
             res.add(mta);
+            send = true;
         }
         if (jsonObject.has("Humidity Source")
                 && jsonObject.has("Humidity")) {
             MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MHU);
-            mhu.setRelativeHumidity(jsonObject.getDouble("Humidity"));
+            double h = jsonObject.getDouble("Humidity");
+            mhu.setRelativeHumidity(h);
+            xdr.addMeasurement(new Measurement("P", Utils.round(h, 2), "H", "Humidity"));
             res.add(mhu);
+            send = true;
         }
         if (jsonObject.has("Atmospheric Pressure")) {
             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MMB);
-            mmb.setBars(jsonObject.getDouble("Atmospheric Pressure") / 100000.0);
+            double p = jsonObject.getDouble("Atmospheric Pressure") / 100000.0;
+            mmb.setBars(p);
+            mmb.setInchesOfMercury(Math.round(p * 760));
+            xdr.addMeasurement(new Measurement("B", Math.round(p * 10000) / 10000d, "B", "Barometer"));
             res.add(mmb);
+            send = true;
+        }
+        if (send) {
+            res.add(xdr);
         }
         return res.toArray(TEMPLATE);
     }

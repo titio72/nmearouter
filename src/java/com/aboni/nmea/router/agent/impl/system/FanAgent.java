@@ -15,11 +15,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.sentence.TalkerId;
+import net.sf.marineapi.nmea.sentence.XDRSentence;
+import net.sf.marineapi.nmea.util.Measurement;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -33,7 +39,7 @@ public class FanAgent extends NMEAAgentImpl {
     @Inject
     public FanAgent(@NotNull NMEACache cache) {
         super(cache);
-        setSourceTarget(false, false);
+        setSourceTarget(true, false);
         fan = new Fan();
     }
 
@@ -54,6 +60,7 @@ public class FanAgent extends NMEAAgentImpl {
             double temp = CPUTemp.getInstance().getTemp();
             if (fan.isFanOn() && temp<getThresholdOff()) fan(false);
             else if (!fan.isFanOn() && temp>getThresholdOn()) fan(true);
+            sendCPUTemp(temp);
         }
     }
 
@@ -69,4 +76,16 @@ public class FanAgent extends NMEAAgentImpl {
         getLogger().info("Switch fan {" + on + "}");
         fan.switchFan(on);
     }
+
+    private void sendCPUTemp(double temp) {
+        try {
+            XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
+            xdr.addMeasurement(new Measurement("C", Utils.round(temp, 2), "C", "CPUTemp"));
+            notify(xdr);
+        } catch (Exception e) {
+            getLogger().error("Error sending CPU temperature", e);
+        }
+    }
+
+
 }

@@ -53,7 +53,7 @@ public class NMEAInputManager {
             return handleN2K(sSentence);
         } else {
             logger.debug("Unknown sentence {" + sSentence + "}");
-            return null;
+            return new Sentence[]{};
         }
     }
 
@@ -63,7 +63,7 @@ public class NMEAInputManager {
             return decoder.getSentence(p.getCanBoatJson());
         } catch (Exception e) {
             logger.warning("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
-            return null;
+            return new Sentence[]{};
         }
     }
 
@@ -85,6 +85,6 @@ public class NMEAInputManager {
         } catch (Exception e) {
             logger.debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");
         }
-        return null;
+        return new Sentence[]{};
     }
 }

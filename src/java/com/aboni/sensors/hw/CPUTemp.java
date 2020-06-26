@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors.hw;
 
 import com.aboni.misc.Sample;
+import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 
 import java.io.FileInputStream;
@@ -44,7 +45,8 @@ public class CPUTemp {
 
     private double read() {
         try {
-            try (FileInputStream f = new FileInputStream("/sys/class/thermal/thermal_zone0/temp")) {
+            String sf = HWSettings.getProperty("thermal.zone", "/sys/class/thermal/thermal_zone0/temp");
+            try (FileInputStream f = new FileInputStream(sf)) {
                 int rr = f.read(bf);
                 if (rr > 0) {
                     String s = new String(bf, 0, rr);
