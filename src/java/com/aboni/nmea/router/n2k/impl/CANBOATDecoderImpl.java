@@ -115,10 +115,10 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         }
         if (jsonObject.has("Atmospheric Pressure")) {
             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MMB);
-            double p = jsonObject.getDouble("Atmospheric Pressure") / 100000.0;
-            mmb.setBars(p);
+            double p = jsonObject.getDouble("Atmospheric Pressure") / 100.0; // millibar
+            mmb.setBars(p / 1000.0);
             mmb.setInchesOfMercury(Math.round(p * 760));
-            xdr.addMeasurement(new Measurement("B", Math.round(p * 10000) / 10000d, "B", "Barometer"));
+            xdr.addMeasurement(new Measurement("B", p, "B", "Barometer"));
             res.add(mmb);
             send = true;
         }
