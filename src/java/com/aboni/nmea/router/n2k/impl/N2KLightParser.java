@@ -34,7 +34,7 @@ public class N2KLightParser implements CANBOATPGNMessage {
     public boolean isValid() {
         if (jFields == null && sFields != null && !invalid) {
             try {
-                jFields = new JSONObject(sFields);
+                jFields = new JSONObject(patch129040And129039(sFields));
                 invalid = false;
             } catch (JSONException e) {
                 jFields = null;
@@ -42,6 +42,13 @@ public class N2KLightParser implements CANBOATPGNMessage {
             }
         }
         return !invalid;
+    }
+
+    private String patch129040And129039(String sFields) {
+        if (pgn==129040 || pgn==129039) {
+            sFields = sFields.replaceFirst("\"Regional Application\"", "Regional Application 1");
+        }
+        return sFields;
     }
 
     public long getTs() {

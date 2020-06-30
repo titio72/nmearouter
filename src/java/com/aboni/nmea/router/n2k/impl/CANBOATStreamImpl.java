@@ -33,6 +33,8 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
 
+    private static final boolean THROTTLING = false;
+
     private static class Payload {
         int hashcode;
         long timestamp;
@@ -90,6 +92,7 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
     }
 
     private boolean isSend(int pgn, long ts, String fields) {
+        if (!THROTTLING) return true;
         Payload p = payloadMap.getOrDefault(pgn, null);
         if (p == null) {
             p = new Payload();

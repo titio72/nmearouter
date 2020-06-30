@@ -30,7 +30,7 @@ public class NMEASpeedFilter implements NMEASentenceFilter {
 
     private final NMEACache cache;
     private final SpeedMovingAverage speedMovingAverage;
-    private static final boolean USE_GPS = true;
+    private static final boolean USE_GPS = false;
     private static final boolean USE_AVERAGE = false;
 
     // check if the speed is within gps*factor
