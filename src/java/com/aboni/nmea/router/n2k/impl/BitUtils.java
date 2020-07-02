@@ -32,8 +32,8 @@ public class BitUtils {
     }
 
     public static Res extractBits(byte[] data, int start, int off, int len, boolean signed) {
-        long[] res = new long[]{extractBits(data, off, len, signed), 0};
-        //long[] res = extractNumber(data, off, start, len, signed);
+        //long[] res = new long[]{extractBits(data, off, len, signed), 0};
+        long[] res = extractNumber(data, off, start, len, signed);
         return new Res(res);
     }
 

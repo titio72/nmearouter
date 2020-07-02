@@ -24,20 +24,29 @@ public class PGNParserTest {
     private static final String S10 = "2020-06-21-08:24:11.859,7,130916,204,255,8,20,07,3b,9f,ff,ff,ff,7f";
     private static final String S11 = "2020-06-21-08:24:08.122,3,126992,22,255,8,01,f0,02,48,80,7a,07,12";
 
-    private static final String[] AIS1 = new String[]{
-            "2020-06-21-08:23:52.582,4,129038,0,255,8,a0,1b,c1,b8,68,bc,0e,c8",
-            "2020-06-21-08:23:52.582,4,129038,0,255,8,a1,33,fa,05,74,bb,ae,19",
-            "2020-06-21-08:23:52.582,4,129038,0,255,8,a2,cc,8b,09,55,03,00,00",
-            "2020-06-21-08:23:52.583,4,129038,0,255,8,a3,00,dc,08,00,00,f0,fe"};
+    private static final String AIS_STATIC_DATA_CLASS_B =
+            "2020-06-21-08:14:50.400,6,129809,0,255,19," +
+                    "18,64,6f,be,0e,53,45,4e," +
+                    "5a,41,46,55,52,49,41,20," +
+                    "20,20,20,20,20,20,20,20," +
+                    "20,ff,ff";
 
-    private static final String J1 = "{\"timestamp\":\"2011-11-24-22:42:04.388\",\"prio\":2,\"src\":36,\"dst\":255,\"pgn\":127251,\"description\":\"Rate of Turn\"," +
-            "\"fields\":{\"SID\":125,\"Rate\":0.0934}}";
-    private static final String J2 = "{\"timestamp\":\"2011-11-24-22:42:04.390\",\"prio\":2,\"src\":36,\"dst\":255,\"pgn\":127250,\"description\":\"Vessel Heading\"," +
-            "\"fields\":{\"SID\":0,\"Heading\":182.4,\"Deviation\":0.0,\"Variation\":0.0,\"Reference\":\"Magnetic\"}}";
-    private static final String J3 = "{\"timestamp\":\"2011-11-24-22:42:04.437\",\"prio\":2,\"src\":36,\"dst\":255,\"pgn\":130306,\"description\":\"Wind Data\"," +
-            "\"fields\":{\"SID\":177,\"Wind Speed\":0.92,\"Wind Angle\":353.4,\"Reference\":\"Apparent\"}}";
-    private static final String J4 = "{\"timestamp\":\"2011-11-24-22:42:04.437\",\"prio\":2,\"src\":22,\"dst\":255,\"pgn\":129025,\"description\":\"Position, Rapid Update\"," +
-            "\"fields\":{\"Latitude\":43.6775106,\"Longitude\":10.2740244}}";
+    private static final String[] AIS_STATIC_DATA_CLASS_B_FAST = new String[]{
+            "2020-06-21-08:14:50.400,6,129809,0,255,8,80,19,18,64,6f,be,0e,53",
+            "2020-06-21-08:14:50.407,6,129809,0,255,8,81,45,4e,5a,41,46,55,52",
+            "2020-06-21-08:14:50.407,6,129809,0,255,8,82,49,41,20,20,20,20,20",
+            "2020-06-21-08:14:50.407,6,129809,0,255,8,83,20,20,20,20,20,ff,ff"};
+
+    private static final String[] AIS_FAST = new String[]{
+            "2020-06-21-08:14:44.664,4,129039,0,255,8,00,1a,12,2e,f1,bd,0e,7e",
+            "2020-06-21-08:14:44.664,4,129039,0,255,8,01,6c,ec,05,44,ba,af,19",
+            "2020-06-21-08:14:44.665,4,129039,0,255,8,02,ab,10,2a,c9,01,00,00",
+            "2020-06-21-08:14:44.665,4,129039,0,255,8,03,00,96,29,00,fc,ff,ff"};
+
+    private static final String AIS_EXT = "2020-07-01-19:35:54.000,4,129039,15,255,26,12,2e,f1,bd,0e,7e,6c,ec,05,44,ba,af,19,ab,11,2a,c9,01,ff,ff,ff,97,29,ff,fc,ff";
+
+    private static final String ENV_TEMP = "2020-07-02-05:48:17.000,5,130311,15,255,8,01,c2,b7,75,ff,7f,ff,ff";
+    private static final String ENV_TEMP_HUM_PRESS = "2020-07-02-05:52:23.000,5,130311,15,255,8,01,02,b7,75,b0,36,f6,03";
 
     private PGNs pgnDefs;
 
@@ -46,11 +55,58 @@ public class PGNParserTest {
     }
 
     @Test
+    public void testAISStaticCLassB() {
+        PGNParser parser = new PGNParser(pgnDefs, AIS_STATIC_DATA_CLASS_B_FAST[0]);
+        for (int i = 1; i < AIS_STATIC_DATA_CLASS_B_FAST.length; i++) parser.addMore(AIS_STATIC_DATA_CLASS_B_FAST[i]);
+        assertEquals(129809, parser.getPgn());
+        JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
+        assertEquals(24, res.getInt("Message ID"));
+        assertEquals("Initial", res.getString("Repeat indicator"));
+        assertEquals(247361380L, res.getLong("User ID"));
+        assertEquals("SENZAFURIA", res.getString("Name"));
+    }
+
+    @Test
+    public void testAISStaticCLassBExt_tolerant() {
+        PGNParser parser = new PGNParser(pgnDefs, AIS_STATIC_DATA_CLASS_B);
+        assertEquals(129809, parser.getPgn());
+        JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
+        assertEquals(24, res.getInt("Message ID"));
+        assertEquals("Initial", res.getString("Repeat indicator"));
+        assertEquals(247361380L, res.getLong("User ID"));
+        assertEquals("SENZAFURIA", res.getString("Name"));
+    }
+
+
+    @Test
+    public void testEnvironmentInfo() {
+        PGNParser parser = new PGNParser(pgnDefs, ENV_TEMP);
+        assertEquals(130311, parser.getPgn());
+        JSONObject j = parser.getCanBoatJson().getJSONObject("fields");
+        assertEquals(28.2, j.getDouble("Temperature"), 0.0001);
+        assertEquals("Inside Temperature", j.getString("Temperature Source"));
+        assertFalse(j.has("Atmospheric Pressure"));
+        assertFalse(j.has("Humidity"));
+        assertFalse(j.has("Humidity Source"));
+    }
+
+    @Test
+    public void testEnvironmentInfoWithPressure() {
+        PGNParser parser = new PGNParser(pgnDefs, ENV_TEMP_HUM_PRESS);
+        assertEquals(130311, parser.getPgn());
+        JSONObject j = parser.getCanBoatJson().getJSONObject("fields");
+        assertEquals(28.2, j.getDouble("Temperature"), 0.0001);
+        assertEquals("Inside Temperature", j.getString("Temperature Source"));
+        assertEquals(56.0, j.getDouble("Humidity"), 0.0001);
+        assertEquals("Inside", j.getString("Humidity Source"));
+        assertEquals(101400, j.getDouble("Atmospheric Pressure"), 0.0001);
+    }
+
+    @Test
     public void test() {
         PGNParser parser = new PGNParser(pgnDefs, S11);
         assertEquals(126992, parser.getPgn());
-        JSONObject j = parser.getCanBoatJson();
-        System.out.println(j);
+        assertNotNull(parser.getCanBoatJson());
     }
 
     @Test
@@ -65,15 +121,16 @@ public class PGNParserTest {
         }
     }
 
-
     @Test
     public void testPilotHeading() {
+        PGNParser.setExperimental();
         PGNParser parser = new PGNParser(pgnDefs, S9);
         assertEquals(65359, parser.getPgn());
         System.out.println(parser.getCanBoatJson());
-        // LOOKUP_INDUSTRY_CODE (",0=Global,1=Highway,2=Agriculture,3=Construction,4=Marine,5=Industrial")
+        assertEquals("Marine", parser.getCanBoatJson().getJSONObject("fields").getString("Industry Code"));
+        assertEquals(1851, parser.getCanBoatJson().getJSONObject("fields").getInt("Manufacturer Code"));
+        assertEquals(28.9, parser.getCanBoatJson().getJSONObject("fields").getDouble("Heading Magnetic"), 0.0001);
     }
-
 
     @Test
     public void testHeading() throws Exception {
@@ -81,7 +138,6 @@ public class PGNParserTest {
         assertEquals(127250, parser.getPgn());
         assertEquals(Instant.parse("2011-11-24T22:42:04.390Z"), parser.getTime());
         JSONObject o = parser.getCanBoatJson();
-        System.out.println(o);
         assertEquals(36, parser.getSource());
         assertEquals("Magnetic", parser.getCanBoatJson().getJSONObject("fields").getString("Reference"));
         assertEquals(0.0, parser.getCanBoatJson().getJSONObject("fields").getDouble("Variation"), 0.001);
@@ -107,49 +163,71 @@ public class PGNParserTest {
         assertEquals(10.2934694, parser.getCanBoatJson().getJSONObject("fields").getDouble("Longitude"), 0.001);
     }
 
+
     @Test
-    public void testMultiLine() throws Exception {
-        PGNParser parser = new PGNParser(pgnDefs, S5);
+    public void testAISPositionReportClassB_EXT() {
+        PGNParser parser = new PGNParser(pgnDefs, AIS_EXT);
+        parser.setDebug();
+        JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
+        assertEquals(18, res.getInt("Message ID"));
+        assertEquals("Initial", res.getString("Repeat Indicator"));
+        assertEquals(247329070, res.getLong("User ID"));
+        assertEquals(9.938035, res.getDouble("Longitude"), 0.0001);
+        assertEquals(43.0946884, res.getDouble("Latitude"), 0.0001);
+        assertEquals("High", res.getString("Position Accuracy"));
+        assertEquals("in use", res.getString("RAIM"));
+        assertEquals(42, res.getInt("Time Stamp"));
+        assertEquals(61.7, res.getDouble("COG"), 0.0001);
+        assertEquals(4.57, res.getDouble("SOG"), 0.0001);
 
-        assertTrue(parser.needMore());
-        parser.addMore(S6);
-        assertEquals(16, parser.getLength());
+        // comm state and transceiver info are not set in the generation of the message - check if they have been skipped
+        assertFalse(res.has("Communication State"));
+        assertFalse(res.has("AIS Transceiver information"));
 
-        assertTrue(parser.needMore());
-        parser.addMore(S7);
-        assertEquals(24, parser.getLength());
-
-        System.out.println(parser.getCanBoatJson());
+        assertEquals(61.0, res.getDouble("Heading"), 0.00001);
+        assertEquals(0, res.getInt("Regional Application"));
+        assertEquals(0, res.getInt("Regional Application"));
+        assertEquals("CS", res.getString("Unit type"));
+        assertEquals("Yes", res.getString("Integrated Display"));
+        assertEquals("Yes", res.getString("DSC"));
+        assertEquals("entire marine band", res.getString("Band"));
+        assertEquals("Yes", res.getString("Can handle Msg 22"));
+        assertEquals("Assigned", res.getString("AIS mode"));
+        assertEquals("ITDMA", res.getString("AIS communication state"));
     }
 
     @Test
-    public void testAIS() {
-        PGNParser parser = new PGNParser(pgnDefs, AIS1[0]);
+    public void testAISPositionReportClassB_FAST() {
+        PGNParser parser = new PGNParser(pgnDefs, AIS_FAST[0]);
         parser.setDebug();
         for (int i = 1; i < 4; i++) {
             assertTrue(parser.needMore());
-            parser.addMore(AIS1[1]);
+            parser.addMore(AIS_FAST[i]);
         }
         assertFalse(parser.needMore());
-        parser.getCanBoatJson();
-        System.out.println(parser.getCanBoatJson());
+        JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
 
-        /*
-        "Message ID":1,
-        "User ID":247228600,
-        "Longitude":10.0283336,
-        "Latitude":43.0881652,
-        "Position Accuracy":"Low",
-        "RAIM":"not in use",
-        "Time Stamp":"51",
-        "COG":14.0,
-        "SOG":8.53,
-        "Communication State":"0",
-        "AIS Transceiver information":"Channel A VDL reception",
-        "Heading":13.0,
-        "Rate of Turn":0.00,
-        "Nav Status":"Under way using engine",
-        "AIS Spare":"6"
-         */
+        assertEquals(18, res.getInt("Message ID"));
+        assertEquals("Initial", res.getString("Repeat Indicator"));
+        assertEquals(247329070, res.getLong("User ID"));
+        assertEquals(9.938035, res.getDouble("Longitude"), 0.0001);
+        assertEquals(43.0946884, res.getDouble("Latitude"), 0.0001);
+        assertEquals("High", res.getString("Position Accuracy"));
+        assertEquals("in use", res.getString("RAIM"));
+        assertEquals(42, res.getInt("Time Stamp"));
+        assertEquals(61.7, res.getDouble("COG"), 0.0001);
+        assertEquals(4.57, res.getDouble("SOG"), 0.0001);
+        assertEquals(0, res.getInt("Communication State"));
+        assertEquals("Channel A VDL reception", res.getString("AIS Transceiver information"));
+        assertEquals(61.0, res.getDouble("Heading"), 0.00001);
+        assertEquals(0, res.getInt("Regional Application"));
+        assertEquals(0, res.getInt("Regional Application"));
+        assertEquals("CS", res.getString("Unit type"));
+        assertEquals("Yes", res.getString("Integrated Display"));
+        assertEquals("Yes", res.getString("DSC"));
+        assertEquals("entire marine band", res.getString("Band"));
+        assertEquals("Yes", res.getString("Can handle Msg 22"));
+        assertEquals("Assigned", res.getString("AIS mode"));
+        assertEquals("ITDMA", res.getString("AIS communication state"));
     }
 }

@@ -49,6 +49,9 @@ public class PGNParser {
         SUPPORTED.add(128267L); // Water Depth
         SUPPORTED.add(128259L); // Speed
         SUPPORTED.add(130312L); // Temperature (does not work)
+        SUPPORTED.add(130311L); // Temperature (does not work)
+        SUPPORTED.add(129809L); // AIS Class B static data (msg 24 Part A)
+        SUPPORTED.add(129039L); // AIS Class B position report
     }
 
     private static final DateTimeFormatter tsFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
@@ -129,7 +132,7 @@ public class PGNParser {
 
     public JSONObject getCanBoatJson() {
         if (definition == null) throw new PGNDataParseException(pgnData.pgn);
-        if (pgnData.canBoatJson == null && !needMore() && (experimental || isSupported(pgnData.pgn))) {
+        if (pgnData.canBoatJson == null /*&& !needMore()*/ && (experimental || isSupported(pgnData.pgn))) {
             JSONObject res = new JSONObject();
             res.put("pgn", pgnData.pgn);
             res.put("prio", pgnData.priority);
@@ -155,15 +158,17 @@ public class PGNParser {
         tok.nextToken(); // skip src
         tok.nextToken(); // skip dst
         int moreLen = Integer.parseInt(tok.nextToken());
-        byte[] newData = new byte[pgnData.data.length + moreLen];
-        System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
-        for (int i = 0; i < moreLen; i++) {
+        int skip = (pgnData.length == 8) ? 2 : 0;
+        byte[] newData = new byte[pgnData.data.length + moreLen - skip - 1];
+        System.arraycopy(pgnData.data, skip, newData, 0, pgnData.data.length - skip); //skip the first 2
+        tok.nextToken(); // skip the first
+        for (int i = 1; i < moreLen; i++) {
             String v = tok.nextToken();
             int c = Integer.parseInt(v, 16);
-            newData[i + pgnData.length] = (byte) (c & 0xFF);
+            newData[i - 1 + pgnData.length - skip] = (byte) (c & 0xFF);
         }
         pgnData.data = newData;
-        pgnData.length += moreLen;
+        pgnData.length = newData.length;
     }
 
     private void parse(PGNs pgnDefinitions, String s) {
@@ -206,8 +211,8 @@ public class PGNParser {
                     case "Lookup table":
                         res = parseEnum(data, json, def);
                         break;
-                    case "Binary data":
-                        res = parseBin(data, json, def);
+                    case "ASCII text":
+                        res = parseAscii(data, json, def);
                         break;
                     default:
                         res = parseValue(data, json, def);
@@ -218,16 +223,22 @@ public class PGNParser {
         return json;
     }
 
-    private static String parseBin(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
+    private static String parseAscii(byte[] data, JSONObject json, PGNDef.PGNFieldDef def) {
         int offset = def.getBitOffset();
         int length = def.getBitLength();
         int start = def.getBitStart();
-        byte[] b = new byte[length / 8];
+
+        int totBits = data.length * 8;
+        if (offset < totBits && (offset + length) > totBits && (totBits - offset) >= 8) length = totBits - offset;
+        if (offset + length > totBits) return null;
+
+
+        byte[] b = new byte[(int) Math.ceil(length / 8.0)];
         for (int i = 0; i < length; i += 8) {
             long e = BitUtils.extractBits(data, start, offset + i, 8, false).v;
             b[i / 8] = (byte) e;
         }
-        String res = new String(b);
+        String res = new String(b).trim();
         json.put(def.getName(), res);
         return res;
     }
@@ -236,18 +247,27 @@ public class PGNParser {
         int offset = def.getBitOffset();
         int length = def.getBitLength();
         int start = def.getBitStart();
+        if (offset + length > (data.length * 8)) return null;
+
         BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, def.isSigned());
-        String ret = null;
-        //if (e.v!=e.m) {
-        String enumDesc = def.getENumValue((int) e.v);
-        if (enumDesc != null) {
-            json.put(def.getName(), enumDesc);
-            ret = enumDesc;
-        } else {
-            json.put(def.getName(), "" + e.v);
-            ret = "" + e.v;
+        int reserved = 0;
+        if (e.m >= 15) {
+            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATAFIELD_UNKNOWN */
         }
-        //}
+
+        String ret = null;
+        if (e.v <= (e.m - reserved)) {
+            String enumDesc = def.getENumValue((int) e.v);
+            if (enumDesc != null) {
+                json.put(def.getName(), enumDesc);
+                ret = enumDesc;
+            } else {
+                json.put(def.getName(), "" + e.v);
+                ret = "" + e.v;
+            }
+        }
         return ret;
     }
 
@@ -255,44 +275,46 @@ public class PGNParser {
         int offset = def.getBitOffset();
         int length = def.getBitLength();
         int start = def.getBitStart();
+        if (offset + length > (data.length * 8)) return null;
+
         BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, def.isSigned());
-        //if (e.v!=e.m) {
-            /*if (def.getResolution() == 1) {
-                json.put(def.getName(), e.v);
-            } else {*/
-        double vv = e.v / ((int) 1.0 / def.getResolution());
-        if ("rad".equals(def.getUnits())) {
-            vv = Utils.round(Math.toDegrees(vv), 1);
-            json.put(def.getName(), vv);
-            return "" + vv;
-        } else if ("days".equals(def.getUnits())) {
-            long l = e.v * 24 * 60 * 60 * 1000;
-            OffsetDateTime dt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.of("UTC"));
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-            String dateString = fmt.withZone(ZoneId.of("UTC")).format(dt);
-            json.put(def.getName(), dateString);
-            return dateString;
-        } else if ("s".equals(def.getUnits())) {
-            long vvv = (long) vv;
-            String timeString = String.format("%02d:%02d:%02d", vvv / 3600, (vvv % 3600) / 60, vvv % 60);
-            json.put(def.getName(), timeString);
-            return timeString;
-        } else if ("K".equals(def.getUnits())) {
-            // transform Kelvin to Celsius
-            vv = Utils.round(vv - 273.15, 1);
-            json.put(def.getName(), vv);
-            return "" + vv;
-        } else {
-            if (def.getResolution() == 1) {
-                json.put(def.getName(), e.v);
-                return "" + e.v;
-            } else {
+        if (e.v != e.m) {
+            double vv = e.v / ((int) 1.0 / def.getResolution());
+            if ("Pressure".equals(def.getType())) {
+                vv = e.v * 100; // put it back into Pa instead of HPa
                 json.put(def.getName(), vv);
                 return "" + vv;
+            } else if ("rad".equals(def.getUnits())) {
+                vv = Utils.round(Math.toDegrees(vv), 1);
+                json.put(def.getName(), vv);
+                return "" + vv;
+            } else if ("days".equals(def.getUnits())) {
+                long l = e.v * 24 * 60 * 60 * 1000;
+                OffsetDateTime dt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.of("UTC"));
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                String dateString = fmt.withZone(ZoneId.of("UTC")).format(dt);
+                json.put(def.getName(), dateString);
+                return dateString;
+            } else if ("s".equals(def.getUnits())) {
+                long vvv = (long) vv;
+                String timeString = String.format("%02d:%02d:%02d", vvv / 3600, (vvv % 3600) / 60, vvv % 60);
+                json.put(def.getName(), timeString);
+                return timeString;
+            } else if ("K".equals(def.getUnits())) {
+                // transform Kelvin to Celsius
+                vv = Utils.round(vv - 273.15, 1);
+                json.put(def.getName(), vv);
+                return "" + vv;
+            } else {
+                if (def.getResolution() == 1) {
+                    json.put(def.getName(), e.v);
+                    return "" + e.v;
+                } else {
+                    json.put(def.getName(), vv);
+                    return "" + vv;
+                }
             }
         }
-        //    }
-        //}
-        //return null;
+        return null;
     }
 }

@@ -86,7 +86,16 @@ public class N2KLookupTables {
     public static final Map<Integer, String> LOOKUP_DSC_EXPANSION_DATA = new HashMap<>();
     public static final Map<Integer, String> LOOKUP_SEATALK_ALARM_STATUS = new HashMap<>();
 
+    private static final Map<String, Map<Integer, String>> TABLES = new HashMap<>();
+
+    public static Map<Integer, String> getTable(String fieldId) {
+        return TABLES.getOrDefault(fieldId, null);
+    }
+
     static {
+        TABLES.put("industryCode", LOOKUP_INDUSTRY_CODE);
+
+
         load(LOOKUP_INDUSTRY_CODE, "0=Global,1=Highway,2=Agriculture,3=Construction,4=Marine,5=Industrial");
 
         load(LOOKUP_SHIP_TYPE,
