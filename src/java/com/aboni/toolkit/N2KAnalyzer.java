@@ -4,6 +4,7 @@ import com.aboni.nmea.router.n2k.CANBOATDecoder;
 import com.aboni.nmea.router.n2k.PGNParser;
 import com.aboni.nmea.router.n2k.PGNs;
 import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
+import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -14,6 +15,12 @@ public class N2KAnalyzer {
 
     private static boolean waitForMore;
     private static PGNParser pgnWaitingForMore;
+
+    private static class QueuedPGN {
+        PGNParser pgnParser;
+        long lastSentence;
+    }
+
 
     public static void main(String[] args) {
         try {
@@ -45,7 +52,12 @@ public class N2KAnalyzer {
                                 System.out.println(line);
                                 JSONObject j = p.getCanBoatJson();
                                 if (j != null) {
-                                    System.out.println(dec.getSentence(j));
+                                    Sentence[] nmeas = dec.getSentence(j);
+                                    if (nmeas != null) {
+                                        for (Sentence ss : dec.getSentence(j)) {
+                                            if (ss != null) System.out.println(ss);
+                                        }
+                                    }
                                 }
                                 System.out.println(j);
                             }

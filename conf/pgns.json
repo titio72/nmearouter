@@ -20638,7 +20638,7 @@
         {
           "Order": 2,
           "Id": "repeatIndicator",
-          "Name": "Repeat indicator",
+          "Name": "Repeat Indicator",
           "BitLength": 2,
           "BitOffset": 6,
           "BitStart": 6,

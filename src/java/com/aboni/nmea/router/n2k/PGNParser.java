@@ -17,6 +17,7 @@ package com.aboni.nmea.router.n2k;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.impl.BitUtils;
+import com.aboni.nmea.router.n2k.impl.N2KLookupTables;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
@@ -51,20 +52,35 @@ public class PGNParser {
         SUPPORTED.add(130312L); // Temperature (does not work)
         SUPPORTED.add(130311L); // Temperature (does not work)
         SUPPORTED.add(129809L); // AIS Class B static data (msg 24 Part A)
+        SUPPORTED.add(129810L); // AIS Class B static data (msg 24 Part B)
         SUPPORTED.add(129039L); // AIS Class B position report
+        SUPPORTED.add(129040L); // AIS Class B position report ext
+        SUPPORTED.add(129794L); // AIS Class A Static and Voyage Related Data
+        SUPPORTED.add(129038L); // AIS Class A Position Report
+        SUPPORTED.add(127237L); // Heading track control
+        SUPPORTED.add(130577L); // Direction Data
+        SUPPORTED.add(65359L); // Seatalk: Pilot Heading
+        SUPPORTED.add(65379L); // Seatalk: Pilot Mode
+        SUPPORTED.add(65360L); // Seatalk: Pilot Locked Heading
+        /* to add */
+        // "PGN": 129798, "Id": "aisSarAircraftPositionReport", "Description": "AIS SAR Aircraft Position Report"
+        // "PGN": 65345,  "Id": "seatalkPilotWindDatum",        "Description": "Seatalk: Pilot Wind Datum"
     }
 
     private static final DateTimeFormatter tsFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
-    private boolean debug;
 
-    public static class PGNDataParseException extends RuntimeException {
+    public static class PGNDataParseException extends Exception {
         PGNDataParseException(long pgn) {
             super(String.format("PGN %d is unsupported", pgn));
         }
-    }
 
-    public void setDebug() {
-        debug = true;
+        PGNDataParseException(String msg) {
+            super(msg);
+        }
+
+        PGNDataParseException(String msg, Throwable t) {
+            super(msg, t);
+        }
     }
 
     public static void setExperimental() {
@@ -82,15 +98,22 @@ public class PGNParser {
         int source;
         int dest;
         int length;
+        int expectedLength;
+        int currentFrame;
         byte[] data;
         JSONObject canBoatJson;
     }
 
     private PGNDecoded pgnData;
     private PGNDef definition;
+    private boolean debug;
 
-    public PGNParser(@NotNull PGNs pgnDefinitions, String pgnString) {
+    public PGNParser(@NotNull PGNs pgnDefinitions, String pgnString) throws PGNDataParseException {
         parse(pgnDefinitions, pgnString);
+    }
+
+    public void setDebug() {
+        debug = true;
     }
 
     public Instant getTime() {
@@ -122,15 +145,10 @@ public class PGNParser {
     }
 
     public boolean needMore() {
-        if (definition != null) {
-            PGNDef.PGNFieldDef lastField = definition.getFields()[definition.getFields().length - 1];
-            return (lastField.getBitOffset() + lastField.getBitLength()) > (pgnData.data.length * 8);
-        } else {
-            return false;
-        }
+        return pgnData.expectedLength == 0 || pgnData.length < pgnData.expectedLength;
     }
 
-    public JSONObject getCanBoatJson() {
+    public JSONObject getCanBoatJson() throws PGNDataParseException {
         if (definition == null) throw new PGNDataParseException(pgnData.pgn);
         if (pgnData.canBoatJson == null /*&& !needMore()*/ && (experimental || isSupported(pgnData.pgn))) {
             JSONObject res = new JSONObject();
@@ -150,49 +168,64 @@ public class PGNParser {
         return pgnData.canBoatJson;
     }
 
-    public void addMore(String s) {
-        StringTokenizer tok = new StringTokenizer(s, ",", false);
-        tok.nextToken(); // skip timestamp
-        tok.nextToken(); // skip priority
-        tok.nextToken(); // skip pgn
-        tok.nextToken(); // skip src
-        tok.nextToken(); // skip dst
-        int moreLen = Integer.parseInt(tok.nextToken());
-        int skip = (pgnData.length == 8) ? 2 : 0;
-        byte[] newData = new byte[pgnData.data.length + moreLen - skip - 1];
-        System.arraycopy(pgnData.data, skip, newData, 0, pgnData.data.length - skip); //skip the first 2
-        tok.nextToken(); // skip the first
-        for (int i = 1; i < moreLen; i++) {
-            String v = tok.nextToken();
-            int c = Integer.parseInt(v, 16);
-            newData[i - 1 + pgnData.length - skip] = (byte) (c & 0xFF);
+    public void addMore(String s) throws PGNDataParseException {
+        PGNDecoded additionalPgn = getDecodedHeader(s);
+        if (additionalPgn.pgn != pgnData.pgn) {
+            throw new PGNDataParseException(String.format("Trying to add data to a different pgn: expected {%d} received {%d}", pgnData.pgn, additionalPgn.pgn));
+        } else {
+            int moreLen = additionalPgn.length;
+            byte[] newData = new byte[pgnData.data.length + moreLen - 1];
+            System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length); //skip the first 2
+            int frameNo = additionalPgn.data[0] & 0x000000FF; // first byte is the n of the frame in the series
+            if (frameNo != pgnData.currentFrame + 1) {
+                throw new PGNDataParseException(String.format("Trying to add non-consecutive frames to fast pgn:" +
+                        " expected {%d} received {%d}", pgnData.currentFrame + 1, frameNo));
+            } else {
+                pgnData.currentFrame = frameNo;
+                System.arraycopy(additionalPgn.data, 1, newData, pgnData.length, additionalPgn.data.length - 1);
+                pgnData.data = newData;
+                pgnData.length = newData.length;
+            }
         }
-        pgnData.data = newData;
-        pgnData.length = newData.length;
     }
 
-    private void parse(PGNs pgnDefinitions, String s) {
-        StringTokenizer tok = new StringTokenizer(s, ",", false);
-        PGNDecoded p = new PGNDecoded();
-        p.ts = parseTimestamp(tok.nextToken());
-        p.priority = Integer.parseInt(tok.nextToken());
-        p.pgn = Integer.parseInt(tok.nextToken());
-        p.source = Integer.parseInt(tok.nextToken());
-        p.dest = Integer.parseInt(tok.nextToken());
-        p.length = Integer.parseInt(tok.nextToken());
-        p.data = new byte[p.length];
-        for (int i = 0; i < p.length; i++) {
-            String v = tok.nextToken();
-            int c = Integer.parseInt(v, 16);
-            p.data[i] = (byte) (c & 0xFF);
+    private PGNDecoded getDecodedHeader(String s) throws PGNDataParseException {
+        try {
+            StringTokenizer tok = new StringTokenizer(s, ",", false);
+            PGNDecoded p = new PGNDecoded();
+            p.ts = parseTimestamp(tok.nextToken());
+            p.priority = Integer.parseInt(tok.nextToken());
+            p.pgn = Integer.parseInt(tok.nextToken());
+            p.source = Integer.parseInt(tok.nextToken());
+            p.dest = Integer.parseInt(tok.nextToken());
+            p.length = Integer.parseInt(tok.nextToken());
+            p.data = new byte[p.length];
+            for (int i = 0; i < p.length; i++) {
+                String v = tok.nextToken();
+                int c = Integer.parseInt(v, 16);
+                p.data[i] = (byte) (c & 0xFF);
+            }
+            return p;
+        } catch (Exception e) {
+            throw new PGNDataParseException(String.format("Error parsing PGN data {%s}", s), e);
         }
+    }
 
-        PGNDef def = pgnDefinitions.getPGN(p.pgn);
+    private void parse(PGNs pgnDefinitions, String s) throws PGNDataParseException {
+        pgnData = getDecodedHeader(s);
+
+        PGNDef def = pgnDefinitions.getPGN(pgnData.pgn);
         if (def != null) {
             definition = def;
+            if (def.getType() == PGNDef.PGNType.FAST && pgnData.length == 8 /* if the length is >8 we can assume the pgn has been "extended" already */) {
+                pgnData.currentFrame = getData()[0] & 0x000000FF;
+                pgnData.expectedLength = getData()[1] & 0x000000FF;
+                byte[] newData = new byte[pgnData.length - 2];
+                System.arraycopy(pgnData.data, 2, newData, 0, pgnData.data.length - 2);
+                pgnData.data = newData;
+                pgnData.length = pgnData.data.length;
+            }
         }
-
-        this.pgnData = p;
     }
 
     private Instant parseTimestamp(String time) {
@@ -238,7 +271,7 @@ public class PGNParser {
             long e = BitUtils.extractBits(data, start, offset + i, 8, false).v;
             b[i / 8] = (byte) e;
         }
-        String res = new String(b).trim();
+        String res = getASCII(b);
         json.put(def.getName(), res);
         return res;
     }
@@ -278,14 +311,33 @@ public class PGNParser {
         if (offset + length > (data.length * 8)) return null;
 
         BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, def.isSigned());
-        if (e.v != e.m) {
+        int reserved = 0;
+        if (e.v >= 15) {
+            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATAFIELD_UNKNOWN */
+        }
+
+        return handleValue(json, def, e, reserved);
+    }
+
+    private static String handleValue(JSONObject json, PGNDef.PGNFieldDef def, BitUtils.Res e, int reserved) {
+        if (e.v <= e.m - reserved) {
             double vv = e.v / ((int) 1.0 / def.getResolution());
-            if ("Pressure".equals(def.getType())) {
-                vv = e.v * 100; // put it back into Pa instead of HPa
+            if ("Manufacturer code".equalsIgnoreCase(def.getType())) {
+                String s = N2KLookupTables.getTable("manufacturerCode").getOrDefault((int) e.v, String.format("%d", e.v));
+                json.put(def.getName(), s);
+                return s;
+            } else if ("Pressure".equals(def.getType())) {
+                vv = e.v * 100.0; // put it back into Pa instead of HPa
                 json.put(def.getName(), vv);
                 return "" + vv;
             } else if ("rad".equals(def.getUnits())) {
                 vv = Utils.round(Math.toDegrees(vv), 1);
+                json.put(def.getName(), vv);
+                return "" + vv;
+            } else if ("rad/s".equals(def.getUnits())) {
+                vv = Utils.round(Math.toDegrees(vv), 5);
                 json.put(def.getName(), vv);
                 return "" + vv;
             } else if ("days".equals(def.getUnits())) {
@@ -316,5 +368,61 @@ public class PGNParser {
             }
         }
         return null;
+    }
+
+    private static String getASCII(byte[] b) {
+        // remove padding
+        int l = b.length;
+        char last = (char) b[l - 1];
+        while (last == 0xff || last == ' ' || last == 0 || last == '@') {
+            l--;
+            last = (char) b[l - 1];
+        }
+        char c;
+        int k;
+
+        StringBuilder sb = new StringBuilder(l);
+        // escape
+        for (k = 0; k < l; k++) {
+            c = (char) b[k];
+            switch (c) {
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+
+                case '\r':
+                    sb.append("\\r");
+                    break;
+
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+
+                case '/':
+                    sb.append("\\/");
+                    break;
+
+                case '\377':
+                    // 0xff has been seen on recent Simrad VHF systems, and it seems to indicate
+                    // end-of-field, with noise following. Assume this does not break other systems.
+                    break;
+
+                default:
+                    if (c >= ' ' && c <= '~') {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
     }
 }
