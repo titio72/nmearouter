@@ -25,6 +25,7 @@ public class N2KLookupTables {
         }
     }
 
+    public static final Map<Integer, String> LOOKUP_MANUFACTURER_CODE = new HashMap<>();
     public static final Map<Integer, String> LOOKUP_INDUSTRY_CODE = new HashMap<>();
     public static final Map<Integer, String> LOOKUP_SHIP_TYPE = new HashMap<>();
     public static final Map<Integer, String> LOOKUP_DEVICE_CLASS = new HashMap<>();
@@ -86,7 +87,29 @@ public class N2KLookupTables {
     public static final Map<Integer, String> LOOKUP_DSC_EXPANSION_DATA = new HashMap<>();
     public static final Map<Integer, String> LOOKUP_SEATALK_ALARM_STATUS = new HashMap<>();
 
+    private static final Map<String, Map<Integer, String>> TABLES = new HashMap<>();
+
+    public static Map<Integer, String> getTable(String fieldId) {
+        return TABLES.getOrDefault(fieldId, null);
+    }
+
     static {
+        TABLES.put("industryCode", LOOKUP_INDUSTRY_CODE);
+        TABLES.put("manufacturerCode", LOOKUP_MANUFACTURER_CODE);
+
+        load(LOOKUP_MANUFACTURER_CODE,
+                "1851=Raymarine," +
+                        "419=Fusion," +
+                        "135=Airmar," +
+                        "137=Maretron," +
+                        "275=Navico," +
+                        "1857=Simrad," +
+                        "1855=Furuno," +
+                        "381=B&G," +
+                        "140=Lowrance," +
+                        "358=Victron," +
+                        "409=Chetco");
+
         load(LOOKUP_INDUSTRY_CODE, "0=Global,1=Highway,2=Agriculture,3=Construction,4=Marine,5=Industrial");
 
         load(LOOKUP_SHIP_TYPE,

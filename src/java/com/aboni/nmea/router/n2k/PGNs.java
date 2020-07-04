@@ -16,20 +16,23 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k;
 
 import com.aboni.utils.Log;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 
 public class PGNs {
 
     private Log logger;
 
-    private Map<Integer, PGNDef> pgnDefMap = new HashMap<>();
+    private Multimap<Integer, PGNDef> pgnDefMap = HashMultimap.create();
 
     public PGNs(String file, Log logger) throws PGNDefParseException {
         this.logger = logger;
@@ -57,7 +60,6 @@ public class PGNs {
         if (logger != null) {
             logger.info(String.format("Loaded {%d} PGN definitions", pgnDefMap.size()));
         }
-
     }
 
     private void createDef(JSONObject jDef) throws PGNDefParseException {
@@ -73,6 +75,16 @@ public class PGNs {
     }
 
     public PGNDef getPGN(int pgnId) {
-        return pgnDefMap.getOrDefault(pgnId, null);
+        Collection<PGNDef> c = pgnDefMap.get(pgnId);
+        if (c == null || c.isEmpty()) {
+            return null;
+        } else {
+            return c.iterator().next();
+        }
+    }
+
+    public List<PGNDef> getPGNExt(int pgnId) {
+        Collection<PGNDef> c = pgnDefMap.get(pgnId);
+        return new ArrayList<>(c);
     }
 }

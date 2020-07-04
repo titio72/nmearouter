@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k;
 
+import com.aboni.nmea.router.n2k.impl.N2KLookupTables;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -98,7 +99,7 @@ public class PGNDef {
         private final int bitStart;
         private final String type;
         private final boolean signed;
-        private final Map<Integer, String> values;
+        private Map<Integer, String> values;
         private final String units;
         private final double resolution;
 
@@ -122,6 +123,8 @@ public class PGNDef {
                             jValues.getJSONObject(i).getString("name")
                     );
                 }
+            } else {
+                values = N2KLookupTables.getTable(id);
             }
             signed = definition.has("Signed") && definition.getBoolean("Signed");
         }

@@ -19,6 +19,9 @@
     <TcpAgent name="TCPIN" host="192.168.3.1" port="1111" inout="IN" active="false">
         <qos>rs120;enrich_hdm;truewind;dpt</qos>
     </TcpAgent>
+    <UdpAgent name="UDPIN" port="1222" inout="IN" active="false">
+        <qos>speed_filter;rmc_filter;truewind;enrich_hdm;dpt</qos>
+    </UdpAgent>
     <TcpAgent name="TCPOUT" port="1111" host="" inout="OUT" active="false"/>
     <UdpAgent name="UDPOUT" port="1111" inout="OUT" active="false">
         <to>192.168.2.255</to>
