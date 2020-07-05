@@ -21,9 +21,6 @@ import com.aboni.nmea.router.n2k.PGNDefParseException;
 import com.aboni.nmea.router.n2k.PGNs;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
-import net.sf.marineapi.ais.message.AISMessage;
-import net.sf.marineapi.ais.message.AISMessage01;
-import net.sf.marineapi.ais.parser.AISMessageFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
@@ -57,7 +54,7 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         try {
             pgns = new PGNs("conf/pgns.json", null);
         } catch (PGNDefParseException e) {
-            e.printStackTrace();
+            ServerLog.getLogger().errorForceStacktrace("CANBOATDecoder Cannont load pgn definitions", e);
         }
         converterMap = new HashMap<>();
         converterMap.put(130306, this::handleWind);
@@ -72,6 +69,22 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         converterMap.put(127257, this::handleAttitude);
         converterMap.put(127251, this::handleRateOfTurn);
         converterMap.put(130311, this::handleEnvironment);
+        converterMap.put(126996, this::handleDeviceInfo);
+    }
+
+    private Sentence[] handleDeviceInfo(JSONObject jsonObject) {
+        String r = "Device ";
+        if (jsonObject.has("Model ID")) r += "Model {" + jsonObject.getString("Model ID") + "}";
+        if (jsonObject.has("Software Version Code")) r += " Software ver. {" + jsonObject.getString("Software Version Code") + "}";
+        if (jsonObject.has("Model Version")) r += " Version {" + jsonObject.getString("Model Version") + "}";
+        if (jsonObject.has("Model Serial Code")) r += " Serial {" + jsonObject.getString("Model Serial Code") + "}";
+        if (jsonObject.has("Certification Level")) r += " Cert. Level {" + jsonObject.getInt("Certification Level") + "}";
+        if (jsonObject.has("NMEA 2000 Version")) r += " NMEA2K Ver. {" + jsonObject.getInt("NMEA 2000 Version") + "}";
+        if (jsonObject.has("Product Code")) r += " Product Code {" + jsonObject.getInt("Product Code") + "}";
+
+        System.out.println(r);
+
+        return TEMPLATE;
     }
 
     @Override
@@ -89,13 +102,7 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
 
     @Override
     public Sentence[] getSentence(int pgn, JSONObject fields) {
-        Converter c = converterMap.getOrDefault(pgn, (JSONObject f) -> {
-            String s = pgns.getPGN(pgn).getDescription();
-            String j = fields.toString();
-            if (pgn==129039  || pgn==129040 )
-                System.out.println(String.format("Unknown %d %s %s", pgn, s, fields.toString()));
-            return null;
-        });
+        Converter c = converterMap.getOrDefault(pgn, (JSONObject f) -> null);
 
         return c.getSentence(fields);
     }
@@ -184,15 +191,16 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
 
     private Sentence[] handleRudder(JSONObject fields) {
         if (fields.getInt("Instance") == 0) {
-            RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
-            double angle = fields.getDouble("Position");
-            rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
-            rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
-            return new Sentence[]{rsa};
-        } else {
-            return TEMPLATE;
-        }
+            if (fields.has("Position")) {
+                double angle = fields.getDouble("Position");
+                RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
 
+                rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
+                rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
+                return new Sentence[]{rsa};
+            }
+        }
+        return TEMPLATE;
     }
 
     private Sentence[] handleSystemTime(JSONObject fields) {

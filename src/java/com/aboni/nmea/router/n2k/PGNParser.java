@@ -36,6 +36,7 @@ public class PGNParser {
     private static boolean experimental = false;
 
     static {
+        SUPPORTED.add(126996L); // device info
         SUPPORTED.add(130306L); // Wind Data
         SUPPORTED.add(127245L); // Rudder
         SUPPORTED.add(127250L); // Vessel Heading
@@ -70,8 +71,16 @@ public class PGNParser {
     private static final DateTimeFormatter tsFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
 
     public static class PGNDataParseException extends Exception {
+
+        private boolean unsupportedPGN;
+
+        public  boolean isUnsupportedPGN() {
+            return unsupportedPGN;
+        }
+
         PGNDataParseException(long pgn) {
             super(String.format("PGN %d is unsupported", pgn));
+            unsupportedPGN = true;
         }
 
         PGNDataParseException(String msg) {

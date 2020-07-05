@@ -55,7 +55,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testAISStaticCLassB() {
+    public void testAISStaticCLassB() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, AIS_STATIC_DATA_CLASS_B_FAST[0]);
         for (int i = 1; i < AIS_STATIC_DATA_CLASS_B_FAST.length; i++) parser.addMore(AIS_STATIC_DATA_CLASS_B_FAST[i]);
         assertEquals(129809, parser.getPgn());
@@ -67,7 +67,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testAISStaticCLassBExt_tolerant() {
+    public void testAISStaticCLassBExt_tolerant() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, AIS_STATIC_DATA_CLASS_B);
         assertEquals(129809, parser.getPgn());
         JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
@@ -79,7 +79,7 @@ public class PGNParserTest {
 
 
     @Test
-    public void testEnvironmentInfo() {
+    public void testEnvironmentInfo() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, ENV_TEMP);
         assertEquals(130311, parser.getPgn());
         JSONObject j = parser.getCanBoatJson().getJSONObject("fields");
@@ -91,7 +91,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testEnvironmentInfoWithPressure() {
+    public void testEnvironmentInfoWithPressure() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, ENV_TEMP_HUM_PRESS);
         assertEquals(130311, parser.getPgn());
         JSONObject j = parser.getCanBoatJson().getJSONObject("fields");
@@ -103,14 +103,14 @@ public class PGNParserTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, S11);
         assertEquals(126992, parser.getPgn());
         assertNotNull(parser.getCanBoatJson());
     }
 
     @Test
-    public void testUnsupported() {
+    public void testUnsupported() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, S10);
         assertEquals(130916, parser.getPgn());
         try {
@@ -122,7 +122,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testPilotHeading() {
+    public void testPilotHeading() throws PGNParser.PGNDataParseException {
         PGNParser.setExperimental();
         PGNParser parser = new PGNParser(pgnDefs, S9);
         assertEquals(65359, parser.getPgn());
@@ -165,7 +165,7 @@ public class PGNParserTest {
 
 
     @Test
-    public void testAISPositionReportClassB_EXT() {
+    public void testAISPositionReportClassB_EXT() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, AIS_EXT);
         parser.setDebug();
         JSONObject res = parser.getCanBoatJson().getJSONObject("fields");
@@ -197,7 +197,7 @@ public class PGNParserTest {
     }
 
     @Test
-    public void testAISPositionReportClassB_FAST() {
+    public void testAISPositionReportClassB_FAST() throws PGNParser.PGNDataParseException {
         PGNParser parser = new PGNParser(pgnDefs, AIS_FAST[0]);
         parser.setDebug();
         for (int i = 1; i < 4; i++) {

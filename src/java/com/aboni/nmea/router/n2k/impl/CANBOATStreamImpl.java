@@ -17,6 +17,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.CANBOATPGNMessage;
 import com.aboni.utils.Log;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -73,6 +74,55 @@ public class CANBOATStreamImpl implements com.aboni.nmea.router.n2k.CANBOATStrea
             if (logger != null) logger.error("Error reading pgn source mapping {" + l + "}");
         }
     }
+
+    private static final class InternalPGNMessage implements CANBOATPGNMessage {
+
+        private final JSONObject canboatJson;
+
+        private InternalPGNMessage(JSONObject canboatJson) {
+            this.canboatJson = canboatJson;
+        }
+
+        @Override
+        public int getPgn() {
+            if (canboatJson.has("pgn"))
+                return canboatJson.getInt("pgn");
+            else
+                return -1;
+        }
+
+        @Override
+        public JSONObject getFields() {
+            if (canboatJson.has("fields"))
+                return canboatJson.getJSONObject("fields");
+            else
+                return null;
+        }
+
+        @Override
+        public int getSource() {
+            if (canboatJson.has("src"))
+                return canboatJson.getInt("src");
+            else
+                return -1;
+        }
+    }
+
+    @Override
+    public CANBOATPGNMessage getMessage(JSONObject canboatJsonObject) {
+        if (canboatJsonObject!=null) {
+            CANBOATPGNMessage p = new InternalPGNMessage(canboatJsonObject);
+            int pgn = p.getPgn();
+            int src = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
+            if (p.getFields() != null && (src == p.getSource() || src == -1)) {
+                // no throtting
+                return p;
+            } else return null;
+        } else {
+            return null;
+        }
+    }
+
 
     @Override
     public CANBOATPGNMessage getMessage(String sMessage) {
