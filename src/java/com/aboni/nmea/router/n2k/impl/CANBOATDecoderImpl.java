@@ -229,10 +229,10 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         if (lastSOGCOG != null) {
             try {
                 rmc.setCourse(lastSOGCOG.getDouble("COG"));
+                rmc.setSpeed(lastSOGCOG.getDouble("SOG"));
             } catch (JSONException ignored) {
                 // do nothing
             }
-            rmc.setSpeed(lastSOGCOG.getDouble("SOG"));
         }
         if (lastTime != null) {
             Instant ts = lastTime.minusMillis(System.currentTimeMillis() - lastLocalTime);
