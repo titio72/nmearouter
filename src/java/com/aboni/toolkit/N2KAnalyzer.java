@@ -1,9 +1,10 @@
 package com.aboni.toolkit;
 
-import com.aboni.nmea.router.n2k.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.PGNParser;
-import com.aboni.nmea.router.n2k.PGNs;
-import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
+import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
+import com.aboni.nmea.router.n2k.canboat.PGNParser;
+import com.aboni.nmea.router.n2k.canboat.PGNs;
+import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -62,7 +63,7 @@ public class N2KAnalyzer {
                                 System.out.println(j);
                             }
                         }
-                    } catch (PGNParser.PGNDataParseException e) {
+                    } catch (PGNDataParseException e) {
                         // do nothing
                     } catch (Exception e) {
                         System.out.printf("Error {%s}%n", line);

@@ -16,9 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.n2k.*;
-import com.aboni.nmea.router.n2k.impl.CANBOATDecoderImpl;
-import com.aboni.nmea.router.n2k.impl.CANBOATStreamImpl;
+import com.aboni.nmea.router.n2k.N2KStream;
+import com.aboni.nmea.router.n2k.canboat.*;
+import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
+import com.aboni.nmea.router.n2k.canboat.impl.CANBOATStreamImpl;
+import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -29,12 +31,14 @@ public class NMEAInputManager {
 
     private PGNs pgnDefs;
     private final CANBOATDecoder decoder;
-    private final CANBOATStream n2kStream;
+    private final CANBOATStream canboatStream;
+    private final N2KStream n2kStream;
     private final Log logger;
 
     public NMEAInputManager(@NotNull Log logger) {
         decoder = new CANBOATDecoderImpl();
-        n2kStream = new CANBOATStreamImpl(logger);
+        canboatStream = new CANBOATStreamImpl(logger);
+        n2kStream = new N2KStreamImpl(logger);
         try {
             pgnDefs = new PGNs(Constants.CONF_DIR + "/pgns.json", logger);
         } catch (PGNDefParseException e) {
@@ -78,7 +82,7 @@ public class NMEAInputManager {
 
     private Sentence[] handleN2KCanboat(String sSentence) {
         try {
-            CANBOATPGNMessage msg = n2kStream.getMessage(sSentence);
+            CANBOATPGNMessage msg = canboatStream.getMessage(sSentence);
             if (msg != null && msg.getFields() != null) {
                 return decoder.getSentence(msg.getPgn(), msg.getFields());
             }
