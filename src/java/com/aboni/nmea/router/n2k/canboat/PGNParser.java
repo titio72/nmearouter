@@ -37,6 +37,7 @@ public class PGNParser {
     private static boolean experimental = false;
 
     static {
+        SUPPORTED.add(126996L); // device info
         SUPPORTED.add(130306L); // Wind Data
         SUPPORTED.add(128267L); // Water Depth
         SUPPORTED.add(128259L); // Speed

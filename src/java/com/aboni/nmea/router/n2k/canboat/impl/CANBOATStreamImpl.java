@@ -19,6 +19,7 @@ import com.aboni.nmea.router.n2k.canboat.CANBOATLightParser;
 import com.aboni.nmea.router.n2k.canboat.CANBOATPGNMessage;
 import com.aboni.nmea.router.n2k.canboat.CANBOATStream;
 import com.aboni.utils.Log;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -34,6 +35,8 @@ public class CANBOATStreamImpl implements CANBOATStream {
 
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
+
+    private static final boolean THROTTLING = false;
 
     private static class Payload {
         int hashcode;
@@ -74,6 +77,55 @@ public class CANBOATStreamImpl implements CANBOATStream {
         }
     }
 
+    private static final class InternalPGNMessage implements CANBOATPGNMessage {
+
+        private final JSONObject canboatJson;
+
+        private InternalPGNMessage(JSONObject canboatJson) {
+            this.canboatJson = canboatJson;
+        }
+
+        @Override
+        public int getPgn() {
+            if (canboatJson.has("pgn"))
+                return canboatJson.getInt("pgn");
+            else
+                return -1;
+        }
+
+        @Override
+        public JSONObject getFields() {
+            if (canboatJson.has("fields"))
+                return canboatJson.getJSONObject("fields");
+            else
+                return null;
+        }
+
+        @Override
+        public int getSource() {
+            if (canboatJson.has("src"))
+                return canboatJson.getInt("src");
+            else
+                return -1;
+        }
+    }
+
+    @Override
+    public CANBOATPGNMessage getMessage(JSONObject canboatJsonObject) {
+        if (canboatJsonObject!=null) {
+            CANBOATPGNMessage p = new InternalPGNMessage(canboatJsonObject);
+            int pgn = p.getPgn();
+            int src = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
+            if (p.getFields() != null && (src == p.getSource() || src == -1)) {
+                // no throtting
+                return p;
+            } else return null;
+        } else {
+            return null;
+        }
+    }
+
+
     @Override
     public CANBOATPGNMessage getMessage(String sMessage) {
         try {
@@ -92,6 +144,7 @@ public class CANBOATStreamImpl implements CANBOATStream {
     }
 
     private boolean isSend(int pgn, long ts, String fields) {
+        if (!THROTTLING) return true;
         Payload p = payloadMap.getOrDefault(pgn, null);
         if (p == null) {
             p = new Payload();

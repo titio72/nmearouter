@@ -13,10 +13,12 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.n2k.canboat.impl;
+package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
+import com.aboni.nmea.router.n2k.CANBOATDecoder;
+import com.aboni.nmea.router.n2k.PGNDefParseException;
+import com.aboni.nmea.router.n2k.PGNs;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -45,9 +47,15 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
     private JSONObject lastSOGCOG = null;
     private Instant lastTime;
     private long lastLocalTime;
+    private PGNs pgns;
 
     @Inject
     public CANBOATDecoderImpl() {
+        try {
+            pgns = new PGNs("conf/pgns.json", null);
+        } catch (PGNDefParseException e) {
+            ServerLog.getLogger().errorForceStacktrace("CANBOATDecoder Cannont load pgn definitions", e);
+        }
         converterMap = new HashMap<>();
         converterMap.put(130306, this::handleWind);
         converterMap.put(128267, this::handleDepth);
@@ -61,6 +69,22 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         converterMap.put(127257, this::handleAttitude);
         converterMap.put(127251, this::handleRateOfTurn);
         converterMap.put(130311, this::handleEnvironment);
+        converterMap.put(126996, this::handleDeviceInfo);
+    }
+
+    private Sentence[] handleDeviceInfo(JSONObject jsonObject) {
+        String r = "Device ";
+        if (jsonObject.has("Model ID")) r += "Model {" + jsonObject.getString("Model ID") + "}";
+        if (jsonObject.has("Software Version Code")) r += " Software ver. {" + jsonObject.getString("Software Version Code") + "}";
+        if (jsonObject.has("Model Version")) r += " Version {" + jsonObject.getString("Model Version") + "}";
+        if (jsonObject.has("Model Serial Code")) r += " Serial {" + jsonObject.getString("Model Serial Code") + "}";
+        if (jsonObject.has("Certification Level")) r += " Cert. Level {" + jsonObject.getInt("Certification Level") + "}";
+        if (jsonObject.has("NMEA 2000 Version")) r += " NMEA2K Ver. {" + jsonObject.getInt("NMEA 2000 Version") + "}";
+        if (jsonObject.has("Product Code")) r += " Product Code {" + jsonObject.getInt("Product Code") + "}";
+
+        System.out.println(r);
+
+        return TEMPLATE;
     }
 
     @Override
@@ -166,15 +190,16 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
 
     private Sentence[] handleRudder(JSONObject fields) {
         if (fields.getInt("Instance") == 0) {
-            RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
-            double angle = fields.getDouble("Position");
-            rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
-            rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
-            return new Sentence[]{rsa};
-        } else {
-            return TEMPLATE;
-        }
+            if (fields.has("Position")) {
+                double angle = fields.getDouble("Position");
+                RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
 
+                rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
+                rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
+                return new Sentence[]{rsa};
+            }
+        }
+        return TEMPLATE;
     }
 
     private Sentence[] handleSystemTime(JSONObject fields) {
@@ -203,10 +228,10 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         if (lastSOGCOG != null) {
             try {
                 rmc.setCourse(lastSOGCOG.getDouble("COG"));
+                rmc.setSpeed(lastSOGCOG.getDouble("SOG"));
             } catch (JSONException ignored) {
                 // do nothing
             }
-            rmc.setSpeed(lastSOGCOG.getDouble("SOG"));
         }
         if (lastTime != null) {
             Instant ts = lastTime.minusMillis(System.currentTimeMillis() - lastLocalTime);
@@ -280,4 +305,12 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         mwv.setStatus(DataStatus.ACTIVE);
         return new Sentence[]{mwv};
     }
+
+    private Sentence[] handleAISClassBReport(JSONObject jsonObject) {
+        // 129039 AIS Class B Position Report {"User ID":247324130,"Unit type":"CS","Can handle Msg 22":"Yes","Regional Application":0,"AIS communication state":"ITDMA","Latitude":43.0578155,"SOG":0.05,"Band":"entire marine band","Integrated Display":"Yes","Longitude":9.8365983,"Repeat Indicator":"Initial","Regional Application 1":0,"Time Stamp":"26","AIS mode":"Assigned","AIS Transceiver information":"Channel A VDL reception","RAIM":"in use","DSC":"Yes","Communication State":"3","Position Accuracy":"High","COG":315.1,"Message ID":18}
+        long mmsi = jsonObject.getLong("User ID");
+        return TEMPLATE;
+    }
+
+
 }

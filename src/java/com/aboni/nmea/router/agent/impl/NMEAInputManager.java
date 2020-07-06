@@ -64,11 +64,18 @@ public class NMEAInputManager {
     private Sentence[] handleN2K(String sSentence) {
         try {
             PGNParser p = new PGNParser(pgnDefs, sSentence.trim());
-            return decoder.getSentence(p.getCanBoatJson());
+            CANBOATPGNMessage msg = n2kStream.getMessage(p.getCanBoatJson());
+            if (msg != null && msg.getFields() != null) {
+                return decoder.getSentence(msg.getPgn(), msg.getFields());
+            }
+        } catch (PGNParser.PGNDataParseException e) {
+            if (!e.isUnsupportedPGN()) {
+                logger.debug("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
+            }
         } catch (Exception e) {
-            logger.warning("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
-            return new Sentence[]{};
+            logger.debug("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
         }
+        return new Sentence[] {};
     }
 
     private Sentence handleN0183(String sSentence) {

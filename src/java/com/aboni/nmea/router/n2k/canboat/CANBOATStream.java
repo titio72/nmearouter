@@ -15,6 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.canboat;
 
+import org.json.JSONObject;
+
 public interface CANBOATStream {
     CANBOATPGNMessage getMessage(String sMessage);
+    CANBOATPGNMessage getMessage(JSONObject canBoatJsonMessage);
 }

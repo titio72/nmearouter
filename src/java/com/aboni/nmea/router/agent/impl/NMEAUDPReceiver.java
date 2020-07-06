@@ -108,26 +108,32 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     }
 
     private void loopRead(DatagramSocket socket) {
+        String sSentence = null;
         try {
             DatagramPacket p = new DatagramPacket(buffer, buffer.length);
             socket.receive(p);
-            String sSentence = new String(p.getData(), 0, p.getLength());
+            sSentence = new String(p.getData(), 0, p.getLength());
             updateReadStats(sSentence);
             Sentence[] sentences = input.getSentence(sSentence);
+            boolean sent = false;
             if (sentences != null) {
                 for (Sentence sentence : sentences) {
                     if (sentence != null) {
                         updateReadSentencesStats(false);
                         onSentenceRead(sentence);
+                        sent = true;
                     }
                 }
+            }
+            if (!sent) {
+               // System.out.println("______________________________@" + sSentence);
             }
         } catch (SocketTimeoutException e) {
             // read timeout
             getLogger().debug("Datagram socket read timeout");
             Utils.pause(1000);
         } catch (Exception e) {
-            getLogger().warning("Error receiving sentence {" + e.getMessage() + "}");
+            getLogger().warning("Error receiving sentence {" + sSentence + "} {" + e.getMessage() + "}");
         }
         updateReadSentencesStats(true);
     }
