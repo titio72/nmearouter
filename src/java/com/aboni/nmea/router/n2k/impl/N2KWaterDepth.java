@@ -5,7 +5,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KWaterDepth extends N2KMessageImpl {
 
-    private int SID;
+    private int sid;
     private double depth;
     private double offset;
     private double range;
@@ -24,7 +24,7 @@ public class N2KWaterDepth extends N2KMessageImpl {
     }
 
     private void fill() {
-        SID = getByte(data, 0, 0);
+        sid = getByte(data, 0, 0);
 
         Double dDepth = parseDouble(data, 8, 0, 32, 0.01, false);
         depth = dDepth == null ? Double.NaN : dDepth;
@@ -41,7 +41,7 @@ public class N2KWaterDepth extends N2KMessageImpl {
     }
 
     public int getSID() {
-        return SID;
+        return sid;
     }
 
     public double getDepth() {

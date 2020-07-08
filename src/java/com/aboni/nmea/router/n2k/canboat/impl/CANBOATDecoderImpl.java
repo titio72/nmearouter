@@ -13,12 +13,10 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.n2k.impl;
+package com.aboni.nmea.router.n2k.canboat.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.n2k.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.PGNDefParseException;
-import com.aboni.nmea.router.n2k.PGNs;
+import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -47,15 +45,9 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
     private JSONObject lastSOGCOG = null;
     private Instant lastTime;
     private long lastLocalTime;
-    private PGNs pgns;
 
     @Inject
     public CANBOATDecoderImpl() {
-        try {
-            pgns = new PGNs("conf/pgns.json", null);
-        } catch (PGNDefParseException e) {
-            ServerLog.getLogger().errorForceStacktrace("CANBOATDecoder Cannont load pgn definitions", e);
-        }
         converterMap = new HashMap<>();
         converterMap.put(130306, this::handleWind);
         converterMap.put(128267, this::handleDepth);
@@ -82,7 +74,7 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         if (jsonObject.has("NMEA 2000 Version")) r += " NMEA2K Ver. {" + jsonObject.getInt("NMEA 2000 Version") + "}";
         if (jsonObject.has("Product Code")) r += " Product Code {" + jsonObject.getInt("Product Code") + "}";
 
-        System.out.println(r);
+        ServerLog.getLogger().info("N2K Device {" + r + "}");
 
         return TEMPLATE;
     }
@@ -189,15 +181,13 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
     }
 
     private Sentence[] handleRudder(JSONObject fields) {
-        if (fields.getInt("Instance") == 0) {
-            if (fields.has("Position")) {
-                double angle = fields.getDouble("Position");
-                RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
+        if (fields.getInt("Instance") == 0 && fields.has("Position")) {
+            double angle = fields.getDouble("Position");
+            RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
 
-                rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
-                rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
-                return new Sentence[]{rsa};
-            }
+            rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
+            rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
+            return new Sentence[]{rsa};
         }
         return TEMPLATE;
     }
@@ -307,8 +297,28 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
     }
 
     private Sentence[] handleAISClassBReport(JSONObject jsonObject) {
-        // 129039 AIS Class B Position Report {"User ID":247324130,"Unit type":"CS","Can handle Msg 22":"Yes","Regional Application":0,"AIS communication state":"ITDMA","Latitude":43.0578155,"SOG":0.05,"Band":"entire marine band","Integrated Display":"Yes","Longitude":9.8365983,"Repeat Indicator":"Initial","Regional Application 1":0,"Time Stamp":"26","AIS mode":"Assigned","AIS Transceiver information":"Channel A VDL reception","RAIM":"in use","DSC":"Yes","Communication State":"3","Position Accuracy":"High","COG":315.1,"Message ID":18}
-        long mmsi = jsonObject.getLong("User ID");
+        // 129039 AIS Class B Position Report
+        // "User ID":247324130,
+        // "Unit type":"CS",
+        // "Can handle Msg 22":"Yes",
+        // "Regional Application":0,
+        // "AIS communication state":"ITDMA",
+        // "Latitude":43.0578155,
+        // "SOG":0.05,
+        // "Band":"entire marine band",
+        // "Integrated Display":"Yes",
+        // "Longitude":9.8365983,
+        // "Repeat Indicator":"Initial",
+        // "Regional Application 1":0,
+        // "Time Stamp":"26",
+        // "AIS mode":"Assigned",
+        // "AIS Transceiver information":"Channel A VDL reception",
+        // "RAIM":"in use",
+        // "DSC":"Yes",
+        // "Communication State":"3",
+        // "Position Accuracy":"High",
+        // "COG":315.1,
+        // "Message ID":18
         return TEMPLATE;
     }
 

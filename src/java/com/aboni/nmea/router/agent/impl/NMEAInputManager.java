@@ -16,10 +16,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KStream;
+import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.canboat.*;
 import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
 import com.aboni.nmea.router.n2k.canboat.impl.CANBOATStreamImpl;
+import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
 import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -29,73 +33,144 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAInputManager {
 
-    private PGNs pgnDefs;
-    private final CANBOATDecoder decoder;
-    private final CANBOATStream canboatStream;
-    private final N2KStream n2kStream;
+    private interface StringInputHandler {
+        Sentence[] getSentences(String pgn);
+    }
+
+    private class N2KHandlerStd implements StringInputHandler {
+        private PGNs pgnDefinitions;
+        private final CANBOATDecoder decoder;
+        private final CANBOATStream canboatStream;
+        private final Log logger;
+
+        N2KHandlerStd(Log logger) {
+            this.logger = logger;
+            try {
+                pgnDefinitions = new PGNs(Constants.CONF_DIR + "/pgns.json", logger);
+            } catch (PGNDefParseException e) {
+                logger.error("Cannot load pgns definitions", e);
+                pgnDefinitions = null;
+            }
+            decoder = new CANBOATDecoderImpl();
+            canboatStream = new CANBOATStreamImpl(logger);
+        }
+
+        @Override
+        public Sentence[] getSentences(String pgn) {
+            if (pgnDefinitions == null) return new Sentence[0];
+            try {
+                PGNParser p = new PGNParser(pgnDefinitions, pgn.trim());
+                CANBOATPGNMessage msg = canboatStream.getMessage(p.getCanBoatJson());
+                if (msg != null && msg.getFields() != null) {
+                    return decoder.getSentence(msg.getPgn(), msg.getFields());
+                }
+            } catch (PGNDataParseException e) {
+                if (!e.isUnsupported()) {
+                    logger.debug(getErrorString(pgn, e));
+                }
+            } catch (Exception e) {
+                logger.warning(getErrorString(pgn, e));
+            }
+            return new Sentence[]{};
+        }
+    }
+
+    private class N2KHandlerExp implements StringInputHandler {
+        private final N2KMessage2NMEA0183 decoder;
+        private final N2KStream stream;
+        private final Log logger;
+
+        N2KHandlerExp(Log logger) {
+            this.logger = logger;
+            decoder = new N2KMessage2NMEA0183Impl();
+            stream = new N2KStreamImpl(logger);
+        }
+
+        @Override
+        public Sentence[] getSentences(String pgn) {
+            try {
+                N2KMessage msg = stream.getMessage(pgn);
+                if (msg != null) {
+                    return decoder.getSentence(msg);
+                }
+            } catch (Exception e) {
+                logger.warning(getErrorString(pgn, e));
+            }
+            return new Sentence[]{};
+        }
+    }
+
+    private class JSONHandler implements StringInputHandler {
+        private final CANBOATDecoder decoder;
+        private final CANBOATStream canboatStream;
+        private final Log logger;
+
+        JSONHandler(Log logger) {
+            this.logger = logger;
+            decoder = new CANBOATDecoderImpl();
+            canboatStream = new CANBOATStreamImpl(logger);
+        }
+
+        @Override
+        public Sentence[] getSentences(String pgn) {
+            try {
+                CANBOATPGNMessage msg = canboatStream.getMessage(pgn);
+                if (msg != null && msg.getFields() != null) {
+                    return decoder.getSentence(msg.getPgn(), msg.getFields());
+                }
+            } catch (Exception e) {
+                logger.debug("Can't read N2K sentence {" + pgn + "} {" + e + "}");
+            }
+            return new Sentence[]{};
+        }
+    }
+
+    private class NMEA0183Handler implements StringInputHandler {
+
+        private final Log logger;
+
+        NMEA0183Handler(Log logger) {
+            this.logger = logger;
+        }
+
+        @Override
+        public Sentence[] getSentences(String sSentence) {
+            try {
+                return new Sentence[]{SentenceFactory.getInstance().createParser(sSentence)};
+            } catch (Exception e) {
+                logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
+            }
+            return new Sentence[0];
+        }
+    }
+
     private final Log logger;
+    private static final boolean EXPERIMENTAL = true;
+    private final StringInputHandler n2kHandler;
+    private final StringInputHandler jsonHandler;
+    private final StringInputHandler nmeaHandler;
 
     public NMEAInputManager(@NotNull Log logger) {
-        decoder = new CANBOATDecoderImpl();
-        canboatStream = new CANBOATStreamImpl(logger);
-        n2kStream = new N2KStreamImpl(logger);
-        try {
-            pgnDefs = new PGNs(Constants.CONF_DIR + "/pgns.json", logger);
-        } catch (PGNDefParseException e) {
-            logger.error("Cannot load pgns definitions", e);
-            pgnDefs = null;
-        }
+        n2kHandler = EXPERIMENTAL ? new N2KHandlerExp(logger) : new N2KHandlerStd(logger);
+        jsonHandler = new JSONHandler(logger);
+        nmeaHandler = new NMEA0183Handler(logger);
         this.logger = logger;
     }
 
     public Sentence[] getSentence(String sSentence) {
         if (sSentence.startsWith("{\"timestamp\":\"")) {
-            return handleN2KCanboat(sSentence);
+            return jsonHandler.getSentences(sSentence);
         } else if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
-            return new Sentence[]{handleN0183(sSentence)};
-        } else if (pgnDefs != null && sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
-            return handleN2K(sSentence);
+            return nmeaHandler.getSentences(sSentence);
+        } else if (sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
+            return n2kHandler.getSentences(sSentence);
         } else {
-            logger.debug("Unknown sentence {" + sSentence + "}");
+            logger.debug("Cannot find a suitable handler for {" + sSentence + "}");
             return new Sentence[]{};
         }
     }
 
-    private Sentence[] handleN2K(String sSentence) {
-        try {
-            PGNParser p = new PGNParser(pgnDefs, sSentence.trim());
-            CANBOATPGNMessage msg = n2kStream.getMessage(p.getCanBoatJson());
-            if (msg != null && msg.getFields() != null) {
-                return decoder.getSentence(msg.getPgn(), msg.getFields());
-            }
-        } catch (PGNParser.PGNDataParseException e) {
-            if (!e.isUnsupportedPGN()) {
-                logger.debug("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
-            }
-        } catch (Exception e) {
-            logger.debug("Cannot parse n2k sentence {" + sSentence + "} {" + e.getMessage() + "}");
-        }
-        return new Sentence[] {};
-    }
-
-    private Sentence handleN0183(String sSentence) {
-        try {
-            return SentenceFactory.getInstance().createParser(sSentence);
-        } catch (Exception e) {
-            logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
-        }
-        return null;
-    }
-
-    private Sentence[] handleN2KCanboat(String sSentence) {
-        try {
-            CANBOATPGNMessage msg = canboatStream.getMessage(sSentence);
-            if (msg != null && msg.getFields() != null) {
-                return decoder.getSentence(msg.getPgn(), msg.getFields());
-            }
-        } catch (Exception e) {
-            logger.debug("Can't read N2K sentence {" + sSentence + "} {" + e + "}");
-        }
-        return new Sentence[]{};
+    private static String getErrorString(String s, Exception e) {
+        return String.format("Cannot parse n2k sentence {%s} {%s}", s, e.getMessage());
     }
 }

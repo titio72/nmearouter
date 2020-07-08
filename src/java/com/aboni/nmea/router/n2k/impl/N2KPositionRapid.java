@@ -6,15 +6,17 @@ import net.sf.marineapi.nmea.util.Position;
 
 public class N2KPositionRapid extends N2KMessageImpl {
 
+    private static final int PGN = 129025;
+
     private double latitude;
     private double longitude;
 
 
     public N2KPositionRapid(byte[] data) throws PGNDataParseException {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -33,10 +35,6 @@ public class N2KPositionRapid extends N2KMessageImpl {
 
         Double dLon = parseDouble(data, 32, 0, 32, 0.0000001, true);
         longitude = dLon == null ? Double.NaN : dLon;
-    }
-
-    private static int getInternalPgn() {
-        return 129025;
     }
 
     public double getLatitude() {

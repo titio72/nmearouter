@@ -26,7 +26,7 @@ public class N2KAnalyzer {
     public static void main(String[] args) {
         try {
             PGNs pgNs = new PGNs("conf/pgns.json", null);
-            CANBOATDecoder dec = new CANBOATDecoderImpl();
+            CANBOATDecoder dec = (CANBOATDecoder) new CANBOATDecoderImpl();
 
             try (FileReader r = new FileReader("nmea2000_1.log")) {
                 BufferedReader bf = new BufferedReader(r);

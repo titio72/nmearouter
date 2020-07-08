@@ -81,8 +81,8 @@ public class N2KStreamImpl implements N2KStream {
             int pgn = p.getHeader().getPgn();
             int acceptedSrc = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
             if (p.isSupported() &&
-                    (acceptedSrc == p.getHeader().getSource() || acceptedSrc == -1) &&
-                    isSend(pgn, p.getHeader().getTimestamp().toEpochMilli(), p.getData())) {
+                    (acceptedSrc == p.getHeader().getSource() || acceptedSrc == -1) /*&&
+                    isSend(pgn, p.getHeader().getTimestamp().toEpochMilli(), p.getData())*/) {
                 return p.getMessage();
             } else return null;
         } catch (Exception e) {

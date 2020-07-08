@@ -125,9 +125,6 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                     }
                 }
             }
-            if (!sent) {
-               // System.out.println("______________________________@" + sSentence);
-            }
         } catch (SocketTimeoutException e) {
             // read timeout
             getLogger().debug("Datagram socket read timeout");

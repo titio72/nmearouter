@@ -10,21 +10,22 @@ import java.util.StringTokenizer;
 
 public class N2KMessageParser {
 
-    private static final Map<Long, Class> SUPPORTED = new HashMap<>();
+    private static final Map<Integer, Class<? extends N2KMessage>> SUPPORTED = new HashMap<>();
 
     static {
-        SUPPORTED.put(130306L, N2KWindData.class); // Wind Data
-        SUPPORTED.put(128267L, N2KWaterDepth.class); // Water Depth
-        SUPPORTED.put(128259L, N2KSpeed.class); // Speed
-        SUPPORTED.put(127250L, N2KHeading.class); // Vessel Heading
-        SUPPORTED.put(129025L, N2KPositionRapid.class); // Position, Rapid update
-        SUPPORTED.put(129026L, N2KSOGAdCOGRapid.class); // COG & SOG, Rapid Update
-        SUPPORTED.put(126992L, N2KSystemTime.class); // System time
-        SUPPORTED.put(127257L, N2KAttitude.class); // Attitude)
-        SUPPORTED.put(130310L, N2KEnvironment310.class); // Env parameter: Water temp, air temp, pressure
-        SUPPORTED.put(130311L, N2KEnvironment311.class); // Env parameter: temperature, humidity, pressure
-        SUPPORTED.put(127245L, N2KRudder.class); // Rudder
-        SUPPORTED.put(127251L, N2KRateOfTurn.class); // Rate of turn
+        SUPPORTED.put(130306, N2KWindData.class); // Wind Data
+        SUPPORTED.put(128267, N2KWaterDepth.class); // Water Depth
+        SUPPORTED.put(128259, N2KSpeed.class); // Speed
+        SUPPORTED.put(127250, N2KHeading.class); // Vessel Heading
+        SUPPORTED.put(129025, N2KPositionRapid.class); // Position, Rapid update
+        SUPPORTED.put(129026, N2KSOGAdCOGRapid.class); // COG & SOG, Rapid Update
+        SUPPORTED.put(129029, N2KGNSSPositionUpdate.class); // GNSS Pos uptae
+        SUPPORTED.put(126992, N2KSystemTime.class); // System time
+        SUPPORTED.put(127257, N2KAttitude.class); // Attitude)
+        SUPPORTED.put(130310, N2KEnvironment310.class); // Env parameter: Water temp, air temp, pressure
+        SUPPORTED.put(130311, N2KEnvironment311.class); // Env parameter: temperature, humidity, pressure
+        SUPPORTED.put(127245, N2KRudder.class); // Rudder
+        SUPPORTED.put(127251, N2KRateOfTurn.class); // Rate of turn
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update
@@ -44,7 +45,7 @@ public class N2KMessageParser {
         // "PGN": 65345,  "Id": "seatalkPilotWindDatum",        "Description": "Seatalk: Pilot Wind Datum"
     }
 
-    public static boolean isSupported(long pgn) {
+    public static boolean isSupported(int pgn) {
         return SUPPORTED.containsKey(pgn);
     }
 
@@ -131,7 +132,7 @@ public class N2KMessageParser {
 
     private PGNDecoded getDecodedHeader(String s) throws PGNDataParseException {
         try {
-            StringTokenizer tok = new StringTokenizer(s, ",", false);
+            StringTokenizer tok = new StringTokenizer(s.trim(), ",", false);
             PGNDecoded p = new PGNDecoded();
             p.ts = parseTimestamp(tok.nextToken());
             p.priority = Integer.parseInt(tok.nextToken());
@@ -161,10 +162,11 @@ public class N2KMessageParser {
 
     public N2KMessage getMessage() throws PGNDataParseException {
         if (message == null) {
-            Class c = SUPPORTED.getOrDefault(pgnData.pgn, null);
+            Class<? extends N2KMessage> c = SUPPORTED.getOrDefault(pgnData.pgn, null);
             if (c != null) {
-                Constructor constructor = c.getConstructors()[0];
+                Constructor<?> constructor = null;
                 try {
+                    constructor = c.getConstructor(new Class[]{N2KMessageHeader.class, (new byte[0]).getClass()});
                     message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
                 } catch (Exception e) {
                     throw new PGNDataParseException("Error decoding N2K message", e);

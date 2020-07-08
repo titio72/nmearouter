@@ -80,8 +80,7 @@ public abstract class N2KMessageImpl implements N2KMessage {
             long e = BitUtils.extractBits(data, start, offset + i, 8, false).v;
             b[i / 8] = (byte) e;
         }
-        String res = getASCII(b);
-        return res;
+        return getASCII(b);
     }
 
     protected static String parseEnum(byte[] data, int offset, int start, int length, Map<Integer, String> map) {
@@ -102,6 +101,23 @@ public abstract class N2KMessageImpl implements N2KMessage {
         return ret;
     }
 
+    protected static long parseIntegerSafe(byte[] data, int offset, int start, int length, boolean signed, long def) {
+        if (offset + length > (data.length * 8)) return def;
+
+        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, signed);
+        int reserved = 0;
+        if (e.v >= 15) {
+            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATAFIELD_UNKNOWN */
+        }
+        if (e.v <= e.m - reserved) {
+            return e.v;
+        } else {
+            return def;
+        }
+    }
+
     protected static Long parseInteger(byte[] data, int offset, int start, int length, boolean signed) {
         if (offset + length > (data.length * 8)) return null;
 
@@ -119,6 +135,11 @@ public abstract class N2KMessageImpl implements N2KMessage {
         }
     }
 
+    protected static double parseDoubleSafe(byte[] data, int offset, int start, int length, double precision, boolean signed) {
+        Double d = parseDouble(data, offset, start, length, precision, signed);
+        return d == null ? Double.NaN : d;
+    }
+
     protected static Double parseDouble(byte[] data, int offset, int start, int length, double precision, boolean signed) {
         if (offset + length > (data.length * 8)) return null;
 
@@ -129,10 +150,18 @@ public abstract class N2KMessageImpl implements N2KMessage {
         } else if (e.m > 1) {
             reserved = 1; /* DATAFIELD_UNKNOWN */
         }
-        if (e.v <= e.m - reserved) {
-            return (double) e.v * precision;
+        if (length == 64) {
+            // todo something better maybe
+            if (e.v != 0x7FFFFFFFFFFFFFFFL)
+                return (double) e.v * precision;
+            else
+                return null;
         } else {
-            return null;
+            if (e.v <= e.m - reserved) {
+                return (double) e.v * precision;
+            } else {
+                return null;
+            }
         }
     }
 

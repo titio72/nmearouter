@@ -14,15 +14,15 @@ public class N2KHeading extends N2KMessageImpl {
     private String reference;
 
     public N2KHeading(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     public N2KHeading(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -41,10 +41,7 @@ public class N2KHeading extends N2KMessageImpl {
         reference = parseEnum(data, 56, 0, 2, N2KLookupTables.LOOKUP_DIRECTION_REFERENCE);
     }
 
-    private static int getInternalPgn() {
-        return 127250;
-    }
-
+    public static final int PGN = 127250;
 
     public int getSID() {
         return sid;

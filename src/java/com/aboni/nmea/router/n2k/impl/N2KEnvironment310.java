@@ -11,7 +11,6 @@ public class N2KEnvironment310 extends N2KMessageImpl {
     private double airTemp;
     private double atmosphericPressure;
 
-
     public N2KEnvironment310(byte[] data) {
         super(getDefaultHeader(getInternalPgn()), data);
         fill();
@@ -35,7 +34,7 @@ public class N2KEnvironment310 extends N2KMessageImpl {
         airTemp = (dAT == null) ? Double.NaN : Utils.round(dAT - 273.15, 1);
 
         Long dP = parseInteger(data, 40, 0, 16, false);
-        atmosphericPressure = (dP == null) ? Double.NaN : Utils.round(dP / 100, 1);
+        atmosphericPressure = (dP == null) ? Double.NaN : Utils.round(dP / 100.0, 1);
 
     }
 

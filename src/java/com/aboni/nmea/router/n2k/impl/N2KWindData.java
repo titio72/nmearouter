@@ -6,7 +6,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KWindData extends N2KMessageImpl {
 
-    private int SID;
+    private int sid;
     private double speed = Double.NaN;
     private double angle = Double.NaN;
     private boolean apparent = true;
@@ -25,7 +25,7 @@ public class N2KWindData extends N2KMessageImpl {
     }
 
     private void fill() {
-        SID = getByte(data, 0, 0xFF);
+        sid = getByte(data, 0, 0xFF);
 
         Double dSpeed = parseDouble(data, 8, 0, 16, 0.01, false);
         if (dSpeed != null) speed = Utils.round(dSpeed * 3600.0 / 1852.0, 2);
@@ -41,7 +41,7 @@ public class N2KWindData extends N2KMessageImpl {
     }
 
     public int getSID() {
-        return SID;
+        return sid;
     }
 
     public double getSpeed() {

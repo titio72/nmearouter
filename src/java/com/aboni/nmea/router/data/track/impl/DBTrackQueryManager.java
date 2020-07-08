@@ -27,7 +27,7 @@ import java.sql.SQLException;
 
 public class DBTrackQueryManager implements TrackQueryManager {
 
-    private static final String SQL_YEAR_STATS = "select year(TS), month(TS), sum(dist*(1-anchor) 	), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
+    private static final String SQL_YEAR_STATS = "select year(TS), month(TS), sum(dist*(1-anchor)), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
 
     @Override
     public JSONObject getYearlyStats() throws TrackManagementException {

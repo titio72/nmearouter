@@ -2,25 +2,34 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.geo.TSAGeoMag;
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
 
+    private static final DateTimeFormatter fTIME = DateTimeFormatter.ofPattern("HHmmss");
+    private static final DateTimeFormatter fDATE = DateTimeFormatter.ofPattern("ddMMyyyy");
+
     private final TSAGeoMag geo;
+    private double lastHeading;
+    private long lastHeadingTime = 0;
+    private N2KSOGAdCOGRapid lastSOG;
+    private N2KGNSSPositionUpdate lastPos;
 
     public N2KMessage2NMEA0183Impl() {
-        geo = new TSAGeoMag();
+        geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
     }
 
     @Override
@@ -35,8 +44,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     return handleSpeed((N2KSpeed) message); // Speed
                 case 127250:
                     return handleHeading((N2KHeading) message); // Vessel Heading
-                case 129025:
-                    return handlePositionRapid((N2KPositionRapid) message); // Position, Rapid update
+                case 129029:
+                    return handlePosition((N2KGNSSPositionUpdate) message); // Position & time
                 case 129026:
                     return handleSOGAdCOGRapid((N2KSOGAdCOGRapid) message); // COG & SOG, Rapid Update
                 case 126992:
@@ -58,76 +67,78 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return new Sentence[0];
     }
 
-    private Instant lastSystemTime;
-    private long lastSystemTimeTime;
-    private double lastHeading;
-    private long lastHeadingTime;
-
-    private static final DateTimeFormatter fTIME = DateTimeFormatter.ofPattern("HHmmss");
-    private static final DateTimeFormatter fDATE = DateTimeFormatter.ofPattern("ddMMyyyy");
-
     private Sentence[] handleSystemTime(N2KSystemTime message) {
-        lastSystemTime = message.getTime();
-        lastSystemTimeTime = System.currentTimeMillis();
-        ZDASentence zda = (ZDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ZDA);
-        Time t = new Time(lastSystemTime.atZone(ZoneId.of("UTC")).format(fTIME));
-        Date d = new Date(lastSystemTime.atZone(ZoneId.of("UTC")).format(fDATE));
-        zda.setTime(t);
-        zda.setDate(d);
-        zda.setLocalZoneHours(0);
-        zda.setLocalZoneMinutes(0);
-        return new Sentence[]{zda};
+        if (message.getTime() != null) {
+            ZDASentence zda = (ZDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ZDA);
+            Time t = new Time(message.getTime().atZone(ZoneId.of("UTC")).format(fTIME));
+            Date d = new Date(message.getTime().atZone(ZoneId.of("UTC")).format(fDATE));
+            zda.setTime(t);
+            zda.setDate(d);
+            zda.setLocalZoneHours(0);
+            zda.setLocalZoneMinutes(0);
+            return new Sentence[]{zda};
+        }
+        return new Sentence[0];
     }
-
-    private Position lastPos;
-    private long lastPosTime;
 
     private Sentence[] handleSOGAdCOGRapid(N2KSOGAdCOGRapid message) {
+        lastSOG = message;
+
+        List<Sentence> ss = new ArrayList<>();
         double cog = message.getCOG();
         double sog = message.getSOG();
+
         if (!Double.isNaN(sog) && !Double.isNaN(cog)) {
-            lastSOG = sog;
-            lastCOG = cog;
-            lastSOGCOGTime = System.currentTimeMillis();
             VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
             vtg.setTrueCourse(cog);
-            if (lastPos != null)
-                vtg.setMagneticCourse(geo.getDeclination(lastPos.getLatitude(), lastPos.getLongitude()) + cog);
+            if (lastPos != null && lastPos.getPosition() != null)
+                vtg.setMagneticCourse(geo.getDeclination(lastPos.getPosition().getLatitude(), lastPos.getPosition().getLongitude()) + cog);
             vtg.setSpeedKnots(sog);
             vtg.setSpeedKmh(sog * 1.852);
+            ss.add(vtg);
+        }
+        Collections.addAll(ss, handleRMC());
+        return ss.toArray(new Sentence[0]);
+    }
 
+    private Sentence[] handleRMC() {
+        if (lastSOG != null && lastPos != null && lastSOG.getSID() == lastPos.getSID()) {
+            Position p = lastPos.getPosition();
+            if (p != null) {
+                RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RMC);
+                rmc.setPosition(p);
+                rmc.setVariation(0.0);
+                rmc.setDirectionOfVariation(CompassPoint.EAST);
+                rmc.setMode(FaaMode.AUTOMATIC);
+                rmc.setStatus(DataStatus.ACTIVE);
+                if (!Double.isNaN(lastSOG.getCOG())) rmc.setCourse(lastSOG.getCOG());
+                if (!Double.isNaN(lastSOG.getSOG())) rmc.setSpeed(lastSOG.getSOG());
+                if (lastPos.getTimestamp() != null) {
+                    Time t = new Time(lastPos.getTimestamp().atZone(ZoneId.of("UTC")).format(fTIME));
+                    Date d = new Date(lastPos.getTimestamp().atZone(ZoneId.of("UTC")).format(fDATE));
+                    rmc.setTime(t);
+                    rmc.setDate(d);
+                }
+                return new Sentence[]{rmc};
+            }
         }
         return new Sentence[0];
     }
 
-    private double lastSOG;
-    private double lastCOG;
-    private long lastSOGCOGTime;
-
-    private Sentence[] handlePositionRapid(N2KPositionRapid message) {
-        Position p = message.getPosition();
-        if (p != null) {
-            lastPos = p;
-            lastPosTime = System.currentTimeMillis();
-            RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RMC);
-            rmc.setPosition(p);
-            rmc.setVariation(0.0);
-            rmc.setDirectionOfVariation(CompassPoint.EAST);
-            rmc.setMode(FaaMode.AUTOMATIC);
-            rmc.setStatus(DataStatus.ACTIVE);
-            if (lastSOGCOGTime != 0) {
-                rmc.setCourse(lastCOG);
-                rmc.setSpeed(lastSOG);
-            }
-            if (lastSystemTime != null) {
-                Time t = new Time(lastSystemTime.atZone(ZoneId.of("UTC")).format(fTIME));
-                Date d = new Date(lastSystemTime.atZone(ZoneId.of("UTC")).format(fDATE));
-                rmc.setTime(t);
-                rmc.setDate(d);
-            }
-            return new Sentence[]{rmc};
+    private Sentence[] handlePosition(N2KGNSSPositionUpdate message) {
+        lastPos = message;
+        List<Sentence> ss = new ArrayList<>();
+        if (message.getPosition() != null) {
+            GLLSentence gll = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
+            gll.setStatus(DataStatus.ACTIVE);
+            gll.setMode(FaaMode.AUTOMATIC);
+            gll.setPosition(message.getPosition());
+            Time t = new Time(message.getTimestamp().atZone(ZoneId.of("UTC")).format(fTIME));
+            gll.setTime(t);
+            ss.add(gll);
         }
-        return new Sentence[0];
+        Collections.addAll(ss, handleRMC());
+        return ss.toArray(new Sentence[0]);
     }
 
     private Sentence[] handleHeading(N2KHeading message) {
@@ -156,7 +167,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         double speed = message.getSpeedWaterRef();
         if (!Double.isNaN(speed)) {
             VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
-            if (lastHeadingTime != 0) {
+            if (System.currentTimeMillis() - lastHeadingTime <= 1000) {
                 vhw.setMagneticHeading(lastHeading);
             }
             vhw.setSpeedKnots(speed);
