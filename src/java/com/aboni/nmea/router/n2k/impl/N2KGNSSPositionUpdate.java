@@ -51,7 +51,7 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
         if (dLat != null && dLon != null) position = new Position(dLat, dLon);
 
         altitude = parseDoubleSafe(data, 184, 0, 64, 1e-06, true);
-        nSV = (int) parseIntegerSafe(data, 264, 0, 8, false, 0xFF);
+        nSV = getByte(data, 264 / 8, 0xFF);
         hdop = parseDoubleSafe(data, 272, 0, 16, 0.01, true);
         pdop = parseDoubleSafe(data, 288, 0, 16, 0.01, true);
         geoidalSeparation = parseDoubleSafe(data, 304, 0, 32, 0.01, true);
@@ -61,7 +61,7 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
 
         int daysSince1970 = (int) parseIntegerSafe(data, 8, 0, 16, false, 0);
         double secsSinceMidnight = parseDoubleSafe(data, 24, 0, 32, 0.0001, false);
-        if (daysSince1970 > 0 && !Double.isNaN(secsSinceMidnight)) {
+        if (daysSince1970 > 0 && isValidDouble(secsSinceMidnight)) {
             timestamp = Instant.ofEpochMilli(0).atZone(ZoneId.of("UTC")).plusDays(daysSince1970).plusNanos((long) (secsSinceMidnight * 1e9)).toInstant();
         }
 
@@ -73,6 +73,10 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
 
     public int getSID() {
         return sid;
+    }
+
+    public boolean isValidSID() {
+        return isValidByte(sid);
     }
 
     public Instant getTimestamp() {
@@ -87,6 +91,10 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
         return altitude;
     }
 
+    public boolean isValidAltitude() {
+        return isValidDouble(altitude);
+    }
+
     public String getGnssType() {
         return gnssType;
     }
@@ -99,20 +107,36 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
         return integrity;
     }
 
-    public int getnSV() {
+    public int getNSatellites() {
         return nSV;
     }
 
-    public double getHdop() {
+    public boolean isValidNSatellites() {
+        return isValidByte(nSV);
+    }
+
+    public double getHDOP() {
         return hdop;
     }
 
-    public double getPdop() {
+    public boolean isHDOP() {
+        return isValidDouble(hdop);
+    }
+
+    public double getPDOP() {
         return pdop;
+    }
+
+    public boolean isPDOP() {
+        return isValidDouble(pdop);
     }
 
     public double getGeoidalSeparation() {
         return geoidalSeparation;
+    }
+
+    public boolean isValidGeoidalSeparation() {
+        return isValidDouble(geoidalSeparation);
     }
 
     public int getReferenceStations() {
@@ -129,5 +153,9 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
 
     public double getAgeOfDgnssCorrections() {
         return ageOfDgnssCorrections;
+    }
+
+    public boolean isValidAgeOfDgnssCorrections() {
+        return isValidDouble(ageOfDgnssCorrections);
     }
 }

@@ -6,21 +6,23 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KAttitude extends N2KMessageImpl {
 
+    private static final int PGN = 127257;
+
     private int sid;
     private double yaw;
     private double pitch;
     private double roll;
 
     public N2KAttitude(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     public N2KAttitude(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -35,10 +37,6 @@ public class N2KAttitude extends N2KMessageImpl {
 
         Double dRoll = parseDouble(data, 40, 0, 16, 0.0001, true);
         roll = (dRoll == null) ? Double.NaN : Utils.round(Math.toDegrees(dRoll), 1);
-    }
-
-    private static int getInternalPgn() {
-        return 127257;
     }
 
     public int getSID() {

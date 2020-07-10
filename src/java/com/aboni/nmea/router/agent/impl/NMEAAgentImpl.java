@@ -22,6 +22,7 @@ import com.aboni.nmea.router.agent.*;
 import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
 import com.aboni.nmea.router.impl.ListenerWrapper;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
+import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.Log;
@@ -73,14 +74,28 @@ public class NMEAAgentImpl implements NMEAAgent {
         @Override
         public void pushMessage(RouterMessage mm) {
             try {
+                if (listenerWrapper == null) {
+                    listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
+                }
                 if (mm.getPayload() instanceof Sentence) {
                     Sentence s = (Sentence) mm.getPayload();
                     if (isStarted() && (getFilter() == null || getFilter().match(s, mm.getSource()))) {
-                        if (listenerWrapper == null) {
-                            listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
-                        }
                         if (listenerWrapper.isNMEA()) {
                             listenerWrapper.onSentence(s, mm.getSource());
+                        }
+                    }
+                } else if (mm.getPayload() instanceof N2KMessage) {
+                    N2KMessage s = (N2KMessage) mm.getPayload();
+                    if (isStarted()) {
+                        if (listenerWrapper.isN2K()) {
+                            listenerWrapper.onSentence(s);
+                        }
+                    }
+                } else if (mm.getPayload() instanceof JSONObject) {
+                    JSONObject s = (JSONObject) mm.getPayload();
+                    if (isStarted()) {
+                        if (listenerWrapper.isJSON()) {
+                            listenerWrapper.onSentence(s);
                         }
                     }
                 }
@@ -291,9 +306,22 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     /**
      * Used by "sources" to push sentences into the stream
+     *
      * @param m The message to be notified to agents
      */
     protected final void notify(JSONObject m) {
+        if (isStarted()) {
+            getLogger().debug("Notify Sentence {" + m + "}");
+            sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
+        }
+    }
+
+    /**
+     * Used by "sources" to push sentences into the stream
+     *
+     * @param m The message to be notified to agents
+     */
+    protected final void notify(N2KMessage m) {
         if (isStarted()) {
             getLogger().debug("Notify Sentence {" + m + "}");
             sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));

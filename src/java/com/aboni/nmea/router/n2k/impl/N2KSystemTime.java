@@ -9,20 +9,22 @@ import java.time.ZoneId;
 
 public class N2KSystemTime extends N2KMessageImpl {
 
+    public static final int PGN = 126992;
+
     private int sid;
     private Instant time;
     private String timeSourceType;
 
     public N2KSystemTime(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     protected N2KSystemTime(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -41,10 +43,6 @@ public class N2KSystemTime extends N2KMessageImpl {
         }
 
         timeSourceType = parseEnum(data, 8, 0, 4, N2KLookupTables.LOOKUP_SYSTEM_TIME);
-    }
-
-    private static int getInternalPgn() {
-        return 126992;
     }
 
     public int getSID() {

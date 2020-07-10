@@ -6,11 +6,10 @@ import net.sf.marineapi.nmea.util.Position;
 
 public class N2KPositionRapid extends N2KMessageImpl {
 
-    private static final int PGN = 129025;
+    public static final int PGN = 129025;
 
     private double latitude;
     private double longitude;
-
 
     public N2KPositionRapid(byte[] data) throws PGNDataParseException {
         super(getDefaultHeader(PGN), data);
@@ -46,7 +45,7 @@ public class N2KPositionRapid extends N2KMessageImpl {
     }
 
     public Position getPosition() {
-        if (!Double.isNaN(latitude) && !Double.isNaN(longitude))
+        if (isValidDouble(latitude) && isValidDouble(longitude))
             return new Position(latitude, longitude);
         else
             return null;

@@ -7,6 +7,8 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KHeading extends N2KMessageImpl {
 
+    public static final int PGN = 127250;
+
     private int sid;
     private double heading;
     private double deviation;
@@ -40,8 +42,6 @@ public class N2KHeading extends N2KMessageImpl {
 
         reference = parseEnum(data, 56, 0, 2, N2KLookupTables.LOOKUP_DIRECTION_REFERENCE);
     }
-
-    public static final int PGN = 127250;
 
     public int getSID() {
         return sid;

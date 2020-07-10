@@ -6,21 +6,23 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KWindData extends N2KMessageImpl {
 
+    public static final int PGN = 130306;
+
     private int sid;
     private double speed = Double.NaN;
     private double angle = Double.NaN;
     private boolean apparent = true;
 
     public N2KWindData(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     public N2KWindData(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -34,10 +36,6 @@ public class N2KWindData extends N2KMessageImpl {
         if (dAngleRad != null) angle = Utils.round(Math.toDegrees(dAngleRad), 1);
 
         apparent = (getByte(data, 5, 1) & 0x07) != 0;
-    }
-
-    private static int getInternalPgn() {
-        return 130306;
     }
 
     public int getSID() {

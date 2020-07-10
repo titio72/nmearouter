@@ -20,6 +20,7 @@ public class N2KMessageParser {
         SUPPORTED.put(129025, N2KPositionRapid.class); // Position, Rapid update
         SUPPORTED.put(129026, N2KSOGAdCOGRapid.class); // COG & SOG, Rapid Update
         SUPPORTED.put(129029, N2KGNSSPositionUpdate.class); // GNSS Pos uptae
+        SUPPORTED.put(129540, N2KSatellites.class); // List of sats
         SUPPORTED.put(126992, N2KSystemTime.class); // System time
         SUPPORTED.put(127257, N2KAttitude.class); // Attitude)
         SUPPORTED.put(130310, N2KEnvironment310.class); // Env parameter: Water temp, air temp, pressure
@@ -166,7 +167,7 @@ public class N2KMessageParser {
             if (c != null) {
                 Constructor<?> constructor = null;
                 try {
-                    constructor = c.getConstructor(new Class[]{N2KMessageHeader.class, (new byte[0]).getClass()});
+                    constructor = c.getConstructor(N2KMessageHeader.class, (new byte[0]).getClass());
                     message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
                 } catch (Exception e) {
                     throw new PGNDataParseException("Error decoding N2K message", e);

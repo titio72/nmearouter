@@ -21,6 +21,7 @@ import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
+import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.ServerLog;
@@ -179,8 +180,10 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
-            if (m.getPayload() instanceof Sentence) {
-                Sentence s = (Sentence)m.getPayload();
+            if (m.getPayload() instanceof N2KMessage) {
+                routeToTarget(m);
+            } else if (m.getPayload() instanceof Sentence) {
+                Sentence s = (Sentence) m.getPayload();
                 Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
                 for (Sentence ss : toSend) {
                     cache.onSentence(ss, m.getSource());

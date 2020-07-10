@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.N2KStream;
@@ -35,6 +36,8 @@ public class N2KStreamImpl implements N2KStream {
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
 
+    private static final boolean THROTTLING = false;
+
     private static class Payload {
         int hashcode;
         long timestamp;
@@ -42,7 +45,7 @@ public class N2KStreamImpl implements N2KStream {
 
     private final Map<Integer, Integer> pgnSources;
     private final Map<Integer, Payload> payloadMap;
-    private Log logger = null;
+    private final Log logger;
 
     public N2KStreamImpl(Log logger) {
         this.logger = logger;
@@ -52,7 +55,7 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private void loadSources() {
-        try (FileReader r = new FileReader("conf/pgns.csv")) {
+        try (FileReader r = new FileReader(Constants.CONF_DIR + "/pgns.csv")) {
             BufferedReader bf = new BufferedReader(r);
             String l;
             while ((l = bf.readLine()) != null) {
@@ -81,8 +84,8 @@ public class N2KStreamImpl implements N2KStream {
             int pgn = p.getHeader().getPgn();
             int acceptedSrc = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
             if (p.isSupported() &&
-                    (acceptedSrc == p.getHeader().getSource() || acceptedSrc == -1) /*&&
-                    isSend(pgn, p.getHeader().getTimestamp().toEpochMilli(), p.getData())*/) {
+                    (acceptedSrc == p.getHeader().getSource() || acceptedSrc == -1) &&
+                    isSend(pgn, p.getHeader().getTimestamp().toEpochMilli(), p.getData())) {
                 return p.getMessage();
             } else return null;
         } catch (Exception e) {
@@ -96,23 +99,27 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private boolean isSend(int pgn, long ts, byte[] data) {
-        Payload p = payloadMap.getOrDefault(pgn, null);
-        if (p == null) {
-            p = new Payload();
-            p.timestamp = ts;
-            p.hashcode = hashCodeOf(data);
-            payloadMap.put(pgn, p);
-            return true;
-        } else {
-            int hash = hashCodeOf(data);
-            // check for minimum age (active throttling) then check for maximum age or some changes
-            if ((ts - MIN_AGE) > p.timestamp &&
-                    ((ts - MAX_AGE) > p.timestamp || hash != p.hashcode)) {
+        if (THROTTLING) {
+            Payload p = payloadMap.getOrDefault(pgn, null);
+            if (p == null) {
+                p = new Payload();
                 p.timestamp = ts;
-                p.hashcode = hash;
+                p.hashcode = hashCodeOf(data);
+                payloadMap.put(pgn, p);
                 return true;
+            } else {
+                int hash = hashCodeOf(data);
+                // check for minimum age (active throttling) then check for maximum age or some changes
+                if ((ts - MIN_AGE) > p.timestamp &&
+                        ((ts - MAX_AGE) > p.timestamp || hash != p.hashcode)) {
+                    p.timestamp = ts;
+                    p.hashcode = hash;
+                    return true;
+                }
             }
+            return false;
+        } else {
+            return true;
         }
-        return false;
     }
 }

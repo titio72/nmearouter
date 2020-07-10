@@ -5,21 +5,23 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KWaterDepth extends N2KMessageImpl {
 
+    public static final int PGN = 128267;
+
     private int sid;
     private double depth;
     private double offset;
     private double range;
 
     public N2KWaterDepth(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     public N2KWaterDepth(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -34,10 +36,6 @@ public class N2KWaterDepth extends N2KMessageImpl {
 
         Double dRange = parseDouble(data, 56, 0, 8, 10, false);
         range = dRange == null ? Double.NaN : dRange;
-    }
-
-    private static int getInternalPgn() {
-        return 128267;
     }
 
     public int getSID() {

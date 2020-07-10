@@ -102,6 +102,15 @@ function httpGetAgents() {
   return JSON.parse(xmlHttp.responseText);
 }
 
+function httpGetGps() {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/gps",
+      false);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+  return JSON.parse(xmlHttp.responseText);
+}
+
 function httpLoadSpeedDateRange(dt0, dt1, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1), true);

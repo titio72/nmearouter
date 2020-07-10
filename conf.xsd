@@ -11,17 +11,18 @@
 			<xs:element name="SerialAgent" type="SerialAgent"/>
 			<xs:element name="TcpAgent" type="TcpAgent"/>
 			<xs:element name="UdpAgent" type="UdpAgent"/>
-			<xs:element name="ConsoleAgent" type="ConsoleAgent"/>
-			<xs:element name="TrackAgent" type="TrackAgent"/>
-			<xs:element name="SensorAgent" type="SensorAgent"/>
-			<xs:element name="VoltageAgent" type="VoltageAgent"/>
-			<xs:element name="GyroAgent" type="GyroAgent"/>
-			<xs:element name="SimulatorAgent" type="SimulatorAgent"/>
-			<xs:element name="MeteoAgent" type="MeteoAgent"/>
-			<xs:element name="MWDAgent" type="MWDAgent"/>
-			<xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
-			<xs:element name="JSONAgent" type="JSONAgent"/>
-		</xs:choice>
+            <xs:element name="ConsoleAgent" type="ConsoleAgent"/>
+            <xs:element name="TrackAgent" type="TrackAgent"/>
+            <xs:element name="SensorAgent" type="SensorAgent"/>
+            <xs:element name="VoltageAgent" type="VoltageAgent"/>
+            <xs:element name="GyroAgent" type="GyroAgent"/>
+            <xs:element name="SimulatorAgent" type="SimulatorAgent"/>
+            <xs:element name="MeteoAgent" type="MeteoAgent"/>
+            <xs:element name="MWDAgent" type="MWDAgent"/>
+            <xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
+            <xs:element name="JSONAgent" type="JSONAgent"/>
+            <xs:element name="GPSStatusAgent" type="GPSStatusAgent"/>
+        </xs:choice>
 	</xs:sequence>
 </xs:complexType>
 
@@ -77,24 +78,32 @@
 	</xs:complexContent>
 </xs:complexType>
 
-<xs:complexType name="GPXPlayerAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="GPXPlayer"/>
-			<xs:attribute name="gpxFile" type="xs:string" use="required"/>
-		</xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="GPXPlayerAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="GPXPlayer"/>
+                <xs:attribute name="gpxFile" type="xs:string" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-<xs:complexType name="TcpAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="TCP"/>
-			<xs:attribute name="host" type="xs:string" default="localhost"/>
-			<xs:attribute name="port" type="xs:int" default="1111"/>
-			<xs:attribute name="inout" type="InOut" use="required"/>
-		</xs:extension>
-	</xs:complexContent>
+    <xs:complexType name="GPSStatusAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="GPSStatus"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="TcpAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="TCP"/>
+                <xs:attribute name="host" type="xs:string" default="localhost"/>
+                <xs:attribute name="port" type="xs:int" default="1111"/>
+                <xs:attribute name="inout" type="InOut" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
 </xs:complexType>
 
 <xs:complexType name="UdpAgent">

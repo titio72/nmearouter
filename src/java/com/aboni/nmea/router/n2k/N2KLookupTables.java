@@ -1,5 +1,7 @@
 package com.aboni.nmea.router.n2k;
 
+import com.aboni.utils.ServerLog;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -21,6 +23,7 @@ public class N2KLookupTables {
                     map.put(value, sValue);
                 }
             } catch (Exception e) {
+                ServerLog.getLogger().error("Error loading N2K enum {" + sMap + "}", e);
             }
         }
     }

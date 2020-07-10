@@ -13,9 +13,6 @@
     </SimulatorAgent>
     <ConsoleAgent name="CONSOLE" active="false"/>
     <MeteoAgent name="METEO" active="false"/>
-    <UdpAgent name="UDPIN" port="1223" inout="IN" active="false">
-        <qos>>speed_filter;enrich_hdm;dpt;truewind_sog</qos>
-    </UdpAgent>
     <TcpAgent name="TCPIN" host="192.168.3.1" port="1111" inout="IN" active="false">
         <qos>rs120;enrich_hdm;truewind;dpt</qos>
     </TcpAgent>
@@ -32,7 +29,7 @@
     <TrackAgent name="TRACK" active="false"/>
     <SerialAgent name="GPS" device="/dev/ttyUSB0" bps="9600" inout="IN" active="false"/>
     <SerialAgent name="OUT" device="/dev/ttyUSB1" bps="9600" inout="OUT" active="false"/>
-
+    <GPSStatusAgent name="GPSStatus" active="true"/>
 
     <!--
     <SensorAgent name="SENSOR" active="false"/>

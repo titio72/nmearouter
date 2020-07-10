@@ -295,32 +295,4 @@ public class CANBOATDecoderImpl implements CANBOATDecoder {
         mwv.setStatus(DataStatus.ACTIVE);
         return new Sentence[]{mwv};
     }
-
-    private Sentence[] handleAISClassBReport(JSONObject jsonObject) {
-        // 129039 AIS Class B Position Report
-        // "User ID":247324130,
-        // "Unit type":"CS",
-        // "Can handle Msg 22":"Yes",
-        // "Regional Application":0,
-        // "AIS communication state":"ITDMA",
-        // "Latitude":43.0578155,
-        // "SOG":0.05,
-        // "Band":"entire marine band",
-        // "Integrated Display":"Yes",
-        // "Longitude":9.8365983,
-        // "Repeat Indicator":"Initial",
-        // "Regional Application 1":0,
-        // "Time Stamp":"26",
-        // "AIS mode":"Assigned",
-        // "AIS Transceiver information":"Channel A VDL reception",
-        // "RAIM":"in use",
-        // "DSC":"Yes",
-        // "Communication State":"3",
-        // "Position Accuracy":"High",
-        // "COG":315.1,
-        // "Message ID":18
-        return TEMPLATE;
-    }
-
-
 }

@@ -46,6 +46,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     return handleHeading((N2KHeading) message); // Vessel Heading
                 case 129029:
                     return handlePosition((N2KGNSSPositionUpdate) message); // Position & time
+                case 129540:
+                    return handleSatellites((N2KSatellites) message); // Sats to GSV
                 case 129026:
                     return handleSOGAdCOGRapid((N2KSOGAdCOGRapid) message); // COG & SOG, Rapid Update
                 case 126992:
@@ -65,6 +67,40 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             }
         }
         return new Sentence[0];
+    }
+
+    private Sentence[] handleSatellites(N2KSatellites message) {
+        List<Sentence> res = new ArrayList<>();
+        int nSat = message.getNumberOfSats();
+        int nGroups = nSat / 12;
+        nGroups = (nGroups * 12) < nSat ? nGroups + 1 : nGroups;
+        int satIx = 0;
+        List<N2KSatellites.Sat> satsList = message.getSatellites();
+        for (int group = 0; group < nGroups; group++) {
+            int satsInGroup = Math.min(nSat - (group * 12), 12);
+            int sentences = satsInGroup / 4;
+            sentences = (sentences * 4) < satsInGroup ? sentences + 1 : sentences;
+            int satIxGroup = 0;
+            for (int i = 0; i < sentences; i++) {
+                GSVSentence s = (GSVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSV);
+                s.setSatelliteCount(satsInGroup);
+                s.setSentenceCount(sentences);
+                s.setSentenceIndex(i + 1);
+                List<SatelliteInfo> l = new ArrayList<>();
+                for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++) {
+                    N2KSatellites.Sat sat = satsList.get(satIx);
+                    satIx++;
+                    satIxGroup++;
+                    if (sat.getId() != 0xFF) {
+                        SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
+                        l.add(sInfo);
+                    }
+                }
+                s.setSatelliteInfo(l);
+                res.add(s);
+            }
+        }
+        return res.toArray(new Sentence[0]);
     }
 
     private Sentence[] handleSystemTime(N2KSystemTime message) {

@@ -111,7 +111,7 @@ public class PGNDef {
             bitLength = definition.getInt("BitLength");
             bitStart = definition.getInt("BitStart");
             bitOffset = definition.has("BitOffset") ? definition.getInt("BitOffset") : 0;
-            type = check(definition, "Type") ? definition.getString("Type") : "Unknown";
+            type = check(definition, "Type") ? definition.getString("Type") : "";
             units = check(definition, "Units") ? definition.getString("Units") : null;
             resolution = check(definition, "Resolution") ? definition.getDouble("Resolution") : 1.0;
             values = new HashMap<>();

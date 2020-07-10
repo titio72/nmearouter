@@ -6,21 +6,23 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KRudder extends N2KMessageImpl {
 
+    public static final int PGN = 127245;
+
     private int instance;
     private double position;
     private double angleOrder;
     private int directionOrder;
 
     public N2KRudder(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     protected N2KRudder(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -53,7 +55,4 @@ public class N2KRudder extends N2KMessageImpl {
         return directionOrder;
     }
 
-    private static int getInternalPgn() {
-        return 127245;
-    }
 }

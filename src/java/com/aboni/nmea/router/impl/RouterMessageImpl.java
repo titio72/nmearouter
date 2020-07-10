@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.n2k.N2KMessage;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -30,6 +31,10 @@ public class RouterMessageImpl<T> implements RouterMessage {
     }
 
     public static RouterMessage createMessage(JSONObject obj, String source, long timestamp) {
+        return new RouterMessageImpl<>(obj, source, timestamp);
+    }
+
+    public static RouterMessage createMessage(N2KMessage obj, String source, long timestamp) {
         return new RouterMessageImpl<>(obj, source, timestamp);
     }
 

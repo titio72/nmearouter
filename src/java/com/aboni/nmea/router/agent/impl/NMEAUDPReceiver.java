@@ -114,16 +114,18 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             socket.receive(p);
             sSentence = new String(p.getData(), 0, p.getLength());
             updateReadStats(sSentence);
-            Sentence[] sentences = input.getSentence(sSentence);
-            boolean sent = false;
-            if (sentences != null) {
-                for (Sentence sentence : sentences) {
+            NMEAInputManager.Output out = input.getSentence(sSentence);
+            if (out != null && !out.isEmpyy()) {
+                for (Sentence sentence : out.nmeaSentences) {
                     if (sentence != null) {
                         updateReadSentencesStats(false);
-                        onSentenceRead(sentence);
-                        sent = true;
+                        notify(sentence);
                     }
                 }
+                if (out.n2KMessage != null) {
+                    notify(out.n2KMessage);
+                }
+
             }
         } catch (SocketTimeoutException e) {
             // read timeout

@@ -114,6 +114,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             case "Voltage":
                 agent = buildVoltage((VoltageAgent) a, q);
                 break;
+            case "GPSStatus":
+                agent = buildGPSStatus((GPSStatusAgent) a, q);
+                break;
             default:
                 break;
         }
@@ -127,6 +130,17 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             loadFilters(tgt, tgtFilterConf);
         }
         return agent;
+    }
+
+    private NMEAAgent buildGPSStatus(GPSStatusAgent a, QOS q) {
+        NMEAGPSStatusAgent gps = null;
+        try {
+            gps = ThingsFactory.getInstance(NMEAGPSStatusAgent.class);
+            gps.setup(a.getName(), q);
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Cannot create GPS Status Agent", e);
+        }
+        return gps;
     }
 
     private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {

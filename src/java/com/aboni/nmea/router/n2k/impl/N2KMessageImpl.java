@@ -12,6 +12,14 @@ public abstract class N2KMessageImpl implements N2KMessage {
     protected N2KMessageHeader header;
     protected byte[] data;
 
+    protected boolean isValidByte(int b) {
+        return b != 0xFF;
+    }
+
+    protected boolean isValidDouble(double d) {
+        return !Double.isNaN(d);
+    }
+
     private static class DefaultHeader implements N2KMessageHeader {
         int pgn;
         Instant now;
@@ -151,7 +159,6 @@ public abstract class N2KMessageImpl implements N2KMessage {
             reserved = 1; /* DATAFIELD_UNKNOWN */
         }
         if (length == 64) {
-            // todo something better maybe
             if (e.v != 0x7FFFFFFFFFFFFFFFL)
                 return (double) e.v * precision;
             else

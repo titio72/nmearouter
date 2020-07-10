@@ -6,21 +6,23 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 public class N2KEnvironment310 extends N2KMessageImpl {
 
+    public static final int PGN = 130310;
+
     private int sid;
     private double waterTemp;
     private double airTemp;
     private double atmosphericPressure;
 
     public N2KEnvironment310(byte[] data) {
-        super(getDefaultHeader(getInternalPgn()), data);
+        super(getDefaultHeader(PGN), data);
         fill();
     }
 
     public N2KEnvironment310(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != getInternalPgn())
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", getInternalPgn(), header.getPgn()));
+        if (header.getPgn() != PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
         fill();
     }
 
@@ -36,10 +38,6 @@ public class N2KEnvironment310 extends N2KMessageImpl {
         Long dP = parseInteger(data, 40, 0, 16, false);
         atmosphericPressure = (dP == null) ? Double.NaN : Utils.round(dP / 100.0, 1);
 
-    }
-
-    private static int getInternalPgn() {
-        return 130310;
     }
 
     public int getSID() {
