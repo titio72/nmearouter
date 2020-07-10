@@ -20,7 +20,7 @@ public class N2KSystemTime extends N2KMessageImpl {
         fill();
     }
 
-    protected N2KSystemTime(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
+    public N2KSystemTime(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != PGN)

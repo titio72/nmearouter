@@ -19,7 +19,7 @@ public class N2KPositionRapid extends N2KMessageImpl {
         fill();
     }
 
-    protected N2KPositionRapid(N2KMessageHeader header, byte[] data) {
+    public N2KPositionRapid(N2KMessageHeader header, byte[] data) {
         super(header, data);
         fill();
     }
