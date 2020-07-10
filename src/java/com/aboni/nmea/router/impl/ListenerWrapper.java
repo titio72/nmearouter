@@ -102,12 +102,14 @@ public class ListenerWrapper {
     }
 
     public void onSentence(N2KMessage s) {
-        Object[] p = new Object[]{s};
-        for (Method m : listenersN2K) {
-            try {
-                m.invoke(o, p);
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error pushing message", e);
+        if (s!=null) {
+            Object[] p = new Object[]{s};
+            for (Method m : listenersN2K) {
+                try {
+                    m.invoke(o, p);
+                } catch (Exception e) {
+                    ServerLog.getLogger().error("Error pushing message", e);
+                }
             }
         }
     }

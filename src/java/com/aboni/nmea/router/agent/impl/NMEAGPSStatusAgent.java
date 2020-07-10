@@ -102,19 +102,21 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     @OnN2KMessage
     public void onMessage(N2KMessage message) {
-        int pgn = message.getHeader().getPgn();
-        switch (pgn) {
-            case N2KGNSSPositionUpdate.PGN:
-                handlePositionMessage((N2KGNSSPositionUpdate) message);
-                break;
-            case N2KSOGAdCOGRapid.PGN:
-                handleSOGMessage((N2KSOGAdCOGRapid) message);
-                break;
-            case N2KSatellites.PGN:
-                handleSatellitesMessage((N2KSatellites) message);
-                break;
-            default:
-                break;
+        if (message!=null) {
+            int pgn = message.getHeader().getPgn();
+            switch (pgn) {
+                case N2KGNSSPositionUpdate.PGN:
+                    handlePositionMessage((N2KGNSSPositionUpdate) message);
+                    break;
+                case N2KSOGAdCOGRapid.PGN:
+                    handleSOGMessage((N2KSOGAdCOGRapid) message);
+                    break;
+                case N2KSatellites.PGN:
+                    handleSatellitesMessage((N2KSatellites) message);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
