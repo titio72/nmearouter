@@ -49,17 +49,9 @@ public class ListenerWrapper {
             final List<Method> allMethods = new ArrayList<>(Arrays.asList(aClass.getDeclaredMethods()));
             for (final Method method : allMethods) {
                 if (method.isAnnotationPresent(OnSentence.class)) {
-                    Class<?>[] params = method.getParameterTypes();
-                    if (params[0].equals(JSONObject.class)) {
-                        listenersJSON.add(method);
-                    } else if (params[0].equals(Sentence.class) && params[1].equals(String.class)) {
-                        listeners.add(method);
-                    }
+                    handleOnSentence(method);
                 } else if (method.isAnnotationPresent(OnN2KMessage.class)) {
-                    Class<?>[] params = method.getParameterTypes();
-                    if (params[0].equals(N2KMessage.class)) {
-                        listenersN2K.add(method);
-                    }
+                    handleOnMessage(method);
                 }
             }
             // move to the upper class in the hierarchy in search for more methods
@@ -67,15 +59,24 @@ public class ListenerWrapper {
         }
     }
 
-    public void onSentence(Sentence s, String src) {
-        for (Method m : listeners) {
-            Object[] p = new Object[]{s, src};
-            try {
-                m.invoke(o, p);
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error pushing message", e);
-            }
+    private void handleOnMessage(Method method) {
+        Class<?>[] params = method.getParameterTypes();
+        if (params[0].equals(N2KMessage.class)) {
+            listenersN2K.add(method);
         }
+    }
+
+    private void handleOnSentence(Method method) {
+        Class<?>[] params = method.getParameterTypes();
+        if (params[0].equals(JSONObject.class)) {
+            listenersJSON.add(method);
+        } else if (params[0].equals(Sentence.class) && params[1].equals(String.class)) {
+            listeners.add(method);
+        }
+    }
+
+    public void onSentence(Sentence s, String src) {
+        privateOnSentence(new Object[]{s, src}, listeners);
     }
 
     public boolean isJSON() {
@@ -90,9 +91,9 @@ public class ListenerWrapper {
         return !listenersN2K.isEmpty();
     }
 
-    public void onSentence(JSONObject s) {
-        Object[] p = new Object[]{s};
-        for (Method m : listenersJSON) {
+    private<T> void privateOnSentence(T sentence, List<Method> methods) {
+        Object[] p = new Object[]{sentence};
+        for (Method m : methods) {
             try {
                 m.invoke(o, p);
             } catch (Exception e) {
@@ -101,16 +102,11 @@ public class ListenerWrapper {
         }
     }
 
+    public void onSentence(JSONObject s) {
+        privateOnSentence(s, listenersJSON);
+    }
+
     public void onSentence(N2KMessage s) {
-        if (s!=null) {
-            Object[] p = new Object[]{s};
-            for (Method m : listenersN2K) {
-                try {
-                    m.invoke(o, p);
-                } catch (Exception e) {
-                    ServerLog.getLogger().error("Error pushing message", e);
-                }
-            }
-        }
+        privateOnSentence(s, listenersN2K);
     }
 }

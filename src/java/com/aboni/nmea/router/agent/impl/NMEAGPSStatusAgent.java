@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.GPSStatus;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnN2KMessage;
@@ -9,16 +10,58 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.impl.N2KGNSSPositionUpdate;
 import com.aboni.nmea.router.n2k.impl.N2KSOGAdCOGRapid;
 import com.aboni.nmea.router.n2k.impl.N2KSatellites;
+import jdk.management.resource.internal.inst.FileInputStreamRMHooks;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
+
+    public class GPSSat {
+        private int prn;
+        private int svn;
+        private String name;
+
+        public int getPrn() {
+            return prn;
+        }
+
+        public int getSvn() {
+            return svn;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public String getOrbit() {
+            return orbit;
+        }
+
+        public String getSignal() {
+            return signal;
+        }
+
+        public String getClock() {
+            return clock;
+        }
+
+        private String date;
+        private String orbit;
+        private String signal;
+        private String clock;
+    }
 
     public static class SatInfo {
 
@@ -42,12 +85,15 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
             return used;
         }
 
-        private SatInfo(String id, int elevation, int azimuth, int noise, boolean used) {
+        public GPSSat getSat() { return sat; }
+
+        private SatInfo(String id, int elevation, int azimuth, int noise, boolean used, Map<Integer, GPSSat> sats) {
             this.id = id;
             this.elevation = elevation;
             this.azimuth = azimuth;
             this.noise = noise;
             this.used = used;
+            this.sat = sats.getOrDefault(Integer.parseInt(id), null);
         }
 
         private String id;
@@ -55,6 +101,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         private int azimuth;
         private int noise;
         private boolean used;
+        private GPSSat sat;
     }
 
     public enum GPSFix {
@@ -94,11 +141,41 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     @Inject
     public NMEAGPSStatusAgent(@NotNull NMEACache cache) {
         super(cache);
-        setSourceTarget(true, true);
+        setSourceTarget(false, true);
         stats = new PositionStats();
         stationaryManager = new StationaryManager();
         stationaryManager.init();
+        loadGPSSats();
     }
+
+    private Map<Integer, GPSSat> sats = new HashMap<>();
+
+    private void loadGPSSats() {
+        try (FileReader reader = new FileReader(Constants.CONF_DIR + "/sats.csv")) {
+            BufferedReader r = new BufferedReader(reader);
+            r.readLine(); // skip header
+            String line;
+            while ((line=r.readLine())!=null) {
+                StringTokenizer tok = new StringTokenizer(line, ",");
+                GPSSat sat = new GPSSat();
+                try {
+                    sat.prn = Integer.parseInt(tok.nextToken());
+                    sat.svn = Integer.parseInt(tok.nextToken());
+                    sat.name = tok.nextToken();
+                    sat.date = tok.nextToken();
+                    sat.orbit = tok.nextToken();
+                    sat.signal = tok.nextToken();
+                    sat.clock = tok.nextToken();
+                    sats.put(sat.prn, sat);
+                } catch (Exception e) {}
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @OnN2KMessage
     public void onMessage(N2KMessage message) {
@@ -151,7 +228,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
             satellites.clear();
             nSat = 0;
             for (N2KSatellites.Sat s : ss.getSatellites()) {
-                SatInfo si = new SatInfo(String.format("%02d", s.getId()), s.getElevation(), s.getAzimuth(), s.getSrn(), "Used".equalsIgnoreCase(s.getStatus()));
+                SatInfo si = new SatInfo(String.format("%02d", s.getId()), s.getElevation(), s.getAzimuth(), s.getSrn(), "Used".equalsIgnoreCase(s.getStatus()), sats);
                 satellites.add(si);
                 if (si.isUsed()) nSat++;
             }

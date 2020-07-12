@@ -9,6 +9,7 @@ import com.aboni.nmea.router.agent.impl.NMEAGPSStatusAgent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -32,16 +33,9 @@ public class GPSStatusService extends JSONWebService {
         setLoader(config -> {
             if (statusProvider != null) {
                 JSONObject res = new JSONObject();
-
                 List<JSONObject> l = new ArrayList<>();
                 for (NMEAGPSStatusAgent.SatInfo s : statusProvider.getSatellites()) {
-                    JSONObject jSat = new JSONObject();
-                    jSat.put("id", s.getId());
-                    jSat.put("elevation", s.getElevation());
-                    jSat.put("azimuth", s.getAzimuth());
-                    jSat.put("noise", s.getNoise());
-                    jSat.put("used", s.isUsed());
-                    l.add(jSat);
+                    l.add(getJsonSat(s));
                 }
                 res.put("satsList", new JSONArray(l));
 
@@ -51,18 +45,36 @@ public class GPSStatusService extends JSONWebService {
                     res.put("longitude", Utils.formatLongitude(p.getLongitude()));
                     res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(p.getTimestamp())));
                 }
-
-                if (!Double.isNaN(statusProvider.getCOG())) res.put("COG", statusProvider.getCOG());
-                if (!Double.isNaN(statusProvider.getSOG())) res.put("SOG", statusProvider.getSOG());
-                if (!Double.isNaN(statusProvider.getHDOP())) res.put("HDOP", statusProvider.getHDOP());
-
+                setDoubleValue(res, statusProvider.getCOG(), "COG");
+                setDoubleValue(res, statusProvider.getSOG(), "SOG");
+                setDoubleValue(res, statusProvider.getHDOP(), "HDOP");
                 res.put("fix", statusProvider.getGPSFix().toString());
-
                 res.put("anchor", statusProvider.isAnchor(System.currentTimeMillis()));
-
                 return res;
             }
             return null;
         });
+    }
+
+    private void setDoubleValue(JSONObject res, double v, String attribute) {
+        if (!Double.isNaN(v)) res.put(attribute, v);
+    }
+
+    @Nonnull
+    private JSONObject getJsonSat(NMEAGPSStatusAgent.SatInfo s) {
+        JSONObject jSat = new JSONObject();
+        jSat.put("id", s.getId());
+        jSat.put("elevation", s.getElevation());
+        jSat.put("azimuth", s.getAzimuth());
+        jSat.put("noise", s.getNoise());
+        jSat.put("used", s.isUsed());
+        if (s.getSat()!=null) {
+            jSat.put("name", s.getSat().getName());
+            jSat.put("clock", s.getSat().getClock());
+            jSat.put("orbit", s.getSat().getOrbit());
+            jSat.put("signal", s.getSat().getSignal());
+            jSat.put("date", s.getSat().getDate());
+        }
+        return jSat;
     }
 }

@@ -76,7 +76,7 @@ public class N2KSatellites extends N2KMessageImpl {
      */
 
 
-    protected N2KSatellites(byte[] data) {
+    public N2KSatellites(byte[] data) {
         super(getDefaultHeader(PGN), data);
         fill();
     }
@@ -128,8 +128,5 @@ public class N2KSatellites extends N2KMessageImpl {
 
             satellites.add(s);
         }
-        /*for (Sat ss: satellites) {
-            if (ss.id!=0xFF) System.out.printf("%d %d %d %d %s\n", ss.id, ss.elevation, ss.azimuth, ss.srn, ss.status);
-        }*/
     }
 }

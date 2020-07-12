@@ -19,7 +19,6 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -47,7 +46,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     private String description;
 
     @Inject
-    public NMEAUDPReceiver(@NotNull NMEACache cache, CANBOATDecoder n2kDecoder) {
+    public NMEAUDPReceiver(@NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(true, false);
         input = new NMEAInputManager(getLogger());

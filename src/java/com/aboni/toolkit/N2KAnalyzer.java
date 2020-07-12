@@ -1,12 +1,7 @@
 package com.aboni.toolkit;
 
+import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.canboat.PGNParser;
-import com.aboni.nmea.router.n2k.canboat.PGNs;
-import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,26 +10,23 @@ import java.io.IOException;
 public class N2KAnalyzer {
 
     private static boolean waitForMore;
-    private static PGNParser pgnWaitingForMore;
+    private static N2KMessageParser pgnWaitingForMore;
 
     private static class QueuedPGN {
-        PGNParser pgnParser;
+        N2KMessageParser pgnParser;
         long lastSentence;
     }
 
 
     public static void main(String[] args) {
         try {
-            PGNs pgNs = new PGNs("conf/pgns.json", null);
-            CANBOATDecoder dec = (CANBOATDecoder) new CANBOATDecoderImpl();
-
             try (FileReader r = new FileReader("nmea2000_1.log")) {
                 BufferedReader bf = new BufferedReader(r);
                 String line;
                 while ((line = bf.readLine()) != null) {
                     try {
-                        PGNParser p = new PGNParser(pgNs, line);
-                        if (waitForMore && p.getPgn() == pgnWaitingForMore.getPgn()) {
+                        N2KMessageParser p = new N2KMessageParser(line);
+                        if (waitForMore && p.getHeader().getPgn() == pgnWaitingForMore.getHeader().getPgn()) {
                             pgnWaitingForMore.addMore(line);
                             if (!pgnWaitingForMore.needMore()) {
                                 p = pgnWaitingForMore;
@@ -51,16 +43,7 @@ public class N2KAnalyzer {
                             } else {
                                 System.out.println("\n------------------------------------------- Multi " + (p.getLength() > 8));
                                 System.out.println(line);
-                                JSONObject j = p.getCanBoatJson();
-                                if (j != null) {
-                                    Sentence[] nmeas = dec.getSentence(j);
-                                    if (nmeas != null) {
-                                        for (Sentence ss : dec.getSentence(j)) {
-                                            if (ss != null) System.out.println(ss);
-                                        }
-                                    }
-                                }
-                                System.out.println(j);
+                                System.out.println(p.toString());
                             }
                         }
                     } catch (PGNDataParseException e) {
@@ -78,6 +61,4 @@ public class N2KAnalyzer {
             e.printStackTrace();
         }
     }
-
-
 }

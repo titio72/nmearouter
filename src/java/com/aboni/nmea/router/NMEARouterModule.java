@@ -36,8 +36,6 @@ import com.aboni.nmea.router.data.track.impl.*;
 import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.impl.*;
-import com.aboni.nmea.router.n2k.canboat.CANBOATDecoder;
-import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
@@ -83,6 +81,5 @@ public class NMEARouterModule extends AbstractModule {
         bind(TimeSeriesReader.class).to(DBTimeSeriesReader.class);
         bind(QueryFactory.class).to(QueryFactoryImpl.class);
         bind(FilterSetSerializer.class).annotatedWith(Names.named(Constants.TAG_JSON)).to(JSONFilterSetSerializer.class);
-        bind(CANBOATDecoder.class).to(CANBOATDecoderImpl.class);
     }
 }

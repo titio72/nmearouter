@@ -15,14 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KStream;
-import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.canboat.*;
-import com.aboni.nmea.router.n2k.canboat.impl.CANBOATDecoderImpl;
-import com.aboni.nmea.router.n2k.canboat.impl.CANBOATStreamImpl;
 import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
 import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
 import com.aboni.utils.Log;
@@ -35,44 +30,6 @@ public class NMEAInputManager {
 
     private interface StringInputHandler {
         Output getSentences(String pgn);
-    }
-
-    private static class N2KHandlerStd implements StringInputHandler {
-        private PGNs pgnDefinitions;
-        private final CANBOATDecoder decoder;
-        private final CANBOATStream canboatStream;
-        private final Log logger;
-
-        N2KHandlerStd(Log logger) {
-            this.logger = logger;
-            try {
-                pgnDefinitions = new PGNs(Constants.CONF_DIR + "/pgns.json", logger);
-            } catch (PGNDefParseException e) {
-                logger.error("Cannot load pgns definitions", e);
-                pgnDefinitions = null;
-            }
-            decoder = new CANBOATDecoderImpl();
-            canboatStream = new CANBOATStreamImpl(logger);
-        }
-
-        @Override
-        public Output getSentences(String pgn) {
-            if (pgnDefinitions == null) return getEmpty(pgn);
-            try {
-                PGNParser p = new PGNParser(pgnDefinitions, pgn.trim());
-                CANBOATPGNMessage msg = canboatStream.getMessage(p.getCanBoatJson());
-                if (msg != null && msg.getFields() != null) {
-                    return new Output(pgn, decoder.getSentence(msg.getPgn(), msg.getFields()), null);
-                }
-            } catch (PGNDataParseException e) {
-                if (!e.isUnsupported()) {
-                    logger.debug(getErrorString(pgn, e));
-                }
-            } catch (Exception e) {
-                logger.warning(getErrorString(pgn, e));
-            }
-            return getEmpty(pgn);
-        }
     }
 
     private static class N2KHandlerExp implements StringInputHandler {
@@ -100,31 +57,6 @@ public class NMEAInputManager {
         }
     }
 
-    private static class JSONHandler implements StringInputHandler {
-        private final CANBOATDecoder decoder;
-        private final CANBOATStream canboatStream;
-        private final Log logger;
-
-        JSONHandler(Log logger) {
-            this.logger = logger;
-            decoder = new CANBOATDecoderImpl();
-            canboatStream = new CANBOATStreamImpl(logger);
-        }
-
-        @Override
-        public Output getSentences(String pgn) {
-            try {
-                CANBOATPGNMessage msg = canboatStream.getMessage(pgn);
-                if (msg != null && msg.getFields() != null) {
-                    return new Output(pgn, decoder.getSentence(msg.getPgn(), msg.getFields()), null);
-                }
-            } catch (Exception e) {
-                logger.debug("Can't read N2K sentence {" + pgn + "} {" + e + "}");
-            }
-            return getEmpty(pgn);
-        }
-    }
-
     private static class NMEA0183Handler implements StringInputHandler {
 
         private final Log logger;
@@ -145,14 +77,11 @@ public class NMEAInputManager {
     }
 
     private final Log logger;
-    private static final boolean EXPERIMENTAL = true;
     private final StringInputHandler n2kHandler;
-    private final StringInputHandler jsonHandler;
     private final StringInputHandler nmeaHandler;
 
     public NMEAInputManager(@NotNull Log logger) {
-        n2kHandler = EXPERIMENTAL ? new N2KHandlerExp(logger) : new N2KHandlerStd(logger);
-        jsonHandler = new JSONHandler(logger);
+        n2kHandler = new N2KHandlerExp(logger);
         nmeaHandler = new NMEA0183Handler(logger);
         this.logger = logger;
     }
@@ -178,9 +107,7 @@ public class NMEAInputManager {
     }
 
     public Output getSentence(String sSentence) {
-        if (sSentence.startsWith("{\"timestamp\":\"")) {
-            return jsonHandler.getSentences(sSentence);
-        } else if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
+        if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
             return nmeaHandler.getSentences(sSentence);
         } else if (sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
             return n2kHandler.getSentences(sSentence);

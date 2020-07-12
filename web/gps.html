@@ -18,6 +18,7 @@
 
 	app.controller("myCtrl", function($scope, $sce) {
 		$scope.data = gps_data
+        $scope.sz = sz;
 		$scope.to_trusted = function(html_code) {
 		    return $sce.trustAsHtml(html_code);
 		}
@@ -31,18 +32,23 @@
         controllerScope.$evalAsync();
 	}
 
+
+    var sz = 250;
+
 	function loadGPS() {
         gps_data = httpGetGps();
         for (i = 0; i<gps_data.satsList.length; i++) {
 			var a = gps_data.satsList[i];
-			if (!a.used)
+			if (!a.used) {
 				a.color = "#222222";
-			else
+                a.used_str = "No";
+            } else {
                 a.color = "#33AA33";
-            
+                a.used_str = "Yes";
+            }
             if (a.id!="255") {
-                a.x = 150 + 140 * Math.cos(a.azimuth / 180.0 * Math.PI) * Math.cos(a.elevation / 180.0 * Math.PI);
-                a.y = 150 + 140 * Math.sin(a.azimuth / 180.0 * Math.PI) * Math.cos(a.elevation / 180.0 * Math.PI);
+                a.x = 200 + 190 * Math.cos(a.azimuth / 180.0 * Math.PI) * Math.cos(a.elevation / 180.0 * Math.PI);
+                a.y = 200 + 190 * Math.sin(a.azimuth / 180.0 * Math.PI) * Math.cos(a.elevation / 180.0 * Math.PI);
             } else {
             	a.x = 150;
             	a.y = 150;
@@ -70,18 +76,21 @@
 
 </script>
 <body ng-app="nmearouter">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+    <li class="breadcrumb-item active">GPS</li>
+</ol>
 <div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">GPS</li>
-    </ol>
-
     <div class="row alert alert-primary">
-        <div class="col-4">
+        <div class="col-4 col-md-4  col-sm-12">
             <table width="100%">
                 <tr>
                     <td width="50%">Fix</td>
-                    <td width="50%" style="text-align: right;">{{data.fix}}
+                    <td width="50%" style="text-align: right;">{{data.fix}}</td>
+                </tr>
+                <tr>
+                    <td>Time</td>
+                    <td style="text-align: right;">{{data.timestamp}}</td>
                 </tr>
                 <tr>
                     <td>Lat</td>
@@ -105,26 +114,41 @@
                 </tr>
             </table>
         </div>
-        <div class="col-8">
-            <svg width="300" height="300" style="display: block; margin: auto;">
-                <circle cx="50%" cy="50%" r="140" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
-                <circle cx="50%" cy="50%" r="70" stroke="gray" stroke-width="3" fill="#EEFFFF"></circle>
-                <line x1="10" y1="150" x2="290" y2="150" stroke="gray" stroke-width="3"/>
-                <line x1="150" y1="10" x2="150" y2="290" stroke="gray" stroke-width="3"/>
+        <div class="col-8 col-md-8 col-sm-12">
+            <svg width="400" height="400" style="display: block; margin: auto;">
+                <circle cx="50%" cy="50%" r="190" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
+                <circle cx="50%" cy="50%" r="95" stroke="gray" stroke-width="3" fill="#EEFFFF"></circle>
+                <line x1="10" y1="200" x2="390" y2="200" stroke="gray" stroke-width="3"/>
+                <line x1="200" y1="10" x2="200" y2="390" stroke="gray" stroke-width="3"/>
                 <circle ng-repeat="s in data.satsList" ng-if="s.id!=255" cx="{{s.x}}" cy="{{s.y}}" r="10" stroke="gray"
                         stroke-width="3" fill="{{s.color}}"></circle>
                 <text ng-repeat="s in data.satsList" ng-if="s.id!=255" x="{{s.x}}" y="{{s.y}}" text-anchor="middle"
-                      >{{s.id}}
+                      fill="white">{{s.id}}
                 </text>
             </svg>
         </div>
     </div>
+    <div class="row alert alert-heading">
+        <div class="col-1">SRN</div>
+        <div class="col-2">Name</div>
+        <div class="col-2">Signal</div>
+        <div class="col-2">Orbit</div>
+        <div class="col-1">Clock</div>
+        <div class="col-1">Elevation</div>
+        <div class="col-1">Azimuth</div>
+        <div class="col-1">Noise</div>
+        <div class="col-1">In use</div>
+    </div>
     <div class="row alert alert-primary" ng-repeat="s in data.satsList" ng-if="s.id!='255'">
-        <div class="col-3">{{s.id}}</div>
-        <div class="col-2">{{s.elevation}}</div>
-        <div class="col-2">{{s.azimuth}}</div>
-        <div class="col-2">{{s.noise}}</div>
-        <div class="col-3">{{s.used}}</div>
+        <div class="col-1">{{s.id}}</div>
+        <div class="col-2">{{s.name}}</div>
+        <div class="col-2">{{s.signal}}</div>
+        <div class="col-2">{{s.orbit}}</div>
+        <div class="col-1">{{s.clock}}</div>
+        <div class="col-1">{{s.elevation}}&deg;</div>
+        <div class="col-1">{{s.azimuth}}&deg;</div>
+        <div class="col-1">{{s.noise}}db</div>
+        <div class="col-1">{{s.used_str}}</div>
     </div>
 </div>
 </body>
