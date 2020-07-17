@@ -76,7 +76,13 @@ public class ListenerWrapper {
     }
 
     public void onSentence(Sentence s, String src) {
-        privateOnSentence(new Object[]{s, src}, listeners);
+        for (Method m : listeners) {
+            try {
+                m.invoke(o, s, src);
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Error pushing message", e);
+            }
+        }
     }
 
     public boolean isJSON() {
@@ -91,22 +97,23 @@ public class ListenerWrapper {
         return !listenersN2K.isEmpty();
     }
 
-    private<T> void privateOnSentence(T sentence, List<Method> methods) {
-        Object[] p = new Object[]{sentence};
-        for (Method m : methods) {
+    public void onSentence(JSONObject s) {
+        for (Method m : listenersJSON) {
             try {
-                m.invoke(o, p);
+                m.invoke(o, s);
             } catch (Exception e) {
                 ServerLog.getLogger().error("Error pushing message", e);
             }
         }
     }
 
-    public void onSentence(JSONObject s) {
-        privateOnSentence(s, listenersJSON);
-    }
-
     public void onSentence(N2KMessage s) {
-        privateOnSentence(s, listenersN2K);
+        for (Method m : listenersN2K) {
+            try {
+                m.invoke(o, s);
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Error pushing message", e);
+            }
+        }
     }
 }
