@@ -13,6 +13,7 @@
     var gps_data_empty = {
         satsList: [],
         timestamp: 'N/A',
+        local_timestamp: 'N/A',
         latitude: 'N/A',
         longitude: 'N/A',
         SOG: 0,
@@ -68,6 +69,10 @@
                 }
             }
             gps_data.satsList.sort(compare);
+            if (gps_data.timestamp!=null && gps_data.timestamp!="" && gps_data.timestamp!="N/A") {
+                var m = new moment(gps_data.timestamp);
+                gps_data.local_timestamp = m.format();
+            }
         } else {
             gps_data = gps_data_empty;      
         }
@@ -106,6 +111,10 @@
                 <tr>
                     <td>Time</td>
                     <td style="text-align: right;">{{data.timestamp}}</td>
+                </tr>
+                <tr>
+                    <td>Local Time</td>
+                    <td style="text-align: right;">{{data.local_timestamp}}</td>
                 </tr>
                 <tr>
                     <td>Lat</td>

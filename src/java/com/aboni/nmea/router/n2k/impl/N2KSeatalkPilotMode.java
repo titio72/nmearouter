@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.n2k.PilotMode;
 import com.aboni.nmea.router.n2k.SeatalkPilotMode;
 
 public class N2KSeatalkPilotMode extends N2KMessageImpl {
@@ -32,11 +33,11 @@ public class N2KSeatalkPilotMode extends N2KMessageImpl {
         mode.setMode(m);
     }
 
-    public SeatalkPilotMode.Mode getMode() {
+    public PilotMode getMode() {
         return mode.getPilotMode();
     }
 
-    public void getMode(SeatalkPilotMode.Mode m) {
+    public void getMode(PilotMode m) {
         mode.setPilotMode(m);
     }
 

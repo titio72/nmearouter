@@ -43,7 +43,11 @@ public class GPSStatusService extends JSONWebService {
                 if (p != null) {
                     res.put("latitude", Utils.formatLatitude(p.getLatitude()));
                     res.put("longitude", Utils.formatLongitude(p.getLongitude()));
-                    res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochMilli(p.getTimestamp())));
+                }
+
+                Instant time = statusProvider.getPositionTime();
+                if (time != null) {
+                    res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(time));
                 }
                 setDoubleValue(res, statusProvider.getCOG(), "COG");
                 setDoubleValue(res, statusProvider.getSOG(), "SOG");

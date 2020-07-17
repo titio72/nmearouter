@@ -2,15 +2,6 @@ package com.aboni.nmea.router.n2k;
 
 public class SeatalkPilotMode {
 
-    public enum Mode {
-        STANDBY,
-        AUTO,
-        VANE,
-        TRACK,
-        TRACK_DEV,
-        UNKNOWN
-    }
-
     private int mode = 0xFF;
     private int subMode = 0xFF;
     private int data = 0xFF;
@@ -26,7 +17,7 @@ public class SeatalkPilotMode {
         setData(d);
     }
 
-    public void setPilotMode(Mode m) {
+    public void setPilotMode(PilotMode m) {
         switch (m) {
             case STANDBY:
                 mode = 0;
@@ -52,13 +43,13 @@ public class SeatalkPilotMode {
         }
     }
 
-    public Mode getPilotMode() {
-        if (mode == 0 && subMode == 0) return Mode.STANDBY;
-        else if (mode == 64 && subMode == 0) return Mode.AUTO;
-        else if (mode == 0 && subMode == 1) return Mode.VANE;
-        else if (mode == 128 && subMode == 1) return Mode.TRACK;
-        else if (mode == 129 && subMode == 1) return Mode.TRACK_DEV;
-        else return Mode.UNKNOWN;
+    public PilotMode getPilotMode() {
+        if (mode == 0 && subMode == 0) return PilotMode.STANDBY;
+        else if (mode == 64 && subMode == 0) return PilotMode.AUTO;
+        else if (mode == 0 && subMode == 1) return PilotMode.VANE;
+        else if (mode == 128 && subMode == 1) return PilotMode.TRACK;
+        else if (mode == 129 && subMode == 1) return PilotMode.TRACK_DEV;
+        else return PilotMode.UNKNOWN;
     }
 
     public int getMode() {

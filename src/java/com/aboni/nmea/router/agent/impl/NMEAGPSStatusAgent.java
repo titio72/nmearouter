@@ -10,6 +10,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.impl.N2KGNSSPositionUpdate;
 import com.aboni.nmea.router.n2k.impl.N2KSOGAdCOGRapid;
 import com.aboni.nmea.router.n2k.impl.N2KSatellites;
+import com.aboni.nmea.router.n2k.impl.N2KSystemTime;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -107,6 +108,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     private double hdop;
 
     private GeoPositionT position;
+    private Instant timestamp;
     private final PositionStats stats;
     private final StationaryManager stationaryManager;
 
@@ -179,6 +181,9 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         if (message != null) {
             int pgn = message.getHeader().getPgn();
             switch (pgn) {
+                case N2KSystemTime.PGN:
+                    handleSystemTime((N2KSystemTime) message);
+                    break;
                 case N2KGNSSPositionUpdate.PGN:
                     handlePositionMessage((N2KGNSSPositionUpdate) message);
                     break;
@@ -191,6 +196,12 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
                 default:
                     break;
             }
+        }
+    }
+
+    private void handleSystemTime(N2KSystemTime message) {
+        synchronized (stats) {
+            timestamp = message.getTime();
         }
     }
 
@@ -306,7 +317,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     @Override
     public Instant getPositionTime() {
         synchronized (stats) {
-            return (position != null) ? position.getInstant() : null;
+            return (position != null) ? position.getInstant() : timestamp;
         }
     }
 
