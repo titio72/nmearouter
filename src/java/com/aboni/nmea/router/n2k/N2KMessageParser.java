@@ -27,6 +27,10 @@ public class N2KMessageParser {
         SUPPORTED.put(130311, N2KEnvironment311.class); // Env parameter: temperature, humidity, pressure
         SUPPORTED.put(127245, N2KRudder.class); // Rudder
         SUPPORTED.put(127251, N2KRateOfTurn.class); // Rate of turn
+        SUPPORTED.put(65359, N2KSeatalkPilotHeading.class); // Seatalk: Pilot Heading
+        SUPPORTED.put(65360, N2KSeatalkPilotLockedHeading.class); // Seatalk: Pilot Locked Heading
+        SUPPORTED.put(65379, N2KSeatalkPilotMode.class); // Seatalk: Pilot Mode
+        SUPPORTED.put(65345, N2KSeatalkPilotWindDatum.class); // Seatalk: wind datum
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update
@@ -36,14 +40,9 @@ public class N2KMessageParser {
         SUPPORTED.add(129040L); // AIS Class B position report ext
         SUPPORTED.add(129794L); // AIS Class A Static and Voyage Related Data
         SUPPORTED.add(129038L); // AIS Class A Position Report
-        SUPPORTED.add(127237L); // Heading track control
-        SUPPORTED.add(65359L); // Seatalk: Pilot Heading
-        SUPPORTED.add(65379L); // Seatalk: Pilot Mode
-        SUPPORTED.add(65360L); // Seatalk: Pilot Locked Heading
         */
         /* to add */
         // "PGN": 129798, "Id": "aisSarAircraftPositionReport", "Description": "AIS SAR Aircraft Position Report"
-        // "PGN": 65345,  "Id": "seatalkPilotWindDatum",        "Description": "Seatalk: Pilot Wind Datum"
     }
 
     public static boolean isSupported(int pgn) {
@@ -91,7 +90,7 @@ public class N2KMessageParser {
     private N2KMessage message;
 
     public N2KMessageParser(String pgnString) throws PGNDataParseException {
-        parse(pgnString);
+        pgnData = getDecodedHeader(pgnString);
     }
 
     public N2KMessageHeader getHeader() {
@@ -153,10 +152,6 @@ public class N2KMessageParser {
         }
     }
 
-    private void parse(String s) throws PGNDataParseException {
-        pgnData = getDecodedHeader(s);
-    }
-
     public boolean isSupported() {
         return SUPPORTED.containsKey(pgnData.pgn);
     }
@@ -167,7 +162,7 @@ public class N2KMessageParser {
             if (c != null) {
                 Constructor<?> constructor = null;
                 try {
-                    constructor = c.getConstructor(N2KMessageHeader.class, (new byte[0]).getClass());
+                    constructor = c.getConstructor(N2KMessageHeader.class, byte[].class);
                     message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
                 } catch (Exception e) {
                     throw new PGNDataParseException("Error decoding N2K message", e);

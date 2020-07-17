@@ -15,15 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters;
 
-import com.aboni.nmea.sentences.NMEASentenceFilter;
-
 import java.util.Iterator;
 
-public interface NMEASentenceFilterSet extends NMEASentenceFilter {
+public interface NMEAFilterSet extends NMEAFilter {
 
-    Iterator<NMEASentenceFilter> getFilters();
+    Iterator<NMEAFilter> getFilters();
 
-    void addFilter(NMEASentenceFilter f);
+    void addFilter(NMEAFilter f);
 
-    void dropFilter(NMEASentenceFilter f);
+    void dropFilter(NMEAFilter f);
 }

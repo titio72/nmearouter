@@ -11,12 +11,19 @@ public class SeatalkPilotMode {
         UNKNOWN
     }
 
-    private int mode = -1;
-    private int subMode = -1;
+    private int mode = 0xFF;
+    private int subMode = 0xFF;
+    private int data = 0xFF;
 
     public SeatalkPilotMode(int m, int s) {
         setMode(m);
         setSubMode(s);
+    }
+
+    public SeatalkPilotMode(int m, int s, int d) {
+        setMode(m);
+        setSubMode(s);
+        setData(d);
     }
 
     public void setPilotMode(Mode m) {
@@ -68,5 +75,13 @@ public class SeatalkPilotMode {
 
     public void setSubMode(int m) {
         subMode = m;
+    }
+
+    public int getData() {
+        return data;
+    }
+
+    public void setData(int data) {
+        this.data = data;
     }
 }

@@ -19,7 +19,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.agent.*;
-import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.impl.ListenerWrapper;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -38,16 +38,16 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private static class InternalSource implements NMEASource {
 
-        NMEASentenceFilterSet filterSet;
+        NMEAFilterSet filterSet;
         NMEASentenceListener listener;
 
         @Override
-        public NMEASentenceFilterSet getFilter() {
+        public NMEAFilterSet getFilter() {
             return filterSet;
         }
 
         @Override
-        public void setFilter(NMEASentenceFilterSet s) {
+        public void setFilter(NMEAFilterSet s) {
             filterSet = s;
         }
 
@@ -59,44 +59,34 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private class InternalTarget implements NMEATarget {
 
-        NMEASentenceFilterSet filterSet;
+        NMEAFilterSet filterSet;
 
         @Override
-        public NMEASentenceFilterSet getFilter() {
+        public NMEAFilterSet getFilter() {
             return filterSet;
         }
 
         @Override
-        public void setFilter(NMEASentenceFilterSet s) {
+        public void setFilter(NMEAFilterSet s) {
             filterSet = s;
         }
 
         @Override
         public void pushMessage(RouterMessage mm) {
             try {
-                if (listenerWrapper == null) {
-                    listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
-                }
-                if (mm.getPayload() instanceof Sentence) {
-                    Sentence s = (Sentence) mm.getPayload();
-                    if (isStarted() && (getFilter() == null || getFilter().match(s, mm.getSource()))) {
-                        if (listenerWrapper.isNMEA()) {
+                if (isStarted()) {
+                    if (listenerWrapper == null) {
+                        listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
+                    }
+                    if (mm.getPayload() instanceof Sentence) {
+                        Sentence s = (Sentence) mm.getPayload();
+                        if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(s, mm.getSource()))) {
                             listenerWrapper.onSentence(s, mm.getSource());
                         }
-                    }
-                } else if (mm.getPayload() instanceof N2KMessage) {
-                    N2KMessage s = (N2KMessage) mm.getPayload();
-                    if (isStarted()) {
-                        if (listenerWrapper.isN2K()) {
-                            listenerWrapper.onSentence(s);
-                        }
-                    }
-                } else if (mm.getPayload() instanceof JSONObject) {
-                    JSONObject s = (JSONObject) mm.getPayload();
-                    if (isStarted()) {
-                        if (listenerWrapper.isJSON()) {
-                            listenerWrapper.onSentence(s);
-                        }
+                    } else if (listenerWrapper.isN2K() && mm.getPayload() instanceof N2KMessage) {
+                        listenerWrapper.onSentence((N2KMessage) mm.getPayload());
+                    } else if (listenerWrapper.isJSON() && mm.getPayload() instanceof JSONObject) {
+                        listenerWrapper.onSentence((JSONObject) mm.getPayload());
                     }
                 }
             } catch (Exception t) {
@@ -297,7 +287,6 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(Sentence sentence) {
         if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
-            getLogger().debug("Notify Sentence {" + sentence.toSentence() + "}");
             List<Sentence> toSend = processorSet.getSentences(sentence, getName());
             for (Sentence s : toSend)
                 sourceIf.listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
@@ -311,7 +300,6 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(JSONObject m) {
         if (isStarted()) {
-            getLogger().debug("Notify Sentence {" + m + "}");
             sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
         }
     }

@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -24,9 +24,9 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAGenericFilterProc implements NMEAPostProcess {
 
-    private final NMEASentenceFilter filter;
+    private final NMEAFilter filter;
 
-    public NMEAGenericFilterProc(@NotNull NMEASentenceFilter filter) {
+    public NMEAGenericFilterProc(@NotNull NMEAFilter filter) {
         this.filter = filter;
     }
 

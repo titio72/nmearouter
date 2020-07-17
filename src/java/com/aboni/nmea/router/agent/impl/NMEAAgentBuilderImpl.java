@@ -22,11 +22,11 @@ import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
 import com.aboni.nmea.router.conf.*;
 import com.aboni.nmea.router.conf.net.NetConf;
-import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSet;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSet.TYPE;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl.TYPE;
 import com.aboni.nmea.sentences.NMEA2JSONb;
-import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -146,20 +146,20 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
     private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
         if (agentFilterable != null && filterConf != null) {
             if (agentFilterable.getFilter() == null) {
-                NMEAFilterSet ff = new NMEAFilterSet(filterConf.isWhitelist() ? TYPE.WHITELIST : TYPE.BLACKLIST);
+                NMEAFilterSetImpl ff = new NMEAFilterSetImpl(filterConf.isWhitelist() ? TYPE.WHITELIST : TYPE.BLACKLIST);
                 agentFilterable.setFilter(ff);
             }
             setFilter(filterConf, agentFilterable.getFilter());
         }
     }
 
-    private static void setFilter(FilterSet conf, NMEASentenceFilterSet dest) {
-        if (conf!=null && dest!=null) {
-            for (Filter fConf: conf.getFilter()) {
+    private static void setFilter(FilterSet conf, NMEAFilterSet dest) {
+        if (conf != null && dest != null) {
+            for (Filter fConf : conf.getFilter()) {
                 NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(
-                        "*".equals(fConf.getSentence())?"":fConf.getSentence(),
-                        "*".equals(fConf.getTalker())?null:TalkerId.parse(fConf.getTalker()),
-                        "*".equals(fConf.getSource())?"":fConf.getSource()
+                        "*".equals(fConf.getSentence()) ? "" : fConf.getSentence(),
+                        "*".equals(fConf.getTalker()) ? null : TalkerId.parse(fConf.getTalker()),
+                        "*".equals(fConf.getSource()) ? "" : fConf.getSource()
                 );
                 dest.addFilter(sF);
             }

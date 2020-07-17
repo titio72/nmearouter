@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -25,13 +25,13 @@ import net.sf.marineapi.nmea.util.Position;
 import javax.inject.Inject;
 import java.util.*;
 
-public class NMEAPositionFilter implements NMEASentenceFilter {
+public class NMEAPositionFilter implements NMEAFilter {
 
-    private static final int 	RESET_TIMEOUT = 5*60000; 	// 5 minutes
-    private static final int 	SPEED_GATE = 35; 			// Kn - if faster reject
-    private static final int 	MAGIC_DISTANCE = 15; 		// Points farther from the median of samples will be discarded
+    private static final int RESET_TIMEOUT = 5 * 60000;    // 5 minutes
+    private static final int SPEED_GATE = 35;            // Kn - if faster reject
+    private static final int MAGIC_DISTANCE = 15;        // Points farther from the median of samples will be discarded
     private static final double SMALL_MAGIC_DISTANCE = 0.5; // Points farther from the last valid point will be discarded
-    private static final int 	SIZE = 30; 					// ~30s of samples
+    private static final int SIZE = 30;                    // ~30s of samples
 
     private final List<Position> positions = new LinkedList<>();
     private Position lastValid;

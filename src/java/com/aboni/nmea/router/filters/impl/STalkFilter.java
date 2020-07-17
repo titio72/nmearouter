@@ -15,21 +15,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public class STalkFilter implements NMEASentenceFilter {
+public class STalkFilter implements NMEAFilter {
 
-	private final String command;
-	private final boolean negate;
+    private final String command;
+    private final boolean negate;
 
-	public STalkFilter(String command, boolean negate) {
-		this.command = command;
-		this.negate = negate;
-	}
+    public STalkFilter(String command, boolean negate) {
+        this.command = command;
+        this.negate = negate;
+    }
 
-	public String getCommand() {
+    public String getCommand() {
 		return command;
 	}
 

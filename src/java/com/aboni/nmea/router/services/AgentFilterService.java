@@ -19,9 +19,9 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
-import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
 import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
@@ -60,7 +60,7 @@ public class AgentFilterService extends JSONWebService {
                 String type = config.getParameter("type");
                 boolean inOut = "out".equals(config.getParameter("direction", "in"));
                 ServerLog.getLogger().info("Setting filters {" + inOut + "} type {" + type + "} sentences {" + toString(sentences) + "}");
-                NMEAFilterSet fs = getNMEAFilterSet(sentences, type);
+                NMEAFilterSetImpl fs = getNMEAFilterSet(sentences, type);
                 String msg = setFilter(router, agentStatusManager, agentName, fs, inOut ? IN_OUT.OUT : IN_OUT.IN);
                 return serializer.getJSON(router, msg);
             } catch (Exception e) {
@@ -69,9 +69,9 @@ public class AgentFilterService extends JSONWebService {
         });
     }
 
-    private static NMEAFilterSet getNMEAFilterSet(String[] sentences, String type) {
-        NMEAFilterSet fs;
-        fs = new NMEAFilterSet("whitelist".equals(type) ? NMEAFilterSet.TYPE.WHITELIST : NMEAFilterSet.TYPE.BLACKLIST);
+    private static NMEAFilterSetImpl getNMEAFilterSet(String[] sentences, String type) {
+        NMEAFilterSetImpl fs;
+        fs = new NMEAFilterSetImpl("whitelist".equals(type) ? NMEAFilterSetImpl.TYPE.WHITELIST : NMEAFilterSetImpl.TYPE.BLACKLIST);
         boolean atLeast1 = false;
         for (String str : sentences) {
             str = str.trim();
@@ -93,7 +93,7 @@ public class AgentFilterService extends JSONWebService {
     }
 
     private String setFilter(@NotNull NMEARouter router, @NotNull AgentStatusManager agentStatusManager,
-                             @NotNull String agentName, NMEAFilterSet fs, IN_OUT inOut) {
+                             @NotNull String agentName, NMEAFilterSetImpl fs, IN_OUT inOut) {
         NMEAAgent a = router.getAgent(agentName);
         String msg;
         if (a != null) {

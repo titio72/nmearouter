@@ -19,6 +19,8 @@ import java.util.List;
 
 public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
 
+    private static final Sentence[] TEMPLATE = new Sentence[0];
+
     private static final DateTimeFormatter fTIME = DateTimeFormatter.ofPattern("HHmmss");
     private static final DateTimeFormatter fDATE = DateTimeFormatter.ofPattern("ddMMyyyy");
 
@@ -63,10 +65,10 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                 case 127251:
                     return handleRateOfTurn((N2KRateOfTurn) message); // Rate of turn
                 default:
-                    return new Sentence[0];
+                    return TEMPLATE;
             }
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleSatellites(N2KSatellites message) {
@@ -87,10 +89,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                 s.setSentenceCount(sentences);
                 s.setSentenceIndex(i + 1);
                 List<SatelliteInfo> l = new ArrayList<>();
-                for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++) {
+                for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++, satIxGroup++, satIx++) {
                     N2KSatellites.Sat sat = satsList.get(satIx);
-                    satIx++;
-                    satIxGroup++;
                     if (sat.getId() != 0xFF) {
                         SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
                         l.add(sInfo);
@@ -100,7 +100,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                 res.add(s);
             }
         }
-        return res.toArray(new Sentence[0]);
+        return res.toArray(TEMPLATE);
     }
 
     private Sentence[] handleSystemTime(N2KSystemTime message) {
@@ -114,7 +114,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             zda.setLocalZoneMinutes(0);
             return new Sentence[]{zda};
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleSOGAdCOGRapid(N2KSOGAdCOGRapid message) {
@@ -134,7 +134,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             ss.add(vtg);
         }
         Collections.addAll(ss, handleRMC());
-        return ss.toArray(new Sentence[0]);
+        return ss.toArray(TEMPLATE);
     }
 
     private Sentence[] handleRMC() {
@@ -158,7 +158,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                 return new Sentence[]{rmc};
             }
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handlePosition(N2KGNSSPositionUpdate message) {
@@ -174,7 +174,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             ss.add(gll);
         }
         Collections.addAll(ss, handleRMC());
-        return ss.toArray(new Sentence[0]);
+        return ss.toArray(TEMPLATE);
     }
 
     private Sentence[] handleHeading(N2KHeading message) {
@@ -193,10 +193,10 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     hdt.setHeading(heading);
                     return new Sentence[]{hdt};
                 default:
-                    return new Sentence[0];
+                    return TEMPLATE;
             }
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleSpeed(N2KSpeed message) {
@@ -210,7 +210,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             vhw.setSpeedKmh(speed * 1.852);
             return new Sentence[]{vhw};
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleWaterDepth(N2KWaterDepth message) {
@@ -224,7 +224,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             if (!Double.isNaN(range)) dpt.setMaximum(range);
             return new Sentence[]{dpt};
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleWindData(N2KWindData message) {
@@ -240,7 +240,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             mwv.setStatus(DataStatus.ACTIVE);
             return new Sentence[]{mwv};
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleAttitude(N2KAttitude message) {
@@ -264,7 +264,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         if (send)
             return new Sentence[]{xdr};
         else
-            return new Sentence[0];
+            return TEMPLATE;
     }
 
     private Sentence[] handleEnvironment310(N2KEnvironment310 message) {
@@ -274,7 +274,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             s.setTemperature(waterTemp);
             return new Sentence[]{s};
         }
-        return new Sentence[0];
+        return TEMPLATE;
     }
 
     private Sentence[] handleEnvironment311(N2KEnvironment311 message) {
@@ -311,7 +311,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         if (send) {
             res.add(xdr);
         }
-        return res.toArray(new Sentence[0]);
+        return res.toArray(TEMPLATE);
     }
 
     private Sentence[] handleRudder(N2KRudder message) {
@@ -323,7 +323,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             rsa.setStatus(Side.STARBOARD, DataStatus.ACTIVE);
             return new Sentence[]{rsa};
         } else {
-            return new Sentence[0];
+            return TEMPLATE;
         }
     }
 
@@ -335,7 +335,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             rot.setRateOfTurn(rate);
             return new Sentence[]{rot};
         } else {
-            return new Sentence[0];
+            return TEMPLATE;
         }
     }
 }

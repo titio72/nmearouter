@@ -16,10 +16,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.filters.FilterSetSerializer;
-import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSet.TYPE;
-import com.aboni.nmea.sentences.NMEABasicSentenceFilter;
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl.TYPE;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,12 +35,12 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
     private static final String FILTERS = "filters";
 
     @Override
-    public String exportFilter(NMEASentenceFilterSet s) {
+    public String exportFilter(NMEAFilterSet s) {
         if (s != null) {
             JSONObject obj = new JSONObject();
             JSONArray sentences = new JSONArray();
-            for (Iterator<NMEASentenceFilter> i = s.getFilters(); i.hasNext(); ) {
-                NMEASentenceFilter f = i.next();
+            for (Iterator<NMEAFilter> i = s.getFilters(); i.hasNext(); ) {
+                NMEAFilter f = i.next();
                 if (f instanceof NMEABasicSentenceFilter) {
                     sentences.put(getJSONFilter((NMEABasicSentenceFilter) f));
                 } else if (f instanceof STalkFilter) {
@@ -49,22 +48,22 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
                 }
             }
             obj.put(FILTERS, sentences);
-            if (s instanceof NMEAFilterSet) {
-                obj.put("type", ((NMEAFilterSet) s).getType() == TYPE.BLACKLIST ? "blacklist" : "whitelist");
+            if (s instanceof NMEAFilterSetImpl) {
+                obj.put("type", ((NMEAFilterSetImpl) s).getType() == TYPE.BLACKLIST ? "blacklist" : "whitelist");
             }
             return obj.toString();
         } else return null;
     }
 
     @Override
-    public NMEASentenceFilterSet importFilter(String jsonFilter) {
+    public NMEAFilterSet importFilter(String jsonFilter) {
         if (jsonFilter != null && !jsonFilter.isEmpty()) {
             JSONObject jFs = new JSONObject(jsonFilter);
             if (jFs.has(FILTERS)) {
-                NMEAFilterSet res = new NMEAFilterSet(("whitelist".equals(jFs.getString("type"))) ? TYPE.WHITELIST : TYPE.BLACKLIST);
+                NMEAFilterSetImpl res = new NMEAFilterSetImpl(("whitelist".equals(jFs.getString("type"))) ? TYPE.WHITELIST : TYPE.BLACKLIST);
                 JSONArray jFa = jFs.getJSONArray(FILTERS);
                 for (Object _fJ : jFa) {
-                    NMEASentenceFilter f = getNMEASentenceFilter((JSONObject) _fJ);
+                    NMEAFilter f = getNMEASentenceFilter((JSONObject) _fJ);
                     res.addFilter(f);
                 }
                 return res;
@@ -85,7 +84,7 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
 
     private JSONObject getJSONFilter(NMEABasicSentenceFilter f) {
         JSONObject fJ = new JSONObject();
-        if (f.getTalkerId()==null) {
+        if (f.getTalkerId() == null) {
             fJ.put(TALKER, f.getTalkerId());
         } else {
             fJ.put(TALKER, f.getTalkerId().toString());
@@ -95,8 +94,8 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
         return fJ;
     }
 
-    private NMEASentenceFilter getNMEASentenceFilter(JSONObject filter) {
-        NMEASentenceFilter f;
+    private NMEAFilter getNMEASentenceFilter(JSONObject filter) {
+        NMEAFilter f;
         String sentence = filter.optString(SENTENCE);
         if (sentence.startsWith(STALK_NEGATE)) {
             String cmd = sentence.substring(STALK_NEGATE.length());

@@ -17,7 +17,7 @@ package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -26,7 +26,7 @@ import net.sf.marineapi.nmea.sentence.VHWSentence;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-public class NMEASpeedFilter implements NMEASentenceFilter {
+public class NMEASpeedFilter implements NMEAFilter {
 
     private final NMEACache cache;
     private final SpeedMovingAverage speedMovingAverage;

@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.BitUtils;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 
@@ -9,8 +8,8 @@ import java.util.Map;
 
 public abstract class N2KMessageImpl implements N2KMessage {
 
-    protected N2KMessageHeader header;
-    protected byte[] data;
+    protected final N2KMessageHeader header;
+    protected final byte[] data;
 
     protected boolean isValidByte(int b) {
         return b != 0xFF;
@@ -21,8 +20,8 @@ public abstract class N2KMessageImpl implements N2KMessage {
     }
 
     private static class DefaultHeader implements N2KMessageHeader {
-        int pgn;
-        Instant now;
+        final int pgn;
+        final Instant now;
 
         DefaultHeader(int pgn, Instant now) {
             this.pgn = pgn;

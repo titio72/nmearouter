@@ -114,7 +114,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             sSentence = new String(p.getData(), 0, p.getLength());
             updateReadStats(sSentence);
             NMEAInputManager.Output out = input.getSentence(sSentence);
-            if (out != null && !out.isEmpyy()) {
+            if (out != null && !out.isEmpty()) {
                 for (Sentence sentence : out.nmeaSentences) {
                     if (sentence != null) {
                         updateReadSentencesStats(false);
@@ -153,10 +153,6 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         synchronized (this) {
             stop = true;
         }
-    }
-
-    private void onSentenceRead(Sentence e) {
-        notify(e);
     }
 
     @Override

@@ -10,13 +10,12 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.impl.N2KGNSSPositionUpdate;
 import com.aboni.nmea.router.n2k.impl.N2KSOGAdCOGRapid;
 import com.aboni.nmea.router.n2k.impl.N2KSatellites;
-import jdk.management.resource.internal.inst.FileInputStreamRMHooks;
+import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
@@ -24,7 +23,7 @@ import java.util.*;
 
 public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
-    public class GPSSat {
+    public static class GPSSat {
         private int prn;
         private int svn;
         private String name;
@@ -96,22 +95,15 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
             this.sat = sats.getOrDefault(Integer.parseInt(id), null);
         }
 
-        private String id;
-        private int elevation;
-        private int azimuth;
-        private int noise;
-        private boolean used;
-        private GPSSat sat;
+        private final String id;
+        private final int elevation;
+        private final int azimuth;
+        private final int noise;
+        private final boolean used;
+        private final GPSSat sat;
     }
 
-    public enum GPSFix {
-        UNKNOWN,
-        NO_FIX,
-        FIX_2D,
-        FIX_3D
-    }
-
-    private GPSFix gpxFix;
+    private String gpxFix = "Unknown";
     private double hdop;
 
     private GeoPositionT position;
@@ -148,38 +140,43 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         loadGPSSats();
     }
 
-    private Map<Integer, GPSSat> sats = new HashMap<>();
+    private final Map<Integer, GPSSat> sats = new HashMap<>();
 
     private void loadGPSSats() {
         try (FileReader reader = new FileReader(Constants.CONF_DIR + "/sats.csv")) {
             BufferedReader r = new BufferedReader(reader);
-            r.readLine(); // skip header
-            String line;
-            while ((line=r.readLine())!=null) {
-                StringTokenizer tok = new StringTokenizer(line, ",");
-                GPSSat sat = new GPSSat();
-                try {
-                    sat.prn = Integer.parseInt(tok.nextToken());
-                    sat.svn = Integer.parseInt(tok.nextToken());
-                    sat.name = tok.nextToken();
-                    sat.date = tok.nextToken();
-                    sat.orbit = tok.nextToken();
-                    sat.signal = tok.nextToken();
-                    sat.clock = tok.nextToken();
-                    sats.put(sat.prn, sat);
-                } catch (Exception e) {}
+            String line = r.readLine(); // skip header
+            while ((line = r.readLine()) != null) {
+                GPSSat sat = getSat(line);
+                if (sat != null) sats.put(sat.prn, sat);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            ServerLog.getLogger().errorForceStacktrace("Cannot open satellites definition", e);
+        }
+    }
+
+    private GPSSat getSat(String line) {
+        try {
+            GPSSat sat = new GPSSat();
+            StringTokenizer tok = new StringTokenizer(line, ",");
+            sat.prn = Integer.parseInt(tok.nextToken());
+            sat.svn = Integer.parseInt(tok.nextToken());
+            sat.name = tok.nextToken();
+            sat.date = tok.nextToken();
+            sat.orbit = tok.nextToken();
+            sat.signal = tok.nextToken();
+            sat.clock = tok.nextToken();
+            return sat;
+        } catch (Exception e) {
+            ServerLog.getLogger().error(String.format("Cannot load satellite definition {%s}", line), e);
+            return null;
         }
     }
 
 
     @OnN2KMessage
     public void onMessage(N2KMessage message) {
-        if (message!=null) {
+        if (message != null) {
             int pgn = message.getHeader().getPgn();
             switch (pgn) {
                 case N2KGNSSPositionUpdate.PGN:
@@ -199,48 +196,39 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     private void handlePositionMessage(N2KGNSSPositionUpdate message) {
         synchronized (stats) {
-            N2KGNSSPositionUpdate u = message;
-            if (u.getPosition() != null) {
-                onPosition(u.getTimestamp(), u.getPosition());
-                setHDOP(u.getHDOP());
-                String fix = u.getMethod();
-                switch (fix) {
-                    case "no GNSS":
-                        setGPSFix(GPSFix.NO_FIX);
-                        break;
-                    case "GNSS fix":
-                        setGPSFix(GPSFix.FIX_2D);
-                        break;
-                    case "Precise GNSS":
-                        setGPSFix(GPSFix.FIX_3D);
-                        break;
-                    default:
-                        setGPSFix(GPSFix.UNKNOWN);
-                }
+            if (message.getPosition() != null) {
+                onPosition(message.getTimestamp(), message.getPosition());
+                setHDOP(message.getHDOP());
+                setGPSFix(message.getMethod());
             }
         }
     }
 
     private void handleSatellitesMessage(N2KSatellites message) {
-        N2KSatellites ss = message;
         synchronized (satellites) {
             lastSatTime = getCache().getNow();
             satellites.clear();
             nSat = 0;
-            for (N2KSatellites.Sat s : ss.getSatellites()) {
+            for (N2KSatellites.Sat s : message.getSatellites()) {
                 SatInfo si = new SatInfo(String.format("%02d", s.getId()), s.getElevation(), s.getAzimuth(), s.getSrn(), "Used".equalsIgnoreCase(s.getStatus()), sats);
                 satellites.add(si);
                 if (si.isUsed()) nSat++;
+            }
+            if (nSat == 0) {
+                position = null;
+                setGPSFix("no GNSS");
+                setHDOP(99);
+                setSOG(Double.NaN);
+                setCOG(Double.NaN);
             }
         }
     }
 
     private void handleSOGMessage(N2KSOGAdCOGRapid message) {
-        N2KSOGAdCOGRapid s = message;
         synchronized (sogSync) {
             lastSogTime = getCache().getNow();
-            setSOG(s.getSOG());
-            setCOG(s.getCOG());
+            setSOG(message.getSOG());
+            setCOG(message.getCOG());
         }
     }
 
@@ -254,8 +242,8 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         position = p;
     }
 
-    private void setGPSFix(GPSFix fix) {
-        this.gpxFix = fix;
+    private void setGPSFix(String fix) {
+        gpxFix = fix;
     }
 
     private void setHDOP(double hdop) {
@@ -285,7 +273,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     }
 
     @Override
-    public GPSFix getGPSFix() {
+    public String getGPSFix() {
         return gpxFix;
     }
 
@@ -346,7 +334,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     @Override
     public List<SatInfo> getSatellites() {
         synchronized (satellites) {
-            return Collections.unmodifiableList(satellites);
+            return new ArrayList<>(satellites);
         }
     }
 

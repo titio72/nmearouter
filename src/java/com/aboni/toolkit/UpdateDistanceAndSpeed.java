@@ -33,7 +33,7 @@ public class UpdateDistanceAndSpeed {
     public void load() {
         try (DBHelper db = new DBHelper(false)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(
-                    "select lat, lon, TS, id from track where TS>'2020-06-20' and TS<'2020-06-22'")) {
+                    "select lat, lon, TS, id from track where TS>'2020-06-27' and TS<'2020-06-30'")) {
 
                 if (st.execute()) {
                     try (ResultSet rs = st.getResultSet()) {

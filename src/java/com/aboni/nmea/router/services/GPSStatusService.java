@@ -30,7 +30,7 @@ public class GPSStatusService extends JSONWebService {
                 break;
             }
         }
-        setLoader(config -> {
+        setLoader((ServiceConfig config) -> {
             if (statusProvider != null) {
                 JSONObject res = new JSONObject();
                 List<JSONObject> l = new ArrayList<>();
@@ -48,7 +48,7 @@ public class GPSStatusService extends JSONWebService {
                 setDoubleValue(res, statusProvider.getCOG(), "COG");
                 setDoubleValue(res, statusProvider.getSOG(), "SOG");
                 setDoubleValue(res, statusProvider.getHDOP(), "HDOP");
-                res.put("fix", statusProvider.getGPSFix().toString());
+                res.put("fix", statusProvider.getGPSFix());
                 res.put("anchor", statusProvider.isAnchor(System.currentTimeMillis()));
                 return res;
             }

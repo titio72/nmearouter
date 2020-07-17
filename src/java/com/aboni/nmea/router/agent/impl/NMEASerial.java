@@ -220,19 +220,7 @@ public class NMEASerial extends NMEAAgentImpl {
         String s = "";
         try {
             s = reader.readLine();
-            if (s != null) {
-                updateReadStats(s);
-                NMEAInputManager.Output out = input.getSentence(s);
-                if (out != null && !out.isEmpyy()) {
-                    for (Sentence sentence : out.nmeaSentences) {
-                        if (sentence != null) {
-                            updateReadStats(false);
-                            notify(sentence);
-                        }
-                    }
-                    if (out.n2KMessage != null) notify(out.n2KMessage);
-                }
-            }
+            handleStringMessage(s);
         } catch (SerialPortTimeoutException e) {
             getLogger().debug(logTag + " read timeout, waiting");
             Utils.pause(PORT_WAIT_FOR_DATA);
@@ -243,6 +231,22 @@ public class NMEASerial extends NMEAAgentImpl {
             getLogger().error(String.format(logError, e) + String.format(" string {%s}", s));
         } catch (Exception e) {
             getLogger().errorForceStacktrace(String.format(logError, e.getMessage()), e);
+        }
+    }
+
+    private void handleStringMessage(String s) {
+        if (s != null) {
+            updateReadStats(s);
+            NMEAInputManager.Output out = input.getSentence(s);
+            if (out != null && !out.isEmpty()) {
+                for (Sentence sentence : out.nmeaSentences) {
+                    if (sentence != null) {
+                        updateReadStats(false);
+                        notify(sentence);
+                    }
+                }
+                if (out.n2KMessage != null) notify(out.n2KMessage);
+            }
         }
     }
 

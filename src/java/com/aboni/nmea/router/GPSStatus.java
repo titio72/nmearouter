@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 public interface GPSStatus {
-    NMEAGPSStatusAgent.GPSFix getGPSFix();
+    String getGPSFix();
 
     double getHDOP();
 

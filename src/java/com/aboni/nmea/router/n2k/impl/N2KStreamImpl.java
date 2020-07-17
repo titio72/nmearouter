@@ -36,7 +36,7 @@ public class N2KStreamImpl implements N2KStream {
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
 
-    private static final boolean THROTTLING = false;
+    private final boolean throttling;
 
     private static class Payload {
         int hashcode;
@@ -47,10 +47,16 @@ public class N2KStreamImpl implements N2KStream {
     private final Map<Integer, Payload> payloadMap;
     private final Log logger;
 
+
     public N2KStreamImpl(Log logger) {
+        this(logger, false);
+    }
+
+    public N2KStreamImpl(Log logger, boolean throttling) {
         this.logger = logger;
         payloadMap = new HashMap<>();
         pgnSources = new HashMap<>();
+        this.throttling = throttling;
         loadSources();
     }
 
@@ -99,7 +105,7 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private boolean isSend(int pgn, long ts, byte[] data) {
-        if (THROTTLING) {
+        if (throttling) {
             Payload p = payloadMap.getOrDefault(pgn, null);
             if (p == null) {
                 p = new Payload();

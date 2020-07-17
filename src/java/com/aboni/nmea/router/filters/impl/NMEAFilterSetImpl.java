@@ -15,16 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.filters.NMEASentenceFilterSet;
-import com.aboni.nmea.sentences.NMEASentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import java.util.*;
 
-public class NMEAFilterSet implements NMEASentenceFilterSet {
+public class NMEAFilterSetImpl implements com.aboni.nmea.router.filters.NMEAFilterSet {
 
-    private final List<NMEASentenceFilter> filters;
-    private final Set<NMEASentenceFilter> filtersSet;
+    private final List<NMEAFilter> filters;
+    private final Set<NMEAFilter> filtersSet;
 
     private final TYPE whiteOrBlackList;
 
@@ -33,7 +32,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
         WHITELIST
     }
 
-    public NMEAFilterSet(TYPE type) {
+    public NMEAFilterSetImpl(TYPE type) {
         filters = new ArrayList<>();
         filtersSet = new HashSet<>();
         whiteOrBlackList = type;
@@ -43,21 +42,21 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
         return whiteOrBlackList;
     }
 
-    public void addFilter(NMEASentenceFilter f) {
+    public void addFilter(NMEAFilter f) {
         if (!filtersSet.contains(f)) {
             filters.add(f);
             filtersSet.add(f);
         }
     }
 
-    public void dropFilter(NMEASentenceFilter f) {
+    public void dropFilter(NMEAFilter f) {
         if (filtersSet.contains(f)) {
             filters.remove(f);
             filtersSet.remove(f);
         }
     }
 
-    public Iterator<NMEASentenceFilter> getFilters() {
+    public Iterator<NMEAFilter> getFilters() {
         return filters.iterator();
     }
 
@@ -67,7 +66,7 @@ public class NMEAFilterSet implements NMEASentenceFilterSet {
 
     public boolean match(Sentence sentence, String src) {
         if (!filters.isEmpty()) {
-            for (Iterator<NMEASentenceFilter> i = getFilters(); i.hasNext(); ) {
+            for (Iterator<NMEAFilter> i = getFilters(); i.hasNext(); ) {
                 if (i.next().match(sentence, src)) return whiteOrBlackList == TYPE.WHITELIST;
             }
         }

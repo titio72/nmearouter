@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.filters;
 
 public interface FilterSetSerializer {
-    String exportFilter(NMEASentenceFilterSet s);
+    String exportFilter(NMEAFilterSet s);
 
-    NMEASentenceFilterSet importFilter(String jsonFilter);
+    NMEAFilterSet importFilter(String serializedFilter);
 }

@@ -40,7 +40,7 @@ public class NMEAInputManager {
         N2KHandlerExp(Log logger) {
             this.logger = logger;
             decoder = new N2KMessage2NMEA0183Impl();
-            stream = new N2KStreamImpl(logger);
+            stream = new N2KStreamImpl(logger, false);
         }
 
         @Override
@@ -51,10 +51,11 @@ public class NMEAInputManager {
                     return new Output(pgn, decoder.getSentence(msg), msg);
                 }
             } catch (Exception e) {
-                logger.warning(getErrorString(pgn, e));
+                logger.warning(String.format("Cannot parse n2k sentence {%s} {%s}", pgn, e.getMessage()));
             }
             return getEmpty(pgn);
         }
+
     }
 
     private static class NMEA0183Handler implements StringInputHandler {
@@ -93,11 +94,11 @@ public class NMEAInputManager {
             n2KMessage = m;
         }
 
-        String original;
-        N2KMessage n2KMessage;
-        Sentence[] nmeaSentences;
+        final String original;
+        final N2KMessage n2KMessage;
+        final Sentence[] nmeaSentences;
 
-        public boolean isEmpyy() {
+        public boolean isEmpty() {
             return n2KMessage == null && (nmeaSentences == null || nmeaSentences.length == 0);
         }
     }
@@ -115,9 +116,5 @@ public class NMEAInputManager {
             logger.debug("Cannot find a suitable handler for {" + sSentence + "}");
             return getEmpty(sSentence);
         }
-    }
-
-    private static String getErrorString(String s, Exception e) {
-        return String.format("Cannot parse n2k sentence {%s} {%s}", s, e.getMessage());
     }
 }

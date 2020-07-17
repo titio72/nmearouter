@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.n2k;
 
+import com.aboni.nmea.router.n2k.impl.BitUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
