@@ -1,9 +1,9 @@
 package com.aboni.nmea.router.filters;
 
-import net.sf.marineapi.nmea.sentence.Sentence;
+import com.aboni.nmea.router.RouterMessage;
 
 public interface NMEAFilter {
 
-    boolean match(Sentence s, String src);
+    boolean match(RouterMessage m);
 
 }

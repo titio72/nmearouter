@@ -117,6 +117,9 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             case "GPSStatus":
                 agent = buildGPSStatus((GPSStatusAgent) a, q);
                 break;
+            case "AIS":
+                agent = buildAIS((AISAgent) a, q);
+                break;
             default:
                 break;
         }
@@ -130,6 +133,17 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
             loadFilters(tgt, tgtFilterConf);
         }
         return agent;
+    }
+
+    private NMEAAgent buildAIS(AISAgent a, QOS q) {
+        NMEAAISAgent ais = null;
+        try {
+            ais = ThingsFactory.getInstance(NMEAAISAgent.class);
+            ais.setup(a.getName(), q);
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Cannot create GPS Status Agent", e);
+        }
+        return ais;
     }
 
     private NMEAAgent buildGPSStatus(GPSStatusAgent a, QOS q) {

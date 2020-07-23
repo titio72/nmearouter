@@ -147,7 +147,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     private void loadGPSSats() {
         try (FileReader reader = new FileReader(Constants.CONF_DIR + "/sats.csv")) {
             BufferedReader r = new BufferedReader(reader);
-            String line = r.readLine(); // skip header
+            @SuppressWarnings("UnusedAssignment") String line = r.readLine(); // skip header
             while ((line = r.readLine()) != null) {
                 GPSSat sat = getSat(line);
                 if (sat != null) sats.put(sat.prn, sat);
@@ -177,7 +177,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
 
     @OnN2KMessage
-    public void onMessage(N2KMessage message) {
+    public void onMessage(N2KMessage message, String source) {
         if (message != null) {
             int pgn = message.getHeader().getPgn();
             switch (pgn) {

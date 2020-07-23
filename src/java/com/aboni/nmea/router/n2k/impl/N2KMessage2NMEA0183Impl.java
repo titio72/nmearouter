@@ -78,6 +78,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         nGroups = (nGroups * 12) < nSat ? nGroups + 1 : nGroups;
         int satIx = 0;
         List<N2KSatellites.Sat> satsList = message.getSatellites();
+        List<String> satInUse = new ArrayList<>();
         for (int group = 0; group < nGroups; group++) {
             int satsInGroup = Math.min(nSat - (group * 12), 12);
             int sentences = satsInGroup / 4;
@@ -94,12 +95,20 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     if (sat.getId() != 0xFF) {
                         SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
                         l.add(sInfo);
+                        if ("Used".equals(sat.getStatus())) {
+                            satInUse.add(sInfo.getId());
+                        }
                     }
                 }
                 s.setSatelliteInfo(l);
                 res.add(s);
             }
         }
+        GSASentence gsa = (GSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSA);
+        gsa.setMode(FaaMode.AUTOMATIC);
+        gsa.setSatelliteIds(satInUse.toArray(new String[0]));
+        gsa.setFixStatus(satInUse.size() > 0 ? GpsFixStatus.GPS_2D : GpsFixStatus.GPS_NA);
+        res.add(gsa);
         return res.toArray(TEMPLATE);
     }
 

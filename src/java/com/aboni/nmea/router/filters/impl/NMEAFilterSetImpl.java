@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import java.util.*;
 
@@ -64,10 +64,11 @@ public class NMEAFilterSetImpl implements com.aboni.nmea.router.filters.NMEAFilt
         return filters.size();
     }
 
-    public boolean match(Sentence sentence, String src) {
+    @Override
+    public boolean match(RouterMessage m) {
         if (!filters.isEmpty()) {
             for (Iterator<NMEAFilter> i = getFilters(); i.hasNext(); ) {
-                if (i.next().match(sentence, src)) return whiteOrBlackList == TYPE.WHITELIST;
+                if (i.next().match(m)) return whiteOrBlackList == TYPE.WHITELIST;
             }
         }
         return whiteOrBlackList == TYPE.BLACKLIST;

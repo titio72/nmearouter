@@ -80,13 +80,15 @@ public class NMEAAgentImpl implements NMEAAgent {
                     }
                     if (mm.getPayload() instanceof Sentence) {
                         Sentence s = (Sentence) mm.getPayload();
-                        if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(s, mm.getSource()))) {
+                        if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(mm))) {
                             listenerWrapper.onSentence(s, mm.getSource());
                         }
                     } else if (listenerWrapper.isN2K() && mm.getPayload() instanceof N2KMessage) {
-                        listenerWrapper.onSentence((N2KMessage) mm.getPayload());
+                        listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
                     } else if (listenerWrapper.isJSON() && mm.getPayload() instanceof JSONObject) {
-                        listenerWrapper.onSentence((JSONObject) mm.getPayload());
+                        listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
+                    } else {
+                        getLogger().error(String.format("Unknown message type {%s}", mm.getPayload()));
                     }
                 }
             } catch (Exception t) {
@@ -276,7 +278,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private boolean checkSourceFilter(Sentence sentence) {
         NMEASource s = getSource();
         if (s!=null && s.getFilter()!=null)
-            return s.getFilter().match(sentence, getName());
+            return s.getFilter().match(RouterMessageImpl.createMessage(sentence, getName(), cache.getNow()));
         return true;
     }
 

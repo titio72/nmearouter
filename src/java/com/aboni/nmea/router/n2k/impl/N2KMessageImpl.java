@@ -174,10 +174,10 @@ public abstract class N2KMessageImpl implements N2KMessage {
     protected static String getASCII(byte[] b) {
         // remove padding
         int l = b.length;
-        char last = (char) b[l - 1];
+        byte last = b[l - 1];
         while (last == 0xff || last == ' ' || last == 0 || last == '@') {
             l--;
-            last = (char) b[l - 1];
+            last = b[l - 1];
         }
         char c;
         int k;
@@ -193,31 +193,21 @@ public abstract class N2KMessageImpl implements N2KMessage {
                 case '\n':
                     sb.append("\\n");
                     break;
-
                 case '\r':
                     sb.append("\\r");
                     break;
-
                 case '\t':
                     sb.append("\\t");
                     break;
                 case '"':
                     sb.append("\\\"");
                     break;
-
                 case '\\':
                     sb.append("\\\\");
                     break;
-
                 case '/':
                     sb.append("\\/");
                     break;
-
-                case '\377':
-                    // 0xff has been seen on recent Simrad VHF systems, and it seems to indicate
-                    // end-of-field, with noise following. Assume this does not break other systems.
-                    break;
-
                 default:
                     if (c >= ' ' && c <= '~') {
                         sb.append(c);

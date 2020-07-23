@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnJSONMessage;
 import com.aboni.utils.ServerLog;
 import org.json.JSONObject;
 
@@ -108,8 +108,8 @@ public class EventSocket {
             }
         }
 
-        @OnSentence
-        public void onSentence(JSONObject obj) {
+        @OnJSONMessage
+        public void onSentence(JSONObject obj, String src) {
             synchronized (this) {
                 if (active && obj != null) {
                     try {

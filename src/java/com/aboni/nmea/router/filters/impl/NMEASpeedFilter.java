@@ -17,6 +17,7 @@ package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -80,7 +81,8 @@ public class NMEASpeedFilter implements NMEAFilter {
     }
 
     @Override
-    public boolean match(Sentence s, String src) {
+    public boolean match(RouterMessage m) {
+        Sentence s = m.getSentence();
         if (s instanceof VHWSentence) {
             VHWSentence vhw = (VHWSentence) s;
             double speed = vhw.getSpeedKnots();

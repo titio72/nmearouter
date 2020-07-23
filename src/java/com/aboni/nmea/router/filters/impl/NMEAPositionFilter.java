@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.utils.ServerLog;
@@ -176,9 +177,10 @@ public class NMEAPositionFilter implements NMEAFilter {
     }
 
     @Override
-    public boolean match(Sentence s, String src) {
+    public boolean match(RouterMessage m) {
+        Sentence s = m.getSentence();
         if (s instanceof RMCSentence) {
-            return acceptPoint((RMCSentence)s);
+            return acceptPoint((RMCSentence) s);
         } else {
             return true;
         }

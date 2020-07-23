@@ -32,6 +32,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
     public WebService getService(String target) {
         WebService s = null;
         switch (target) {
+            case "/ais":
+                s = ThingsFactory.getInstance(AISTargetsService.class);
+                break;
             case "/gps":
                 s = ThingsFactory.getInstance(GPSStatusService.class);
                 break;

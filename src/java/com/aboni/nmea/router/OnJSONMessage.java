@@ -15,22 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.n2k.N2KMessage;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import org.json.JSONObject;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface RouterMessage {
-
-    long getTimestamp();
-
-    String getSource();
-
-    Object getPayload();
-
-    N2KMessage getN2KMessage();
-
-    Sentence getSentence();
-
-    JSONObject getJSON();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface OnJSONMessage {
 
 }

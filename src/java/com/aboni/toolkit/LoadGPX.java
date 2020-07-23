@@ -62,7 +62,7 @@ public class LoadGPX {
     // <navionics_speed>0.000<
 
 
-    private static final String pattern = "lat=\"(.+)\" lon=\"(.+)\".+time\\>(.+)\\<\\/time\\>.*navionics_speed\\>(.+)\\<\\/navionics_speed";
+    private static final String pattern = "lat=\"(.+)\" lon=\"(.+)\".+time>(.+)</time>.*navionics_speed>(.+)</navionics_speed";
     private static final Pattern rx = Pattern.compile(pattern);
 
     private static void processPoint(String toString) {

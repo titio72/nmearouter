@@ -22,6 +22,7 @@
             <xs:element name="GPXPlayerAgent" type="GPXPlayerAgent"/>
             <xs:element name="JSONAgent" type="JSONAgent"/>
             <xs:element name="GPSStatusAgent" type="GPSStatusAgent"/>
+            <xs:element name="AISAgent" type="AISAgent"/>
         </xs:choice>
 	</xs:sequence>
 </xs:complexType>
@@ -56,27 +57,35 @@
 
 <xs:complexType name="FilterSet">
 	<xs:sequence>
-		<xs:element name="Filter" type="Filter" minOccurs="0" maxOccurs="unbounded"/>
-	</xs:sequence>
-	<xs:attribute name="whitelist" type="xs:boolean" default="false"/>
+        <xs:element name="Filter" type="Filter" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="whitelist" type="xs:boolean" default="false"/>
 </xs:complexType>
 
-<xs:complexType name="Filter">
-	<xs:attribute name="source" type="xs:string" default="*"/>
-	<xs:attribute name="sentence" type="xs:string" default="*"/>
-	<xs:attribute name="talker" type="xs:string" default="*"/>
-</xs:complexType>
+    <xs:complexType name="Filter">
+        <xs:attribute name="source" type="xs:string" default="*"/>
+        <xs:attribute name="sentence" type="xs:string" default="*"/>
+        <xs:attribute name="talker" type="xs:string" default="*"/>
+    </xs:complexType>
 
-<xs:complexType name="SerialAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="Serial"/>
-			<xs:attribute name="device" type="xs:string" use="required"/>
-			<xs:attribute name="bps" type="xs:int" default="4800"/>
-			<xs:attribute name="inout" type="InOut" use="required"/>
-		</xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="AISAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="AIS"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="SerialAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="Serial"/>
+                <xs:attribute name="device" type="xs:string" use="required"/>
+                <xs:attribute name="bps" type="xs:int" default="4800"/>
+                <xs:attribute name="inout" type="InOut" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
     <xs:complexType name="GPXPlayerAgent">
         <xs:complexContent>
@@ -104,30 +113,30 @@
                 <xs:attribute name="inout" type="InOut" use="required"/>
             </xs:extension>
         </xs:complexContent>
-</xs:complexType>
+    </xs:complexType>
 
-<xs:complexType name="UdpAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:sequence>
-				<xs:element name="to" type="xs:string" maxOccurs="unbounded"/>
-			</xs:sequence>		
-			<xs:attribute name="type" type="xs:string" fixed="UDP"/>
-			<xs:attribute name="port" type="xs:int" default="1515"/>
-			<xs:attribute name="inout" type="InOut" use="required"/>
-		</xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="UdpAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:sequence>
+                    <xs:element name="to" type="xs:string" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="type" type="xs:string" fixed="UDP"/>
+                <xs:attribute name="port" type="xs:int" default="1515"/>
+                <xs:attribute name="inout" type="InOut" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-	<xs:complexType name="ConsoleAgent">
-		<xs:complexContent>
-			<xs:extension base="AgentBase">
-				<xs:attribute name="type" type="xs:string" fixed="Console"/>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
+    <xs:complexType name="ConsoleAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="Console"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-	<xs:complexType name="SensorAgent">
+    <xs:complexType name="SensorAgent">
 		<xs:complexContent>
 			<xs:extension base="AgentBase">
 				<xs:attribute name="type" type="xs:string" fixed="Sensor"/>
@@ -149,76 +158,76 @@
 				<xs:attribute name="type" type="xs:string" fixed="Gyro"/>
 			</xs:extension>
 		</xs:complexContent>
-	</xs:complexType>
+    </xs:complexType>
 
-	<xs:complexType name="SimulatorAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="Simulator"/>
-	    </xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="SimulatorAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="Simulator"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-<xs:complexType name="MeteoAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-	    	<xs:attribute name="type" type="xs:string" fixed="Meteo"/>
-	    </xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="MeteoAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="Meteo"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-<xs:complexType name="MWDAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-            <xs:attribute name="type" type="xs:string" fixed="MWDSynthesizer"/>
-        </xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="MWDAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="MWDSynthesizer"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-<xs:complexType name="TrackAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
-			<xs:attribute name="type" type="xs:string" fixed="Track"/>
-			<xs:attribute name="file" type="xs:string" default=""/>
-			<xs:attribute name="sentence" type="xs:string" default="RMC"/>
-			<xs:attribute name="interval" type="xs:int" default="30"/>
-			<xs:attribute name="intervalStatic" type="xs:int" default="1800"/>
-		</xs:extension>
-	</xs:complexContent>
-</xs:complexType>
+    <xs:complexType name="TrackAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="Track"/>
+                <xs:attribute name="file" type="xs:string" default=""/>
+                <xs:attribute name="sentence" type="xs:string" default="RMC"/>
+                <xs:attribute name="interval" type="xs:int" default="30"/>
+                <xs:attribute name="intervalStatic" type="xs:int" default="1800"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
- <xs:complexType name="JSONAgent">
-	<xs:complexContent>
-	    <xs:extension base="AgentBase">
- 			<xs:attribute name="type" type="xs:string" fixed="JSON" />
- 			<xs:attribute name="port" type="xs:int" default="1110" />
- 		</xs:extension>
-	</xs:complexContent>
- </xs:complexType>
+    <xs:complexType name="JSONAgent">
+        <xs:complexContent>
+            <xs:extension base="AgentBase">
+                <xs:attribute name="type" type="xs:string" fixed="JSON"/>
+                <xs:attribute name="port" type="xs:int" default="1110"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
-<xs:complexType name="Log">
-	<xs:sequence>
-		<xs:element name="file" type="xs:string" default="router.log"/>
-	</xs:sequence>
-	<xs:attribute name="level" type="LogLevelType" default="INFO"/>
-</xs:complexType>
+    <xs:complexType name="Log">
+        <xs:sequence>
+            <xs:element name="file" type="xs:string" default="router.log"/>
+        </xs:sequence>
+        <xs:attribute name="level" type="LogLevelType" default="INFO"/>
+    </xs:complexType>
 
-<xs:simpleType name="InOut">
-	<xs:restriction base="xs:string">
-		<xs:enumeration value="IN" />
-		<xs:enumeration value="OUT" />
-		<xs:enumeration value="INOUT" />
-	</xs:restriction>
-</xs:simpleType>
+    <xs:simpleType name="InOut">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="IN"/>
+            <xs:enumeration value="OUT"/>
+            <xs:enumeration value="INOUT"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-<xs:simpleType name="LogLevelType">
-	<xs:restriction base="xs:string">
-		<xs:enumeration value="DEBUG" />
-		<xs:enumeration value="INFO" />
-		<xs:enumeration value="WARNING" />
-		<xs:enumeration value="ERROR" />
-		<xs:enumeration value="NONE" />
-	</xs:restriction>
-</xs:simpleType>
+    <xs:simpleType name="LogLevelType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="DEBUG"/>
+            <xs:enumeration value="INFO"/>
+            <xs:enumeration value="WARNING"/>
+            <xs:enumeration value="ERROR"/>
+            <xs:enumeration value="NONE"/>
+        </xs:restriction>
+    </xs:simpleType>
 
 </xs:schema>

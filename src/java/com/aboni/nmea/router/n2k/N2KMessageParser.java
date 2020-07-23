@@ -10,36 +10,48 @@ import java.util.StringTokenizer;
 
 public class N2KMessageParser {
 
-    private static final Map<Integer, Class<? extends N2KMessage>> SUPPORTED = new HashMap<>();
+    private static class N2KDef {
+        Class messageClass;
+        boolean fast;
+
+        static N2KDef getInstance(Class c, boolean fast) {
+            N2KDef d = new N2KDef();
+            d.fast = fast;
+            d.messageClass = c;
+            return d;
+        }
+    }
+
+    private static final Map<Integer, N2KDef> SUPPORTED = new HashMap<>();
 
     static {
-        SUPPORTED.put(130306, N2KWindData.class); // Wind Data
-        SUPPORTED.put(128267, N2KWaterDepth.class); // Water Depth
-        SUPPORTED.put(128259, N2KSpeed.class); // Speed
-        SUPPORTED.put(127250, N2KHeading.class); // Vessel Heading
-        SUPPORTED.put(129025, N2KPositionRapid.class); // Position, Rapid update
-        SUPPORTED.put(129026, N2KSOGAdCOGRapid.class); // COG & SOG, Rapid Update
-        SUPPORTED.put(129029, N2KGNSSPositionUpdate.class); // GNSS Pos uptae
-        SUPPORTED.put(129540, N2KSatellites.class); // List of sats
-        SUPPORTED.put(126992, N2KSystemTime.class); // System time
-        SUPPORTED.put(127257, N2KAttitude.class); // Attitude)
-        SUPPORTED.put(130310, N2KEnvironment310.class); // Env parameter: Water temp, air temp, pressure
-        SUPPORTED.put(130311, N2KEnvironment311.class); // Env parameter: temperature, humidity, pressure
-        SUPPORTED.put(127245, N2KRudder.class); // Rudder
-        SUPPORTED.put(127251, N2KRateOfTurn.class); // Rate of turn
-        SUPPORTED.put(65359, N2KSeatalkPilotHeading.class); // Seatalk: Pilot Heading
-        SUPPORTED.put(65360, N2KSeatalkPilotLockedHeading.class); // Seatalk: Pilot Locked Heading
-        SUPPORTED.put(65379, N2KSeatalkPilotMode.class); // Seatalk: Pilot Mode
-        SUPPORTED.put(65345, N2KSeatalkPilotWindDatum.class); // Seatalk: wind datum
+        SUPPORTED.put(130306, N2KDef.getInstance(N2KWindData.class, false)); // Wind Data
+        SUPPORTED.put(128267, N2KDef.getInstance(N2KWaterDepth.class, false)); // Water Depth
+        SUPPORTED.put(128259, N2KDef.getInstance(N2KSpeed.class, false)); // Speed
+        SUPPORTED.put(127250, N2KDef.getInstance(N2KHeading.class, false)); // Vessel Heading
+        SUPPORTED.put(129025, N2KDef.getInstance(N2KPositionRapid.class, false)); // Position, Rapid update
+        SUPPORTED.put(129026, N2KDef.getInstance(N2KSOGAdCOGRapid.class, false)); // COG & SOG, Rapid Update
+        SUPPORTED.put(129029, N2KDef.getInstance(N2KGNSSPositionUpdate.class, true)); // GNSS Pos uptae
+        SUPPORTED.put(129540, N2KDef.getInstance(N2KSatellites.class, true)); // List of sats
+        SUPPORTED.put(126992, N2KDef.getInstance(N2KSystemTime.class, false)); // System time
+        SUPPORTED.put(127257, N2KDef.getInstance(N2KAttitude.class, false)); // Attitude)
+        SUPPORTED.put(130310, N2KDef.getInstance(N2KEnvironment310.class, false)); // Env parameter: Water temp, air temp, pressure
+        SUPPORTED.put(130311, N2KDef.getInstance(N2KEnvironment311.class, false)); // Env parameter: temperature, humidity, pressure
+        SUPPORTED.put(127245, N2KDef.getInstance(N2KRudder.class, false)); // Rudder
+        SUPPORTED.put(127251, N2KDef.getInstance(N2KRateOfTurn.class, false)); // Rate of turn
+        SUPPORTED.put(65359, N2KDef.getInstance(N2KSeatalkPilotHeading.class, false)); // Seatalk: Pilot Heading
+        SUPPORTED.put(65360, N2KDef.getInstance(N2KSeatalkPilotLockedHeading.class, false)); // Seatalk: Pilot Locked Heading
+        SUPPORTED.put(65379, N2KDef.getInstance(N2KSeatalkPilotMode.class, false)); // Seatalk: Pilot Mode
+        SUPPORTED.put(65345, N2KDef.getInstance(N2KSeatalkPilotWindDatum.class, false)); // Seatalk: wind datum
+        SUPPORTED.put(129038, N2KDef.getInstance(N2KAISPositionReportA.class, true)); // AIS position report class A
+        SUPPORTED.put(129039, N2KDef.getInstance(N2KAISPositionReportB.class, true)); // AIS Class B position report
+        SUPPORTED.put(129794, N2KDef.getInstance(N2KAISStaticDataA.class, true)); // AIS Class A Static and Voyage Related Data
+        SUPPORTED.put(129809, N2KDef.getInstance(N2KAISStaticDataB_PartA.class, true)); // AIS Class B static data (msg 24 Part A)
+        SUPPORTED.put(129810, N2KDef.getInstance(N2KAISStaticDataB_PartB.class, true)); // AIS Class B static data (msg 24 Part B)
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update
-        SUPPORTED.add(129809L); // AIS Class B static data (msg 24 Part A)
-        SUPPORTED.add(129810L); // AIS Class B static data (msg 24 Part B)
-        SUPPORTED.add(129039L); // AIS Class B position report
         SUPPORTED.add(129040L); // AIS Class B position report ext
-        SUPPORTED.add(129794L); // AIS Class A Static and Voyage Related Data
-        SUPPORTED.add(129038L); // AIS Class A Position Report
         */
         /* to add */
         // "PGN": 129798, "Id": "aisSarAircraftPositionReport", "Description": "AIS SAR Aircraft Position Report"
@@ -86,11 +98,20 @@ public class N2KMessageParser {
         }
     }
 
-    private PGNDecoded pgnData;
+    private final PGNDecoded pgnData;
     private N2KMessage message;
 
     public N2KMessageParser(String pgnString) throws PGNDataParseException {
         pgnData = getDecodedHeader(pgnString);
+        N2KDef d = SUPPORTED.getOrDefault(pgnData.pgn, null);
+        if (d != null && d.fast && pgnData.length == 8) {
+            pgnData.expectedLength = getData()[1] & 0xFF;
+            pgnData.currentFrame = getData()[0] & 0xFF;
+            byte[] b = new byte[6];
+            System.arraycopy(pgnData.data, 2, b, 0, 6);
+            pgnData.data = b;
+            pgnData.length = 6;
+        }
     }
 
     public N2KMessageHeader getHeader() {
@@ -106,7 +127,7 @@ public class N2KMessageParser {
     }
 
     public boolean needMore() {
-        return pgnData.expectedLength == 0 || pgnData.length < pgnData.expectedLength;
+        return pgnData.length < pgnData.expectedLength;
     }
 
     public void addMore(String s) throws PGNDataParseException {
@@ -116,7 +137,7 @@ public class N2KMessageParser {
         } else {
             int moreLen = additionalPgn.length;
             byte[] newData = new byte[pgnData.data.length + moreLen - 1];
-            System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length); //skip the first 2
+            System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
             int frameNo = additionalPgn.data[0] & 0x000000FF; // first byte is the n of the frame in the series
             if (frameNo != pgnData.currentFrame + 1) {
                 throw new PGNDataParseException(String.format("Trying to add non-consecutive frames to fast pgn:" +
@@ -158,9 +179,10 @@ public class N2KMessageParser {
 
     public N2KMessage getMessage() throws PGNDataParseException {
         if (message == null) {
-            Class<? extends N2KMessage> c = SUPPORTED.getOrDefault(pgnData.pgn, null);
-            if (c != null) {
-                Constructor<?> constructor = null;
+            N2KDef d = SUPPORTED.getOrDefault(pgnData.pgn, null);
+            if (d != null) {
+                Class<?> c = d.messageClass;
+                Constructor<?> constructor;
                 try {
                     constructor = c.getConstructor(N2KMessageHeader.class, byte[].class);
                     message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
@@ -177,6 +199,10 @@ public class N2KMessageParser {
     private static Instant parseTimestamp(String time) {
         //2011-11-24-22:42:04.437
         String sTs = time.substring(0, 10) + "T" + time.substring(11) + "Z";
-        return Instant.parse(sTs);
+        try {
+            return Instant.parse(sTs);
+        } catch (Exception e) {
+            return Instant.now();
+        }
     }
 }

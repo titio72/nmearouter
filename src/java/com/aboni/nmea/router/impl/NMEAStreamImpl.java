@@ -62,27 +62,27 @@ public class NMEAStreamImpl implements NMEAStream {
 			JSONObject msg = (payload instanceof JSONObject)?(JSONObject)payload:null;
 			Sentence s = (payload instanceof Sentence)?(Sentence)payload:null;
 			for (ListenerWrapper i: annotatedListeners.values()) {
-				try {
-					sendNMEASentence(message, s, i);
-					msg = sendJsonObject(msg, s, i);
-				} catch (Exception e) {
-					ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
-				}
-			}
-		}
-	}
+                try {
+                    sendNMEASentence(message, s, i);
+                    msg = sendJsonObject(msg, s, message.getSource(), i);
+                } catch (Exception e) {
+                    ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
+                }
+            }
+        }
+    }
 
-	private JSONObject sendJsonObject(JSONObject msg, Sentence s, ListenerWrapper i) {
-		if (i.isJSON()) {
-			msg = getJsonObject(msg, s);
-			if (msg!=null) {
-				i.onSentence(msg);
-			}
-		}
-		return msg;
-	}
+    private JSONObject sendJsonObject(JSONObject msg, Sentence s, String src, ListenerWrapper i) {
+        if (i.isJSON()) {
+            msg = getJsonObject(msg, s);
+            if (msg != null) {
+                i.onSentence(msg, src);
+            }
+        }
+        return msg;
+    }
 
-	private void sendNMEASentence(RouterMessage message, Sentence s, ListenerWrapper i) {
+    private void sendNMEASentence(RouterMessage message, Sentence s, ListenerWrapper i) {
 		if (i.isNMEA() && s != null) {
 			i.onSentence(s, message.getSource());
 		}

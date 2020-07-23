@@ -59,6 +59,33 @@ public class RouterMessageImpl<T> implements RouterMessage {
     }
 
     @Override
+    public N2KMessage getN2KMessage() {
+        try {
+            return (N2KMessage) message;
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Sentence getSentence() {
+        try {
+            return (Sentence) message;
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public JSONObject getJSON() {
+        try {
+            return (JSONObject) message;
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
     public String getSource() {
         return source;
     }

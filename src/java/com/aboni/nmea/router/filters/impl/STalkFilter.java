@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -37,13 +38,15 @@ public class STalkFilter implements NMEAFilter {
 		return negate;
 	}
 
-	@Override
-	public boolean match(Sentence s, String src) {
-		if (s instanceof STALKSentence) {
-			boolean b = command.equals(((STALKSentence)s).getCommand());
-			return negate == (!b);
-		}
-		return false;
-	}
+    @Override
+    public boolean match(RouterMessage m) {
+        Sentence s = m.getSentence();
+        if (s instanceof STALKSentence) {
+            boolean b = command.equals(((STALKSentence) s).getCommand());
+            return negate == (!b);
+        } else {
+            return false;
+        }
+    }
 
 }

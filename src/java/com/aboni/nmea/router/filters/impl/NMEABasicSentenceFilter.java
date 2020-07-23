@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -56,11 +57,19 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
     }
 
     @Override
+    public boolean match(RouterMessage m) {
+        return match(m.getSentence(), m.getSource());
+    }
+
     public boolean match(Sentence s, String src) {
-        if ((isAllSources() || getSource().equals(src)) && (isAllSentences() || getSentenceId().equals(s.getSentenceId()))) {
-            return isAllTalkers() || getTalkerId().equals(s.getTalkerId());
+        if (s != null) {
+            if ((isAllSources() || getSource().equals(src)) && (isAllSentences() || getSentenceId().equals(s.getSentenceId()))) {
+                return isAllTalkers() || getTalkerId().equals(s.getTalkerId());
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            return true;
         }
     }
 }

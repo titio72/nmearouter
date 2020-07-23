@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.router.OnJSONMessage;
 import com.aboni.nmea.router.OnN2KMessage;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -49,9 +50,11 @@ public class ListenerWrapper {
             final List<Method> allMethods = new ArrayList<>(Arrays.asList(aClass.getDeclaredMethods()));
             for (final Method method : allMethods) {
                 if (method.isAnnotationPresent(OnSentence.class)) {
-                    handleOnSentence(method);
+                    scanMethod(method, Sentence.class, listeners);
                 } else if (method.isAnnotationPresent(OnN2KMessage.class)) {
-                    handleOnMessage(method);
+                    scanMethod(method, N2KMessage.class, listenersN2K);
+                } else if (method.isAnnotationPresent(OnJSONMessage.class)) {
+                    scanMethod(method, JSONObject.class, listenersJSON);
                 }
             }
             // move to the upper class in the hierarchy in search for more methods
@@ -59,26 +62,29 @@ public class ListenerWrapper {
         }
     }
 
-    private void handleOnMessage(Method method) {
+    private void scanMethod(Method method, Class<?> c, List<Method> listenerMethods) {
         Class<?>[] params = method.getParameterTypes();
-        if (params[0].equals(N2KMessage.class)) {
-            listenersN2K.add(method);
-        }
-    }
-
-    private void handleOnSentence(Method method) {
-        Class<?>[] params = method.getParameterTypes();
-        if (params[0].equals(JSONObject.class)) {
-            listenersJSON.add(method);
-        } else if (params[0].equals(Sentence.class) && params[1].equals(String.class)) {
-            listeners.add(method);
+        if (params[0].equals(c) && params[1].equals(String.class)) {
+            listenerMethods.add(method);
         }
     }
 
     public void onSentence(Sentence s, String src) {
-        for (Method m : listeners) {
+        dispatch(s, src, listeners);
+    }
+
+    public void onSentence(N2KMessage s, String src) {
+        dispatch(s, src, listenersN2K);
+    }
+
+    public void onSentence(JSONObject s, String src) {
+        dispatch(s, src, listenersJSON);
+    }
+
+    private <T> void dispatch(T payload, String src, List<Method> listenerMethods) {
+        for (Method m : listenerMethods) {
             try {
-                m.invoke(o, s, src);
+                m.invoke(o, payload, src);
             } catch (Exception e) {
                 ServerLog.getLogger().error("Error pushing message", e);
             }
@@ -95,25 +101,5 @@ public class ListenerWrapper {
 
     public boolean isN2K() {
         return !listenersN2K.isEmpty();
-    }
-
-    public void onSentence(JSONObject s) {
-        for (Method m : listenersJSON) {
-            try {
-                m.invoke(o, s);
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error pushing message", e);
-            }
-        }
-    }
-
-    public void onSentence(N2KMessage s) {
-        for (Method m : listenersN2K) {
-            try {
-                m.invoke(o, s);
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error pushing message", e);
-            }
-        }
     }
 }

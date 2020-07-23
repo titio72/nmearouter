@@ -93,9 +93,7 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (this) {
             if (!started.get()) {
                 started.set(true);
-                initProcessingThread();
-
-                if (timer==null) {
+                if (timer == null) {
                     timer = new Timer(true);
                     timer.scheduleAtFixedRate(new TimerTask() {
 
@@ -104,6 +102,13 @@ public class NMEARouterImpl implements NMEARouter {
                             onTimerHR();
                         }
                     }, 0, TIMER_HR);
+                }
+                while (started.get()) {
+                    try {
+                        routeSentence(sentenceQueue.take());
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         }
@@ -121,18 +126,6 @@ public class NMEARouterImpl implements NMEARouter {
     @Override
     public boolean isStarted() {
         return started.get();
-    }
-
-    private void initProcessingThread() {
-        exec.execute(()->{
-            while (started.get()) {
-                try {
-                    routeSentence(sentenceQueue.take());
-                } catch (InterruptedException e1) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
     }
 
     @Override
@@ -181,30 +174,41 @@ public class NMEARouterImpl implements NMEARouter {
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
             if (m.getPayload() instanceof N2KMessage) {
-                routeToTarget(m);
+                routeToTarget(new RouterMessage[]{m});
             } else if (m.getPayload() instanceof Sentence) {
                 Sentence s = (Sentence) m.getPayload();
                 Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
+                final RouterMessage[] messages = new RouterMessage[toSend.size()];
+                int counter = 0;
                 for (Sentence ss : toSend) {
                     cache.onSentence(ss, m.getSource());
                     RouterMessage mm = RouterMessageImpl.createMessage(ss, m.getSource(), m.getTimestamp());
-                    routeToTarget(mm);
-                    stream.pushSentence(mm);
+                    messages[counter] = mm;
                 }
+                routeToTarget(messages);
+                exec.execute(() -> {
+                    for (RouterMessage mm : messages) {
+                        stream.pushSentence(mm);
+                    }
+                });
             } else if (m.getPayload() instanceof JSONObject) {
-                stream.pushSentence(m);
+                exec.execute(() -> stream.pushSentence(m));
             }
         }
     }
 
-    private void routeToTarget(RouterMessage mm) {
+    private void routeToTarget(final RouterMessage[] mm) {
         synchronized (agents) {
             for (NMEAAgent nmeaAgent : agents.values()) {
                 try {
-                    NMEATarget target = nmeaAgent.getTarget();
-                    if (target != null && !mm.getSource().equals(nmeaAgent.getName())) {
-                        exec.execute(() -> target.pushMessage(mm));
-                    }
+                    final NMEATarget target = nmeaAgent.getTarget();
+                    exec.execute(() -> {
+                        for (RouterMessage m : mm) {
+                            if (target != null && !m.getSource().equals(nmeaAgent.getName())) {
+                                target.pushMessage(m);
+                            }
+                        }
+                    });
                 } catch (Exception e) {
                     ServerLog.getLogger().error("Error dispatching to target!", e);
                 }

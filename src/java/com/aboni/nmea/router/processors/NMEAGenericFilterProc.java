@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -36,7 +37,8 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
-            return (filter.match(sentence, src) ? OK : KO);
+            // TODO get the timestamp from the real sentence - required a change of signature
+            return (filter.match(RouterMessageImpl.createMessage(sentence, src, System.currentTimeMillis())) ? OK : KO);
         } catch (Exception e) {
             ServerLog.getLogger().warning("Filter processor: Cannot analyze sentence {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;
