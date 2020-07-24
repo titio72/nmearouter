@@ -11,10 +11,10 @@ import java.util.StringTokenizer;
 public class N2KMessageParser {
 
     private static class N2KDef {
-        Class messageClass;
+        Class<? extends N2KMessage> messageClass;
         boolean fast;
 
-        static N2KDef getInstance(Class c, boolean fast) {
+        static N2KDef getInstance(Class<? extends N2KMessage> c, boolean fast) {
             N2KDef d = new N2KDef();
             d.fast = fast;
             d.messageClass = c;
@@ -46,8 +46,8 @@ public class N2KMessageParser {
         SUPPORTED.put(129038, N2KDef.getInstance(N2KAISPositionReportA.class, true)); // AIS position report class A
         SUPPORTED.put(129039, N2KDef.getInstance(N2KAISPositionReportB.class, true)); // AIS Class B position report
         SUPPORTED.put(129794, N2KDef.getInstance(N2KAISStaticDataA.class, true)); // AIS Class A Static and Voyage Related Data
-        SUPPORTED.put(129809, N2KDef.getInstance(N2KAISStaticDataB_PartA.class, true)); // AIS Class B static data (msg 24 Part A)
-        SUPPORTED.put(129810, N2KDef.getInstance(N2KAISStaticDataB_PartB.class, true)); // AIS Class B static data (msg 24 Part B)
+        SUPPORTED.put(129809, N2KDef.getInstance(n2KAISStaticDataBPartA.class, true)); // AIS Class B static data (msg 24 Part A)
+        SUPPORTED.put(129810, N2KDef.getInstance(n2KAISStaticDataBPartB.class, true)); // AIS Class B static data (msg 24 Part B)
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update

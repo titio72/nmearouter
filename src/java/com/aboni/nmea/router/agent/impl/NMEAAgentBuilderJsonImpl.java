@@ -15,127 +15,86 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEAFilterable;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.NMEAAgentBuilder;
+import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
-import com.aboni.nmea.router.conf.*;
+import com.aboni.nmea.router.conf.InOut;
+import com.aboni.nmea.router.conf.json.AgentTypes;
+import com.aboni.nmea.router.conf.json.ConfJSON;
 import com.aboni.nmea.router.conf.net.NetConf;
-import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl.TYPE;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
-import java.lang.reflect.Method;
-import java.util.StringTokenizer;
 
-public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
-
-    private static String getType(AgentBase a) {
-        Method m;
-        try {
-            m = a.getClass().getMethod("getType");
-            return (String)m.invoke(a);
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private static QOS getQos(String par) {
-        QOS q = new QOS();
-        if (par!=null) {
-            StringTokenizer t = new StringTokenizer(par, ";");
-            while (t.hasMoreTokens()) {
-                StringTokenizer t1 = new StringTokenizer(t.nextToken(), "=");
-                if (t1.countTokens()==1) {
-                    String token = t1.nextToken();
-                    q.addProp(token);
-                } else {
-                    q.addProp(t1.nextToken(), t1.nextToken());
-                }
-            }
-        }
-        return q;
-    }
+public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
 
     @Inject
-    public NMEAAgentBuilderImpl() {
+    public NMEAAgentBuilderJsonImpl() {
         // do nothing
     }
 
     @Override
-    public NMEAAgent createAgent(AgentBase a) {
+    public NMEAAgent createAgent(ConfJSON.AgentDef a) {
         NMEAAgent agent = null;
-        QOS q = getQos(a.getQos());
-        switch (getType(a)) {
-            case "Simulator":
-                agent = buildSimulator((SimulatorAgent) a, q);
+        QOS q = a.getQos();
+        switch (a.getType()) {
+            case AgentTypes.SIMULATOR:
+                agent = buildSimulator(a, q);
                 break;
-            case "Sensor":
-                agent = buildSensor((SensorAgent) a, q);
+            case AgentTypes.SENSOR:
+                agent = buildSensor(a, q);
                 break;
-            case "Gyro":
-                agent = buildGyro((GyroAgent) a, q);
+            case AgentTypes.GYRO:
+                agent = buildGyro(a, q);
                 break;
-            case "Serial":
-                agent = buildSerial((SerialAgent) a, q);
+            case AgentTypes.SERIAL:
+                agent = buildSerial(a, q);
                 break;
-            case "TCP":
-                agent = buildSocket((TcpAgent) a, q);
+            case AgentTypes.TCP:
+                agent = buildSocket(a, q);
                 break;
-            case "JSON":
-                agent = buildSocketJSON((JSONAgent) a, q);
+            case AgentTypes.JSON:
+                agent = buildSocketJSON(a, q);
                 break;
-            case "UDP":
-                agent = buildUDP((UdpAgent) a, q);
+            case AgentTypes.UDP:
+                agent = buildUDP(a, q);
                 break;
-            case "Console":
-                agent = buildConsoleTarget((ConsoleAgent) a, q);
+            case AgentTypes.CONSOLE:
+                agent = buildConsoleTarget(a, q);
                 break;
-            case "Track":
-                agent = buildTrackTarget((TrackAgent) a, q);
+            case AgentTypes.TRACK:
+                agent = buildTrackTarget(a, q);
                 break;
-            case "Meteo":
-                agent = buildMeteoTarget((MeteoAgent) a, q);
+            case AgentTypes.METEO:
+                agent = buildMeteoTarget(a, q);
                 break;
-            case "MWDSynthesizer":
+            case AgentTypes.MWD:
                 agent = buildMWDSynthesizer(q);
                 break;
-            case "GPXPlayer":
-                agent = buildGPXPlayer((com.aboni.nmea.router.conf.GPXPlayerAgent) a, q);
+            case AgentTypes.GPX:
+                agent = buildGPXPlayer(a, q);
                 break;
-            case "Voltage":
-                agent = buildVoltage((VoltageAgent) a, q);
+            case AgentTypes.VOLT:
+                agent = buildVoltage(a, q);
                 break;
-            case "GPSStatus":
-                agent = buildGPSStatus((GPSStatusAgent) a, q);
+            case AgentTypes.GPS:
+                agent = buildGPSStatus(a, q);
                 break;
-            case "AIS":
-                agent = buildAIS((AISAgent) a, q);
+            case AgentTypes.AIS:
+                agent = buildAIS(a, q);
                 break;
             default:
                 break;
         }
-        if (agent!=null) {
-            NMEAFilterable src = agent.getSource();
-            FilterSet srcFilterConf = a.getFilterSource();
-            loadFilters(src, srcFilterConf);
-
-            NMEAFilterable tgt = agent.getTarget();
-            FilterSet tgtFilterConf = a.getFilterTarget();
-            loadFilters(tgt, tgtFilterConf);
-        }
         return agent;
     }
 
-    private NMEAAgent buildAIS(AISAgent a, QOS q) {
+    private NMEAAgent buildAIS(ConfJSON.AgentDef a, QOS q) {
         NMEAAISAgent ais = null;
         try {
             ais = ThingsFactory.getInstance(NMEAAISAgent.class);
@@ -146,7 +105,7 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return ais;
     }
 
-    private NMEAAgent buildGPSStatus(GPSStatusAgent a, QOS q) {
+    private NMEAAgent buildGPSStatus(ConfJSON.AgentDef a, QOS q) {
         NMEAGPSStatusAgent gps = null;
         try {
             gps = ThingsFactory.getInstance(NMEAGPSStatusAgent.class);
@@ -157,55 +116,36 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return gps;
     }
 
-    private void loadFilters(NMEAFilterable agentFilterable, FilterSet filterConf) {
-        if (agentFilterable != null && filterConf != null) {
-            if (agentFilterable.getFilter() == null) {
-                NMEAFilterSetImpl ff = new NMEAFilterSetImpl(filterConf.isWhitelist() ? TYPE.WHITELIST : TYPE.BLACKLIST);
-                agentFilterable.setFilter(ff);
+    private NMEAAgent buildGPXPlayer(ConfJSON.AgentDef g, QOS q) {
+        if (g.getConfiguration().has("file")) {
+            NMEAGPXPlayerAgent gpx = null;
+            try {
+                String file = g.getConfiguration().getString("file");
+                gpx = ThingsFactory.getInstance(NMEAGPXPlayerAgent.class);
+                gpx.setup(g.getName(), q);
+                gpx.setFile(file);
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Cannot create GPX reader", e);
             }
-            setFilter(filterConf, agentFilterable.getFilter());
+            return gpx;
+        } else {
+            return null;
         }
     }
 
-    private static void setFilter(FilterSet conf, NMEAFilterSet dest) {
-        if (conf != null && dest != null) {
-            for (Filter fConf : conf.getFilter()) {
-                NMEABasicSentenceFilter sF = new NMEABasicSentenceFilter(
-                        "*".equals(fConf.getSentence()) ? "" : fConf.getSentence(),
-                        "*".equals(fConf.getTalker()) ? null : TalkerId.parse(fConf.getTalker()),
-                        "*".equals(fConf.getSource()) ? "" : fConf.getSource()
-                );
-                dest.addFilter(sF);
-            }
-        }
-    }
-
-    private NMEAAgent buildGPXPlayer(GPXPlayerAgent g, QOS q) {
-        String file = g.getGpxFile();
-        NMEAGPXPlayerAgent gpx = null;
-        try {
-            gpx = ThingsFactory.getInstance(NMEAGPXPlayerAgent.class);
-            gpx.setup(g.getName(), q);
-            gpx.setFile(file);
-        } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot create GPX reader", e);
-        }
-        return gpx;
-    }
-
-    private NMEAAgent buildConsoleTarget(ConsoleAgent c, QOS q) {
+    private NMEAAgent buildConsoleTarget(ConfJSON.AgentDef c, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleTarget.class);
         a.setup(c.getName(), q);
         return a;
     }
 
-    private NMEAAgent buildSerial(SerialAgent s, QOS q) {
+    private NMEAAgent buildSerial(ConfJSON.AgentDef s, QOS q) {
         String name = s.getName();
-        String portName = s.getDevice();
-        int speed = s.getBps();
+        String portName = getString(s.getConfiguration(), "device", "/dev/ttyUSB0");
+        int speed = getInt(s.getConfiguration(), "bps", 9600);
         boolean t;
         boolean r;
-        switch (s.getInout()) {
+        switch (s.getInOut()) {
             case IN:
                 r = true;
                 t = false;
@@ -229,17 +169,19 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return serial;
     }
 
-    private NMEAAgent buildUDP(UdpAgent conf, QOS q) {
-        if (conf.getInout()==InOut.OUT) {
+    private NMEAAgent buildUDP(ConfJSON.AgentDef conf, QOS q) {
+        int port = getInt(conf.getConfiguration(), "port", 1222);
+        if (conf.getInOut() == InOut.OUT) {
             NMEAUDPSender a = ThingsFactory.getInstance(NMEAUDPSender.class);
-            a.setup(conf.getName(), q, conf.getPort());
-            for (String s : conf.getTo()) {
+            a.setup(conf.getName(), q, port);
+            String[] addresses = conf.getConfiguration().getString("addresses").split(",");
+            for (String s : addresses) {
                 a.addTarget(s);
             }
             return a;
         } else {
             NMEAUDPReceiver a = ThingsFactory.getInstance(NMEAUDPReceiver.class);
-            a.setup(conf.getName(), q, conf.getPort());
+            a.setup(conf.getName(), q, port);
             return a;
         }
     }
@@ -250,15 +192,15 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return mwd;
     }
 
-    private NMEAAgent buildMeteoTarget(MeteoAgent a, QOS q) {
+    private NMEAAgent buildMeteoTarget(ConfJSON.AgentDef a, QOS q) {
         NMEAAgent meteo = ThingsFactory.getInstance(NMEAMeteoTarget.class);
         meteo.setup(a.getName(), q);
         return meteo;
     }
 
-    private NMEAAgent buildSocketJSON(JSONAgent s, QOS q) {
+    private NMEAAgent buildSocketJSON(ConfJSON.AgentDef s, QOS q) {
         String name = s.getName();
-        int port = s.getPort();
+        int port = getInt(s.getConfiguration(), "port", 1113);
         NMEASocketServer c = ThingsFactory.getInstance(NMEASocketServer.class);
         c.setup(name, q, new NetConf(null, port, false, true),
                 new NMEASocketServer.SentenceSerializer() {
@@ -272,21 +214,21 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return c;
     }
 
-    private NMEAAgent buildSocket(TcpAgent s, QOS q) {
-        if (s.getHost()==null || s.getHost().isEmpty()) {
+    private NMEAAgent buildSocket(ConfJSON.AgentDef s, QOS q) {
+        if (getString(s.getConfiguration(), "host", null) == null) {
             return buildServerSocket(s, q);
         } else {
             return buildClientSocket(s, q);
         }
     }
 
-    private NMEAAgent buildClientSocket(TcpAgent s, QOS q) {
+    private NMEAAgent buildClientSocket(ConfJSON.AgentDef s, QOS q) {
+        String server = s.getConfiguration().getString("host");
         String name = s.getName();
-        String server = s.getHost();
-        int port = s.getPort();
+        int port = getInt(s.getConfiguration(), "port", 1111);
         boolean t;
         boolean r;
-        switch (s.getInout()) {
+        switch (s.getInOut()) {
             case IN:
                 r = true;
                 t = false;
@@ -309,12 +251,30 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return c;
     }
 
-    private NMEAAgent buildServerSocket(TcpAgent s, QOS q) {
+    private static int getInt(JSONObject conf, String attr, int def) {
+        try {
+            return conf.getInt(attr);
+        } catch (Exception ignore) {
+            // ignore, not important
+        }
+        return def;
+    }
+
+    private static String getString(JSONObject conf, String attr, String def) {
+        try {
+            return conf.getString(attr);
+        } catch (Exception ignore) {
+            // ignore, not important
+        }
+        return def;
+    }
+
+    private NMEAAgent buildServerSocket(ConfJSON.AgentDef s, QOS q) {
         String name = s.getName();
-        int port = s.getPort();
+        int port = getInt(s.getConfiguration(), "port", 1111);
         boolean t;
         boolean r;
-        switch (s.getInout()) {
+        switch (s.getInOut()) {
             case IN:
                 r = true;
                 t = false;
@@ -337,33 +297,34 @@ public class NMEAAgentBuilderImpl implements NMEAAgentBuilder {
         return c;
     }
 
-    private NMEAAgent buildTrackTarget(TrackAgent c, QOS q) {
+    private NMEAAgent buildTrackTarget(ConfJSON.AgentDef c, QOS q) {
         NMEATrackAgent track = ThingsFactory.getInstance(NMEATrackAgent.class);
         track.setup(c.getName(), q);
-        track.setPeriod(c.getInterval() * 1000L);
-        track.setStaticPeriod(c.getIntervalStatic() * 1000L);
+        if (c.getConfiguration().has("period")) track.setPeriod(c.getConfiguration().getInt("period") * 1000L);
+        if (c.getConfiguration().has("periodStationary"))
+            track.setPeriod(c.getConfiguration().getInt("periodStationary") * 1000L);
         return track;
     }
 
-    private NMEAAgent buildSimulator(SimulatorAgent s, QOS q) {
+    private NMEAAgent buildSimulator(ConfJSON.AgentDef s, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEASimulatorSource.class);
         a.setup(s.getName(), q);
         return a;
     }
 
-    private NMEAAgent buildSensor(SensorAgent s, QOS q) {
+    private NMEAAgent buildSensor(ConfJSON.AgentDef s, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEASourceSensor.class);
         a.setup(s.getName(), q);
         return a;
     }
 
-    private NMEAAgent buildGyro(GyroAgent s, QOS q) {
+    private NMEAAgent buildGyro(ConfJSON.AgentDef s, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEASourceGyro.class);
         a.setup(s.getName(), q);
         return a;
     }
 
-    private NMEAAgent buildVoltage(VoltageAgent s, QOS q) {
+    private NMEAAgent buildVoltage(ConfJSON.AgentDef s, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEAVoltageSensor.class);
         a.setup(s.getName(), q);
         return a;

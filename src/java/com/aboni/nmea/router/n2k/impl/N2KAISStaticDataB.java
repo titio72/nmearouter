@@ -4,24 +4,24 @@ import com.aboni.nmea.router.n2k.AISStaticData;
 
 public class N2KAISStaticDataB implements AISStaticData {
 
-    public N2KAISStaticDataB_PartA getPartA() {
+    public n2KAISStaticDataBPartA getPartA() {
         return partA;
     }
 
-    public void setPartA(N2KAISStaticDataB_PartA partA) {
+    public void setPartA(n2KAISStaticDataBPartA partA) {
         this.partA = partA;
     }
 
-    public N2KAISStaticDataB_PartB getPartB() {
+    public n2KAISStaticDataBPartB getPartB() {
         return partB;
     }
 
-    public void setPartB(N2KAISStaticDataB_PartB partB) {
+    public void setPartB(n2KAISStaticDataBPartB partB) {
         this.partB = partB;
     }
 
-    private N2KAISStaticDataB_PartA partA;
-    private N2KAISStaticDataB_PartB partB;
+    private n2KAISStaticDataBPartA partA;
+    private n2KAISStaticDataBPartB partB;
 
     @Override
     public int getMessageId() {

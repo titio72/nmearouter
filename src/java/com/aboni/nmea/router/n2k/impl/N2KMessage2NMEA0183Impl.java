@@ -107,7 +107,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         GSASentence gsa = (GSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSA);
         gsa.setMode(FaaMode.AUTOMATIC);
         gsa.setSatelliteIds(satInUse.toArray(new String[0]));
-        gsa.setFixStatus(satInUse.size() > 0 ? GpsFixStatus.GPS_2D : GpsFixStatus.GPS_NA);
+        gsa.setFixStatus(satInUse.isEmpty() ? GpsFixStatus.GPS_NA : GpsFixStatus.GPS_2D);
         res.add(gsa);
         return res.toArray(TEMPLATE);
     }

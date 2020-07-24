@@ -23,6 +23,7 @@ public class Constants {
     public static final String LOG = "log/router.log";
     public static final String CONF_DIR = "conf";
     public static final String ROUTER_CONF = CONF_DIR + "/router.xml";
+    public static final String ROUTER_CONF_JSON = CONF_DIR + "/router.json";
     public static final String WMM = CONF_DIR + "/WMM.cof";
     public static final String DEVIATION = CONF_DIR + "/deviation.csv";
     public static final String SENSOR = CONF_DIR + "/sensors.properties";

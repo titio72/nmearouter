@@ -75,24 +75,47 @@ public class NMEAAgentImpl implements NMEAAgent {
         public void pushMessage(RouterMessage mm) {
             try {
                 if (isStarted()) {
-                    if (listenerWrapper == null) {
-                        listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
-                    }
-                    if (mm.getPayload() instanceof Sentence) {
-                        Sentence s = (Sentence) mm.getPayload();
-                        if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(mm))) {
-                            listenerWrapper.onSentence(s, mm.getSource());
-                        }
-                    } else if (listenerWrapper.isN2K() && mm.getPayload() instanceof N2KMessage) {
-                        listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
-                    } else if (listenerWrapper.isJSON() && mm.getPayload() instanceof JSONObject) {
-                        listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
-                    } else {
-                        getLogger().error(String.format("Unknown message type {%s}", mm.getPayload()));
-                    }
+                    lazyLoadListenerWrapper();
+                    if (handleNMEA0183(mm)) return;
+                    if (handleNMEA2000(mm)) return;
+                    if (handleJSON(mm)) return;
+                    getLogger().error(String.format("Unknown message type {%s}", mm.getPayload()));
                 }
             } catch (Exception t) {
                 getLogger().warning("Error delivering message to agent {" + mm.getPayload() + "} error {" + t.getMessage() + "}");
+            }
+        }
+
+        private boolean handleJSON(RouterMessage mm) {
+            if (listenerWrapper.isJSON() && mm.getPayload() instanceof JSONObject) {
+                listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
+                return true;
+            }
+            return false;
+        }
+
+        private boolean handleNMEA2000(RouterMessage mm) {
+            if (listenerWrapper.isN2K() && mm.getPayload() instanceof N2KMessage) {
+                listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
+                return true;
+            }
+            return false;
+        }
+
+        private boolean handleNMEA0183(RouterMessage mm) {
+            if (mm.getPayload() instanceof Sentence) {
+                Sentence s = (Sentence) mm.getPayload();
+                if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(mm))) {
+                    listenerWrapper.onSentence(s, mm.getSource());
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private void lazyLoadListenerWrapper() {
+            if (listenerWrapper == null) {
+                listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this);
             }
         }
     }

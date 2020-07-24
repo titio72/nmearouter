@@ -9,8 +9,8 @@ import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.impl.AISPositionReport;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB_PartA;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB_PartB;
+import com.aboni.nmea.router.n2k.impl.n2KAISStaticDataBPartA;
+import com.aboni.nmea.router.n2k.impl.n2KAISStaticDataBPartB;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -20,12 +20,12 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     private static final long CLEAN_UP_TIMEOUT = 30 * 60 * 1000L; //30 minutes
 
-    private static final boolean TEST = true;
+    private static final boolean TEST = false;
 
     public static class PositionReport {
 
-        private long timestamp;
-        private AISPositionReport report;
+        private final long timestamp;
+        private final AISPositionReport report;
 
         private PositionReport(long timestamp, @NotNull AISPositionReport report) {
             this.report = report;
@@ -67,6 +67,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                 p.addMore(STATIC1[4]);
                 onMessage(p.getMessage(), "TEST");
             } catch (Exception e) {
+                getLogger().error("Cannot load test data", e);
             }
         }
     }
@@ -89,10 +90,10 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                     }
                 }
                 AISStaticData d = data.get(mmsi);
-                if (s instanceof N2KAISStaticDataB_PartA)
-                    ((N2KAISStaticDataB) d).setPartA((N2KAISStaticDataB_PartA) s);
-                else if (s instanceof N2KAISStaticDataB_PartB)
-                    ((N2KAISStaticDataB) d).setPartB((N2KAISStaticDataB_PartB) s);
+                if (s instanceof n2KAISStaticDataBPartA)
+                    ((N2KAISStaticDataB) d).setPartA((n2KAISStaticDataBPartA) s);
+                else if (s instanceof n2KAISStaticDataBPartB)
+                    ((N2KAISStaticDataB) d).setPartB((n2KAISStaticDataBPartB) s);
             } else {
                 synchronized (data) {
                     data.put(mmsi, (AISStaticData) message);
@@ -108,7 +109,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     @Override
     public void onTimer() {
-        load_tests();
+        loadTests();
         long now = getCache().getNow();
         synchronized (reports) {
             Collection<PositionReport> reportsCopy = new ArrayList<>(reports.values());
@@ -140,7 +141,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     int c;
 
-    private void load_tests() {
+    private void loadTests() {
         if (TEST) {
             synchronized (this) {
                 c = (c + 1) % tests.length;
@@ -181,14 +182,14 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                     "2020-06-21-08:14:52.583,4,129039,0,255,8,23,08,ff,ff,00,fc,ff,ff"}
     };
 
-    String[] STATIC = new String[]{
+    private static final String[] STATIC = new String[]{
             "2020-06-21-08:12:32.611,6,129809,0,255,8,20,19,18,e6,0c,03,0e,43",
             "2020-06-21-08:12:32.613,6,129809,0,255,8,21,4c,41,4e,20,53,4f,4c",
             "2020-06-21-08:12:32.613,6,129809,0,255,8,22,41,43,45,20,20,20,20",
             "2020-06-21-08:12:32.613,6,129809,0,255,8,23,20,20,20,20,20,ff,ff"
     };
 
-    String[] STATIC1 = new String[]{
+    private static final String[] STATIC1 = new String[]{
             "2020-06-21-08:12:37.012,6,129810,0,255,8,80,21,18,e6,0c,03,0e,24",
             "2020-06-21-08:12:37.014,6,129810,0,255,8,81,00,00,00,43,53,4f,21",
             "2020-06-21-08:12:37.017,6,129810,0,255,8,82,32,44,50,49,38,20,20",

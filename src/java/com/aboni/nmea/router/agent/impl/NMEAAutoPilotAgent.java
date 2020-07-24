@@ -190,7 +190,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 
     @Override
     public PilotMode getMode() {
-        throw new RuntimeException("Unsupported operation");
+        return null;
     }
 
     @Override

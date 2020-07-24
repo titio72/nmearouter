@@ -47,8 +47,8 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
 
         aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.LOOKUP_AIS_TRANSCEIVER);
 
-        long i = parseIntegerSafe(data, 194, 2, 1, false, 0xFF);
-        unitType = i == 0 ? "SOTDMA" : (i == 1 ? "CS" : null);
+        int i = (int) parseIntegerSafe(data, 194, 2, 1, false, 0xFF);
+        unitType = getUnitType(i);
 
         integratedDisplay = parseIntegerSafe(data, 195, 3, 1, false, 0) == 1;
         sDSC = parseIntegerSafe(data, 196, 4, 1, false, 0) == 1;
@@ -57,6 +57,17 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
         band = parseIntegerSafe(data, 197, 5, 1, false, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
         aisMode = parseIntegerSafe(data, 199, 7, 1, false, 0) == 0 ? "Autonomous" : "Assigned";
         aisCommunicationState = parseIntegerSafe(data, 200, 0, 1, false, 0) == 0 ? "SOTDMA" : "ITDMA";
+    }
+
+    private String getUnitType(int i) {
+        switch (i) {
+            case 0:
+                return "SOTDMA";
+            case 1:
+                return "CS";
+            default:
+                return null;
+        }
     }
 
     private int messageId;
@@ -180,6 +191,10 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
 
     public String getAisTransceiverInfo() {
         return aisTransceiverInfo;
+    }
+
+    public String getAisCommunicationState() {
+        return aisCommunicationState;
     }
 
     /*

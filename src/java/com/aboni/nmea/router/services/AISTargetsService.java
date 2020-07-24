@@ -20,63 +20,19 @@ import java.util.List;
 public class AISTargetsService extends JSONWebService {
 
     private AISTargets targetsProvider;
-    private NMEACache cache;
 
     @Inject
     public AISTargetsService(@NotNull NMEARouter router, NMEACache cache) {
-        this.cache = cache;
-        for (String ag_id : router.getAgents()) {
-            NMEAAgent ag = router.getAgent(ag_id);
-            if (ag instanceof AISTargets) {
-                targetsProvider = (AISTargets) ag;
-                break;
-            }
-        }
+        findService(router);
         setLoader((ServiceConfig config) -> {
             if (targetsProvider != null) {
                 List<AISPositionReport> reports = targetsProvider.getAISTargets();
                 JSONObject res = new JSONObject();
                 List<JSONObject> l = new ArrayList<>();
                 if (reports != null) {
-                    Position myPos = null;
-                    if (cache != null && cache.getLastPosition() != null && cache.getLastPosition().getData() != null && cache.getLastPosition().getData().getPosition() != null) {
-                        myPos = cache.getLastPosition().getData().getPosition();
-                    } else {
-                        myPos = new Position(43.25678, 10.071234);
-                    }
+                    Position myPos = getCurrentPosition(cache);
                     for (AISPositionReport r : reports) {
-                        JSONObject j = new JSONObject();
-                        j.put("MMSI", r.getMMSI());
-                        j.put("class", r.getAISClass());
-                        j.put("latitude", r.getPosition().getLatitude());
-                        j.put("longitude", r.getPosition().getLongitude());
-                        j.put("s_latitude", Utils.formatLatitude(r.getPosition().getLatitude()));
-                        j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
-                        if (r.getPositionAccuracy() != null) j.put("accuracy", r.getPositionAccuracy());
-                        if (!Double.isNaN(r.getSog())) j.put("SOG", r.getSog());
-                        if (!Double.isNaN(r.getCog())) j.put("COG", r.getCog());
-                        if (!Double.isNaN(r.getHeading())) j.put("heading", r.getCog());
-                        if (r.getRepeatIndicator() != null) j.put("repeatIndicator", r.getRepeatIndicator());
-                        if (r.getTimestampStatus() != null) j.put("timeStampStatus", r.getTimestampStatus());
-                        if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
-                        if (myPos != null) {
-                            Course c1 = new Course(myPos, r.getPosition());
-                            j.put("distance", c1.getDistance());
-                            j.put("bearing", c1.getCOG());
-                        }
-                        if (r.getNavStatus() != null) j.put("status", r.getNavStatus());
-
-                        AISStaticData data = targetsProvider.getData(r.getMMSI());
-                        if (data != null) {
-                            j.put("name", data.getName());
-                            if (data.getTypeOfShip() != null) j.put("vessel_type", data.getTypeOfShip());
-                            j.put("length", data.getLength());
-                            j.put("beam", data.getBeam());
-                            if (data.getCallSign() != null) j.put("callsign", data.getCallSign());
-                            if (data.getAisTransceiverInfo() != null) j.put("tranceiver", data.getAisTransceiverInfo());
-                        }
-
-                        l.add(j);
+                        l.add(getJsonTarget(myPos, r));
                     }
                 }
                 res.put("targets", new JSONArray(l));
@@ -84,5 +40,67 @@ public class AISTargetsService extends JSONWebService {
             }
             return null;
         });
+    }
+
+    private JSONObject getJsonTarget(Position myPos, AISPositionReport r) {
+        JSONObject j = new JSONObject();
+        j.put("MMSI", r.getMMSI());
+        j.put("class", r.getAISClass());
+        j.put("latitude", r.getPosition().getLatitude());
+        j.put("longitude", r.getPosition().getLongitude());
+        j.put("s_latitude", Utils.formatLatitude(r.getPosition().getLatitude()));
+        j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
+        setStringAttribute(j, r.getPositionAccuracy(), "accuracy");
+        setDoubleAttribute(j, r.getSog(), "SOG");
+        setDoubleAttribute(j, r.getCog(), "COG");
+        setDoubleAttribute(j, r.getHeading(), "heading");
+        setStringAttribute(j, r.getNavStatus(), "status");
+        setStringAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
+        setStringAttribute(j, r.getTimestampStatus(), "timeStampStatus");
+        if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
+        if (myPos != null) {
+            Course c1 = new Course(myPos, r.getPosition());
+            j.put("distance", c1.getDistance());
+            j.put("bearing", c1.getCOG());
+        }
+
+        AISStaticData data = targetsProvider.getData(r.getMMSI());
+        if (data != null) {
+            j.put("name", data.getName());
+            setStringAttribute(j, data.getTypeOfShip(), "vessel_type");
+            j.put("length", data.getLength());
+            j.put("beam", data.getBeam());
+            setStringAttribute(j, data.getCallSign(), "callsign");
+            setStringAttribute(j, data.getAisTransceiverInfo(), "tranceiver");
+        }
+        return j;
+    }
+
+    private void setDoubleAttribute(JSONObject j, double value, String attribute) {
+        if (!Double.isNaN(value)) j.put(attribute, value);
+    }
+
+    private void setStringAttribute(JSONObject j, String value, String attribute) {
+        if (value != null) j.put(attribute, value);
+    }
+
+    private Position getCurrentPosition(NMEACache cache) {
+        Position myPos;
+        if (cache != null && cache.getLastPosition() != null && cache.getLastPosition().getData() != null && cache.getLastPosition().getData().getPosition() != null) {
+            myPos = cache.getLastPosition().getData().getPosition();
+        } else {
+            myPos = new Position(43.25678, 10.071234);
+        }
+        return myPos;
+    }
+
+    private void findService(@NotNull NMEARouter router) {
+        for (String ag_id : router.getAgents()) {
+            NMEAAgent ag = router.getAgent(ag_id);
+            if (ag instanceof AISTargets) {
+                targetsProvider = (AISTargets) ag;
+                break;
+            }
+        }
     }
 }

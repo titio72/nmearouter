@@ -5,7 +5,7 @@ import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
-public class N2KAISStaticDataB_PartA extends N2KMessageImpl implements AISStaticData {
+public class n2KAISStaticDataBPartA extends N2KMessageImpl implements AISStaticData {
 
     public static final int PGN = 129809;
 
@@ -16,12 +16,12 @@ public class N2KAISStaticDataB_PartA extends N2KMessageImpl implements AISStatic
     private String transceiverInfo;
     private int seqId;
 
-    public N2KAISStaticDataB_PartA(byte[] data) {
+    public n2KAISStaticDataBPartA(byte[] data) {
         super(getDefaultHeader(PGN), data);
         fill();
     }
 
-    public N2KAISStaticDataB_PartA(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
+    public n2KAISStaticDataBPartA(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != PGN)

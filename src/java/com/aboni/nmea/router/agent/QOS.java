@@ -17,6 +17,7 @@ package com.aboni.nmea.router.agent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class QOS {
 
@@ -31,14 +32,31 @@ public class QOS {
 	}
 
 	public void addProp(String propName, String v) {
-		theQOS.put(propName, v);
-	}
+        theQOS.put(propName, v);
+    }
 
-	public boolean get(String propName) {
-		return theQOS.containsKey(propName);
-	}
+    public boolean get(String propName) {
+        return theQOS.containsKey(propName);
+    }
 
-	public String[] getKeys() {
-		return theQOS.keySet().toArray(new String[] {});
-	}
+    public String[] getKeys() {
+        return theQOS.keySet().toArray(new String[]{});
+    }
+
+    public static QOS parse(String qos) {
+        QOS q = new QOS();
+        if (qos != null) {
+            StringTokenizer t = new StringTokenizer(qos, ";");
+            while (t.hasMoreTokens()) {
+                StringTokenizer t1 = new StringTokenizer(t.nextToken(), "=");
+                if (t1.countTokens() == 1) {
+                    String token = t1.nextToken();
+                    q.addProp(token);
+                } else {
+                    q.addProp(t1.nextToken(), t1.nextToken());
+                }
+            }
+        }
+        return q;
+    }
 }
