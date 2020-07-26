@@ -29,4 +29,12 @@ public interface AISPositionReport {
     int getTimestamp();
 
     String getNavStatus();
+
+    long getAge(long now);
+
+    void setOverrideTime(long t);
+
+    long getOverrrideTime();
+
+
 }

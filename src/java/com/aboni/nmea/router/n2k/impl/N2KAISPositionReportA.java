@@ -7,6 +7,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
 
+import java.time.Instant;
+
 public class N2KAISPositionReportA extends N2KMessageImpl implements AISPositionReport {
 
     public static final int PGN = 129038;
@@ -73,6 +75,8 @@ public class N2KAISPositionReportA extends N2KMessageImpl implements AISPosition
     private String specialManeuverIndicator;
     private int aisSpare;
     private int seqId;
+
+    private long overrideTime = -1;
 
     @Override
     public int getTimestamp() {
@@ -159,5 +163,27 @@ public class N2KAISPositionReportA extends N2KMessageImpl implements AISPosition
 
     public String getSpecialManeuverIndicator() {
         return specialManeuverIndicator;
+    }
+
+    @Override
+    public long getAge(long now) {
+        if (getTimestamp()<=60) {
+            Instant l = (getOverrrideTime()>0)?
+                    Instant.ofEpochMilli(getOverrrideTime()):
+                    getHeader().getTimestamp().plusNanos((long) (getTimestamp() * 1E06));
+            return now - l.toEpochMilli();
+        } else {
+            return -1;
+        }
+    }
+
+    @Override
+    public void setOverrideTime(long t) {
+        overrideTime = t;
+    }
+
+    @Override
+    public long getOverrrideTime() {
+        return overrideTime;
     }
 }

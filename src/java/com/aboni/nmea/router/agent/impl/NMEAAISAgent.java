@@ -76,6 +76,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
     public void onMessage(N2KMessage message, String source) {
         if (message instanceof AISPositionReport) {
             String mmsi = ((AISPositionReport) message).getMMSI();
+            ((AISPositionReport) message).setOverrideTime(getCache().getNow());
             synchronized (reports) {
                 reports.put(mmsi, new PositionReport(getCache().getNow(), (AISPositionReport) message));
             }
