@@ -87,16 +87,16 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
 
         private boolean handleJSON(RouterMessage mm) {
-            if (listenerWrapper.isJSON() && mm.getPayload() instanceof JSONObject) {
-                listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
+            if (mm.getPayload() instanceof JSONObject) {
+                if (listenerWrapper.isJSON()) listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
                 return true;
             }
             return false;
         }
 
         private boolean handleNMEA2000(RouterMessage mm) {
-            if (listenerWrapper.isN2K() && mm.getPayload() instanceof N2KMessage) {
-                listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
+            if (mm.getPayload() instanceof N2KMessage) {
+                if (listenerWrapper.isN2K()) listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
                 return true;
             }
             return false;

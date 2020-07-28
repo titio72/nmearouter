@@ -1,10 +1,7 @@
-package com.aboni.nmea.router.conf.json;
+package com.aboni.nmea.router.conf;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.conf.InOut;
-import com.aboni.nmea.router.conf.LogLevelType;
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

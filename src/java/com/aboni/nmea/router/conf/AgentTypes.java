@@ -1,6 +1,9 @@
-package com.aboni.nmea.router.conf.json;
+package com.aboni.nmea.router.conf;
 
 public class AgentTypes {
+
+    private AgentTypes() {}
+
     public static final String SIMULATOR = "Simulator";
     public static final String CONSOLE = "Console";
     public static final String METEO = "Meteo";

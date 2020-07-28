@@ -54,7 +54,8 @@ public class AISTargetsService extends JSONWebService {
         j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
 
         long age = r.getAge(cache.getNow());
-        j.put("age", String.format("%02d:%02d", age/60000, (age/1000)%60 ));
+        j.put("age", age);
+        j.put("s_age", String.format("%02d:%02d", age/60000, (age/1000)%60 ));
 
         setStringAttribute(j, r.getPositionAccuracy(), "accuracy");
         setDoubleAttribute(j, r.getSog(), "SOG");

@@ -72,28 +72,28 @@ function setCurrent(itm) {
     </ol>
     <div class="container-fluid">
         <div class="row alert alert-heading">
-            <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 col-xs-6">MMSI</div>
+            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6">MMSI</div>
             <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block">Name</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">Callsign</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">Dimension</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">Type</div>
-            <div class="col-xl-1 col-lg-3 col-md-3 col-sm-4 d-none d-sm-block">Pos</div>
+            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-4 d-none d-sm-block">Pos</div>
             <div class="col-xl-1 col-lg-1 col-md-2 d-none d-md-block">Nav</div>
-            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-2 col-xs-6">Dist./Bearing</div>
+            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-2 col-xs-6">Dist.</div>
             <div class="col-xl-2 d-none d-xl-block">Status</div>
-            <div class="col-xl-2 d-none d-xl-block">Transceiver</div>
+            <div class="col-xl-1 col-lg-1 col-md-1 d-none d-md-block">Age</div>
         </div>
         <div class="row alert alert-primary" ng-repeat="s in data.targets">
-            <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 col-xs-6"><a href="#" id ="{{s.MMSI}}" onclick="setCurrent(this);">{{s.MMSI}}</a></div>
+            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6"><a href="#" id ="{{s.MMSI}}" onclick="setCurrent(this);">{{s.MMSI}}</a></div>
             <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block">{{s.name}}</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.callsign}}</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.length}} m<br>{{s.beam}} m</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.vessel_type}}</div>
-            <div class="col-xl-1 col-lg-3 col-md-3 col-sm-4 d-none d-sm-block">{{s.s_latitude}}<br>{{s.s_longitude}}</div>
-            <div class="col-xl-1 col-lg-1 col-md_2 d-none d-md-block">{{s.SOG | number:1}} Kn<br>{{s.COG | number:0}}&deg;</div>
+            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-4 d-none d-sm-block">{{s.s_latitude}}<br>{{s.s_longitude}}</div>
+            <div class="col-xl-1 col-lg-1 col-md-2 d-none d-md-block">{{s.SOG | number:1}} Kn<br>{{s.COG | number:0}}&deg;</div>
             <div class="col-xl-1 col-lg-1 col-md-2 col-sm-2 col-xs-6">{{s.distance | number:1}} Nm<br>{{s.bearing | number:0}}&deg;</div>
             <div class="col-xl-2 d-none d-xl-block">{{s.status}}</div>
-            <div class="col-xl-2 d-none d-xl-block">{{s.age}}</div>
+            <div class="col-xl-1 col-lg-1 col-md-1 d-none d-md-block">{{s.s_age}}</div>
         </div>
         <div class="row">
             <div class="col-12">

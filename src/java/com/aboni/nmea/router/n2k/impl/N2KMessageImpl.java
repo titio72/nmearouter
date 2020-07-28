@@ -177,6 +177,7 @@ public abstract class N2KMessageImpl implements N2KMessage {
         byte last = b[l - 1];
         while (last == 0xff || last == ' ' || last == 0 || last == '@') {
             l--;
+            if (l==0) return "";
             last = b[l - 1];
         }
         char c;

@@ -187,6 +187,7 @@ public class N2KMessageParser {
                     constructor = c.getConstructor(N2KMessageHeader.class, byte[].class);
                     message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
                 } catch (Exception e) {
+
                     throw new PGNDataParseException("Error decoding N2K message", e);
                 }
             } else {

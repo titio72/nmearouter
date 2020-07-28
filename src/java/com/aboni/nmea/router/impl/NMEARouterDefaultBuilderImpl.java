@@ -24,14 +24,13 @@ import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
 import com.aboni.nmea.router.agent.impl.QOSKeys;
 import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.*;
-import com.aboni.nmea.router.conf.json.ConfJSON;
+import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -65,18 +64,11 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         LogLevelType logLevel;
         List<String> gpsPriority;
 
-        ConfJSON cJ = null;
-        Router conf = null;
+        ConfJSON cJ;
         try {
-            if (new File(Constants.ROUTER_CONF_JSON).exists()) {
-                cJ = new ConfJSON();
-                logLevel = cJ.getLogLevel();
-                gpsPriority = cJ.getGPSPriority();
-            } else {
-                conf = parseConf();
-                logLevel = conf.getLog().getLevel();
-                gpsPriority = conf.getGPSPriority() == null ? null : conf.getGPSPriority().getGPSSource();
-            }
+            cJ = new ConfJSON();
+            logLevel = cJ.getLogLevel();
+            gpsPriority = cJ.getGPSPriority();
         } catch (Exception e) {
             throw new MalformedConfigurationException("Cannot read configuration", e);
         }
@@ -92,22 +84,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         buildWebUI(r);
         if (ENABLE_AP) buildAutoPilot(r);
 
-        if (cJ != null) {
-            buildAgents(cJ, r);
-        } else {
-            buildAgents(conf, r);
-        }
-    }
-
-    private void buildAgents(Router conf, NMEARouter r) {
-        NMEAAgentBuilder builder = ThingsFactory.getInstance(NMEAAgentBuilder.class);
-        for (AgentBase a : conf.getSerialAgentOrTcpAgentOrUdpAgent()) {
-            NMEAAgent agent = builder.createAgent(a);
-            if (agent != null) {
-                r.addAgent(agent);
-                handlePersistentState(agent);
-            }
-        }
+        buildAgents(cJ, r);
     }
 
     private void buildAgents(ConfJSON conf, NMEARouter r) throws MalformedConfigurationException {
@@ -263,11 +240,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         web.setup("UI", q);
         r.addAgent(web);
         web.start();
-    }
-
-    private Router parseConf() throws MalformedConfigurationException {
-        ConfParser parser = new ConfParser();
-        return parser.init(Constants.ROUTER_CONF).getConf();
     }
 
     private QOS createBuiltInQOS() {

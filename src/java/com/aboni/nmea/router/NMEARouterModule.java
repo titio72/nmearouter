@@ -16,10 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.agent.AgentStatusManager;
-import com.aboni.nmea.router.agent.NMEAAgentBuilder;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.impl.AgentStatusManagerImpl;
-import com.aboni.nmea.router.agent.impl.NMEAAgentBuilderImpl;
 import com.aboni.nmea.router.agent.impl.NMEAAgentBuilderJsonImpl;
 import com.aboni.nmea.router.data.meteo.Meteo;
 import com.aboni.nmea.router.data.meteo.MeteoReader;
@@ -62,7 +60,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(NMEAStream.class).to(NMEAStreamImpl.class).in(Singleton.class);
         bind(NMEARouter.class).to(NMEARouterImpl.class).in(Singleton.class);
         bind(WebServiceFactory.class).to(WebServiceFactoryImpl.class).in(Singleton.class);
-        bind(NMEAAgentBuilder.class).to(NMEAAgentBuilderImpl.class);
         bind(NMEAAgentBuilderJson.class).to(NMEAAgentBuilderJsonImpl.class);
         bind(TrackQueryManager.class).to(DBTrackQueryManager.class);
         bind(TripManagerX.class).to(TripManagerXImpl.class);
