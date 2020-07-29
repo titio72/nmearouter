@@ -9,8 +9,8 @@ import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.impl.AISPositionReport;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB;
-import com.aboni.nmea.router.n2k.impl.n2KAISStaticDataBPartA;
-import com.aboni.nmea.router.n2k.impl.n2KAISStaticDataBPartB;
+import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartA;
+import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartB;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -91,10 +91,10 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                     }
                 }
                 AISStaticData d = data.get(mmsi);
-                if (s instanceof n2KAISStaticDataBPartA)
-                    ((N2KAISStaticDataB) d).setPartA((n2KAISStaticDataBPartA) s);
-                else if (s instanceof n2KAISStaticDataBPartB)
-                    ((N2KAISStaticDataB) d).setPartB((n2KAISStaticDataBPartB) s);
+                if (s instanceof N2KAISStaticDataBPartA)
+                    ((N2KAISStaticDataB) d).setPartA((N2KAISStaticDataBPartA) s);
+                else if (s instanceof N2KAISStaticDataBPartB)
+                    ((N2KAISStaticDataB) d).setPartB((N2KAISStaticDataBPartB) s);
             } else {
                 synchronized (data) {
                     data.put(mmsi, (AISStaticData) message);

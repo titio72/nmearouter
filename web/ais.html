@@ -1,69 +1,121 @@
 <!DOCTYPE html>
 <html xml:lang="en">
+
 <head>
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
     <script src="js/nmearouter.js?G"></script>
-    <link href="css/nmearouter.css" rel="stylesheet"/>
+    <link href="css/nmearouter.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="nmeasail.png">
 </head>
 <script>
-var ais_data_empty = {
-    targets: []
-};
+    var ais_data_empty = {
+        targets: []
+    };
 
-var ais_data = ais_data_empty;
+    var ais_data = ais_data_empty;
+    var zoomFactors = [50, 30, 20, 15, 10, 5, 3, 1, 0.5];
+    var zoomFactor = 2;
+    var s_current;
+    var show_mmsi = '';
+    var sz = getSz();
 
-loadAIS();
-
-setInterval(loadAndUpdate, 2000);
-
-var s_current;
-var show_mmsi = '';
-
-app.controller("myCtrl", function($scope, $sce) {
-    $scope.data = ais_data
-});
-
-function loadAndUpdate() {
     loadAIS();
-    controllerElement = document.getElementById('aistargets');
-    var controllerScope = angular.element(controllerElement).scope();
-    controllerScope.data = ais_data;
-    controllerScope.s_current = s_current;
-    controllerScope.$evalAsync();
-}
 
-function loadAIS() {
-    ais_data = httpGetAIS();
-    ais_data.targets.sort(compare);
-    s_current = null;
-    for (i = 0; i<ais_data.targets.length; i++) {
-        var a = ais_data.targets[i];
-        if (a.MMSI==show_mmsi) s_current = a;
-        if (20>a.distance) {
-            a.x = 200 + 190 * (a.distance/20.0) * Math.cos(a.bearing / 180.0 * Math.PI);
-            a.y = 200 + 190 * (a.distance/20.0) * Math.sin(a.bearing / 180.0 * Math.PI);
-            a.show = "yes";
-        } else {
-            a.show = "no";
+    setInterval(loadAndUpdate, 2000);
+
+    app.controller("myCtrl", function ($scope, $sce) {
+        setupController($scope);
+    });
+
+    function loadAndUpdate() {
+        sz = getSz();
+        loadAIS();
+        controllerElement = document.getElementById('aistargets');
+        var controllerScope = angular.element(controllerElement).scope();
+        setupController(controllerScope);
+        controllerScope.$evalAsync();
+    }
+
+    function setupController(controllerScope) {
+        controllerScope.data = ais_data;
+        controllerScope.s_current = s_current;
+        controllerScope.sz = sz;
+        controllerScope.cx = sz / 2;
+        controllerScope.cy = sz / 2;
+        controllerScope.r = sz / 2 - 10;
+        controllerScope.mtop = 10;
+        controllerScope.mright = sz - 10;
+        controllerScope.scale = zoomFactors[zoomFactor];
+        controllerScope.scaleIx = zoomFactor;
+    }
+
+    function loadAIS() {
+        sz = getSz();
+        ais_data = httpGetAIS();
+        ais_data.targets.sort(compare);
+        s_current = null;
+        for (i = 0; i < ais_data.targets.length; i++) {
+            var a = ais_data.targets[i];
+            if (a.MMSI == show_mmsi) {
+                s_current = a;
+                a.color = "red";
+                a.is_current = true;
+            } else {
+                a.color = "green";
+                a.is_current = false;
+            }
+            var scale = zoomFactors[zoomFactor];
+            if (scale > a.distance) {
+                a.x = (sz / 2) + (sz / 2 - 10) * (a.distance / scale) * Math.sin(a.bearing / 180.0 * Math.PI);
+                a.y = (sz / 2) - (sz / 2 - 10) * (a.distance / scale) * Math.cos(a.bearing / 180.0 * Math.PI);
+                a.show = "yes";
+            } else {
+                a.show = "no";
+            }
         }
     }
-}
 
-function compare(a, b) {
-    if (a.distance<b.distance) return -1;
-    else if (a.distance>b.distance) return 1;
-    else return 0;
-}
+    function compare(a, b) {
+        if (a.distance < b.distance) return -1;
+        else if (a.distance > b.distance) return 1;
+        else return 0;
+    }
 
-function setCurrent(itm) {
-    show_mmsi = itm.id;
-    loadAndUpdate();
-}
+    function setCurrent(itm) {
+        show_mmsi = itm.id;
+        if (show_mmsi.startsWith("pt_")) show_mmsi = show_mmsi.substring(3);
+        loadAndUpdate();
+    }
 
+    function getSz() {
+        const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);    
+        var s = 500;
+        return s;
+    } 
+
+    function zoomIn() {
+        zoomFactor = (zoomFactor+1)%zoomFactors.length;
+        loadAndUpdate();
+    }
+
+    function zoomOut() {
+        zoomFactor = (zoomFactor+zoomFactors.length-1)%zoomFactors.length;
+        loadAndUpdate();
+    }
+
+    $(document).ready(function(){
+        $('circle').on('click', function(e){
+            e.preventDefault();
+            var mmsi = $(this).data('MMSI');
+            console.log('Setting current:', mmsi);
+            show_mmsi = mmsi;
+            loadAndUpdate();
+        });
+    });
 </script>
+
 <body id="aistargets" ng-app="nmearouter" ng-controller="myCtrl">
 
     <ol class="breadcrumb">
@@ -71,6 +123,47 @@ function setCurrent(itm) {
         <li class="breadcrumb-item active">AIS</li>
     </ol>
     <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-6 col-lg-7 col-md-12">
+                <svg width="{{sz}}" height="{{sz}}" style="display: block; margin: auto;">
+                    <circle cx="50%" cy="50%" r="{{r}}" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
+                    <line x1="{{mtop}}" y1="{{cx}}" x2="{{mright}}" y2="{{cy}}" stroke="gray" stroke-width="1" />
+                    <line x1="{{cx}}" y1="{{mtop}}" x2="{{cx}}" y2="{{mright}}" stroke="gray" stroke-width="1" />
+                    <a ng-repeat="s in data.targets" ng-if="s.show=='yes'" href="#" onclick="setCurrent(this);" id="pt_{{s.MMSI}}">
+                        <circle cx="{{s.x}}" cy="{{s.y}}" r="3" stroke="{{s.color}}" stroke-width="2"
+                            fill="{{s.color}}" data-mmsi="{{s.MMSI}}"></circle>
+                    </a>
+                    <text ng-if="s_current!=null && s_current.show=='yes'" x="{{s_current.x}}" y="{{s_current.y}}" fill="blue" font-size="10">
+                        <tspan x="{{s_current.x}}" dx="10">{{s_current.MMSI}}</tspan>
+                        <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.name}}</tspan>
+                        <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.distance | number:1}} Nm
+                            {{s_current.bearing | number:0}}&deg;</tspan>
+                    </text>
+                    <circle ng-if="s_current!=null && s_current.show=='yes'" cx="{{s_current.x}}" cy="{{s_current.y}}" r="4" stroke="{{s_current.color}}" stroke-width="2"
+                        fill="{{s_current.color}}"></circle>
+
+                </svg>
+                <table>
+                    <tr>
+                        <td><a href="#" onclick="zoomIn();"><div class="h1">&plus;</div></a></td>
+                        <td>{{scale}}</td>
+                        <td><a href="#" onclick="zoomOut();"><div class="h1">&minus;</div></a></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-xl-6 col-lg-5 d-none d-lg-block">
+                <p class="h1">{{s.MMSI}}</p>
+                <p class="h4">{{s_current.name}}</p>
+                <p class="h4">{{s_current.callsign}}</p>
+                <p class="h4">{{s_current.legth}} m / {{s_current.beam}} m</p>
+                <p class="h4">{{s_current.vessel_type}}</p>
+                <p class="h4">{{s_current.s_latitude}} {{s_current.s_longitude}}</p>
+                <p class="h4">{{s_current.SOG | number:1}} Kn {{s_current.COG | number:0}}&deg;</p>
+                <p class="h4">{{s_current.distance | number:1}} Nm {{s_current.bearing | number:0}}&deg;</p>
+                <p class="h4">{{s_current.status}}</p>
+                <p class="h4">{{s_current.s_age}}</p>
+            </div>
+        </div>
         <div class="row alert alert-heading">
             <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6">MMSI</div>
             <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block">Name</div>
@@ -83,8 +176,8 @@ function setCurrent(itm) {
             <div class="col-xl-2 d-none d-xl-block">Status</div>
             <div class="col-xl-1 col-lg-1 col-md-1 d-none d-md-block">Age</div>
         </div>
-        <div class="row alert alert-primary" ng-repeat="s in data.targets">
-            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6"><a href="#" id ="{{s.MMSI}}" onclick="setCurrent(this);">{{s.MMSI}}</a></div>
+        <div ng-class="s.is_current ? 'row alert alert-warning' : 'row alert alert-primary'" ng-repeat="s in data.targets" id ="{{s.MMSI}}" onclick="setCurrent(this);">
+            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6"><a href="#">{{s.MMSI}}</a></div>
             <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block">{{s.name}}</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.callsign}}</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.length}} m<br>{{s.beam}} m</div>
@@ -95,22 +188,7 @@ function setCurrent(itm) {
             <div class="col-xl-2 d-none d-xl-block">{{s.status}}</div>
             <div class="col-xl-1 col-lg-1 col-md-1 d-none d-md-block">{{s.s_age}}</div>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <svg width="400" height="400" style="display: block; margin: auto;">
-                    <circle cx="50%" cy="50%" r="190" stroke="gray" stroke-width="3" fill="#EEEEFF"></circle>
-                    <line x1="10" y1="200" x2="390" y2="200" stroke="gray" stroke-width="3"/>
-                    <line x1="200" y1="10" x2="200" y2="390" stroke="gray" stroke-width="3"/>
-                    <circle ng-repeat="s in data.targets" cx="{{s.x}}" cy="{{s.y}}" r="2" stroke="gray"
-                            stroke-width="2" fill="{{s.color}}"></circle>
-                    <text ng-if="s_current!=null" x="{{s_current.x}}" y="{{s_current.y}}" fill="blue" font-size="10">
-                        <tspan x="{{s_current.x}}" dx="10">{{s_current.MMSI}}</tspan>
-                        <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.name}}</tspan>
-                        <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.distance | number:1}} Nm {{s_current.bearing | number:0}}&deg;</tspan>
-                    </text>
-                </svg>
-            </div>            
-        </div>
     </div>
 </body>
+
 </html>

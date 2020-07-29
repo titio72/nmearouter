@@ -45,9 +45,10 @@ public class N2KMessageParser {
         SUPPORTED.put(65345, N2KDef.getInstance(N2KSeatalkPilotWindDatum.class, false)); // Seatalk: wind datum
         SUPPORTED.put(129038, N2KDef.getInstance(N2KAISPositionReportA.class, true)); // AIS position report class A
         SUPPORTED.put(129039, N2KDef.getInstance(N2KAISPositionReportB.class, true)); // AIS Class B position report
+        SUPPORTED.put(129040, N2KDef.getInstance(N2KAISPositionReportBExt.class, true)); // AIS Class B position report
         SUPPORTED.put(129794, N2KDef.getInstance(N2KAISStaticDataA.class, true)); // AIS Class A Static and Voyage Related Data
-        SUPPORTED.put(129809, N2KDef.getInstance(n2KAISStaticDataBPartA.class, true)); // AIS Class B static data (msg 24 Part A)
-        SUPPORTED.put(129810, N2KDef.getInstance(n2KAISStaticDataBPartB.class, true)); // AIS Class B static data (msg 24 Part B)
+        SUPPORTED.put(129809, N2KDef.getInstance(N2KAISStaticDataBPartA.class, true)); // AIS Class B static data (msg 24 Part A)
+        SUPPORTED.put(129810, N2KDef.getInstance(N2KAISStaticDataBPartB.class, true)); // AIS Class B static data (msg 24 Part B)
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update

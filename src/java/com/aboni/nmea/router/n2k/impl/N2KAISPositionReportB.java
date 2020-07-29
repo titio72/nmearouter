@@ -26,7 +26,7 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
         fill();
     }
 
-    private void fill() {
+    protected void fill() {
         messageId = (int) parseIntegerSafe(data, 0, 0, 6, false, 0xFF);
         repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.LOOKUP_REPEAT_INDICATOR);
         sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, false, 0));
@@ -44,6 +44,7 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
         cog = parseDoubleSafe(data, 112, 0, 16, 0.0001, false);
         cog = Double.isNaN(cog) ? cog : Utils.round(Math.toDegrees(cog), 1);
         sog = parseDoubleSafe(data, 128, 0, 16, 0.01, false);
+        if (!Double.isNaN(sog)) sog = Utils.round(sog * 3600.0 / 1852.0, 1);
         heading = parseDoubleSafe(data, 168, 0, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
 

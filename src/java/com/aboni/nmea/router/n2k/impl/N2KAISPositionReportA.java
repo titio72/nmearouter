@@ -44,6 +44,8 @@ public class N2KAISPositionReportA extends N2KMessageImpl implements AISPosition
         cog = parseDoubleSafe(data, 112, 0, 16, 0.0001, false);
         cog = Double.isNaN(cog) ? cog : Utils.round(Math.toDegrees(cog), 1);
         sog = parseDoubleSafe(data, 128, 0, 16, 0.01, false);
+        if (!Double.isNaN(sog)) sog = Utils.round(sog * 3600.0 / 1852.0, 1);
+
         heading = parseDoubleSafe(data, 168, 0, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
         rateOfTurn = parseDoubleSafe(data, 184, 0, 16, 0.0001, false);
