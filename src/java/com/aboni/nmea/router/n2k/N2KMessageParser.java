@@ -52,7 +52,6 @@ public class N2KMessageParser {
         /*
         SUPPORTED.add(130577L); // Direction Data
         SUPPORTED.add(129291L); // Set & Drift, Rapid Update
-        SUPPORTED.add(129040L); // AIS Class B position report ext
         */
         /* to add */
         // "PGN": 129798, "Id": "aisSarAircraftPositionReport", "Description": "AIS SAR Aircraft Position Report"

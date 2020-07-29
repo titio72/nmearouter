@@ -69,6 +69,7 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void onTimerHR() {
         synchronized (agents) {
+            if (timerCount % 4 == 0) notifyDiag();
             timerCount = (timerCount +1) % TIMER_FACTOR;
             for (NMEAAgent a: agents.values()) {
                 exec.execute(a::onTimerHR);
@@ -86,6 +87,16 @@ public class NMEARouterImpl implements NMEARouter {
             lastStatsTime = t;
             ServerLog.getLogger().info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
         }
+    }
+
+    private void notifyDiag() {
+        JSONObject msg = new JSONObject();
+        msg.put("topic", "diag");
+        msg.put("queue", sentenceQueue.size());
+        msg.put("free_memory", Runtime.getRuntime().freeMemory()/1024/1024);
+        RouterMessage m = RouterMessageImpl.createMessage(msg, "SYS", cache.getNow());
+        privateQueueUpSentence(m);
+
     }
 
     @Override

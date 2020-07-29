@@ -185,6 +185,13 @@
           controllerScope.$evalAsync();
         }
       }
+    } else if (msg.topic == "diag") {
+      var controllerElement = document.getElementById('sensorPanel');
+      var controllerScope = angular.element(controllerElement).scope();
+      controllerScope.free_memory = msg.free_memory;
+      controllerScope.queue = msg.queue;
+      controllerScope.$evalAsync();
+
     } else if (msg.topic == "anchor") {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
@@ -531,9 +538,13 @@
                                 <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;</td>
-                                <td style="text-align: right">{{engine.status}}</td>
+                                <td>Queue</td>
+                                <td style="text-align: right">{{queue}} Msg</td>
                             </tr>
+                            <tr>
+                              <td>Free Memory</td>
+                              <td style="text-align: right">{{free_memory}} MB</td>
+                            </tr>                    
                         </table>
                     </div>
                 </div>
