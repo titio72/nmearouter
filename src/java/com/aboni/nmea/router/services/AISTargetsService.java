@@ -34,7 +34,8 @@ public class AISTargetsService extends JSONWebService {
                 if (reports != null) {
                     Position myPos = getCurrentPosition(cache);
                     for (AISPositionReport r : reports) {
-                        l.add(getJsonTarget(myPos, r));
+                        JSONObject jTarget = getJsonTarget(myPos, r);
+                        if (jTarget!=null) l.add(jTarget);
                     }
                 }
                 res.put("targets", new JSONArray(l));
@@ -45,42 +46,46 @@ public class AISTargetsService extends JSONWebService {
     }
 
     private JSONObject getJsonTarget(Position myPos, AISPositionReport r) {
-        JSONObject j = new JSONObject();
-        j.put("MMSI", r.getMMSI());
-        j.put("class", r.getAISClass());
-        j.put("latitude", r.getPosition().getLatitude());
-        j.put("longitude", r.getPosition().getLongitude());
-        j.put("s_latitude", Utils.formatLatitude(r.getPosition().getLatitude()));
-        j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
+        if (r.getPosition()!=null) {
+            JSONObject j = new JSONObject();
+            j.put("MMSI", r.getMMSI());
+            j.put("class", r.getAISClass());
+            j.put("latitude", r.getPosition().getLatitude());
+            j.put("longitude", r.getPosition().getLongitude());
+            j.put("s_latitude", Utils.formatLatitude(r.getPosition().getLatitude()));
+            j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
 
-        long age = r.getAge(cache.getNow());
-        j.put("age", age);
-        j.put("s_age", String.format("%02d:%02d", age/60000, (age/1000)%60 ));
+            long age = r.getAge(cache.getNow());
+            j.put("age", age);
+            j.put("s_age", String.format("%02d:%02d", age / 60000, (age / 1000) % 60));
 
-        setStringAttribute(j, r.getPositionAccuracy(), "accuracy");
-        setDoubleAttribute(j, r.getSog(), "SOG");
-        setDoubleAttribute(j, r.getCog(), "COG");
-        setDoubleAttribute(j, r.getHeading(), "heading");
-        setStringAttribute(j, r.getNavStatus(), "status");
-        setStringAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
-        setStringAttribute(j, r.getTimestampStatus(), "timeStampStatus");
-        if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
-        if (myPos != null) {
-            Course c1 = new Course(myPos, r.getPosition());
-            j.put("distance", c1.getDistance());
-            j.put("bearing", c1.getCOG());
+            setStringAttribute(j, r.getPositionAccuracy(), "accuracy");
+            setDoubleAttribute(j, r.getSog(), "SOG");
+            setDoubleAttribute(j, r.getCog(), "COG");
+            setDoubleAttribute(j, r.getHeading(), "heading");
+            setStringAttribute(j, r.getNavStatus(), "status");
+            setStringAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
+            setStringAttribute(j, r.getTimestampStatus(), "timeStampStatus");
+            if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
+            if (myPos != null) {
+                Course c1 = new Course(myPos, r.getPosition());
+                j.put("distance", c1.getDistance());
+                j.put("bearing", c1.getCOG());
+            }
+
+            AISStaticData data = targetsProvider.getData(r.getMMSI());
+            if (data != null) {
+                setStringAttribute(j, data.getName(), "name");
+                setStringAttribute(j, data.getTypeOfShip(), "vessel_type");
+                j.put("length", data.getLength());
+                j.put("beam", data.getBeam());
+                setStringAttribute(j, data.getCallSign(), "callsign");
+                setStringAttribute(j, data.getAisTransceiverInfo(), "tranceiver");
+            }
+            return j;
+        } else {
+            return null;
         }
-
-        AISStaticData data = targetsProvider.getData(r.getMMSI());
-        if (data != null) {
-            j.put("name", data.getName());
-            setStringAttribute(j, data.getTypeOfShip(), "vessel_type");
-            j.put("length", data.getLength());
-            j.put("beam", data.getBeam());
-            setStringAttribute(j, data.getCallSign(), "callsign");
-            setStringAttribute(j, data.getAisTransceiverInfo(), "tranceiver");
-        }
-        return j;
     }
 
     private void setDoubleAttribute(JSONObject j, double value, String attribute) {

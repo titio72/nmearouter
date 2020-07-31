@@ -15,7 +15,7 @@
     };
 
     var ais_data = ais_data_empty;
-    var zoomFactors = [50, 30, 20, 15, 10, 5, 3, 1, 0.5];
+    var zoomFactors = [100, 50, 30, 20, 15, 10, 5, 3, 1, 0.5, 0.1];
     var zoomFactor = 2;
     var s_current;
     var show_mmsi = '';
@@ -58,6 +58,7 @@
         s_current = null;
         for (i = 0; i < ais_data.targets.length; i++) {
             var a = ais_data.targets[i];
+            a.uriName = encodeURI(a.name);
             if (a.MMSI == show_mmsi) {
                 s_current = a;
                 a.color = "red";
@@ -74,6 +75,11 @@
             } else {
                 a.show = "no";
             }
+            a.stationary = (a.SOG==null || a.SOG==0.0);
+            
+            a.direction = a.COG;
+            if (a.direction==null) a.direction = a.heading;
+            if (a.direction==null) a.direction = 0.0;
         }
     }
 
@@ -130,18 +136,25 @@
                     <line x1="{{mtop}}" y1="{{cx}}" x2="{{mright}}" y2="{{cy}}" stroke="gray" stroke-width="1" />
                     <line x1="{{cx}}" y1="{{mtop}}" x2="{{cx}}" y2="{{mright}}" stroke="gray" stroke-width="1" />
                     <a ng-repeat="s in data.targets" ng-if="s.show=='yes'" href="#" onclick="setCurrent(this);" id="pt_{{s.MMSI}}">
-                        <circle cx="{{s.x}}" cy="{{s.y}}" r="3" stroke="{{s.color}}" stroke-width="2"
-                            fill="{{s.color}}" data-mmsi="{{s.MMSI}}"></circle>
+                        <circle ng-if="s.stationary" cx="{{s.x}}" cy="{{s.y}}" r="3" stroke="{{s.color}}" stroke-width="2" fill="{{s.color}}" data-mmsi="{{s.MMSI}}"></circle>
+                        <path ng-if="!s.stationary" d="M0 -6 l4 12 l-8 0 z" fill="{{s.color}}" transform="translate({{s.x}} {{s.y}}) rotate({{s.direction}} 0 0)" data-mmsi="{{s.MMSI}}"></path>
                     </a>
                     <text ng-if="s_current!=null && s_current.show=='yes'" x="{{s_current.x}}" y="{{s_current.y}}" fill="blue" font-size="10">
                         <tspan x="{{s_current.x}}" dx="10">{{s_current.MMSI}}</tspan>
                         <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.name}}</tspan>
                         <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.distance | number:1}} Nm
                             {{s_current.bearing | number:0}}&deg;</tspan>
-                    </text>
-                    <circle ng-if="s_current!=null && s_current.show=='yes'" cx="{{s_current.x}}" cy="{{s_current.y}}" r="4" stroke="{{s_current.color}}" stroke-width="2"
-                        fill="{{s_current.color}}"></circle>
-
+                        <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.SOG | number:1}} Kn
+                            {{s_current.COG | number:0}}&deg;</tspan>
+                        </text>
+                    <circle ng-if="(s_current!=null && s_current.show=='yes') && s_current.stationary" 
+                            cx="{{s_current.x}}" 
+                            cy="{{s_current.y}}" r="4" stroke="{{s_current.color}}" stroke-width="2"
+                            fill="{{s_current.color}}"></circle>
+                    <path ng-if="(s_current!=null && s_current.show=='yes') && !s_current.stationary" d="M0 -8 l5 16 l-10 0 z" 
+                            fill="{{s_current.color}}" 
+                            transform="translate({{s_current.x}} {{s_current.y}}) rotate({{s_current.direction}} 0 0)" 
+                            data-mmsi="{{s_current.MMSI}}"></path>
                 </svg>
                 <table>
                     <tr>
@@ -155,7 +168,7 @@
                 <p class="h1">{{s.MMSI}}</p>
                 <p class="h4">{{s_current.name}}</p>
                 <p class="h4">{{s_current.callsign}}</p>
-                <p class="h4">{{s_current.legth}} m / {{s_current.beam}} m</p>
+                <p class="h4">{{s_current.length}} m / {{s_current.beam}} m</p>
                 <p class="h4">{{s_current.vessel_type}}</p>
                 <p class="h4">{{s_current.s_latitude}} {{s_current.s_longitude}}</p>
                 <p class="h4">{{s_current.SOG | number:1}} Kn {{s_current.COG | number:0}}&deg;</p>
@@ -177,8 +190,8 @@
             <div class="col-xl-1 col-lg-1 col-md-1 d-none d-md-block">Age</div>
         </div>
         <div ng-class="s.is_current ? 'row alert alert-warning' : 'row alert alert-primary'" ng-repeat="s in data.targets" id ="{{s.MMSI}}" onclick="setCurrent(this);">
-            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6"><a href="#">{{s.MMSI}}</a></div>
-            <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block">{{s.name}}</div>
+            <div class="col-xl-1 col-lg-1 col-md-2 col-sm-3 col-xs-6"><a href="https://www.marinetraffic.com/it/ais/details/ships/mmsi:{{s.MMSI}}">{{s.MMSI}}</a></div>
+            <div class="col-xl-1 col-lg-2 col-md-2 col-sm-3 d-none d-sm-block"><a href="https://www.google.com/search?q=%22{{s.uriName}}%22+yacht" target="_blank">{{s.name}}</a></div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.callsign}}</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.length}} m<br>{{s.beam}} m</div>
             <div class="col-xl-1 col-lg-1 d-none d-lg-block">{{s.vessel_type}}</div>
