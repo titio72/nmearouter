@@ -57,7 +57,7 @@ public class Track2KML implements TrackDumper {
     }
 
     @Override
-    public void dump(Query query, Writer w) throws TrackManagementException {
+    public void dump(@NotNull Query query, @NotNull Writer w) throws TrackManagementException {
         LineString s = createString();
         writePoints(query, s);
         kml.marshal(w);
@@ -79,7 +79,7 @@ public class Track2KML implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(String trackName) {
+    public void setTrackName(@NotNull String trackName) {
         // unsupported
     }
 

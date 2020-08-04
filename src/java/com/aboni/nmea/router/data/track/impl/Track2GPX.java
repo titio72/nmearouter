@@ -98,7 +98,7 @@ public class Track2GPX implements TrackDumper {
     }
 
     @Override
-    public void dump(Query query, Writer w) throws IOException, TrackManagementException {
+    public void dump(@NotNull Query query, @NotNull Writer w) throws IOException, TrackManagementException {
         writeHeader(w);
         writePoints(query, w);
         writeFooter(w);
@@ -126,7 +126,7 @@ public class Track2GPX implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(String trackName) {
+    public void setTrackName(@NotNull String trackName) {
         this.trackName = trackName;
     }
 

@@ -5,6 +5,8 @@ import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+
 public class N2KAISStaticDataA extends N2KMessageImpl implements AISStaticData {
 
     public static final int PGN = 129794;
@@ -35,15 +37,15 @@ public class N2KAISStaticDataA extends N2KMessageImpl implements AISStaticData {
 
     private void fill() {
         messageId = (int) parseIntegerSafe(data, 0, 0, 6, false, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.LOOKUP_REPEAT_INDICATOR);
+        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
         sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, false, 0));
         imo = (int) parseIntegerSafe(data, 40, 0, 32, false, 0xFFFFFF);
         callSign = parseAscii(data, 72, 0, 56);
         name = parseAscii(data, 128, 0, 160);
-        typeOfShip = parseEnum(data, 288, 0, 8, N2KLookupTables.LOOKUP_SHIP_TYPE);
+        typeOfShip = parseEnum(data, 288, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
         length = parseDoubleSafe(data, 296, 0, 16, 0.1, false);
         beam = parseDoubleSafe(data, 312, 0, 16, 0.1, false);
-        aisTransceiverInformation = parseEnum(data, 592, 0, 5, N2KLookupTables.LOOKUP_AIS_TRANSCEIVER);
+        aisTransceiverInformation = parseEnum(data, 592, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
     }
 

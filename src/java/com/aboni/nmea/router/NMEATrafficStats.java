@@ -57,8 +57,8 @@ public class NMEATrafficStats {
     private boolean output;
     private final StatsOnTimer callback;
     private long expireAfterTimerCount;
-    private Stats statsIn;
-    private Stats statsOut;
+    private final Stats statsIn;
+    private final Stats statsOut;
     private long timerCount;
     private long time0;
 
@@ -68,11 +68,15 @@ public class NMEATrafficStats {
 
     public NMEATrafficStats(StatsOnTimer callback) {
         this.callback = callback;
+        statsOut = new Stats();
+        statsIn = new Stats();
         setup(1, true, true);
     }
 
     public NMEATrafficStats(StatsOnTimer callback, long expireAfterTimerCount, boolean input, boolean output) {
         this.callback = callback;
+        statsOut = new Stats();
+        statsIn = new Stats();
         setup(expireAfterTimerCount, input, output);
     }
 
@@ -80,8 +84,6 @@ public class NMEATrafficStats {
         this.expireAfterTimerCount = expireAfterTimerCount;
         this.input = input;
         this.output = output;
-        statsOut = output ? new Stats() : null;
-        statsIn = input ? new Stats() : null;
         timerCount = 0;
     }
 

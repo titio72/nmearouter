@@ -5,6 +5,8 @@ import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
+
 public class N2KHeading extends N2KMessageImpl {
 
     public static final int PGN = 127250;
@@ -40,7 +42,7 @@ public class N2KHeading extends N2KMessageImpl {
         Double dV = parseDouble(data, 40, 0, 16, 0.0001, true);
         variation = dV == null ? Double.NaN : Utils.round(Math.toDegrees(dV), 1);
 
-        reference = parseEnum(data, 56, 0, 2, N2KLookupTables.LOOKUP_DIRECTION_REFERENCE);
+        reference = parseEnum(data, 56, 0, 2, N2KLookupTables.getTable(DIRECTION_REFERENCE));
     }
 
     public int getSID() {

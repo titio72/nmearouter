@@ -5,6 +5,8 @@ import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.WATER_REFERENCE;
+
 public class N2KSpeed extends N2KMessageImpl {
 
     public static final int PGN = 128259;
@@ -38,7 +40,7 @@ public class N2KSpeed extends N2KMessageImpl {
         Double dSpeedG = parseDouble(data, 24, 0, 16, 0.01, false);
         speedGroundRef = dSpeedG == null ? Double.NaN : Utils.round(dSpeedG * 3600.0 / 1852.0, 2);
 
-        waterRefType = parseEnum(data, 40, 0, 8, N2KLookupTables.LOOKUP_WATER_REFERENCE);
+        waterRefType = parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(WATER_REFERENCE));
 
         Long lSpeedDir = parseInteger(data, 48, 0, 4, false);
         if (lSpeedDir != null) speedDirection = lSpeedDir.intValue();

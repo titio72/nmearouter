@@ -5,6 +5,9 @@ import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.HUMIDITY_SOURCE;
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
+
 public class N2KEnvironment311 extends N2KMessageImpl {
 
     public static final int PGN = 130311;
@@ -34,9 +37,9 @@ public class N2KEnvironment311 extends N2KMessageImpl {
 
         sid = getByte(data, 0, 0xFF);
 
-        tempSource = parseEnum(data, 8, 0, 6, N2KLookupTables.LOOKUP_TEMPERATURE_SOURCE);
+        tempSource = parseEnum(data, 8, 0, 6, N2KLookupTables.getTable(TEMPERATURE_SOURCE));
 
-        humiditySource = parseEnum(data, 14, 6, 2, N2KLookupTables.LOOKUP_HUMIDITY_SOURCE);
+        humiditySource = parseEnum(data, 14, 6, 2, N2KLookupTables.getTable(HUMIDITY_SOURCE));
 
         Double dT = parseDouble(data, 16, 0, 16, 0.01, false);
         temperature = (dT == null) ? Double.NaN : Utils.round(dT - 273.15, 1);

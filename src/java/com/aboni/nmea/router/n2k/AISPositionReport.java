@@ -15,17 +15,41 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k;
 
-import java.time.Instant;
+import net.sf.marineapi.nmea.util.Position;
 
-public interface N2KMessageHeader {
+public interface AISPositionReport {
 
-    int getPgn();
+    String getAISClass();
 
-    int getSource();
+    Position getPosition();
 
-    int getDest();
+    int getMessageId();
 
-    int getPriority();
+    String getPositionAccuracy();
 
-    Instant getTimestamp();
+    String getRepeatIndicator();
+
+    boolean issRAIM();
+
+    double getCog();
+
+    double getSog();
+
+    double getHeading();
+
+    String getMMSI();
+
+    String getTimestampStatus();
+
+    int getTimestamp();
+
+    String getNavStatus();
+
+    long getAge(long now);
+
+    void setOverrideTime(long t);
+
+    long getOverrrideTime();
+
+
 }

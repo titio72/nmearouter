@@ -134,7 +134,7 @@ public class Track2JSON implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(String trackName) {
+    public void setTrackName(@NotNull String trackName) {
         this.trackName = trackName;
     }
 }

@@ -7,11 +7,12 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.n2k.AISStaticData;
-import com.aboni.nmea.router.n2k.impl.AISPositionReport;
+import com.aboni.nmea.router.n2k.AISPositionReport;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.List;
 public class AISTargetsService extends JSONWebService {
 
     private AISTargets targetsProvider;
-    private NMEACache cache;
+    private final NMEACache cache;
 
     @Inject
     public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache) {
@@ -30,15 +31,7 @@ public class AISTargetsService extends JSONWebService {
             if (targetsProvider != null) {
                 List<AISPositionReport> reports = targetsProvider.getAISTargets();
                 JSONObject res = new JSONObject();
-                List<JSONObject> l = new ArrayList<>();
-                if (reports != null) {
-                    Position myPos = getCurrentPosition(cache);
-                    for (AISPositionReport r : reports) {
-                        JSONObject jTarget = getJsonTarget(myPos, r);
-                        if (jTarget!=null) l.add(jTarget);
-                    }
-                }
-                res.put("targets", new JSONArray(l));
+                res.put("targets", new JSONArray(getListOfTargets(cache, reports)));
                 if (cache.getLastHeading()!=null) {
                     double heading = cache.getLastHeading().getData().getHeading();
                     res.put("heading", Utils.round(heading, 1));
@@ -47,6 +40,19 @@ public class AISTargetsService extends JSONWebService {
             }
             return null;
         });
+    }
+
+    @Nonnull
+    private List<JSONObject> getListOfTargets(@NotNull NMEACache cache, List<AISPositionReport> reports) {
+        List<JSONObject> l = new ArrayList<>();
+        if (reports != null) {
+            Position myPos = getCurrentPosition(cache);
+            for (AISPositionReport r : reports) {
+                JSONObject jTarget = getJsonTarget(myPos, r);
+                if (jTarget!=null) l.add(jTarget);
+            }
+        }
+        return l;
     }
 
     private JSONObject getJsonTarget(Position myPos, AISPositionReport r) {

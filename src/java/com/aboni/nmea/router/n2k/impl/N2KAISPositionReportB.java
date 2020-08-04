@@ -2,12 +2,15 @@ package com.aboni.nmea.router.n2k.impl;
 
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.n2k.AISPositionReport;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;
+
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
 
 public class N2KAISPositionReportB extends N2KMessageImpl implements AISPositionReport {
 
@@ -28,7 +31,7 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
 
     protected void fill() {
         messageId = (int) parseIntegerSafe(data, 0, 0, 6, false, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.LOOKUP_REPEAT_INDICATOR);
+        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
         sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, false, 0));
 
         double lon = parseDoubleSafe(data, 40, 0, 32, 0.0000001, true);
@@ -37,7 +40,7 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
             position = new Position(lat, lon);
         }
 
-        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.LOOKUP_POSITION_ACCURACY);
+        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
         sRAIM = parseIntegerSafe(data, 105, 1, 1, false, 0) == 1;
         timestamp = (int) parseIntegerSafe(data, 106, 2, 6, false, 0xFF);
 
@@ -48,7 +51,7 @@ public class N2KAISPositionReportB extends N2KMessageImpl implements AISPosition
         heading = parseDoubleSafe(data, 168, 0, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
 
-        aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.LOOKUP_AIS_TRANSCEIVER);
+        aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
         int i = (int) parseIntegerSafe(data, 194, 2, 1, false, 0xFF);
         unitType = getUnitType(i);

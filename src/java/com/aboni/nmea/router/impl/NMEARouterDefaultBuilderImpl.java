@@ -24,7 +24,6 @@ import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
 import com.aboni.nmea.router.agent.impl.QOSKeys;
 import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.*;
-import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;

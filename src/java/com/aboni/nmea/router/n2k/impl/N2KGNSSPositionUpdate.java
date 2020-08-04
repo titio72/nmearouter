@@ -8,6 +8,8 @@ import net.sf.marineapi.nmea.util.Position;
 import java.time.Instant;
 import java.time.ZoneId;
 
+import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+
 public class N2KGNSSPositionUpdate extends N2KMessageImpl {
 
     public static final int PGN = 129029;
@@ -65,10 +67,10 @@ public class N2KGNSSPositionUpdate extends N2KMessageImpl {
             timestamp = Instant.ofEpochMilli(0).atZone(ZoneId.of("UTC")).plusDays(daysSince1970).plusNanos((long) (secsSinceMidnight * 1e9)).toInstant();
         }
 
-        gnssType = parseEnum(data, 248, 0, 4, N2KLookupTables.LOOKUP_GNS);
-        method = parseEnum(data, 252, 4, 4, N2KLookupTables.LOOKUP_GNS_METHOD);
-        integrity = parseEnum(data, 256, 0, 2, N2KLookupTables.LOOKUP_GNS_INTEGRITY);
-        referenceStationType = parseEnum(data, 344, 0, 4, N2KLookupTables.LOOKUP_GNS);
+        gnssType = parseEnum(data, 248, 0, 4, N2KLookupTables.getTable(GNS));
+        method = parseEnum(data, 252, 4, 4, N2KLookupTables.getTable(GNS_METHOD));
+        integrity = parseEnum(data, 256, 0, 2, N2KLookupTables.getTable(GNS_INTEGRITY));
+        referenceStationType = parseEnum(data, 344, 0, 4, N2KLookupTables.getTable(GNS));
     }
 
     public int getSID() {

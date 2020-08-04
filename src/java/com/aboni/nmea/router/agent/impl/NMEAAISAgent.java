@@ -7,7 +7,7 @@ import com.aboni.nmea.router.n2k.AISStaticData;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.impl.AISPositionReport;
+import com.aboni.nmea.router.n2k.AISPositionReport;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartA;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartB;
