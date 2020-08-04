@@ -155,7 +155,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                     N2KMessage m = p.getMessage();
                     onMessage(m, "TEST");
                 } catch (PGNDataParseException e) {
-                    e.printStackTrace();
+                    getLogger().errorForceStacktrace("Cannot process n2k message", e);
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.aboni.nmea.router.data.track.impl.DBTripEventWriter;
 import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
 import com.aboni.nmea.router.data.track.impl.TripManagerXImpl;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -42,7 +43,7 @@ public class LoadGPX {
                     String s = new String(buffer);
                     if ("<trkpt".equals(s)) {
                         b = new StringBuilder("<trkpt");
-                    } else if ("trkpt>".equals(s)) {
+                    } else if ("trkpt>".equals(s) && b!=null) {
                         b.append(">");
                         processPoint(b.toString());
                         b = null;
@@ -55,18 +56,18 @@ public class LoadGPX {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(ServerLog.getConsoleOut());
         }
     }
     //<trkpt lat="43.584781" lon="10.204714"><ele>48</ele><time>2020-06-20T05:46:25.255Z</time></trkpt>
     // <navionics_speed>0.000<
 
 
-    private static final String pattern = "lat=\"(.+)\" lon=\"(.+)\".+time>(.+)</time>.*navionics_speed>(.+)</navionics_speed";
-    private static final Pattern rx = Pattern.compile(pattern);
+    private static final String PATTERN = "lat=\"(.+)\" lon=\"(.+)\".+time>(.+)</time>.*navionics_speed>(.+)</navionics_speed";
+    private static final Pattern RX = Pattern.compile(PATTERN);
 
     private static void processPoint(String toString) {
-        Matcher m = rx.matcher(toString);
+        Matcher m = RX.matcher(toString);
 
         if (m.find()) {
             double lat = Double.parseDouble(m.group(1));
@@ -78,7 +79,7 @@ public class LoadGPX {
             process(g, speed);
 
 
-            System.out.println(String.format("%s %s %s %s", m.group(1), m.group(2), m.group(3), m.group(4)));
+            ServerLog.getConsoleOut().println(String.format("%s %s %s %s", m.group(1), m.group(2), m.group(3), m.group(4)));
         }
     }
 
@@ -96,7 +97,7 @@ public class LoadGPX {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                e.printStackTrace();
+                e.printStackTrace(ServerLog.getConsoleOut());
             }
         }
     }

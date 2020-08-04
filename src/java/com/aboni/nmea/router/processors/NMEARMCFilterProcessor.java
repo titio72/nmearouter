@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.filters.impl.NMEAPositionFilter;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.utils.Pair;
@@ -22,14 +23,17 @@ import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class NMEARMCFilterProcessor implements NMEAPostProcess {
 
     private final NMEAPositionFilter filter;
+    private final NMEACache cache;
 
     @Inject
-    public NMEARMCFilterProcessor() {
-        filter = new NMEAPositionFilter();
+    public NMEARMCFilterProcessor(@NotNull NMEACache cache) {
+        this.cache = cache;
+        this.filter = new NMEAPositionFilter();
     }
 
     private static final Pair<Boolean, Sentence[]> OK = new Pair<>(true, null);
@@ -38,8 +42,7 @@ public class NMEARMCFilterProcessor implements NMEAPostProcess {
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
-            // TODO - fix the timestamp
-            return (filter.match(RouterMessageImpl.createMessage(sentence, src, System.currentTimeMillis())) ? OK : KO);
+            return (filter.match(RouterMessageImpl.createMessage(sentence, src, cache.getNow())) ? OK : KO);
         } catch (Exception e) {
             ServerLog.getLogger().warning("NMEARMCFilterProcessor: Cannot analyze RMC {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;

@@ -12,12 +12,6 @@ public class N2KAnalyzer {
     private static boolean waitForMore;
     private static N2KMessageParser pgnWaitingForMore;
 
-    private static class QueuedPGN {
-        N2KMessageParser pgnParser;
-        long lastSentence;
-    }
-
-
     public static void main(String[] args) {
         try {
             try (FileReader r = new FileReader("nmea2000_1.log")) {

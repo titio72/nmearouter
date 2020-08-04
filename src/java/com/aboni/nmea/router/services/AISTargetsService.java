@@ -23,7 +23,7 @@ public class AISTargetsService extends JSONWebService {
     private NMEACache cache;
 
     @Inject
-    public AISTargetsService(@NotNull NMEARouter router, NMEACache cache) {
+    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache) {
         this.cache = cache;
         findService(router);
         setLoader((ServiceConfig config) -> {
@@ -39,6 +39,10 @@ public class AISTargetsService extends JSONWebService {
                     }
                 }
                 res.put("targets", new JSONArray(l));
+                if (cache.getLastHeading()!=null) {
+                    double heading = cache.getLastHeading().getData().getHeading();
+                    res.put("heading", Utils.round(heading, 1));
+                }
                 return res;
             }
             return null;

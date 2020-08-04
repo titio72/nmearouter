@@ -20,6 +20,7 @@
     var s_current;
     var show_mmsi = '';
     var sz = getSz();
+    var northUp = false;
 
     loadAIS();
 
@@ -40,6 +41,7 @@
 
     function setupController(controllerScope) {
         controllerScope.data = ais_data;
+        controllerScope.northUp = northUp;
         controllerScope.s_current = s_current;
         controllerScope.sz = sz;
         controllerScope.cx = sz / 2;
@@ -54,7 +56,9 @@
     function loadAIS() {
         sz = getSz();
         ais_data = httpGetAIS();
+        ais_data.orientation = northUp?"North Up":"Head Up";
         ais_data.targets.sort(compare);
+        let heading = (ais_data.heading==null)?0.0:ais_data.heading;
         s_current = null;
         for (i = 0; i < ais_data.targets.length; i++) {
             var a = ais_data.targets[i];
@@ -69,8 +73,9 @@
             }
             var scale = zoomFactors[zoomFactor];
             if (scale > a.distance) {
-                a.x = (sz / 2) + (sz / 2 - 10) * (a.distance / scale) * Math.sin(a.bearing / 180.0 * Math.PI);
-                a.y = (sz / 2) - (sz / 2 - 10) * (a.distance / scale) * Math.cos(a.bearing / 180.0 * Math.PI);
+                let angle = (northUp?a.bearing:(a.bearing-heading));
+                a.x = (sz / 2) + (sz / 2 - 10) * (a.distance / scale) * Math.sin(angle / 180.0 * Math.PI);
+                a.y = (sz / 2) - (sz / 2 - 10) * (a.distance / scale) * Math.cos(angle / 180.0 * Math.PI);
                 a.show = "yes";
             } else {
                 a.show = "no";
@@ -108,6 +113,11 @@
 
     function zoomOut() {
         zoomFactor = (zoomFactor+zoomFactors.length-1)%zoomFactors.length;
+        loadAndUpdate();
+    }
+
+    function switchNorthUp() {
+        northUp = !northUp;
         loadAndUpdate();
     }
 
@@ -155,14 +165,23 @@
                             fill="{{s_current.color}}" 
                             transform="translate({{s_current.x}} {{s_current.y}}) rotate({{s_current.direction}} 0 0)" 
                             data-mmsi="{{s_current.MMSI}}"></path>
+                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue"></path>   
+                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(90 {{cx}} {{cy}})"></path>   
+                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(180 {{cx}} {{cy}})"></path>   
+                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(270 {{cx}} {{cy}})"></path>   
+                        <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue" transform="rotate(-{{data.heading}} {{cx}} {{cy}})"></path>   
+                        <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(90 {{cx}} {{cy}})"></path>   
+                        <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(180 {{cx}} {{cy}})"></path>   
+                        <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(270 {{cx}} {{cy}})"></path>   
+                                
+                    <path ng-if="northUp" d="M{{cx}} {{mtop}} m-10 0 l-10 0 l20 20 l20 -20 l-10 0 l-10 10 z" fill="gray" transform="rotate({{data.heading}} {{cx}} {{cy}})"></path>   
+                    <path ng-if="!northUp" d="M{{cx}} {{mtop}} m-10 0 l-10 0 l20 20 l20 -20 l-10 0 l-10 10 z" fill="gray"></path>   
+
                 </svg>
-                <table>
-                    <tr>
-                        <td><a href="#" onclick="zoomIn();"><div class="h1">&plus;</div></a></td>
-                        <td>{{scale}}</td>
-                        <td><a href="#" onclick="zoomOut();"><div class="h1">&minus;</div></a></td>
-                    </tr>
-                </table>
+                <div style="position: absolute; top: 10px; left: 10px;">
+                    <a href="#" onclick="zoomIn();"><span class="glyphicon glyphicon-zoom-in"></span></a>&nbsp;{{scale}} Nm&nbsp;<a href="#" onclick="zoomOut();"><span class="glyphicon glyphicon-zoom-out"></span></a>
+                    <br><a href="#" onclick="switchNorthUp();">{{data.orientation}}</a>
+                </div>  
             </div>
             <div class="col-xl-6 col-lg-5 d-none d-lg-block">
                 <p class="h1">{{s.MMSI}}</p>

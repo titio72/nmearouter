@@ -79,30 +79,10 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         int satIx = 0;
         List<N2KSatellites.Sat> satsList = message.getSatellites();
         List<String> satInUse = new ArrayList<>();
-        for (int group = 0; group < nGroups; group++) {
-            int satsInGroup = Math.min(nSat - (group * 12), 12);
-            int sentences = satsInGroup / 4;
-            sentences = (sentences * 4) < satsInGroup ? sentences + 1 : sentences;
-            int satIxGroup = 0;
-            for (int i = 0; i < sentences; i++) {
-                GSVSentence s = (GSVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSV);
-                s.setSatelliteCount(satsInGroup);
-                s.setSentenceCount(sentences);
-                s.setSentenceIndex(i + 1);
-                List<SatelliteInfo> l = new ArrayList<>();
-                for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++, satIxGroup++, satIx++) {
-                    N2KSatellites.Sat sat = satsList.get(satIx);
-                    if (sat.getId() != 0xFF) {
-                        SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
-                        l.add(sInfo);
-                        if ("Used".equals(sat.getStatus())) {
-                            satInUse.add(sInfo.getId());
-                        }
-                    }
-                }
-                s.setSatelliteInfo(l);
-                res.add(s);
-            }
+        int group = 0;
+        while (group < nGroups) {
+            satIx = handleSatellitesGroup(res, nSat, satIx, satsList, satInUse, group);
+            group++;
         }
         GSASentence gsa = (GSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSA);
         gsa.setMode(FaaMode.AUTOMATIC);
@@ -110,6 +90,33 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         gsa.setFixStatus(satInUse.isEmpty() ? GpsFixStatus.GPS_NA : GpsFixStatus.GPS_2D);
         res.add(gsa);
         return res.toArray(TEMPLATE);
+    }
+
+    private int handleSatellitesGroup(List<Sentence> res, int nSat, int satIx, List<N2KSatellites.Sat> satsList, List<String> satInUse, int group) {
+        int satsInGroup = Math.min(nSat - (group * 12), 12);
+        int sentences = satsInGroup / 4;
+        sentences = (sentences * 4) < satsInGroup ? sentences + 1 : sentences;
+        int satIxGroup = 0;
+        for (int i = 0; i < sentences; i++) {
+            GSVSentence s = (GSVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GSV);
+            s.setSatelliteCount(satsInGroup);
+            s.setSentenceCount(sentences);
+            s.setSentenceIndex(i + 1);
+            List<SatelliteInfo> l = new ArrayList<>();
+            for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++, satIxGroup++, satIx++) {
+                N2KSatellites.Sat sat = satsList.get(satIx);
+                if (sat.getId() != 0xFF) {
+                    SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
+                    l.add(sInfo);
+                    if ("Used".equals(sat.getStatus())) {
+                        satInUse.add(sInfo.getId());
+                    }
+                }
+            }
+            s.setSatelliteInfo(l);
+            res.add(s);
+        }
+        return satIx;
     }
 
     private Sentence[] handleSystemTime(N2KSystemTime message) {

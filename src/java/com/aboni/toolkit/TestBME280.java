@@ -45,7 +45,7 @@ public class TestBME280 {
 				try {
 					sp.init();
 				} catch (SensorException e) {
-					e.printStackTrace();
+					e.printStackTrace(out);
 				}
 				return true;
 			}

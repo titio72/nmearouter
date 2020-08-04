@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.utils.Pair;
@@ -26,8 +27,10 @@ import javax.validation.constraints.NotNull;
 public class NMEAGenericFilterProc implements NMEAPostProcess {
 
     private final NMEAFilter filter;
+    private final NMEACache cache;
 
-    public NMEAGenericFilterProc(@NotNull NMEAFilter filter) {
+    public NMEAGenericFilterProc(@NotNull NMEACache cache,  @NotNull NMEAFilter filter) {
+        this.cache = cache;
         this.filter = filter;
     }
 
@@ -37,8 +40,7 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
-            // TODO get the timestamp from the real sentence - required a change of signature
-            return (filter.match(RouterMessageImpl.createMessage(sentence, src, System.currentTimeMillis())) ? OK : KO);
+            return (filter.match(RouterMessageImpl.createMessage(sentence, src, cache.getNow())) ? OK : KO);
         } catch (Exception e) {
             ServerLog.getLogger().warning("Filter processor: Cannot analyze sentence {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;

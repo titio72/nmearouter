@@ -216,7 +216,7 @@
       msg.s_time = new Date(Date.parse(msg.UTC)).toLocaleTimeString();
       controllerScope['rmc'] = msg;
       controllerScope.$evalAsync();
-    } else if (msg.topic == 'DBT') {
+    } else if (msg.topic == 'DPT') {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
       controllerScope['depth'] = msg;
@@ -492,8 +492,8 @@
                                 <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
                             </tr>
                             <tr>
-                                <td>Head</td>
-                                <td style="text-align: right">{{vector.s_dir}} {{vector.true_angle | number:1}}&deg;
+                                <td>Head (mag)</td>
+                                <td style="text-align: right">{{vector.s_dir}} {{vector.mag_angle | number:1}}&deg;
                                 </td>
                             </tr>
                             <tr>
