@@ -38,16 +38,16 @@ public class JSONFilterSetSerializer implements FilterSetSerializer {
     public String exportFilter(NMEAFilterSet s) {
         if (s != null) {
             JSONObject obj = new JSONObject();
-            JSONArray sentences = new JSONArray();
+            JSONArray filtersArray = new JSONArray();
             for (Iterator<NMEAFilter> i = s.getFilters(); i.hasNext(); ) {
                 NMEAFilter f = i.next();
                 if (f instanceof NMEABasicSentenceFilter) {
-                    sentences.put(getJSONFilter((NMEABasicSentenceFilter) f));
+                    filtersArray.put(getJSONFilter((NMEABasicSentenceFilter) f));
                 } else if (f instanceof STalkFilter) {
-                    sentences.put(getJSONFilter((STalkFilter) f));
+                    filtersArray.put(getJSONFilter((STalkFilter) f));
                 }
             }
-            obj.put(FILTERS, sentences);
+            obj.put(FILTERS, filtersArray);
             if (s instanceof NMEAFilterSetImpl) {
                 obj.put("type", ((NMEAFilterSetImpl) s).getType() == TYPE.BLACKLIST ? "blacklist" : "whitelist");
             }

@@ -222,4 +222,16 @@ public abstract class N2KMessageImpl implements N2KMessage {
     public byte[] getData() {
         return data;
     }
+
+    @Override
+    public String toString() {
+        if (getHeader()!=null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (byte b: getData()) {
+                stringBuilder.append( String.format(" %x", (b & 0xFF)) );
+            }
+            return String.format("PGN {%d} Source {%d} Data {%s}", getHeader().getPgn(), getHeader().getSource(), stringBuilder.toString());
+        } else
+            return super.toString();
+    }
 }

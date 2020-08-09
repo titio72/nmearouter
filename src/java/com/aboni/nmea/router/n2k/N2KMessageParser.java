@@ -16,12 +16,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k;
 
 import com.aboni.nmea.router.n2k.impl.*;
+import com.google.protobuf.MapEntry;
 
 import java.lang.reflect.Constructor;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 public class N2KMessageParser {
 
@@ -38,6 +40,7 @@ public class N2KMessageParser {
     }
 
     private static final Map<Integer, N2KDef> SUPPORTED = new HashMap<>();
+    private static final Map<Integer, Long> STATS = new TreeMap<>();
 
     static {
         SUPPORTED.put(130306, N2KDef.getInstance(N2KWindData.class, false)); // Wind Data
@@ -121,7 +124,29 @@ public class N2KMessageParser {
             pgnData.data = b;
             pgnData.length = 6;
         }
+        synchronized (STATS) {
+            long l = STATS.getOrDefault((d != null) ? pgnData.getPgn() : -1, 0L);
+            l++;
+            STATS.put(pgnData.getPgn(), l);
+        }
     }
+
+    public static void resetStats() {
+        synchronized (STATS) {
+            STATS.clear();
+        }
+    }
+
+    public static String dumpStats() {
+        synchronized (STATS) {
+            StringBuilder b = new StringBuilder();
+            for (Map.Entry<Integer, Long> e: STATS.entrySet()) {
+                b.append(e.getKey().toString()).append(",").append(e.getValue().toString()).append("\n");
+            }
+            return b.toString();
+        }
+    }
+
 
     public N2KMessageHeader getHeader() {
         return pgnData;

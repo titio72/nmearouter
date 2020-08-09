@@ -67,6 +67,9 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             case AgentTypes.CONSOLE:
                 agent = buildConsoleTarget(a, q);
                 break;
+            case AgentTypes.CONSOLE_N2K:
+                agent = buildN2KConsoleTarget(a, q);
+                break;
             case AgentTypes.TRACK:
                 agent = buildTrackTarget(a, q);
                 break;
@@ -135,6 +138,12 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
 
     private NMEAAgent buildConsoleTarget(ConfJSON.AgentDef c, QOS q) {
         NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleTarget.class);
+        a.setup(c.getName(), q);
+        return a;
+    }
+
+    private NMEAAgent buildN2KConsoleTarget(ConfJSON.AgentDef c, QOS q) {
+        NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleN2KTarget.class);
         a.setup(c.getName(), q);
         return a;
     }

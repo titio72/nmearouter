@@ -70,4 +70,9 @@ public class N2KSOGAdCOGRapid extends N2KMessageImpl {
     public boolean isTrueCOG() {
         return "True".equals(cogReference);
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} SOG {%.1f} COG {%.1f} Ref {%s}", PGN, getHeader().getSource(), getSOG(), getCOG(), getCOGReference());
+    }
 }

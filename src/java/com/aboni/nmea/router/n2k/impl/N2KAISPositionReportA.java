@@ -190,4 +190,12 @@ public class N2KAISPositionReportA extends N2KMessageImpl implements AISPosition
     public long getOverrrideTime() {
         return overrideTime;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
+                PGN, getHeader().getSource(), getMMSI(), getAISClass(), Utils.formatLatitude(getPosition().getLatitude()), Utils.formatLongitude(getPosition().getLatitude()),
+                getCog(), getSog(), getTimestamp()
+                );
+    }
 }

@@ -73,4 +73,9 @@ public class N2KSystemTime extends N2KMessageImpl {
     public String getTimeSourceType() {
         return timeSourceType;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d}Time {%s} Time Source {%s}", PGN, getHeader().getSource(), getTime(), getTimeSourceType());
+    }
 }

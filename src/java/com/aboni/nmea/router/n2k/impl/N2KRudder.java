@@ -70,4 +70,10 @@ public class N2KRudder extends N2KMessageImpl {
         return directionOrder;
     }
 
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d}  Rudder Instance {%d} Position {%.1f} Angle Order {%.1f} Direction Order {%d}",
+                PGN, getHeader().getSource(), getInstance(), getPosition(), getAngleOrder(), getDirectionOrder());
+    }
+
 }

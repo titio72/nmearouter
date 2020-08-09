@@ -65,4 +65,9 @@ public class N2KSpeed extends N2KMessageImpl {
     public int getSpeedDirection() {
         return speedDirection;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Water Speed {%.1f}", PGN, getHeader().getSource(), getSpeedWaterRef());
+    }
 }

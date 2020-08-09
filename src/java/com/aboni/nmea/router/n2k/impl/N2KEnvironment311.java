@@ -75,4 +75,10 @@ public class N2KEnvironment311 extends N2KMessageImpl {
     public double getAtmosphericPressure() {
         return atmosphericPressure;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Humidity {%.1f} Hum. Source {%s} Temperature {%.1f} Temp. Source {%s} Atmo. Pressure {%.1f}",
+                PGN, getHeader().getSource(), getHumidity(), getHumiditySource(), getTemperature(), getTempSource(), getAtmosphericPressure());
+    }
 }

@@ -96,7 +96,10 @@ public class NMEAAgentImpl implements NMEAAgent {
 
         private boolean handleNMEA2000(RouterMessage mm) {
             if (mm.getPayload() instanceof N2KMessage) {
-                if (listenerWrapper.isN2K()) listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
+                N2KMessage s = mm.getN2KMessage();
+                if (listenerWrapper.isN2K() && (getFilter()==null || getFilter().match(mm))) {
+                    listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
+                }
                 return true;
             }
             return false;

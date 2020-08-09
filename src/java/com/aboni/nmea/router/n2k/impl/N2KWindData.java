@@ -68,4 +68,10 @@ public class N2KWindData extends N2KMessageImpl {
     public boolean isApparent() {
         return apparent;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Wind Speed {%.1f} Angle {%.1f} Ref {%s}", PGN, getHeader().getSource(), getSpeed(), getAngle(), isApparent()?"A":"T");
+    }
+
 }

@@ -27,16 +27,37 @@ public class BitUtils {
             m = r[1];
         }
 
+        private Res(long r, long max) {
+            v = r;
+            m = max;
+        }
+
         public final long v;
         public final long m;
     }
 
-    public static Res extractBits(byte[] data, int start, int off, int len, boolean signed) {
-        long[] res = extractNumber(data, off, start, len, signed);
-        return new Res(res);
+    public static int getByte(byte[] data, int index) {
+        return data[index] & 0xff;
     }
 
-    private static long[] extractNumber(byte[] data, int offset, int startBit, int bits, boolean hasSign) {
+    public static long get4ByteInt(byte[] data, int index) {
+        return ((long)getByte(data, index + 3) << 24) | (long)get3ByteInt(data, index);
+    }
+
+    public static int get3ByteInt(byte[] data, int index) {
+        return (getByte(data, index + 2) << 16) | get2ByteInt(data, index);
+    }
+
+    public static int get2ByteInt(byte[] data, int index) {
+        return (getByte(data, index + 1) << 8) | getByte(data, index);
+    }
+
+    @Deprecated
+    public static Res extractBits(byte[] data, int start, int off, int len, boolean signed) {
+        return extractNumber(data, off, start, len, signed);
+    }
+
+    public static Res extractNumber(byte[] data, int offset, int startBit, int bits, boolean hasSign) {
         long value = 0;
         long maxValue = 0;
 
@@ -49,7 +70,6 @@ public class BitUtils {
         long bitMask;
         long allOnes;
         long valueInThisByte;
-
 
         while (bitsRemaining > 0) {
             bitsInThisByte = Math.min(8 - firstBit, bitsRemaining);
@@ -73,9 +93,7 @@ public class BitUtils {
             }
         }
         if (hasSign) {
-            // check if the first bit is 1
             maxValue >>= 1;
-
             boolean negative = (value & (1L << (bits - 1))) > 0;
             if (negative) {
                 /* Sign extend value for cases where bits < 64 */
@@ -86,9 +104,7 @@ public class BitUtils {
                 value |= ~maxValue;
             }
         }
-        return new long[]{value, maxValue};
+        return new Res(value, maxValue);
     }
 }
-
-
 

@@ -18,10 +18,14 @@
             "name": "CONSOLE"
         },
         {
+            "type": "ConsoleN2K",
+            "name": "CONSOLE_N2K"
+        },
+        {
             "type": "UDP",
             "inout": "IN",
             "port": 1222,
-            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind_sog",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
             "name": "UDPIN"
         },
         {
@@ -29,7 +33,7 @@
             "inout": "IN",
             "host": "192.168.3.1",
             "port": 1111,
-            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind_sog",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
             "name": "UDPIN"
         },
         {

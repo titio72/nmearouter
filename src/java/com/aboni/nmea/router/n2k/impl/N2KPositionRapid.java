@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
@@ -64,5 +65,13 @@ public class N2KPositionRapid extends N2KMessageImpl {
             return new Position(latitude, longitude);
         else
             return null;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Lat {%s} Lon {%s}",
+                PGN, getHeader().getSource(),
+                (getPosition() == null) ? "" : Utils.formatLatitude(getPosition().getLatitude()),
+                (getPosition() == null) ? "" : Utils.formatLongitude(getPosition().getLongitude()));
     }
 }

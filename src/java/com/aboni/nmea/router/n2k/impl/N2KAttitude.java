@@ -70,4 +70,9 @@ public class N2KAttitude extends N2KMessageImpl {
         return roll;
     }
 
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Roll {%.1f} Yaw {%.1f} Pitch {%.1f}",
+                PGN, getHeader().getSource(), getRoll(), getYaw(), getPitch());
+    }
 }

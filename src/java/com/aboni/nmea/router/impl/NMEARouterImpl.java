@@ -85,7 +85,7 @@ public class NMEARouterImpl implements NMEARouter {
         long t = cache.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
-            ServerLog.getLogger().info(String.format("Router Queue Size {%d}", sentenceQueue.size()) + "}");
+            ServerLog.getLogger().info(String.format("Router Queue Size {%d} Free Mem {%d}", sentenceQueue.size(), Runtime.getRuntime().freeMemory()));
         }
     }
 
@@ -96,7 +96,6 @@ public class NMEARouterImpl implements NMEARouter {
         msg.put("free_memory", Runtime.getRuntime().freeMemory()/1024/1024);
         RouterMessage m = RouterMessageImpl.createMessage(msg, "SYS", cache.getNow());
         privateQueueUpSentence(m);
-
     }
 
     @Override

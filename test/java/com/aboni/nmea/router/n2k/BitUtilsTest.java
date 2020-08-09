@@ -23,4 +23,13 @@ public class BitUtilsTest {
         assertEquals(2, v1);
     }
 
+    @Test
+    public void test1() {
+        assertEquals(0xb1, BitUtils.getByte(b, 0));
+        assertEquals(BitUtils.extractBits(b, 0, 0, 16, false).v, BitUtils.get2ByteInt(b, 0));
+        assertEquals(BitUtils.extractBits(b, 0, 0, 24, false).v, BitUtils.get3ByteInt(b, 0));
+        assertEquals(BitUtils.extractBits(b, 0, 0, 32, false).v, BitUtils.get4ByteInt(b, 0));
+
+
+    }
 }

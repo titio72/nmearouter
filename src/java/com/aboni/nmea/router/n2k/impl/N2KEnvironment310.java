@@ -70,4 +70,10 @@ public class N2KEnvironment310 extends N2KMessageImpl {
     public double getAtmosphericPressure() {
         return atmosphericPressure;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} Water Temp {%.1f} Air Temp {%.1f} Atmo Press. {%.1f}",
+                PGN, getHeader().getSource(), getWaterTemp(), getAirTemp(), getAtmosphericPressure());
+    }
 }

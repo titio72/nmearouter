@@ -144,4 +144,13 @@ public class N2KSatellites extends N2KMessageImpl {
             satellites.add(s);
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        for (Sat  s: getSatellites()) {
+            b.append(String.format(" [Sat {%s} El {%d} Az {%d} Status {%s}]", s.id, s.elevation, s.azimuth, s.status));
+        }
+        return String.format("PGN {%s} Soure {%d} %s", PGN, getHeader().getSource(), b.toString());
+    }
 }
