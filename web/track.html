@@ -424,9 +424,9 @@
     tripArray = days.trips;
     for (i = 0; i<tripArray.length; i++) {
       t = tripArray[i];
-      dates = [ 
+      dates = [
         {
-          dateLabel:  new moment(t.startTS).format("l"), 
+          dateLabel:  new moment(t.startTS).format("l"),
           dateRef:  new moment(t.startTS).format("YYYYMMDD")
         }
       ];

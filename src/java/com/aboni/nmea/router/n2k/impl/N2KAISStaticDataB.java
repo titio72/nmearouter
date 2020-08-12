@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.AISStaticData;
+import com.aboni.nmea.router.AISStaticData;
 
 public class N2KAISStaticDataB implements AISStaticData {
 

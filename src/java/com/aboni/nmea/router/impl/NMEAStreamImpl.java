@@ -94,5 +94,4 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 		return msg;
 	}
-
 }

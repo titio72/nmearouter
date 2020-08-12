@@ -79,7 +79,7 @@ public class LoadGPX {
             process(g, speed);
 
 
-            ServerLog.getConsoleOut().println(String.format("%s %s %s %s", m.group(1), m.group(2), m.group(3), m.group(4)));
+            ServerLog.getConsoleOut().printf("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4));
         }
     }
 

@@ -22,30 +22,33 @@ import org.json.JSONObject;
 
 public class RouterMessageImpl<T> implements RouterMessage {
 
+    public static final byte INVALID = 0;
+    public static final byte N2K = 1;
+    public static final byte NMEA = 2;
+    public static final byte JSON = 3;
+
     private final long timestamp;
     private final T message;
     private final String source;
+    private final byte type;
 
     public static RouterMessage createMessage(Sentence obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, source, timestamp);
+        return new RouterMessageImpl<>(obj, NMEA, source, timestamp);
     }
 
     public static RouterMessage createMessage(JSONObject obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, source, timestamp);
+        return new RouterMessageImpl<>(obj, JSON, source, timestamp);
     }
 
     public static RouterMessage createMessage(N2KMessage obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, source, timestamp);
+        return new RouterMessageImpl<>(obj, N2K, source, timestamp);
     }
 
-    public static RouterMessage clone(RouterMessage m) {
-        return new RouterMessageImpl<>(m.getPayload(), m.getSource(), m.getTimestamp());
-    }
-
-    private RouterMessageImpl(T msg, String source, long timestamp) {
+    private RouterMessageImpl(T msg, byte type, String source, long timestamp) {
         this.timestamp = timestamp;
         this.message = msg;
         this.source = source;
+        this.type = type;
     }
 
     @Override
@@ -60,29 +63,20 @@ public class RouterMessageImpl<T> implements RouterMessage {
 
     @Override
     public N2KMessage getN2KMessage() {
-        try {
-            return (N2KMessage) message;
-        } catch (ClassCastException e) {
-            return null;
-        }
+        if (N2K == type) return (N2KMessage) message;
+        return null;
     }
 
     @Override
     public Sentence getSentence() {
-        try {
-            return (Sentence) message;
-        } catch (ClassCastException e) {
-            return null;
-        }
+        if (NMEA == type) return (Sentence) message;
+        return null;
     }
 
     @Override
     public JSONObject getJSON() {
-        try {
-            return (JSONObject) message;
-        } catch (ClassCastException e) {
-            return null;
-        }
+        if (JSON == type) return (JSONObject) message;
+        return null;
     }
 
     @Override

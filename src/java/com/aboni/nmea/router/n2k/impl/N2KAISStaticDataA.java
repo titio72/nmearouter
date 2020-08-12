@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.AISStaticData;
+import com.aboni.nmea.router.AISStaticData;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;

@@ -133,6 +133,20 @@ function httpLoadSpeedDateRange(dt0, dt1, cback) {
   xmlHttp.send(null);
 }
 
+function httpLoadWindStatsDateRange(dt0, dt1, ticks, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/windanalytics?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1)
+   + "&ticks=" + ticks, true);
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
+      var json = JSON.parse(xmlHttp.responseText);
+      cback(json);
+    }
+  };
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
 function httpLoadSpeedById(id, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/speed?trip=" + id, true);

@@ -13,28 +13,43 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.n2k;
+package com.aboni.nmea.router;
 
-public interface AISStaticData {
+import net.sf.marineapi.nmea.util.Position;
 
-    int getMessageId();
-
-    String getMMSI();
-
-    String getRepeatIndicator();
-
-    String getName();
-
-    String getCallSign();
+public interface AISPositionReport {
 
     String getAISClass();
 
-    double getLength();
+    Position getPosition();
 
-    double getBeam();
+    int getMessageId();
 
-    String getTypeOfShip();
+    String getPositionAccuracy();
 
-    String getAisTransceiverInfo();
+    String getRepeatIndicator();
+
+    boolean issRAIM();
+
+    double getCog();
+
+    double getSog();
+
+    double getHeading();
+
+    String getMMSI();
+
+    String getTimestampStatus();
+
+    int getTimestamp();
+
+    String getNavStatus();
+
+    long getAge(long now);
+
+    void setOverrideTime(long t);
+
+    long getOverrrideTime();
+
 
 }

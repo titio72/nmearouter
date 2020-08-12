@@ -1,13 +1,9 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.AISTargets;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.OnN2KMessage;
-import com.aboni.nmea.router.n2k.AISStaticData;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.AISPositionReport;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartA;
 import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartB;

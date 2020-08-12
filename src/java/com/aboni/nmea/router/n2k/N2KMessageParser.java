@@ -16,7 +16,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k;
 
 import com.aboni.nmea.router.n2k.impl.*;
-import com.google.protobuf.MapEntry;
 
 import java.lang.reflect.Constructor;
 import java.time.Instant;

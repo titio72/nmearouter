@@ -21,12 +21,6 @@ public class BitUtils {
     }
 
     public static class Res {
-
-        private Res(long[] r) {
-            v = r[0];
-            m = r[1];
-        }
-
         private Res(long r, long max) {
             v = r;
             m = max;

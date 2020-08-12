@@ -2,12 +2,8 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.geo.Course;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.AISTargets;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.n2k.AISStaticData;
-import com.aboni.nmea.router.n2k.AISPositionReport;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;

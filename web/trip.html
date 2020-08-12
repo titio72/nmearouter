@@ -2,7 +2,7 @@
 <html xml:lang="en">
 
 <head>
-    <meta charset="ISO-8859-1">
+    <meta charset="UTF8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -19,7 +19,7 @@
         console.log('GMAP Labels API Lodaded');
         loadMap();
       });
-    });      
+    });
 
     </script>
     <style>
@@ -34,7 +34,7 @@
 
     .leg-navigator {
       border-color: darkslategrey;
-      border-width: 2px; 
+      border-width: 2px;
       border-radius: 5px;
       border-style: solid;
       padding: 5px;
@@ -89,9 +89,6 @@
       margin-top: 5px;
       min-width: 300px;
       min-height: 300px;
-      width: 100%;
-      height: 100%;      
-      border-radius: 5px;
     }
 
 
@@ -107,13 +104,17 @@
   var current = tripObject;
   var currentLegIx = 0;
   var pieChart;
+  var windChart;
   var speedDistrChart;
   var speedChart;
+  var windStatsChart;
   var listVisible = false;
   var map;
   var paths;
   var markerStart;
   var markerEnd;
+
+  var windStatsTick = 24;
 
   document.addEventListener('keydown', anKeyPress);
 
@@ -181,6 +182,8 @@
     loadTimeChart();
     loadSpeedDistrChart();
     createSpeedChart();
+    createWindStatsChart();
+    createWindChart();
   }
 
   function loadSpeedDistrChart() {
@@ -247,7 +250,7 @@
       datasets: [{
           data: [getTime(tripObject.navEngineOffTime), getTime(tripObject.navEngineOn_Time), getTime(tripObject.navEngineUnkTime), getTime(tripObject.anchorTime)],
           backgroundColor: ["blue", "red", "orange", "gray"],
-         
+
       }],
       labels: [
           'Sail',
@@ -262,11 +265,11 @@
   function loadDistChart() {
     var data = {
       datasets: [{
-          data: [Math.round(current.navEngineOffDist * 100)/100, 
+          data: [Math.round(current.navEngineOffDist * 100)/100,
             Math.round(current.navEngineOn_Dist * 100)/100,
             Math.round(current.navEngineUnkDist * 100)/100],
           backgroundColor: ["blue", "red", "orange"],
-         
+
       }],
       labels: [
           'Sail',
@@ -282,7 +285,7 @@
     } while (document.getElementById("L" + currentLegIx)==null);
     panel = _switchLeg();
     legList = document.getElementById("legList");
-    viewHeight = legList.offsetHeight; 
+    viewHeight = legList.offsetHeight;
     panelBottom = panel.offsetTop;
     panelTop = panel.offsetTop - panel.offsetHeight;
     viewBottom = legList.scrollTop + legList.offsetHeight;
@@ -300,7 +303,7 @@
     } while (document.getElementById("L" + currentLegIx)==null);
     panel = _switchLeg();
     legList = document.getElementById("legList");
-    viewHeight = legList.offsetHeight; 
+    viewHeight = legList.offsetHeight;
     panelBottom = panel.offsetTop;
     panelTop = panel.offsetTop - panel.offsetHeight;
     viewBottom = legList.scrollTop + legList.offsetHeight;
@@ -315,7 +318,7 @@
   function getLegIx(leg) {
     return parseInt(leg.id.substring(1));
   }
-  
+
   function switchLeg(leg){
     currentLegIx = getLegIx(leg);
     _switchLeg();
@@ -350,8 +353,12 @@
 
     if (currentLegIx>0) {
       httpLoadSpeedDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillSpeedChart);
+      httpLoadWindStatsDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), windStatsTick, onFillWindStatsChart);
+      httpLoadAllMeteoDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillWindChart);
     } else {
       resetSpeedChart();
+      resetWindStatsChart();
+      resetWindChart();
     }
 
     var controllerElement = document.getElementById('nmearouter');
@@ -365,7 +372,105 @@
 
     return panel;
   }
-  
+
+  function resetWindChart() {
+    if (windChart!=null) {
+      windChart.data.datasets = [{
+        data: []
+      }];
+      windChart.update();
+    }
+  }
+
+  function createWindChart() {
+    ctx = document.getElementById('windChart');
+    windChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            data: []
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          spanGaps: false,
+          legend: { display: false },
+          scales: { xAxes: [{ type: 'time', }] }
+        }
+      });
+  }
+
+  function onFillWindChart(meteoData) {
+    windChart.data.datasets = [
+      getSerie(meteoData, "TW_", "v",    "blue"),
+      getSerie(meteoData, "TW_", "vMin", "gray"),
+      getSerie(meteoData, "TW_", "vMax", "orange")
+    ];
+    windChart.update();
+  }
+
+  function resetWindStatsChart() {
+    if (windStatsChart!=null) {
+      windStatsChart.data.datasets = [{
+        data: []
+      }];
+      windStatsChart.update();
+    }
+  }
+
+  function createWindStatsChart() {
+    var color = 'blue';
+    var colors = [];
+    var labels = [];
+    var dataempty = [];
+    for (i = 0; i<windStatsTick; i++) {
+      colors.push(color);
+      labels.push("" + (i * (360 / windStatsTick)) + "°");
+      dataempty.push(0.0);
+    }
+    ctx = document.getElementById('windPolarChart');
+    windStatsChart = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+          datasets: [{
+            data: dataempty,
+            backgroundColor: colors,
+            borderColor: colors
+          }],
+          labels: labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: { display: false },
+          scale: {
+            ticks: {
+              display: true,
+              fontColor: 'white',
+              backdropColor: '#0000'
+            }
+          }
+        }
+      });
+  }
+
+  function onFillWindStatsChart(windData) {
+    var color = 'blue';
+    var colors = [];
+    var d = [];
+    for (i = 0; i<windStatsTick; i++) {
+      colors.push(color);
+      d.push(windData.values[i].windDistance);
+    }
+    windStatsChart.data.datasets = [{
+      data: d,
+      backgroundColor: colors,
+      borderWidth: 1
+    }];
+    windStatsChart.update();
+  }
+
   function resetSpeedChart() {
     if (speedChart!=null) {
       speedChart.data.datasets = [{
@@ -456,7 +561,7 @@
     static get observedAttributes() {
       return ['title', 'value1', 'value2', 'value3'];
     }
-    
+
     get title() {
       return this.getAttribute('title');
     }
@@ -524,8 +629,8 @@
             ss.push(currStint);
           }
           currStint = {
-            eng: state, 
-            start: pp.time, 
+            eng: state,
+            start: pp.time,
             end: pp.time,
             dur: 0,
             durS: '00:00:00',
@@ -725,10 +830,10 @@
                              value2="{{current.max10NMSpeedTime0T | date:'short'}}"
                              value3="{{current.max10NMSpeedTime1T | date:'short'}}"></my-tile>
                 </div>
-                <div class="tile-wrapper">
+                <!--div class="tile-wrapper">
                     <my-tile title="30s Speed" value1="Max {{current.maxAvgSpeed | number:2}} KN"
                              value2="{{current.maxAvgSpeedTimeT | date:'short'}}" value3=""></my-tile>
-                </div>
+                </div-->
                 <div class="tile-wrapper">
                     <my-tile title="Speed" value1="Max {{current.maxSpeed | number:2}} KN"
                              value2="{{current.maxSpeedTimeT | date:'short'}}" value3=""></my-tile>
@@ -747,23 +852,33 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
             <div class="chart-wrapper card-router">
                 <canvas class="chart-canvas" id="pieChart"></canvas>
             </div>
         </div>
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
             <div class="chart-wrapper card-router">
                 <canvas class="chart-canvas" id="speedDistrChart"></canvas>
             </div>
         </div>
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
             <div class="chart-wrapper card-router">
                 <canvas class="chart-canvas" id="speedChart"></canvas>
             </div>
         </div>
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
             <div class="map card-router" id="map"></div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="windPolarChart"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="windChart"></canvas>
+            </div>
         </div>
     </div>
 </div>

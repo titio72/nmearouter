@@ -33,18 +33,18 @@ public class ListenerWrapper {
     private final List<Method> listeners;
     private final List<Method> listenersJSON;
     private final List<Method> listenersN2K;
-    private final Object o;
+    private final Object listenerObject;
 
-    public ListenerWrapper(Object l) {
-        o = l;
+    public ListenerWrapper(Object listener) {
         listeners = new ArrayList<>();
         listenersJSON = new ArrayList<>();
         listenersN2K = new ArrayList<>();
-        fillMethodsAnnotatedWith();
+        fillMethodsAnnotatedWith(listener);
+        listenerObject = listener;
     }
 
-    private void fillMethodsAnnotatedWith() {
-        Class<?> aClass = o.getClass();
+    private void fillMethodsAnnotatedWith(Object listener) {
+        Class<?> aClass = listener.getClass();
         while (aClass != Object.class) { // need to iterated thought hierarchy in order to retrieve methods from above the current instance
             // iterate though the list of methods declared in the class represented by aClass variable, and add those annotated with the specified annotation
             final List<Method> allMethods = new ArrayList<>(Arrays.asList(aClass.getDeclaredMethods()));
@@ -84,7 +84,7 @@ public class ListenerWrapper {
     private <T> void dispatch(T payload, String src, List<Method> listenerMethods) {
         for (Method m : listenerMethods) {
             try {
-                m.invoke(o, payload, src);
+                m.invoke(listenerObject, payload, src);
             } catch (Exception e) {
                 ServerLog.getLogger().error("Error pushing message", e);
             }
