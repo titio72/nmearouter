@@ -46,12 +46,7 @@ public class BitUtils {
         return (getByte(data, index + 1) << 8) | getByte(data, index);
     }
 
-    @Deprecated
-    public static Res extractBits(byte[] data, int start, int off, int len, boolean signed) {
-        return extractNumber(data, off, start, len, signed);
-    }
-
-    public static Res extractNumber(byte[] data, int offset, int startBit, int bits, boolean hasSign) {
+    public static Res extractBits(byte[] data, int startBit, int offset, int bits, boolean signed) {
         long value = 0;
         long maxValue = 0;
 
@@ -86,7 +81,7 @@ public class BitUtils {
                 dataIndex++;
             }
         }
-        if (hasSign) {
+        if (signed) {
             maxValue >>= 1;
             boolean negative = (value & (1L << (bits - 1))) > 0;
             if (negative) {

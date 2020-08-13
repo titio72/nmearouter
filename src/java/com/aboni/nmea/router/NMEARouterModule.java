@@ -25,7 +25,7 @@ import com.aboni.nmea.router.data.meteo.WindStatsReader;
 import com.aboni.nmea.router.data.meteo.impl.DBMeteo;
 import com.aboni.nmea.router.data.meteo.impl.DBMeteoReader;
 import com.aboni.nmea.router.data.meteo.impl.DBMeteoWriter;
-import com.aboni.nmea.router.data.meteo.impl.DBWindSTatsReader;
+import com.aboni.nmea.router.data.meteo.impl.DBWindStatsReader;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
@@ -83,6 +83,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(TimeSeriesReader.class).to(DBTimeSeriesReader.class);
         bind(QueryFactory.class).to(QueryFactoryImpl.class);
         bind(FilterSetSerializer.class).annotatedWith(Names.named(Constants.TAG_JSON)).to(JSONFilterSetSerializer.class);
-        bind(WindStatsReader.class).to(DBWindSTatsReader.class);
+        bind(WindStatsReader.class).to(DBWindStatsReader.class);
     }
 }

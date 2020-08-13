@@ -12,7 +12,7 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
     private final TalkerId talkerId;
     private final String source;
     private int pgn = -1;
-    private int n2k_source = -1;
+    private int n2kSource = -1;
 
     public NMEABasicSentenceFilter(String sentenceId, TalkerId talkerId, String source) {
         if (sentenceId == null) sentenceId = "";
@@ -74,16 +74,16 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
                 try {
                     String[] ss = sentenceId.split(":");
                     pgn = Integer.parseInt(ss[0]);
-                    n2k_source = (ss.length>1)?Integer.parseInt(ss[1]):0xFF;
+                    n2kSource = (ss.length > 1) ? Integer.parseInt(ss[1]) : 0xFF;
                 } catch (Exception ignored) {
                     // do nothing with it
                     pgn = 0;
-                    n2k_source = 0xFF;
+                    n2kSource = 0xFF;
                 }
             }
-            return  ((isAllSources() || getSource().equals(source)) &&
-                    (pgn==0 || pgn==n2KMessage.getHeader().getPgn()) &&
-                    (n2k_source==0xFF || n2k_source==n2KMessage.getHeader().getSource()));
+            return ((isAllSources() || getSource().equals(source)) &&
+                    (pgn == 0 || pgn == n2KMessage.getHeader().getPgn()) &&
+                    (n2kSource == 0xFF || n2kSource == n2KMessage.getHeader().getSource()));
         } else {
             return true;
         }

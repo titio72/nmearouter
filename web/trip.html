@@ -114,7 +114,7 @@
   var markerStart;
   var markerEnd;
 
-  var windStatsTick = 24;
+  var windStatsTick = 36;
 
   document.addEventListener('keydown', anKeyPress);
 
@@ -395,6 +395,10 @@
           responsive: true,
           maintainAspectRatio: false,
           spanGaps: false,
+          title: {
+            display: true,
+            text: 'Wind speed'
+          },
           legend: { display: false },
           scales: { xAxes: [{ type: 'time', }] }
         }
@@ -444,9 +448,13 @@
           responsive: true,
           maintainAspectRatio: false,
           legend: { display: false },
+          title: {
+            display: true,
+            text: 'Wind'
+          },
           scale: {
             ticks: {
-              display: true,
+              display: false,
               fontColor: 'white',
               backdropColor: '#0000'
             }
@@ -456,18 +464,29 @@
   }
 
   function onFillWindStatsChart(windData) {
-    var color = 'blue';
     var colors = [];
     var d = [];
+    var l = [];
     for (i = 0; i<windStatsTick; i++) {
-      colors.push(color);
+      var wMax = (windData.values[i].windMaxSpeed + windData.values[i].windAvgSpeed) / 2.0;
+      var b_coeff = 1.0 - Math.min(1.0, (wMax / 10.0));
+      var g_coeff = 1.0 - Math.min(1.0, Math.abs(13.0 - wMax) / 7.0);
+      var r_coeff = Math.min(1.0, Math.max(0.0, wMax - 10.0) / 30.0);
+      l.push('' + (i*360/windStatsTick) + '° Max ' + windData.values[i].windMaxSpeed + 'Kn')
+      var red = (0xFF * r_coeff).toFixed();
+      var blue = (0xFF * b_coeff).toFixed();
+      var green = (0xFF * g_coeff).toFixed();
+      colors.push('rgb(' + red +',' + green + ',' + blue + ')');
       d.push(windData.values[i].windDistance);
     }
-    windStatsChart.data.datasets = [{
-      data: d,
-      backgroundColor: colors,
-      borderWidth: 1
-    }];
+    windStatsChart.data = {
+        datasets: [{
+        data: d,
+        backgroundColor: colors,
+        borderWidth: 1
+      }],
+      labels: l
+    };
     windStatsChart.update();
   }
 
@@ -494,6 +513,10 @@
           maintainAspectRatio: false,
           spanGaps: false,
           legend: { display: false },
+          title: {
+            display: true,
+            text: 'Boat SOG'
+          },
           scales: { xAxes: [{ type: 'time', }] }
         }
       });

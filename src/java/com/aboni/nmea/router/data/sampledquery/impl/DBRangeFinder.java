@@ -40,31 +40,35 @@ public class DBRangeFinder implements RangeFinder {
         this.tripTable = tripTable;
     }
 
-    private PreparedStatement getTimeFrameSQL(String table, Query q, DBHelper h) throws SQLException {
+    private String getSQL(String table, Query q) {
         if (q instanceof QueryByDate) {
-            String sql = "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
-            PreparedStatement stm = h.getConnection().prepareStatement(sql);
-            stm.setTimestamp(1, new java.sql.Timestamp(((QueryByDate) q).getFrom().toEpochMilli()));
-            stm.setTimestamp(2, new java.sql.Timestamp(((QueryByDate) q).getTo().toEpochMilli()));
-            return stm;
+            return "select count(TS), max(TS), min(TS) from " + table + " where TS>=? and TS<=?";
         } else if (q instanceof QueryById) {
-            String sql = "select count(TS), max(TS), min(TS) from " + table + " " +
+            return "select count(TS), max(TS), min(TS) from " + table + " " +
                     "where TS>=(select fromTS from " + tripTable + " where id=?) " +
                     "and TS<=(select toTS from " + tripTable + " where id=?)";
-            PreparedStatement stm = h.getConnection().prepareStatement(sql);
-            stm.setInt(1, ((QueryById) q).getId());
-            stm.setInt(2, ((QueryById) q).getId());
-            return stm;
         } else {
             return null;
+        }
+    }
+
+    private void fillStatement(PreparedStatement stm, Query q) throws SQLException {
+        if (q instanceof QueryByDate) {
+            stm.setTimestamp(1, new java.sql.Timestamp(((QueryByDate) q).getFrom().toEpochMilli()));
+            stm.setTimestamp(2, new java.sql.Timestamp(((QueryByDate) q).getTo().toEpochMilli()));
+        } else if (q instanceof QueryById) {
+            stm.setInt(1, ((QueryById) q).getId());
+            stm.setInt(2, ((QueryById) q).getId());
         }
     }
 
     @Override
     public Range getRange(String table, Query q) {
         try (DBHelper h = new DBHelper(true)) {
-            try (PreparedStatement stm = getTimeFrameSQL(table, q, h)) {
-                if (stm != null) {
+            String sql = getSQL(table, q);
+            if (sql != null) {
+                try (PreparedStatement stm = h.getConnection().prepareStatement(sql)) {
+                    fillStatement(stm, q);
                     try (ResultSet rs = stm.executeQuery()) {
                         if (rs.next()) {
                             long count = rs.getLong(1);
@@ -75,14 +79,13 @@ public class DBRangeFinder implements RangeFinder {
                             }
                         }
                     }
-                } else {
-                    ServerLog.getLogger().error("SampledQuery: Unsupported query type " + q);
                 }
+            } else {
+                ServerLog.getLogger().error("SampledQuery: Unsupported query type " + q);
             }
         } catch (SQLException | ClassNotFoundException e) {
             ServerLog.getLogger().error("SampledQuery: Cannot create time range for {" + table + "} because connection is not established!", e);
         }
         return null;
     }
-
 }
