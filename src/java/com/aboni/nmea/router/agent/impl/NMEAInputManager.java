@@ -28,6 +28,20 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAInputManager {
 
+    public static class Output {
+        Output(Sentence[] ss, N2KMessage m) {
+            nmeaSentences = ss;
+            n2KMessage = m;
+        }
+
+        final N2KMessage n2KMessage;
+        final Sentence[] nmeaSentences;
+
+        public boolean hasMessages() {
+            return n2KMessage != null || (nmeaSentences != null && nmeaSentences.length != 0);
+        }
+    }
+
     private interface StringInputHandler {
         Output getSentences(String pgn);
     }
@@ -48,12 +62,12 @@ public class NMEAInputManager {
             try {
                 N2KMessage msg = stream.getMessage(pgn);
                 if (msg != null) {
-                    return new Output(pgn, decoder.getSentence(msg), msg);
+                    return new Output(decoder.getSentence(msg), msg);
                 }
             } catch (Exception e) {
                 logger.warning(String.format("Cannot parse n2k sentence {%s} {%s}", pgn, e.getMessage()));
             }
-            return getEmpty(pgn);
+            return getEmpty();
         }
 
     }
@@ -69,11 +83,11 @@ public class NMEAInputManager {
         @Override
         public Output getSentences(String sSentence) {
             try {
-                return new Output(sSentence, new Sentence[]{SentenceFactory.getInstance().createParser(sSentence)}, null);
+                return new Output(new Sentence[]{SentenceFactory.getInstance().createParser(sSentence)}, null);
             } catch (Exception e) {
                 logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
             }
-            return getEmpty(sSentence);
+            return getEmpty();
         }
     }
 
@@ -87,34 +101,18 @@ public class NMEAInputManager {
         this.logger = logger;
     }
 
-    public static class Output {
-        Output(String s, Sentence[] ss, N2KMessage m) {
-            original = s;
-            nmeaSentences = ss;
-            n2KMessage = m;
-        }
-
-        final String original;
-        final N2KMessage n2KMessage;
-        final Sentence[] nmeaSentences;
-
-        public boolean isEmpty() {
-            return n2KMessage == null && (nmeaSentences == null || nmeaSentences.length == 0);
-        }
+    private static Output getEmpty() {
+        return new Output(new Sentence[0], null);
     }
 
-    private static Output getEmpty(String orig) {
-        return new Output(orig, new Sentence[0], null);
-    }
-
-    public Output getSentence(String sSentence) {
+    public Output getMessage(String sSentence) {
         if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
             return nmeaHandler.getSentences(sSentence);
         } else if (sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
             return n2kHandler.getSentences(sSentence);
         } else {
             logger.debug("Cannot find a suitable handler for {" + sSentence + "}");
-            return getEmpty(sSentence);
+            return getEmpty();
         }
     }
 }

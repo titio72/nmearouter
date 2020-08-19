@@ -80,7 +80,7 @@ public class EventSocket {
         private final String id;
         private boolean active;
 
-        MySession(Session s) {
+        private MySession(Session s) {
             session = s;
             id = session.getId();
             active = false;
@@ -109,7 +109,7 @@ public class EventSocket {
         }
 
         @OnJSONMessage
-        public void onSentence(JSONObject obj, String src) {
+        public void onSentence(JSONObject obj) {
             synchronized (this) {
                 if (active && obj != null) {
                     try {

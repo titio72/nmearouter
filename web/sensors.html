@@ -249,13 +249,13 @@
         trueWind.tack = "Starboard"
       }
       controllerScope['wind_t'] = trueWind;
-      
+
       absoluteWind = {
         mag_angle: (heading + trueWind.angle) % 360,
         speed: trueWind.speed
       };
       controllerScope['wind'] = absoluteWind;
-      
+
       controllerScope.$evalAsync();
     } else if (msg.topic == 'HDG') {
       var controllerElement = document.getElementById('sensorPanel');
@@ -295,14 +295,14 @@
     get angle_app() { return this.getAttribute('angle_app'); }
 
     connectedCallback() {
-      var aT = this.getAttribute('angle_true'); 
-      var aA = this.getAttribute('angle_app'); 
+      var aT = this.getAttribute('angle_true');
+      var aA = this.getAttribute('angle_app');
       aT = (aT==null)?0:aT;
       aA = (aA==null)?0:aA;
       let template = document.getElementById('my-dial');
       let templateContent = template.content;
       let newInstance = templateContent.cloneNode(true);
-      
+
       let arrowT = document.createElementNS("http://www.w3.org/2000/svg", "path");
       arrowT.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
       arrowT.setAttributeNS(null, "fill", "blue");
@@ -351,7 +351,7 @@
     }
 
     connectedCallback() {
-      var a = this.getAttribute('angle'); 
+      var a = this.getAttribute('angle');
       a = (a==null)?0:a;
       let template = document.getElementById('my-dial');
       let templateContent = template.content;
@@ -542,9 +542,9 @@
                                 <td style="text-align: right">{{queue}} Msg</td>
                             </tr>
                             <tr>
-                              <td>Free Memory</td>
-                              <td style="text-align: right">{{free_memory}} MB</td>
-                            </tr>                    
+                                <td>Free Memory</td>
+                                <td style="text-align: right">{{free_memory}} MB</td>
+                            </tr>
                         </table>
                     </div>
                 </div>

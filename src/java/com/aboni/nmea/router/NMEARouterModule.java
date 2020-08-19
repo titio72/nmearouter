@@ -38,6 +38,8 @@ import com.aboni.nmea.router.data.track.impl.*;
 import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.impl.*;
+import com.aboni.nmea.router.n2k.N2KMessageParser;
+import com.aboni.nmea.router.n2k.impl.N2KMessageParserImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
@@ -50,6 +52,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+@SuppressWarnings("OverlyCoupledClass")
 public class NMEARouterModule extends AbstractModule {
 
     @Override
@@ -84,5 +87,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(QueryFactory.class).to(QueryFactoryImpl.class);
         bind(FilterSetSerializer.class).annotatedWith(Names.named(Constants.TAG_JSON)).to(JSONFilterSetSerializer.class);
         bind(WindStatsReader.class).to(DBWindStatsReader.class);
+        bind(N2KMessageParser.class).to(N2KMessageParserImpl.class);
     }
 }

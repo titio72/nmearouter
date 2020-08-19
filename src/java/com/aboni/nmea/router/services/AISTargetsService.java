@@ -86,7 +86,7 @@ public class AISTargetsService extends JSONWebService {
                 j.put("length", data.getLength());
                 j.put("beam", data.getBeam());
                 setStringAttribute(j, data.getCallSign(), "callsign");
-                setStringAttribute(j, data.getAisTransceiverInfo(), "tranceiver");
+                setStringAttribute(j, data.getAisTransceiverInfo(), "transceiver");
             }
             return j;
         } else {

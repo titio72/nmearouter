@@ -27,7 +27,6 @@ public class BMP180 implements Atmospheric {
 
     private static final I2CInterface.Endianness BMP180_ENDIANNESS = I2CInterface.Endianness.BIG_ENDIAN;
 
-    // This next addresses is returned by "sudo i2cdetect -y 1", see above.
     public static final int BMP180_ADDRESS = 0x77;
 
     // Operating Modes
@@ -118,7 +117,7 @@ public class BMP180 implements Atmospheric {
     private int readRawTemp() throws IOException {
         // Reads the raw (uncompensated) temperature from the sensor
         getI2CBus().write(BMP180_CONTROL, (byte) BMP180_READ_TEMP_CMD);
-        waitfor(5);  // Wait 5ms
+        waitFor(5);  // Wait 5ms
         return readU16(BMP180_TEMP_DATA);
     }
 
@@ -128,16 +127,16 @@ public class BMP180 implements Atmospheric {
 
         switch (mode) {
             case BMP180_ULTRA_LOW_POWER:
-                waitfor(5);
+                waitFor(5);
                 break;
             case BMP180_HIGH_RES:
-                waitfor(14);
+                waitFor(14);
                 break;
             case BMP180_ULTRA_HIGH_RES:
-                waitfor(26);
+                waitFor(26);
                 break;
             default:
-                waitfor(8);
+                waitFor(8);
                 break;
         }
         int msb = getI2CBus().readU8(BMP180_PRESSURE_DATA);
@@ -213,7 +212,7 @@ public class BMP180 implements Atmospheric {
         }
     }
 
-    private static void waitfor(int howMuch) {
+    private static void waitFor(int howMuch) {
         Utils.pause(howMuch);
     }
 

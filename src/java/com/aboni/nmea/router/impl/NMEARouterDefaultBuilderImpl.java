@@ -15,15 +15,23 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.agent.*;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEAFilterable;
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.NMEARouterBuilder;
+import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
+import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
 import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
 import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
 import com.aboni.nmea.router.agent.impl.QOSKeys;
 import com.aboni.nmea.router.agent.impl.system.*;
-import com.aboni.nmea.router.conf.*;
+import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.conf.LogLevelType;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
@@ -35,6 +43,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("OverlyCoupledClass")
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private static final boolean ENABLE_GPS_TIME = true;

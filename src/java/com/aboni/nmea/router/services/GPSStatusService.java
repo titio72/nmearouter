@@ -53,7 +53,6 @@ public class GPSStatusService extends JSONWebService {
                 setDoubleValue(res, statusProvider.getSOG(), "SOG");
                 setDoubleValue(res, statusProvider.getHDOP(), "HDOP");
                 res.put("fix", statusProvider.getGPSFix());
-                res.put("anchor", statusProvider.isAnchor(System.currentTimeMillis()));
                 return res;
             }
             return null;

@@ -23,7 +23,7 @@ import java.time.Instant;
 
 public class DBWindStatsReader implements WindStatsReader {
 
-    private MeteoReader reader;
+    private final MeteoReader reader;
 
     private double wSpeed;
     private double wAngle;

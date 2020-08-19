@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEAAgentImpl implements NMEAAgent {
 
@@ -124,7 +125,7 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private static class AgentAttributes {
         String name;
-        boolean active;
+        AtomicBoolean active = new AtomicBoolean();
         boolean builtin;
         boolean target;
         boolean source;
@@ -246,18 +247,16 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     @Override
     public final boolean isStarted() {
-        synchronized (this) {
-            return attributes.active;
-        }
+        return attributes.active.get();
     }
 
     @Override
     public final void start() {
         synchronized (this) {
-            if (!attributes.active) {
+            if (!isStarted()) {
                 getLogger().info("Activating agent {" + getName() + "}");
                 if (onActivate()) {
-                    attributes.active = true;
+                    attributes.active.set(true);
                     notifyStatus();
                 } else {
                     getLogger().error("Cannot activate agent {" + getName() + "}");
@@ -273,10 +272,10 @@ public class NMEAAgentImpl implements NMEAAgent {
     @Override
     public final void stop() {
         synchronized (this) {
-            if (attributes.active) {
+            if (isStarted()) {
                 getLogger().info("Deactivating {" + getName() + "}");
                 onDeactivate();
-                attributes.active = false;
+                attributes.active.set(false);
                 notifyStatus();
             }
         }

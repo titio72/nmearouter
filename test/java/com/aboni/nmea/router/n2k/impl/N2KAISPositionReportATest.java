@@ -2,6 +2,8 @@ package com.aboni.nmea.router.n2k.impl;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class N2KAISPositionReportATest {
 
     private static final byte[] data = new byte[]{
@@ -12,9 +14,15 @@ public class N2KAISPositionReportATest {
 
     @Test
     public void test() {
-        N2KAISPositionReportA p = new N2KAISPositionReportA(data);
-        // TODO
-
+        N2KAISPositionReportAImpl p = new N2KAISPositionReportAImpl(data);
+        assertEquals("247228600", p.getMMSI());
+        assertEquals("A", p.getAISClass());
+        assertEquals(43.0530014, p.getPosition().getLatitude(), 0.00001);
+        assertEquals(10.0111665, p.getPosition().getLongitude(), 0.00001);
+        assertEquals(27.0, p.getHeading(), 0.01);
+        assertEquals(16.8, p.getSog(), 0.01);
+        assertEquals(28.0, p.getCog(), 0.01);
+        assertEquals("Under way using engine", p.getNavStatus());
     }
 
 }

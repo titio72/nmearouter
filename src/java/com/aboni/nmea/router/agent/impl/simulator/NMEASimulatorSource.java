@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
+@SuppressWarnings("OverlyComplexClass")
 public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDriver {
 
     private static NMEASimulatorSource simulator;
@@ -130,22 +131,22 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 
     @Override
     public double getWindSpeed() {
-        return data.getwSpeed();
+        return data.getWindSpeed();
     }
 
     @Override
     public void setWindSpeed(double wSpeed) {
-        this.data.setwSpeed(wSpeed);
+        this.data.setWindSpeed(wSpeed);
     }
 
     @Override
     public double getWindDirection() {
-        return data.getwDirection();
+        return data.getWindDirection();
     }
 
     @Override
     public void setWindDirection(double wDirection) {
-        this.data.setwDirection(wDirection);
+        this.data.setWindDirection(wDirection);
     }
 
     @Override
@@ -162,8 +163,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             double ph15m = System.currentTimeMillis() / (1000d * 60d * 15d) * 2 * Math.PI; // 15 minutes phase
             double depth = Utils.round(data.getDepth() + Math.sin(ph15m) * data.getDepthRange(), 1);
             double hdg = Utils.normalizeDegrees0To360(navData.refHeading + r.nextDouble() * 3.0);
-            double absoluteWindSpeed = data.getwSpeed() + r.nextDouble() * 1.0;
-            double absoluteWindDir = data.getwDirection() + r.nextDouble() * 2.0;
+            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble() * 1.0;
+            double absoluteWindDir = data.getWindDirection() + r.nextDouble() * 2.0;
             double tWDirection = Utils.normalizeDegrees0To360(absoluteWindDir - hdg);
             double speed = getSpeed((float) absoluteWindSpeed, (int) tWDirection);
 
@@ -237,7 +238,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     }
 
     private void sendVoltage() {
-        if (data.isXdrDiag()) {
+        if (data.isXdrDiagnostic()) {
             XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
             xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));

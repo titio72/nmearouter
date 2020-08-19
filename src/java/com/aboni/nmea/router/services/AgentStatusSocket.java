@@ -82,7 +82,7 @@ public class AgentStatusSocket {
         private final Session session;
         private final String id;
 
-        MySession(Session s) {
+        private MySession(Session s) {
             session = s;
             id = session.getId();
         }
@@ -93,7 +93,7 @@ public class AgentStatusSocket {
             }
         }
 
-        void send(String msg) {
+        private void send(String msg) {
             synchronized (this) {
                 if (msg != null) {
                     try {

@@ -63,17 +63,17 @@ public class NMEARouterImpl implements NMEARouter {
         started  = new AtomicBoolean(false);
         this.cache = cache;
         this.stream = stream;
-        exec = Executors.newFixedThreadPool(4);
+        exec = Executors.newFixedThreadPool(2);
         timer = null;
     }
 
     private void onTimerHR() {
         synchronized (agents) {
-            if (timerCount % 4 == 0) notifyDiag();
-            timerCount = (timerCount +1) % TIMER_FACTOR;
-            for (NMEAAgent a: agents.values()) {
+            if (timerCount % 4 == 0) notifyDiagnostic();
+            timerCount = (timerCount + 1) % TIMER_FACTOR;
+            for (NMEAAgent a : agents.values()) {
                 exec.execute(a::onTimerHR);
-                if (timerCount ==0) {
+                if (timerCount == 0) {
                     exec.execute(a::onTimer);
                     dumpStats();
                 }
@@ -89,11 +89,11 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void notifyDiag() {
+    private void notifyDiagnostic() {
         JSONObject msg = new JSONObject();
         msg.put("topic", "diag");
         msg.put("queue", sentenceQueue.size());
-        msg.put("free_memory", Runtime.getRuntime().freeMemory()/1024/1024);
+        msg.put("free_memory", Runtime.getRuntime().freeMemory() / 1024 / 1024);
         RouterMessage m = RouterMessageImpl.createMessage(msg, "SYS", cache.getNow());
         privateQueueUpSentence(m);
     }
@@ -175,7 +175,7 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void privateQueueUpSentence(RouterMessage s) {
         try {
-            sentenceQueue.put(s);
+            if (isStarted()) sentenceQueue.put(s);
         } catch (InterruptedException e1) {
             Thread.currentThread().interrupt();
         }
@@ -212,13 +212,15 @@ public class NMEARouterImpl implements NMEARouter {
             for (NMEAAgent nmeaAgent : agents.values()) {
                 try {
                     final NMEATarget target = nmeaAgent.getTarget();
-                    exec.execute(() -> {
-                        for (RouterMessage m : mm) {
-                            if (target != null && !m.getSource().equals(nmeaAgent.getName())) {
-                                target.pushMessage(m);
+                    if (target != null) {
+                        exec.execute(() -> {
+                            for (RouterMessage m : mm) {
+                                if (!m.getSource().equals(nmeaAgent.getName())) {
+                                    target.pushMessage(m);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 } catch (Exception e) {
                     ServerLog.getLogger().error("Error dispatching to target!", e);
                 }

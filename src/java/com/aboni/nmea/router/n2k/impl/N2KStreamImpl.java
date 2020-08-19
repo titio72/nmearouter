@@ -20,6 +20,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.utils.Log;
+import com.aboni.utils.ThingsFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -86,7 +87,8 @@ public class N2KStreamImpl implements N2KStream {
     @Override
     public N2KMessage getMessage(String sMessage) {
         try {
-            N2KMessageParser p = new N2KMessageParser(sMessage);
+            N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
+            p.addString(sMessage);
             int pgn = p.getHeader().getPgn();
             int acceptedSrc = pgnSources.getOrDefault(pgn, WHITE_LIST ? ACCEPT_ALL : REJECT_ALL);
             if (p.isSupported() &&

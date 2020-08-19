@@ -75,30 +75,15 @@ public abstract class N2KMessageImpl implements N2KMessage {
             return def;
     }
 
-    protected static String parseAscii(byte[] data, int offset, int start, int length) {
-
-        int totBits = data.length * 8;
-        if (offset < totBits && (offset + length) > totBits && (totBits - offset) >= 8) length = totBits - offset;
-        if (offset + length > totBits) return null;
-
-
-        byte[] b = new byte[(int) Math.ceil(length / 8.0)];
-        for (int i = 0; i < length; i += 8) {
-            long e = BitUtils.extractBits(data, start, offset + i, 8, false).v;
-            b[i / 8] = (byte) e;
-        }
-        return getASCII(b);
-    }
-
     protected static String parseEnum(byte[] data, int offset, int start, int length, Map<Integer, String> map) {
         if (offset + length > (data.length * 8)) return null;
 
         BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, false);
         int reserved = 0;
         if (e.m >= 15) {
-            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
         } else if (e.m > 1) {
-            reserved = 1; /* DATAFIELD_UNKNOWN */
+            reserved = 1; /* DATA FIELD_UNKNOWN */
         }
 
         String ret = null;
@@ -108,15 +93,15 @@ public abstract class N2KMessageImpl implements N2KMessage {
         return ret;
     }
 
-    protected static long parseIntegerSafe(byte[] data, int offset, int start, int length, boolean signed, long def) {
+    protected static long parseIntegerSafe(byte[] data, int offset, int start, int length, long def) {
         if (offset + length > (data.length * 8)) return def;
 
-        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, signed);
+        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, false);
         int reserved = 0;
         if (e.v >= 15) {
-            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
         } else if (e.m > 1) {
-            reserved = 1; /* DATAFIELD_UNKNOWN */
+            reserved = 1; /* DATA FIELD_UNKNOWN */
         }
         if (e.v <= e.m - reserved) {
             return e.v;
@@ -125,15 +110,15 @@ public abstract class N2KMessageImpl implements N2KMessage {
         }
     }
 
-    protected static Long parseInteger(byte[] data, int offset, int start, int length, boolean signed) {
+    protected static Long parseInteger(byte[] data, int offset, int length) {
         if (offset + length > (data.length * 8)) return null;
 
-        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, signed);
+        BitUtils.Res e = BitUtils.extractBits(data, 0, offset, length, false);
         int reserved = 0;
         if (e.v >= 15) {
-            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
         } else if (e.m > 1) {
-            reserved = 1; /* DATAFIELD_UNKNOWN */
+            reserved = 1; /* DATA FIELD_UNKNOWN */
         }
         if (e.v <= e.m - reserved) {
             return e.v;
@@ -142,20 +127,20 @@ public abstract class N2KMessageImpl implements N2KMessage {
         }
     }
 
-    protected static double parseDoubleSafe(byte[] data, int offset, int start, int length, double precision, boolean signed) {
-        Double d = parseDouble(data, offset, start, length, precision, signed);
+    protected static double parseDoubleSafe(byte[] data, int offset, int length, double precision, boolean signed) {
+        Double d = parseDouble(data, offset, length, precision, signed);
         return d == null ? Double.NaN : d;
     }
 
-    protected static Double parseDouble(byte[] data, int offset, int start, int length, double precision, boolean signed) {
+    protected static Double parseDouble(byte[] data, int offset, int length, double precision, boolean signed) {
         if (offset + length > (data.length * 8)) return null;
 
-        BitUtils.Res e = BitUtils.extractBits(data, start, offset, length, signed);
+        BitUtils.Res e = BitUtils.extractBits(data, 0, offset, length, signed);
         int reserved = 0;
         if (e.v >= 15) {
-            reserved = 2; /* DATAFIELD_ERROR and DATAFIELD_UNKNOWN */
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
         } else if (e.m > 1) {
-            reserved = 1; /* DATAFIELD_UNKNOWN */
+            reserved = 1; /* DATA FIELD_UNKNOWN */
         }
         if (length == 64) {
             if (e.v != 0x7FFFFFFFFFFFFFFFL)
@@ -171,14 +156,17 @@ public abstract class N2KMessageImpl implements N2KMessage {
         }
     }
 
-    protected static String getASCII(byte[] b) {
+    protected static String getText(byte[] data, int byteStart, int byteLength) {
+
+        if (byteStart < 0 || (byteStart + byteLength) > data.length) return "";
+
         // remove padding
-        int l = b.length;
-        byte last = b[l - 1];
-        while (last == (byte)0xff || last == ' ' || last == 0 || last == '@') {
+        int l = byteLength;
+        byte last = data[byteStart + l - 1];
+        while (last == (byte) 0xff || last == ' ' || last == 0 || last == '@') {
             l--;
-            if (l==0) return "";
-            last = b[l - 1];
+            if (l == 0) return "";
+            last = data[byteStart + l - 1];
         }
         char c;
         int k;
@@ -186,7 +174,7 @@ public abstract class N2KMessageImpl implements N2KMessage {
         StringBuilder sb = new StringBuilder(l);
         // escape
         for (k = 0; k < l; k++) {
-            c = (char) b[k];
+            c = (char) data[byteStart + k];
             switch (c) {
                 case '\b':
                     sb.append("\\b");

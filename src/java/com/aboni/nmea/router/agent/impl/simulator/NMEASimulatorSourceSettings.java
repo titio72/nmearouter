@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+@SuppressWarnings({"OverlyComplexClass", "ClassWithTooManyFields"})
 public class NMEASimulatorSourceSettings {
 
     private static final String YES = "1";
@@ -43,15 +44,15 @@ public class NMEASimulatorSourceSettings {
     private boolean mbb = true;
     private boolean mhu = true;
     private boolean mda = true;
-    private boolean mwva = true;
-    private boolean mwvt = true;
+    private boolean mwvApparent = true;
+    private boolean mwvTrue = true;
     private boolean vwr = true;
     private boolean hdm = true;
     private boolean hdg = true;
     private boolean hdt = true;
     private boolean vtg = true;
     private boolean rsa = true;
-    private boolean xdrDiag = true;
+    private boolean xdrDiagnostic = true;
     private boolean xdrMeteo = true;
     private boolean xdrMeteoAtm = true;
     private boolean xdrMeteoHum = true;
@@ -174,19 +175,19 @@ public class NMEASimulatorSourceSettings {
     }
 
     public boolean isMwvA() {
-        return mwva;
+        return mwvApparent;
     }
 
-    public void setMwva(boolean mwva) {
-        this.mwva = mwva;
+    public void setMwvApparent(boolean mwvApparent) {
+        this.mwvApparent = mwvApparent;
     }
 
     public boolean isMwvT() {
-        return mwvt;
+        return mwvTrue;
     }
 
-    public void setMwvt(boolean mwvt) {
-        this.mwvt = mwvt;
+    public void setMwvTrue(boolean mwvTrue) {
+        this.mwvTrue = mwvTrue;
     }
 
     public boolean isVwr() {
@@ -237,12 +238,12 @@ public class NMEASimulatorSourceSettings {
         this.rsa = rsa;
     }
 
-    public boolean isXdrDiag() {
-        return xdrDiag;
+    public boolean isXdrDiagnostic() {
+        return xdrDiagnostic;
     }
 
-    public void setXdrDiag(boolean xdrDiag) {
-        this.xdrDiag = xdrDiag;
+    public void setXdrDiagnostic(boolean xdrDiagnostic) {
+        this.xdrDiagnostic = xdrDiagnostic;
     }
 
     public boolean isXdrMeteo() {
@@ -309,19 +310,19 @@ public class NMEASimulatorSourceSettings {
         this.speed = speed;
     }
 
-    public double getwSpeed() {
+    public double getWindSpeed() {
         return wSpeed;
     }
 
-    public void setwSpeed(double wSpeed) {
+    public void setWindSpeed(double wSpeed) {
         this.wSpeed = wSpeed;
     }
 
-    public double getwDirection() {
+    public double getWindDirection() {
         return wDirection;
     }
 
-    public void setwDirection(double wDirection) {
+    public void setWindDirection(double wDirection) {
         this.wDirection = wDirection;
     }
 
@@ -405,7 +406,6 @@ public class NMEASimulatorSourceSettings {
         this.usePolars = usePolars;
     }
 
-
     public NMEASimulatorSourceSettings(String confFile) {
         this.confFile = confFile;
     }
@@ -427,7 +427,7 @@ public class NMEASimulatorSourceSettings {
     }
 
     private void readConf(Properties p) {
-        vhw = p.getProperty("simulate.vhw", "0").equals(YES);  // water spead and heading
+        vhw = p.getProperty("simulate.vhw", "0").equals(YES);  // water speed and heading
         vlw = p.getProperty("simulate.vlw", "0").equals(YES);  // distance traveled through water
         gll = p.getProperty("simulate.gll", "0").equals(YES);  // gps
         rmc = p.getProperty("simulate.rmc", "0").equals(YES);  // gps
@@ -439,17 +439,17 @@ public class NMEASimulatorSourceSettings {
         mbb = p.getProperty("simulate.mbb", "0").equals(YES);  // atm pressure
         mhu = p.getProperty("simulate.mhu", "0").equals(YES);  // humidity
         mda = p.getProperty("simulate.mda", "0").equals(YES);  // aggregated meteo
-        mwva = p.getProperty("simulate.mwv.apparent", "0").equals(YES);  // wind apparent
-        mwvt = p.getProperty("simulate.mwv.true", "0").equals(YES);  // wind true
+        mwvApparent = p.getProperty("simulate.mwv.apparent", "0").equals(YES);  // wind apparent
+        mwvTrue = p.getProperty("simulate.mwv.true", "0").equals(YES);  // wind true
         vwr = p.getProperty("simulate.vwr", "0").equals(YES);  // relative wind speed and angle (apparent)
-        hdm = p.getProperty("simulate.hdm", "0").equals(YES); // magn heading
-        hdg = p.getProperty("simulate.hdg", "0").equals(YES);  // magn heading + variation/deviation
+        hdm = p.getProperty("simulate.hdm", "0").equals(YES); // magnetic heading
+        hdg = p.getProperty("simulate.hdg", "0").equals(YES);  // magnetic heading + variation/deviation
         hdt = p.getProperty("simulate.hdt", "0").equals(YES); // true heading
         vtg = p.getProperty("simulate.vtg", "0").equals(YES);  // cog-sog
         rsa = p.getProperty("simulate.rsa", "0").equals(YES);  // rudder angle
         usePolars = p.getProperty("simulate.use.polars", "0").equals(YES);  // use polars to calculate the speed
         autoPilot = p.getProperty("simulate.autopilot", "0").equals(YES);
-        xdrDiag = p.getProperty("simulate.xdr.diag", "0").equals(YES);
+        xdrDiagnostic = p.getProperty("simulate.xdr.diag", "0").equals(YES);
         xdrMeteo = p.getProperty("simulate.xdr.meteo", "0").equals(YES);
         xdrMeteoAtm = p.getProperty("simulate.xdr.meteo.atm", "0").equals(YES);
         xdrMeteoHum = p.getProperty("simulate.xdr.meteo.hum", "0").equals(YES);
@@ -482,14 +482,22 @@ public class NMEASimulatorSourceSettings {
         try {
             press = Double.parseDouble(p.getProperty("simulate.pressure", "1013"));
         } catch (Exception ignored) { /* optional data */ }
-        try { temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1")); } catch (Exception ignored) { /* optional data */ }
-        try { hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2")); } catch (Exception ignored) { /* optional data */ }
+        try {
+            temp = Double.parseDouble(p.getProperty("simulate.temperature", "22.1"));
+        } catch (Exception ignored) { /* optional data */ }
+        try {
+            hum = Double.parseDouble(p.getProperty("simulate.humidity", "48.2"));
+        } catch (Exception ignored) { /* optional data */ }
 
-        try { depth = Double.parseDouble(p.getProperty("simulate.dpt.depth", "8.0")); } catch (Exception ignored) { /* optional data */ }
-        try { depthOffset = Double.parseDouble(p.getProperty("simulate.dpt.offset", "0.0")); } catch (Exception ignored) { /* optional data */ }
-        try { depthRange = Double.parseDouble(p.getProperty("simulate.dpt.range", "2.0")); } catch (Exception ignored) { /* optional data */ }
-
-
+        try {
+            depth = Double.parseDouble(p.getProperty("simulate.dpt.depth", "8.0"));
+        } catch (Exception ignored) { /* optional data */ }
+        try {
+            depthOffset = Double.parseDouble(p.getProperty("simulate.dpt.offset", "0.0"));
+        } catch (Exception ignored) { /* optional data */ }
+        try {
+            depthRange = Double.parseDouble(p.getProperty("simulate.dpt.range", "2.0"));
+        } catch (Exception ignored) { /* optional data */ }
     }
 
     public boolean isSplitWind() {

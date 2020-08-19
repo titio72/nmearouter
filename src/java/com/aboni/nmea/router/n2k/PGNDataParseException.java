@@ -24,6 +24,11 @@ public class PGNDataParseException extends Exception {
         unsupported = true;
     }
 
+    public PGNDataParseException(Exception e) {
+        super(e);
+        unsupported = false;
+    }
+
     public boolean isUnsupported() {
         return unsupported;
     }

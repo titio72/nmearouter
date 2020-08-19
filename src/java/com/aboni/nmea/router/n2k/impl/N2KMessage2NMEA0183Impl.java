@@ -20,6 +20,8 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.n2k.Satellite;
+import com.aboni.nmea.router.n2k.messages.*;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -92,7 +94,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         int nGroups = nSat / 12;
         nGroups = (nGroups * 12) < nSat ? nGroups + 1 : nGroups;
         int satIx = 0;
-        List<N2KSatellites.Sat> satsList = message.getSatellites();
+        List<Satellite> satsList = message.getSatellites();
         List<String> satInUse = new ArrayList<>();
         int group = 0;
         while (group < nGroups) {
@@ -107,7 +109,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return res.toArray(TEMPLATE);
     }
 
-    private int handleSatellitesGroup(List<Sentence> res, int nSat, int satIx, List<N2KSatellites.Sat> satsList, List<String> satInUse, int group) {
+    private int handleSatellitesGroup(List<Sentence> res, int nSat, int satIx, List<Satellite> satsList, List<String> satInUse, int group) {
         int satsInGroup = Math.min(nSat - (group * 12), 12);
         int sentences = satsInGroup / 4;
         sentences = (sentences * 4) < satsInGroup ? sentences + 1 : sentences;
@@ -119,7 +121,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             s.setSentenceIndex(i + 1);
             List<SatelliteInfo> l = new ArrayList<>();
             for (int j = 0; j < 4 && satIxGroup < satsInGroup; j++, satIxGroup++, satIx++) {
-                N2KSatellites.Sat sat = satsList.get(satIx);
+                Satellite sat = satsList.get(satIx);
                 if (sat.getId() != 0xFF) {
                     SatelliteInfo sInfo = new SatelliteInfo(String.format("%02d", sat.getId()), sat.getElevation(), sat.getAzimuth(), sat.getSrn());
                     l.add(sInfo);

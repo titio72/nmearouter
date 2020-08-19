@@ -37,31 +37,31 @@ public class ProcessorsBuilder {
             for (String q : qos.getKeys()) {
                 switch (q) {
                     case "speed_filter":
-                        log.info("QoS {SPEED_FILTER}");
+                        log.info("QoS {Speed filter}");
                         res.add(new NMEAGenericFilterProc(cache, ThingsFactory.getInstance(NMEASpeedFilter.class)));
                         break;
                     case "dpt":
-                        log.info("QoS {DPT}");
+                        log.info("QoS {Depth}");
                         res.add(ThingsFactory.getInstance(NMEADepthEnricher.class));
                         break;
                     case "rmc2vtg":
-                        log.info("QoS {RMC2VTG}");
+                        log.info("QoS {RMC to VTG}");
                         res.add(ThingsFactory.getInstance(NMEARMC2VTGProcessor.class));
                         break;
                     case "truewind_sog":
-                        log.info("QoS {TRUEWIND_SOG}");
+                        log.info("QoS {True wind SOG}");
                         res.add(new NMEAMWVTrue(cache, true));
                         break;
                     case "truewind":
-                        log.info("QoS {TRUEWIND}");
+                        log.info("QoS {True wind}");
                         res.add(new NMEAMWVTrue(cache, false));
                         break;
                     case "enrich_hdg":
-                        log.info("QoS {ENRICH_HDG}");
+                        log.info("QoS {Enrich HDG}");
                         res.add(ThingsFactory.getInstance(NMEAHDGEnricher.class));
                         break;
                     case "enrich_hdm":
-                        log.info("QoS {ENRICH_HDM}");
+                        log.info("QoS {Enrich HDM}");
                         res.add(ThingsFactory.getInstance(NMEAHDMEnricher.class));
                         break;
                     case "rmc_filter":

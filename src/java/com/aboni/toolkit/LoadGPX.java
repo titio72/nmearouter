@@ -59,9 +59,6 @@ public class LoadGPX {
             e.printStackTrace(ServerLog.getConsoleOut());
         }
     }
-    //<trkpt lat="43.584781" lon="10.204714"><ele>48</ele><time>2020-06-20T05:46:25.255Z</time></trkpt>
-    // <navionics_speed>0.000<
-
 
     private static final String PATTERN = "lat=\"(.+)\" lon=\"(.+)\".+time>(.+)</time>.*navionics_speed>(.+)</navionics_speed";
     private static final Pattern RX = Pattern.compile(PATTERN);

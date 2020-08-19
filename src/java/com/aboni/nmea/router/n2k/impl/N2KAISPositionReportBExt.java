@@ -19,12 +19,12 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
-public class N2KAISPositionReportBExt extends N2KAISPositionReportB {
+public class N2KAISPositionReportBExt extends N2KAISPositionReportBImpl {
 
     public static final int PGN = 129040;
 
     public N2KAISPositionReportBExt(byte[] data) throws PGNDataParseException {
-        super(getDefaultHeader(PGN), data);
+        super(N2KMessageImpl.getDefaultHeader(PGN), data);
         fill();
     }
 

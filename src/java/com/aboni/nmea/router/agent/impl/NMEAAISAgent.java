@@ -4,9 +4,10 @@ import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataB;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartA;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartB;
+import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBImpl;
+import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartAImpl;
+import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartBImpl;
+import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -50,18 +51,20 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
         setSourceTarget(false, true);
         if (TEST) {
             try {
-                N2KMessageParser p = new N2KMessageParser(STATIC[0]);
-                p.addMore(STATIC[1]);
-                p.addMore(STATIC[2]);
-                p.addMore(STATIC[3]);
-                onMessage(p.getMessage(), "TEST");
+                N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
+                p.addString(STATIC[0]);
+                p.addString(STATIC[1]);
+                p.addString(STATIC[2]);
+                p.addString(STATIC[3]);
+                onMessage(p.getMessage());
 
-                p = new N2KMessageParser(STATIC1[0]);
-                p.addMore(STATIC1[1]);
-                p.addMore(STATIC1[2]);
-                p.addMore(STATIC1[3]);
-                p.addMore(STATIC1[4]);
-                onMessage(p.getMessage(), "TEST");
+                p = ThingsFactory.getInstance(N2KMessageParser.class);
+                p.addString(STATIC1[0]);
+                p.addString(STATIC1[1]);
+                p.addString(STATIC1[2]);
+                p.addString(STATIC1[3]);
+                p.addString(STATIC1[4]);
+                onMessage(p.getMessage());
             } catch (Exception e) {
                 getLogger().error("Cannot load test data", e);
             }
@@ -69,7 +72,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
     }
 
     @OnN2KMessage
-    public void onMessage(N2KMessage message, String source) {
+    public void onMessage(N2KMessage message) {
         if (message instanceof AISPositionReport) {
             String mmsi = ((AISPositionReport) message).getMMSI();
             ((AISPositionReport) message).setOverrideTime(getCache().getNow());
@@ -83,14 +86,14 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
             if ("B".equals(aisClass)) {
                 synchronized (data) {
                     if (!data.containsKey(mmsi)) {
-                        data.put(mmsi, new N2KAISStaticDataB());
+                        data.put(mmsi, new N2KAISStaticDataBImpl());
                     }
                 }
                 AISStaticData d = data.get(mmsi);
-                if (s instanceof N2KAISStaticDataBPartA)
-                    ((N2KAISStaticDataB) d).setPartA((N2KAISStaticDataBPartA) s);
-                else if (s instanceof N2KAISStaticDataBPartB)
-                    ((N2KAISStaticDataB) d).setPartB((N2KAISStaticDataBPartB) s);
+                if (s instanceof N2KAISStaticDataBPartAImpl)
+                    ((N2KAISStaticDataBImpl) d).setPartA((N2KAISStaticDataBPartAImpl) s);
+                else if (s instanceof N2KAISStaticDataBPartBImpl)
+                    ((N2KAISStaticDataBImpl) d).setPartB((N2KAISStaticDataBPartBImpl) s);
             } else {
                 synchronized (data) {
                     data.put(mmsi, (AISStaticData) message);
@@ -144,12 +147,13 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
                 c = (c + 1) % tests.length;
                 try {
                     String[] s = tests[c];
-                    N2KMessageParser p = new N2KMessageParser(s[0]);
-                    p.addMore(s[1]);
-                    p.addMore(s[2]);
-                    p.addMore(s[3]);
+                    N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
+                    p.addString(s[0]);
+                    p.addString(s[1]);
+                    p.addString(s[2]);
+                    p.addString(s[3]);
                     N2KMessage m = p.getMessage();
-                    onMessage(m, "TEST");
+                    onMessage(m);
                 } catch (PGNDataParseException e) {
                     getLogger().errorForceStacktrace("Cannot process n2k message", e);
                 }

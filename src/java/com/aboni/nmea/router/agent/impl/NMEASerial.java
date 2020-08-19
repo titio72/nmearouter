@@ -237,30 +237,32 @@ public class NMEASerial extends NMEAAgentImpl {
     private void handleStringMessage(String s) {
         if (s != null) {
             updateReadStats(s);
-            NMEAInputManager.Output out = input.getSentence(s);
-            if (out != null && !out.isEmpty()) {
+            NMEAInputManager.Output out = input.getMessage(s);
+            if (out != null && out.hasMessages()) {
                 for (Sentence sentence : out.nmeaSentences) {
                     if (sentence != null) {
-                        updateReadStats(false);
+                        updateReadStats();
                         notify(sentence);
                     }
                 }
-                if (out.n2KMessage != null) notify(out.n2KMessage);
+                if (out.n2KMessage != null) {
+                    notify(out.n2KMessage);
+                }
             }
         }
     }
 
-    private void updateReadStats(boolean fail) {
+    private void updateReadStats() {
         synchronized (stats) {
-            fastStats.updateReadStats(fail);
-            stats.updateReadStats(fail);
+            fastStats.updateReadStats(false);
+            stats.updateReadStats(false);
         }
     }
 
-    private void updateWriteStats(boolean fail) {
+    private void updateWriteStats() {
         synchronized (stats) {
-            fastStats.updateWriteStats(fail);
-            stats.updateWriteStats(fail);
+            fastStats.updateWriteStats(false);
+            stats.updateWriteStats(false);
         }
     }
 
@@ -301,7 +303,7 @@ public class NMEASerial extends NMEAAgentImpl {
             if (p != null) {
                 if (p.writeBytes(b, b.length) != -1) {
                     updateWriteStats(strSentence);
-                    updateWriteStats(false);
+                    updateWriteStats();
                 } else {
                     getLogger().warning(logTag + " write failure, resetting");
                     resetPortAndReader();

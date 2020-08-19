@@ -86,11 +86,11 @@ public class N2KLookupTables {
         DSC_FORMAT,
         DSC_CATEGORY,
         DSC_NATURE,
-        DSC_FIRST_TELECOMMAND,
-        DSC_SECOND_TELECOMMAND,
+        DSC_FIRST_TELE_COMMAND,
+        DSC_SECOND_TELE_COMMAND,
         DSC_EXPANSION_DATA,
         SEATALK_ALARM_STATUS
-        }
+    }
     
     private N2KLookupTables() {
     }

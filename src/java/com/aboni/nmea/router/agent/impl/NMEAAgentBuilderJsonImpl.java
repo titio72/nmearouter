@@ -19,9 +19,9 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
-import com.aboni.nmea.router.conf.InOut;
 import com.aboni.nmea.router.conf.AgentTypes;
 import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.conf.InOut;
 import com.aboni.nmea.router.conf.net.NetConf;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.ServerLog;
@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("OverlyCoupledClass")
 public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
 
     @Inject

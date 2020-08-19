@@ -17,6 +17,7 @@ package com.aboni.sensors.hw;
 
 import com.aboni.misc.Utils;
 import com.aboni.sensors.I2CInterface;
+import com.aboni.utils.Log;
 
 import java.io.IOException;
 
@@ -26,32 +27,15 @@ public class BME280 implements Atmospheric {
 
     private final I2CInterface device;
 
-    private int digT1;
-    private int digT2;
-    private int digT3;
-
-    private int digP1;
-    private int digP2;
-    private int digP3;
-    private int digP4;
-    private int digP5;
-    private int digP6;
-    private int digP7;
-    private int digP8;
-    private int digP9;
-
-    private int digH1;
-    private int digH2;
-    private int digH3;
-    private int digH4;
-    private int digH5;
-    private int digH6;
-
+    private int[] digT;
+    private int[] digP;
+    private int[] digH;
     private long lastRead;
     private double cTemp;
     private double pressure;
     private double humidity;
     private double standardSeaLevelPressure;
+    private final byte[] dataBuffer = new byte[8];
 
     public BME280(I2CInterface i2cDevice) throws IOException {
         device = i2cDevice;
@@ -59,81 +43,57 @@ public class BME280 implements Atmospheric {
         read();
     }
 
+    private static int signed16Bits(byte[] data, int offset) {
+        int byte0 = data[offset] & 0xff;
+        int byte1 = data[offset + 1];
+
+        return (byte1 << 8) + byte0;
+    }
+
+    private static int unsigned16Bits(byte[] data, int offset) {
+        int byte0 = data[offset] & 0xff;
+        int byte1 = data[offset + 1] & 0xff;
+
+        return (byte1 << 8) + byte0;
+    }
+
     private void init() throws IOException {
         // Read 24 bytes of data from address 0x88(136)
-        byte[] b1 = new byte[24];
-        device.read(0x88, b1, 0, 24);
+        byte[] data = new byte[24];
+        device.read(0x88, data, 0, 24);
         // Convert the data
         // temp coefficients
-        digT1 = (b1[0] & 0xFF) + ((b1[1] & 0xFF) * 256);
-        digT2 = (b1[2] & 0xFF) + ((b1[3] & 0xFF) * 256);
-        if (digT2 > 32767) {
-            digT2 -= 65536;
-        }
-        digT3 = (b1[4] & 0xFF) + ((b1[5] & 0xFF) * 256);
-        if (digT3 > 32767) {
-            digT3 -= 65536;
-        }
-        // pressure coefficients
-        digP1 = (b1[6] & 0xFF) + ((b1[7] & 0xFF) * 256);
-        digP2 = (b1[8] & 0xFF) + ((b1[9] & 0xFF) * 256);
-        if (digP2 > 32767) {
-            digP2 -= 65536;
-        }
-        digP3 = (b1[10] & 0xFF) + ((b1[11] & 0xFF) * 256);
-        if (digP3 > 32767) {
-            digP3 -= 65536;
-        }
-        digP4 = (b1[12] & 0xFF) + ((b1[13] & 0xFF) * 256);
-        if (digP4 > 32767) {
-            digP4 -= 65536;
-        }
-        digP5 = (b1[14] & 0xFF) + ((b1[15] & 0xFF) * 256);
-        if (digP5 > 32767) {
-            digP5 -= 65536;
-        }
-        digP6 = (b1[16] & 0xFF) + ((b1[17] & 0xFF) * 256);
-        if (digP6 > 32767) {
-            digP6 -= 65536;
-        }
-        digP7 = (b1[18] & 0xFF) + ((b1[19] & 0xFF) * 256);
-        if (digP7 > 32767) {
-            digP7 -= 65536;
-        }
-        digP8 = (b1[20] & 0xFF) + ((b1[21] & 0xFF) * 256);
-        if (digP8 > 32767) {
-            digP8 -= 65536;
-        }
-        digP9 = (b1[22] & 0xFF) + ((b1[23] & 0xFF) * 256);
-        if (digP9 > 32767) {
-            digP9 -= 65536;
-        }
+        digT = new int[]{
+                unsigned16Bits(data, 0),
+                signed16Bits(data, 2),
+                signed16Bits(data, 4)
+        };
 
-        // Read 1 byte of data from address 0xA1(161)
-        digH1 = ((byte) device.readU8(0xA1) & 0xFF);
+        // pressure coefficients
+        digP = new int[]{
+                unsigned16Bits(data, 6),
+                signed16Bits(data, 8),
+                signed16Bits(data, 10),
+                signed16Bits(data, 12),
+                signed16Bits(data, 14),
+                signed16Bits(data, 16),
+                signed16Bits(data, 18),
+                signed16Bits(data, 20),
+                signed16Bits(data, 22)
+        };
 
         // Read 7 bytes of data from address 0xE1(225)
-        device.read(0xE1, b1, 0, 7);
-
-        // Convert the data
+        device.read(0xE1, data, 0, 7);
         // humidity coefficients
-        digH2 = (b1[0] & 0xFF) + (b1[1] * 256);
-        if (digH2 > 32767) {
-            digH2 -= 65536;
-        }
-        digH3 = b1[2] & 0xFF;
-        digH4 = ((b1[3] & 0xFF) * 16) + (b1[4] & 0xF);
-        if (digH4 > 32767) {
-            digH4 -= 65536;
-        }
-        digH5 = ((b1[4] & 0xFF) / 16) + ((b1[5] & 0xFF) * 16);
-        if (digH5 > 32767) {
-            digH5 -= 65536;
-        }
-        digH6 = b1[6] & 0xFF;
-        if (digH6 > 127) {
-            digH6 -= 256;
-        }
+        digH = new int[]{
+                // Read 1 byte of data from address 0xA1(161)
+                device.readU8(0xA1) & 0xFF,
+                signed16Bits(data, 0),
+                data[2] & 0xFF,
+                ((data[3] & 0xff) << 4) + (data[4] & 0x0f),
+                ((data[5] & 0xff) << 4) + ((data[4] & 0xff) >> 4),
+                data[6]
+        };
 
         // Select control humidity register
         // Humidity over sampling rate = 1
@@ -146,6 +106,29 @@ public class BME280 implements Atmospheric {
         device.write(0xF5, (byte) 0xA0);
     }
 
+    public void printParameters(Log logger, String logPrefix) {
+        logger.debug(String.format("%s dig_T1:{%d} u16", logPrefix, digT[0]));
+        logger.debug(String.format("%s dig_T2:{%d} s16", logPrefix, digT[1]));
+        logger.debug(String.format("%s dig_T3:{%d} s16", logPrefix, digT[2]));
+
+        logger.debug(String.format("%s dig_P1:{%d} u16", logPrefix, digP[0]));
+        logger.debug(String.format("%s dig_P2:{%d} s16", logPrefix, digP[1]));
+        logger.debug(String.format("%s dig_P3:{%d} s16", logPrefix, digP[2]));
+        logger.debug(String.format("%s dig_P4:{%d} s16", logPrefix, digP[3]));
+        logger.debug(String.format("%s dig_P5:{%d} s16", logPrefix, digP[4]));
+        logger.debug(String.format("%s dig_P6:{%d} s16", logPrefix, digP[5]));
+        logger.debug(String.format("%s dig_P7:{%d} s16", logPrefix, digP[6]));
+        logger.debug(String.format("%s dig_P8:{%d} s16", logPrefix, digP[7]));
+        logger.debug(String.format("%s dig_P9:{%d} s16", logPrefix, digP[8]));
+
+        logger.debug(String.format("%s dig_H1:{%d} u8", logPrefix, digH[0]));
+        logger.debug(String.format("%s dig_H2:{%d} s16", logPrefix, digH[1]));
+        logger.debug(String.format("%s dig_H3:{%d} u8", logPrefix, digH[2]));
+        logger.debug(String.format("%s dig_H4:{%d} s16", logPrefix, digH[3]));
+        logger.debug(String.format("%s dig_H5:{%d} s16", logPrefix, digH[4]));
+        logger.debug(String.format("%s dig_H6:{%d} s8", logPrefix, digH[5]));
+    }
+
     private boolean read() {
         try {
             long now = System.currentTimeMillis();
@@ -153,39 +136,38 @@ public class BME280 implements Atmospheric {
 
                 // Read 8 bytes of data from address 0xF7(247)
                 // pressure msb1, pressure msb, pressure lsb, temp msb1, temp msb, temp lsb, humidity lsb, humidity msb
-                byte[] data = new byte[8];
-                device.read(0xF7, data, 0, 8);
+                device.read(0xF7, dataBuffer, 0, 8);
 
                 // Convert pressure and temperature data to 19-bits
-                long adcP = (((long) (data[0] & 0xFF) * 65536) + ((long) (data[1] & 0xFF) * 256) + (long) (data[2] & 0xF0)) / 16;
-                long adcT = (((long) (data[3] & 0xFF) * 65536) + ((long) (data[4] & 0xFF) * 256) + (long) (data[5] & 0xF0)) / 16;
-                // Convert the humidity data
-                long adcH = ((long) (data[6] & 0xFF) * 256 + (long) (data[7] & 0xFF));
+                int adcP = (((dataBuffer[0] & 0xff) << 16) + ((dataBuffer[1] & 0xff) << 8) + (dataBuffer[2] & 0xff)) >> 4;
+                int adcT = (((dataBuffer[3] & 0xff) << 16) + ((dataBuffer[4] & 0xff) << 8) + (dataBuffer[5] & 0xff)) >> 4;
+                int adcH = ((dataBuffer[6] & 0xff) << 8) + (dataBuffer[7] & 0xff);
 
                 // Temperature offset calculations
-                double var1 = (((double) adcT) / 16384.0 - ((double) digT1) / 1024.0) * ((double) digT2);
-                double var2 = ((((double) adcT) / 131072.0 - ((double) digT1) / 8192.0) *
-                        (((double) adcT) / 131072.0 - ((double) digT1) / 8192.0)) * ((double) digT3);
+                double var1 = (adcT / 16384.0 - digT[0] / 1024.0) * (double) digT[1];
+                double var2 = ((adcT / 131072.0 - digT[0] / 8192.0) *
+                        (adcT / 131072.0 - digT[0] / 8192.0)) * ((double) digT[2]);
                 double tFine = (long) (var1 + var2);
                 cTemp = (var1 + var2) / 5120.0;
 
                 // Pressure offset calculations
                 var1 = (tFine / 2.0) - 64000.0;
-                var2 = var1 * var1 * ((double) digP6) / 32768.0;
-                var2 = var2 + var1 * ((double) digP5) * 2.0;
-                var2 = (var2 / 4.0) + (((double) digP4) * 65536.0);
-                var1 = (((double) digP3) * var1 * var1 / 524288.0 + ((double) digP2) * var1) / 524288.0;
-                var1 = (1.0 + var1 / 32768.0) * ((double) digP1);
+                var2 = var1 * var1 * digP[5] / 32768.0;
+                var2 = var2 + var1 * digP[4] * 2.0;
+                var2 = (var2 / 4.0) + (digP[3] * 65536.0);
+                var1 = (digP[2] * var1 * var1 / 524288.0 + digP[1] * var1) / 524288.0;
+                var1 = (1.0 + var1 / 32768.0) * digP[0];
                 double p = 1048576.0 - (double) adcP;
                 p = (p - (var2 / 4096.0)) * 6250.0 / var1;
-                var1 = ((double) digP9) * p * p / 2147483648.0;
-                var2 = p * ((double) digP8) / 32768.0;
-                pressure = (p + (var1 + var2 + ((double) digP7)) / 16.0);
+                var1 = digP[8] * p * p / 2147483648.0;
+                var2 = p * digP[7] / 32768.0;
+                pressure = (p + (var1 + var2 + digP[6]) / 16.0);
 
                 // Humidity offset calculations
                 double varH = tFine - 76800.0;
-                varH = (adcH - (digH4 * 64.0 + digH5 / 16384.0 * varH)) * (digH2 / 65536.0 * (1.0 + digH6 / 67108864.0 * varH * (1.0 + digH3 / 67108864.0 * varH)));
-                humidity = varH * (1.0 - digH1 * varH / 524288.0);
+                varH = (adcH - (digH[3] * 64.0 + digH[4] / 16384.0 * varH)) *
+                        (digH[1] / 65536.0 * (1.0 + digH[5] / 67108864.0 * varH * (1.0 + digH[2] / 67108864.0 * varH)));
+                humidity = varH * (1.0 - digH[0] * varH / 524288.0);
                 if (humidity > 100.0) {
                     humidity = 100.0;
                 } else if (humidity < 0.0) {

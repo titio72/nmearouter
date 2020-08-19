@@ -64,7 +64,8 @@ public class ListenerWrapper {
 
     private void scanMethod(Method method, Class<?> c, List<Method> listenerMethods) {
         Class<?>[] params = method.getParameterTypes();
-        if (params[0].equals(c) && params[1].equals(String.class)) {
+        if ((params.length == 1 && params[0].equals(c))
+                || (params.length == 2 && params[0].equals(c) && params[1].equals(String.class))) {
             listenerMethods.add(method);
         }
     }
@@ -84,7 +85,10 @@ public class ListenerWrapper {
     private <T> void dispatch(T payload, String src, List<Method> listenerMethods) {
         for (Method m : listenerMethods) {
             try {
-                m.invoke(listenerObject, payload, src);
+                if (m.getParameterCount() == 1)
+                    m.invoke(listenerObject, payload);
+                else if (m.getParameterCount() == 2)
+                    m.invoke(listenerObject, payload, src);
             } catch (Exception e) {
                 ServerLog.getLogger().error("Error pushing message", e);
             }

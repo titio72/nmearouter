@@ -222,7 +222,7 @@
     "3": "Band pass",
     "4": "Notch filter"
   },
-  "DSC_SECOND_TELECOMMAND": {
+  "DSC_SECOND_TELE_COMMAND": {
     "110": "Ships and aircraft of States not parties to an armed conflict",
     "100": "No reason given",
     "111": "Medical transports",
@@ -560,7 +560,7 @@
     "3": "True (boat referenced)",
     "4": "True (water referenced)"
   },
-  "DSC_FIRST_TELECOMMAND": {
+  "DSC_FIRST_TELE_COMMAND": {
     "110": "Distress acknowledgement",
     "121": "Ship position or location registration updating",
     "100": "F3E/G3E All modes TP",
