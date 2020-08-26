@@ -158,7 +158,9 @@ public abstract class N2KMessageImpl implements N2KMessage {
 
     protected static String getText(byte[] data, int byteStart, int byteLength) {
 
-        if (byteStart < 0 || (byteStart + byteLength) > data.length) return "";
+        if (byteStart < 0 || byteStart >= data.length) return "";
+
+        byteLength = Math.min(byteLength, data.length - byteStart);
 
         // remove padding
         int l = byteLength;

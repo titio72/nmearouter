@@ -197,8 +197,8 @@ function getDataset(caption, sr, min, avg, max) {
 
 function info() {
   bootbox.alert({
-    message: 
-    "<p>NMEA Router v1.0</p>" +			
+    message:
+    "<p>NMEA Router v1.0</p>" +
     "<p>Andrea Boni</p>"
   });
 }

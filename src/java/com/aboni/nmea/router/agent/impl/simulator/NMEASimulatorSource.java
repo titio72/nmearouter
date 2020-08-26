@@ -150,7 +150,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     }
 
     @Override
-    public void onTimer() {
+    public void onTimerHR() {
         if (isStarted()) {
             data.loadConf();
             loadPolars();

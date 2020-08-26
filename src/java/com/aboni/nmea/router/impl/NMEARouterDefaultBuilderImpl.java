@@ -38,8 +38,10 @@ import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,12 +99,17 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildAgents(ConfJSON conf, NMEARouter r) throws MalformedConfigurationException {
         NMEAAgentBuilderJson builder = ThingsFactory.getInstance(NMEAAgentBuilderJson.class);
+        Set<NMEAAgent> toActivate = new HashSet<>();
         for (ConfJSON.AgentDef a : conf.getAgents()) {
             NMEAAgent agent = builder.createAgent(a);
             if (agent != null) {
                 r.addAgent(agent);
-                handlePersistentState(agent);
+                handleFilter(agent);
+                if (handleActivation(agent)) toActivate.add(agent);
             }
+        }
+        for (NMEAAgent a : toActivate) {
+            a.start();
         }
     }
 
@@ -137,12 +144,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
     }
 
-    private void handlePersistentState(NMEAAgent agent) {
-        boolean activate = handleActivation(agent);
-        handleFilter(agent);
-        if (activate) agent.start();
-    }
-
     private void handleFilter(NMEAAgent agent) {
         NMEAFilterable tgt = agent.getTarget();
         if (tgt != null) {
@@ -169,7 +170,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         if (agentStatusManager != null) {
             AgentStatusManager.STATUS requestedStatus = agentStatusManager.getStartMode(agent.getName());
             if (requestedStatus == STATUS.UNKNOWN) {
-                agentStatusManager.setStartMode(agent.getName(), STATUS.AUTO);
+                agentStatusManager.setStartMode(agent.getName(), STATUS.MANUAL);
             } else {
                 active = (requestedStatus == STATUS.AUTO);
             }
@@ -182,7 +183,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         NMEA2FileAgent dumper = ThingsFactory.getInstance(NMEA2FileAgent.class);
         dumper.setup("Log", q);
         r.addAgent(dumper);
-        handlePersistentState(dumper);
         handleFilter(dumper);
     }
 

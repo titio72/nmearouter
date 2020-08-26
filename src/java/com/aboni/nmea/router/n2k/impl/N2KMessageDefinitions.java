@@ -65,6 +65,7 @@ public class N2KMessageDefinitions {
         SUPPORTED.put(129794, N2KDef.getInstance(N2KAISStaticDataAImpl.class, true)); // AIS Class A Static and Voyage Related Data
         SUPPORTED.put(129809, N2KDef.getInstance(N2KAISStaticDataBPartAImpl.class, true)); // AIS Class B static data (msg 24 Part A)
         SUPPORTED.put(129810, N2KDef.getInstance(N2KAISStaticDataBPartBImpl.class, true)); // AIS Class B static data (msg 24 Part B)
+        SUPPORTED.put(129041, N2KDef.getInstance(N2KAISAtoN.class, true)); // AIS AtoN
     }
 
     public static boolean isSupported(int pgn) {

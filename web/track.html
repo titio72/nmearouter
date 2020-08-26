@@ -296,7 +296,7 @@
   }
 
   function refreshMeteoCharts() {
-    if (tripId!=null) 
+    if (tripId!=null)
     httpLoadAllMeteoById(tripId, function(res) {
         drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
         drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
@@ -311,7 +311,7 @@
         drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
         drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
         drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
-      });    
+      });
   }
 
   function getDataPoints(data, name, attr) {

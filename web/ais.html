@@ -68,7 +68,7 @@
                 a.color = "red";
                 a.is_current = true;
             } else {
-                a.color = "green";
+                a.color = a.class=="X"?"yellow":"green";
                 a.is_current = false;
             }
             var scale = zoomFactors[zoomFactor];
@@ -81,7 +81,7 @@
                 a.show = "no";
             }
             a.stationary = (a.SOG==null || a.SOG==0.0);
-            
+
             a.direction = a.COG;
             if (a.direction==null) a.direction = a.heading;
             if (a.direction==null) a.direction = 0.0;
@@ -150,28 +150,38 @@
                         <circle ng-if="s.stationary && s.class=='A'" cx="{{s.x}}" cy="{{s.y}}" r="6" stroke="{{s.color}}" stroke-width="2" fill="{{s.color}}" data-mmsi="{{s.MMSI}}"></circle>
                         <path ng-if="!s.stationary && s.class=='B'" d="M0 -6 l4 12 l-8 0 z" fill="{{s.color}}" transform="translate({{s.x}} {{s.y}}) rotate({{s.direction}} 0 0)" data-mmsi="{{s.MMSI}}"></path>
                         <path ng-if="!s.stationary && s.class=='A'" d="M0 -12 l6 6 l0 18 l-12 0 l0 -18 z" fill="{{s.color}}" transform="translate({{s.x}} {{s.y}}) rotate({{s.direction}} 0 0)" data-mmsi="{{s.MMSI}}"></path>
+                        <path ng-if="s.class=='X'" d="M-6 -6 l12 0 l0 12 l-12 0 z" fill="{{s.color}}"
+                              transform="translate({{s.x}} {{s.y}}) rotate({{s.direction}} 0 0)"
+                              data-mmsi="{{s.MMSI}}"></path>
                     </a>
-                    <text ng-if="s_current!=null && s_current.show=='yes'" x="{{s_current.x}}" y="{{s_current.y}}" fill="blue" font-size="10">
+                    <text ng-if="s_current!=null && s_current.show=='yes'" x="{{s_current.x}}" y="{{s_current.y}}"
+                          fill="blue" font-size="10">
                         <tspan x="{{s_current.x}}" dx="10">{{s_current.MMSI}}</tspan>
                         <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.name}}</tspan>
                         <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.distance | number:1}} Nm
-                            {{s_current.bearing | number:0}}&deg;</tspan>
+                            {{s_current.bearing | number:0}}&deg;
+                        </tspan>
                         <tspan x="{{s_current.x}}" dx="10" dy="10">{{s_current.SOG | number:1}} Kn
-                            {{s_current.COG | number:0}}&deg;</tspan>
-                        </text>
-                    <circle ng-if="(s_current!=null && s_current.show=='yes') && s_current.stationary" 
-                            cx="{{s_current.x}}" 
+                            {{s_current.COG | number:0}}&deg;
+                        </tspan>
+                    </text>
+                    <circle ng-if="(s_current!=null && s_current.show=='yes') && s_current.stationary"
+                            cx="{{s_current.x}}"
                             cy="{{s_current.y}}" r="4" stroke="{{s_current.color}}" stroke-width="2"
                             fill="{{s_current.color}}"></circle>
-                    <path ng-if="(s_current!=null && s_current.show=='yes') && !s_current.stationary" d="M0 -8 l5 16 l-10 0 z" 
-                            fill="{{s_current.color}}" 
-                            transform="translate({{s_current.x}} {{s_current.y}}) rotate({{s_current.direction}} 0 0)" 
-                            data-mmsi="{{s_current.MMSI}}"></path>
-                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue"></path>   
-                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(90 {{cx}} {{cy}})"></path>   
-                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(180 {{cx}} {{cy}})"></path>   
-                        <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(270 {{cx}} {{cy}})"></path>   
-                        <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue" transform="rotate(-{{data.heading}} {{cx}} {{cy}})"></path>   
+                    <path ng-if="(s_current!=null && s_current.show=='yes') && !s_current.stationary"
+                          d="M0 -8 l5 16 l-10 0 z"
+                          fill="{{s_current.color}}"
+                          transform="translate({{s_current.x}} {{s_current.y}}) rotate({{s_current.direction}} 0 0)"
+                          data-mmsi="{{s_current.MMSI}}"></path>
+                    <path ng-if="northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue"></path>
+                    <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue"
+                          transform="rotate(90 {{cx}} {{cy}})"></path>
+                    <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue"
+                          transform="rotate(180 {{cx}} {{cy}})"></path>
+                    <path ng-if="northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue"
+                          transform="rotate(270 {{cx}} {{cy}})"></path>
+                    <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-15 0 l15 15 l15 -15 z" fill="blue" transform="rotate(-{{data.heading}} {{cx}} {{cy}})"></path>
                         <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(90 {{cx}} {{cy}})"></path>   
                         <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(180 {{cx}} {{cy}})"></path>   
                         <path ng-if="!northUp" d="M{{cx}} {{mtop}} l-10 0 l10 10 l10 -10 z" fill="darkblue" transform="rotate(-{{data.heading}} {{cx}} {{cy}}) rotate(270 {{cx}} {{cy}})"></path>   
