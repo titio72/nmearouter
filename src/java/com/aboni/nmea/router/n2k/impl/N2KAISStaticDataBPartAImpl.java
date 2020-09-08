@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.n2k.impl;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AISStaticData;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
@@ -93,5 +94,12 @@ public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISSta
     @Override
     public double getBeam() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} MsgId {%d} Repeat {%s} Name {%s} MMSI {%s} AISClass {%s} Transceiver {%s}",
+                PGN, getHeader().getSource(),
+                getMessageId(), getRepeatIndicator(), getMMSI(), getAISClass(), getAisTransceiverInfo());
     }
 }

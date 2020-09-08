@@ -34,7 +34,7 @@
             "host": "192.168.3.1",
             "port": 1111,
             "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "name": "UDPIN"
+            "name": "TCPIN"
         },
         {
             "type": "TCP",
