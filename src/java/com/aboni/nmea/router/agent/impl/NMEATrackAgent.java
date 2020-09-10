@@ -120,6 +120,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private void notifyAnchorStatus() {
         Position avgPos = tracker.getAverage();
+        getCache().setStatus(NMEARouterStatuses.ANCHOR_STATUS, tracker.isStationary());
         if (avgPos!=null) {
             JSONObject msg = new JSONObject();
             msg.put("topic", "anchor");

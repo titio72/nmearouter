@@ -78,6 +78,6 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements N2KSystemTime {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d}Time {%s} Time Source {%s}", PGN, getHeader().getSource(), getTime(), getTimeSourceType());
+        return String.format("PGN {%s} Source {%d} Time {%s} Time Source {%s}", PGN, getHeader().getSource(), getTime(), getTimeSourceType());
     }
 }

@@ -101,10 +101,10 @@
     }
 
     function getSz() {
-        const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);    
-        var s = 500;
+        var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        var s = Math.min(600, width * 0.85);
         return s;
-    } 
+    }
 
     function zoomIn() {
         zoomFactor = (zoomFactor+1)%zoomFactors.length;

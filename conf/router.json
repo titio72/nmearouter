@@ -2,6 +2,12 @@
     "logLevel": "INFO",
     "agents": [
         {
+            "type": "Nextion",
+            "port": "/dev/ttyUSB0",
+            "src": "SIM1",
+            "name": "NEXTION"
+        },
+        {
             "type": "Simulator",
             "name": "SIM1"
         },

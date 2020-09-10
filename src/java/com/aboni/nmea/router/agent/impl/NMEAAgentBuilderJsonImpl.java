@@ -44,6 +44,9 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         NMEAAgent agent = null;
         QOS q = a.getQos();
         switch (a.getType()) {
+            case AgentTypes.NEXTION:
+                agent = buildNextion(a, q);
+                break;
             case AgentTypes.SIMULATOR:
                 agent = buildSimulator(a, q);
                 break;
@@ -98,13 +101,34 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         return agent;
     }
 
+    private NMEAAgent buildNextion(ConfJSON.AgentDef a, QOS q) {
+        if (a.getConfiguration().has("port")) {
+            NextionDisplayAgent nx = null;
+            try {
+                nx = ThingsFactory.getInstance(NextionDisplayAgent.class);
+                String src;
+                try {
+                    src = a.getConfiguration().getString("src");
+                } catch (Exception e) {
+                    src = "";
+                }
+                nx.setup(a.getName(), a.getConfiguration().getString("port"), src, q);
+            } catch (Exception e) {
+                ServerLog.getLogger().error("Cannot create Nextion Display Agent", e);
+            }
+            return nx;
+        } else {
+            return null;
+        }
+    }
+
     private NMEAAgent buildAIS(ConfJSON.AgentDef a, QOS q) {
         NMEAAISAgent ais = null;
         try {
             ais = ThingsFactory.getInstance(NMEAAISAgent.class);
             ais.setup(a.getName(), q);
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot create GPS Status Agent", e);
+            ServerLog.getLogger().error("Cannot create AIS Status Agent", e);
         }
         return ais;
     }
