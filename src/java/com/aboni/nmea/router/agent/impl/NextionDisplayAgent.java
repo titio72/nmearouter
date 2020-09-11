@@ -9,6 +9,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.messages.N2KGNSSPositionUpdate;
 import com.aboni.nmea.router.n2k.messages.N2KSOGAdCOGRapid;
 import com.aboni.nmea.router.n2k.messages.N2KWaterDepth;
+import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import com.aboni.sensors.EngineStatus;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -19,6 +20,10 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NextionDisplayAgent extends NMEAAgentImpl {
@@ -181,6 +186,15 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
                 } catch (DataNotAvailableException ee) {
                     sendCommand("sog.txt=\"\"");
                 }
+                try {
+                    Instant t = NMEATimestampExtractor.extractInstant(s);
+                    OffsetDateTime dt = t.atOffset(ZoneOffset.of(ZoneOffset.systemDefault().getId()));
+                    DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
+                    sendCommand(String.format("time.txt=\"%s\"", f.format(dt)));
+                } catch (NMEATimestampExtractor.GPSTimeException e) {
+                    sendCommand("time.txt=\"\"");
+                }
+
             } else if (s instanceof DPTSentence) {
                 try {
                     sendCommand(String.format("depth.txt=\"%.1f m\"", ((DPTSentence) s).getDepth()));
