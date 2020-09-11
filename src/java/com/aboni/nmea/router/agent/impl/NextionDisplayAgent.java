@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -188,7 +189,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
                 }
                 try {
                     Instant t = NMEATimestampExtractor.extractInstant(s);
-                    OffsetDateTime dt = t.atOffset(ZoneOffset.of(ZoneOffset.systemDefault().getId()));
+                    ZonedDateTime dt = t.atZone(ZoneOffset.systemDefault());
                     DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
                     sendCommand(String.format("time.txt=\"%s\"", f.format(dt)));
                 } catch (NMEATimestampExtractor.GPSTimeException e) {
@@ -248,6 +249,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         sendCommand("lat.txt=\"\"");
         sendCommand("depth.txt=\"\"");
         sendCommand("head.txt=\"\"");
+        sendCommand("time.txt=\"\"");
     }
 
     private void sendPosition(Position p) throws IOException {
