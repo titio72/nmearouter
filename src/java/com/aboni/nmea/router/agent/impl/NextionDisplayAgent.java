@@ -187,15 +187,6 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
                 } catch (DataNotAvailableException ee) {
                     sendCommand("sog.txt=\"\"");
                 }
-                try {
-                    Instant t = NMEATimestampExtractor.extractInstant(s);
-                    ZonedDateTime dt = t.atZone(ZoneOffset.systemDefault());
-                    DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
-                    sendCommand(String.format("time.txt=\"%s\"", f.format(dt)));
-                } catch (NMEATimestampExtractor.GPSTimeException e) {
-                    sendCommand("time.txt=\"\"");
-                }
-
             } else if (s instanceof DPTSentence) {
                 try {
                     sendCommand(String.format("depth.txt=\"%.1f m\"", ((DPTSentence) s).getDepth()));
@@ -295,6 +286,14 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         try {
+            try {
+                ZonedDateTime dt = ZonedDateTime.now();
+                DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
+                sendCommand(String.format("time.txt=\"%s\"", f.format(dt)));
+            } catch (Exception e) {
+                sendCommand("time.txt=\"\"");
+            }
+
             boolean engine = getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN) == EngineStatus.ON;
             sendCommand(String.format("engine.pic=%d", engine ? 2 : 1));
             boolean anchor = getCache().getStatus(NMEARouterStatuses.ANCHOR_STATUS, Boolean.FALSE);
