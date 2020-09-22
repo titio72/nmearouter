@@ -1,11 +1,19 @@
 package com.aboni.nmea.router.n2k.can;
 
+import com.aboni.nmea.router.n2k.N2KMessageCallback;
+import com.aboni.nmea.router.n2k.impl.N2KMessageDefaultImpl;
+
 public class N2KCanReader {
 
     private final N2KMessageCallback callback;
+    private N2KCanBusErrorCallback errCallback;
 
     public N2KCanReader(N2KMessageCallback messageCallback) {
         callback = messageCallback;
+    }
+
+    public void setErrCallback(N2KCanBusErrorCallback errCallback) {
+        this.errCallback = errCallback;
     }
 
     public boolean onRead(int[] b, int offset) {
@@ -27,12 +35,13 @@ public class N2KCanReader {
             } else {
                 id = b[2] + (b[3] << 8);
             }
-            //dumpCandumpFormat(offset, b, dataSize, id);
             dumpAnalyzerFormat(offset, b, dataSize, id);
-
-        } else {
-            System.out.println("Error");
-            // Log error
+        } else if (errCallback != null) {
+            byte[] errB = new byte[offset];
+            for (int i = 0; i < offset; i++) {
+                errB[i] = (byte) (b[i] & 0xFF);
+            }
+            errCallback.onError(errB);
         }
     }
 
@@ -41,16 +50,16 @@ public class N2KCanReader {
             N2KHeader iso = new N2KHeader(id);
             byte[] data = new byte[dataSize];
             for (int i = 0; i < dataSize; i++) data[i] = (byte) (b[offset - 1 - dataSize + i] & 0xFF);
-            N2KMessageImpl msg = new N2KMessageImpl(iso, data);
-            callback.onRead(msg);
+            N2KMessageDefaultImpl msg = new N2KMessageDefaultImpl(iso, data);
+            callback.onMessage(msg);
         }
     }
 
-    private void dumpCandumpFormat(int offset, int[] b, int dataSize, long id) {
+    public static String dumpCanDumpFormat(int[] b, int dataSize, long id) {
         StringBuilder res = new StringBuilder(String.format("  %08x  [%d]", id, dataSize));
         for (int i = 0; i < dataSize; i++)
-            res.append(String.format(" %02x", b[offset - 1 - dataSize + i]));
+            res.append(String.format(" %02x", b[i]));
 
-        System.out.println(res.toString());
+        return res.toString();
     }
 }

@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.n2k.impl;
 
-
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AISPositionReport;
 import com.aboni.nmea.router.GNSSInfo;
@@ -10,36 +9,33 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
 
-public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPositionReport {
+public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPositionReport {
 
-    public static final int PGN = 129039;
+    public static final int PGN = 129793;
 
     private int messageId;
     private String repeatIndicator;
     private String sMMSI;
     private String positionAccuracy;
     private boolean sRAIM;
-    private int timestamp;
-    private double heading;
     private String aisTransceiverInfo;
-    private String unitType;
-    private boolean sDSC;
-    private String band;
-    private boolean canHandleMsg22;
-    private String aisMode;
     private String aisCommunicationState;
-    private long overrideTime = -1;
     private final GNSSInfoImpl gpsInfo = new GNSSInfoImpl();
+    private long overrideTime = -1;
+    private Instant utc;
+    private String gnssType;
 
-    public N2KAISPositionReportBImpl(byte[] data) {
+    public N2KAISUTCPositionReportImpl(byte[] data) {
         super(getDefaultHeader(PGN), data);
         fill();
     }
 
-    public N2KAISPositionReportBImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
+    public N2KAISUTCPositionReportImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != PGN)
@@ -60,62 +56,20 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
 
         positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
         sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        gpsInfo.setCOG(parseDoubleSafe(data, 112, 16, 0.0001, false));
-        gpsInfo.setCOG(Double.isNaN(gpsInfo.getCOG()) ? gpsInfo.getCOG() : Utils.round(Math.toDegrees(gpsInfo.getCOG()), 1));
-        gpsInfo.setSOG(parseDoubleSafe(data, 128, 16, 0.01, false));
-        if (!Double.isNaN(gpsInfo.getSOG())) gpsInfo.setSOG(Utils.round(gpsInfo.getSOG() * 3600.0 / 1852.0, 1));
-        heading = parseDoubleSafe(data, 168, 16, 0.0001, false);
-        heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
-
+        aisCommunicationState = parseIntegerSafe(data, 144, 0, 19, 0) == 0 ? "SOTDMA" : "ITDMA";
         aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
-        int i = (int) parseIntegerSafe(data, 194, 2, 1, 0xFF);
-        unitType = getUnitType(i);
-
-        sDSC = parseIntegerSafe(data, 196, 4, 1, 0) == 1;
-        canHandleMsg22 = parseIntegerSafe(data, 198, 6, 1, 0) == 1;
-
-        band = parseIntegerSafe(data, 197, 5, 1, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
-        aisMode = parseIntegerSafe(data, 199, 7, 1, 0) == 0 ? "Autonomous" : "Assigned";
-        aisCommunicationState = parseIntegerSafe(data, 200, 0, 1, 0) == 0 ? "SOTDMA" : "ITDMA";
-
-    }
-
-    private String getUnitType(int i) {
-        switch (i) {
-            case 0:
-                return "SOTDMA";
-            case 1:
-                return "CS";
-            default:
-                return null;
+        double secsToMidnight = parseDoubleSafe(data, 112, 32, 0.0001, false);
+        long daysSince1970 = parseIntegerSafe(data, 168, 0, 16, -1);
+        if (!Double.isNaN(secsToMidnight) && daysSince1970 > 0) {
+            LocalDateTime s = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+            s = s.plusDays(daysSince1970);
+            s = s.plusSeconds((long) secsToMidnight);
+            utc = s.toInstant(ZoneOffset.UTC);
         }
-    }
 
-    public String getBand() {
-        return band;
-    }
-
-    public String getAisMode() {
-        return aisMode;
-    }
-
-    public boolean isCanHandleMsg22() {
-        return canHandleMsg22;
-    }
-
-    public boolean isDSC() {
-        return sDSC;
-    }
-
-    public String getUnitType() {
-        return unitType;
-    }
-
-    public int getTimestamp() {
-        return timestamp;
+        gnssType = parseEnum(data, 188, 4, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
     }
 
     @Override
@@ -150,7 +104,7 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
 
     @Override
     public double getHeading() {
-        return heading;
+        return Double.NaN;
     }
 
     @Override
@@ -160,19 +114,12 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
 
     @Override
     public String getTimestampStatus() {
-        switch (timestamp) {
-            case 0xFF:
-            case 0x60:
-                return "Not available";
-            case 61:
-                return "Manual input mode";
-            case 62:
-                return "Dead reckoning mode";
-            case 63:
-                return "Positioning system is inoperative";
-            default:
-                return "Available";
-        }
+        return "Available";
+    }
+
+    @Override
+    public int getTimestamp() {
+        return 0;
     }
 
     public String getAisTransceiverInfo() {
@@ -183,13 +130,15 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
         return aisCommunicationState;
     }
 
+    public Instant getUtc() {
+        return utc;
+    }
 
     @Override
     public long getAge(long now) {
-        if (getTimestamp()<=60) {
-            Instant l = (getOverrrideTime()>0)?
-                    Instant.ofEpochMilli(getOverrrideTime()):
-                    getHeader().getTimestamp().plusNanos((long) (getTimestamp() * 1E06));
+        if (utc != null) {
+            Instant l = (getOverrrideTime() > 0) ?
+                    Instant.ofEpochMilli(getOverrrideTime()) : utc;
             return now - l.toEpochMilli();
         } else {
             return -1;
@@ -211,13 +160,17 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
         return gpsInfo;
     }
 
+    public String getGNSSType() {
+        return gnssType;
+    }
+
     @Override
     public String toString() {
-        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
+        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Time {%s}",
                 PGN, getHeader().getSource(), getMMSI(), getAISClass(),
                 Utils.formatLatitude(gpsInfo.getPosition().getLatitude()),
                 Utils.formatLongitude(gpsInfo.getPosition().getLatitude()),
-                gpsInfo.getCOG(), gpsInfo.getSOG(), getTimestamp()
+                gpsInfo.getCOG(), gpsInfo.getSOG(), utc
         );
     }
 }

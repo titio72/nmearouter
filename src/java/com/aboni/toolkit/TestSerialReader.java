@@ -16,8 +16,7 @@ public class TestSerialReader {
     private static final int SPEED = 115200;
 
     public static void onMsg(N2KMessage msg) {
-        if (msg instanceof N2KAISAtoN)
-        System.out.println(msg);
+        if (msg instanceof N2KAISAtoN) System.out.println(msg);
     }
 
     public static void main(String[] args) {

@@ -4,6 +4,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.N2KCanReader;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
 import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
@@ -15,31 +16,40 @@ import javax.validation.constraints.NotNull;
 
 public class NMEACanBusAgent extends NMEAAgentImpl {
 
-    private String portName;
-    private int speed;
-
-    private SerialReader serialReader;
-    private N2KCanReader canReader;
-    private N2KFastCache fastCache;
-    private N2KMessage2NMEA0183 converter;
+    private final SerialReader serialReader;
+    private final N2KCanReader canReader;
+    private final N2KMessage2NMEA0183 converter;
+    private final PGNSourceFilter srcFilter;
 
     @Inject
     public NMEACanBusAgent(@NotNull NMEACache cache, N2KMessage2NMEA0183 converter) {
         super(cache);
         setSourceTarget(true, false);
-        fastCache = new N2KFastCache(this::onRecv);
+        N2KFastCache fastCache = new N2KFastCache(this::onReceive);
         canReader = new N2KCanReader(fastCache::onMessage);
+        canReader.setErrCallback(this::onError);
         serialReader = new SerialReader();
+        srcFilter = new PGNSourceFilter(getLogger());
         this.converter = converter;
     }
 
-    private void onRecv(@NotNull N2KMessage msg) {
-        if (N2KMessageDefinitions.isSupported(msg.getHeader().getPgn())) {
+    private void onError(byte[] buffer) {
+        StringBuilder sb = new StringBuilder("NMEACanBusAgent Error decoding buffer {");
+        for (byte b : buffer) {
+            sb.append(String.format(" %02x", b));
+        }
+        sb.append("}");
+        getLogger().error(sb.toString());
+    }
+
+    private void onReceive(@NotNull N2KMessage msg) {
+        if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
+                && N2KMessageDefinitions.isSupported(msg.getHeader().getPgn())) {
             notify(msg);
-            if (converter!=null) {
+            if (converter != null) {
                 Sentence[] s = converter.getSentence(msg);
-                if (s!=null) {
-                    for (Sentence ss: s) notify(ss);
+                if (s != null) {
+                    for (Sentence ss : s) notify(ss);
                 }
             }
         }
@@ -47,8 +57,6 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
 
     public void setup(String name, QOS qos, String port, int speed) {
         super.setup(name, qos);
-        portName = port;
-        this.speed = speed;
         serialReader.setup(port, speed, canReader::onRead);
     }
 

@@ -52,4 +52,9 @@ public class N2KSeatalkPilotHeadingImpl extends N2KMessageImpl implements N2KSea
     public double getHeadingTrue() {
         return headingTrue;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%d} Source {%d} HeadM {%.1f}", getHeader().getPgn(), getHeader().getSource(), getHeadingMagnetic());
+    }
 }

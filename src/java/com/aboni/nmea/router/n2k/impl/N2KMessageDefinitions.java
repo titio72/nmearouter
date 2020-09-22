@@ -36,6 +36,10 @@ public class N2KMessageDefinitions {
             }
             return d;
         }
+
+        public boolean isFast() {
+            return fast;
+        }
     }
 
     private static final Map<Integer, N2KDef> SUPPORTED = new HashMap<>();
@@ -64,6 +68,7 @@ public class N2KMessageDefinitions {
         SUPPORTED.put(129039, N2KDef.getInstance(N2KAISPositionReportBImpl.class, true)); // AIS Class B position report
         SUPPORTED.put(129040, N2KDef.getInstance(N2KAISPositionReportBExt.class, true)); // AIS Class B position report
         SUPPORTED.put(129794, N2KDef.getInstance(N2KAISStaticDataAImpl.class, true)); // AIS Class A Static and Voyage Related Data
+        SUPPORTED.put(129793, N2KDef.getInstance(N2KAISUTCPositionReportImpl.class, true)); // AIS Position report in UTC
         SUPPORTED.put(129809, N2KDef.getInstance(N2KAISStaticDataBPartAImpl.class, true)); // AIS Class B static data (msg 24 Part A)
         SUPPORTED.put(129810, N2KDef.getInstance(N2KAISStaticDataBPartBImpl.class, true)); // AIS Class B static data (msg 24 Part B)
         SUPPORTED.put(129041, N2KDef.getInstance(N2KAISAtoN.class, true)); // AIS AtoN

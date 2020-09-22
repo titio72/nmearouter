@@ -15,11 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageHeader;
-import com.aboni.nmea.router.n2k.N2KMessageParser;
-import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.can.N2KMessageImpl;
+import com.aboni.nmea.router.n2k.*;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Constructor;
@@ -79,12 +75,15 @@ public class N2KMessageParserImpl implements N2KMessageParser {
         set(getDecodedHeader(pgnString));
     }
 
-    private void set(@NotNull PGNDecoded dec) {
+    private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
         N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(pgnData.pgn);
         if (d != null && d.fast && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
             pgnData.currentFrame = getData()[0] & 0xFF;
+            if ((pgnData.currentFrame & 0x0F) != 0) {
+                throw new PGNFastException("First frame of a sequence is expected to terminate with 0, received " + pgnData.currentFrame);
+            }
             byte[] b = new byte[6];
             System.arraycopy(pgnData.data, 2, b, 0, 6);
             pgnData.data = b;
@@ -170,7 +169,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
             System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
             int frameNo = additionalPgn.data[0] & 0x000000FF; // first byte is the n of the frame in the series
             if (frameNo != pgnData.currentFrame + 1) {
-                throw new PGNDataParseException(String.format("Trying to add non-consecutive frames to fast pgn:" +
+                throw new PGNFastException(String.format("Trying to add non-consecutive frames to fast pgn:" +
                         " expected {%d} received {%d}", pgnData.currentFrame + 1, frameNo));
             } else {
                 pgnData.currentFrame = frameNo;
@@ -221,8 +220,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
                     throw new PGNDataParseException("Error decoding N2K message", e);
                 }
             } else {
-                message = new N2KMessageImpl(pgnData, pgnData.data);
-                //throw new PGNDataParseException("Unsupported PGN {" + pgnData.pgn + "}");
+                message = new N2KMessageDefaultImpl(pgnData, pgnData.data);
             }
         }
         return message;

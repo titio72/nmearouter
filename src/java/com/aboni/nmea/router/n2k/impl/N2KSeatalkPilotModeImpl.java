@@ -53,4 +53,9 @@ public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements N2KSeatal
     public void getMode(PilotMode m) {
         mode.setPilotMode(m);
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%d} Source {%d} Mode {%s}", getHeader().getPgn(), getHeader().getSource(), getMode().toString());
+    }
 }

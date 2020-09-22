@@ -101,4 +101,11 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
     public String getAisTransceiverInfo() {
         return aisTransceiverInformation;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} MsgId {%d} Repeat {%s} Name {%s} MMSI {%s} CallSign {%s} Type {%s} AISClass {%s} Transceiver {%s}",
+                PGN, getHeader().getSource(),
+                getMessageId(), getRepeatIndicator(), getName(), getMMSI(), getCallSign(), getTypeOfShip(), getAISClass(), getAisTransceiverInfo());
+    }
 }

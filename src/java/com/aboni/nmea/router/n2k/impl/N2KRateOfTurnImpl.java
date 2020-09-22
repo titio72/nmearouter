@@ -54,4 +54,10 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements N2KRateOfTurn {
     public double getRate() {
         return rate;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%d} Source {%d} RateOfTurn {%.1f}", getHeader().getPgn(), getHeader().getSource(), getRate());
+    }
+
 }
