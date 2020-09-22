@@ -199,4 +199,10 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     public GNSSInfo getGPSInfo() {
         return gpsInfo;
     }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%d} Source {%d} MMSI {%s} Position {%s} Name {%s} Type {%s}",
+                getHeader().getPgn(), getHeader().getSource(), getMMSI(), getGPSInfo().getPosition(), getName(), getAtoNType());
+    }
 }

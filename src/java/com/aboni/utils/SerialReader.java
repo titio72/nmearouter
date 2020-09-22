@@ -77,6 +77,10 @@ public class SerialReader {
         return false;
     }
 
+    public void deactivate() {
+        run.set(false);
+    }
+
     private SerialPort getPort() {
         synchronized (this) {
             long now = System.currentTimeMillis();

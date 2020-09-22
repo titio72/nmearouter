@@ -59,6 +59,9 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             case AgentTypes.SERIAL:
                 agent = buildSerial(a, q);
                 break;
+            case AgentTypes.CANBUS:
+                agent = buildCanbus(a, q);
+                break;
             case AgentTypes.TCP:
                 agent = buildSocket(a, q);
                 break;
@@ -99,6 +102,16 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 break;
         }
         return agent;
+    }
+
+    private NMEAAgent buildCanbus(ConfJSON.AgentDef a, QOS q) {
+        String name = a.getName();
+        String portName = getString(a.getConfiguration(), "device", "/dev/ttyUSB0");
+        int speed = getInt(a.getConfiguration(), "bps", 115200);
+
+        NMEACanBusAgent serial = ThingsFactory.getInstance(NMEACanBusAgent.class);
+        serial.setup(name, q, portName, speed);
+        return serial;
     }
 
     private NMEAAgent buildNextion(ConfJSON.AgentDef a, QOS q) {

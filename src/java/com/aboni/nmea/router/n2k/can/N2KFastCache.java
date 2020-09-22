@@ -58,8 +58,8 @@ public class N2KFastCache {
                 if (callback != null) callback.onRead(p.getMessage());
             }
         } catch (PGNDataParseException e) {
-            ServerLog.getLogger().error("Error handling N2K message");
-            e.printStackTrace();
+            //ServerLog.getLogger().error("Error handling N2K message");
+            //e.printStackTrace();
             cache.remove(id);
         }
     }

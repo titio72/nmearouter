@@ -38,7 +38,10 @@ import com.aboni.nmea.router.data.track.impl.*;
 import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.impl.*;
+import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
+import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
+import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
 import com.aboni.nmea.router.n2k.impl.N2KMessageParserImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;
@@ -88,5 +91,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(FilterSetSerializer.class).annotatedWith(Names.named(Constants.TAG_JSON)).to(JSONFilterSetSerializer.class);
         bind(WindStatsReader.class).to(DBWindStatsReader.class);
         bind(N2KMessageParser.class).to(N2KMessageParserImpl.class);
+        bind(N2KMessage2NMEA0183.class).to(N2KMessage2NMEA0183Impl.class);
     }
 }

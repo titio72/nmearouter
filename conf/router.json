@@ -3,8 +3,8 @@
     "agents": [
         {
             "type": "Nextion",
-            "port": "/dev/ttyUSB0",
-            "src": "SIM1",
+            "port": "COM14",
+            "src": "UDPIN",
             "name": "NEXTION"
         },
         {
@@ -59,6 +59,13 @@
         {
             "type": "AIS",
             "name": "AIS"
+        },
+        {
+            "type": "Canbus",
+            "name": "CANBUS",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
+            "device": "COM8",
+            "bps": 115200
         }
     ]
 }
