@@ -53,6 +53,7 @@ public class N2KMessageDefinitions {
         SUPPORTED.put(127257, N2KDef.getInstance(N2KAttitudeImpl.class, false)); // Attitude)
         SUPPORTED.put(130310, N2KDef.getInstance(N2KEnvironment310Impl.class, false)); // Env parameter: Water temp, air temp, pressure
         SUPPORTED.put(130311, N2KDef.getInstance(N2KEnvironment311Impl.class, false)); // Env parameter: temperature, humidity, pressure
+        SUPPORTED.put(130312, N2KDef.getInstance(N2KTemperatureImpl.class, false)); // Env parameter: temperature
         SUPPORTED.put(127245, N2KDef.getInstance(N2KRudderImpl.class, false)); // Rudder
         SUPPORTED.put(127251, N2KDef.getInstance(N2KRateOfTurnImpl.class, false)); // Rate of turn
         SUPPORTED.put(65359, N2KDef.getInstance(N2KSeatalkPilotHeadingImpl.class, false)); // Seatalk: Pilot Heading

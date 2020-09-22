@@ -48,13 +48,13 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 agent = buildNextion(a, q);
                 break;
             case AgentTypes.SIMULATOR:
-                agent = buildSimulator(a, q);
+                agent = buildStandard(a, q, NMEASimulatorSource.class);
                 break;
             case AgentTypes.SENSOR:
-                agent = buildSensor(a, q);
+                agent = buildStandard(a, q, NMEASourceSensor.class);
                 break;
             case AgentTypes.GYRO:
-                agent = buildGyro(a, q);
+                agent = buildStandard(a, q, NMEASourceGyro.class);
                 break;
             case AgentTypes.SERIAL:
                 agent = buildSerial(a, q);
@@ -69,31 +69,31 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 agent = buildUDP(a, q);
                 break;
             case AgentTypes.CONSOLE:
-                agent = buildConsoleTarget(a, q);
+                agent = buildStandard(a, q, NMEAConsoleTarget.class);
                 break;
             case AgentTypes.CONSOLE_N2K:
-                agent = buildN2KConsoleTarget(a, q);
+                agent = buildStandard(a, q, NMEAConsoleN2KTarget.class);
                 break;
             case AgentTypes.TRACK:
                 agent = buildTrackTarget(a, q);
                 break;
             case AgentTypes.METEO:
-                agent = buildMeteoTarget(a, q);
+                agent = buildStandard(a, q, NMEAMeteoTarget.class);
                 break;
             case AgentTypes.MWD:
-                agent = buildMWDSynthesizer(q);
+                agent = buildStandard(a, q, NMEAMWDSentenceCalculator.class);
                 break;
             case AgentTypes.GPX:
                 agent = buildGPXPlayer(a, q);
                 break;
             case AgentTypes.VOLT:
-                agent = buildVoltage(a, q);
+                agent = buildStandard(a, q, NMEAVoltageSensor.class);
                 break;
             case AgentTypes.GPS:
                 agent = buildGPSStatus(a, q);
                 break;
             case AgentTypes.AIS:
-                agent = buildAIS(a, q);
+                agent = buildStandard(a, q, NMEAAISAgent.class);
                 break;
             default:
                 break;
@@ -122,17 +122,6 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         }
     }
 
-    private NMEAAgent buildAIS(ConfJSON.AgentDef a, QOS q) {
-        NMEAAISAgent ais = null;
-        try {
-            ais = ThingsFactory.getInstance(NMEAAISAgent.class);
-            ais.setup(a.getName(), q);
-        } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot create AIS Status Agent", e);
-        }
-        return ais;
-    }
-
     private NMEAAgent buildGPSStatus(ConfJSON.AgentDef a, QOS q) {
         NMEAGPSStatusAgent gps = null;
         try {
@@ -159,18 +148,6 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         } else {
             return null;
         }
-    }
-
-    private NMEAAgent buildConsoleTarget(ConfJSON.AgentDef c, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleTarget.class);
-        a.setup(c.getName(), q);
-        return a;
-    }
-
-    private NMEAAgent buildN2KConsoleTarget(ConfJSON.AgentDef c, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEAConsoleN2KTarget.class);
-        a.setup(c.getName(), q);
-        return a;
     }
 
     private NMEAAgent buildSerial(ConfJSON.AgentDef s, QOS q) {
@@ -218,18 +195,6 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             a.setup(conf.getName(), q, port);
             return a;
         }
-    }
-
-    private NMEAAgent buildMWDSynthesizer(QOS q) {
-        NMEAAgent mwd = ThingsFactory.getInstance(NMEAMWDSentenceCalculator.class);
-        mwd.setup("MWD", q);
-        return mwd;
-    }
-
-    private NMEAAgent buildMeteoTarget(ConfJSON.AgentDef a, QOS q) {
-        NMEAAgent meteo = ThingsFactory.getInstance(NMEAMeteoTarget.class);
-        meteo.setup(a.getName(), q);
-        return meteo;
     }
 
     private NMEAAgent buildSocketJSON(ConfJSON.AgentDef s, QOS q) {
@@ -340,27 +305,14 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         return track;
     }
 
-    private NMEAAgent buildSimulator(ConfJSON.AgentDef s, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEASimulatorSource.class);
-        a.setup(s.getName(), q);
-        return a;
-    }
-
-    private NMEAAgent buildSensor(ConfJSON.AgentDef s, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEASourceSensor.class);
-        a.setup(s.getName(), q);
-        return a;
-    }
-
-    private NMEAAgent buildGyro(ConfJSON.AgentDef s, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEASourceGyro.class);
-        a.setup(s.getName(), q);
-        return a;
-    }
-
-    private NMEAAgent buildVoltage(ConfJSON.AgentDef s, QOS q) {
-        NMEAAgent a = ThingsFactory.getInstance(NMEAVoltageSensor.class);
-        a.setup(s.getName(), q);
+    private <T extends NMEAAgent> T buildStandard(ConfJSON.AgentDef s, QOS q, Class<T> c) {
+        T a = null;
+        try {
+            a = ThingsFactory.getInstance(c);
+            a.setup(s.getName(), q);
+        } catch (Exception e) {
+            ServerLog.getLogger().error("Could not create agent {" + c + "}", e);
+        }
         return a;
     }
 }

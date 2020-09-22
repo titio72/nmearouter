@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.AISPositionReport;
 import com.aboni.nmea.router.AISStaticData;
+import com.aboni.nmea.router.GNSSInfo;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
@@ -18,7 +19,6 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     private int messageId;
     private String sMMSI;
     private String repeatIndicator;
-    private Position position;
     private String positionAccuracy;
     private boolean sRAIM;
     private int timestamp;
@@ -28,6 +28,8 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     private int aisSpare;
     private String positionFixingDeviceType;
     private long overrideTime = -1;
+
+    private final GNSSInfoImpl gpsInfo = new GNSSInfoImpl();
 
     public N2KAISAtoN(byte[] data) {
         super(getDefaultHeader(PGN), data);
@@ -50,8 +52,10 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
         double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
         double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
-            position = new Position(lat, lon);
+            gpsInfo.setPosition(new Position(lat, lon));
         }
+        gpsInfo.setCOG(0.0);
+        gpsInfo.setSOG(0.0);
 
         positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
         sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
@@ -150,23 +154,8 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     }
 
     @Override
-    public Position getPosition() {
-        return position;
-    }
-
-    @Override
     public boolean issRAIM() {
         return sRAIM;
-    }
-
-    @Override
-    public double getCog() {
-        return 0;
-    }
-
-    @Override
-    public double getSog() {
-        return 0;
     }
 
     @Override
@@ -205,137 +194,9 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     public long getOverrrideTime() {
         return overrideTime;
     }
-    /*
-        {
-            "Order": 9,
-                "Id": "lengthDiameter",
-                "Name": "Length/Diameter",
-                "BitLength": 16,
-                "BitOffset": 112,
-                "BitStart": 0,
-                "Units": "m",
-                "Resolution": "0.1",
-                "Signed": false
-        },
-        {
-            "Order": 10,
-                "Id": "beamDiameter",
-                "Name": "Beam/Diameter",
-                "BitLength": 16,
-                "BitOffset": 128,
-                "BitStart": 0,
-                "Units": "m",
-                "Resolution": "0.1",
-                "Signed": false
-        },
-        {
-            "Order": 11,
-                "Id": "positionReferenceFromStarboardEdge",
-                "Name": "Position Reference from Starboard Edge",
-                "BitLength": 16,
-                "BitOffset": 144,
-                "BitStart": 0,
-                "Units": "m",
-                "Resolution": "0.1",
-                "Signed": false
-        },
-        {
-            "Order": 12,
-                "Id": "positionReferenceFromTrueNorthFacingEdge",
-                "Name": "Position Reference from True North Facing Edge",
-                "BitLength": 16,
-                "BitOffset": 160,
-                "BitStart": 0,
-                "Units": "m",
-                "Resolution": "0.1",
-                "Signed": false
-        },
-        {
-            "Order": 14,
-                "Id": "offPositionIndicator",
-                "Name": "Off Position Indicator",
-                "BitLength": 1,
-                "BitOffset": 181,
-                "BitStart": 5,
-                "Type": "Lookup table",
-                "Signed": false,
-                "EnumValues": [
-            {
-                "name": "No",
-                    "value": "0"
-            },
-            {
-                "name": "Yes",
-                    "value": "1"
-            },
-            {
-                "name": "Error",
-                    "value": "10"
-            },
-            {
-                "name": "Unavailable",
-                    "value": "11"
-            }
-          ]
-        },
-        {
-            "Order": 15,
-                "Id": "virtualAtonFlag",
-                "Name": "Virtual AtoN Flag",
-                "BitLength": 1,
-                "BitOffset": 182,
-                "BitStart": 6,
-                "Type": "Lookup table",
-                "Signed": false,
-                "EnumValues": [
-            {
-                "name": "No",
-                    "value": "0"
-            },
-            {
-                "name": "Yes",
-                    "value": "1"
-            },
-            {
-                "name": "Error",
-                    "value": "10"
-            },
-            {
-                "name": "Unavailable",
-                    "value": "11"
-            }
-          ]
-        },
-        {
-            "Order": 16,
-                "Id": "assignedModeFlag",
-                "Name": "Assigned Mode Flag",
-                "BitLength": 1,
-                "BitOffset": 183,
-                "BitStart": 7,
-                "Type": "Lookup table",
-                "Signed": false,
-                "EnumValues": [
-            {
-                "name": "Autonomous and continuous",
-                    "value": "0"
-            },
-            {
-                "name": "Assigned mode",
-                    "value": "1"
-            }
-          ]
-        },
-        {
-            "Order": 20,
-                "Id": "atonStatus",
-                "Name": "AtoN Status",
-                "Description": "00000000 = default",
-                "BitLength": 8,
-                "BitOffset": 192,
-                "BitStart": 0,
-                "Type": "Binary data",
-                "Signed": false
-        },
-*/
+
+    @Override
+    public GNSSInfo getGPSInfo() {
+        return gpsInfo;
+    }
 }

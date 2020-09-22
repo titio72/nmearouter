@@ -97,11 +97,6 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     }
 
     @Override
-    public boolean isValidAltitude() {
-        return isValidDouble(altitude);
-    }
-
-    @Override
     public String getGnssType() {
         return gnssType;
     }
@@ -119,11 +114,6 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     @Override
     public int getNSatellites() {
         return nSV;
-    }
-
-    @Override
-    public boolean isValidNSatellites() {
-        return isValidByte(nSV);
     }
 
     @Override
@@ -152,11 +142,6 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     }
 
     @Override
-    public boolean isValidGeoidalSeparation() {
-        return isValidDouble(geoidalSeparation);
-    }
-
-    @Override
     public int getReferenceStations() {
         return referenceStations;
     }
@@ -174,11 +159,6 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     @Override
     public double getAgeOfDgnssCorrections() {
         return ageOfDgnssCorrections;
-    }
-
-    @Override
-    public boolean isValidAgeOfDgnssCorrections() {
-        return isValidDouble(ageOfDgnssCorrections);
     }
 
     @Override

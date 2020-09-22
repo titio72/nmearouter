@@ -125,7 +125,7 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private static class AgentAttributes {
         String name;
-        AtomicBoolean active = new AtomicBoolean();
+        final AtomicBoolean active = new AtomicBoolean();
         boolean builtin;
         boolean target;
         boolean source;

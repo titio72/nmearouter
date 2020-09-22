@@ -18,17 +18,18 @@ public interface N2KGNSSPositionUpdate {
 
     double getAltitude();
 
-    boolean isValidAltitude();
-
     String getGnssType();
 
     String getMethod();
 
     String getIntegrity();
 
+    /**
+     * Number of satellites used for the position calc.
+     *
+     * @return N of sats is successful, 0xFF if not available
+     */
     int getNSatellites();
-
-    boolean isValidNSatellites();
 
     double getHDOP();
 
@@ -40,8 +41,6 @@ public interface N2KGNSSPositionUpdate {
 
     double getGeoidalSeparation();
 
-    boolean isValidGeoidalSeparation();
-
     int getReferenceStations();
 
     String getReferenceStationType();
@@ -49,6 +48,4 @@ public interface N2KGNSSPositionUpdate {
     int getReferenceStationId();
 
     double getAgeOfDgnssCorrections();
-
-    boolean isValidAgeOfDgnssCorrections();
 }

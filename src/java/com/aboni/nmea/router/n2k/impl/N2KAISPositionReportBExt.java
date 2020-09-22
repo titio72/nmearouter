@@ -39,7 +39,9 @@ public class N2KAISPositionReportBExt extends N2KAISPositionReportBImpl {
     @Override
     public String toString() {
         return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
-                PGN, getHeader().getSource(), getMMSI(), getAISClass(), Utils.formatLatitude(getPosition().getLatitude()), Utils.formatLongitude(getPosition().getLatitude()),
-                getCog(), getSog(), getTimestamp()
+                PGN, getHeader().getSource(), getMMSI(), getAISClass(),
+                Utils.formatLatitude(getGPSInfo().getPosition().getLatitude()),
+                Utils.formatLongitude(getGPSInfo().getPosition().getLatitude()),
+                getGPSInfo().getCOG(), getGPSInfo().getSOG(), getTimestamp()
         );
     }}

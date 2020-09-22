@@ -19,7 +19,9 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.n2k.can.N2KMessageImpl;
 
+import javax.validation.constraints.NotNull;
 import java.lang.reflect.Constructor;
 import java.time.Instant;
 import java.util.Map;
@@ -74,11 +76,11 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     }
 
     public N2KMessageParserImpl(String pgnString) throws PGNDataParseException {
-        set(pgnString);
+        set(getDecodedHeader(pgnString));
     }
 
-    private void set(String pgnString) throws PGNDataParseException {
-        pgnData = getDecodedHeader(pgnString);
+    private void set(@NotNull PGNDecoded dec) {
+        pgnData = dec;
         N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(pgnData.pgn);
         if (d != null && d.fast && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
@@ -132,27 +134,49 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     }
 
     @Override
-    public void addString(String s) throws PGNDataParseException {
+    public void addMessage(N2KMessage msg) throws PGNDataParseException {
+        PGNDecoded d = new PGNDecoded();
+        d.data = msg.getData();
+        d.dest = msg.getHeader().getDest();
+        d.source = msg.getHeader().getSource();
+        d.length = msg.getData().length;
+        d.pgn = msg.getHeader().getPgn();
+        d.priority = msg.getHeader().getPriority();
+        d.ts = Instant.now();
+
         if (pgnData == null) {
-            set(s);
+            set(d);
         } else {
-            PGNDecoded additionalPgn = getDecodedHeader(s);
-            if (additionalPgn.pgn != pgnData.pgn) {
-                throw new PGNDataParseException(String.format("Trying to add data to a different pgn: expected {%d} received {%d}", pgnData.pgn, additionalPgn.pgn));
+            add(d);
+        }
+    }
+
+    @Override
+    public void addString(String s) throws PGNDataParseException {
+        PGNDecoded d = getDecodedHeader(s);
+        if (pgnData == null) {
+            set(d);
+        } else {
+            add(d);
+        }
+    }
+
+    private void add(PGNDecoded additionalPgn) throws PGNDataParseException {
+        if (additionalPgn.pgn != pgnData.pgn) {
+            throw new PGNDataParseException(String.format("Trying to add data to a different pgn: expected {%d} received {%d}", pgnData.pgn, additionalPgn.pgn));
+        } else {
+            int moreLen = additionalPgn.length;
+            byte[] newData = new byte[pgnData.data.length + moreLen - 1];
+            System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
+            int frameNo = additionalPgn.data[0] & 0x000000FF; // first byte is the n of the frame in the series
+            if (frameNo != pgnData.currentFrame + 1) {
+                throw new PGNDataParseException(String.format("Trying to add non-consecutive frames to fast pgn:" +
+                        " expected {%d} received {%d}", pgnData.currentFrame + 1, frameNo));
             } else {
-                int moreLen = additionalPgn.length;
-                byte[] newData = new byte[pgnData.data.length + moreLen - 1];
-                System.arraycopy(pgnData.data, 0, newData, 0, pgnData.data.length);
-                int frameNo = additionalPgn.data[0] & 0x000000FF; // first byte is the n of the frame in the series
-                if (frameNo != pgnData.currentFrame + 1) {
-                    throw new PGNDataParseException(String.format("Trying to add non-consecutive frames to fast pgn:" +
-                            " expected {%d} received {%d}", pgnData.currentFrame + 1, frameNo));
-                } else {
-                    pgnData.currentFrame = frameNo;
-                    System.arraycopy(additionalPgn.data, 1, newData, pgnData.length, additionalPgn.data.length - 1);
-                    pgnData.data = newData;
-                    pgnData.length = newData.length;
-                }
+                pgnData.currentFrame = frameNo;
+                System.arraycopy(additionalPgn.data, 1, newData, pgnData.length, additionalPgn.data.length - 1);
+                pgnData.data = newData;
+                pgnData.length = newData.length;
             }
         }
     }
@@ -197,7 +221,8 @@ public class N2KMessageParserImpl implements N2KMessageParser {
                     throw new PGNDataParseException("Error decoding N2K message", e);
                 }
             } else {
-                throw new PGNDataParseException("Unsupported PGN {" + pgnData.pgn + "}");
+                message = new N2KMessageImpl(pgnData, pgnData.data);
+                //throw new PGNDataParseException("Unsupported PGN {" + pgnData.pgn + "}");
             }
         }
         return message;

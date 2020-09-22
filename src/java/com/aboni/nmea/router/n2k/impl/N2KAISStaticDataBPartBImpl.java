@@ -94,8 +94,10 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Src {%d} MMSI {%s} MsgId {%d} Repeat {%s} Type {%s} Callsign {%s} AISClass {%s} Length {%.1f} Beam {%.1f} Transceiver {%s}",
+        return String.format("PGN {%s} Src {%d} MsgId {%d} MMSI {%s} Repeat {%s} Type {%s} Callsign {%s} " +
+                        "AISClass {%s} Length {%.1f} Beam {%.1f} Transceiver {%s}",
                 PGN, getHeader().getSource(),
-                getMessageId(), getMMSI(), getRepeatIndicator(), getTypeOfShip(), getCallSign(), getAISClass(), getLength(), getBeam(), getAisTransceiverInfo());
+                getMessageId(), getMMSI(), getRepeatIndicator(), getTypeOfShip(), getCallSign(),
+                getAISClass(), getLength(), getBeam(), getAisTransceiverInfo());
     }
 }

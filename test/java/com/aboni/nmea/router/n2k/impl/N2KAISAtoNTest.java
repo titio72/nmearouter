@@ -5,8 +5,6 @@ import org.junit.Test;
 
 public class N2KAISAtoNTest {
 
-
-
     private static final byte[] b = {(byte)0x55, (byte)0xdc, (byte)0xe7, (byte)0x27, (byte)0x3b, (byte)0x27, (byte)0x49, (byte)0xe0, (byte)0x05, (byte)0xcf, (byte)0xc0, (byte)0x41, (byte)0x1a, (byte)0x01, (byte)0x45, (byte)0x31, (byte)0x32, (byte)0x36,
             (byte)0x33, (byte)0x20, (byte)0x53, (byte)0x43, (byte)0x4f, (byte)0x47, (byte)0x4c, (byte)0x49, (byte)0x4f, (byte)0x20, (byte)0x20, (byte)0x55, (byte)0x4f, (byte)0x4c, (byte)0x41, (byte)0xff, (byte)0xfc, (byte)0x14,
             (byte)0x00, (byte)0x14, (byte)0x00, (byte)0x0a, (byte)0x00};
@@ -23,7 +21,7 @@ public class N2KAISAtoNTest {
         System.out.println(aton.getAtoNType() + " Expected 'Fixed light: with sectors'");
         System.out.println(aton.getMMSI() + " Expected 992471004");
         System.out.println(aton.getName());
-        System.out.println(aton.getPosition() + " Expected 44.05168 N, 009.858487 E");
+        System.out.println(aton.getGPSInfo().getPosition() + " Expected 44.05168 N, 009.858487 E");
         System.out.println(aton.getBeam() + " Expected 2");
         System.out.println(aton.getLength() + " Expected 2");
     }

@@ -53,6 +53,8 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
             "time"
     };
 
+    private static final byte[] CMD_TERM = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+
     private final AtomicBoolean run = new AtomicBoolean(false);
 
     private final Dimmer dimmer = new Dimmer();
@@ -119,7 +121,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
                 SerialPort p = SerialPort.getCommPort(portName);
                 p.setComPortParameters(PORT_SPEED, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(
-                        SerialPort.TIMEOUT_READ_BLOCKING/* | SerialPort.TIMEOUT_WRITE_BLOCKING*/,
+                        SerialPort.TIMEOUT_READ_BLOCKING,
                         PORT_READ_TIMEOUT, PORT_WRITE_TIMEOUT);
                 if (!p.openPort()) {
                     lastPortRetryTime = now;
@@ -151,9 +153,9 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private void sendCommand(@NotNull String cmd) {
         if (getPort() != null) {
-            byte[] cmdTerm = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+
             port.writeBytes(cmd.getBytes(), cmd.getBytes().length);
-            port.writeBytes(cmdTerm, 3);
+            port.writeBytes(CMD_TERM, 3);
         }
     }
 
@@ -314,11 +316,15 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
             return bfIx;
         }
 
-        private boolean isTerminated(int bfIx, byte[] readBuffer) {
-            return (bfIx >= 3 &&
-                    readBuffer[bfIx - 1] == (byte) 0xFF &&
-                    readBuffer[bfIx - 2] == (byte) 0xFF &&
-                    readBuffer[bfIx - 3] == (byte) 0xFF);
+        private boolean isTerminated(int len, byte[] b) {
+            if (len >= CMD_TERM.length) {
+                for (int i = 1; i <= CMD_TERM.length; i++) {
+                    if (CMD_TERM[CMD_TERM.length - i] != b[b.length - i]) return false;
+                }
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

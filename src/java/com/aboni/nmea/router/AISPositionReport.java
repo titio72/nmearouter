@@ -15,13 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import net.sf.marineapi.nmea.util.Position;
-
 public interface AISPositionReport {
 
     String getAISClass();
-
-    Position getPosition();
 
     int getMessageId();
 
@@ -30,10 +26,6 @@ public interface AISPositionReport {
     String getRepeatIndicator();
 
     boolean issRAIM();
-
-    double getCog();
-
-    double getSog();
 
     double getHeading();
 
@@ -51,5 +43,6 @@ public interface AISPositionReport {
 
     long getOverrrideTime();
 
+    GNSSInfo getGPSInfo();
 
 }

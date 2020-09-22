@@ -52,29 +52,29 @@ public class AISTargetsService extends JSONWebService {
     }
 
     private JSONObject getJsonTarget(Position myPos, AISPositionReport r) {
-        if (r.getPosition()!=null) {
+        if (r.getGPSInfo().getPosition() != null) {
             JSONObject j = new JSONObject();
             j.put("MMSI", r.getMMSI());
             j.put("class", r.getAISClass());
-            j.put("latitude", r.getPosition().getLatitude());
-            j.put("longitude", r.getPosition().getLongitude());
-            j.put("s_latitude", Utils.formatLatitude(r.getPosition().getLatitude()));
-            j.put("s_longitude", Utils.formatLongitude(r.getPosition().getLongitude()));
+            j.put("latitude", r.getGPSInfo().getPosition().getLatitude());
+            j.put("longitude", r.getGPSInfo().getPosition().getLongitude());
+            j.put("s_latitude", Utils.formatLatitude(r.getGPSInfo().getPosition().getLatitude()));
+            j.put("s_longitude", Utils.formatLongitude(r.getGPSInfo().getPosition().getLongitude()));
 
             long age = r.getAge(cache.getNow());
             j.put("age", age);
             j.put("s_age", String.format("%02d:%02d", age / 60000, (age / 1000) % 60));
 
             setStringAttribute(j, r.getPositionAccuracy(), "accuracy");
-            setDoubleAttribute(j, r.getSog(), "SOG");
-            setDoubleAttribute(j, r.getCog(), "COG");
+            setDoubleAttribute(j, r.getGPSInfo().getSOG(), "SOG");
+            setDoubleAttribute(j, r.getGPSInfo().getCOG(), "COG");
             setDoubleAttribute(j, r.getHeading(), "heading");
             setStringAttribute(j, r.getNavStatus(), "status");
             setStringAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
             setStringAttribute(j, r.getTimestampStatus(), "timeStampStatus");
             if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
             if (myPos != null) {
-                Course c1 = new Course(myPos, r.getPosition());
+                Course c1 = new Course(myPos, r.getGPSInfo().getPosition());
                 j.put("distance", c1.getDistance());
                 j.put("bearing", c1.getCOG());
             }

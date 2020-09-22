@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AISPositionReport;
+import com.aboni.nmea.router.GNSSInfo;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
@@ -18,12 +19,9 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     private int messageId;
     private String repeatIndicator;
     private String sMMSI;
-    private Position position;
     private String positionAccuracy;
     private boolean sRAIM;
     private int timestamp;
-    private double cog;
-    private double sog;
     private double heading;
     private double rateOfTurn;
     private String aisTransceiverInfo;
@@ -31,6 +29,7 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     private String specialManeuverIndicator;
     private int aisSpare;
     private int seqId;
+    private final GNSSInfoImpl gnssInfo = new GNSSInfoImpl();
 
     private long overrideTime = -1;
 
@@ -55,17 +54,17 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
         double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
         double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
-            position = new Position(lat, lon);
+            gnssInfo.setPosition(new Position(lat, lon));
         }
 
         positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
         sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
         timestamp = (int) parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        cog = parseDoubleSafe(data, 112, 16, 0.0001, false);
-        cog = Double.isNaN(cog) ? cog : Utils.round(Math.toDegrees(cog), 1);
-        sog = parseDoubleSafe(data, 128, 16, 0.01, false);
-        if (!Double.isNaN(sog)) sog = Utils.round(sog * 3600.0 / 1852.0, 1);
+        gnssInfo.setCOG(parseDoubleSafe(data, 112, 16, 0.0001, false));
+        gnssInfo.setCOG(Double.isNaN(gnssInfo.getCOG()) ? gnssInfo.getCOG() : Utils.round(Math.toDegrees(gnssInfo.getCOG()), 1));
+        gnssInfo.setCOG(parseDoubleSafe(data, 128, 16, 0.01, false));
+        if (!Double.isNaN(gnssInfo.getSOG())) gnssInfo.setSOG(Utils.round(gnssInfo.getSOG() * 3600.0 / 1852.0, 1));
 
         heading = parseDoubleSafe(data, 168, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
@@ -93,7 +92,7 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     }
 
     public Position getPosition() {
-        return position;
+        return gnssInfo.getPosition();
     }
 
     public int getMessageId() {
@@ -112,12 +111,12 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
         return sRAIM;
     }
 
-    public double getCog() {
-        return cog;
+    public double getCOG() {
+        return gnssInfo.getCOG();
     }
 
-    public double getSog() {
-        return sog;
+    public double getSOG() {
+        return gnssInfo.getSOG();
     }
 
     public double getHeading() {
@@ -192,10 +191,15 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     }
 
     @Override
+    public GNSSInfo getGPSInfo() {
+        return gnssInfo;
+    }
+
+    @Override
     public String toString() {
         return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
                 PGN, getHeader().getSource(), getMMSI(), getAISClass(), Utils.formatLatitude(getPosition().getLatitude()), Utils.formatLongitude(getPosition().getLatitude()),
-                getCog(), getSog(), getTimestamp()
-                );
+                getCOG(), getSOG(), getTimestamp()
+        );
     }
 }

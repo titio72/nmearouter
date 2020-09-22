@@ -20,8 +20,8 @@ public class N2KAISPositionReportATest {
         assertEquals(43.0530014, p.getPosition().getLatitude(), 0.00001);
         assertEquals(10.0111665, p.getPosition().getLongitude(), 0.00001);
         assertEquals(27.0, p.getHeading(), 0.01);
-        assertEquals(16.8, p.getSog(), 0.01);
-        assertEquals(28.0, p.getCog(), 0.01);
+        assertEquals(16.8, p.getSOG(), 0.01);
+        assertEquals(28.0, p.getCOG(), 0.01);
         assertEquals("Under way using engine", p.getNavStatus());
     }
 
