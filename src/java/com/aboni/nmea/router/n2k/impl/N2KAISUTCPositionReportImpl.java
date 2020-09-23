@@ -1,7 +1,5 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.misc.Utils;
-import com.aboni.nmea.router.AISPositionReport;
 import com.aboni.nmea.router.GNSSInfo;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
@@ -14,7 +12,7 @@ import java.time.ZoneOffset;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
 
-public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPositionReport {
+public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
 
     public static final int PGN = 129793;
 
@@ -72,54 +70,28 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPo
         gnssType = parseEnum(data, 188, 4, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
     }
 
-    @Override
-    public String getNavStatus() {
-        return null;
-    }
-
-    @Override
-    public String getAISClass() {
-        return "B";
-    }
-
-    @Override
     public int getMessageId() {
         return messageId;
     }
 
-    @Override
     public String getPositionAccuracy() {
         return positionAccuracy;
     }
 
-    @Override
     public String getRepeatIndicator() {
         return repeatIndicator;
     }
 
-    @Override
     public boolean issRAIM() {
         return sRAIM;
     }
 
-    @Override
     public double getHeading() {
         return Double.NaN;
     }
 
-    @Override
     public String getMMSI() {
         return sMMSI;
-    }
-
-    @Override
-    public String getTimestampStatus() {
-        return "Available";
-    }
-
-    @Override
-    public int getTimestamp() {
-        return 0;
     }
 
     public String getAisTransceiverInfo() {
@@ -134,7 +106,6 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPo
         return utc;
     }
 
-    @Override
     public long getAge(long now) {
         if (utc != null) {
             Instant l = (getOverrrideTime() > 0) ?
@@ -145,17 +116,14 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPo
         }
     }
 
-    @Override
     public void setOverrideTime(long t) {
         overrideTime = t;
     }
 
-    @Override
     public long getOverrrideTime() {
         return overrideTime;
     }
 
-    @Override
     public GNSSInfo getGPSInfo() {
         return gpsInfo;
     }
@@ -166,11 +134,9 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl implements AISPo
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Time {%s}",
-                PGN, getHeader().getSource(), getMMSI(), getAISClass(),
-                Utils.formatLatitude(gpsInfo.getPosition().getLatitude()),
-                Utils.formatLongitude(gpsInfo.getPosition().getLatitude()),
-                gpsInfo.getCOG(), gpsInfo.getSOG(), utc
+        return String.format("PGN {%s} Src {%d} MMSI {%s} Position {%s} Time {%s}",
+                PGN, getHeader().getSource(), getMMSI(),
+                gpsInfo.getPosition(), utc
         );
     }
 }

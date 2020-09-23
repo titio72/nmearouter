@@ -213,10 +213,9 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
+        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Position {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
                 PGN, getHeader().getSource(), getMMSI(), getAISClass(),
-                Utils.formatLatitude(gpsInfo.getPosition().getLatitude()),
-                Utils.formatLongitude(gpsInfo.getPosition().getLatitude()),
+                gpsInfo.getPosition(),
                 gpsInfo.getCOG(), gpsInfo.getSOG(), getTimestamp()
         );
     }

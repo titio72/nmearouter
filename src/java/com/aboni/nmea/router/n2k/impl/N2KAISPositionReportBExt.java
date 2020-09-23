@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
@@ -38,10 +37,9 @@ public class N2KAISPositionReportBExt extends N2KAISPositionReportBImpl {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Lat {%s} Lon {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
+        return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Position {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
                 PGN, getHeader().getSource(), getMMSI(), getAISClass(),
-                Utils.formatLatitude(getGPSInfo().getPosition().getLatitude()),
-                Utils.formatLongitude(getGPSInfo().getPosition().getLatitude()),
+                getGPSInfo().getPosition(),
                 getGPSInfo().getCOG(), getGPSInfo().getSOG(), getTimestamp()
         );
     }}

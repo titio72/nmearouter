@@ -64,7 +64,7 @@
             "type": "Canbus",
             "name": "CANBUS",
             "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "device": "COM8",
+            "device": "/dev/ttyUSB0",
             "bps": 115200
         }
     ]

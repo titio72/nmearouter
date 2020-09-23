@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
@@ -163,13 +162,8 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} Lat {%s} Lon {%s} Sats {%d} HDOP {%.1f} PDOP {%.1f} GNSS {%s}",
-                PGN, getHeader().getSource(),
-                (getPosition() == null) ? "" : Utils.formatLatitude(getPosition().getLatitude()),
-                (getPosition() == null) ? "" : Utils.formatLongitude(getPosition().getLongitude()),
-                getNSatellites(),
-                getHDOP(),
-                getPDOP(),
-                getGnssType());
+        return String.format("PGN {%s} Source {%d} Position {%s} Sats {%d} HDOP {%.1f} PDOP {%.1f} GNSS {%s}",
+                PGN, getHeader().getSource(), getPosition(), getNSatellites(),
+                getHDOP(), getPDOP(), getGnssType());
     }
 }

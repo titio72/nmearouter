@@ -5,6 +5,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -14,10 +15,10 @@ import java.io.FileReader;
 
 public class N2KAnalyzer {
 
-    private static int SRC = 1;
+    private static int srcFilter = -1;
 
     public static void onMsg(N2KMessage msg) {
-        if (msg.getHeader().getSource() == SRC) System.out.println(msg);
+        if (srcFilter == -1 || msg.getHeader().getSource() == srcFilter) System.out.println(msg);
     }
 
     public static void main(String... args) {
@@ -38,11 +39,13 @@ public class N2KAnalyzer {
                     data[i] = (byte) (Integer.parseInt(tokens[3 + i], 16) & 0xFF);
                 }
                 N2KHeader iso = new N2KHeader(id);
-                //if (N2KMessageDefinitions.isSupported(iso.getPgn())) {
                 N2KMessageDefaultImpl msg = new N2KMessageDefaultImpl(iso, data);
-                if (msg.getHeader().getSource() == SRC) System.out.println(msg);
-                cache.onMessage(msg);
-                //}
+                if (N2KMessageDefinitions.isSupported(iso.getPgn())) {
+                    //if (SRC==-1 || msg.getHeader().getSource()==SRC) System.out.println(msg);
+                    cache.onMessage(msg);
+                } else {
+                    //onMsg(msg);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
