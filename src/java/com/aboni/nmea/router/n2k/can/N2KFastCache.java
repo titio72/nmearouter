@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.can;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
@@ -50,7 +51,7 @@ public class N2KFastCache {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public N2KFastCache(TimestampProvider tsp) {
+    public N2KFastCache(NMEACache tsp) {
         timestampProvider = tsp;
     }
 
