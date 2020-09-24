@@ -8,6 +8,7 @@ import com.aboni.nmea.router.n2k.messages.N2KEnvironment311;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.HUMIDITY_SOURCE;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_130311_PGN;
 
 public class N2KEnvironment311Impl extends N2KMessageImpl implements N2KEnvironment311 {
 
@@ -20,15 +21,15 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements N2KEnvironm
 
 
     public N2KEnvironment311Impl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(ENVIRONMENT_130311_PGN), data);
         fill();
     }
 
     public N2KEnvironment311Impl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != ENVIRONMENT_130311_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", ENVIRONMENT_130311_PGN, header.getPgn()));
         fill();
     }
 
@@ -84,6 +85,6 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements N2KEnvironm
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Humidity {%.1f} Hum. Source {%s} Temperature {%.1f} Temp. Source {%s} Atmo. Pressure {%.1f}",
-                PGN, getHeader().getSource(), getHumidity(), getHumiditySource(), getTemperature(), getTempSource(), getAtmosphericPressure());
+                ENVIRONMENT_130311_PGN, getHeader().getSource(), getHumidity(), getHumiditySource(), getTemperature(), getTempSource(), getAtmosphericPressure());
     }
 }

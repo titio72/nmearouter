@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface N2KSatellites {
 
-    int PGN = 129540;
-
     int getSID();
 
     int getNumberOfSats();

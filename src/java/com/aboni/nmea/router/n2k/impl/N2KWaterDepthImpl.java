@@ -19,6 +19,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KWaterDepth;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.DEPTH_PGN;
+
 public class N2KWaterDepthImpl extends N2KMessageImpl implements N2KWaterDepth {
 
     private int sid;
@@ -27,15 +29,15 @@ public class N2KWaterDepthImpl extends N2KMessageImpl implements N2KWaterDepth {
     private double range;
 
     public N2KWaterDepthImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(DEPTH_PGN), data);
         fill();
     }
 
     public N2KWaterDepthImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != DEPTH_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", DEPTH_PGN, header.getPgn()));
         fill();
     }
 
@@ -75,6 +77,6 @@ public class N2KWaterDepthImpl extends N2KMessageImpl implements N2KWaterDepth {
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Depth {%.1f} Offset {%.1f} Range {%.1f}",
-                PGN, getHeader().getSource(), getDepth(), getOffset(), getRange());
+                DEPTH_PGN, getHeader().getSource(), getDepth(), getOffset(), getRange());
     }
 }

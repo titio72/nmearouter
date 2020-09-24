@@ -1,11 +1,13 @@
 package com.aboni.nmea.router.n2k.can;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +15,13 @@ import java.util.Objects;
 
 public class N2KFastCache {
 
+    private static final String ERR_MSG = "Error handling N2K message";
+
     private static final long REMOVE_TIMEOUT = 2000;
 
     private static class Payload {
         N2KMessageParser parser;
         long lastTS;
-        int lastSeq;
     }
 
     private static class N2KFastEnvelope {
@@ -42,9 +45,16 @@ public class N2KFastCache {
 
     private final Map<N2KFastEnvelope, Payload> cache = new HashMap<>();
 
-    private final N2KMessageCallback callback;
+    private N2KMessageCallback callback;
 
-    public N2KFastCache(N2KMessageCallback callback) {
+    private final TimestampProvider timestampProvider;
+
+    @Inject
+    public N2KFastCache(TimestampProvider tsp) {
+        timestampProvider = tsp;
+    }
+
+    public void setCallback(N2KMessageCallback callback) {
         this.callback = callback;
     }
 
@@ -62,7 +72,7 @@ public class N2KFastCache {
                     p.addMessage(msg);
                     callback.onMessage(p.getMessage());
                 } catch (PGNDataParseException e) {
-                    ServerLog.getLogger().error("Error handling N2K message", e);
+                    ServerLog.getLogger().error(ERR_MSG, e);
                 }
             }
         }
@@ -71,20 +81,9 @@ public class N2KFastCache {
     private void handleFastMessage(N2KMessage msg, N2KFastEnvelope id) {
         int seqId = msg.getData()[0] & 0xFF;
         N2KMessageParser p = getN2KMessageParser(id);
-        if (p.getLength() != 0 && (seqId & 0x0F) == 0) {
-            // "start of sequence" has arrived but there's already a running sequence
-            if (callback != null) {
-                try {
-                    callback.onMessage(p.getMessage());
-                } catch (PGNDataParseException e) {
-                    ServerLog.getLogger().error("Error handling N2K message", e);
-                }
-            }
-            synchronized (cache) {
-                cache.remove(id);
-            }
-            p = getN2KMessageParser(id);
-        } else if (p.getLength() == 0 && (seqId & 0x0F) != 0) {
+        if (!isEmpty(p) && seqId != (p.getFastSequenceNo() + 1) && isPotentialFirstMessage(msg)) {
+            p = handlePrematureEndOfMessage(id, p);
+        } else if (isEmpty(p) && !isPotentialFirstMessage(msg)) {
             // not a "start of sequence" but no parser is available - skip it because the previous messages were lost
             return;
         }
@@ -100,7 +99,7 @@ public class N2KFastCache {
             ServerLog.getLogger().debug("Out of sequence message {" + msg + "} err {" + e.getMessage() + "}");
             remove = true;
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error handling N2K message", e);
+            ServerLog.getLogger().error(ERR_MSG, e);
             remove = true;
         }
         if (remove) {
@@ -108,6 +107,31 @@ public class N2KFastCache {
                 cache.remove(id);
             }
         }
+    }
+
+    private N2KMessageParser handlePrematureEndOfMessage(N2KFastEnvelope id, N2KMessageParser p) {
+        // "start of sequence" has arrived but there's already a running sequence
+        if (callback != null) {
+            try {
+                callback.onMessage(p.getMessage());
+            } catch (PGNDataParseException e) {
+                ServerLog.getLogger().error(ERR_MSG, e);
+            }
+        }
+        synchronized (cache) {
+            cache.remove(id);
+        }
+        p = getN2KMessageParser(id);
+        return p;
+    }
+
+    private boolean isEmpty(N2KMessageParser p) {
+        return p.getLength() == 0;
+    }
+
+    private boolean isPotentialFirstMessage(N2KMessage msg) {
+        int seqId = msg.getData()[0] & 0xFF;
+        return (seqId & 0x0F) == 0;
     }
 
     private N2KMessageParser getN2KMessageParser(N2KFastEnvelope id) {
@@ -122,13 +146,13 @@ public class N2KFastCache {
             } else {
                 p = entry.parser;
             }
-            entry.lastTS = System.currentTimeMillis();
+            entry.lastTS = (timestampProvider != null) ? timestampProvider.getNow() : System.currentTimeMillis();
         }
         return p;
     }
 
     public void onTimer() {
-        long now = System.currentTimeMillis();
+        long now = (timestampProvider != null) ? timestampProvider.getNow() : System.currentTimeMillis();
         synchronized (cache) {
             cache.entrySet().removeIf(e -> Utils.isOlderThan(e.getValue().lastTS, now, REMOVE_TIMEOUT));
         }

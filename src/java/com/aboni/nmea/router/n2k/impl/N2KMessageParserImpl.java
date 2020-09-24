@@ -67,6 +67,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
 
     private PGNDecoded pgnData;
     private N2KMessage message;
+    private boolean fast = false;
 
     public N2KMessageParserImpl() {
     }
@@ -78,6 +79,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
         N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(pgnData.pgn);
+        if (d != null) fast = d.fast;
         if (d != null && d.fast && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
             pgnData.currentFrame = getData()[0] & 0xFF;
@@ -94,6 +96,16 @@ public class N2KMessageParserImpl implements N2KMessageParser {
             l++;
             STATS.put(pgnData.getPgn(), l);
         }
+    }
+
+    @Override
+    public boolean isFast() {
+        return fast;
+    }
+
+    @Override
+    public int getFastSequenceNo() {
+        return pgnData.currentFrame;
     }
 
     public static void resetStats() {

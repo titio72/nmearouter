@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.SYSTEM_TIME;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SYSTEM_TIME_PGN;
 
 public class N2KSystemTimeImpl extends N2KMessageImpl implements N2KSystemTime {
 
@@ -32,15 +33,15 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements N2KSystemTime {
     private String timeSourceType;
 
     public N2KSystemTimeImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SYSTEM_TIME_PGN), data);
         fill();
     }
 
     public N2KSystemTimeImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SYSTEM_TIME_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SYSTEM_TIME_PGN, header.getPgn()));
         fill();
     }
 
@@ -78,6 +79,7 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements N2KSystemTime {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} Time {%s} Time Source {%s}", PGN, getHeader().getSource(), getTime(), getTimeSourceType());
+        return String.format("PGN {%s} Source {%d} Time {%s} Time Source {%s}",
+                SYSTEM_TIME_PGN, getHeader().getSource(), getTime(), getTimeSourceType());
     }
 }

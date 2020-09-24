@@ -26,7 +26,8 @@ public class N2KAnalyzer {
             BufferedReader reader = new BufferedReader(fileReader);
             Injector injector = Guice.createInjector(new NMEARouterModule());
             ThingsFactory.setInjector(injector);
-            N2KFastCache cache = new N2KFastCache(N2KAnalyzer::onMsg);
+            N2KFastCache cache = new N2KFastCache(null);
+            cache.setCallback(N2KAnalyzer::onMsg);
 
             String line;
             while ((line = reader.readLine()) != null) {

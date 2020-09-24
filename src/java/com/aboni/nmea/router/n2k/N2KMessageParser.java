@@ -17,4 +17,8 @@ public interface N2KMessageParser {
     boolean isSupported();
 
     N2KMessage getMessage() throws PGNDataParseException;
+
+    boolean isFast();
+
+    int getFastSequenceNo();
 }

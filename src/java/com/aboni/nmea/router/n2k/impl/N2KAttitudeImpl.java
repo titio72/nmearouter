@@ -20,6 +20,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KAttitude;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ATTITUDE_PGN;
+
 public class N2KAttitudeImpl extends N2KMessageImpl implements N2KAttitude {
 
     private int sid;
@@ -28,15 +30,15 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements N2KAttitude {
     private double roll;
 
     public N2KAttitudeImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(ATTITUDE_PGN), data);
         fill();
     }
 
     public N2KAttitudeImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != ATTITUDE_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", ATTITUDE_PGN, header.getPgn()));
         fill();
     }
 
@@ -76,6 +78,6 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements N2KAttitude {
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Roll {%.1f} Yaw {%.1f} Pitch {%.1f}",
-                PGN, getHeader().getSource(), getRoll(), getYaw(), getPitch());
+                ATTITUDE_PGN, getHeader().getSource(), getRoll(), getYaw(), getPitch());
     }
 }

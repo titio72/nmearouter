@@ -20,21 +20,23 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotWindDatum;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_WIND_DATUM_PGN;
+
 public class N2KSeatalkPilotWindDatumImpl extends N2KMessageImpl implements N2KSeatalkPilotWindDatum {
 
     private double windDatum;
     private double rollingAverageWind;
 
     public N2KSeatalkPilotWindDatumImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SEATALK_PILOT_WIND_DATUM_PGN), data);
         fill();
     }
 
     public N2KSeatalkPilotWindDatumImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SEATALK_PILOT_WIND_DATUM_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SEATALK_PILOT_WIND_DATUM_PGN, header.getPgn()));
         fill();
     }
 

@@ -22,10 +22,10 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     private final PGNSourceFilter srcFilter;
 
     @Inject
-    public NMEACanBusAgent(@NotNull NMEACache cache, N2KMessage2NMEA0183 converter) {
+    public NMEACanBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, N2KMessage2NMEA0183 converter) {
         super(cache);
         setSourceTarget(true, false);
-        N2KFastCache fastCache = new N2KFastCache(this::onReceive);
+        fastCache.setCallback(this::onReceive);
         canReader = new N2KCanReader(fastCache::onMessage);
         canReader.setErrCallback(this::onError);
         serialReader = new SerialReader();

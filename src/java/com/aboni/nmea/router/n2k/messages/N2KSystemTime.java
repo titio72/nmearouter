@@ -4,8 +4,6 @@ import java.time.Instant;
 
 public interface N2KSystemTime {
 
-    int PGN = 126992;
-
     int getSID();
 
     Instant getTime();

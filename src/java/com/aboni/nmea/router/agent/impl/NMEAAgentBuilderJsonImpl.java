@@ -119,12 +119,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             NextionDisplayAgent nx = null;
             try {
                 nx = ThingsFactory.getInstance(NextionDisplayAgent.class);
-                String src;
-                try {
-                    src = a.getConfiguration().getString("src");
-                } catch (Exception e) {
-                    src = "";
-                }
+                String src = extractSource(a);
                 nx.setup(a.getName(), a.getConfiguration().getString("port"), src, q);
             } catch (Exception e) {
                 ServerLog.getLogger().error("Cannot create Nextion Display Agent", e);
@@ -133,6 +128,16 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         } else {
             return null;
         }
+    }
+
+    private String extractSource(ConfJSON.AgentDef a) {
+        String src;
+        try {
+            src = a.getConfiguration().getString("src");
+        } catch (Exception e) {
+            src = "";
+        }
+        return src;
     }
 
     private NMEAAgent buildGPSStatus(ConfJSON.AgentDef a, QOS q) {

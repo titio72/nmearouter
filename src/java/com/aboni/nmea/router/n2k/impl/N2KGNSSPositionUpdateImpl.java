@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN;
 
 public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSSPositionUpdate {
 
@@ -30,15 +31,15 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     private double ageOfDgnssCorrections;
 
     public N2KGNSSPositionUpdateImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(GNSS_POSITION_UPDATE_PGN), data);
         fill();
     }
 
     public N2KGNSSPositionUpdateImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != GNSS_POSITION_UPDATE_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", GNSS_POSITION_UPDATE_PGN, header.getPgn()));
         fill();
     }
 
@@ -163,7 +164,7 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSS
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Position {%s} Sats {%d} HDOP {%.1f} PDOP {%.1f} GNSS {%s}",
-                PGN, getHeader().getSource(), getPosition(), getNSatellites(),
+                GNSS_POSITION_UPDATE_PGN, getHeader().getSource(), getPosition(), getNSatellites(),
                 getHDOP(), getPDOP(), getGnssType());
     }
 }

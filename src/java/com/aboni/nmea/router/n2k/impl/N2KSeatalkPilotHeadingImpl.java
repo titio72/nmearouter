@@ -19,6 +19,8 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotHeading;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_HEADING_PGN;
+
 public class N2KSeatalkPilotHeadingImpl extends N2KMessageImpl implements N2KSeatalkPilotHeading {
 
     private double headingMagnetic;
@@ -26,7 +28,7 @@ public class N2KSeatalkPilotHeadingImpl extends N2KMessageImpl implements N2KSea
     private double headingTrue;
 
     public N2KSeatalkPilotHeadingImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SEATALK_PILOT_HEADING_PGN), data);
         fill();
     }
 

@@ -6,10 +6,9 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_STATIC_DATA_CLASS_B_PART_B_PGN;
 
 public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISStaticData {
-
-    public static final int PGN = 129810;
 
     private int messageId;
     private String sMMSI;
@@ -21,15 +20,15 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
     private String aisTransceiverInformation;
 
     public N2KAISStaticDataBPartBImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_STATIC_DATA_CLASS_B_PART_B_PGN), data);
         fill();
     }
 
     public N2KAISStaticDataBPartBImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_STATIC_DATA_CLASS_B_PART_B_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_STATIC_DATA_CLASS_B_PART_B_PGN, header.getPgn()));
         fill();
     }
 
@@ -96,7 +95,7 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
     public String toString() {
         return String.format("PGN {%s} Src {%d} MsgId {%d} MMSI {%s} Repeat {%s} Type {%s} Callsign {%s} " +
                         "AISClass {%s} Length {%.1f} Beam {%.1f} Transceiver {%s}",
-                PGN, getHeader().getSource(),
+                AIS_STATIC_DATA_CLASS_B_PART_B_PGN, getHeader().getSource(),
                 getMessageId(), getMMSI(), getRepeatIndicator(), getTypeOfShip(), getCallSign(),
                 getAISClass(), getLength(), getBeam(), getAisTransceiverInfo());
     }

@@ -6,8 +6,6 @@ import java.time.Instant;
 
 public interface N2KGNSSPositionUpdate {
 
-    int PGN = 129029;
-
     int getSID();
 
     boolean isValidSID();

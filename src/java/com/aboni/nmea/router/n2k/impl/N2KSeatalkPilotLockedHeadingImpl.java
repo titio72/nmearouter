@@ -20,6 +20,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotLockedHeading;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_LOCKED_HEADING_PGN;
+
 public class N2KSeatalkPilotLockedHeadingImpl extends N2KMessageImpl implements N2KSeatalkPilotLockedHeading {
 
     private double lockedHeadingTrue;
@@ -28,13 +30,13 @@ public class N2KSeatalkPilotLockedHeadingImpl extends N2KMessageImpl implements 
     public N2KSeatalkPilotLockedHeadingImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SEATALK_PILOT_LOCKED_HEADING_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SEATALK_PILOT_LOCKED_HEADING_PGN, header.getPgn()));
         fill();
     }
 
     public N2KSeatalkPilotLockedHeadingImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SEATALK_PILOT_LOCKED_HEADING_PGN), data);
         fill();
     }
 

@@ -41,7 +41,6 @@ import com.aboni.nmea.router.impl.*;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
-import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
 import com.aboni.nmea.router.n2k.impl.N2KMessageParserImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;

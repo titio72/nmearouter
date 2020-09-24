@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SATELLITES_IN_VIEW_PGN;
+
 public class N2KSatellitesImpl extends N2KMessageImpl implements N2KSatellites {
 
     private int sid;
@@ -67,15 +69,15 @@ public class N2KSatellitesImpl extends N2KMessageImpl implements N2KSatellites {
 
 
     public N2KSatellitesImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SATELLITES_IN_VIEW_PGN), data);
         fill();
     }
 
     public N2KSatellitesImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SATELLITES_IN_VIEW_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SATELLITES_IN_VIEW_PGN, header.getPgn()));
         fill();
     }
 
@@ -104,6 +106,6 @@ public class N2KSatellitesImpl extends N2KMessageImpl implements N2KSatellites {
             b.append(String.format("[Sat {%s} El {%d} Az {%d} Status {%s}] ",
                     s.getId(), s.getElevation(), s.getAzimuth(), s.getStatus()));
         }
-        return String.format("PGN {%s} Source {%d} Sats {%s}", PGN, getHeader().getSource(), b.toString());
+        return String.format("PGN {%s} Source {%d} Sats {%s}", SATELLITES_IN_VIEW_PGN, getHeader().getSource(), b.toString());
     }
 }

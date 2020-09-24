@@ -20,16 +20,18 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KPositionRapid;
 import net.sf.marineapi.nmea.util.Position;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.POSITION_UPDATE_RAPID;
+
 public class N2KPositionRapidImpl extends N2KMessageImpl implements N2KPositionRapid {
 
     private double latitude;
     private double longitude;
 
     public N2KPositionRapidImpl(byte[] data) throws PGNDataParseException {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(POSITION_UPDATE_RAPID), data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != POSITION_UPDATE_RAPID)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", POSITION_UPDATE_RAPID, header.getPgn()));
         fill();
     }
 
@@ -69,6 +71,6 @@ public class N2KPositionRapidImpl extends N2KMessageImpl implements N2KPositionR
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Position {%s}",
-                PGN, getHeader().getSource(), getPosition());
+                POSITION_UPDATE_RAPID, getHeader().getSource(), getPosition());
     }
 }

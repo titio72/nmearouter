@@ -20,6 +20,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KWindData;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.WIND_PGN;
+
 public class N2KWindDataImpl extends N2KMessageImpl implements N2KWindData {
 
     private int sid;
@@ -28,15 +30,15 @@ public class N2KWindDataImpl extends N2KMessageImpl implements N2KWindData {
     private boolean apparent = true;
 
     public N2KWindDataImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(WIND_PGN), data);
         fill();
     }
 
     public N2KWindDataImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != WIND_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", WIND_PGN, header.getPgn()));
         fill();
     }
 
@@ -74,7 +76,8 @@ public class N2KWindDataImpl extends N2KMessageImpl implements N2KWindData {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} Wind Speed {%.1f} Angle {%.1f} Ref {%s}", PGN, getHeader().getSource(), getSpeed(), getAngle(), isApparent() ? "A" : "T");
+        return String.format("PGN {%s} Source {%d} Wind Speed {%.1f} Angle {%.1f} Ref {%s}",
+                WIND_PGN, getHeader().getSource(), getSpeed(), getAngle(), isApparent() ? "A" : "T");
     }
 
 }

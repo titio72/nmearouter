@@ -6,10 +6,9 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_STATIC_DATA_CLASS_A_PGN;
 
 public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticData {
-
-    public static final int PGN = 129794;
 
     private int messageId;
     private String sMMSI;
@@ -23,15 +22,15 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
     private String aisTransceiverInformation;
 
     public N2KAISStaticDataAImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_STATIC_DATA_CLASS_A_PGN), data);
         fill();
     }
 
     public N2KAISStaticDataAImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_STATIC_DATA_CLASS_A_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_STATIC_DATA_CLASS_A_PGN, header.getPgn()));
         fill();
     }
 
@@ -105,7 +104,8 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} MsgId {%d} Repeat {%s} Name {%s} MMSI {%s} CallSign {%s} Type {%s} AISClass {%s} Transceiver {%s}",
-                PGN, getHeader().getSource(),
-                getMessageId(), getRepeatIndicator(), getName(), getMMSI(), getCallSign(), getTypeOfShip(), getAISClass(), getAisTransceiverInfo());
+                AIS_STATIC_DATA_CLASS_A_PGN, getHeader().getSource(),
+                getMessageId(), getRepeatIndicator(), getName(), getMMSI(), getCallSign(),
+                getTypeOfShip(), getAISClass(), getAisTransceiverInfo());
     }
 }

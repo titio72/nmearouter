@@ -11,10 +11,9 @@ import net.sf.marineapi.nmea.util.Position;
 import java.time.Instant;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_ATON_PGN;
 
 public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AISStaticData {
-
-    public static final int PGN = 129041;
 
     private int messageId;
     private String sMMSI;
@@ -32,15 +31,15 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     private final GNSSInfoImpl gpsInfo = new GNSSInfoImpl();
 
     public N2KAISAtoN(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_ATON_PGN), data);
         fill();
     }
 
     public N2KAISAtoN(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_ATON_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_ATON_PGN, header.getPgn()));
         fill();
     }
 

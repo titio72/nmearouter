@@ -7,6 +7,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KHeading;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.HEADING_PGN;
 
 public class N2KHeadingImpl extends N2KMessageImpl implements N2KHeading {
 
@@ -17,15 +18,15 @@ public class N2KHeadingImpl extends N2KMessageImpl implements N2KHeading {
     private String reference;
 
     public N2KHeadingImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(HEADING_PGN), data);
         fill();
     }
 
     public N2KHeadingImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != HEADING_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", HEADING_PGN, header.getPgn()));
         fill();
     }
 
@@ -76,6 +77,7 @@ public class N2KHeadingImpl extends N2KMessageImpl implements N2KHeading {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} Heading {%.1f} Ref {%s}", PGN, getHeader().getSource(), getHeading(), getReference());
+        return String.format("PGN {%s} Source {%d} Heading {%.1f} Ref {%s}",
+                HEADING_PGN, getHeader().getSource(), getHeading(), getReference());
     }
 }

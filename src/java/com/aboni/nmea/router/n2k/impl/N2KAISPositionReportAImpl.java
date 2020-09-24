@@ -11,10 +11,9 @@ import net.sf.marineapi.nmea.util.Position;
 import java.time.Instant;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_POSITION_REPORT_CLASS_A_PGN;
 
 public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPositionReport {
-
-    public static final int PGN = 129038;
 
     private int messageId;
     private String repeatIndicator;
@@ -34,15 +33,15 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     private long overrideTime = -1;
 
     public N2KAISPositionReportAImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_POSITION_REPORT_CLASS_A_PGN), data);
         fill();
     }
 
     public N2KAISPositionReportAImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_POSITION_REPORT_CLASS_A_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_POSITION_REPORT_CLASS_A_PGN, header.getPgn()));
         fill();
     }
 
@@ -198,7 +197,7 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     @Override
     public String toString() {
         return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Position {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
-                PGN, getHeader().getSource(), getMMSI(), getAISClass(),
+                AIS_POSITION_REPORT_CLASS_A_PGN, getHeader().getSource(), getMMSI(), getAISClass(),
                 getPosition(), getCOG(), getSOG(), getTimestamp()
         );
     }

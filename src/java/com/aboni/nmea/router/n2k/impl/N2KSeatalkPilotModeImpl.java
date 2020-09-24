@@ -21,20 +21,22 @@ import com.aboni.nmea.router.n2k.PilotMode;
 import com.aboni.nmea.router.n2k.SeatalkPilotMode;
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotMode;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_MODE_PGN;
+
 public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements N2KSeatalkPilotMode {
 
     private SeatalkPilotMode mode;
 
     public N2KSeatalkPilotModeImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SEATALK_PILOT_MODE_PGN), data);
         fill();
     }
 
     public N2KSeatalkPilotModeImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SEATALK_PILOT_MODE_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SEATALK_PILOT_MODE_PGN, header.getPgn()));
         fill();
     }
 
@@ -56,6 +58,7 @@ public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements N2KSeatal
 
     @Override
     public String toString() {
-        return String.format("PGN {%d} Source {%d} Mode {%s}", getHeader().getPgn(), getHeader().getSource(), getMode().toString());
+        return String.format("PGN {%d} Source {%d} Mode {%s}",
+                getHeader().getPgn(), getHeader().getSource(), getMode().toString());
     }
 }

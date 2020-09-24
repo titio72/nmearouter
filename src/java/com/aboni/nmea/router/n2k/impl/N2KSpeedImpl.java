@@ -7,6 +7,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KSpeed;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.WATER_REFERENCE;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SPEED_PGN;
 
 public class N2KSpeedImpl extends N2KMessageImpl implements N2KSpeed {
 
@@ -17,15 +18,15 @@ public class N2KSpeedImpl extends N2KMessageImpl implements N2KSpeed {
     private int speedDirection;
 
     public N2KSpeedImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SPEED_PGN), data);
         fill();
     }
 
     public N2KSpeedImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SPEED_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SPEED_PGN, header.getPgn()));
         fill();
     }
 
@@ -72,6 +73,7 @@ public class N2KSpeedImpl extends N2KMessageImpl implements N2KSpeed {
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} Water Speed {%.1f}", PGN, getHeader().getSource(), getSpeedWaterRef());
+        return String.format("PGN {%s} Source {%d} Water Speed {%.1f}",
+                SPEED_PGN, getHeader().getSource(), getSpeedWaterRef());
     }
 }

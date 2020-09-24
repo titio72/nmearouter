@@ -7,10 +7,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnN2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.Satellite;
-import com.aboni.nmea.router.n2k.messages.N2KGNSSPositionUpdate;
-import com.aboni.nmea.router.n2k.messages.N2KSOGAdCOGRapid;
-import com.aboni.nmea.router.n2k.messages.N2KSatellites;
-import com.aboni.nmea.router.n2k.messages.N2KSystemTime;
+import com.aboni.nmea.router.n2k.messages.*;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -188,21 +185,32 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         if (message != null) {
             int pgn = message.getHeader().getPgn();
             switch (pgn) {
-                case N2KSystemTime.PGN:
+                case N2kMessagePGNs.SYSTEM_TIME_PGN:
                     handleSystemTime((N2KSystemTime) message);
                     break;
-                case N2KGNSSPositionUpdate.PGN:
+                case N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN:
                     handlePositionMessage((N2KGNSSPositionUpdate) message);
                     break;
-                case N2KSOGAdCOGRapid.PGN:
+                case N2kMessagePGNs.SOG_COG_RAPID_PGN:
                     handleSOGMessage((N2KSOGAdCOGRapid) message);
                     break;
-                case N2KSatellites.PGN:
+                case N2kMessagePGNs.SATELLITES_IN_VIEW_PGN:
                     handleSatellitesMessage((N2KSatellites) message);
+                    break;
+                case N2kMessagePGNs.GNSS_DOP_PGN:
+                    handleDOPs((N2KGNSSDOPs) message);
                     break;
                 default:
                     break;
             }
+        }
+    }
+
+    private void handleDOPs(N2KGNSSDOPs message) {
+        synchronized (this) {
+            setHDOP(message.getHDOP());
+            setGPSFix(message.getFixDescription());
+
         }
     }
 
@@ -216,8 +224,6 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         synchronized (this) {
             if (message.getPosition() != null) {
                 setPosition(message.getTimestamp(), message.getPosition());
-                setHDOP(message.getHDOP());
-                setGPSFix(message.getMethod());
             }
         }
     }

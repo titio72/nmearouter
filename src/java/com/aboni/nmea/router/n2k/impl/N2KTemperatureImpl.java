@@ -7,6 +7,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KTemperature;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
 
 public class N2KTemperatureImpl extends N2KMessageImpl implements N2KTemperature {
 
@@ -18,15 +19,15 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements N2KTemperature
 
 
     public N2KTemperatureImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(ENVIRONMENT_TEMPERATURE_PGN), data);
         fill();
     }
 
     public N2KTemperatureImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != ENVIRONMENT_TEMPERATURE_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", ENVIRONMENT_TEMPERATURE_PGN, header.getPgn()));
         fill();
     }
 
@@ -41,7 +42,7 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements N2KTemperature
         temperature = (dT == null) ? Double.NaN : Utils.round(dT - 273.15, 1);
 
         Double dST = parseDouble(data, 40, 16, 0.01, false);
-        setTemperature = (dST == null) ? Double.NaN : Utils.round(dT - 273.15, 1);
+        setTemperature = (dST == null) ? Double.NaN : Utils.round(dST - 273.15, 1);
 
     }
 
@@ -73,6 +74,6 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements N2KTemperature
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Instance {%d} TempSource {%s} Temperature {%.1f} SetTemperature {%.1f}",
-                PGN, getHeader().getSource(), getInstance(), getSource(), getTemperature(), getSetTemperature());
+                ENVIRONMENT_TEMPERATURE_PGN, getHeader().getSource(), getInstance(), getSource(), getTemperature(), getSetTemperature());
     }
 }

@@ -7,6 +7,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KSOGAdCOGRapid;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SOG_COG_RAPID_PGN;
 
 public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements N2KSOGAdCOGRapid {
 
@@ -16,15 +17,15 @@ public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements N2KSOGAdCOGR
     private String cogReference;
 
     public N2KSOGAdCOGRapidImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(SOG_COG_RAPID_PGN), data);
         fill();
     }
 
     public N2KSOGAdCOGRapidImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != SOG_COG_RAPID_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SOG_COG_RAPID_PGN, header.getPgn()));
         fill();
     }
 
@@ -77,6 +78,7 @@ public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements N2KSOGAdCOGR
 
     @Override
     public String toString() {
-        return String.format("PGN {%s} Source {%d} SOG {%.1f} COG {%.1f} Ref {%s}", PGN, getHeader().getSource(), getSOG(), getCOG(), getCOGReference());
+        return String.format("PGN {%s} Source {%d} SOG {%.1f} COG {%.1f} Ref {%s}",
+                SOG_COG_RAPID_PGN, getHeader().getSource(), getSOG(), getCOG(), getCOGReference());
     }
 }

@@ -11,10 +11,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_UTC_REPORT_PGN;
 
 public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
-
-    public static final int PGN = 129793;
 
     private int messageId;
     private String repeatIndicator;
@@ -29,15 +28,15 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
     private String gnssType;
 
     public N2KAISUTCPositionReportImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_UTC_REPORT_PGN), data);
         fill();
     }
 
     public N2KAISUTCPositionReportImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_UTC_REPORT_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_UTC_REPORT_PGN, header.getPgn()));
         fill();
     }
 
@@ -135,7 +134,7 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
     @Override
     public String toString() {
         return String.format("PGN {%s} Src {%d} MMSI {%s} Position {%s} Time {%s}",
-                PGN, getHeader().getSource(), getMMSI(),
+                AIS_UTC_REPORT_PGN, getHeader().getSource(), getMMSI(),
                 gpsInfo.getPosition(), utc
         );
     }

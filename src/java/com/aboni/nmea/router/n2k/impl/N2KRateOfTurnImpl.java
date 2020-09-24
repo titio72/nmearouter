@@ -20,21 +20,23 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KRateOfTurn;
 
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.RATE_OF_TURN_PGN;
+
 public class N2KRateOfTurnImpl extends N2KMessageImpl implements N2KRateOfTurn {
 
     private int sid;
     private double rate;
 
     public N2KRateOfTurnImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(RATE_OF_TURN_PGN), data);
         fill();
     }
 
     public N2KRateOfTurnImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != RATE_OF_TURN_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", RATE_OF_TURN_PGN, header.getPgn()));
         fill();
     }
 

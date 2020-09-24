@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.n2k.impl;
 
-
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AISPositionReport;
 import com.aboni.nmea.router.GNSSInfo;
@@ -12,10 +11,9 @@ import net.sf.marineapi.nmea.util.Position;
 import java.time.Instant;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
+import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_POSITION_REPORT_CLASS_B_PGN;
 
 public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPositionReport {
-
-    public static final int PGN = 129039;
 
     private int messageId;
     private String repeatIndicator;
@@ -35,15 +33,15 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
     private final GNSSInfoImpl gpsInfo = new GNSSInfoImpl();
 
     public N2KAISPositionReportBImpl(byte[] data) {
-        super(getDefaultHeader(PGN), data);
+        super(getDefaultHeader(AIS_POSITION_REPORT_CLASS_B_PGN), data);
         fill();
     }
 
     public N2KAISPositionReportBImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
         super(header, data);
         if (header == null) throw new PGNDataParseException("Null message header!");
-        if (header.getPgn() != PGN)
-            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", PGN, header.getPgn()));
+        if (header.getPgn() != AIS_POSITION_REPORT_CLASS_B_PGN)
+            throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", AIS_POSITION_REPORT_CLASS_B_PGN, header.getPgn()));
         fill();
     }
 
@@ -214,7 +212,7 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
     @Override
     public String toString() {
         return String.format("PGN {%s} Src {%d} MMSI {%s} AIS Class {%s} Position {%s} COG {%.1f} SOG {%.1f} Timestamp {%d}",
-                PGN, getHeader().getSource(), getMMSI(), getAISClass(),
+                AIS_POSITION_REPORT_CLASS_B_PGN, getHeader().getSource(), getMMSI(), getAISClass(),
                 gpsInfo.getPosition(),
                 gpsInfo.getCOG(), gpsInfo.getSOG(), getTimestamp()
         );

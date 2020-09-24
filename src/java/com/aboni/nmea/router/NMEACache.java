@@ -20,7 +20,7 @@ import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public interface NMEACache {
+public interface NMEACache extends TimestampProvider {
 
     DataEvent<HeadingSentence> getLastHeading();
 
@@ -33,7 +33,5 @@ public interface NMEACache {
     <T> void setStatus(String statusKey, T status);
 
     <T> T getStatus(String statusKey, T defaultValue);
-
-    long getNow();
 
 }

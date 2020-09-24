@@ -107,27 +107,30 @@ public class SerialReader {
             while (run.get()) {
                 SerialPort p = getPort();
                 if (p != null) {
-                    try {
-                        int r = p.getInputStream().read();
-                        b[offset] = r & 0xFF;
-                        if (callback != null) {
-                            if (callback.onRead(b, offset)) {
-                                offset = 0;
-                            }
-                        }
-                        offset++;
-                        offset = offset % b.length;
-                    } catch (SerialPortTimeoutException e) {
-                        Utils.pause(250);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    offset = readByte(offset, b, p);
                 } else {
                     Utils.pause(500);
                 }
             }
         });
         thread.start();
+    }
+
+    private int readByte(int offset, int[] b, SerialPort p) {
+        try {
+            int r = p.getInputStream().read();
+            b[offset] = r & 0xFF;
+            if (callback != null && callback.onRead(b, offset)) {
+                offset = 0;
+            }
+            offset++;
+            offset = offset % b.length;
+        } catch (SerialPortTimeoutException e) {
+            Utils.pause(250);
+        } catch (IOException e) {
+            resetPortAndReader();
+        }
+        return offset;
     }
 
     private void resetPortAndReader() {
