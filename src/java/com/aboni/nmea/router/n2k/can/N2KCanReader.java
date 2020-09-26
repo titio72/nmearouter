@@ -80,7 +80,7 @@ public class N2KCanReader {
     }
 
     public boolean onRead(int[] b, int offset) {
-        if (offset>2 && b[offset] == 0xaa && b[offset - 1] == 0xaa && b[offset - 2] == 0x55) {
+        if (offset>2 && b[offset] == 0xaa && b[offset - 1] == 0x55) {
             handleFrame(b, offset);
             return true;
         }
@@ -92,15 +92,15 @@ public class N2KCanReader {
     }
 
     private void handleFrame(int[] b, int offset) {
-        int dataSize = (b[0] & 0x0F);
+        int dataSize = (b[1] & 0x0F);
         long id;
-        boolean ext = (b[0] & 0x20) != 0;
-        if (offset == (2 + dataSize + (ext ? 4 : 2))) {
+        boolean ext = (b[1] & 0x20) != 0;
+        if (offset == (3 + dataSize + (ext ? 4 : 2))) {
             stats.incrFrames(1);
             if (ext) {
-                id = b[1] + (b[2] << 8) + (b[3] << 16) + ((long) b[4] << 24);
+                id = b[2] + (b[3] << 8) + (b[4] << 16) + ((long) b[5] << 24);
             } else {
-                id = b[1] + (b[2] << 8);
+                id = b[2] + (b[3] << 8);
             }
             dumpAnalyzerFormat(offset, b, dataSize, id);
         } else if (errCallback != null) {

@@ -22,6 +22,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private long lastStats;
+    private String description;
 
     private class Stats {
         long messages;
@@ -146,6 +147,10 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         super.onTimer();
         long t = getCache().getNow();
         if ((Utils.isOlderThan(lastStats, t, 30000))) {
+	    synchronized (this) {
+                description = getType() + " " + stats.toString(t);
+	    }
+
             getLogger().info("CAN Agent STATS " + stats.toString(t));
             getLogger().info("CAN Agent STATS " + canReader.getStats().toString(t));
             getLogger().info("CAN Agent STATS " + serialReader.getStats().toString(t));
