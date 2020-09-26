@@ -1,9 +1,11 @@
 package com.aboni.utils;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.TimestampProvider;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -12,10 +14,65 @@ public class SerialReader {
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
 
+    public class Stats {
+        private long bytesRead;
+        private long overFlows;
+        private long lastBytesReadReset;
+
+        public long getBytesRead() {
+            synchronized (this) {
+                return bytesRead;
+            }
+        }
+
+        public long getOverFlows() {
+            synchronized (this) {
+                return overFlows;
+            }
+        }
+
+        public void reset() {
+            synchronized (this) {
+                bytesRead = 0;
+                overFlows = 0;
+                lastBytesReadReset = ts.getNow();
+            }
+        }
+
+        private void incrBytesRead(int n) {
+            synchronized (this) {
+                if (bytesRead<Long.MAX_VALUE) bytesRead++;
+            }
+        }
+
+        private void incrOverflows(int n) {
+            synchronized (this) {
+                if (overFlows<Long.MAX_VALUE) overFlows++;
+            }
+        }
+
+        public long getLastResetTime() {
+            synchronized (this) {
+                return lastBytesReadReset;
+            }
+        }
+
+        public String toString(long t) {
+            synchronized (this) {
+                return String.format("Bytes {%d} Overflows {%d} Period {%d}", bytesRead, overFlows, t - lastBytesReadReset);
+            }
+        }
+
+    }
+
+    private final Stats stats;
+
+    private TimestampProvider ts;
+
     private static class Config {
         private String portName;
         private int speed;
-        private int bufferSize = 4096;
+        private int bufferSize = 256;
 
         String getPortName() {
             return portName;
@@ -48,9 +105,20 @@ public class SerialReader {
     private long lastPortRetryTime;
     private ReaderCallback callback;
 
-    public SerialReader() {
+    @Inject
+    public SerialReader(TimestampProvider ts) {
+        this.ts = ts;
         config = new Config();
+        stats = new Stats();
     }
+
+    @Inject
+    public SerialReader() {
+        this.ts = ThingsFactory.getInstance(TimestampProvider.class);
+        config = new Config();
+        stats = new Stats();
+    }
+
 
     public void setup(String portName, int speed, ReaderCallback callback) {
         config.setPortName(portName);
@@ -65,13 +133,17 @@ public class SerialReader {
         this.callback = callback;
     }
 
+    public Stats getStats() {
+        return stats;
+    }
+
     public boolean activate() {
         try {
             run.set(true);
+            stats.reset();
             startReader();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             resetPortAndReader();
         }
         return false;
@@ -119,12 +191,16 @@ public class SerialReader {
     private int readByte(int offset, int[] b, SerialPort p) {
         try {
             int r = p.getInputStream().read();
+            stats.incrBytesRead(1);
             b[offset] = r & 0xFF;
             if (callback != null && callback.onRead(b, offset)) {
                 offset = 0;
             }
             offset++;
-            offset = offset % b.length;
+            if (offset>=b.length) {
+                stats.incrOverflows(1);
+                offset = 0;
+            }
         } catch (SerialPortTimeoutException e) {
             Utils.pause(250);
         } catch (IOException e) {

@@ -64,6 +64,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("play")).to(NMEARouterPlayerBuilderImpl.class);
         bind(AbstractHandler.class).to(WebHandler.class);
         bind(NMEACache.class).to(NMEACacheImpl.class).in(Singleton.class);
+        bind(TimestampProvider.class).to(DefaultTimestampProvider.class).in(Singleton.class);
         bind(NMEAStream.class).to(NMEAStreamImpl.class).in(Singleton.class);
         bind(NMEARouter.class).to(NMEARouterImpl.class).in(Singleton.class);
         bind(WebServiceFactory.class).to(WebServiceFactoryImpl.class).in(Singleton.class);

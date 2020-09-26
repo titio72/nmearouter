@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.agent.QOS;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -20,20 +21,68 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     private final N2KCanReader canReader;
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
+    private long lastStats;
+
+    private class Stats {
+        long messages;
+        long messagesAccepted;
+        long errors;
+        long lastReset;
+
+        void incrMessages() {
+            synchronized (this) {
+                messages++;
+            }
+        }
+
+        void incrAccepted() {
+            synchronized (this) {
+                messagesAccepted++;
+            }
+        }
+
+        void incrErrors() {
+            synchronized (this) {
+                errors++;
+            }
+        }
+
+        void reset() {
+            synchronized (this) {
+                messagesAccepted = 0;
+                messages = 0;
+                errors = 0;
+                lastReset = getCache().getNow();
+            }
+        }
+
+        String toString(long t) {
+            return String.format("Message {%d} Accepted {%d} Errors {%s} Period {%d}", messages, messagesAccepted, errors, t - lastReset);
+        }
+    }
+
+    private final Stats stats = new Stats();
 
     @Inject
-    public NMEACanBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, N2KMessage2NMEA0183 converter) {
+    public NMEACanBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, @NotNull N2KCanReader canReader, N2KMessage2NMEA0183 converter) {
         super(cache);
         setSourceTarget(true, false);
-        fastCache.setCallback(this::onReceive);
-        canReader = new N2KCanReader(fastCache::onMessage);
-        canReader.setErrCallback(this::onError);
+        stats.reset();
+
         serialReader = new SerialReader();
+
+        fastCache.setCallback(this::onReceive);
+
+        this.canReader = canReader;
+        canReader.setCallback(fastCache::onMessage);
+        canReader.setErrCallback(this::onError);
+
         srcFilter = new PGNSourceFilter(getLogger());
         this.converter = converter;
     }
 
     private void onError(byte[] buffer) {
+        stats.incrErrors();
         StringBuilder sb = new StringBuilder("NMEACanBusAgent Error decoding buffer {");
         for (byte b : buffer) {
             sb.append(String.format(" %02x", b));
@@ -43,8 +92,10 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     }
 
     private void onReceive(@NotNull N2KMessage msg) {
+        stats.incrMessages();
         if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
                 && N2KMessageDefinitions.isSupported(msg.getHeader().getPgn())) {
+            stats.incrAccepted();
             notify(msg);
             if (converter != null) {
                 Sentence[] s = converter.getSentence(msg);
@@ -67,12 +118,12 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return getType();
+        return getType() + " " + stats.toString();
     }
 
     @Override
     public String toString() {
-        return getDescription();
+        return getType();
     }
 
     @Override
@@ -88,5 +139,22 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     protected void onDeactivate() {
         super.onDeactivate();
         serialReader.deactivate();
+    }
+
+    @Override
+    public void onTimer() {
+        super.onTimer();
+        long t = getCache().getNow();
+        if ((Utils.isOlderThan(lastStats, t, 30000))) {
+            getLogger().info("CAN Agent STATS " + stats.toString(t));
+            getLogger().info("CAN Agent STATS " + canReader.getStats().toString(t));
+            getLogger().info("CAN Agent STATS " + serialReader.getStats().toString(t));
+
+            stats.reset();
+            canReader.getStats().reset();
+            serialReader.getStats().reset();
+
+            lastStats = t;
+        }
     }
 }

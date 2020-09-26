@@ -1,6 +1,7 @@
 package com.aboni.toolkit;
 
 import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.impl.DefaultTimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.can.N2KCanReader;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
@@ -25,7 +26,8 @@ public class TestSerialReader {
         SerialReader s = new SerialReader();
         N2KFastCache cache = new N2KFastCache(null);
         cache.setCallback(TestSerialReader::onMsg);
-        N2KCanReader reader = new N2KCanReader(cache::onMessage);
+        N2KCanReader reader = new N2KCanReader(new DefaultTimestampProvider());
+        reader.setCallback(cache::onMessage);
         //N2KCanReader reader = new N2KCanReader(TestSerialReader::onMsg);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();

@@ -1,15 +1,78 @@
 package com.aboni.nmea.router.n2k.can;
 
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessageCallback;
 import com.aboni.nmea.router.n2k.impl.N2KMessageDefaultImpl;
 
+import javax.inject.Inject;
+
 public class N2KCanReader {
 
-    private final N2KMessageCallback callback;
+    private final TimestampProvider ts;
+
+    private N2KMessageCallback callback;
     private N2KCanBusErrorCallback errCallback;
 
-    public N2KCanReader(N2KMessageCallback messageCallback) {
-        callback = messageCallback;
+    public class Stats {
+        private long frames;
+        private long invalidFrames;
+        private long lastReset;
+
+        public long getFrames() {
+            synchronized (this) {
+                return frames;
+            }
+        }
+
+        public long getInvalidFrames() {
+            synchronized (this) {
+                return invalidFrames;
+            }
+        }
+
+        public void reset() {
+            synchronized (this) {
+                frames = 0;
+                invalidFrames = 0;
+                lastReset = ts.getNow();
+            }
+        }
+
+        private void incrFrames(int n) {
+            synchronized (this) {
+                if (frames<Long.MAX_VALUE) frames++;
+            }
+        }
+
+        private void incrInvalidFrames(int n) {
+            synchronized (this) {
+                if (invalidFrames<Long.MAX_VALUE) invalidFrames++;
+            }
+        }
+
+        public long getLastResetTime() {
+            synchronized (this) {
+                return lastReset;
+            }
+        }
+
+        public String toString(long t) {
+            synchronized (this) {
+                return String.format("Frames {%d} Invalid Frames {%d} Period {%d}", frames, invalidFrames, t - lastReset);
+            }
+        }
+
+    }
+
+    private final Stats stats = new Stats();
+
+    @Inject
+    public N2KCanReader(TimestampProvider ts) {
+        this.ts = ts;
+    }
+
+    public void setCallback(N2KMessageCallback cback) {
+        this.callback = cback;
     }
 
     public void setErrCallback(N2KCanBusErrorCallback errCallback) {
@@ -17,26 +80,31 @@ public class N2KCanReader {
     }
 
     public boolean onRead(int[] b, int offset) {
-        if (b[offset] == 0xaa && offset > 1 && b[offset - 1] == 0x55) {
-            // Note: b[0] is always 0xaa - frames are separated by a (0xaa, 0xaa)
+        if (offset>2 && b[offset] == 0xaa && b[offset - 1] == 0xaa && b[offset - 2] == 0x55) {
             handleFrame(b, offset);
             return true;
         }
         return false;
     }
 
+    public Stats getStats() {
+        return stats;
+    }
+
     private void handleFrame(int[] b, int offset) {
-        int dataSize = (b[1] & 0x0F);
+        int dataSize = (b[0] & 0x0F);
         long id;
-        boolean ext = (b[1] & 0x20) != 0;
-        if (offset == (3 + dataSize + (ext ? 4 : 2))) {
+        boolean ext = (b[0] & 0x20) != 0;
+        if (offset == (2 + dataSize + (ext ? 4 : 2))) {
+            stats.incrFrames(1);
             if (ext) {
-                id = b[2] + (b[3] << 8) + (b[4] << 16) + ((long) b[5] << 24);
+                id = b[1] + (b[2] << 8) + (b[3] << 16) + ((long) b[4] << 24);
             } else {
-                id = b[2] + (b[3] << 8);
+                id = b[1] + (b[2] << 8);
             }
             dumpAnalyzerFormat(offset, b, dataSize, id);
         } else if (errCallback != null) {
+            stats.incrInvalidFrames(1);
             byte[] errB = new byte[offset];
             for (int i = 0; i < offset; i++) {
                 errB[i] = (byte) (b[i] & 0xFF);

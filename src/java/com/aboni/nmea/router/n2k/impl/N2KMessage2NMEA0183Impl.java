@@ -285,7 +285,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             send = true;
         }
         if (!Double.isNaN(message.getRoll())) {
-            double roll = Utils.round(message.getYaw() - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), 1);
+            double roll = Utils.round(message.getRoll() - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), 1);
             xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
             send = true;
         }
