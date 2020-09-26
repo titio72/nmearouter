@@ -12,12 +12,11 @@ import com.google.inject.Injector;
 
 public class TestSerialReader {
 
-    private static final String PORT_NAME = "/dev/ttyUSB0";
+    private static final String PORT_NAME = "COM10";
     private static final int SPEED = 115200;
 
     public static void onMsg(N2KMessage msg) {
-        if (msg.getHeader().getPgn() == 129540)
-            System.out.println(msg);
+        System.out.println(msg);
     }
 
     public static void main(String[] args) {
@@ -27,8 +26,8 @@ public class TestSerialReader {
         N2KFastCache cache = new N2KFastCache(null);
         cache.setCallback(TestSerialReader::onMsg);
         N2KCanReader reader = new N2KCanReader(new DefaultTimestampProvider());
-        reader.setCallback(cache::onMessage);
-        //N2KCanReader reader = new N2KCanReader(TestSerialReader::onMsg);
+        //reader.setCallback(cache::onMessage);
+        reader.setCallback(TestSerialReader::onMsg);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();
     }

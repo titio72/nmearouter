@@ -91,25 +91,44 @@ public class N2KCanReader {
         return stats;
     }
 
+    private boolean isDataPackage(int type) {
+        return ((type >> 6) ^ 3) == 0;
+    }
+
+    private static boolean isExt(int type) {
+        return (type & 0x20) != 0;
+    }
+
+    private static long getExtId(int[] b) {
+        return b[2] + (b[3] << 8) + (b[4] << 16) + ((long) b[5] << 24);
+    }
+
+    private static long getId(int[] b) {
+        return b[2] + (b[3] << 8);
+    }
+
+    private static boolean checkBufferSize(int l, int dataSize, boolean ext) {
+        // 3 because we have the initial 0xaa, the final 0x55 and the type (first byte after the 0xaa)
+        return l == (3 + dataSize + (ext ? 4 : 2));
+    }
+
     private void handleFrame(int[] b, int offset) {
-        int dataSize = (b[1] & 0x0F);
-        long id;
-        boolean ext = (b[1] & 0x20) != 0;
-        if (offset == (3 + dataSize + (ext ? 4 : 2))) {
-            stats.incrFrames(1);
-            if (ext) {
-                id = b[2] + (b[3] << 8) + (b[4] << 16) + ((long) b[5] << 24);
-            } else {
-                id = b[2] + (b[3] << 8);
+        if (isDataPackage(b[1])) {
+            int dataSize = (b[1] & 0x0F);
+            long id;
+            boolean ext = isExt(b[1]);
+            if (checkBufferSize(offset, dataSize, ext)) {
+                stats.incrFrames(1);
+                id = ext?getExtId(b):getId(b);
+                dumpAnalyzerFormat(offset, b, dataSize, id);
+            } else if (errCallback != null) {
+                stats.incrInvalidFrames(1);
+                byte[] errB = new byte[offset];
+                for (int i = 0; i < offset; i++) {
+                    errB[i] = (byte) (b[i] & 0xFF);
+                }
+                errCallback.onError(errB);
             }
-            dumpAnalyzerFormat(offset, b, dataSize, id);
-        } else if (errCallback != null) {
-            stats.incrInvalidFrames(1);
-            byte[] errB = new byte[offset];
-            for (int i = 0; i < offset; i++) {
-                errB[i] = (byte) (b[i] & 0xFF);
-            }
-            errCallback.onError(errB);
         }
     }
 
