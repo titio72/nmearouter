@@ -84,7 +84,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
 
     private void onError(byte[] buffer) {
         stats.incrErrors();
-        StringBuilder sb = new StringBuilder("NMEACanBusAgent Error decoding buffer {");
+        StringBuilder sb = new StringBuilder("Error decoding buffer {");
         for (byte b : buffer) {
             sb.append(String.format(" %02x", b));
         }
@@ -153,9 +153,9 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
                     description = getType() + " " + stats.toString(t);
             }
 
-            getLogger().info("CAN Agent STATS " + stats.toString(t));
-            getLogger().info("CAN Agent STATS " + canReader.getStats().toString(t));
-            getLogger().info("CAN Agent STATS " + serialReader.getStats().toString(t));
+            getLogger().info("STATS " + stats.toString(t));
+            getLogger().info("STATS " + canReader.getStats().toString(t));
+            getLogger().info("STATS " + serialReader.getStats().toString(t));
 
             stats.reset();
             canReader.getStats().reset();
