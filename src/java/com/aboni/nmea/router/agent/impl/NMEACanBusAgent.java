@@ -70,7 +70,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         setSourceTarget(true, false);
         stats.reset();
 
-        serialReader = new SerialReader();
+        serialReader = new SerialReader(cache, getLogger());
 
         fastCache.setCallback(this::onReceive);
 

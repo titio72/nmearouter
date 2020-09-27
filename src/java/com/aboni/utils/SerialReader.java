@@ -131,10 +131,8 @@ public class SerialReader {
     }
 
     @Inject
-    public SerialReader() {
-        this.ts = ThingsFactory.getInstance(TimestampProvider.class);
-        config = new Config();
-        stats = new Stats();
+    public SerialReader(@NotNull Log logger) {
+        this(ThingsFactory.getInstance(TimestampProvider.class), logger);
     }
 
 
