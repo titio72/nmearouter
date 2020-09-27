@@ -119,7 +119,9 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return getType() + " " + stats.toString();
+        synchronized (this) {
+            return description;
+        }
     }
 
     @Override
@@ -147,9 +149,9 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         super.onTimer();
         long t = getCache().getNow();
         if ((Utils.isOlderThan(lastStats, t, 30000))) {
-	    synchronized (this) {
-                description = getType() + " " + stats.toString(t);
-	    }
+            synchronized (this) {
+                    description = getType() + " " + stats.toString(t);
+            }
 
             getLogger().info("CAN Agent STATS " + stats.toString(t));
             getLogger().info("CAN Agent STATS " + canReader.getStats().toString(t));

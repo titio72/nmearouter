@@ -6,6 +6,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,6 +19,7 @@ public class SerialReader {
         private long bytesRead;
         private long overFlows;
         private long lastBytesReadReset;
+        private int timeouts;
 
         public long getBytesRead() {
             synchronized (this) {
@@ -57,12 +59,24 @@ public class SerialReader {
             }
         }
 
-        public String toString(long t) {
+        public int getTimeouts() {
             synchronized (this) {
-                return String.format("Bytes {%d} Overflows {%d} Period {%d}", bytesRead, overFlows, t - lastBytesReadReset);
+                return timeouts;
             }
         }
 
+        public String toString(long t) {
+            synchronized (this) {
+                return String.format("Bytes {%d} Overflows {%d} Timeouts {%d} Period {%d} Last read {%d}",
+                        bytesRead, overFlows, timeouts, t - lastBytesReadReset, t - lastSuccesfullLoop);
+            }
+        }
+
+        public void incrTimeouts(int i) {
+            synchronized (this) {
+                timeouts += i;
+            }
+        }
     }
 
     private final Stats stats;
@@ -104,10 +118,14 @@ public class SerialReader {
     private SerialPort port;
     private long lastPortRetryTime;
     private ReaderCallback callback;
+    private Log logger;
+
+    private long lastSuccesfullLoop;
 
     @Inject
-    public SerialReader(TimestampProvider ts) {
+    public SerialReader(@NotNull TimestampProvider ts, @NotNull Log logger) {
         this.ts = ts;
+        this.logger = logger;
         config = new Config();
         stats = new Stats();
     }
@@ -155,17 +173,18 @@ public class SerialReader {
 
     private SerialPort getPort() {
         synchronized (this) {
-            long now = System.currentTimeMillis();
+            long now = ts.getNow();
             if ((port == null && (now - lastPortRetryTime) > PORT_OPEN_RETRY_TIMEOUT)) {
                 resetPortAndReader();
                 SerialPort p = SerialPort.getCommPort(config.getPortName());
                 p.setComPortParameters(config.getSpeed(), 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, PORT_TIMEOUT, PORT_TIMEOUT);
-                if (!p.openPort()) {
-                    lastPortRetryTime = now;
-                } else {
+                if (p.openPort()) {
                     lastPortRetryTime = 0;
                     port = p;
+                    logger.info(String.format("Serial port opened {%s} at {%d} baud", config.getPortName(), config.getSpeed()));
+                } else {
+                    lastPortRetryTime = now;
                 }
             }
             return port;
@@ -177,11 +196,16 @@ public class SerialReader {
             int offset = 0;
             int[] b = new int[config.bufferSize];
             while (run.get()) {
-                SerialPort p = getPort();
-                if (p != null) {
-                    offset = readByte(offset, b, p);
-                } else {
-                    Utils.pause(500);
+                try {
+                    SerialPort p = getPort();
+                    if (p != null) {
+                        lastSuccesfullLoop = ts.getNow();
+                        offset = readByte(offset, b, p);
+                    } else {
+                        Utils.pause(500);
+                    }
+                } catch (Exception e) {
+                    logger.errorForceStacktrace("Serial port reading loop stoppoed unexpectedly", e);
                 }
             }
         });
@@ -203,16 +227,20 @@ public class SerialReader {
             }
         } catch (SerialPortTimeoutException e) {
             Utils.pause(250);
+            stats.incrTimeouts(1);
         } catch (IOException e) {
+            logger.error("Serial port read error: resetting", e);
             resetPortAndReader();
         }
         return offset;
     }
 
     private void resetPortAndReader() {
-        if (port != null) {
-            port.closePort();
+        synchronized (this) {
+            if (port != null) {
+                port.closePort();
+            }
+            port = null;
         }
-        port = null;
     }
 }
