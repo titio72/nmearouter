@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KWindData;
+import com.aboni.nmea.router.n2k.messages.impl.N2KWindDataImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

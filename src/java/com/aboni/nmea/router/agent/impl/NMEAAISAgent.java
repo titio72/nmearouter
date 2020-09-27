@@ -4,9 +4,9 @@ import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBImpl;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartAImpl;
-import com.aboni.nmea.router.n2k.impl.N2KAISStaticDataBPartBImpl;
+import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBImpl;
+import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
+import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;

@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.*;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Constructor;
@@ -78,7 +79,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
 
     private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
-        N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(pgnData.pgn);
+        N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(pgnData.pgn);
         if (d != null) fast = d.fast;
         if (d != null && d.fast && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
@@ -216,14 +217,14 @@ public class N2KMessageParserImpl implements N2KMessageParser {
 
     @Override
     public boolean isSupported() {
-        return pgnData != null && N2KMessageDefinitions.isSupported(pgnData.pgn);
+        return pgnData != null && N2KMessageFactory.isSupported(pgnData.pgn);
     }
 
     @Override
     public N2KMessage getMessage() throws PGNDataParseException {
         if (pgnData == null) return null;
         if (message == null) {
-            N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(pgnData.pgn);
+            N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(pgnData.pgn);
             if (d != null && d.constructor != null) {
                 Constructor<?> constructor = d.constructor;
                 try {

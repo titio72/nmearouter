@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.n2k.messages.impl.N2KAISAtoN;
 import org.junit.Test;
 
 public class N2KAISAtoNTest {

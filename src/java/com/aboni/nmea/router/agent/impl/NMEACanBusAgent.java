@@ -8,7 +8,7 @@ import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.N2KCanReader;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
-import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
+import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
 import com.aboni.utils.SerialReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -23,6 +23,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     private final PGNSourceFilter srcFilter;
     private long lastStats;
     private String description;
+    private static final String STATS_TAG = "STATS ";
 
     private class Stats {
         long messages;
@@ -30,19 +31,19 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         long errors;
         long lastReset;
 
-        void incrMessages() {
+        void incrementMessages() {
             synchronized (this) {
                 messages++;
             }
         }
 
-        void incrAccepted() {
+        void incrementAccepted() {
             synchronized (this) {
                 messagesAccepted++;
             }
         }
 
-        void incrErrors() {
+        void incrementErrors() {
             synchronized (this) {
                 errors++;
             }
@@ -83,7 +84,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     }
 
     private void onError(byte[] buffer) {
-        stats.incrErrors();
+        stats.incrementErrors();
         StringBuilder sb = new StringBuilder("Error decoding buffer {");
         for (byte b : buffer) {
             sb.append(String.format(" %02x", b));
@@ -93,10 +94,10 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     }
 
     private void onReceive(@NotNull N2KMessage msg) {
-        stats.incrMessages();
+        stats.incrementMessages();
         if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
-                && N2KMessageDefinitions.isSupported(msg.getHeader().getPgn())) {
-            stats.incrAccepted();
+                && N2KMessageFactory.isSupported(msg.getHeader().getPgn())) {
+            stats.incrementAccepted();
             notify(msg);
             if (converter != null) {
                 Sentence[] s = converter.getSentence(msg);
@@ -150,12 +151,12 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         long t = getCache().getNow();
         if ((Utils.isOlderThan(lastStats, t, 30000))) {
             synchronized (this) {
-                    description = getType() + " " + stats.toString(t);
+                description = getType() + " " + stats.toString(t);
             }
 
-            getLogger().info("STATS " + stats.toString(t));
-            getLogger().info("STATS " + canReader.getStats().toString(t));
-            getLogger().info("STATS " + serialReader.getStats().toString(t));
+            getLogger().info(STATS_TAG + stats.toString(t));
+            getLogger().info(STATS_TAG + canReader.getStats().toString(t));
+            getLogger().info(STATS_TAG + serialReader.getStats().toString(t));
 
             stats.reset();
             canReader.getStats().reset();

@@ -11,7 +11,7 @@ public class N2KHeadingTest {
 
     @Test
     public void testHeadingOk() throws PGNDataParseException {
-        N2KHeading h = (N2KHeading) N2KMessageDefinitions.newInstance(N2kMessagePGNs.HEADING_PGN, new byte[]{(byte) 0xff, (byte) 0xf7, (byte) 0x12, (byte) 0xff, (byte) 0x7f, (byte) 0xff, (byte) 0x7f, (byte) 0xfd});
+        N2KHeading h = (N2KHeading) N2KMessageFactory.newInstance(N2kMessagePGNs.HEADING_PGN, new byte[]{(byte) 0xff, (byte) 0xf7, (byte) 0x12, (byte) 0xff, (byte) 0x7f, (byte) 0xff, (byte) 0x7f, (byte) 0xfd});
         assertEquals(0xFF, h.getSID());
         assertEquals(27.8, h.getHeading(), 0.1);
         assertTrue(Double.isNaN(h.getVariation()));

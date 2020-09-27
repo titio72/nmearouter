@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.messages.impl.N2KSystemTimeImpl;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.ZDASentence;
 import net.sf.marineapi.nmea.util.Date;

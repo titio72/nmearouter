@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotLockedHeading;
+import com.aboni.nmea.router.n2k.messages.impl.N2KSeatalkPilotLockedHeadingImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

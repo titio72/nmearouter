@@ -4,7 +4,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
-import com.aboni.nmea.router.n2k.impl.N2KMessageDefinitions;
+import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
@@ -63,7 +63,7 @@ public class N2KFastCache {
         N2KFastEnvelope id = new N2KFastEnvelope();
         id.pgn = msg.getHeader().getPgn();
         id.src = msg.getHeader().getSource();
-        N2KMessageDefinitions.N2KDef d = N2KMessageDefinitions.getDefinition(id.pgn);
+        N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(id.pgn);
         if (d != null) {
             if (d.isFast()) {
                 handleFastMessage(msg, id);

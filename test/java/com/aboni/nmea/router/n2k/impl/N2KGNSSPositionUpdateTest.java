@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.messages.N2KGNSSPositionUpdate;
+import com.aboni.nmea.router.n2k.messages.impl.N2KGNSSPositionUpdateImpl;
 import org.junit.Test;
 
 import java.time.Instant;

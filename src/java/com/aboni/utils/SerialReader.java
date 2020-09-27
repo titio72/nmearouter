@@ -41,15 +41,15 @@ public class SerialReader {
             }
         }
 
-        private void incrBytesRead(int n) {
+        private void incrementBytesRead() {
             synchronized (this) {
-                if (bytesRead<Long.MAX_VALUE) bytesRead++;
+                if (bytesRead < Long.MAX_VALUE) bytesRead += 1;
             }
         }
 
-        private void incrOverflows(int n) {
+        private void incrementOverflows() {
             synchronized (this) {
-                if (overFlows<Long.MAX_VALUE) overFlows++;
+                if (overFlows < Long.MAX_VALUE) overFlows += 1;
             }
         }
 
@@ -68,11 +68,11 @@ public class SerialReader {
         public String toString(long t) {
             synchronized (this) {
                 return String.format("Bytes {%d} Overflows {%d} Timeouts {%d} Period {%d} Last read {%d}",
-                        bytesRead, overFlows, timeouts, t - lastBytesReadReset, t - lastSuccesfullLoop);
+                        bytesRead, overFlows, timeouts, t - lastBytesReadReset, t - lastSuccessfulLoop);
             }
         }
 
-        public void incrTimeouts(int i) {
+        public void incrementTimeouts(int i) {
             synchronized (this) {
                 timeouts += i;
             }
@@ -81,7 +81,7 @@ public class SerialReader {
 
     private final Stats stats;
 
-    private TimestampProvider ts;
+    private final TimestampProvider ts;
 
     private static class Config {
         private String portName;
@@ -118,9 +118,9 @@ public class SerialReader {
     private SerialPort port;
     private long lastPortRetryTime;
     private ReaderCallback callback;
-    private Log logger;
+    private final Log logger;
 
-    private long lastSuccesfullLoop;
+    private long lastSuccessfulLoop;
 
     @Inject
     public SerialReader(@NotNull TimestampProvider ts, @NotNull Log logger) {
@@ -153,16 +153,14 @@ public class SerialReader {
         return stats;
     }
 
-    public boolean activate() {
+    public void activate() {
         try {
             run.set(true);
             stats.reset();
             startReader();
-            return true;
         } catch (Exception e) {
             resetPortAndReader();
         }
-        return false;
     }
 
     public void deactivate() {
@@ -197,13 +195,13 @@ public class SerialReader {
                 try {
                     SerialPort p = getPort();
                     if (p != null) {
-                        lastSuccesfullLoop = ts.getNow();
+                        lastSuccessfulLoop = ts.getNow();
                         offset = readByte(offset, b, p);
                     } else {
                         Utils.pause(500);
                     }
                 } catch (Exception e) {
-                    logger.errorForceStacktrace("Serial port reading loop stoppoed unexpectedly", e);
+                    logger.errorForceStacktrace("Serial port reading loop stopped unexpectedly", e);
                 }
             }
         });
@@ -213,19 +211,19 @@ public class SerialReader {
     private int readByte(int offset, int[] b, SerialPort p) {
         try {
             int r = p.getInputStream().read();
-            stats.incrBytesRead(1);
+            stats.incrementBytesRead();
             b[offset] = r & 0xFF;
             if (callback != null && callback.onRead(b, offset)) {
                 offset = 0;
             }
             offset++;
             if (offset>=b.length) {
-                stats.incrOverflows(1);
+                stats.incrementOverflows();
                 offset = 0;
             }
         } catch (SerialPortTimeoutException e) {
             Utils.pause(250);
-            stats.incrTimeouts(1);
+            stats.incrementTimeouts(1);
         } catch (IOException e) {
             logger.error("Serial port read error: resetting", e);
             resetPortAndReader();

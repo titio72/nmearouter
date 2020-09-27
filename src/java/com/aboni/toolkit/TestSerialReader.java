@@ -17,7 +17,7 @@ public class TestSerialReader {
     private static final int SPEED = 115200;
 
     public static void onMsg(N2KMessage msg) {
-        System.out.println(msg);
+        ConsoleLog.getLogger().console(msg.toString());
     }
 
     public static void main(String[] args) {
@@ -27,7 +27,6 @@ public class TestSerialReader {
         N2KFastCache cache = new N2KFastCache(null);
         cache.setCallback(TestSerialReader::onMsg);
         N2KCanReader reader = new N2KCanReader(new DefaultTimestampProvider());
-        //reader.setCallback(cache::onMessage);
         reader.setCallback(TestSerialReader::onMsg);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();

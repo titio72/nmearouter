@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotWindDatum;
+import com.aboni.nmea.router.n2k.messages.impl.N2KSeatalkPilotWindDatumImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

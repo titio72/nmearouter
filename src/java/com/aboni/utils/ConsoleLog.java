@@ -33,7 +33,7 @@ public class ConsoleLog implements Log {
 
     private final Logger lgConsole;
 
-    private static ConsoleLog logger = new ConsoleLog();
+    private static final ConsoleLog logger = new ConsoleLog();
 
     public static ConsoleLog getLogger() {
         return logger;

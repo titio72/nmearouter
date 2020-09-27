@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.messages.N2KEnvironment310;
+import com.aboni.nmea.router.n2k.messages.impl.N2KEnvironment310Impl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

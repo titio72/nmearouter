@@ -2,7 +2,7 @@ package com.aboni.nmea.router.n2k.can;
 
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessageCallback;
-import com.aboni.nmea.router.n2k.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
 
 import javax.inject.Inject;
 
@@ -38,15 +38,15 @@ public class N2KCanReader {
             }
         }
 
-        private void incrFrames(int n) {
+        private void incrementFrames() {
             synchronized (this) {
-                if (frames<Long.MAX_VALUE) frames++;
+                if (frames < Long.MAX_VALUE) frames += 1;
             }
         }
 
-        private void incrInvalidFrames(int n) {
+        private void incrementInvalidFrames() {
             synchronized (this) {
-                if (invalidFrames<Long.MAX_VALUE) invalidFrames++;
+                if (invalidFrames < Long.MAX_VALUE) invalidFrames += 1;
             }
         }
 
@@ -71,8 +71,8 @@ public class N2KCanReader {
         this.ts = ts;
     }
 
-    public void setCallback(N2KMessageCallback cback) {
-        this.callback = cback;
+    public void setCallback(N2KMessageCallback callback) {
+        this.callback = callback;
     }
 
     public void setErrCallback(N2KCanBusErrorCallback errCallback) {
@@ -80,7 +80,7 @@ public class N2KCanReader {
     }
 
     public boolean onRead(int[] b, int offset) {
-        if (offset>2 && b[offset] == 0xaa && b[offset - 1] == 0x55) {
+        if (offset > 2 && b[offset] == 0xaa && b[offset - 1] == 0x55) {
             handleFrame(b, offset);
             return true;
         }
@@ -104,7 +104,7 @@ public class N2KCanReader {
     }
 
     private static long getId(int[] b) {
-        return b[2] + (b[3] << 8);
+        return b[2] + ((long) b[3] << 8);
     }
 
     private static boolean checkBufferSize(int l, int dataSize, boolean ext) {
@@ -118,11 +118,11 @@ public class N2KCanReader {
             long id;
             boolean ext = isExt(b[1]);
             if (checkBufferSize(offset, dataSize, ext)) {
-                stats.incrFrames(1);
-                id = ext?getExtId(b):getId(b);
+                stats.incrementFrames();
+                id = ext ? getExtId(b) : getId(b);
                 dumpAnalyzerFormat(offset, b, dataSize, id);
             } else if (errCallback != null) {
-                stats.incrInvalidFrames(1);
+                stats.incrementInvalidFrames();
                 byte[] errB = new byte[offset];
                 for (int i = 0; i < offset; i++) {
                     errB[i] = (byte) (b[i] & 0xFF);
