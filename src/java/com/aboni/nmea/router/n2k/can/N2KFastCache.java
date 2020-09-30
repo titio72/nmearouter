@@ -73,7 +73,9 @@ public class N2KFastCache {
                     p.addMessage(msg);
                     callback.onMessage(p.getMessage());
                 } catch (PGNDataParseException e) {
-                    ServerLog.getLogger().error(ERR_MSG, e);
+                    ServerLog.getLogger().error("N2K message parsing error", e);
+                } catch (Exception e) {
+                    ServerLog.getLogger().errorForceStacktrace(ERR_MSG, e);
                 }
             }
         }
@@ -99,8 +101,11 @@ public class N2KFastCache {
         } catch (PGNFastException e) {
             ServerLog.getLogger().debug("Out of sequence message {" + msg + "} err {" + e.getMessage() + "}");
             remove = true;
+        } catch (PGNDataParseException e) {
+            ServerLog.getLogger().error("N2K fast message parsing error", e);
+            remove = true;
         } catch (Exception e) {
-            ServerLog.getLogger().error(ERR_MSG, e);
+            ServerLog.getLogger().errorForceStacktrace(ERR_MSG, e);
             remove = true;
         }
         if (remove) {

@@ -15,12 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEASentenceListener;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.agent.*;
+import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
+import com.aboni.nmea.router.agent.NMEASource;
+import com.aboni.nmea.router.agent.NMEATarget;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.impl.ListenerWrapper;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;

@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.sentences.NMEA2JSONb;

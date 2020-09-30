@@ -17,8 +17,8 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.conf.net.NetConf;
+import com.aboni.nmea.router.conf.NetConf;
+import com.aboni.nmea.router.conf.QOS;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;

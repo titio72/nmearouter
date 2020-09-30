@@ -15,29 +15,24 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAFilterable;
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEARouterBuilder;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
+import com.aboni.nmea.router.agent.BuiltInAgents;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
-import com.aboni.nmea.router.agent.QOS;
-import com.aboni.nmea.router.agent.impl.DepthStatsAgent;
-import com.aboni.nmea.router.agent.impl.NMEA2FileAgent;
-import com.aboni.nmea.router.agent.impl.NMEAAutoPilotAgent;
-import com.aboni.nmea.router.agent.impl.QOSKeys;
-import com.aboni.nmea.router.agent.impl.system.*;
+import com.aboni.nmea.router.conf.AgentConfJSON;
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
+import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -45,18 +40,22 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("OverlyCoupledClass")
 public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private static final boolean ENABLE_GPS_TIME = true;
     private static final boolean ENABLE_AP = false;
     private final AgentStatusManager agentStatusManager;
+    private final NMEAAgentBuilderJson builder;
+    private final FilterSetSerializer filterSetSerializer;
 
     private NMEARouter theRouter;
 
     @Inject
-    public NMEARouterDefaultBuilderImpl(AgentStatusManager agentStatusManager) {
+    public NMEARouterDefaultBuilderImpl(@NotNull AgentStatusManager agentStatusManager, @NotNull NMEAAgentBuilderJson builder,
+                                        @NotNull @Named(Constants.TAG_JSON) FilterSetSerializer filterSetSerializer) {
         this.agentStatusManager = agentStatusManager;
+        this.builder = builder;
+        this.filterSetSerializer = filterSetSerializer;
     }
 
     @Override
@@ -98,9 +97,8 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     }
 
     private void buildAgents(ConfJSON conf, NMEARouter r) throws MalformedConfigurationException {
-        NMEAAgentBuilderJson builder = ThingsFactory.getInstance(NMEAAgentBuilderJson.class);
         Set<NMEAAgent> toActivate = new HashSet<>();
-        for (ConfJSON.AgentDef a : conf.getAgents()) {
+        for (AgentConfJSON a : conf.getAgents()) {
             NMEAAgent agent = builder.createAgent(a);
             if (agent != null) {
                 r.addAgent(agent);
@@ -149,18 +147,18 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         if (tgt != null) {
             String data = agentStatusManager.getFilterOutData(agent.getName());
             if (data == null) {
-                agentStatusManager.setFilterOutData(agent.getName(), new JSONFilterSetSerializer().exportFilter(tgt.getFilter()));
+                agentStatusManager.setFilterOutData(agent.getName(), filterSetSerializer.exportFilter(tgt.getFilter()));
             } else {
-                tgt.setFilter(new JSONFilterSetSerializer().importFilter(data));
+                tgt.setFilter(filterSetSerializer.importFilter(data));
             }
         }
         NMEAFilterable src = agent.getSource();
         if (src != null) {
             String data = agentStatusManager.getFilterInData(agent.getName());
             if (data == null) {
-                agentStatusManager.setFilterInData(agent.getName(), new JSONFilterSetSerializer().exportFilter(src.getFilter()));
+                agentStatusManager.setFilterInData(agent.getName(), filterSetSerializer.exportFilter(src.getFilter()));
             } else {
-                src.setFilter(new JSONFilterSetSerializer().importFilter(data));
+                src.setFilter(filterSetSerializer.importFilter(data));
             }
         }
     }
@@ -179,80 +177,67 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
     }
 
     private void buildStreamDump(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        NMEA2FileAgent dumper = ThingsFactory.getInstance(NMEA2FileAgent.class);
-        dumper.setup("Log", q);
-        r.addAgent(dumper);
-        handleFilter(dumper);
+        NMEAAgent dumper = builder.createAgent(BuiltInAgents.FILE_DUMPER);
+        if (dumper != null) {
+            r.addAgent(dumper);
+            handleFilter(dumper);
+        }
     }
 
     private void buildDPTStats(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        DepthStatsAgent a = ThingsFactory.getInstance(DepthStatsAgent.class);
-        a.setup("Depth", q);
-        r.addAgent(a);
-        a.start();
+        NMEAAgent a = builder.createAgent(BuiltInAgents.DEPTH_STATS);
+        if (a != null) {
+            r.addAgent(a);
+            a.start();
+        }
     }
 
     private void buildPowerLedTarget(NMEARouter r) {
-        if (System.getProperty("os.arch").startsWith("arm")) {
-            QOS q = createBuiltInQOS();
-            q.addProp(QOSKeys.CANNOT_START_STOP);
-            PowerLedAgent pwrLed = ThingsFactory.getInstance(PowerLedAgent.class);
-            pwrLed.setup("PowerLed", q);
+        NMEAAgent pwrLed = builder.createAgent(BuiltInAgents.POWER_LED);
+        if (pwrLed != null) {
             r.addAgent(pwrLed);
             pwrLed.start();
         }
     }
 
     private void buildAutoPilot(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        NMEAAutoPilotAgent ap = ThingsFactory.getInstance(NMEAAutoPilotAgent.class);
-        ap.setup("SmartPilot", q);
-        r.addAgent(ap);
-        ap.start();
+        NMEAAgent ap = builder.createAgent(BuiltInAgents.AUTO_PILOT);
+        if (ap != null) {
+            r.addAgent(ap);
+            ap.start();
+        }
     }
 
     private void buildFanTarget(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        q.addProp(QOSKeys.CANNOT_START_STOP);
-        FanAgent fan = ThingsFactory.getInstance(FanAgent.class);
-        fan.setup("FanManager", q);
-        r.addAgent(fan);
-        fan.start();
+        NMEAAgent fan = builder.createAgent(BuiltInAgents.FAN_MANAGER);
+        if (fan != null) {
+            r.addAgent(fan);
+            fan.start();
+        }
     }
 
     private void buildEngineDetector(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        q.addProp(QOSKeys.CANNOT_START_STOP);
-        EngineDetectionAgent eng = ThingsFactory.getInstance(EngineDetectionAgent.class);
-        eng.setup("EngineManager", q);
-        r.addAgent(eng);
-        eng.start();
+        NMEAAgent eng = builder.createAgent(BuiltInAgents.ENGINE_DETECTOR);
+        if (eng != null) {
+            r.addAgent(eng);
+            eng.start();
+        }
     }
 
     private void buildGPSTimeTarget(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        q.addProp(QOSKeys.CANNOT_START_STOP);
-        NMEASystemTimeGPS gpsTime = ThingsFactory.getInstance(NMEASystemTimeGPS.class);
-        gpsTime.setup("GPSTime", q);
-        r.addAgent(gpsTime);
-        handleFilter(gpsTime);
-        gpsTime.start();
+        NMEAAgent gpsTime = builder.createAgent(BuiltInAgents.GPS_TIME_SYNC);
+        if (gpsTime != null) {
+            r.addAgent(gpsTime);
+            handleFilter(gpsTime);
+            gpsTime.start();
+        }
     }
 
     private void buildWebUI(NMEARouter r) {
-        QOS q = createBuiltInQOS();
-        q.addProp(QOSKeys.CANNOT_START_STOP);
-        WebInterfaceAgent web = ThingsFactory.getInstance(WebInterfaceAgent.class);
-        web.setup("UI", q);
-        r.addAgent(web);
-        web.start();
-    }
-
-    private QOS createBuiltInQOS() {
-        QOS q = new QOS();
-        q.addProp(QOSKeys.BUILT_IN);
-        return q;
+        NMEAAgent web = builder.createAgent(BuiltInAgents.WEB_UI);
+        if (web != null) {
+            r.addAgent(web);
+            web.start();
+        }
     }
 }

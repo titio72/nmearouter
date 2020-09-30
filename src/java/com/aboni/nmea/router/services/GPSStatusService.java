@@ -4,8 +4,8 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.GPSStatus;
 import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.SatInfo;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.agent.impl.NMEAGPSStatusAgent;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -34,7 +34,7 @@ public class GPSStatusService extends JSONWebService {
             if (statusProvider != null) {
                 JSONObject res = new JSONObject();
                 List<JSONObject> l = new ArrayList<>();
-                for (NMEAGPSStatusAgent.SatInfo s : statusProvider.getSatellites()) {
+                for (SatInfo s : statusProvider.getSatellites()) {
                     l.add(getJsonSat(s));
                 }
                 res.put("satsList", new JSONArray(l));
@@ -64,14 +64,14 @@ public class GPSStatusService extends JSONWebService {
     }
 
     @Nonnull
-    private JSONObject getJsonSat(NMEAGPSStatusAgent.SatInfo s) {
+    private JSONObject getJsonSat(SatInfo s) {
         JSONObject jSat = new JSONObject();
         jSat.put("id", s.getId());
         jSat.put("elevation", s.getElevation());
         jSat.put("azimuth", s.getAzimuth());
         jSat.put("noise", s.getNoise());
         jSat.put("used", s.isUsed());
-        if (s.getSat()!=null) {
+        if (s.getSat() != null) {
             jSat.put("name", s.getSat().getName());
             jSat.put("clock", s.getSat().getClock());
             jSat.put("orbit", s.getSat().getOrbit());

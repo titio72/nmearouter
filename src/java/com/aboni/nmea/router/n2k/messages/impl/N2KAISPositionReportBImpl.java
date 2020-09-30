@@ -13,6 +13,7 @@ import java.time.Instant;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_POSITION_REPORT_CLASS_B_PGN;
 
+@SuppressWarnings("ClassWithTooManyFields")
 public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPositionReport {
 
     private int messageId;

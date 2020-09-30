@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.impl.NMEASpeedFilter;
 import com.aboni.nmea.router.processors.*;
 import com.aboni.utils.Log;

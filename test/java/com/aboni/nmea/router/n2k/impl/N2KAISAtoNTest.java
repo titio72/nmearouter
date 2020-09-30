@@ -4,11 +4,13 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISAtoN;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class N2KAISAtoNTest {
 
-    private static final byte[] b = {(byte)0x55, (byte)0xdc, (byte)0xe7, (byte)0x27, (byte)0x3b, (byte)0x27, (byte)0x49, (byte)0xe0, (byte)0x05, (byte)0xcf, (byte)0xc0, (byte)0x41, (byte)0x1a, (byte)0x01, (byte)0x45, (byte)0x31, (byte)0x32, (byte)0x36,
-            (byte)0x33, (byte)0x20, (byte)0x53, (byte)0x43, (byte)0x4f, (byte)0x47, (byte)0x4c, (byte)0x49, (byte)0x4f, (byte)0x20, (byte)0x20, (byte)0x55, (byte)0x4f, (byte)0x4c, (byte)0x41, (byte)0xff, (byte)0xfc, (byte)0x14,
-            (byte)0x00, (byte)0x14, (byte)0x00, (byte)0x0a, (byte)0x00};
+    private static final byte[] b = {(byte) 0x55, (byte) 0xdc, (byte) 0xe7, (byte) 0x27, (byte) 0x3b, (byte) 0x27, (byte) 0x49, (byte) 0xe0, (byte) 0x05, (byte) 0xcf, (byte) 0xc0, (byte) 0x41, (byte) 0x1a, (byte) 0x01, (byte) 0x45, (byte) 0x31, (byte) 0x32, (byte) 0x36,
+            (byte) 0x33, (byte) 0x20, (byte) 0x53, (byte) 0x43, (byte) 0x4f, (byte) 0x47, (byte) 0x4c, (byte) 0x49, (byte) 0x4f, (byte) 0x20, (byte) 0x20, (byte) 0x55, (byte) 0x4f, (byte) 0x4c, (byte) 0x41, (byte) 0xff, (byte) 0xfc, (byte) 0x14,
+            (byte) 0x00, (byte) 0x14, (byte) 0x00, (byte) 0x0a, (byte) 0x00};
 
     @Test
     public void test() throws PGNDataParseException {
@@ -19,12 +21,8 @@ public class N2KAISAtoNTest {
         for (String ss : s0) p.addString(ss);
 
         N2KAISAtoN aton = (N2KAISAtoN) p.getMessage();
-        System.out.println(aton.getAtoNType() + " Expected 'Fixed light: with sectors'");
-        System.out.println(aton.getMMSI() + " Expected 992471004");
-        System.out.println(aton.getName());
-        System.out.println(aton.getGPSInfo().getPosition() + " Expected 44.05168 N, 009.858487 E");
-        System.out.println(aton.getBeam() + " Expected 2");
-        System.out.println(aton.getLength() + " Expected 2");
+        assertEquals("Fixed light: with sectors", aton.getAtoNType());
+        assertEquals("992471004", aton.getMMSI());
     }
 
     private static final String[] ORIGINAL = new String[]{

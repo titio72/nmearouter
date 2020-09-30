@@ -19,7 +19,6 @@ import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
 
 import javax.validation.constraints.NotNull;
-import java.lang.reflect.Constructor;
 import java.time.Instant;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -80,8 +79,8 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
         N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(pgnData.pgn);
-        if (d != null) fast = d.fast;
-        if (d != null && d.fast && pgnData.length == 8) {
+        if (d != null) fast = d.isFast();
+        if (d != null && d.isFast() && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
             pgnData.currentFrame = getData()[0] & 0xFF;
             if ((pgnData.currentFrame & 0x0F) != 0) {
@@ -224,16 +223,13 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     public N2KMessage getMessage() throws PGNDataParseException {
         if (pgnData == null) return null;
         if (message == null) {
-            N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(pgnData.pgn);
-            if (d != null && d.constructor != null) {
-                Constructor<?> constructor = d.constructor;
-                try {
-                    message = (N2KMessage) constructor.newInstance(pgnData, pgnData.data);
-                } catch (Exception e) {
-                    throw new PGNDataParseException("Error decoding N2K message", e);
+            try {
+                message = N2KMessageFactory.newInstance(pgnData.pgn, pgnData, pgnData.data);
+                if (message == null) {
+                    message = new N2KMessageDefaultImpl(pgnData, pgnData.data);
                 }
-            } else {
-                message = new N2KMessageDefaultImpl(pgnData, pgnData.data);
+            } catch (Exception e) {
+                throw new PGNDataParseException("Error decoding N2K message", e);
             }
         }
         return message;

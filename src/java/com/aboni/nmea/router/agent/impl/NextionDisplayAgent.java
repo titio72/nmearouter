@@ -4,7 +4,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.OnSentence;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ServerLog;
 import com.fazecast.jSerialComm.SerialPort;

@@ -1,9 +1,9 @@
 package com.aboni.toolkit;
 
 import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.impl.DefaultTimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.can.N2KCanReader;
+import com.aboni.nmea.router.n2k.can.CANReader;
+import com.aboni.nmea.router.n2k.can.HL340USBSerialCANReader;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.SerialReader;
@@ -26,7 +26,7 @@ public class TestSerialReader {
         SerialReader s = new SerialReader(ConsoleLog.getLogger());
         N2KFastCache cache = new N2KFastCache(null);
         cache.setCallback(TestSerialReader::onMsg);
-        N2KCanReader reader = new N2KCanReader(new DefaultTimestampProvider());
+        CANReader reader = new HL340USBSerialCANReader();
         reader.setCallback(TestSerialReader::onMsg);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();

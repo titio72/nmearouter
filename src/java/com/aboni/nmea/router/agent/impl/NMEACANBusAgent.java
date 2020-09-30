@@ -2,11 +2,11 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
-import com.aboni.nmea.router.n2k.can.N2KCanReader;
+import com.aboni.nmea.router.n2k.can.CANReader;
 import com.aboni.nmea.router.n2k.can.N2KFastCache;
 import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
 import com.aboni.utils.SerialReader;
@@ -15,10 +15,10 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-public class NMEACanBusAgent extends NMEAAgentImpl {
+public class NMEACANBusAgent extends NMEAAgentImpl {
 
     private final SerialReader serialReader;
-    private final N2KCanReader canReader;
+    private final CANReader canReader;
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private long lastStats;
@@ -66,7 +66,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACanBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, @NotNull N2KCanReader canReader, N2KMessage2NMEA0183 converter) {
+    public NMEACANBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, @NotNull CANReader canReader, @NotNull N2KMessage2NMEA0183 converter) {
         super(cache);
         setSourceTarget(true, false);
         stats.reset();
@@ -83,14 +83,8 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
         this.converter = converter;
     }
 
-    private void onError(byte[] buffer) {
+    private void onError(byte[] buffer, String errorMessage) {
         stats.incrementErrors();
-        StringBuilder sb = new StringBuilder("Error decoding buffer {");
-        for (byte b : buffer) {
-            sb.append(String.format(" %02x", b));
-        }
-        sb.append("}");
-        getLogger().error(sb.toString());
     }
 
     private void onReceive(@NotNull N2KMessage msg) {
@@ -159,7 +153,7 @@ public class NMEACanBusAgent extends NMEAAgentImpl {
             getLogger().info(STATS_TAG + serialReader.getStats().toString(t));
 
             stats.reset();
-            canReader.getStats().reset();
+            canReader.getStats().reset(t);
             serialReader.getStats().reset();
 
             lastStats = t;

@@ -15,30 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent;
 
-import com.aboni.nmea.router.Startable;
-import com.aboni.nmea.router.conf.QOS;
-
-public interface NMEAAgent extends Startable {
-
-    String getType();
-
-    String getName();
-
-    String getDescription();
-
-    boolean isBuiltIn();
-
-    boolean isUserCanStartAndStop();
-
-    void setup(String name, QOS qos);
-
-    void setStatusListener(NMEAAgentStatusListener listener);
-
-    NMEASource getSource();
-
-    NMEATarget getTarget();
-
-    void onTimer();
-
-    void onTimerHR();
+public enum BuiltInAgents {
+    FILE_DUMPER,
+    GPS_TIME_SYNC,
+    DEPTH_STATS,
+    POWER_LED,
+    ENGINE_DETECTOR,
+    AUTO_PILOT,
+    FAN_MANAGER,
+    WEB_UI
 }

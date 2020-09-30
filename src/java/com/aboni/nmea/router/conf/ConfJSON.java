@@ -1,7 +1,6 @@
 package com.aboni.nmea.router.conf;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.agent.QOS;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,35 +14,31 @@ import java.util.Map;
 
 public class ConfJSON {
 
-    public static class AgentDef {
+    private static class AgentConf implements AgentConfJSON {
 
         private String type;
         private String name;
         private QOS qos;
         private JSONObject configuration;
 
+        @Override
         public String getType() {
             return type;
         }
 
+        @Override
         public String getName() {
             return name;
         }
 
+        @Override
         public QOS getQos() {
             return qos;
         }
 
+        @Override
         public JSONObject getConfiguration() {
             return configuration;
-        }
-
-        public InOut getInOut() {
-            if (configuration.has("inout")) {
-                return InOut.fromValue(configuration.getString("inout"));
-            } else {
-                return InOut.INOUT;
-            }
         }
     }
 
@@ -82,15 +77,15 @@ public class ConfJSON {
         return res;
     }
 
-    public List<AgentDef> getAgents()  throws MalformedConfigurationException {
+    public List<AgentConfJSON> getAgents() throws MalformedConfigurationException {
         try {
             int c = 1;
-            List<AgentDef> res = new ArrayList<>();
+            List<AgentConfJSON> res = new ArrayList<>();
             JSONArray agentsJ = conf.getJSONArray("agents");
-            for (Object agentO: agentsJ) {
+            for (Object agentO : agentsJ) {
                 JSONObject agentJ = (JSONObject) agentO;
                 if (!(agentJ.has("disabled") && agentJ.getBoolean("disabled")) && agentJ.has("type")) {
-                    AgentDef def = new AgentDef();
+                    AgentConf def = new AgentConf();
                     def.type = agentJ.getString("type");
                     def.name = agentJ.has("name") ? agentJ.getString("name") : String.format("AGENT_%d", c++);
                     def.configuration = agentJ;

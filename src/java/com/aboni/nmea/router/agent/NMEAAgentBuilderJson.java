@@ -15,10 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent;
 
-import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.conf.AgentConfJSON;
 
 public interface NMEAAgentBuilderJson {
 
-    NMEAAgent createAgent(ConfJSON.AgentDef a);
+    NMEAAgent createAgent(AgentConfJSON a);
 
+    NMEAAgent createAgent(BuiltInAgents agent);
 }

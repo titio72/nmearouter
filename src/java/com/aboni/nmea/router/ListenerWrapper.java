@@ -13,11 +13,8 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.impl;
+package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.OnJSONMessage;
-import com.aboni.nmea.router.OnN2KMessage;
-import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;

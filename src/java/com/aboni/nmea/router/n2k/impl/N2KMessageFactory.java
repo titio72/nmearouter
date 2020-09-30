@@ -17,9 +17,9 @@ public class N2KMessageFactory {
     }
 
     public static class N2KDef {
-        boolean fast;
-        Constructor<?> constructor;
-        Constructor<?> constructor1;
+        private boolean fast;
+        private Constructor<?> constructor;
+        private Constructor<?> constructor1;
 
         static N2KDef getInstance(Class<? extends N2KMessage> c, boolean fast) {
             N2KDef d = new N2KDef();

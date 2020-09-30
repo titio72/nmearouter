@@ -18,7 +18,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
-import com.aboni.nmea.router.agent.QOS;
+import com.aboni.nmea.router.conf.QOS;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;

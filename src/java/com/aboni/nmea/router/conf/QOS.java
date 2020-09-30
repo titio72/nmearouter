@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.agent;
+package com.aboni.nmea.router.conf;
 
 import java.util.HashMap;
 import java.util.Map;
