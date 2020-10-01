@@ -128,7 +128,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 Duration timeout = Duration.ofMillis(50);
                 channel.setOption(SO_RCVTIMEO, timeout);
                 Thread t = new Thread(() -> {
-                    byte[] data = new byte[8];
+                    byte[] data = new byte[32];
                     while (isStarted()) {
                         readFrame(data);
                     }
@@ -147,10 +147,9 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private void readFrame(byte[] data) {
         try {
             CanFrame frame = channel.read();
-            byte[] b = new byte[frame.getDataLength()];
-            frame.getData(data, 0, b.length);
+            frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            N2KMessage msg = messageFactory.newInstance(h, b);
+            N2KMessage msg = messageFactory.newInstance(h, data);
             fastCache.onMessage(msg);
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {

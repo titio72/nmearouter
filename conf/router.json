@@ -61,11 +61,17 @@
             "name": "AIS"
         },
         {
-            "type": "Canbus",
+            "type": "CanSerial",
             "name": "CANBUS",
             "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
             "device": "/dev/ttyUSB0",
             "bps": 115200
+        },
+        {
+            "type": "CanSocket",
+            "name": "CANBUS_S",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
+            "device": "vcan0"
         }
     ]
 }

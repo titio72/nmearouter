@@ -28,7 +28,8 @@ public class AgentTypes {
     public static final String UDP = "UDP";
     public static final String TRACK = "Track";
     public static final String SERIAL = "Serial";
-    public static final String CANBUS = "Canbus";
+    public static final String CAN_SERIAL = "CanSerial";
+    public static final String CAN_SOCKET = "CanSocket";
     public static final String GPS = "GPSStatus";
     public static final String AIS = "AIS";
     public static final String SENSOR = "Sensor";
