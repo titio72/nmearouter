@@ -2,7 +2,6 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
-import com.aboni.nmea.router.n2k.impl.BitUtils;
 
 import java.time.Instant;
 import java.util.Map;

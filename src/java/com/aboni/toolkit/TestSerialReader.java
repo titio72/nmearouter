@@ -1,10 +1,9 @@
 package com.aboni.toolkit;
 
 import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.can.CANReader;
-import com.aboni.nmea.router.n2k.can.HL340USBSerialCANReader;
-import com.aboni.nmea.router.n2k.can.N2KFastCache;
+import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.SerialReader;
 import com.aboni.utils.ThingsFactory;
@@ -24,9 +23,9 @@ public class TestSerialReader {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         SerialReader s = new SerialReader(ConsoleLog.getLogger());
-        N2KFastCache cache = new N2KFastCache(null);
+        N2KFastCache cache = ThingsFactory.getInstance(N2KFastCache.class);
         cache.setCallback(TestSerialReader::onMsg);
-        CANReader reader = new HL340USBSerialCANReader();
+        SerialCANReader reader = ThingsFactory.getInstance(SerialCANReader.class, ConsoleLog.getLogger());
         reader.setCallback(TestSerialReader::onMsg);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();

@@ -3,24 +3,25 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
-import com.aboni.nmea.router.n2k.can.CANReader;
-import com.aboni.nmea.router.n2k.can.N2KFastCache;
-import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
+import com.aboni.nmea.router.n2k.can.SerialCANReader;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.SerialReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-public class NMEACANBusAgent extends NMEAAgentImpl {
+public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
     private final SerialReader serialReader;
-    private final CANReader canReader;
+    private final SerialCANReader serialCanReader;
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
+    private final N2KMessageFactory messageFactory;
     private long lastStats;
     private String description;
     private static final String STATS_TAG = "STATS ";
@@ -66,19 +67,18 @@ public class NMEACANBusAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache, @NotNull CANReader canReader, @NotNull N2KMessage2NMEA0183 converter) {
+    public NMEACANBusSerialAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
+                                 @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
+                                 @NotNull N2KMessageFactory msgFactory) {
         super(cache);
+        messageFactory = msgFactory;
         setSourceTarget(true, false);
         stats.reset();
-
         serialReader = new SerialReader(cache, getLogger());
-
         fastCache.setCallback(this::onReceive);
-
-        this.canReader = canReader;
-        canReader.setCallback(fastCache::onMessage);
-        canReader.setErrCallback(this::onError);
-
+        this.serialCanReader = serialCanReader;
+        serialCanReader.setCallback(fastCache::onMessage);
+        serialCanReader.setErrCallback(this::onError);
         srcFilter = new PGNSourceFilter(getLogger());
         this.converter = converter;
     }
@@ -90,7 +90,7 @@ public class NMEACANBusAgent extends NMEAAgentImpl {
     private void onReceive(@NotNull N2KMessage msg) {
         stats.incrementMessages();
         if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
-                && N2KMessageFactory.isSupported(msg.getHeader().getPgn())) {
+                && messageFactory.isSupported(msg.getHeader().getPgn())) {
             stats.incrementAccepted();
             notify(msg);
             if (converter != null) {
@@ -104,7 +104,7 @@ public class NMEACANBusAgent extends NMEAAgentImpl {
 
     public void setup(String name, QOS qos, String port, int speed) {
         super.setup(name, qos);
-        serialReader.setup(port, speed, canReader::onRead);
+        serialReader.setup(port, speed, serialCanReader::onRead);
     }
 
     @Override
@@ -149,11 +149,11 @@ public class NMEACANBusAgent extends NMEAAgentImpl {
             }
 
             getLogger().info(STATS_TAG + stats.toString(t));
-            getLogger().info(STATS_TAG + canReader.getStats().toString(t));
+            getLogger().info(STATS_TAG + serialCanReader.getStats().toString(t));
             getLogger().info(STATS_TAG + serialReader.getStats().toString(t));
 
             stats.reset();
-            canReader.getStats().reset(t);
+            serialCanReader.getStats().reset(t);
             serialReader.getStats().reset();
 
             lastStats = t;

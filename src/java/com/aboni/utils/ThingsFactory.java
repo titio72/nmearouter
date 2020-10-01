@@ -19,6 +19,9 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 public class ThingsFactory {
 
     private ThingsFactory() {
@@ -37,5 +40,18 @@ public class ThingsFactory {
     public static <T> T getInstance(Class<T> aClass, String named) {
         Key<T> key = Key.get(aClass, Names.named(named));
         return injector.getInstance(key);
+    }
+
+    public static <T> T getInstance(Class<T> aClass, Log logger) {
+        T res = getInstance(aClass);
+        if (res != null) {
+            try {
+                Method m = res.getClass().getMethod("setLogger", Log.class);
+                m.invoke(res, logger);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                // ignored
+            }
+        }
+        return res;
     }
 }

@@ -29,12 +29,13 @@ public class TrackService implements WebService {
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
     private static final String ERROR_DOWNLOADING_TRACK = "Error downloading track";
 
-    private @Inject
-    QueryFactory queryFactory;
+    private final QueryFactory queryFactory;
+    private final TrackDumperFactory trackerDumperFactory;
 
     @Inject
-    public TrackService() {
-        // nothing to initialize
+    public TrackService(QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
+        this.queryFactory = queryFactory;
+        this.trackerDumperFactory = trackerDumperFactory;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class TrackService implements WebService {
             Query q = queryFactory.getQuery(config);
             String f = config.getParameter("format", "gpx");
             boolean download = "1".equals(config.getParameter("download", "0"));
-            TrackDumper dumper = TrackDumperFactory.getDumper(f);
+            TrackDumper dumper = trackerDumperFactory.getDumper(f);
             if (dumper != null) {
                 String mime = dumper.getMime();
                 String fileName = "track." + dumper.getExtension();

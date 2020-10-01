@@ -21,7 +21,6 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.data.track.impl.FileTrackWriter;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ServerLog;
@@ -38,7 +37,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private final TrackManager tracker;
     private final TripManagerX tripManager;
-    private final TrackWriter backupWriter;
 
 
     @Inject
@@ -47,7 +45,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         setSourceTarget(true, true);
         this.tracker = trackManager;
         this.tripManager = tripManager;
-        this.backupWriter = new FileTrackWriter("track.csv");
     }
 
     @Override
@@ -98,12 +95,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         notifyAnchorStatus();
         if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
-            point = builder.withPoint(point).withEngine(getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN));
+            point = builder.withPoint(point).withEngine(getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN)).getPoint();
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
                 getLogger().error("Cannot write point!", e);
-                backupWriter.write(point);
             }
             notifyTrackedPoint(point);
             synchronized (this) {

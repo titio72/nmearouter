@@ -15,22 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.ListenerWrapper;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEASentenceListener;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.Log;
 import com.aboni.utils.ServerLog;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -169,6 +166,11 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
 
         @Override
+        public void warning(String msg, Exception e) {
+            log.warning(getMsg(NMEAAgentImpl.this, msg), e);
+        }
+
+        @Override
         public void info(String msg) {
             log.info(getMsg(NMEAAgentImpl.this, msg));
         }
@@ -196,6 +198,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private final NMEACache cache;
     private final AgentAttributes attributes;
     private final Log internalLog;
+    private final RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
 
     @Inject
@@ -206,6 +209,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         attributes = new AgentAttributes();
         processorSet = new NMEAProcessorSet();
         internalLog = new PrivateLog();
+        messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
         attributes.canStartStop = true;
     }
 
@@ -306,7 +310,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private boolean checkSourceFilter(Sentence sentence) {
         NMEASource s = getSource();
         if (s!=null && s.getFilter()!=null)
-            return s.getFilter().match(RouterMessageImpl.createMessage(sentence, getName(), cache.getNow()));
+            return s.getFilter().match(messageFactory.createMessage(sentence, getName(), cache.getNow()));
         return true;
     }
 
@@ -319,7 +323,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
             List<Sentence> toSend = processorSet.getSentences(sentence, getName());
             for (Sentence s : toSend)
-                sourceIf.listener.onSentence(RouterMessageImpl.createMessage(s, getName(), cache.getNow()));
+                sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), cache.getNow()));
         }
     }
 
@@ -330,7 +334,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(JSONObject m) {
         if (isStarted()) {
-            sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
+            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
         }
     }
 
@@ -342,7 +346,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     protected final void notify(N2KMessage m) {
         if (isStarted()) {
             getLogger().debug("Notify Sentence {" + m + "}");
-            sourceIf.listener.onSentence(RouterMessageImpl.createMessage(m, getName(), cache.getNow()));
+            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
         }
     }
 

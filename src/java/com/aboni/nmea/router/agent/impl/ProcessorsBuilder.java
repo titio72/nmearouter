@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.impl.NMEASpeedFilter;
 import com.aboni.nmea.router.processors.*;
@@ -38,7 +39,8 @@ public class ProcessorsBuilder {
                 switch (q) {
                     case "speed_filter":
                         log.info("QoS {Speed filter}");
-                        res.add(new NMEAGenericFilterProc(cache, ThingsFactory.getInstance(NMEASpeedFilter.class)));
+                        res.add(new NMEAGenericFilterProc(cache, ThingsFactory.getInstance(NMEASpeedFilter.class),
+                                ThingsFactory.getInstance(RouterMessageFactory.class)));
                         break;
                     case "dpt":
                         log.info("QoS {Depth}");

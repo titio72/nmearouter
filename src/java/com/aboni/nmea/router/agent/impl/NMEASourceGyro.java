@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.geo.DeviationManager;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.geo.impl.DeviationManagerImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
@@ -27,6 +27,7 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,12 +44,15 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private SensorCompass compassSensor;
 
+    private final DeviationManager deviationManager;
+
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(NMEACache cache) {
+    public NMEASourceGyro(NMEACache cache, @NotNull DeviationManager deviationManager) {
         super(cache);
+        this.deviationManager = deviationManager;
         setSourceTarget(true, true);
     }
 
@@ -89,7 +93,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         try {
             SensorCompass r = new SensorCompass(
                     USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(),
-                    new DeviationManagerImpl());
+                    deviationManager);
             r.init();
             return r;
         } catch (Exception e) {

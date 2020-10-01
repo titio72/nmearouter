@@ -16,8 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.utils.Pair;
 import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -28,10 +28,12 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
 
     private final NMEAFilter filter;
     private final NMEACache cache;
+    private final RouterMessageFactory messageFactory;
 
-    public NMEAGenericFilterProc(@NotNull NMEACache cache,  @NotNull NMEAFilter filter) {
+    public NMEAGenericFilterProc(@NotNull NMEACache cache, @NotNull NMEAFilter filter, @NotNull RouterMessageFactory messageFactory) {
         this.cache = cache;
         this.filter = filter;
+        this.messageFactory = messageFactory;
     }
 
     private static final Pair<Boolean, Sentence[]> OK = new Pair<>(true, null);
@@ -40,7 +42,7 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
         try {
-            return (filter.match(RouterMessageImpl.createMessage(sentence, src, cache.getNow())) ? OK : KO);
+            return (filter.match(messageFactory.createMessage(sentence, src, cache.getNow())) ? OK : KO);
         } catch (Exception e) {
             ServerLog.getLogger().warning("Filter processor: Cannot analyze sentence {" + sentence + "} error {" + e.getMessage() + "}");
             return KO;

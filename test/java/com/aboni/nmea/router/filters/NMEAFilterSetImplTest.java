@@ -4,7 +4,7 @@ import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl.TYPE;
 import com.aboni.nmea.router.filters.impl.STalkFilter;
-import com.aboni.nmea.router.impl.RouterMessageImpl;
+import com.aboni.nmea.router.impl.RouterMessageFactoryImpl;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -19,7 +19,7 @@ public class NMEAFilterSetImplTest {
         NMEAFilterSetImpl set = new NMEAFilterSetImpl(TYPE.WHITELIST);
         Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
         // any sentence fails
-        assertFalse(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 	
 
@@ -32,13 +32,13 @@ public class NMEAFilterSetImplTest {
         set.addFilter(f2);
 
         Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
-        assertFalse(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 
 
@@ -46,7 +46,7 @@ public class NMEAFilterSetImplTest {
 	public void testEmptyBlackList() {
         NMEAFilterSetImpl set = new NMEAFilterSetImpl(TYPE.BLACKLIST);
         Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 	
 	@Test
@@ -58,13 +58,13 @@ public class NMEAFilterSetImplTest {
         set.addFilter(f2);
 
         Sentence test = SentenceFactory.getInstance().createParser(TalkerId.II, "GLL");
-        assertFalse(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-        assertFalse(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 
     @Test
@@ -121,13 +121,13 @@ public class NMEAFilterSetImplTest {
         //should pass any sentence not-STALK and STALK:84
 
         Sentence test = SentenceFactory.getInstance().createParser("$STALK,84,36,85,88,40,00,0A,02,08*16");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        assertTrue(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertTrue(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
 
         test = SentenceFactory.getInstance().createParser("$STALK,23,01,0E,39*3E");
-        assertFalse(set.match(RouterMessageImpl.createMessage(test, "WHATEVER", System.currentTimeMillis())));
+        assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 
 }

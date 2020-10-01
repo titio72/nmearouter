@@ -1,10 +1,9 @@
-package com.aboni.nmea.router.n2k.can;
+package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
-import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
@@ -14,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class N2KFastCache {
+public class N2KFastCacheImpl implements N2KFastCache {
 
     private static final String ERR_MSG = "Error handling N2K message";
 
@@ -49,23 +48,26 @@ public class N2KFastCache {
     private N2KMessageCallback callback;
 
     private final TimestampProvider timestampProvider;
+    private final N2KMessageFactory messageFactory;
 
     @Inject
-    public N2KFastCache(NMEACache tsp) {
+    public N2KFastCacheImpl(TimestampProvider tsp, @NotNull N2KMessageFactory messageFactory) {
         timestampProvider = tsp;
+        this.messageFactory = messageFactory;
     }
 
+    @Override
     public void setCallback(N2KMessageCallback callback) {
         this.callback = callback;
     }
 
+    @Override
     public void onMessage(@NotNull N2KMessage msg) {
         N2KFastEnvelope id = new N2KFastEnvelope();
         id.pgn = msg.getHeader().getPgn();
         id.src = msg.getHeader().getSource();
-        N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(id.pgn);
-        if (d != null) {
-            if (d.isFast()) {
+        if (messageFactory.isSupported(id.pgn)) {
+            if (messageFactory.isFast(id.pgn)) {
                 handleFastMessage(msg, id);
             } else if (callback != null) {
                 N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
@@ -157,7 +159,8 @@ public class N2KFastCache {
         return p;
     }
 
-    public void onTimer() {
+    @Override
+    public void cleanUp() {
         long now = (timestampProvider != null) ? timestampProvider.getNow() : System.currentTimeMillis();
         synchronized (cache) {
             cache.entrySet().removeIf(e -> Utils.isOlderThan(e.getValue().lastTS, now, REMOVE_TIMEOUT));

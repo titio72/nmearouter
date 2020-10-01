@@ -1,11 +1,10 @@
 package com.aboni.toolkit;
 
 import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.can.N2KFastCache;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
-import com.aboni.nmea.router.n2k.impl.N2KMessageFactory;
-import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
@@ -25,7 +24,7 @@ public class N2KAnalyzer {
             BufferedReader reader = new BufferedReader(fileReader);
             Injector injector = Guice.createInjector(new NMEARouterModule());
             ThingsFactory.setInjector(injector);
-            N2KFastCache cache = new N2KFastCache(null);
+            N2KFastCache cache = ThingsFactory.getInstance(N2KFastCache.class);
             cache.setCallback(N2KAnalyzer::onMsg);
 
             String line;
@@ -39,8 +38,8 @@ public class N2KAnalyzer {
                     data[i] = (byte) (Integer.parseInt(tokens[3 + i], 16) & 0xFF);
                 }
                 N2KHeader iso = new N2KHeader(id);
-                N2KMessageDefaultImpl msg = new N2KMessageDefaultImpl(iso, data);
-                if (N2KMessageFactory.isSupported(iso.getPgn())) {
+                N2KMessage msg = ThingsFactory.getInstance(N2KMessageFactory.class).newUntypedInstance(iso, data);
+                if (ThingsFactory.getInstance(N2KMessageFactory.class).isSupported(iso.getPgn())) {
                     cache.onMessage(msg);
                 } else {
                     onMsg(msg);

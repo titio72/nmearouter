@@ -32,19 +32,7 @@ public class RouterMessageImpl<T> implements RouterMessage {
     private final String source;
     private final byte type;
 
-    public static RouterMessage createMessage(Sentence obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, NMEA, source, timestamp);
-    }
-
-    public static RouterMessage createMessage(JSONObject obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, JSON, source, timestamp);
-    }
-
-    public static RouterMessage createMessage(N2KMessage obj, String source, long timestamp) {
-        return new RouterMessageImpl<>(obj, N2K, source, timestamp);
-    }
-
-    private RouterMessageImpl(T msg, byte type, String source, long timestamp) {
+    RouterMessageImpl(T msg, byte type, String source, long timestamp) {
         this.timestamp = timestamp;
         this.message = msg;
         this.source = source;

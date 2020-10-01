@@ -43,38 +43,38 @@ public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withPosition(GeoPositionT pos) {
+    public synchronized TrackPointBuilder withPosition(GeoPositionT pos) {
         position = pos;
         return this;
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withSpeed(double speed, double maxSpeed) {
+    public synchronized TrackPointBuilder withSpeed(double speed, double maxSpeed) {
         this.maxSpeed = maxSpeed;
         this.averageSpeed = speed;
         return this;
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withAnchor(boolean anchor) {
+    public synchronized TrackPointBuilder withAnchor(boolean anchor) {
         this.anchor = anchor;
         return this;
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withDistance(double distance) {
+    public synchronized TrackPointBuilder withDistance(double distance) {
         this.distance = distance;
         return this;
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withPeriod(int period) {
+    public synchronized TrackPointBuilder withPeriod(int period) {
         this.period = period;
         return this;
     }
 
     @Override
-    public synchronized TrackPointBuilderImpl withEngine(EngineStatus engine) {
+    public synchronized TrackPointBuilder withEngine(EngineStatus engine) {
         this.engine = engine;
         return this;
     }

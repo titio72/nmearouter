@@ -25,6 +25,8 @@ public interface Log {
 
     void warning(String msg);
 
+    void warning(String msg, Exception e);
+
     void info(String msg);
 
     void infoFill(String msg);

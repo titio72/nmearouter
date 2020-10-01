@@ -3,6 +3,7 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KHeading;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,7 +12,8 @@ public class N2KMessageParserTest {
 
     @Test
     public void testParse() throws PGNDataParseException {
-        N2KMessageParser p = new N2KMessageParserImpl("2020-06-21-08:23:52.452,2,127250,204,255,8,ff,f7,12,ff,7f,ff,7f,fd");
+        N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
+        p.addString("2020-06-21-08:23:52.452,2,127250,204,255,8,ff,f7,12,ff,7f,ff,7f,fd");
         assertEquals(127250, p.getHeader().getPgn());
         assertEquals(2, p.getHeader().getPriority());
         assertEquals(204, p.getHeader().getSource());
@@ -28,13 +30,15 @@ public class N2KMessageParserTest {
     }
 
     public void testMessage() throws PGNDataParseException {
-        N2KMessageParser p = new N2KMessageParserImpl("2020-06-21-08:23:52.452,2,127250,204,255,8,ff,f7,12,ff,7f,ff,7f,fd");
+        N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
+        p.addString("2020-06-21-08:23:52.452,2,127250,204,255,8,ff,f7,12,ff,7f,ff,7f,fd");
         assertNotNull(p.getMessage());
         assertTrue(p.getMessage() instanceof N2KHeading);
     }
 
     public void testUnsupported() throws PGNDataParseException {
-        N2KMessageParser p = new N2KMessageParserImpl("2020-06-21-08:23:52.452,2,999999,204,255,8,ff,ff,ff,ff,ff,ff,ff,ff");
+        N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
+        p.addString("2020-06-21-08:23:52.452,2,999999,204,255,8,ff,ff,ff,ff,ff,ff,ff,ff");
         try {
             p.getMessage();
             fail("Message should be unsupported");
@@ -45,7 +49,8 @@ public class N2KMessageParserTest {
 
     @Test
     public void testFast() throws PGNDataParseException {
-        N2KMessageParser p = new N2KMessageParserImpl(FAST[0]);
+        N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
+        p.addString(FAST[0]);
         assertTrue(p.needMore());
         p.addString(FAST[1]);
         assertTrue(p.needMore());
@@ -67,7 +72,8 @@ public class N2KMessageParserTest {
 
     @Test
     public void testFastExpanded() throws PGNDataParseException {
-        N2KMessageParser p = new N2KMessageParserImpl("2020-06-21-08:15:42.595,4,129038,0,255,27," +
+        N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
+        p.addString("2020-06-21-08:15:42.595,4,129038,0,255,27," +
                 "c1,b8,68,bc,0e,31,95,f7,05," +
                 "de,5d,a9,19,98,16,13,60,03," +
                 "00,00,00,68,12,00,00,f0,fe");

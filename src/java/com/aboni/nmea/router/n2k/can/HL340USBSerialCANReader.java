@@ -1,9 +1,11 @@
 package com.aboni.nmea.router.n2k.can;
 
+import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageCallback;
-import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
@@ -166,17 +168,17 @@ Byte(s) Description
 19 Checksum
  */
 
-public class HL340USBSerialCANReader implements CANReader {
+public class HL340USBSerialCANReader implements SerialCANReader {
 
     private N2KMessageCallback callback;
     private CANErrorCallback errCallback;
     private CANFrameCallback frameCallback;
-
+    private final N2KMessageFactory msgFactory;
     private final CANReaderStats stats = new CANReaderStats();
 
     @Inject
-    public HL340USBSerialCANReader() {
-        // nothing to initialize
+    public HL340USBSerialCANReader(@NotNull N2KMessageFactory msgFactory) {
+        this.msgFactory = msgFactory;
     }
 
     @Override
@@ -267,6 +269,10 @@ public class HL340USBSerialCANReader implements CANReader {
         return b[2] + ((long) b[3] << 8);
     }
 
+    private static int getFirstDataByteIndex(boolean ext) {
+        return ext ? 6 : 4;
+    }
+
     private static boolean checkBufferSize(int l, int dataSize, boolean ext) {
         // 3 because we have the initial 0xaa, the final 0x55 and the type (first byte after the 0xaa)
         return l >= (3 + dataSize + (ext ? 4 : 2));
@@ -278,7 +284,8 @@ public class HL340USBSerialCANReader implements CANReader {
         if (checkBufferSize(length, dataSize, ext)) {
             stats.incrementDataFrames();
             long id = ext ? getExtId(b) : getId(b);
-            dumpAnalyzerFormat(length, b, dataSize, id);
+            CANDataFrame frame = getFrame(b, dataSize, ext, id);
+            dumpAnalyzerFormat(frame);
         } else {
             stats.incrementInvalidFrames();
             if (errCallback != null) {
@@ -296,16 +303,21 @@ public class HL340USBSerialCANReader implements CANReader {
         return errB;
     }
 
-    private void dumpAnalyzerFormat(int offset, int[] b, int dataSize, long id) {
+    private static CANDataFrame getFrame(int[] b, int dataSize, boolean ext, long id) {
+        byte[] data = new byte[dataSize];
+        int dataStart = getFirstDataByteIndex(ext);
+        for (int i = 0; i < dataSize; i++) data[i] = (byte) (b[dataStart + i] & 0xFF);
+        return CANDataFrame.create(id, data);
+    }
+
+    private void dumpAnalyzerFormat(CANDataFrame frame) {
+
         if (frameCallback != null) {
-            byte[] bytes = getBytes(b, offset);
-            frameCallback.onFrame(bytes);
+            frameCallback.onFrame(frame);
         }
         if (callback != null) {
-            N2KHeader iso = new N2KHeader(id);
-            byte[] data = new byte[dataSize];
-            for (int i = 0; i < dataSize; i++) data[i] = (byte) (b[offset - 1 - dataSize + i] & 0xFF);
-            N2KMessageDefaultImpl msg = new N2KMessageDefaultImpl(iso, data);
+            N2KHeader iso = new N2KHeader(frame.getId());
+            N2KMessage msg = msgFactory.newUntypedInstance(iso, frame.getData());
             callback.onMessage(msg);
         }
     }

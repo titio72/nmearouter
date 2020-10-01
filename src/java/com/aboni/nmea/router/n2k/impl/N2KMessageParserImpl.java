@@ -16,8 +16,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.*;
-import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Map;
@@ -68,19 +69,18 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     private PGNDecoded pgnData;
     private N2KMessage message;
     private boolean fast = false;
+    private final N2KMessageFactory factory;
 
-    public N2KMessageParserImpl() {
-    }
-
-    public N2KMessageParserImpl(String pgnString) throws PGNDataParseException {
-        set(getDecodedHeader(pgnString));
+    @Inject
+    public N2KMessageParserImpl(@NotNull N2KMessageFactory factory) {
+        this.factory = factory;
     }
 
     private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
-        N2KMessageFactory.N2KDef d = N2KMessageFactory.getDefinition(pgnData.pgn);
-        if (d != null) fast = d.isFast();
-        if (d != null && d.isFast() && pgnData.length == 8) {
+        fast = factory.isFast(dec.pgn);
+        boolean supported = factory.isSupported(dec.pgn);
+        if (supported && fast && pgnData.length == 8) {
             pgnData.expectedLength = getData()[1] & 0xFF;
             pgnData.currentFrame = getData()[0] & 0xFF;
             if ((pgnData.currentFrame & 0x0F) != 0) {
@@ -92,7 +92,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
             pgnData.length = 6;
         }
         synchronized (STATS) {
-            long l = STATS.getOrDefault((d != null) ? pgnData.getPgn() : -1, 0L);
+            long l = STATS.getOrDefault(supported ? pgnData.getPgn() : -1, 0L);
             l++;
             STATS.put(pgnData.getPgn(), l);
         }
@@ -216,7 +216,7 @@ public class N2KMessageParserImpl implements N2KMessageParser {
 
     @Override
     public boolean isSupported() {
-        return pgnData != null && N2KMessageFactory.isSupported(pgnData.pgn);
+        return pgnData != null && factory.isSupported(pgnData.pgn);
     }
 
     @Override
@@ -224,9 +224,9 @@ public class N2KMessageParserImpl implements N2KMessageParser {
         if (pgnData == null) return null;
         if (message == null) {
             try {
-                message = N2KMessageFactory.newInstance(pgnData.pgn, pgnData, pgnData.data);
+                message = factory.newInstance(pgnData, pgnData.data);
                 if (message == null) {
-                    message = new N2KMessageDefaultImpl(pgnData, pgnData.data);
+                    message = factory.newUntypedInstance(pgnData, pgnData.data);
                 }
             } catch (Exception e) {
                 throw new PGNDataParseException("Error decoding N2K message", e);

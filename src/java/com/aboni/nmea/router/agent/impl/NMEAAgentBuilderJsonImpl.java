@@ -143,7 +143,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         String portName = getString(a.getConfiguration(), "device", "/dev/ttyUSB0");
         int speed = getInt(a.getConfiguration(), "bps", 115200);
 
-        NMEACANBusAgent serial = ThingsFactory.getInstance(NMEACANBusAgent.class);
+        NMEACANBusSerialAgent serial = ThingsFactory.getInstance(NMEACANBusSerialAgent.class);
         serial.setup(name, q, portName, speed);
         return serial;
     }

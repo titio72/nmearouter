@@ -20,8 +20,12 @@ import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.utils.Log;
+import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
+import com.google.common.hash.HashCode;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +34,7 @@ public class N2KStreamImpl implements N2KStream {
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
 
-    private final boolean throttling;
+    private boolean throttling;
 
     private static class Payload {
         int hashcode;
@@ -38,11 +42,12 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private final Map<Integer, Payload> payloadMap;
-    private final Log logger;
+    private Log logger;
     private final PGNSourceFilter srcFilter;
 
-    public N2KStreamImpl(Log logger) {
-        this(logger, false);
+    @Inject
+    public N2KStreamImpl() {
+        this(ServerLog.getLogger(), false);
     }
 
     public N2KStreamImpl(Log logger, boolean throttling) {
@@ -50,6 +55,14 @@ public class N2KStreamImpl implements N2KStream {
         payloadMap = new HashMap<>();
         srcFilter = new PGNSourceFilter(logger);
         this.throttling = throttling;
+    }
+
+    public void setThrottling(boolean throttling) {
+        this.throttling = throttling;
+    }
+
+    public void setLogger(@NotNull Log logger) {
+        this.logger = logger;
     }
 
     @Override
@@ -69,7 +82,7 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private static int hashCodeOf(byte[] data) {
-        return new String(data).hashCode();
+        return HashCode.fromBytes(data).hashCode();
     }
 
     private boolean isSend(int pgn, long ts, byte[] data) {

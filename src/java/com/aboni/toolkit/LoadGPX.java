@@ -90,7 +90,7 @@ public class LoadGPX {
         TrackPoint point = tracker.processPosition(posT, sog);
         if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
-            point = builder.withPoint(point).withEngine(EngineStatus.UNKNOWN);
+            point = builder.withPoint(point).withEngine(EngineStatus.UNKNOWN).getPoint();
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {

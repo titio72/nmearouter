@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.n2k.impl;
+package com.aboni.nmea.router.n2k.messages.impl;
 
 public class BitUtils {
 

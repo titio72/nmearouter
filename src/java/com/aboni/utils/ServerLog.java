@@ -156,6 +156,14 @@ public class ServerLog implements LogAdmin {
     }
 
     @Override
+    public void warning(String msg, Exception e) {
+        if (debug)
+            lg.log(Level.WARNING, msg, e);
+        else
+            lg.warning(() -> String.format("{%s} error {%s}", msg, e.getMessage()));
+    }
+
+    @Override
     public void info(String msg) {
         lg.log(Level.INFO, msg);
     }

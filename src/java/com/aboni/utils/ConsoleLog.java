@@ -89,6 +89,11 @@ public class ConsoleLog implements Log {
     }
 
     @Override
+    public void warning(String msg, Exception e) {
+        lgConsole.warning(() -> String.format("{%s} error {%s}", msg, e.getMessage()));
+    }
+
+    @Override
     public void info(String msg) {
         lgConsole.log(Level.INFO, msg);
     }

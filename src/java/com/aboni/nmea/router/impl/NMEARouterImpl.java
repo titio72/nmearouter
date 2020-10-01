@@ -15,10 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -29,6 +26,7 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -47,6 +45,7 @@ public class NMEARouterImpl implements NMEARouter {
     private final NMEAProcessorSet processors;
     private final NMEACache cache;
     private final NMEAStream stream;
+    private final RouterMessageFactory messageFactory;
 
     private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
     private static final int TIMER_HR		= 250;
@@ -56,11 +55,12 @@ public class NMEARouterImpl implements NMEARouter {
     private static final long STATS_PERIOD = 60; // seconds
 
     @Inject
-    public NMEARouterImpl(NMEACache cache, NMEAStream stream) {
+    public NMEARouterImpl(NMEACache cache, NMEAStream stream, @NotNull RouterMessageFactory messageFactory) {
         agents = new HashMap<>();
+        this.messageFactory = messageFactory;
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
-        started  = new AtomicBoolean(false);
+        started = new AtomicBoolean(false);
         this.cache = cache;
         this.stream = stream;
         exec = Executors.newFixedThreadPool(2);
@@ -91,10 +91,10 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void notifyDiagnostic() {
         JSONObject msg = new JSONObject();
-        msg.put("topic", "diag");
+        msg.put("topic", "diagnostic");
         msg.put("queue", sentenceQueue.size());
         msg.put("free_memory", Runtime.getRuntime().freeMemory() / 1024 / 1024);
-        RouterMessage m = RouterMessageImpl.createMessage(msg, "SYS", cache.getNow());
+        RouterMessage m = messageFactory.createMessage(msg, "SYS", cache.getNow());
         privateQueueUpSentence(m);
     }
 
@@ -192,7 +192,7 @@ public class NMEARouterImpl implements NMEARouter {
                 int counter = 0;
                 for (Sentence ss : toSend) {
                     cache.onSentence(ss, m.getSource());
-                    RouterMessage mm = RouterMessageImpl.createMessage(ss, m.getSource(), m.getTimestamp());
+                    RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
                     messages[counter] = mm;
                 }
                 routeToTarget(messages);

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISAtoN;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -17,7 +18,7 @@ public class N2KAISAtoNTest {
         for (byte x : b) System.out.print(new String(new byte[]{x}) + " ");
         System.out.println();
 
-        N2KMessageParserImpl p = new N2KMessageParserImpl();
+        N2KMessageParserImpl p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
         for (String ss : s0) p.addString(ss);
 
         N2KAISAtoN aton = (N2KAISAtoN) p.getMessage();

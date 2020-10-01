@@ -16,24 +16,23 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.data.track.impl.TrackPointBuilderImpl;
 import com.aboni.sensors.EngineStatus;
 
 public interface TrackPointBuilder {
 
-    TrackPointBuilderImpl withPoint(TrackPoint point);
+    TrackPointBuilder withPoint(TrackPoint point);
 
-    TrackPointBuilderImpl withPosition(GeoPositionT pos);
+    TrackPointBuilder withPosition(GeoPositionT pos);
 
-    TrackPointBuilderImpl withSpeed(double speed, double maxSpeed);
+    TrackPointBuilder withSpeed(double speed, double maxSpeed);
 
-    TrackPointBuilderImpl withAnchor(boolean anchor);
+    TrackPointBuilder withAnchor(boolean anchor);
 
-    TrackPointBuilderImpl withDistance(double distance);
+    TrackPointBuilder withDistance(double distance);
 
-    TrackPointBuilderImpl withPeriod(int period);
+    TrackPointBuilder withPeriod(int period);
 
-    TrackPointBuilderImpl withEngine(EngineStatus engine);
+    TrackPointBuilder withEngine(EngineStatus engine);
 
     TrackPoint getPoint();
 }

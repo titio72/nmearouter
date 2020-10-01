@@ -1,29 +1,35 @@
 package com.aboni.nmea.router.n2k.can;
 
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessageHeader;
+import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.validation.constraints.NotNull;
+
 import static org.junit.Assert.*;
 
-public class CANReaderTest {
+public class SerialCANReaderTest {
 
     private static class FrameListener implements CANFrameCallback {
 
-        private byte[] lastRead;
+        private CANDataFrame lastRead;
 
         @Override
-        public void onFrame(byte[] frame) {
+        public void onFrame(CANDataFrame frame) {
             lastRead = frame;
         }
 
-        public byte[] getLastRead() {
+        public CANDataFrame getLastRead() {
             return lastRead;
         }
 
         public void dump() {
             if (lastRead != null) {
-                for (byte b : lastRead) System.out.printf("%02x ", b);
-                System.out.println();
+                System.out.println(lastRead.toString());
             }
         }
     }
@@ -49,30 +55,54 @@ public class CANReaderTest {
 
         public void dump() {
             if (lastRead != null) {
-                for (byte b : lastRead) System.out.printf("%02x ", b);
-                System.out.println(error);
+                System.out.println(lastRead);
             }
         }
     }
 
-    private CANReader canReader;
+    private SerialCANReader serialCanReader;
     private FrameErrorListener e;
     private FrameListener l;
 
     @Before
     public void setUp() {
-        canReader = new HL340USBSerialCANReader();
+        serialCanReader = new HL340USBSerialCANReader(new N2KMessageFactory() {
+            @Override
+            public boolean isSupported(int pgn) {
+                return false;
+            }
+
+            @Override
+            public boolean isFast(int pgn) {
+                return false;
+            }
+
+            @Override
+            public N2KMessage newUntypedInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) {
+                return new N2KMessageDefaultImpl(h, data);
+            }
+
+            @Override
+            public N2KMessage newInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) throws PGNDataParseException {
+                return null;
+            }
+
+            @Override
+            public N2KMessage newInstance(int pgn, @NotNull byte[] data) throws PGNDataParseException {
+                return null;
+            }
+        });
         l = new FrameListener();
         e = new FrameErrorListener();
-        canReader.setFrameCallback(l);
-        canReader.setErrCallback(e);
+        serialCanReader.setFrameCallback(l);
+        serialCanReader.setErrCallback(e);
     }
 
     @Test
     public void testStartWithIncompleteFrame() {
         int[] buffer = new int[]{0x10, 0x10, 0x10, 0x55, 0x00, 0x00};
         int offset = 3;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertTrue(managed);
         assertNull(l.getLastRead());
         assertNotNull(e.getLastRead());
@@ -90,16 +120,13 @@ public class CANReaderTest {
                 0x00, 0x00 // unused tail
         };
         int offset = 12;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertTrue(managed);
         assertNotNull(l.getLastRead());
         assertNull(e.getLastRead());
-        assertArrayEquals(new byte[]{
-                (byte) 0xAA, (byte) 0xC8, (byte) 0xAB, (byte) 0xCD,
+        assertEquals(CANDataFrame.create(0xCDAB, new byte[]{
                 (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04,
-                (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08,
-                (byte) 0x55
-        }, l.getLastRead());
+                (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08}), l.getLastRead());
 
         l.dump();
     }
@@ -116,17 +143,13 @@ public class CANReaderTest {
                 0x00, 0x00 // unused tail
         };
         int offset = 13;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertTrue(managed);
         assertNotNull(l.getLastRead());
         assertNull(e.getLastRead());
-        assertArrayEquals(new byte[]{
-                (byte) 0xAA, (byte) 0xC8, (byte) 0xAB, (byte) 0xCD,
+        assertEquals(CANDataFrame.create(0xCDAB, new byte[]{
                 (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04,
-                (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08, (byte) 0x09,
-                (byte) 0x55
-        }, l.getLastRead());
-        l.dump();
+                (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08}), l.getLastRead());
     }
 
     @Test
@@ -138,7 +161,7 @@ public class CANReaderTest {
                 0x01, 0x02, 0x03, 0x04
         };
         int offset = 7;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertFalse(managed);
         assertNull(l.getLastRead());
         assertNull(e.getLastRead());
@@ -154,7 +177,7 @@ public class CANReaderTest {
                 0x00, 0x00 // unused tail (not filled yet...)
         };
         int offset = 11;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertFalse(managed);
         assertNull(l.getLastRead());
         assertNull(e.getLastRead());
@@ -171,7 +194,7 @@ public class CANReaderTest {
                 0xCC // checksum
         };
         int offset = 19;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertTrue(managed);
         assertNull(l.getLastRead());
         assertNull(e.getLastRead());
@@ -186,7 +209,7 @@ public class CANReaderTest {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
         };
         int offset = 10;
-        boolean managed = canReader.onRead(buffer, offset);
+        boolean managed = serialCanReader.onRead(buffer, offset);
         assertFalse(managed);
         assertNull(l.getLastRead());
         assertNull(e.getLastRead());

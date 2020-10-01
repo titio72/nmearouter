@@ -10,7 +10,7 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        N2KMessage o = new N2KStreamImpl(null).getMessage(ss[0]);
+        N2KMessage o = new N2KStreamImpl().getMessage(ss[0]);
         assertNotNull(o);
         assertEquals(127250, o.getHeader().getPgn());
     }
@@ -33,7 +33,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageBecauseChanged() {
         // send second because the short timeout is expired (350ms) and the value is different
-        N2KStreamImpl stream = new N2KStreamImpl(null);
+        N2KStreamImpl stream = new N2KStreamImpl();
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[3]));
     }
@@ -41,7 +41,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageTimeout() {
         // send second because the long timeout is expired (so no matter the values are changed or not
-        N2KStreamImpl stream = new N2KStreamImpl(null);
+        N2KStreamImpl stream = new N2KStreamImpl();
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[4]));
     }

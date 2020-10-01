@@ -180,6 +180,11 @@
             <artifactId>jSerialComm</artifactId>
             <version>[2.3.0,3.0.0)</version>
         </dependency>
+        <dependency>
+            <groupId>tel.schich</groupId>
+            <artifactId>javacan</artifactId>
+            <version>2.3.0</version>
+        </dependency>
     </dependencies>
     <scm>
         <url>git@github.com:titio72/mmearouter.git</url>

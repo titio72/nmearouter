@@ -15,6 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.geo.DeviationManager;
+import com.aboni.geo.impl.DeviationManagerImpl;
 import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.impl.AgentStatusManagerImpl;
@@ -38,12 +40,18 @@ import com.aboni.nmea.router.data.track.impl.*;
 import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.impl.*;
+import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
-import com.aboni.nmea.router.n2k.can.CANReader;
+import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.nmea.router.n2k.can.HL340USBSerialCANReader;
+import com.aboni.nmea.router.n2k.can.SerialCANReader;
+import com.aboni.nmea.router.n2k.impl.N2KFastCacheImpl;
 import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
 import com.aboni.nmea.router.n2k.impl.N2KMessageParserImpl;
+import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
+import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
+import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
@@ -61,6 +69,7 @@ public class NMEARouterModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(RouterMessageFactory.class).to(RouterMessageFactoryImpl.class);
         bind(AgentStatusManager.class).to(AgentStatusManagerImpl.class).in(Singleton.class);
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("router")).to(NMEARouterDefaultBuilderImpl.class);
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("play")).to(NMEARouterPlayerBuilderImpl.class);
@@ -76,6 +85,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(TrackManager.class).to(TrackManagerImpl.class);
         bind(Meteo.class).to(DBMeteo.class);
         bind(TrackPointBuilder.class).to(TrackPointBuilderImpl.class);
+        bind(TrackDumperFactory.class).to(TrackDumperFactoryImpl.class);
         bind(MeteoReader.class).to(DBMeteoReader.class);
         bind(TrackReader.class).to(DBTrackReader.class);
         bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_TRACK)).to(DBTrackEventWriter.class);
@@ -94,6 +104,11 @@ public class NMEARouterModule extends AbstractModule {
         bind(WindStatsReader.class).to(DBWindStatsReader.class);
         bind(N2KMessageParser.class).to(N2KMessageParserImpl.class);
         bind(N2KMessage2NMEA0183.class).to(N2KMessage2NMEA0183Impl.class);
-        bind(CANReader.class).to(HL340USBSerialCANReader.class);
+        bind(N2KFastCache.class).to(N2KFastCacheImpl.class);
+        bind(N2KStream.class).to(N2KStreamImpl.class);
+        bind(N2KMessageFactory.class).to(N2KMessageFactoryImpl.class).in(Singleton.class);
+        bind(SerialCANReader.class).to(HL340USBSerialCANReader.class);
+        bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
+
     }
 }

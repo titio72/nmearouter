@@ -18,9 +18,8 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KStream;
-import com.aboni.nmea.router.n2k.impl.N2KMessage2NMEA0183Impl;
-import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
 import com.aboni.utils.Log;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -53,8 +52,8 @@ public class NMEAInputManager {
 
         N2KHandlerExp(Log logger) {
             this.logger = logger;
-            decoder = new N2KMessage2NMEA0183Impl();
-            stream = new N2KStreamImpl(logger, false);
+            decoder = ThingsFactory.getInstance(N2KMessage2NMEA0183.class);
+            stream = ThingsFactory.getInstance(N2KStream.class, logger);
         }
 
         @Override
