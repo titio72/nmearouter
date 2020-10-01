@@ -185,7 +185,7 @@
           controllerScope.$evalAsync();
         }
       }
-    } else if (msg.topic == "diag") {
+    } else if (msg.topic == "diagnostic") {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
       controllerScope.free_memory = msg.free_memory;
