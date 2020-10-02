@@ -215,8 +215,9 @@ public class SerialReader {
             b[offset] = r & 0xFF;
             if (callback != null && callback.onRead(b, offset)) {
                 offset = 0;
+            } else {
+                offset++;
             }
-            offset++;
             if (offset>=b.length) {
                 stats.incrementOverflows();
                 offset = 0;
