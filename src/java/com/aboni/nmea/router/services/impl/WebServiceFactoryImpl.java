@@ -16,16 +16,20 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services.impl;
 
 import com.aboni.nmea.router.services.*;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class WebServiceFactoryImpl implements WebServiceFactory {
 
+    private final Log log;
+
     @Inject
-    public WebServiceFactoryImpl() {
-        // nothing to initialize
+    public WebServiceFactoryImpl(@NotNull Log log) {
+        this.log = log;
     }
 
     @Override
@@ -87,7 +91,9 @@ public class WebServiceFactoryImpl implements WebServiceFactory {
                 break;
         }
         if (s != null) {
-            ServerLog.getLogger().debug("ServiceFactory: created {" + s + "}");
+            final String sDescription = s.toString();
+            log.debug(() -> LogStringBuilder.start("WebServiceFactory")
+                    .withOperation("create service").withValue("service", sDescription).toString());
         }
         return s;
 

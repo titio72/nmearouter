@@ -20,7 +20,7 @@ import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.EngineDetector;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -30,9 +30,12 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
 
     private EngineStatus engineRunning;
 
+    private final Log log;
+
     @Inject
-    public EngineDetectionAgent(@NotNull NMEACache cache) {
+    public EngineDetectionAgent(@NotNull NMEACache cache, @NotNull Log log) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
         engineRunning = EngineStatus.UNKNOWN;
     }
@@ -47,7 +50,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
         EngineDetector.getInstance().refresh();
         EngineStatus localEngineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
         if (engineRunning != localEngineRunning) {
-            ServerLog.getLogger().info("Engine status change {" + localEngineRunning + "}");
+            log.info(getLogBuilder().withOperation("status change").withValue("status", localEngineRunning).toString());
         }
         engineRunning = localEngineRunning;
         getCache().setStatus(NMEARouterStatuses.ENGINE_STATUS, engineRunning);

@@ -23,11 +23,9 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.conf.AgentConfJSON;
 import com.aboni.nmea.router.conf.ConfJSON;
-import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.filters.FilterSetSerializer;
 import com.aboni.nmea.router.processors.NMEASourcePriorityProcessor;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
@@ -70,28 +68,25 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void buildRouter() throws MalformedConfigurationException {
         NMEARouter r = theRouter;
-        LogLevelType logLevel;
         List<String> gpsPriority;
 
         ConfJSON cJ;
         try {
             cJ = new ConfJSON();
-            logLevel = cJ.getLogLevel();
             gpsPriority = cJ.getGPSPriority();
         } catch (Exception e) {
-            throw new MalformedConfigurationException("Cannot read configuration", e);
+            throw new MalformedConfigurationException(e);
         }
 
         configureGPSPriority(gpsPriority, r);
-        configureLog(logLevel);
-        if (ENABLE_GPS_TIME) buildGPSTimeTarget(r);
-        buildStreamDump(r);
-        buildPowerLedTarget(r);
-        buildFanTarget(r);
-        buildDPTStats(r);
-        buildEngineDetector(r);
-        buildWebUI(r);
-        if (ENABLE_AP) buildAutoPilot(r);
+        if (ENABLE_GPS_TIME) buildBuiltInAgent(r, BuiltInAgents.GPS_TIME_SYNC);
+        if (ENABLE_AP) buildBuiltInAgent(r, BuiltInAgents.AUTO_PILOT);
+        buildBuiltInAgent(r, BuiltInAgents.FILE_DUMPER);
+        buildBuiltInAgent(r, BuiltInAgents.POWER_LED);
+        buildBuiltInAgent(r, BuiltInAgents.FAN_MANAGER);
+        buildBuiltInAgent(r, BuiltInAgents.DEPTH_STATS);
+        buildBuiltInAgent(r, BuiltInAgents.ENGINE_DETECTOR);
+        buildBuiltInAgent(r, BuiltInAgents.WEB_UI);
 
         buildAgents(cJ, r);
     }
@@ -108,26 +103,6 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
         for (NMEAAgent a : toActivate) {
             a.start();
-        }
-    }
-
-    private void configureLog(LogLevelType level) {
-        switch (level) {
-            case DEBUG:
-                ServerLog.getLoggerAdmin().setDebug();
-                break;
-            case WARNING:
-                ServerLog.getLoggerAdmin().setWarning();
-                break;
-            case ERROR:
-                ServerLog.getLoggerAdmin().setError();
-                break;
-            case NONE:
-                ServerLog.getLoggerAdmin().setNone();
-                break;
-            default:
-                ServerLog.getLoggerAdmin().setInfo();
-                break;
         }
     }
 
@@ -176,68 +151,11 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         return active;
     }
 
-    private void buildStreamDump(NMEARouter r) {
-        NMEAAgent dumper = builder.createAgent(BuiltInAgents.FILE_DUMPER);
-        if (dumper != null) {
-            r.addAgent(dumper);
-            handleFilter(dumper);
-        }
-    }
-
-    private void buildDPTStats(NMEARouter r) {
-        NMEAAgent a = builder.createAgent(BuiltInAgents.DEPTH_STATS);
-        if (a != null) {
-            r.addAgent(a);
-            a.start();
-        }
-    }
-
-    private void buildPowerLedTarget(NMEARouter r) {
-        NMEAAgent pwrLed = builder.createAgent(BuiltInAgents.POWER_LED);
-        if (pwrLed != null) {
-            r.addAgent(pwrLed);
-            pwrLed.start();
-        }
-    }
-
-    private void buildAutoPilot(NMEARouter r) {
-        NMEAAgent ap = builder.createAgent(BuiltInAgents.AUTO_PILOT);
-        if (ap != null) {
-            r.addAgent(ap);
-            ap.start();
-        }
-    }
-
-    private void buildFanTarget(NMEARouter r) {
-        NMEAAgent fan = builder.createAgent(BuiltInAgents.FAN_MANAGER);
-        if (fan != null) {
-            r.addAgent(fan);
-            fan.start();
-        }
-    }
-
-    private void buildEngineDetector(NMEARouter r) {
-        NMEAAgent eng = builder.createAgent(BuiltInAgents.ENGINE_DETECTOR);
-        if (eng != null) {
-            r.addAgent(eng);
-            eng.start();
-        }
-    }
-
-    private void buildGPSTimeTarget(NMEARouter r) {
-        NMEAAgent gpsTime = builder.createAgent(BuiltInAgents.GPS_TIME_SYNC);
-        if (gpsTime != null) {
-            r.addAgent(gpsTime);
-            handleFilter(gpsTime);
-            gpsTime.start();
-        }
-    }
-
-    private void buildWebUI(NMEARouter r) {
-        NMEAAgent web = builder.createAgent(BuiltInAgents.WEB_UI);
-        if (web != null) {
-            r.addAgent(web);
-            web.start();
+    private void buildBuiltInAgent(NMEARouter r, BuiltInAgents a) {
+        NMEAAgent agent = builder.createAgent(a);
+        if (agent != null) {
+            r.addAgent(agent);
+            agent.start();
         }
     }
 }

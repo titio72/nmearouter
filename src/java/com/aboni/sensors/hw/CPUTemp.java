@@ -17,7 +17,8 @@ package com.aboni.sensors.hw;
 
 import com.aboni.misc.Sample;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.ThingsFactory;
 
 import java.io.FileInputStream;
 
@@ -54,7 +55,7 @@ public class CPUTemp {
                 }
             }
         } catch (Exception e) {
-            ServerLog.getLogger().debug("Cannot read cpu temperature {" + e.getMessage() + "}");
+            ThingsFactory.getInstance(Log.class).debug("Cannot read cpu temperature {" + e.getMessage() + "}");
         }
         return 0;
     }

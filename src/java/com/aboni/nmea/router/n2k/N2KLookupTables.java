@@ -140,7 +140,7 @@ public class N2KLookupTables {
             }
             w.write(j.toString(2));
         } catch (Exception e) {
-            e.printStackTrace(ServerLog.getConsoleOut());
+            ServerLog.getLogger().error("Error dumping N2K lookup tables", e);
         }
     }
 }

@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.sampledquery.impl;
 
 import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
 import com.aboni.utils.Query;
@@ -83,7 +84,7 @@ public class DBRangeFinder implements RangeFinder {
             } else {
                 ServerLog.getLogger().error("SampledQuery: Unsupported query type " + q);
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
             ServerLog.getLogger().error("SampledQuery: Cannot create time range for {" + table + "} because connection is not established!", e);
         }
         return null;

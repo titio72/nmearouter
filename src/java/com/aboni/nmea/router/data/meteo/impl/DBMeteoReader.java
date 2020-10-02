@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.nmea.router.data.meteo.MeteoReader;
 import com.aboni.nmea.router.data.meteo.MeteoSample;
@@ -44,7 +45,7 @@ public class DBMeteoReader implements MeteoReader {
                     }
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             ServerLog.getLogger().error("Error reading meteo", e);
             throw new MeteoManagementException("Error reading meteo", e);
         }

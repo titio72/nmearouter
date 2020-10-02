@@ -56,7 +56,7 @@ public class LoadGPX {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace(ServerLog.getConsoleOut());
+            e.printStackTrace();
         }
     }
 
@@ -76,7 +76,7 @@ public class LoadGPX {
             process(g, speed);
 
 
-            ServerLog.getConsoleOut().printf("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4));
+            ServerLog.getLogger().console(String.format("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4)));
         }
     }
 
@@ -94,7 +94,7 @@ public class LoadGPX {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                e.printStackTrace(ServerLog.getConsoleOut());
+                e.printStackTrace();
             }
         }
     }

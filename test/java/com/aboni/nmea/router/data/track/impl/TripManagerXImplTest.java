@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
@@ -146,7 +147,7 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testChangeDescription() throws TripManagerException, ClassNotFoundException, SQLException {
+    public void testChangeDescription() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         tm.setTripDescription(136, "Capraia 1");
         assertEquals("Capraia 1", tm.getTrip(136).getTripDescription());
         try (DBHelper db = new DBHelper(true)) {
@@ -168,7 +169,7 @@ public class TripManagerXImplTest {
 
 
     @Test
-    public void testDelete() throws TripManagerException, ClassNotFoundException, SQLException {
+    public void testDelete() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         tm.deleteTrip(136);
         try (DBHelper db = new DBHelper(true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
@@ -188,7 +189,7 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testOnTrackPointNewTrip() throws TripManagerException, ClassNotFoundException, SQLException {
+    public void testOnTrackPointNewTrip() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         Instant t = Instant.ofEpochMilli(System.currentTimeMillis());
         TrackPoint p = new TrackPointBuilderImpl().
                 withPosition(new GeoPositionT(t.toEpochMilli(), 43.6484500, 10.2660330)).

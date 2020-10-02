@@ -26,6 +26,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -37,6 +38,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEAAgentImpl implements NMEAAgent {
+
+    public static final String AGENT_LIFECYCLE_CATEGORY = "Agent lifecycle";
+    public static final String AGENT_MESSAGE_CATEGORY = "Agent message";
 
     private static class InternalSource implements NMEASource {
 
@@ -76,15 +80,16 @@ public class NMEAAgentImpl implements NMEAAgent {
         @Override
         public void pushMessage(RouterMessage mm) {
             try {
-                if (isStarted()) {
+                if (mm != null && isStarted()) {
                     lazyLoadListenerWrapper();
                     if (handleNMEA0183(mm)) return;
                     if (handleNMEA2000(mm)) return;
                     if (handleJSON(mm)) return;
-                    getLogger().error(String.format("Unknown message type {%s}", mm.getPayload()));
+                    log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Receive")
+                            .withValue("error", "Unknown message type").withValue("message", mm.getPayload()).toString());
                 }
             } catch (Exception t) {
-                getLogger().warning("Error delivering message to agent {" + mm.getPayload() + "} error {" + t.getMessage() + "}");
+                log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Receive").toString(), t);
             }
         }
 
@@ -146,6 +151,11 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
 
         @Override
+        public boolean isDebug() {
+            return log.isDebug();
+        }
+
+        @Override
         public void error(String msg) {
             log.error(getMsg(NMEAAgentImpl.this, msg));
         }
@@ -202,6 +212,13 @@ public class NMEAAgentImpl implements NMEAAgent {
     private ListenerWrapper listenerWrapper;
 
     @Inject
+    private Log log;
+
+    protected LogStringBuilder getLogBuilder() {
+        return LogStringBuilder.start("").withValue("Agent", getName()).withValue("Type", getType());
+    }
+
+    @Inject
     public NMEAAgentImpl(@NotNull NMEACache cache) {
         this.cache = cache;
         targetIf = new InternalTarget();
@@ -239,6 +256,10 @@ public class NMEAAgentImpl implements NMEAAgent {
         attributes.source = isSource;
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     protected Log getLogger() {
         return internalLog;
     }
@@ -262,12 +283,12 @@ public class NMEAAgentImpl implements NMEAAgent {
     public final void start() {
         synchronized (this) {
             if (!isStarted()) {
-                getLogger().info("Activating agent {" + getName() + "}");
+                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Activate").toString());
                 if (onActivate()) {
                     attributes.active.set(true);
                     notifyStatus();
                 } else {
-                    getLogger().error("Cannot activate agent {" + getName() + "}");
+                    log.error(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Activate").toString());
                 }
             }
         }
@@ -281,7 +302,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     public final void stop() {
         synchronized (this) {
             if (isStarted()) {
-                getLogger().info("Deactivating {" + getName() + "}");
+                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Deactivate").toString());
                 onDeactivate();
                 attributes.active.set(false);
                 notifyStatus();
@@ -345,7 +366,9 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(N2KMessage m) {
         if (isStarted()) {
-            getLogger().debug("Notify Sentence {" + m + "}");
+            log.debug(
+                    getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Notify")
+                            .withValue("MsgType", "N2K").withValue("Message", m).toString());
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
         }
     }

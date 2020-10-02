@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBEventWriter;
@@ -60,7 +61,7 @@ public class TripManagerXImpl implements TripManagerX {
                 t.setDistance(rs.getDouble("dist"));
                 archive.setTrip(t);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             ServerLog.getLogger().error(ERROR_LOADING_TRIPS, e);
         }
     }
@@ -107,7 +108,7 @@ public class TripManagerXImpl implements TripManagerX {
                         trackEventWriter.write(event, conn);
                         conn.commit();
                     }
-                } catch (ClassNotFoundException | SQLException e) {
+                } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                     throw new TripManagerException("Error starting a new trip from track point", e);
                 }
             } else {
@@ -119,7 +120,7 @@ public class TripManagerXImpl implements TripManagerX {
                         tripEventWriter.write(new TripEvent(t), conn);
                         conn.commit();
                     }
-                } catch (ClassNotFoundException | SQLException e) {
+                } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                     throw new TripManagerException("Error writing rack point", e);
                 }
             }
@@ -153,7 +154,7 @@ public class TripManagerXImpl implements TripManagerX {
                     stm.execute();
                 }
                 db.getConnection().commit();
-            } catch (ClassNotFoundException | SQLException e) {
+            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error deleting trip " + id, e);
             }
         }
@@ -167,7 +168,7 @@ public class TripManagerXImpl implements TripManagerX {
             t.setTripDescription(description);
             try (Connection c = new DBHelper(true).getConnection()) {
                 saveTrip(t, c);
-            } catch (ClassNotFoundException | SQLException e) {
+            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error saving trip", e);
             }
         }

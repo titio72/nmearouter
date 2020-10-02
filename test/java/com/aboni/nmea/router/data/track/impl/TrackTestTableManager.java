@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.data.track.impl;
 
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.utils.db.DBHelper;
 
 import java.sql.PreparedStatement;
@@ -79,7 +80,7 @@ public class TrackTestTableManager {
         return null;
     }
 
-    public static void addTestData() throws SQLException, ClassNotFoundException {
+    public static void addTestData() throws SQLException, MalformedConfigurationException, ClassNotFoundException {
         try (DBHelper db = new DBHelper(false)) {
             PreparedStatement st = db.getConnection().prepareStatement("insert into trip_test values (?, ?, ?, ?, ?)");
             for (Object[] t : testTrips) {

@@ -39,17 +39,13 @@ public class Tester {
         this.period = period;
     }
 
-    private PrintStream getOut() {
-        return ServerLog.getConsoleOut();
-    }
-
     public void start(TestingProc runnable) {
-        if (runnable.init(getOut())) {
+        if (runnable.init(System.out)) {
             goon.set(true);
             Thread t = new Thread(() -> {
                 try {
                     while (goon.get()) {
-                        if (runnable.doIt(getOut())) {
+                        if (runnable.doIt(System.out)) {
                             Utils.pause(period);
                         } else {
                             break;

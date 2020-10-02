@@ -16,10 +16,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.agent.AgentStatusManager;
-import com.aboni.utils.ServerLog;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.db.DBHelper;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,25 +32,31 @@ import java.util.Map;
 
 public class AgentStatusManagerImpl implements AgentStatusManager {
 
-    private static final String ERROR_MSG = "Cannot persist status for Agent";
-
+    public static final String AGENT_STATUS_MANAGER_CATEGORY = "Agent Status Manager";
+    public static final String FILTER_KEY_NAME = "filter";
+    public static final String AGENT_KEY_NAME = "agent";
     private final Map<String, AgentStatusManager.STATUS> status;
     private final Map<String, String> filterOut;
     private final Map<String, String> filterIn;
 
+    private Log log;
+
     @Inject
-    public AgentStatusManagerImpl() {
+    public AgentStatusManagerImpl(@NotNull Log log) {
+        this.log = log;
         status = new HashMap<>();
         filterOut = new HashMap<>();
         filterIn = new HashMap<>();
         try {
             loadAll();
+            log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                    .withOperation("Load").withValue("agents", status.size()).toString());
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error loading agents status", e);
+            log.error(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).withOperation("Load").toString(), e);
         }
     }
 
-    private void loadAll() throws SQLException, ClassNotFoundException {
+    private void loadAll() throws SQLException, ClassNotFoundException, MalformedConfigurationException {
         try (DBHelper db = new DBHelper(true)) {
             String sql = "select id, autostart, filterOut, filterIn from agent";
             try (Statement st = db.getConnection().createStatement()) {
@@ -84,7 +93,8 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
     @Override
     public synchronized void setStartMode(String agent, STATUS s) {
         status.put(agent, s);
-        ServerLog.getLogger().info("Saving startup setting for agent {" + agent + "} Startup {" + s + "}");
+        log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                .withOperation("Set Startup Mode").withValue(AGENT_KEY_NAME, agent).withValue("startup", s).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?")) {
                 updateStatusSt.setString(1, agent);
@@ -92,15 +102,17 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
                 updateStatusSt.setInt(3, (s == STATUS.AUTO) ? 1 : 0);
                 updateStatusSt.executeUpdate();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} Start {" + s + "}", e);
+        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+            log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                    .withOperation("Set Startup Mode").withValue(AGENT_KEY_NAME, agent).withValue("mode", s).toString(), e);
         }
     }
 
     @Override
     public synchronized void setFilterOutData(String agent, String agData) {
         filterOut.put(agent, agData);
-        ServerLog.getLogger().info("Saving outbound filter for agent {" + agent + "} FilterOut {" + agData + "}");
+        log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                .withOperation("Set Filter Out").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateFilterOut =
                          db.getConnection().prepareStatement("update agent set filterOut=? where id=?")) {
@@ -108,23 +120,26 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
                 updateFilterOut.setString(2, agent);
                 updateFilterOut.executeUpdate();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} FilterOut {" + agData + "}", e);
+        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+            log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                    .withOperation("Set Filter Out").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString(), e);
         }
     }
 
     @Override
     public synchronized void setFilterInData(String agent, String agData) {
         filterIn.put(agent, agData);
-        ServerLog.getLogger().info("Saving inbound filter for agent {" + agent + "} FilterIn {" + agData + "}");
+        log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                .withOperation("Set Filter In").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateFilterIn = db.getConnection().prepareStatement("update agent set filterIn=? where id=?")) {
                 updateFilterIn.setString(1, agData);
                 updateFilterIn.setString(2, agent);
                 updateFilterIn.executeUpdate();
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            ServerLog.getLogger().error(ERROR_MSG + " {" + agent + "} FilterIn {" + agData + "}", e);
+        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+            log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
+                    .withOperation("Set Filter In").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString(), e);
         }
     }
 }

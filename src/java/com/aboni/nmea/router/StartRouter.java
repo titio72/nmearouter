@@ -15,9 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
+import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
@@ -43,12 +46,24 @@ public class StartRouter {
     }
 
     private static void consoleOut(String s) {
-        ServerLog.getConsoleOut().println(s);
+        logAdmin.console(s);
     }
+
+    private static LogAdmin logAdmin = null;
 
     public static void main(@NotNull String[] args) {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
+        logAdmin = ThingsFactory.getInstance(LogAdmin.class);
+        ConfJSON cJ;
+        try {
+            cJ = new ConfJSON();
+            LogLevelType logLevel = cJ.getLogLevel();
+            configureLog(logLevel);
+        } catch (Exception e) {
+            consoleOut("Cannot read configuration:" + e.getMessage());
+        }
+
         int ix;
         if (checkFlag(HELP, args) >= 0) {
             consoleOut("-sensor : sensor monitor\r\n" +
@@ -81,20 +96,41 @@ public class StartRouter {
             consoleOut("C_Y:    " + cc.getCalibration()[1]);
             consoleOut("C_Z:    " + cc.getCalibration()[2]);
         } catch (Exception e1) {
-            ServerLog.getLogger().error("Error during calibration", e1);
+            logAdmin.error("Error during calibration", e1);
         }
     }
 
     private static void startRouter(Injector injector, NMEARouterBuilder builder, Properties p) {
-        ServerLog.getLogger().infoFill("");
-        ServerLog.getLogger().infoFill("NMEARouter");
-        ServerLog.getLogger().infoFill("");
-        ServerLog.getLogger().infoFill("Start " + ZonedDateTime.now());
-        ServerLog.getLogger().infoFill("");
+        logAdmin.infoFill("");
+        logAdmin.infoFill("NMEARouter");
+        logAdmin.infoFill("");
+        logAdmin.infoFill("Start " + ZonedDateTime.now());
+        logAdmin.infoFill("");
         NMEAUtils.registerExtraSentences();
         injector.getInstance(NMEAStream.class); // be sure the stream started
         NMEARouter router = ThingsFactory.getInstance(NMEARouter.class);
         builder.init(router, p);
         router.start();
+    }
+
+
+    private static void configureLog(LogLevelType level) {
+        switch (level) {
+            case DEBUG:
+                ServerLog.getLoggerAdmin().setDebug();
+                break;
+            case WARNING:
+                ServerLog.getLoggerAdmin().setWarning();
+                break;
+            case ERROR:
+                ServerLog.getLoggerAdmin().setError();
+                break;
+            case NONE:
+                ServerLog.getLoggerAdmin().setNone();
+                break;
+            default:
+                ServerLog.getLoggerAdmin().setInfo();
+                break;
+        }
     }
 }

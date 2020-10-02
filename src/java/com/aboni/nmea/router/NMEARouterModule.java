@@ -57,6 +57,9 @@ import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
 import com.aboni.nmea.router.services.impl.WebHandler;
 import com.aboni.nmea.router.services.impl.WebServiceFactoryImpl;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogAdmin;
+import com.aboni.utils.RouterLog;
 import com.aboni.utils.StatsWriter;
 import com.aboni.utils.db.DBEventWriter;
 import com.google.inject.AbstractModule;
@@ -67,8 +70,12 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 @SuppressWarnings("OverlyCoupledClass")
 public class NMEARouterModule extends AbstractModule {
 
+    private LogAdmin logger = new RouterLog();
+
     @Override
     protected void configure() {
+        bind(LogAdmin.class).toInstance(logger);
+        bind(Log.class).toInstance(logger);
         bind(RouterMessageFactory.class).to(RouterMessageFactoryImpl.class);
         bind(AgentStatusManager.class).to(AgentStatusManagerImpl.class).in(Singleton.class);
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("router")).to(NMEARouterDefaultBuilderImpl.class);

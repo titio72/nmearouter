@@ -19,7 +19,8 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.services.EventSocket;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -27,7 +28,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
@@ -37,13 +37,17 @@ import javax.validation.constraints.NotNull;
 
 public class WebInterfaceAgent extends NMEAAgentImpl {
 
+    public static final String WEB_UI_CATEGORY = "WebUI";
     private boolean webStarted;
     private Server server;
     private final NMEAStream stream;
 
+    private final Log log;
+
     @Inject
-    public WebInterfaceAgent(@NotNull NMEACache cache, @NotNull NMEAStream stream) {
+    public WebInterfaceAgent(@NotNull NMEACache cache, @NotNull NMEAStream stream, @NotNull Log log) {
         super(cache);
+        this.log = log;
         this.stream = stream;
         setSourceTarget(false, false);
     }
@@ -52,9 +56,9 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     protected final boolean onActivate() {
         synchronized (this) {
             if (!webStarted) {
-                getLogger().info("Starting web interface");
+                log.info(LogStringBuilder.start(WEB_UI_CATEGORY).withOperation("init").toString());
                 org.eclipse.jetty.util.log.Logger l = new org.eclipse.jetty.util.log.JavaUtilLog("jetty");
-                Log.setLog(l);
+                org.eclipse.jetty.util.log.Log.setLog(l);
                 server = new Server(1112);
                 ResourceHandler resourceHandler = new ResourceHandler();
                 resourceHandler.setWelcomeFiles(new String[]{"index.html"});
@@ -65,15 +69,15 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 handlers.setHandlers(new Handler[]{resourceHandler, ThingsFactory.getInstance(AbstractHandler.class), context});
                 server.setHandler(handlers);
                 EventSocket.setNMEAStream(stream);
+                WebSocketServerContainerInitializer.configure(context,
+                        (ServletContext servletContext, ServerContainer serverContainer) -> serverContainer.addEndpoint(EventSocket.class)
+                );
                 try {
-                    WebSocketServerContainerInitializer.configure(context,
-                            (ServletContext servletContext, ServerContainer serverContainer) -> serverContainer.addEndpoint(EventSocket.class)
-                    );
                     server.start();
                     webStarted = true;
-                    getLogger().info("Started web interface");
+                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).withOperation("start").toString());
                 } catch (Exception e) {
-                    ServerLog.getLogger().errorForceStacktrace("Cannot start web interface", e);
+                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).withOperation("start").toString(), e);
                     return false;
                 }
             }
@@ -86,11 +90,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         synchronized (this) {
             if (webStarted) {
                 try {
-                    getLogger().info("Stopping web interface");
+                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).withOperation("stop").toString());
                     server.stop();
-                    getLogger().info("Stopped web interface");
                 } catch (Exception e) {
-                    ServerLog.getLogger().errorForceStacktrace("Error stopping web interface", e);
+                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).withOperation("stop").toString(), e);
                 }
                 server = null;
             }

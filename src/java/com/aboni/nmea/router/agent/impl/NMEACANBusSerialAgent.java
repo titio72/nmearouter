@@ -84,6 +84,14 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     }
 
     private void onError(byte[] buffer, String errorMessage) {
+        getLogger().debug((() -> {
+            StringBuilder builder = new StringBuilder("Error reading frame:buffer {");
+            if (buffer != null) {
+                for (byte b : buffer) builder.append(String.format(" %02x", b));
+            }
+            builder.append("} error {").append(errorMessage).append("}");
+            return builder.toString();
+        }));
         stats.incrementErrors();
     }
 

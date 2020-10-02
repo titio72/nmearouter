@@ -225,7 +225,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private void onInput(byte[] b) {
         if (CONSOLE_OUT) {
-            ServerLog.getConsoleOut().println("Nextion input:" + dump(b));
+            ServerLog.getLogger().console("Nextion input:" + dump(b));
         }
         if (isDisplayTouched(b)) {
             dimmer.lightUp(getCache().getNow());

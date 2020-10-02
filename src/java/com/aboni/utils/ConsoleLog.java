@@ -1,35 +1,10 @@
 package com.aboni.utils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConsoleLog implements Log {
-
-    private static class MyFormatter extends Formatter {
-
-        final DateFormat df;
-
-        MyFormatter() {
-            df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
-        }
-
-        @Override
-        public String format(LogRecord record) {
-            Date d = new Date(record.getMillis());
-            String s = df.format(d) + " " + record.getLevel() + " " + record.getMessage() + "\n";
-            if (record.getThrown()!=null) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                record.getThrown().printStackTrace(pw);
-                s += sw.toString() + "\n";
-            }
-            return s;
-        }
-    }
 
     private final Logger lgConsole;
 
@@ -45,7 +20,12 @@ public class ConsoleLog implements Log {
         lgConsole.setUseParentHandlers(false);
         ConsoleHandler c = new ConsoleHandler();
         lgConsole.addHandler(c);
-        c.setFormatter(new MyFormatter());
+        c.setFormatter(new LogFormatter());
+    }
+
+    @Override
+    public boolean isDebug() {
+        return Level.FINEST == lgConsole.getLevel();
     }
 
     public void setDebug() {

@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.track.impl;
 
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackQueryManager;
 import com.aboni.utils.db.DBHelper;
@@ -67,7 +68,7 @@ public class DBTrackQueryManager implements TrackQueryManager {
                 res.put("NM_per_month", samples);
                 return res;
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
             throw new TrackManagementException("Error reading distance stats", e);
         }
     }

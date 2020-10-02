@@ -15,7 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.utils;
 
+import java.util.function.Supplier;
+
 public interface Log {
+
+    boolean isDebug();
 
     void error(String msg);
 
@@ -33,6 +37,11 @@ public interface Log {
 
     void debug(String msg);
 
+    default void debug(Supplier<String> supplier) {
+        if (isDebug()) debug(supplier.get());
+    }
+
     void console(String msg);
+
 
 }

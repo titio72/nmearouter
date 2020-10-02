@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.toolkit;
 
 
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.utils.db.DBHelper;
 
 import java.io.BufferedReader;
@@ -49,7 +50,7 @@ public class TrackToDB2 {
         dfParser.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public void load(String file) throws SQLException, IOException, ClassNotFoundException {
+    public void load(String file) throws SQLException, IOException, MalformedConfigurationException, ClassNotFoundException {
         int i = 0;
         db = new DBHelper(false);
         try (PreparedStatement st = db.getConnection().prepareStatement("insert into track (lat, lon, TS, anchor, dTime, speed) values (?, ?, ?, ?, ?, ?)")) {

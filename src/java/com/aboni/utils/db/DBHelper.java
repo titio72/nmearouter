@@ -16,7 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.utils.db;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.ServerLog;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.ThingsFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +36,7 @@ public class DBHelper implements AutoCloseable {
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
+    public static final String DB_HELPER_CATEGORY = "DBHelper";
 
     private String jdbc = JDBC_DRIVER;
     private String dbUrl = DB_URL;
@@ -42,14 +46,17 @@ public class DBHelper implements AutoCloseable {
     private final boolean autocommit;
     private Connection conn;
 
-    public DBHelper(boolean autocommit) throws ClassNotFoundException {
+    private Log log;
+
+    public DBHelper(boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
         readConf();
         this.autocommit = autocommit;
         Class.forName(jdbc);
+        log = ThingsFactory.getInstance(Log.class);
         reconnect();
     }
 
-    private void readConf() {
+    private void readConf() throws MalformedConfigurationException {
         try {
             File f = new File(Constants.DB);
             try (FileInputStream propInput = new FileInputStream(f)) {
@@ -61,7 +68,9 @@ public class DBHelper implements AutoCloseable {
                 password = p.getProperty("pwd");
             }
         } catch (Exception e) {
-            ServerLog.getLogger().debug("Cannot read db configuration!");
+            log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Read configuration")
+                    .withValue("error", e.getMessage()).toString());
+            throw new MalformedConfigurationException("Cannot read DB configuration", e);
         }
     }
 
@@ -73,9 +82,10 @@ public class DBHelper implements AutoCloseable {
     public void close() {
         if (conn != null) {
             try {
+                log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Close").toString());
                 conn.close();
             } catch (SQLException e) {
-                ServerLog.getLogger().error("Error closing connection!", e);
+                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Close").toString(), e);
             }
             conn = null;
         }
@@ -84,20 +94,20 @@ public class DBHelper implements AutoCloseable {
     private boolean reconnect() {
         try {
             close();
-            ServerLog.getLogger().debug("Establishing connection to DB {" + dbUrl + "}!");
+            log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Connect").toString());
             conn = DriverManager.getConnection(dbUrl, user, password);
             conn.setAutoCommit(autocommit);
             return true;
         } catch (Exception e) {
             conn = null;
-            ServerLog.getLogger().error("Cannot reset connection!", e);
+            log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Connect").toString(), e);
             return false;
         }
     }
 
     public synchronized String backup() throws IOException, InterruptedException {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
-        ServerLog.getLogger().info("DB Backup");
+        log.info("DB Backup");
         String file = df.format(new Date()) + ".sql";
         ProcessBuilder b = new ProcessBuilder("./dbBck.sh", user, password, file);
         Process process = b.start();
@@ -121,7 +131,8 @@ public class DBHelper implements AutoCloseable {
             } catch (Exception ex) {
                 writer.reset();
                 retry = true;
-                ServerLog.getLogger().error("Cannot write {" + e + "} (" + count + ")!", ex);
+                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Write event")
+                        .withValue("event", e).withValue("count", count).toString(), ex);
             }
         }
         if (retry) {

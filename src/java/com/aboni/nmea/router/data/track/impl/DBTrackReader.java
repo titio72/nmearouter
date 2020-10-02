@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
@@ -66,7 +67,7 @@ public class DBTrackReader implements TrackReader {
                     }
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             ServerLog.getLogger().error(ERROR_READING_TRACK, e);
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }
@@ -83,7 +84,7 @@ public class DBTrackReader implements TrackReader {
                     }
                 }
             }
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             ServerLog.getLogger().error(ERROR_READING_TRACK, e);
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }

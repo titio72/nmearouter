@@ -17,7 +17,9 @@ package com.aboni.sensors;
 
 import com.aboni.sensors.hw.PinDetector;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.ThingsFactory;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.RaspiPin;
 
@@ -35,7 +37,8 @@ public class EngineDetector {
     private EngineDetector() {
         Pin p = RaspiPin.getPinByName(HWSettings.getProperty("engine.pin", "GPIO 24"));
         pin = new PinDetector(p, false);
-        ServerLog.getLogger().info("Engine Detection created {" + pin.getName() + "}");
+        ThingsFactory.getInstance(Log.class).info(LogStringBuilder.start("Engine").withOperation("create")
+                .withValue("pin", pin.getName()).toString());
     }
 
     public void refresh() {

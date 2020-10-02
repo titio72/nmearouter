@@ -88,15 +88,15 @@ public class UpdateAnchorDB {
                             }
                             db.getConnection().commit();
                             final int count = i;
-                            ServerLog.getConsoleOut().println("Processed %d points " + count);
-                            ServerLog.getConsoleOut().println("wrong ids   " + idDiscrepancies);
-                            ServerLog.getConsoleOut().println("anchor      " + anchorDiscrepancies);
+                            ServerLog.getLogger().console("Processed %d points " + count);
+                            ServerLog.getLogger().console("wrong ids   " + idDiscrepancies);
+                            ServerLog.getLogger().console("anchor      " + anchorDiscrepancies);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace(ServerLog.getConsoleOut());
+            e.printStackTrace();
         }
     }
 
@@ -112,9 +112,9 @@ public class UpdateAnchorDB {
         if (filter(item)) {
             if (isLastValid(item)) {
                 // very bad issue... consecutive points are not ordered with time
-                ServerLog.getConsoleOut().println("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
-                ServerLog.getConsoleOut().println("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
-                ServerLog.getConsoleOut().println("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
+                ServerLog.getLogger().console("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
+                ServerLog.getLogger().console("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
+                ServerLog.getLogger().console("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
                 idDiscrepancies++;
             } else if (isRecent(item)) {
                 updateSameLeg(item, tp, stUpd);
@@ -162,9 +162,9 @@ public class UpdateAnchorDB {
 
 
     private void logItem(TrackItem item, boolean expectedAnchor) {
-        ServerLog.getConsoleOut().format("Discrepancy: %s %s %d %s Speed %f.2 %n",
+        ServerLog.getLogger().console(String.format("Discrepancy: %s %s %d %s Speed %f.2 %n",
                 item.anchor ? "Y" : "N", expectedAnchor ? "Y" : "N", item.id,
-                new Date(item.position.getTimestamp()), item.speed);
+                new Date(item.position.getTimestamp()), item.speed));
     }
 
     public static void main(String[] args) {

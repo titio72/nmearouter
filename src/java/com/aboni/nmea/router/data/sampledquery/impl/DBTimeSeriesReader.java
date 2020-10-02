@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery.impl;
 
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
@@ -45,7 +46,7 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
                 readSamples(res, stm, sampling, maxSamples);
             }
             return res;
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             ServerLog.getLogger().error("TimeSeriesReader: cannot read time series", e);
             return null;
         }

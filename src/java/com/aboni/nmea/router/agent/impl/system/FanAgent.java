@@ -21,6 +21,8 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -35,10 +37,12 @@ public class FanAgent extends NMEAAgentImpl {
     private static final double FAN_THRESHOLD_ON = 55.0;
     private static final double FAN_THRESHOLD_OFF = 52.0;
     private final Fan fan;
+    private final Log log;
 
     @Inject
-    public FanAgent(@NotNull NMEACache cache) {
+    public FanAgent(@NotNull NMEACache cache, @NotNull Log log) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
         fan = new Fan();
     }
@@ -73,7 +77,7 @@ public class FanAgent extends NMEAAgentImpl {
     }
 
     private void fan(boolean on) {
-        getLogger().info("Switch fan {" + on + "}");
+        log.info(LogStringBuilder.start("Fan Manager").withOperation("switch").withValue("status", on).toString());
         fan.switchFan(on);
     }
 
@@ -83,7 +87,8 @@ public class FanAgent extends NMEAAgentImpl {
             xdr.addMeasurement(new Measurement("C", Utils.round(temp, 2), "C", "CPUTemp"));
             notify(xdr);
         } catch (Exception e) {
-            getLogger().error("Error sending CPU temperature", e);
+            log.debug(() -> LogStringBuilder.start("Fan Manager").withOperation("read temperature")
+                    .withValue("error", e.getMessage()).toString());
         }
     }
 
