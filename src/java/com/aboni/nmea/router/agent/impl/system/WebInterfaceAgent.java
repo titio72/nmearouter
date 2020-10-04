@@ -15,24 +15,20 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEAStream;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.services.EventSocket;
+import com.aboni.nmea.router.services.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.servlet.*;
 
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import javax.validation.constraints.NotNull;
 
 public class WebInterfaceAgent extends NMEAAgentImpl {
@@ -49,7 +45,26 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         super(cache);
         this.log = log;
         this.stream = stream;
-        setSourceTarget(false, false);
+        setSourceTarget(false, true);
+    }
+
+    public class MyWebSocketServlet extends WebSocketServlet
+    {
+
+        @Override
+        public void configure(WebSocketServletFactory wsFactory)
+        {
+            wsFactory.setCreator(new MyWebSocketCreator());
+        }
+    }
+
+    public class MyWebSocketCreator implements WebSocketCreator
+    {
+        @Override
+        public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest, ServletUpgradeResponse servletUpgradeResponse)
+        {
+            return new EventSocket(stream);
+        }
     }
 
     @Override
@@ -63,15 +78,34 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 ResourceHandler resourceHandler = new ResourceHandler();
                 resourceHandler.setWelcomeFiles(new String[]{"index.html"});
                 resourceHandler.setResourceBase("./web");
+
                 ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 context.setContextPath("/");
+                context.addServlet(new ServletHolder(new MyWebSocketServlet()), "/events");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(WindStatsService.class))), "/windanalytics");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AISTargetsService.class))),"/ais");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(GPSStatusService.class))), "/gps");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackAnalyticsService.class))), "/trackanalytics");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackService.class))), "/track");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AgentStatusService.class))), "/agentsj");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceShutdown.class))), "/shutdown");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SimulatorService.class))), "/sim");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService.class))), "/meteo");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceDBBackup.class))), "/backup");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AgentFilterService.class))), "/filter");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/auto");
+                context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
+
                 HandlerList handlers = new HandlerList();
-                handlers.setHandlers(new Handler[]{resourceHandler, ThingsFactory.getInstance(AbstractHandler.class), context});
+                handlers.addHandler(resourceHandler);
+                handlers.addHandler(context);
+
                 server.setHandler(handlers);
-                EventSocket.setNMEAStream(stream);
-                WebSocketServerContainerInitializer.configure(context,
-                        (ServletContext servletContext, ServerContainer serverContainer) -> serverContainer.addEndpoint(EventSocket.class)
-                );
+
                 try {
                     server.start();
                     webStarted = true;
@@ -100,9 +134,13 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         }
     }
 
-
     @Override
     public String getDescription() {
         return "Web interface - sessions " + EventSocket.getSessions();
+    }
+
+    @OnRouterMessage
+    public void onSentenceMessage(RouterMessage msg) {
+        stream.pushSentence(msg);
     }
 }

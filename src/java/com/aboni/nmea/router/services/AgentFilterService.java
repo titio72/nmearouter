@@ -22,7 +22,6 @@ import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
-import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -50,8 +49,7 @@ public class AgentFilterService extends JSONWebService {
     }
 
     @Inject
-    public AgentFilterService(@NotNull NMEARouter router, @NotNull AgentListSerializer serializer,
-                              @NotNull AgentStatusManager agentStatusManager) {
+    public AgentFilterService(@NotNull NMEARouter router, @NotNull AgentListSerializer serializer, @NotNull AgentStatusManager agentStatusManager) {
         super();
         setLoader((ServiceConfig config) -> {
             try {
@@ -59,7 +57,6 @@ public class AgentFilterService extends JSONWebService {
                 String[] sentences = config.getParameter("sentences").split(",");
                 String type = config.getParameter("type");
                 boolean inOut = "out".equals(config.getParameter("direction", "in"));
-                ServerLog.getLogger().info("Setting filters {" + inOut + "} type {" + type + "} sentences {" + toString(sentences) + "}");
                 NMEAFilterSetImpl fs = getNMEAFilterSet(sentences, type);
                 String msg = setFilter(router, agentStatusManager, agentName, fs, inOut ? IN_OUT.OUT : IN_OUT.IN);
                 return serializer.getJSON(router, msg);
@@ -84,12 +81,6 @@ public class AgentFilterService extends JSONWebService {
         }
         fs = (atLeast1 ? fs : null);
         return fs;
-    }
-
-    private static String toString(String[] ss) {
-        StringBuilder r = new StringBuilder();
-        for (String s : ss) r.append(" ").append(s);
-        return r.toString();
     }
 
     private String setFilter(@NotNull NMEARouter router, @NotNull AgentStatusManager agentStatusManager,

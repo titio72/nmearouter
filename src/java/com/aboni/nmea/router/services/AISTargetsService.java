@@ -4,6 +4,8 @@ import com.aboni.geo.Course;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,18 +22,22 @@ public class AISTargetsService extends JSONWebService {
     private final NMEACache cache;
 
     @Inject
-    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache) {
+    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache, @NotNull Log log) {
         this.cache = cache;
         findService(router);
         setLoader((ServiceConfig config) -> {
             if (targetsProvider != null) {
+                log.info(LogStringBuilder.start("WebService").withOperation("invoke").withValue("service", "AISTarget").toString());
                 List<AISPositionReport> reports = targetsProvider.getAISTargets();
                 JSONObject res = new JSONObject();
-                res.put("targets", new JSONArray(getListOfTargets(cache, reports)));
+                List<JSONObject> targets = getListOfTargets(cache, reports);
+                res.put("targets", new JSONArray(targets));
                 if (cache.getLastHeading()!=null) {
                     double heading = cache.getLastHeading().getData().getHeading();
                     res.put("heading", Utils.round(heading, 1));
                 }
+                log.info(LogStringBuilder.start("WebService").withOperation("load").withValue("service", "AISTarget").
+                        withValue("targets", targets.size()).toString());
                 return res;
             }
             return null;
@@ -83,8 +89,8 @@ public class AISTargetsService extends JSONWebService {
             if (data != null) {
                 setStringAttribute(j, data.getName(), "name");
                 setStringAttribute(j, data.getTypeOfShip(), "vessel_type");
-                j.put("length", data.getLength());
-                j.put("beam", data.getBeam());
+                setDoubleAttribute(j, data.getLength(), "length");
+                setDoubleAttribute(j, data.getBeam(), "beam");
                 setStringAttribute(j, data.getCallSign(), "callsign");
                 setStringAttribute(j, data.getAisTransceiverInfo(), "transceiver");
             }

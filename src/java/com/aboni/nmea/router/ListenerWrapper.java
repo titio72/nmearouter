@@ -30,12 +30,14 @@ public class ListenerWrapper {
     private final List<Method> listeners;
     private final List<Method> listenersJSON;
     private final List<Method> listenersN2K;
+    private final List<Method> listenersMsg;
     private final Object listenerObject;
 
     public ListenerWrapper(Object listener) {
         listeners = new ArrayList<>();
         listenersJSON = new ArrayList<>();
         listenersN2K = new ArrayList<>();
+        listenersMsg = new ArrayList<>();
         fillMethodsAnnotatedWith(listener);
         listenerObject = listener;
     }
@@ -52,6 +54,8 @@ public class ListenerWrapper {
                     scanMethod(method, N2KMessage.class, listenersN2K);
                 } else if (method.isAnnotationPresent(OnJSONMessage.class)) {
                     scanMethod(method, JSONObject.class, listenersJSON);
+                } else if (method.isAnnotationPresent(OnRouterMessage.class)) {
+                    scanMethod(method, RouterMessage.class, listenersMsg);
                 }
             }
             // move to the upper class in the hierarchy in search for more methods
@@ -67,6 +71,10 @@ public class ListenerWrapper {
         }
     }
 
+    public void onSentence(RouterMessage m) {
+        dispatch(m, null, listenersMsg);
+    }
+
     public void onSentence(Sentence s, String src) {
         dispatch(s, src, listeners);
     }
@@ -80,16 +88,22 @@ public class ListenerWrapper {
     }
 
     private <T> void dispatch(T payload, String src, List<Method> listenerMethods) {
-        for (Method m : listenerMethods) {
-            try {
-                if (m.getParameterCount() == 1)
-                    m.invoke(listenerObject, payload);
-                else if (m.getParameterCount() == 2)
-                    m.invoke(listenerObject, payload, src);
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error pushing message", e);
+        if (payload!=null) {
+            for (Method m : listenerMethods) {
+                try {
+                    if (m.getParameterCount() == 1)
+                        m.invoke(listenerObject, payload);
+                    else if (m.getParameterCount() == 2)
+                        m.invoke(listenerObject, payload, src);
+                } catch (Exception e) {
+                    ServerLog.getLogger().error("Error pushing message", e);
+                }
             }
         }
+    }
+
+    public boolean isRouterMessage() {
+        return !listenersMsg.isEmpty();
     }
 
     public boolean isJSON() {

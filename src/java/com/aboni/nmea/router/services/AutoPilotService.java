@@ -17,17 +17,50 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
 
-public class AutoPilotService implements WebService {
+public class AutoPilotService extends JSONWebService {
 
     private final AutoPilotDriver auto;
 
     @Inject
     public AutoPilotService(NMEARouter router) {
+        super();
         this.auto = (AutoPilotDriver) router.getAgent("SmartPilot");
+        setLoader((ServiceConfig config) -> {
+            if (auto!=null) {
+                String command = config.getParameter("command");
+                switch (command) {
+                    case CMD_PORT_10:
+                        auto.port10();
+                        break;
+                    case CMD_PORT_1:
+                        auto.port1();
+                        break;
+                    case CMD_STARBOARD_10:
+                        auto.starboard10();
+                        break;
+                    case CMD_STARBOARD_1:
+                        auto.starboard1();
+                        break;
+                    case CMD_AUTO:
+                        auto.enable();
+                        break;
+                    case CMD_STANDBY:
+                        auto.standBy();
+                        break;
+                    case CMD_WIND_VANE:
+                        auto.windVane();
+                        break;
+                    default:
+                        break;
+                }
+                return getOk();
+            } else {
+                return getError("No Autopilot driver found");
+            }
+        });
     }
 
     private static final String CMD_STARBOARD_1 = "S1";
@@ -38,46 +71,4 @@ public class AutoPilotService implements WebService {
     private static final String CMD_STANDBY = "Standby";
     private static final String CMD_WIND_VANE = "Wind";
 
-    @Override
-    public void doIt(ServiceConfig config, ServiceOutput response) {
-        try {
-            String command = config.getParameter("command");
-            switch (command) {
-                case CMD_PORT_10:
-                    auto.port10();
-                    break;
-                case CMD_PORT_1:
-                    auto.port1();
-                    break;
-                case CMD_STARBOARD_10:
-                    auto.starboard10();
-                    break;
-                case CMD_STARBOARD_1:
-                    auto.starboard1();
-                    break;
-                case CMD_AUTO:
-                    auto.enable();
-                    break;
-                case CMD_STANDBY:
-                    auto.standBy();
-                    break;
-                case CMD_WIND_VANE:
-                    auto.windVane();
-                    break;
-                default:
-                    break;
-            }
-            response.setContentType("application/json");
-            response.getWriter().println("{}");
-            response.ok();
-        } catch (Exception e) {
-            response.setContentType("application/json");
-            try {
-                response.getWriter().println("{\"error\", \"" + e.getMessage() + "\"}");
-            } catch (Exception ee) {
-                ServerLog.getLogger().error("Error sending response to web client", ee);
-            }
-            response.ok();
-        }
-    }
 }

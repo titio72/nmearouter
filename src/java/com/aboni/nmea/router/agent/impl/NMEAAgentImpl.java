@@ -27,7 +27,6 @@ import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
@@ -82,20 +81,29 @@ public class NMEAAgentImpl implements NMEAAgent {
             try {
                 if (mm != null && isStarted()) {
                     lazyLoadListenerWrapper();
+                    if (handleRouterMsg(mm)) return;
                     if (handleNMEA0183(mm)) return;
                     if (handleNMEA2000(mm)) return;
                     if (handleJSON(mm)) return;
-                    log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Receive")
+                    log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("receive")
                             .withValue("error", "Unknown message type").withValue("message", mm.getPayload()).toString());
                 }
             } catch (Exception t) {
-                log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Receive").toString(), t);
+                log.warning(getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("receive").toString(), t);
             }
         }
 
         private boolean handleJSON(RouterMessage mm) {
             if (mm.getPayload() instanceof JSONObject) {
                 if (listenerWrapper.isJSON()) listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
+                return true;
+            }
+            return false;
+        }
+
+        private boolean handleRouterMsg(RouterMessage mm) {
+            if (listenerWrapper.isRouterMessage()) {
+                listenerWrapper.onSentence(mm);
                 return true;
             }
             return false;
@@ -143,7 +151,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         private final Log log;
 
         private PrivateLog() {
-            log = ServerLog.getLogger();
+            log = ThingsFactory.getInstance(Log.class);
         }
 
         private String getMsg(NMEAAgentImpl a, String msg) {
@@ -211,8 +219,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private final RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
 
-    @Inject
-    private Log log;
+    private final Log log;
 
     protected LogStringBuilder getLogBuilder() {
         return LogStringBuilder.start("").withValue("Agent", getName()).withValue("Type", getType());
@@ -228,6 +235,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         internalLog = new PrivateLog();
         messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
         attributes.canStartStop = true;
+        log = ThingsFactory.getInstance(Log.class);
     }
 
     @Override
@@ -245,7 +253,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         if (qos != null) {
             attributes.builtin = qos.get(QOSKeys.BUILT_IN);
             attributes.canStartStop = !qos.get(QOSKeys.CANNOT_START_STOP);
-            for (NMEAPostProcess p : ProcessorsBuilder.load(qos, getLogger())) {
+            for (NMEAPostProcess p : ProcessorsBuilder.load(qos, log)) {
                 addProcessor(p);
             }
         }
@@ -283,12 +291,12 @@ public class NMEAAgentImpl implements NMEAAgent {
     public final void start() {
         synchronized (this) {
             if (!isStarted()) {
-                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Activate").toString());
+                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("activate").toString());
                 if (onActivate()) {
                     attributes.active.set(true);
                     notifyStatus();
                 } else {
-                    log.error(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Activate").toString());
+                    log.error(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("activate").toString());
                 }
             }
         }
@@ -302,7 +310,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     public final void stop() {
         synchronized (this) {
             if (isStarted()) {
-                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("Deactivate").toString());
+                log.info(getLogBuilder().withCategory(AGENT_LIFECYCLE_CATEGORY).withOperation("deactivate").toString());
                 onDeactivate();
                 attributes.active.set(false);
                 notifyStatus();
@@ -367,8 +375,8 @@ public class NMEAAgentImpl implements NMEAAgent {
     protected final void notify(N2KMessage m) {
         if (isStarted()) {
             log.debug(
-                    getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("Notify")
-                            .withValue("MsgType", "N2K").withValue("Message", m).toString());
+                    getLogBuilder().withCategory(AGENT_MESSAGE_CATEGORY).withOperation("notify")
+                            .withValue("msgType", "N2K").withValue("message", m).toString());
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
         }
     }

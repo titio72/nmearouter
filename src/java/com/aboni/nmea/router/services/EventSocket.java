@@ -17,109 +17,68 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnJSONMessage;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.ThingsFactory;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.json.JSONObject;
 
 import javax.websocket.*;
-import javax.websocket.server.ServerEndpoint;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ServerEndpoint(value = "/events")
+@WebSocket
 public class EventSocket {
 
-    private static NMEAStream stream;
     private static final AtomicInteger sessions = new AtomicInteger(0);
-
-    public static void setNMEAStream(NMEAStream stream) {
-        EventSocket.stream = stream;
-    }
-
     public static int getSessions() {
         return sessions.get();
     }
 
-    private MySession session;
+    private final NMEAStream stream;
+    private static final String WEB_SOCKET_CATEGORY = "WebSocket";
+    private final Log log;
+    private Session session;
+    private String id;
+
+    public EventSocket(NMEAStream stream) {
+        log = ThingsFactory.getInstance(Log.class);
+        this.stream = stream;
+    }
 
     @OnOpen
     public void onWebSocketConnect(Session s) {
-        if (stream != null) {
-            ServerLog.getLogger().info("Started web-socket session {" + s.getId() + "}");
-            session = new MySession(s);
-            doStart();
-        }
+        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("connect").withValue("id", s.getId()).toString());
+        session = s;
+        sessions.incrementAndGet();
+        id = s.getId();
+        stream.subscribe(this);
     }
 
     @OnClose
     public void onWebSocketClose(Session s) {
-        if (stream != null) {
-            ServerLog.getLogger().info("Closed web-socket session {" + s.getId() + "}");
-            if (session != null && session.isActive()) {
-                doClose();
-            }
-        }
-    }
-
-    private void doStart() {
-        sessions.incrementAndGet();
-        session.start(stream);
-    }
-
-    private void doClose() {
-        session.stop(stream);
+        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("close").withValue("id", s.getId()).toString());
+        stream.unsubscribe(this);
         sessions.decrementAndGet();
     }
 
+    @SuppressWarnings("unused")
     @OnError
     public void onWebSocketError(Throwable cause) {
-        ServerLog.getLogger().error("Error handling web sockets", cause);
-        doClose();
+        log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("error").toString(), cause);
+        stream.unsubscribe(this);
+        sessions.decrementAndGet();
     }
 
-    public static class MySession {
-        private final Session session;
-        private final String id;
-        private boolean active;
 
-        private MySession(Session s) {
-            session = s;
-            id = session.getId();
-            active = false;
-        }
-
-        private boolean isActive() {
-            synchronized (this) {
-                return active;
-            }
-        }
-
-        private void start(NMEAStream stream) {
-            synchronized (this) {
-                ServerLog.getLogger().info("Start new WS session {" + id + "}");
-                active = true;
-                stream.subscribe(this);
-            }
-        }
-
-        private void stop(NMEAStream stream) {
-            synchronized (this) {
-                ServerLog.getLogger().info("Close WS session {" + id + "}");
-                stream.unsubscribe(this);
-                active = false;
-            }
-        }
-
-        @OnJSONMessage
-        public void onSentence(JSONObject obj) {
-            synchronized (this) {
-                if (active && obj != null) {
-                    try {
-                        RemoteEndpoint.Async remote = session.getAsyncRemote();
-                        remote.setSendTimeout(1000);
-                        remote.sendText(obj.toString());
-                    } catch (Exception e) {
-                        ServerLog.getLogger().error("Error sending json to WS {" + id + "}", e);
-                    }
-                }
+    @OnJSONMessage
+    public void onSentence(JSONObject obj) {
+        if (obj != null) {
+            try {
+                RemoteEndpoint.Async remote = session.getAsyncRemote();
+                remote.setSendTimeout(1000);
+                remote.sendText(obj.toString());
+            } catch (Exception e) {
+                log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("message").withValue("id", id).toString(), e);
             }
         }
     }

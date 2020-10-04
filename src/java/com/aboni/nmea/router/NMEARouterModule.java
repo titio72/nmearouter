@@ -53,10 +53,7 @@ import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import com.aboni.nmea.router.services.QueryFactory;
-import com.aboni.nmea.router.services.WebServiceFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
-import com.aboni.nmea.router.services.impl.WebHandler;
-import com.aboni.nmea.router.services.impl.WebServiceFactoryImpl;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.RouterLog;
@@ -65,12 +62,11 @@ import com.aboni.utils.db.DBEventWriter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
 @SuppressWarnings("OverlyCoupledClass")
 public class NMEARouterModule extends AbstractModule {
 
-    private LogAdmin logger = new RouterLog();
+    private final LogAdmin logger = new RouterLog();
 
     @Override
     protected void configure() {
@@ -80,12 +76,10 @@ public class NMEARouterModule extends AbstractModule {
         bind(AgentStatusManager.class).to(AgentStatusManagerImpl.class).in(Singleton.class);
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("router")).to(NMEARouterDefaultBuilderImpl.class);
         bind(NMEARouterBuilder.class).annotatedWith(Names.named("play")).to(NMEARouterPlayerBuilderImpl.class);
-        bind(AbstractHandler.class).to(WebHandler.class);
         bind(NMEACache.class).to(NMEACacheImpl.class).in(Singleton.class);
         bind(TimestampProvider.class).to(DefaultTimestampProvider.class).in(Singleton.class);
-        bind(NMEAStream.class).to(NMEAStreamImpl.class).in(Singleton.class);
+        bind(NMEAStream.class).to(NMEAStreamImpl.class);
         bind(NMEARouter.class).to(NMEARouterImpl.class).in(Singleton.class);
-        bind(WebServiceFactory.class).to(WebServiceFactoryImpl.class).in(Singleton.class);
         bind(NMEAAgentBuilderJson.class).to(NMEAAgentBuilderJsonImpl.class);
         bind(TrackQueryManager.class).to(DBTrackQueryManager.class);
         bind(TripManagerX.class).to(TripManagerXImpl.class);

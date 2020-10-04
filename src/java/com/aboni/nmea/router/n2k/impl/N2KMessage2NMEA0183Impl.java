@@ -269,7 +269,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         boolean apparent = message.isApparent();
         if (!Double.isNaN(windAngle) && !Double.isNaN(windSpeed)) {
             MWVSentence mwv = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-            mwv.setAngle(windAngle);
+            mwv.setAngle(Utils.normalizeDegrees0To360(windAngle));
             mwv.setSpeed(windSpeed);
             mwv.setSpeedUnit(Units.KNOT);
             mwv.setTrue(!apparent);

@@ -21,7 +21,8 @@ import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -36,6 +37,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
 
+    public static final String ROUTER_CATEGORY = "Router";
+    public static final String AGENT_KEY_NAME = "agent";
     private Timer timer;
     private final AtomicBoolean started;
     private final ExecutorService exec;
@@ -44,9 +47,10 @@ public class NMEARouterImpl implements NMEARouter {
     private final BlockingQueue<RouterMessage> sentenceQueue;
     private final NMEAProcessorSet processors;
     private final NMEACache cache;
-    private final NMEAStream stream;
     private final RouterMessageFactory messageFactory;
+    private final Log log;
 
+    private static final int THREADS_POOL  	= 4;
     private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
     private static final int TIMER_HR		= 250;
     private int timerCount = 0;
@@ -55,15 +59,15 @@ public class NMEARouterImpl implements NMEARouter {
     private static final long STATS_PERIOD = 60; // seconds
 
     @Inject
-    public NMEARouterImpl(NMEACache cache, NMEAStream stream, @NotNull RouterMessageFactory messageFactory) {
+    public NMEARouterImpl(NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
         agents = new HashMap<>();
+        this.log = log;
         this.messageFactory = messageFactory;
+        this.cache = cache;
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
-        this.cache = cache;
-        this.stream = stream;
-        exec = Executors.newFixedThreadPool(2);
+        exec = Executors.newFixedThreadPool(THREADS_POOL);
         timer = null;
     }
 
@@ -72,9 +76,17 @@ public class NMEARouterImpl implements NMEARouter {
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
             for (NMEAAgent a : agents.values()) {
-                exec.execute(a::onTimerHR);
+                try {
+                    exec.execute(a::onTimerHR);
+                } catch (Exception e) {
+                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("timer").withValue(AGENT_KEY_NAME, a.getName()).toString(), e);
+                }
                 if (timerCount == 0) {
-                    exec.execute(a::onTimer);
+                    try {
+                        exec.execute(a::onTimer);
+                    } catch (Exception e) {
+                        log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("timer").withValue(AGENT_KEY_NAME, a.getName()).toString(), e);
+                    }
                     dumpStats();
                 }
             }
@@ -85,7 +97,8 @@ public class NMEARouterImpl implements NMEARouter {
         long t = cache.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
-            ServerLog.getLogger().info(String.format("Router Queue Size {%d} Free Mem {%d}", sentenceQueue.size(), Runtime.getRuntime().freeMemory()));
+            log.info(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("stats").withValue("queue", sentenceQueue.size()).
+                    withValue("mem", Runtime.getRuntime().freeMemory()).toString());
         }
     }
 
@@ -146,7 +159,7 @@ public class NMEARouterImpl implements NMEARouter {
     @Override
     public void addAgent(NMEAAgent agent) {
         synchronized (agents) {
-            ServerLog.getLogger().info("Adding Agent {" + agent.getName() + "}");
+            log.info(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("add agent").withValue(AGENT_KEY_NAME, agent.getName()).toString());
             agents.put(agent.getName(), agent);
             agent.setStatusListener(this::privateOnStatusChange);
             if (agent.getSource()!=null) {
@@ -170,7 +183,7 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     private void privateOnStatusChange(NMEAAgent src) {
-        ServerLog.getLogger().debug("New status received for {" + src + "}");
+        // nothing to do... evaluate to remove the method
     }
 
     private void privateQueueUpSentence(RouterMessage s) {
@@ -178,6 +191,7 @@ public class NMEARouterImpl implements NMEARouter {
             if (isStarted()) sentenceQueue.put(s);
         } catch (InterruptedException e1) {
             Thread.currentThread().interrupt();
+            log.errorForceStacktrace("Thread error", e1);
         }
     }
 
@@ -196,13 +210,6 @@ public class NMEARouterImpl implements NMEARouter {
                     messages[counter] = mm;
                 }
                 routeToTarget(messages);
-                exec.execute(() -> {
-                    for (RouterMessage mm : messages) {
-                        stream.pushSentence(mm);
-                    }
-                });
-            } else if (m.getPayload() instanceof JSONObject) {
-                exec.execute(() -> stream.pushSentence(m));
             }
         }
     }
@@ -222,7 +229,7 @@ public class NMEARouterImpl implements NMEARouter {
                         });
                     }
                 } catch (Exception e) {
-                    ServerLog.getLogger().error("Error dispatching to target!", e);
+                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("dispatch message").toString(), e);
                 }
             }
         }
