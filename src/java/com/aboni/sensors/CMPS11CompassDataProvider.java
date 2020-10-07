@@ -18,6 +18,7 @@ package com.aboni.sensors;
 import com.aboni.utils.HWSettings;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 public class CMPS11CompassDataProvider implements CompassDataProvider {
@@ -25,6 +26,7 @@ public class CMPS11CompassDataProvider implements CompassDataProvider {
     private I2CInterface device;
     private final int bus;
 
+    @Inject
     public CMPS11CompassDataProvider() {
         this.bus = HWSettings.getPropertyAsInteger("bus", 1);
     }

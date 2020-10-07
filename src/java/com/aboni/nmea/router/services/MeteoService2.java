@@ -17,15 +17,17 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.data.meteo.Meteo;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
+import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class MeteoService2 extends JSONWebService {
 
-    public MeteoService2() {
-        super();
+    public MeteoService2(@NotNull Log log) {
+        super(log);
         setLoader(this::getResult);
     }
 

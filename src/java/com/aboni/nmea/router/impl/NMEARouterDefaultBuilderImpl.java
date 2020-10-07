@@ -79,14 +79,14 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         }
 
         configureGPSPriority(gpsPriority, r);
-        if (ENABLE_GPS_TIME) buildBuiltInAgent(r, BuiltInAgents.GPS_TIME_SYNC);
-        if (ENABLE_AP) buildBuiltInAgent(r, BuiltInAgents.AUTO_PILOT);
-        buildBuiltInAgent(r, BuiltInAgents.FILE_DUMPER);
-        buildBuiltInAgent(r, BuiltInAgents.POWER_LED);
-        buildBuiltInAgent(r, BuiltInAgents.FAN_MANAGER);
-        buildBuiltInAgent(r, BuiltInAgents.DEPTH_STATS);
-        buildBuiltInAgent(r, BuiltInAgents.ENGINE_DETECTOR);
-        buildBuiltInAgent(r, BuiltInAgents.WEB_UI);
+        if (ENABLE_GPS_TIME) buildBuiltInAgent(r, BuiltInAgents.GPS_TIME_SYNC, true);
+        if (ENABLE_AP) buildBuiltInAgent(r, BuiltInAgents.AUTO_PILOT, false);
+        buildBuiltInAgent(r, BuiltInAgents.FILE_DUMPER, false);
+        buildBuiltInAgent(r, BuiltInAgents.POWER_LED, true);
+        buildBuiltInAgent(r, BuiltInAgents.FAN_MANAGER, true);
+        buildBuiltInAgent(r, BuiltInAgents.DEPTH_STATS, true);
+        buildBuiltInAgent(r, BuiltInAgents.ENGINE_DETECTOR, true);
+        buildBuiltInAgent(r, BuiltInAgents.WEB_UI, true);
 
         buildAgents(cJ, r);
     }
@@ -151,11 +151,11 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
         return active;
     }
 
-    private void buildBuiltInAgent(NMEARouter r, BuiltInAgents a) {
+    private void buildBuiltInAgent(NMEARouter r, BuiltInAgents a, boolean doStart) {
         NMEAAgent agent = builder.createAgent(a);
         if (agent != null) {
             r.addAgent(agent);
-            agent.start();
+            if (doStart) agent.start();
         }
     }
 }

@@ -9,6 +9,8 @@ import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.SerialReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -17,14 +19,15 @@ import javax.validation.constraints.NotNull;
 
 public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
+    public static final String STATS_KEY_NAME = "stats";
     private final SerialReader serialReader;
     private final SerialCANReader serialCanReader;
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
+    private final Log log;
     private long lastStats;
     private String description;
-    private static final String STATS_TAG = "STATS ";
 
     private class Stats {
         long messages;
@@ -67,31 +70,30 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSerialAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
+    public NMEACANBusSerialAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
                                  @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
                                  @NotNull N2KMessageFactory msgFactory) {
         super(cache);
+        this.log = log;
         messageFactory = msgFactory;
         setSourceTarget(true, false);
         stats.reset();
-        serialReader = new SerialReader(cache, getLogger());
+        serialReader = new SerialReader(cache, log);
         fastCache.setCallback(this::onReceive);
         this.serialCanReader = serialCanReader;
         serialCanReader.setCallback(fastCache::onMessage);
         serialCanReader.setErrCallback(this::onError);
-        srcFilter = new PGNSourceFilter(getLogger());
+        srcFilter = new PGNSourceFilter(log);
         this.converter = converter;
     }
 
     private void onError(byte[] buffer, String errorMessage) {
-        getLogger().debug((() -> {
-            StringBuilder builder = new StringBuilder("Error reading frame:buffer {");
-            if (buffer != null) {
-                for (byte b : buffer) builder.append(String.format(" %02x", b));
-            }
-            builder.append("} error {").append(errorMessage).append("}");
-            return builder.toString();
-        }));
+        LogStringBuilder lb = getLogBuilder().wO("read");
+        StringBuilder builder = new StringBuilder();
+        if (buffer != null) {
+            for (byte b : buffer) builder.append(String.format(" %02x", b));
+        }
+        lb.wV("buffer", builder.toString()).wV("error", errorMessage).error(log);
         stats.incrementErrors();
     }
 
@@ -150,21 +152,23 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        long t = getCache().getNow();
-        if ((Utils.isOlderThan(lastStats, t, 30000))) {
-            synchronized (this) {
-                description = getType() + " " + stats.toString(t);
+        if (isStarted()) {
+            long t = getCache().getNow();
+            if ((Utils.isOlderThan(lastStats, t, 30000))) {
+                synchronized (this) {
+                    description = getType() + " " + stats.toString(t);
+                }
+
+                getLogBuilder().wO(STATS_KEY_NAME).w(" " + stats.toString(t)).info(log);
+                getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialCanReader.getStats().toString(t)).info(log);
+                getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialReader.getStats().toString(t)).info(log);
+
+                stats.reset();
+                serialCanReader.getStats().reset(t);
+                serialReader.getStats().reset();
+
+                lastStats = t;
             }
-
-            getLogger().info(STATS_TAG + stats.toString(t));
-            getLogger().info(STATS_TAG + serialCanReader.getStats().toString(t));
-            getLogger().info(STATS_TAG + serialReader.getStats().toString(t));
-
-            stats.reset();
-            serialCanReader.getStats().reset(t);
-            serialReader.getStats().reset();
-
-            lastStats = t;
         }
     }
 }

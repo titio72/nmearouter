@@ -17,18 +17,23 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class SimulatorService extends JSONWebService {
 
-    public SimulatorService() {
-        super();
+    @Inject
+    public SimulatorService(@NotNull Log log) {
+        super(log);
         setLoader(this::getResult);
     }
 
     private JSONObject getResult(ServiceConfig config) {
         NMEASimulatorSource sim = NMEASimulatorSource.getSimulator();
-        if (sim!=null) {
+        if (sim != null) {
 
             double speed = config.getDouble("speed", Double.NaN);
             if (!Double.isNaN(speed)) {

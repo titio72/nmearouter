@@ -18,7 +18,6 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
 
@@ -49,10 +48,14 @@ public class TripManagerXImpl implements TripManagerX {
         archive = new TripArchive();
         this.trackEventWriter = trackEventWriter;
         this.tripEventWriter = tripEventWriter;
+    }
+
+    @Override
+    public void init() throws TripManagerException {
         loadArchive(archive);
     }
 
-    private void loadArchive(TripArchive archive) {
+    private void loadArchive(TripArchive archive) throws TripManagerException {
         try (ResultSet rs = new DBHelper(true).getConnection().createStatement().executeQuery("select id, description, fromTS, toTS, dist from " + tripTable)) {
             while (rs.next()) {
                 TripImpl t = new TripImpl(rs.getInt("id"), rs.getString("description"));
@@ -62,7 +65,7 @@ public class TripManagerXImpl implements TripManagerX {
                 archive.setTrip(t);
             }
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            ServerLog.getLogger().error(ERROR_LOADING_TRIPS, e);
+            throw new TripManagerException("Error loading trips in memory", e);
         }
     }
 

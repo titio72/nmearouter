@@ -20,9 +20,11 @@ import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class AgentStatusService extends JSONWebService {
@@ -31,8 +33,8 @@ public class AgentStatusService extends JSONWebService {
     private final AgentStatusManager agentStatusManager;
 
     @Inject
-    public AgentStatusService(NMEARouter router, AgentStatusManager agentStatusManager) {
-        super();
+    public AgentStatusService(NMEARouter router, AgentStatusManager agentStatusManager, @NotNull Log log) {
+        super(log);
         this.router = router;
         this.agentStatusManager = agentStatusManager;
         setLoader((ServiceConfig config) -> {

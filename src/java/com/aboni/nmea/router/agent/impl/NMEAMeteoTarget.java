@@ -71,10 +71,13 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private boolean useMWD;
 
+    private final Log log;
+
     @Inject
-    public NMEAMeteoTarget(@NotNull NMEACache cache, @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
+    public NMEAMeteoTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
         super(cache);
         setSourceTarget(false, true);
+        this.log = log;
         writer = w;
     }
 
@@ -104,7 +107,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             if (writer != null) writer.init();
             return true;
         } catch (Exception e) {
-            getLogger().error("Error connecting db Agent {Meteo}", e);
+            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
             return false;
         }
     }
@@ -159,7 +162,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
                 }
             }
         } catch (Exception e) {
-            getLogger().warning("Error processing meteo stats {" + s + "} error {" + e + "}");
+            getLogBuilder().wO("process sentence").wV("sentence", s).error(log, e);
         }
     }
 

@@ -19,6 +19,8 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorVoltage;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -30,12 +32,15 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAVoltageSensor extends NMEAAgentImpl {
 
+    public static final String VOLTAGE_AGENT_CATEGORY = "VoltageAgent";
     private int errCounter;
     private SensorVoltage voltageSensor;
+    private final Log log;
 
     @Inject
-    public NMEAVoltageSensor(@NotNull NMEACache cache) {
+    public NMEAVoltageSensor(@NotNull NMEACache cache, @NotNull Log log) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
     }
 
@@ -63,7 +68,7 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
                     voltageSensor.init();
                     return true;
                 } catch (SensorException e) {
-                    getLogger().errorForceStacktrace("Voltage Sensor: Error initializing voltage sensor ", e);
+                    log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
                     voltageSensor = null;
                 }
             }
@@ -75,9 +80,9 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
 
     private SensorVoltage createVoltage() {
         try {
-            return new SensorVoltage();
+            return new SensorVoltage(log);
         } catch (Exception e) {
-            getLogger().errorForceStacktrace("Voltage Sensor: Error creating voltage sensor ", e);
+            log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
             return null;
         }
     }
@@ -108,10 +113,11 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
             errCounter = 0;
             return true;
         } catch (Exception e) {
-            getLogger().errorForceStacktrace("Voltage Sensor: Error reading voltage data", e);
+            log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("read").wV("failures", errCounter)
+                    .wV("max failures", 10).toString(), e);
             errCounter++;
             if (errCounter == 10) {
-                getLogger().warning("Voltage Sensor: Max error count reached - deactivating");
+                log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("deactivate").toString(), e);
                 stop();
             }
             return false;
@@ -128,7 +134,7 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("V", Utils.round(voltageSensor.getVoltage3(), 3), "V", "V3"));
                 notify(xdr);
             } catch (Exception e) {
-                getLogger().error("Voltage Sensor: error posting voltage values", e);
+                log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("message").toString(), e);
             }
         }
     }

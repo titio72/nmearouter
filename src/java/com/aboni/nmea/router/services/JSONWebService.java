@@ -15,7 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
@@ -24,14 +25,19 @@ import java.io.IOException;
 public class JSONWebService implements WebService {
 
     private static final String APPLICATION_JSON = "application/json";
+    public static final String JSON_WEB_SERVICE_CATEGORY = "JSONWebService";
+    public static final String SERVICE_KEY_NAME = "service";
     private WebServiceJSONLoader loader;
+    private final Log log;
 
-    public JSONWebService(@NotNull WebServiceJSONLoader loader) {
+    public JSONWebService(@NotNull WebServiceJSONLoader loader, @NotNull Log log) {
         this.loader = loader;
+        this.log = log;
     }
 
-    public JSONWebService() {
+    public JSONWebService(@NotNull Log log) {
         loader = null;
+        this.log = log;
     }
 
     public void setLoader(@NotNull WebServiceJSONLoader loader) {
@@ -40,11 +46,13 @@ public class JSONWebService implements WebService {
 
     @Override
     public final void doIt(ServiceConfig config, ServiceOutput response) {
-        ServerLog.getLogger().info("JSONWebService invoked {" + this.getClass().getName() + "} " + config.dump());
         try {
+            log.info(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("invoked")
+                    .wV(SERVICE_KEY_NAME, this.getClass().getName()).wV("config", config.dump()).toString());
             setResponse(response, getJsonObjectResult(config));
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error creating database helper Svc {" + this.getClass().getName() + "}", e);
+            log.info(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("invoked")
+                    .wV(SERVICE_KEY_NAME, this.getClass().getName()).toString());
         }
     }
 
@@ -53,7 +61,8 @@ public class JSONWebService implements WebService {
         try {
             res = loader.getResult(config);
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error extracting JSON {" + e.getMessage() + "}", e);
+            log.errorForceStacktrace(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("response")
+                    .wV(SERVICE_KEY_NAME, this.getClass().getName()).toString(), e);
             res = new JSONObject();
             res.put("Error", "Error extracting JSON {" + e.getMessage() + "}");
         }
@@ -70,7 +79,8 @@ public class JSONWebService implements WebService {
                 response.error("Invalid response detected: something went wrong");
             }
         } catch (IOException e) {
-            ServerLog.getLogger().error("Error sending output for Svc {" + this.getClass().getName() + "}", e);
+            log.errorForceStacktrace(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("response")
+                    .wV(SERVICE_KEY_NAME, this.getClass().getName()).toString(), e);
         }
     }
 

@@ -18,6 +18,7 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.data.track.Trip;
 import com.aboni.nmea.router.data.track.TripManagerX;
 import com.aboni.nmea.router.data.track.TripsToJSON;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -30,8 +31,8 @@ public class TripListService extends JSONWebService {
     private final TripManagerX manager;
 
     @Inject
-    public TripListService(@NotNull TripManagerX manager) {
-        super();
+    public TripListService(@NotNull TripManagerX manager, @NotNull Log log) {
+        super(log);
         this.manager = manager;
         setLoader(this::getResult);
     }

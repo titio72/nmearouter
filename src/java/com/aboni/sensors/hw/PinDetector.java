@@ -15,11 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors.hw;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
+import javax.validation.constraints.NotNull;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +30,7 @@ import java.util.Set;
 
 public class PinDetector {
 
+    private final Log log;
     private GpioPinDigitalInput pin;
     private boolean pinOn;
     private final Set<PinListener> listener;
@@ -40,7 +43,7 @@ public class PinDetector {
     private class InternalPinListener implements GpioPinListenerDigital {
         @Override
         public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-            ServerLog.getLogger().info("PinDetector: State {" + pinOn + "}");
+            LogStringBuilder.start("PinState").wO("state received").wV("state", pinOn).info(log);
             pinOn = event.getState().isHigh();
             List<PinListener> listeners;
             synchronized (this) {
@@ -50,13 +53,14 @@ public class PinDetector {
                 try {
                     l.engineStateEvent(pinOn);
                 } catch (Exception t) {
-                    ServerLog.getLogger().error("Error notifying pin status", t);
+                    LogStringBuilder.start("PinState").wO("state notification").wV("state", pinOn).error(log, t);
                 }
             }
         }
     }
 
-    public PinDetector(Pin p, boolean active) {
+    public PinDetector(@NotNull Log log, Pin p, boolean active) {
+        this.log = log;
         listener = new HashSet<>();
         name = "pin_" + p.getName();
         if (RPIHelper.isRaspberry()) {

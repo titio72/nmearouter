@@ -15,7 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -79,13 +82,13 @@ public class NMEARouterImpl implements NMEARouter {
                 try {
                     exec.execute(a::onTimerHR);
                 } catch (Exception e) {
-                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("timer").withValue(AGENT_KEY_NAME, a.getName()).toString(), e);
+                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("timer").wV(AGENT_KEY_NAME, a.getName()).toString(), e);
                 }
                 if (timerCount == 0) {
                     try {
                         exec.execute(a::onTimer);
                     } catch (Exception e) {
-                        log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("timer").withValue(AGENT_KEY_NAME, a.getName()).toString(), e);
+                        log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("timer").wV(AGENT_KEY_NAME, a.getName()).toString(), e);
                     }
                     dumpStats();
                 }
@@ -97,8 +100,8 @@ public class NMEARouterImpl implements NMEARouter {
         long t = cache.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
-            log.info(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("stats").withValue("queue", sentenceQueue.size()).
-                    withValue("mem", Runtime.getRuntime().freeMemory()).toString());
+            log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
+                    wV("mem", Runtime.getRuntime().freeMemory()).toString());
         }
     }
 
@@ -159,7 +162,7 @@ public class NMEARouterImpl implements NMEARouter {
     @Override
     public void addAgent(NMEAAgent agent) {
         synchronized (agents) {
-            log.info(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("add agent").withValue(AGENT_KEY_NAME, agent.getName()).toString());
+            log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("add agent").wV(AGENT_KEY_NAME, agent.getName()).toString());
             agents.put(agent.getName(), agent);
             agent.setStatusListener(this::privateOnStatusChange);
             if (agent.getSource()!=null) {
@@ -229,7 +232,7 @@ public class NMEARouterImpl implements NMEARouter {
                         });
                     }
                 } catch (Exception e) {
-                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).withOperation("dispatch message").toString(), e);
+                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("dispatch message").toString(), e);
                 }
             }
         }

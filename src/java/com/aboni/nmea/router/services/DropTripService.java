@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.data.track.TripManagerX;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -26,8 +27,8 @@ public class DropTripService extends JSONWebService {
     private final TripManagerX q;
 
     @Inject
-    public DropTripService(@NotNull TripManagerX manager) {
-        super();
+    public DropTripService(@NotNull TripManagerX manager, @NotNull Log log) {
+        super(log);
         q = manager;
         setLoader(this::getResult);
     }

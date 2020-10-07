@@ -16,8 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.misc.DataFilter;
+import com.aboni.utils.Log;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorMPU6050 extends I2CSensor {
@@ -71,8 +74,9 @@ public class SensorMPU6050 extends I2CSensor {
 
     private I2CInterface device;
 
-    public SensorMPU6050() {
-        super();
+    @Inject
+    public SensorMPU6050(@NotNull Log log) {
+        super(log);
     }
 
     @Override

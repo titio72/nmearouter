@@ -18,8 +18,11 @@ package com.aboni.sensors;
 import com.aboni.misc.DataFilter;
 import com.aboni.misc.Utils;
 import com.aboni.sensors.hw.HMC5883L;
+import com.aboni.utils.Log;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorHMC5883 extends I2CSensor {
@@ -31,8 +34,9 @@ public class SensorHMC5883 extends I2CSensor {
     private HMC5883L hmc5883l;
     private double[] mag;
 
-    public SensorHMC5883() {
-        super();
+    @Inject
+    public SensorHMC5883(@NotNull Log log) {
+        super(log);
         setDefaultSmoothingAlpha(0.66);
     }
 

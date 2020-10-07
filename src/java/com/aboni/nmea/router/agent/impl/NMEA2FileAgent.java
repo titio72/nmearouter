@@ -18,12 +18,11 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.sentences.NMEASentenceItem;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,13 +35,14 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
     private static final long DUMP_PERIOD = 10L * 1000L;
     private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-
+    private final Log log;
     private long lastDump = 0;
     private final List<NMEASentenceItem> queue = new LinkedList<>();
 
     @Inject
-    public NMEA2FileAgent(@NotNull NMEACache cache) {
+    public NMEA2FileAgent(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
+        this.log = log;
         setSourceTarget(false, true);
     }
 
@@ -56,6 +56,11 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
         return "StreamDump";
     }
 
+    @Override
+    public String toString() {
+        return "NMEA2FileAgent";
+    }
+
     @OnSentence
     public void onSentence(Sentence s, String source) {
         NMEASentenceItem e = new NMEASentenceItem(s, getCache().getNow(), "  ");
@@ -65,7 +70,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
                 try {
                     dump();
                 } catch (IOException e1) {
-                    ServerLog.getLogger().error("Error dumping NMEA stream", e1);
+                    getLogBuilder().wO("dump sentence").wV("sentence", s).error(log, e1);
                 }
             }
         }
@@ -74,20 +79,20 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     private void dump() throws IOException {
         long t = getCache().getNow();
         if (t - lastDump > DUMP_PERIOD) {
-            getLogger().debug("Dumping NMEA log at {" + new Date() + "}");
             lastDump = t;
             File f = new File("nmea" + df.format(new Date()) + ".log");
-            FileWriter w = new FileWriter(f, true);
-            try (BufferedWriter bw = new BufferedWriter(w)) {
+            long bytes = 0;
+            try (FileWriter w = new FileWriter(f, true)) {
                 for (NMEASentenceItem e : queue) {
-                    bw.write(e.toString());
-                    bw.write("\n");
+                    String s = e.toString();
+                    w.write(s);
+                    w.write("\n");
+                    bytes += s.length() + 1;
                 }
                 queue.clear();
-                bw.flush();
+                w.flush();
             }
-            w.close();
+            getLogBuilder().wO("dump").wV("bytes", bytes).wV("timestamp", new Date()).info(log);
         }
     }
-
 }

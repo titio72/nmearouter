@@ -19,7 +19,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -42,15 +42,18 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private final Set<InetAddress> targets;
     private boolean setup = false;
 
+    private final Log log;
+
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
     private String description;
     private String baseDescription;
 
     @Inject
-    public NMEAUDPSender(@NotNull NMEACache cache) {
+    public NMEAUDPSender(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(false, true);
+        this.log = log;
         targets = new HashSet<>();
         baseDescription = "UDP Sender";
         description = baseDescription;
@@ -72,7 +75,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            getLogger().info(s.toString(time));
+            getLogBuilder().wO("stats").w(s.toString(time)).info(log);
         }
     }
 
@@ -85,9 +88,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             baseDescription = "UDP Sender Port " + getPort() + "<br>";
             description = baseDescription;
 
-            getLogger().info(String.format("Setting up UDP sender: Port {%d}", portTarget));
+            getLogBuilder().wO("init").wV("port", portTarget).info(log);
         } else {
-            getLogger().info("Cannot setup UDP sender - already set up");
+            getLogBuilder().wO("init").wV("error", "already initialized").error(log);
         }
     }
 
@@ -116,8 +119,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             targets.add(address);
             baseDescription += " " + address.getHostName();
             description = baseDescription;
+            getLogBuilder().wO("init").wV("target", target).info(log);
         } catch (UnknownHostException e) {
-            getLogger().error("Invalid target {" + target + "}");
+            getLogBuilder().wO("init").wV("target", target).error(log, e);
         }
     }
 
@@ -127,7 +131,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             serverSocket = new DatagramSocket();
             return true;
         } catch (IOException e) {
-            ServerLog.getLogger().error("Cannot open datagram server", e);
+            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
         }
         return false;
     }
@@ -137,7 +141,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         try {
             serverSocket.close();
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot close datagram server", e);
+            getLogBuilder().wO("deactivate").errorForceStacktrace(log, e);
         }
     }
 
@@ -154,7 +158,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             updateStats(false);
         } catch (IOException e) {
             updateStats(true);
-            ServerLog.getLogger().error("Error sending datagram packet", e);
+            getLogBuilder().wO("message").errorForceStacktrace(log, e);
         }
     }
 
@@ -178,11 +182,13 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        long t = getCache().getNow();
-        synchronized (stats) {
-            stats.onTimer(t);
-            fastStats.onTimer(t);
+        if (isStarted()) {
+            long t = getCache().getNow();
+            synchronized (stats) {
+                stats.onTimer(t);
+                fastStats.onTimer(t);
+            }
+            super.onTimer();
         }
-        super.onTimer();
     }
 }

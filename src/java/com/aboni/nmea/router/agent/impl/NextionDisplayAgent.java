@@ -6,7 +6,8 @@ import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.*;
@@ -59,6 +60,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private final Dimmer dimmer = new Dimmer();
     private final NextionReader reader = new NextionReader();
+    private final Log log;
 
     private long lastPortRetryTime;
     private long lastInput;
@@ -70,8 +72,9 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private String src;
 
     @Inject
-    public NextionDisplayAgent(@NotNull NMEACache cache) {
+    public NextionDisplayAgent(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
+        this.log = log;
     }
 
     public void setup(String name, String portName, String src, QOS qos) {
@@ -117,7 +120,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         synchronized (this) {
             long now = getCache().getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
-                getLogger().info("Nextion Display opening port {" + portName + "}");
+                LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).info(log);
                 SerialPort p = SerialPort.getCommPort(portName);
                 p.setComPortParameters(PORT_SPEED, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(
@@ -138,7 +141,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private void resetPortAndDisplay() {
         if (port != null) {
             reset();
-            getLogger().info("Nextion display closing serial port {" + portName + "}");
+            LogStringBuilder.start("NextionAgent").wO("reset port").wV("port", portName).info(log);
             port.closePort();
             port = null;
         }
@@ -225,7 +228,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private void onInput(byte[] b) {
         if (CONSOLE_OUT) {
-            ServerLog.getLogger().console("Nextion input:" + dump(b));
+            log.console("Nextion input:" + dump(b));
         }
         if (isDisplayTouched(b)) {
             dimmer.lightUp(getCache().getNow());

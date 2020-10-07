@@ -20,7 +20,7 @@ import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.utils.Log;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
 import com.google.common.hash.HashCode;
 
@@ -46,8 +46,8 @@ public class N2KStreamImpl implements N2KStream {
     private final PGNSourceFilter srcFilter;
 
     @Inject
-    public N2KStreamImpl() {
-        this(ServerLog.getLogger(), false);
+    public N2KStreamImpl(@NotNull Log log) {
+        this(log, false);
     }
 
     public N2KStreamImpl(Log logger, boolean throttling) {
@@ -76,7 +76,7 @@ public class N2KStreamImpl implements N2KStream {
                 return p.getMessage();
             } else return null;
         } catch (Exception e) {
-            if (logger != null) logger.error("N2KStream error for {" + sMessage + "} {" + e.toString() + "}", e);
+            logger.error(LogStringBuilder.start("N2KStream").wO("parse").wV("message", sMessage).toString(), e);
             return null;
         }
     }

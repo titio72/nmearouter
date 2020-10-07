@@ -19,6 +19,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -38,6 +39,8 @@ public class NMEASocketClient extends NMEAAgentImpl {
     private SentenceReader reader;
     private boolean receive;
     private boolean transmit;
+
+    private final Log log;
 
     private class InternalSentenceReader implements SentenceListener {
 
@@ -63,9 +66,10 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketClient(@NotNull NMEACache cache) {
+    public NMEASocketClient(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(true, false);
+        this.log = log;
     }
 
     public void setup(String name, QOS qos, NetConf conf) {
@@ -75,9 +79,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
             this.port = conf.getPort();
             this.receive = conf.isRx();
             this.transmit = conf.isTx();
-            getLogger().info(String.format("Setting up TCP client: Server {%s} Port {%d} RX {%b %b}", server, port, receive, transmit));
+            getLogBuilder().wO("init").wV("server", server).wV("port", port).wV("rx", receive).wV("tx", transmit).info(log);
         } else {
-            getLogger().info("Cannot setup TCP client - already set up");
+            getLogBuilder().wO("init").wV("error", "already setup").warn(log);
         }
     }
 
@@ -92,10 +96,8 @@ public class NMEASocketClient extends NMEAAgentImpl {
         synchronized (this) {
             if (socket == null) {
                 try {
-                    getLogger().info("Creating Socket {" + server + ":" + port + "}");
                     socket = new Socket(server, port);
                     InputStream iStream = socket.getInputStream();
-                    getLogger().info("Opened Socket {" + server + ":" + port + "}");
 
                     if (receive) {
                         reader = new SentenceReader(iStream);
@@ -105,7 +107,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
 
                     return true;
                 } catch (Exception e) {
-                    getLogger().error("Error initializing socket {" + server + ":" + port + "} ", e);
+                    getLogBuilder().wO("activate").errorForceStacktrace(log, e);
                     socket = null;
                 }
             }
@@ -121,7 +123,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    getLogger().error("Error trying to close socket", e);
+                    getLogBuilder().wO("deactivate").errorForceStacktrace(log, e);
                 } finally {
                     socket = null;
                 }
@@ -143,7 +145,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 socket.getOutputStream().write("\r".getBytes());
             }
         } catch (Exception e) {
-            getLogger().info("Error sending data {" + e.getMessage() + "}");
+            getLogBuilder().wO("message").error(log, e);
         }
     }
 }

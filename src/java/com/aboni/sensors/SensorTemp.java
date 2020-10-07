@@ -16,8 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.sensors.hw.DS18B20;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,11 +57,14 @@ public class SensorTemp implements Sensor {
 
     private long lastRead;
     private DS18B20 sensor;
+    private final Log log;
 
-    public SensorTemp() {
+    @Inject
+    public SensorTemp(@NotNull Log log) {
         readings = new HashMap<>();
         lastRead = 0;
         sensor = null;
+        this.log = log;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class SensorTemp implements Sensor {
         try {
             sensor = new DS18B20();
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot initialize temp W1 sensor", e);
+            LogStringBuilder.start("DS18B20Sensor").wO("init").error(log, e);
             sensor = null;
         }
     }

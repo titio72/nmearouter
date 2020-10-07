@@ -17,7 +17,8 @@ package com.aboni.geo.impl;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.misc.Utils;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -28,9 +29,12 @@ import java.util.List;
 
 public class DeviationManagerImpl implements DeviationManager {
 
+    public static final String DEVIATION_MANAGER_CATEGORY = "DeviationManager";
+
     static class Pair implements Comparable<Pair> {
 
-        Pair() {}
+        Pair() {
+        }
 
         Pair(int r, double a) {
             input = r;
@@ -65,11 +69,13 @@ public class DeviationManagerImpl implements DeviationManager {
 
     private final List<Pair> deviationMap;
     private final List<Pair> reverseDeviationMap;
+    private final Log log;
 
     @Inject
-    public DeviationManagerImpl() {
+    public DeviationManagerImpl(@NotNull Log log) {
         deviationMap = new ArrayList<>();
         reverseDeviationMap = new ArrayList<>();
+        this.log = log;
     }
 
     /**
@@ -80,7 +86,7 @@ public class DeviationManagerImpl implements DeviationManager {
      */
     @Override
     public boolean load(InputStream stream) {
-
+        log.info(LogStringBuilder.start(DEVIATION_MANAGER_CATEGORY).wO("load").toString());
         synchronized (this) {
             try {
                 BufferedReader r = new BufferedReader(new InputStreamReader(stream));
@@ -94,7 +100,7 @@ public class DeviationManagerImpl implements DeviationManager {
                 r.close();
                 return true;
             } catch (IOException e) {
-                ServerLog.getLogger().error("DeviationManager cannot read deviation table", e);
+                log.errorForceStacktrace(LogStringBuilder.start(DEVIATION_MANAGER_CATEGORY).wO("load").toString(), e);
                 return false;
             }
         }
@@ -119,6 +125,7 @@ public class DeviationManagerImpl implements DeviationManager {
      * Clear the deviation table.
      */
     public void reset() {
+        log.info(LogStringBuilder.start(DEVIATION_MANAGER_CATEGORY).wO("reset").toString());
         synchronized (this) {
             deviationMap.clear();
             reverseDeviationMap.clear();

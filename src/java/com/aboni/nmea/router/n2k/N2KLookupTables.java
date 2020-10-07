@@ -16,7 +16,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -123,7 +125,7 @@ public class N2KLookupTables {
                 }
             }
         } catch (Exception e) {
-            ServerLog.getLogger().errorForceStacktrace("Error reading lookup maps", e);
+            LogStringBuilder.start("N2KLookupTables").wO("load").error(ThingsFactory.getInstance(Log.class), e);
         }
     }
 
@@ -140,7 +142,7 @@ public class N2KLookupTables {
             }
             w.write(j.toString(2));
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error dumping N2K lookup tables", e);
+            LogStringBuilder.start("N2KLookupTables").wO("dump").error(ThingsFactory.getInstance(Log.class), e);
         }
     }
 }

@@ -50,9 +50,9 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
         try {
             loadAll();
             log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                    .withOperation("Load").withValue("agents", status.size()).toString());
+                    .wO("Load").wV("agents", status.size()).toString());
         } catch (Exception e) {
-            log.error(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).withOperation("Load").toString(), e);
+            log.error(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).wO("Load").toString(), e);
         }
     }
 
@@ -94,7 +94,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
     public synchronized void setStartMode(String agent, STATUS s) {
         status.put(agent, s);
         log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                .withOperation("Set Startup Mode").withValue(AGENT_KEY_NAME, agent).withValue("startup", s).toString());
+                .wO("Set Startup Mode").wV(AGENT_KEY_NAME, agent).wV("startup", s).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateStatusSt = db.getConnection().prepareStatement("insert into agent (id, autostart) values (?, ?) on duplicate key update autostart = ?")) {
                 updateStatusSt.setString(1, agent);
@@ -104,7 +104,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
             }
         } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
             log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                    .withOperation("Set Startup Mode").withValue(AGENT_KEY_NAME, agent).withValue("mode", s).toString(), e);
+                    .wO("Set Startup Mode").wV(AGENT_KEY_NAME, agent).wV("mode", s).toString(), e);
         }
     }
 
@@ -112,7 +112,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
     public synchronized void setFilterOutData(String agent, String agData) {
         filterOut.put(agent, agData);
         log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                .withOperation("Set Filter Out").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString());
+                .wO("Set Filter Out").wV(AGENT_KEY_NAME, agent).wV(FILTER_KEY_NAME, agData).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateFilterOut =
                          db.getConnection().prepareStatement("update agent set filterOut=? where id=?")) {
@@ -122,7 +122,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
             }
         } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
             log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                    .withOperation("Set Filter Out").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString(), e);
+                    .wO("Set Filter Out").wV(AGENT_KEY_NAME, agent).wV(FILTER_KEY_NAME, agData).toString(), e);
         }
     }
 
@@ -130,7 +130,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
     public synchronized void setFilterInData(String agent, String agData) {
         filterIn.put(agent, agData);
         log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                .withOperation("Set Filter In").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString());
+                .wO("Set Filter In").wV(AGENT_KEY_NAME, agent).wV(FILTER_KEY_NAME, agData).toString());
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement updateFilterIn = db.getConnection().prepareStatement("update agent set filterIn=? where id=?")) {
                 updateFilterIn.setString(1, agData);
@@ -139,7 +139,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
             }
         } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
             log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
-                    .withOperation("Set Filter In").withValue(AGENT_KEY_NAME, agent).withValue(FILTER_KEY_NAME, agData).toString(), e);
+                    .wO("Set Filter In").wV(AGENT_KEY_NAME, agent).wV(FILTER_KEY_NAME, agData).toString(), e);
         }
     }
 }

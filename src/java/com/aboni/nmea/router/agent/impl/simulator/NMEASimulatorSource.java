@@ -26,6 +26,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.seatalk.Stalk84;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
@@ -67,10 +69,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private final NavData navData = new NavData();
     private long lastTS = 0;
 
+    private final Log log;
+
     @Inject
-    public NMEASimulatorSource(@NotNull NMEACache cache) {
+    public NMEASimulatorSource(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(true, true);
+        this.log = log;
         id = TalkerId.GP;
         polars = null;
     }
@@ -94,7 +99,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
                 lastPolarFile = data.getPolars();
             }
         } catch (Exception e) {
-            getLogger().error("Cannot load polars", e);
+            getLogBuilder().wO("load polars").error(log, e);
         }
     }
 
@@ -109,7 +114,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (data != null) {
             return true;
         } else {
-            getLogger().error("Cannot start Simulator - setup missing!");
+            getLogBuilder().wO("init").wV("error", "setup data missing").error(log);
             return false;
         }
     }
@@ -152,7 +157,11 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     @Override
     public void onTimer() {
         if (isStarted()) {
-            data.loadConf();
+            try {
+                data.loadConf();
+            } catch (IOException e) {
+                getLogBuilder().wO("load setup data").error(log, e);
+            }
             loadPolars();
 
             Position posOut = new Position(navData.pos.getLatitude(), navData.pos.getLongitude());

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.filters;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.processors.NMEAHDGEnricher;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.DataEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -56,46 +57,45 @@ public class NMEAHDGEnricherTest {
 	
 	@Test
 	public void testEnrichVariation() {
-		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), false, false);
 
-		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		hdg.setHeading(320.0);
-		filler.process(hdg, "SRC");
-		assertEquals(2.5, hdg.getVariation(), 0.1);
-	}
+        HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
+        hdg.setHeading(320.0);
+        filler.process(hdg, "SRC");
+        assertEquals(2.5, hdg.getVariation(), 0.1);
+    }
 
 	@Test
 	public void testEnrichVariationFail() {
-		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(false), false, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(false), false, false);
 
-		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		hdg.setHeading(320.0);
-		filler.process(hdg, "SRC");
-		assertEquals(2.5, hdg.getVariation(), 0.1);
-	}
+        HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
+        hdg.setHeading(320.0);
+        filler.process(hdg, "SRC");
+        assertEquals(2.5, hdg.getVariation(), 0.1);
+    }
 
 	@Test
 	public void testHDT() {
-		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, true);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), false, true);
 
-		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		hdg.setHeading(320.0);
-		Sentence[] res = filler.process(hdg, "SRC").second;
-		assertEquals(1, res.length);
-		HDTSentence hdt = (HDTSentence)res[0];
-		assertEquals(322.5, hdt.getHeading(), 0.1);
-	}
+        HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
+        hdg.setHeading(320.0);
+        Sentence[] res = filler.process(hdg, "SRC").second;
+        assertEquals(1, res.length);
+        HDTSentence hdt = (HDTSentence) res[0];
+        assertEquals(322.5, hdt.getHeading(), 0.1);
+    }
 
 	@Test
 	public void testHDM() {
-		NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), true, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), true, false);
 
-		HDGSentence hdg = (HDGSentence)SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
-		hdg.setHeading(320.0);
-		Sentence[] res = filler.process(hdg, "SRC").second;
-		assertEquals(1, res.length);
-		HDMSentence hdm = (HDMSentence)res[0];
-		assertEquals(320.0, hdm.getHeading(), 0.1);
-	}
-
+        HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
+        hdg.setHeading(320.0);
+        Sentence[] res = filler.process(hdg, "SRC").second;
+        assertEquals(1, res.length);
+        HDMSentence hdm = (HDMSentence) res[0];
+        assertEquals(320.0, hdm.getHeading(), 0.1);
+    }
 }

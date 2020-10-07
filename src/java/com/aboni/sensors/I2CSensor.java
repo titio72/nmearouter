@@ -16,7 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+
+import javax.validation.constraints.NotNull;
 
 public abstract class I2CSensor implements Sensor {
 
@@ -25,14 +28,14 @@ public abstract class I2CSensor implements Sensor {
     }
 
     protected void log(String msg) {
-        ServerLog.getLogger().info(getMessage(msg));
+        log.info(getMessage(msg));
     }
 
     protected void error(String msg, Throwable t) {
         if (t==null)
-            ServerLog.getLogger().error(getMessage(msg));
+            log.error(getMessage(msg));
         else
-            ServerLog.getLogger().error( getMessage(msg),  t);
+            log.error(getMessage(msg), t);
     }
 
     private static final double LPF_ALPHA = 0.75;
@@ -47,10 +50,11 @@ public abstract class I2CSensor implements Sensor {
     private int failures;
 
     private boolean initialized;
-
+    private final Log log;
     private long lastReadingTS;
 
-    public I2CSensor() {
+    public I2CSensor(@NotNull Log log) {
+        this.log = log;
         setDefaultSmoothingAlpha(LPF_ALPHA);
         instanceCounter++;
         instance = instanceCounter;
@@ -65,9 +69,8 @@ public abstract class I2CSensor implements Sensor {
     }
 
     public final void init(int bus) throws SensorException {
-        log("Initializing bus {" + bus + "}");
+        log(LogStringBuilder.start("I2CSensor").wO("init").wV("bus", bus).toString());
         initSensor(bus);
-        log("Initialized!");
         initialized = true;
     }
 
@@ -87,7 +90,7 @@ public abstract class I2CSensor implements Sensor {
                 lastReadingTS = System.currentTimeMillis();
             } catch (Exception e) {
                 failures++;
-                error("Error reading sensor {" + e.getMessage() + "} failure {" + failures + "/" + maxFailures + "}", e);
+                error(LogStringBuilder.start("I2CSensor").wO("read").wV("failure", failures).wV("max failures", maxFailures).toString(), e);
             }
         } else throw new SensorException("Sensor not initialized!");
     }

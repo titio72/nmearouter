@@ -18,6 +18,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.sentences.NMEASentenceItem;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -28,11 +29,13 @@ import java.io.FileReader;
 
 public class NMEAPlayer extends NMEAAgentImpl {
 
+    private final Log log;
     private String file;
 
     @Inject
-    public NMEAPlayer(@NotNull NMEACache cache) {
+    public NMEAPlayer(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
     }
 
@@ -98,7 +101,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                getLogger().error("Error playing file", e);
+                getLogBuilder().wO("play").error(log, e);
                 Utils.pause(10000);
             }
         }
@@ -111,7 +114,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
             Thread.sleep(55);
             notify(s);
         } catch (Exception e) {
-            getLogger().error("Error playing sentence {" + line + "}", e);
+            getLogBuilder().wO("play").wV("line", line).error(log, e);
         }
     }
 
@@ -128,7 +131,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
             }
             notify(itm.getSentence());
         } catch (Exception e) {
-            getLogger().error("Error playing sentence {" + line + "}", e);
+            getLogBuilder().wO("play").wV("line", line).error(log, e);
         }
         return logT;
     }

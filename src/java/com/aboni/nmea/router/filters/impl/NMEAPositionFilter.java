@@ -18,7 +18,8 @@ package com.aboni.nmea.router.filters.impl;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.sentences.NMEAUtils;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
@@ -169,10 +170,12 @@ public class NMEAPositionFilter implements NMEAFilter {
         }
     }
 
-    public void dumpStats() {
-        synchronized (stats) {
-            ServerLog.getLogger().info("RMCFilter " + stats);
-            stats.reset();
+    public void dumpStats(Log log) {
+        if (log != null) {
+            synchronized (stats) {
+                LogStringBuilder.start("PositionFilter").wO("stats").w(stats.toString()).info(log);
+                stats.reset();
+            }
         }
     }
 

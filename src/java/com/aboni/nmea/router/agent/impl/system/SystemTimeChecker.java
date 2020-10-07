@@ -19,34 +19,42 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TimeSentence;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class SystemTimeChecker {
 
+    public static final String SYSTEM_TIME_CHECKER_CATEGORY = "SystemTimeChecker";
     private boolean synced;
     private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
     private final NMEACache cache;
+    private final Log log;
     private final SystemTimeChanger changer;
 
     public interface SystemTimeChanger {
         void doChangeTime(OffsetDateTime timestamp);
     }
 
-    public SystemTimeChecker(NMEACache cache) {
+    @Inject
+    public SystemTimeChecker(NMEACache cache, @NotNull Log log) {
         this.cache = cache;
-        this.changer = SystemTimeChecker::doChangeTime;
+        this.log = log;
+        this.changer = this::doChangeTime;
     }
 
-    public SystemTimeChecker(NMEACache cache, SystemTimeChanger changer) {
+    public SystemTimeChecker(NMEACache cache, SystemTimeChanger changer, @NotNull Log log) {
         this.cache = cache;
         this.changer = changer;
+        this.log = log;
     }
 
     public void checkAndSetTime(Sentence s) {
@@ -55,7 +63,7 @@ public class SystemTimeChecker {
                 OffsetDateTime gpsTime = NMEATimestampExtractor.extractTimestamp(s);
                 if (gpsTime != null && !checkAndSetTimeSkew(cache.getNow(), gpsTime)) {
                     // time skew from GPS is too high - reset time stamp
-                    ServerLog.getLogger().info("Changing system time to {" + gpsTime + "}");
+                    log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").wV("new time", gpsTime).toString());
                     if (changer != null) {
                         changer.doChangeTime(gpsTime);
                     }
@@ -63,7 +71,7 @@ public class SystemTimeChecker {
                 }
             }
         } catch (GPSTimeException e) {
-            ServerLog.getLogger().warning("Caught invalid GPS time: " + e.getMessage());
+            log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").toString(), e);
         }
     }
 
@@ -77,16 +85,16 @@ public class SystemTimeChecker {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
 
-    private static void doChangeTime(OffsetDateTime c) {
+    private void doChangeTime(OffsetDateTime c) {
         try {
             String sUTC = DATE_TIME_FORMATTER.format(c.withOffsetSameInstant(ZoneOffset.UTC));
-            ServerLog.getLogger().info("Running {./setGPSTime '" + sUTC + "'}");
+            log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").wV("script", "./setGPSTime '" + sUTC + "'").toString());
             ProcessBuilder b = new ProcessBuilder("./setGPSTime", sUTC);
             Process process = b.start();
             int retCode = process.waitFor();
-            ServerLog.getLogger().info("SetTime Return code {" + retCode + "}");
+            log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").wV("return code", retCode).toString());
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot set GPS time", e);
+            log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").toString(), e);
         }
     }
 

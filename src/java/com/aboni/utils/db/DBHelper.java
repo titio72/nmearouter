@@ -46,7 +46,7 @@ public class DBHelper implements AutoCloseable {
     private final boolean autocommit;
     private Connection conn;
 
-    private Log log;
+    private final Log log;
 
     public DBHelper(boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
         readConf();
@@ -68,8 +68,8 @@ public class DBHelper implements AutoCloseable {
                 password = p.getProperty("pwd");
             }
         } catch (Exception e) {
-            log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Read configuration")
-                    .withValue("error", e.getMessage()).toString());
+            log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Read configuration")
+                    .wV("error", e.getMessage()).toString());
             throw new MalformedConfigurationException("Cannot read DB configuration", e);
         }
     }
@@ -82,10 +82,10 @@ public class DBHelper implements AutoCloseable {
     public void close() {
         if (conn != null) {
             try {
-                log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Close").toString());
+                log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Close").toString());
                 conn.close();
             } catch (SQLException e) {
-                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Close").toString(), e);
+                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Close").toString(), e);
             }
             conn = null;
         }
@@ -94,13 +94,13 @@ public class DBHelper implements AutoCloseable {
     private boolean reconnect() {
         try {
             close();
-            log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Connect").toString());
+            log.debug(() -> LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Connect").toString());
             conn = DriverManager.getConnection(dbUrl, user, password);
             conn.setAutoCommit(autocommit);
             return true;
         } catch (Exception e) {
             conn = null;
-            log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Connect").toString(), e);
+            log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Connect").toString(), e);
             return false;
         }
     }
@@ -129,17 +129,25 @@ public class DBHelper implements AutoCloseable {
             try {
                 writer.write(e, getConnection());
             } catch (Exception ex) {
-                writer.reset();
+                resetWriter(writer);
                 retry = true;
-                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).withOperation("Write event")
-                        .withValue("event", e).withValue("count", count).toString(), ex);
+                log.error(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Write event")
+                        .wV("event", e).wV("count", count).toString(), ex);
             }
         }
         if (retry) {
             count++;
-            if (count<3 && reconnect()) {
+            if (count < 3 && reconnect()) {
                 write(writer, e, count);
             }
+        }
+    }
+
+    private void resetWriter(DBEventWriter writer) {
+        try {
+            writer.reset();
+        } catch (SQLException ignored) {
+            // do nothing
         }
     }
 }

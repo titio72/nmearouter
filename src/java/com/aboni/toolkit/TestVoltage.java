@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.toolkit;
 
 import com.aboni.sensors.SensorVoltage;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.Tester;
 
 import java.io.PrintStream;
@@ -27,7 +28,7 @@ public class TestVoltage {
     public static void main(String[] args) {
 
         new Tester(500).start(new Tester.TestingProc() {
-            final SensorVoltage v = new SensorVoltage(0x48);
+            final SensorVoltage v = new SensorVoltage(0x48, ConsoleLog.getLogger());
 
             @Override
             public boolean doIt(PrintStream out) {

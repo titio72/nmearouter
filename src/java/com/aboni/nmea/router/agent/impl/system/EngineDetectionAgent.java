@@ -50,7 +50,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
         EngineDetector.getInstance().refresh();
         EngineStatus localEngineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
         if (engineRunning != localEngineRunning) {
-            log.info(getLogBuilder().withOperation("status change").withValue("status", localEngineRunning).toString());
+            log.info(getLogBuilder().wO("status change").wV("status", localEngineRunning).toString());
         }
         engineRunning = localEngineRunning;
         getCache().setStatus(NMEARouterStatuses.ENGINE_STATUS, engineRunning);

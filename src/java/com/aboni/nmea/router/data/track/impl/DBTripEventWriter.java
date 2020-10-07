@@ -17,7 +17,6 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.track.TripEvent;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.Event;
 
@@ -47,18 +46,14 @@ public class DBTripEventWriter implements DBEventWriter {
         }
     }
 
-    private void closeStatement(PreparedStatement s) {
+    private void closeStatement(PreparedStatement s) throws SQLException {
         if (s != null) {
-            try {
-                s.close();
-            } catch (Exception e) {
-                ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
-            }
+            s.close();
         }
     }
 
     @Override
-    public void reset() {
+    public void reset() throws SQLException {
         closeStatement(stm);
         stm = null;
     }

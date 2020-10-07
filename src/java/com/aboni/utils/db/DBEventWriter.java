@@ -22,5 +22,5 @@ public interface DBEventWriter {
 
     void write(Event e, Connection c) throws SQLException;
 
-    void reset();
+    void reset() throws SQLException;
 }

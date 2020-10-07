@@ -18,8 +18,10 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackWriter;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 
+import javax.validation.constraints.NotNull;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -33,14 +35,17 @@ public class FileTrackWriter implements TrackWriter {
 
     private final String fileName;
 
-    public FileTrackWriter(String file) {
+    private final Log log;
+
+    public FileTrackWriter(@NotNull Log log, String file) {
         fileName = file;
+        this.log = log;
     }
 
     @Override
     public void write(TrackPoint point) {
         String msg = getPositionString(point);
-        if (msg!=null) {
+        if (msg != null) {
             writeLine(msg);
         }
     }
@@ -51,7 +56,7 @@ public class FileTrackWriter implements TrackWriter {
                 Files.write(Paths.get(fileName), line.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             }
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot write position log", e);
+            LogStringBuilder.start("TrackFileWriter").wO("write").wV("line", line).error(log, e);
         }
     }
 

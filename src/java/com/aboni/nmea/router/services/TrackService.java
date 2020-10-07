@@ -18,30 +18,34 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackDumperFactory;
 import com.aboni.nmea.router.data.track.TrackManagementException;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Query;
-import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class TrackService implements WebService {
 
     private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
-    private static final String ERROR_DOWNLOADING_TRACK = "Error downloading track";
 
     private final QueryFactory queryFactory;
     private final TrackDumperFactory trackerDumperFactory;
+    private final Log log;
 
     @Inject
-    public TrackService(QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
+    public TrackService(@NotNull Log log, QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
         this.queryFactory = queryFactory;
+        this.log = log;
         this.trackerDumperFactory = trackerDumperFactory;
     }
 
     @Override
     public void doIt(ServiceConfig config, ServiceOutput response) {
+        Query q = null;
         try {
-            Query q = queryFactory.getQuery(config);
+            q = queryFactory.getQuery(config);
             String f = config.getParameter("format", "gpx");
             boolean download = "1".equals(config.getParameter("download", "0"));
             TrackDumper dumper = trackerDumperFactory.getDumper(f);
@@ -58,7 +62,7 @@ public class TrackService implements WebService {
                 response.error("Unknown format '" + f + "'");
             }
         } catch (IOException | TrackManagementException e) {
-            ServerLog.getLogger().error(ERROR_DOWNLOADING_TRACK, e);
+            LogStringBuilder.start("TrackService").wO("response").wV("query", q).error(log, e);
             response.setContentType(TEXT_HTML_CHARSET_UTF_8);
             sendError(response, e.getMessage());
         }
@@ -68,7 +72,7 @@ public class TrackService implements WebService {
         try {
             response.error(s);
         } catch (Exception ee) {
-            ServerLog.getLogger().error(ERROR_DOWNLOADING_TRACK, ee);
+            LogStringBuilder.start("TrackService").wO("response").error(log, ee);
         }
     }
 }

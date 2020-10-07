@@ -19,6 +19,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -42,14 +43,16 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     private final NMEAInputManager input;
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
+    private final Log log;
     private final byte[] buffer = new byte[2048];
     private String description;
 
     @Inject
-    public NMEAUDPReceiver(@NotNull NMEACache cache) {
+    public NMEAUDPReceiver(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(true, false);
-        input = new NMEAInputManager(getLogger());
+        this.log = log;
+        input = new NMEAInputManager(log);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, true, false);
         stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, true, false);
         description = "UDP Receiver";
@@ -69,7 +72,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            getLogger().info(s.toString(time));
+            getLogBuilder().wO("stats").w(s.toString(time)).info(log);
         }
     }
 
@@ -78,9 +81,9 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             setup = true;
             setup(name, q);
             this.port = port;
-            getLogger().info(String.format("Setting up UDP receiver: Port {%d}", port));
+            getLogBuilder().wO("init").wV("port", port).info(log);
         } else {
-            getLogger().info("Cannot setup UDP receiver - already set up");
+            getLogBuilder().wO("init").wV("error", "already initialized").error(log);
         }
     }
 
@@ -95,12 +98,11 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         while (!stop) {
             try (DatagramSocket socket = new DatagramSocket(port)) {
                 socket.setSoTimeout(SOCKET_READ_TIMEOUT);
-                getLogger().info("Opened Datagram socket {" + port + "}");
                 while (!stop) {
                     loopRead(socket);
                 }
             } catch (SocketException e) {
-                getLogger().error("Error opening datagram socket", e);
+                getLogBuilder().wO("open datagram socket").error(log, e);
             }
             if (!stop) Utils.pause(OPEN_SOCKET_RETRY_TIME);
         }
@@ -128,10 +130,10 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             }
         } catch (SocketTimeoutException e) {
             // read timeout
-            getLogger().debug("Datagram socket read timeout");
+            getLogBuilder().wO("read").error(log, e);
             Utils.pause(1000);
         } catch (Exception e) {
-            getLogger().warning("Error receiving sentence {" + sSentence + "} {" + e.getMessage() + "}");
+            getLogBuilder().wO("read").wV("sentence", sSentence).warn(log, e);
         }
         updateReadSentencesStats(true);
     }
@@ -176,11 +178,13 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        long t = getCache().getNow();
-        synchronized (stats) {
-            stats.onTimer(t);
-            fastStats.onTimer(t);
+        if (isStarted()) {
+            long t = getCache().getNow();
+            synchronized (stats) {
+                stats.onTimer(t);
+                fastStats.onTimer(t);
+            }
+            super.onTimer();
         }
-        super.onTimer();
     }
 }

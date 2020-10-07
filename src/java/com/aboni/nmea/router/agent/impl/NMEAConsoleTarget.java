@@ -17,7 +17,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.ConsoleLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -35,7 +35,7 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @OnSentence
     public void onSentence(Sentence s, String src) {
-        ServerLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
+        ConsoleLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
                 " [" + src + "] " + s);
     }
 

@@ -29,10 +29,11 @@ public class HWSettings {
     private HWSettings() {}
 
     private static void readConf() {
+        Log log = ThingsFactory.getInstance(Log.class);
         try {
             File f = new File(Constants.SENSOR);
             if (f.exists() && f.lastModified() > lastProp) {
-                ServerLog.getLogger().info("Reading sensor configuration file");
+                log.info(LogStringBuilder.start("HWSettings").wO("load").wV("file", f.getAbsolutePath()).toString());
                 try (FileInputStream propInput = new FileInputStream(f)) {
                     prop.clear();
                     prop.load(propInput);
@@ -40,7 +41,7 @@ public class HWSettings {
                 }
             }
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot read sensors configuration!", e);
+            log.error(LogStringBuilder.start("HWSettings").wO("load").toString(), e);
         }
     }
 
@@ -66,7 +67,6 @@ public class HWSettings {
                     return Double.parseDouble(s);
                 } catch (NumberFormatException e) {
                     String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
-                    ServerLog.getLogger().error(msg);
                     throw new NumberFormatException(msg);
                 }
             }
@@ -82,7 +82,6 @@ public class HWSettings {
                     return Integer.parseInt(s);
                 } catch (NumberFormatException e) {
                     String msg = String.format("Invalid sensor property {%s} value {%s}", key, s);
-                    ServerLog.getLogger().error(msg);
                     throw new NumberFormatException(msg);
                 }
             }

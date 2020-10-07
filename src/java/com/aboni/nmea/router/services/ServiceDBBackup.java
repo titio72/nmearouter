@@ -15,21 +15,29 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 public class ServiceDBBackup extends JSONWebService {
 
-    public ServiceDBBackup() {
-        super();
+    private final Log log;
+
+    @Inject
+    public ServiceDBBackup(@NotNull Log log) {
+        super(log);
+        this.log = log;
         setLoader(this::getResult);
     }
 
     private JSONObject getResult(ServiceConfig config) {
         try (DBHelper h = new DBHelper(true)) {
             String file = h.backup();
-            ServerLog.getLogger().info("DB Backup Return {" + file + "}");
+            log.info(LogStringBuilder.start("DBBackupService").wO("backup").wV("file", file).toString());
             if (file != null) {
                 JSONObject res = getOk();
                 res.put("file", file);
@@ -38,7 +46,7 @@ public class ServiceDBBackup extends JSONWebService {
                 return getError("Backup failed");
             }
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error during db backup", e);
+            log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
             return getError("Error " + e.getMessage());
         }
     }

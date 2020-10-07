@@ -20,7 +20,8 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.data.track.TrackManager;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.ConsoleLog;
+import com.aboni.utils.Log;
 import com.aboni.utils.db.DBHelper;
 
 import java.sql.PreparedStatement;
@@ -30,6 +31,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class UpdateAnchorDB {
+
+    private final Log log = ConsoleLog.getLogger();
 
     public static final long AGE_THRESHOLD = 6L * 60L * 60L * 1000L; //6h
 
@@ -88,9 +91,9 @@ public class UpdateAnchorDB {
                             }
                             db.getConnection().commit();
                             final int count = i;
-                            ServerLog.getLogger().console("Processed %d points " + count);
-                            ServerLog.getLogger().console("wrong ids   " + idDiscrepancies);
-                            ServerLog.getLogger().console("anchor      " + anchorDiscrepancies);
+                            log.console("Processed %d points " + count);
+                            log.console("wrong ids   " + idDiscrepancies);
+                            log.console("anchor      " + anchorDiscrepancies);
                         }
                     }
                 }
@@ -112,9 +115,9 @@ public class UpdateAnchorDB {
         if (filter(item)) {
             if (isLastValid(item)) {
                 // very bad issue... consecutive points are not ordered with time
-                ServerLog.getLogger().console("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
-                ServerLog.getLogger().console("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
-                ServerLog.getLogger().console("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
+                log.console("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
+                log.console("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
+                log.console("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
                 idDiscrepancies++;
             } else if (isRecent(item)) {
                 updateSameLeg(item, tp, stUpd);
@@ -162,7 +165,7 @@ public class UpdateAnchorDB {
 
 
     private void logItem(TrackItem item, boolean expectedAnchor) {
-        ServerLog.getLogger().console(String.format("Discrepancy: %s %s %d %s Speed %f.2 %n",
+        log.console(String.format("Discrepancy: %s %s %d %s Speed %f.2 %n",
                 item.anchor ? "Y" : "N", expectedAnchor ? "Y" : "N", item.id,
                 new Date(item.position.getTimestamp()), item.speed));
     }

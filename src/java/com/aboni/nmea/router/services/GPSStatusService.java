@@ -6,6 +6,7 @@ import com.aboni.nmea.router.GPSStatus;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.SatInfo;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -22,7 +23,8 @@ public class GPSStatusService extends JSONWebService {
     private GPSStatus statusProvider;
 
     @Inject
-    public GPSStatusService(@NotNull NMEARouter router) {
+    public GPSStatusService(@NotNull NMEARouter router, @NotNull Log log) {
+        super(log);
         for (String ag_id : router.getAgents()) {
             NMEAAgent ag = router.getAgent(ag_id);
             if (ag instanceof GPSStatus) {

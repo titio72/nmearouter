@@ -17,23 +17,29 @@ package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.*;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
 public class NMEACacheImpl implements NMEACache {
 
 
+    private final Log log;
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;
     private final Map<String, Object> statuses;
 
-    public NMEACacheImpl() {
+    @Inject
+    public NMEACacheImpl(@NotNull Log log) {
         lastHeading = new DataEvent<>(null, 0, "");
         lastPosition = new DataEvent<>(null, 0, "");
         statuses = new HashMap<>();
+        this.log = log;
     }
 
     @Override
@@ -47,7 +53,7 @@ public class NMEACacheImpl implements NMEACache {
                 lastPosition = new DataEvent<>((PositionSentence) s, getNow(), src);
             }
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot cache message {" + s + "} error {" + e.getMessage() + "}");
+            LogStringBuilder.start("Cache").wO("cache sentence").wV("sentence", s).error(log, e);
         }
     }
 

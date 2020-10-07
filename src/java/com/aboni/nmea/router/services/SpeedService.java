@@ -17,17 +17,13 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.data.sampledquery.SampleWriter;
-import com.aboni.nmea.router.data.sampledquery.SampleWriterFactory;
-import com.aboni.nmea.router.data.sampledquery.SampledQuery;
-import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
-import com.aboni.utils.Query;
-import com.aboni.utils.ThingsFactory;
-import com.aboni.utils.TimeSeriesSample;
+import com.aboni.nmea.router.data.sampledquery.*;
+import com.aboni.utils.*;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
 public class SpeedService extends JSONWebService {
 
@@ -39,6 +35,8 @@ public class SpeedService extends JSONWebService {
     private @Inject
     QueryFactory queryFactory;
     private SampledQuery sampledQuery;
+
+    private final Log log;
 
     private static class SpeedSampleWriter implements SampleWriter {
 
@@ -119,8 +117,9 @@ public class SpeedService extends JSONWebService {
     }
 
     @Inject
-    public SpeedService() {
-        super();
+    public SpeedService(@NotNull Log log) {
+        super(log);
+        this.log = log;
         setLoader(this::getResult);
     }
 
@@ -128,7 +127,12 @@ public class SpeedService extends JSONWebService {
         Query q = queryFactory.getQuery(config);
         if (q != null) {
             SampledQuery sq = getSampledQuery();
-            return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
+            try {
+                return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
+            } catch (SampledQueryException e) {
+                LogStringBuilder.start("SpeedService").wO("execute").wV("query", q).errorForceStacktrace(log, e);
+                return getError("Error executing query");
+            }
         } else {
             return getError("No valid query specified!");
         }

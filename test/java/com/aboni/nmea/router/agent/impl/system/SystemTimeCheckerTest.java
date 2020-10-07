@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.DataEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.HeadingSentence;
@@ -16,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 public class SystemTimeCheckerTest {
 
-    private class NMEACacheMock implements NMEACache {
+    private static class NMEACacheMock implements NMEACache {
 
         @Override
         public DataEvent<HeadingSentence> getLastHeading() {
@@ -66,7 +67,7 @@ public class SystemTimeCheckerTest {
         SystemTimeChecker checker = new SystemTimeChecker(cache, timestamp -> {
             cache.setNow(timestamp.toEpochSecond() * 1000);
             attemptedChanged.set(true);
-        });
+        }, ConsoleLog.getLogger());
 
         // the sentence is 1 second behind the system time - expected to be considered ok
         Sentence s = SentenceFactory.getInstance().createParser("$IIRMC,103021.00,A,5046.305,N,00132.959,W,5.30,107.3,030220,0.9,W,A");
@@ -85,7 +86,7 @@ public class SystemTimeCheckerTest {
         SystemTimeChecker checker = new SystemTimeChecker(cache, timestamp -> {
             cache.setNow(timestamp.toEpochSecond() * 1000);
             attemptedChanged.set(true);
-        });
+        }, ConsoleLog.getLogger());
 
         // the sentence is 10 minutes ahead of the system time - the checker should try to change the system time
         Sentence s = SentenceFactory.getInstance().createParser("$IIRMC,104021.00,A,5046.305,N,00132.959,W,5.30,107.3,030220,0.9,W,A");

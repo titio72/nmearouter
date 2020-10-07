@@ -17,21 +17,28 @@ package com.aboni.sensors;
 
 import com.aboni.misc.Utils;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class HMC5883MPU6050CompassDataProvider implements CompassDataProvider {
 
     private final SensorHMC5883 magnetometer;
     private final SensorMPU6050 gyro;
     private final MagnetometerToCompass compass;
+    private final Log log;
     private final int bus;
     private boolean init;
 
-    public HMC5883MPU6050CompassDataProvider() {
+    @Inject
+    public HMC5883MPU6050CompassDataProvider(@NotNull Log log) {
+        this.log = log;
         this.bus = HWSettings.getPropertyAsInteger("bus", 1);
         this.init = false;
-        gyro = new SensorMPU6050();
-        magnetometer = new SensorHMC5883();
+        gyro = new SensorMPU6050(log);
+        magnetometer = new SensorHMC5883(log);
         compass = new MagnetometerToCompass();
     }
 
@@ -90,7 +97,7 @@ public class HMC5883MPU6050CompassDataProvider implements CompassDataProvider {
             int z = HWSettings.getPropertyAsInteger("calibration.z", 0);
             compass.setCalibration(x, y, z);
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot load compass calibration!", e);
+            log.error(LogStringBuilder.start("CompassDataProvider").wO("load calibration").toString(), e);
         }
     }
 }

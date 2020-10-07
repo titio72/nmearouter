@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.data.track.TrackQueryManager;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -27,8 +27,8 @@ public class YearlyAnalyticsService extends JSONWebService {
     private final TrackQueryManager trackQueryManager;
 
     @Inject
-    public YearlyAnalyticsService(@NotNull final TrackQueryManager manager) {
-        super();
+    public YearlyAnalyticsService(@NotNull final TrackQueryManager manager, @NotNull Log log) {
+        super(log);
         this.trackQueryManager = manager;
         setLoader(this::getResult);
     }
@@ -37,7 +37,6 @@ public class YearlyAnalyticsService extends JSONWebService {
         try {
             return trackQueryManager.getYearlyStats();
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error reading yearly stats", e);
             throw new JSONGenerationException("Error reading yearly stats", e);
         }
     }

@@ -18,6 +18,7 @@ package com.aboni.nmea.router.agent.impl.system;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -31,7 +32,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     public NMEASystemTimeGPS(@NotNull NMEACache cache) {
         super(cache);
         setSourceTarget(false, true);
-        systemTimeCHecker = new SystemTimeChecker(cache);
+        systemTimeCHecker = ThingsFactory.getInstance(SystemTimeChecker.class);
     }
 
     @Override

@@ -15,7 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.ThingsFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -90,7 +92,8 @@ public class GPSSatsRepository {
                 if (sat != null) sats.put(sat.prn, sat);
             }
         } catch (IOException e) {
-            ServerLog.getLogger().errorForceStacktrace("Cannot open satellites definition", e);
+            ThingsFactory.getInstance(Log.class).errorForceStacktrace(
+                    LogStringBuilder.start("SatRepository").wO("load").toString(), e);
         }
     }
 
@@ -107,7 +110,8 @@ public class GPSSatsRepository {
             sat.clock = tok.nextToken();
             return sat;
         } catch (Exception e) {
-            ServerLog.getLogger().error(String.format("Cannot load satellite definition {%s}", line), e);
+            ThingsFactory.getInstance(Log.class).errorForceStacktrace(
+                    LogStringBuilder.start("SatRepository").wO("load").wV("string", line).toString(), e);
             return null;
         }
     }

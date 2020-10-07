@@ -17,13 +17,14 @@ package com.aboni.toolkit;
 
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorPressureTemp;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.Tester;
 
 import java.io.PrintStream;
 
 public class TestBME280 implements Tester.TestingProc {
 
-    final SensorPressureTemp sp = new SensorPressureTemp(SensorPressureTemp.Sensor.BME280);
+    final SensorPressureTemp sp = new SensorPressureTemp(ConsoleLog.getLogger());
 
     @Override
     public boolean doIt(PrintStream out) {

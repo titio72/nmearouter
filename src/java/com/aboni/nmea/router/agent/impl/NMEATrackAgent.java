@@ -23,7 +23,7 @@ import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -38,10 +38,12 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private final TrackManager tracker;
     private final TripManagerX tripManager;
 
+    private final Log log;
 
     @Inject
-    public NMEATrackAgent(@NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
+    public NMEATrackAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, true);
         this.tracker = trackManager;
         this.tripManager = tripManager;
@@ -49,6 +51,12 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     protected boolean onActivate() {
+        try {
+            tripManager.init();
+        } catch (TripManagerException e) {
+            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+            return false;
+        }
         return true;
     }
 
@@ -83,7 +91,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                ServerLog.getLogger().error("Error processing position {" + s + "}", e);
+                getLogBuilder().wO("process sentence").wV("sentence", s).error(log, e);
             }
         }
     }
@@ -99,7 +107,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                getLogger().error("Cannot write point!", e);
+                getLogBuilder().wO("process point").wV("point", posT).error(log, e);
             }
             notifyTrackedPoint(point);
             synchronized (this) {
@@ -146,14 +154,16 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        long now = getCache().getNow();
-        if (now - lastStats > 30000) {
-            lastStats = now;
-            synchronized (this) {
-                getLogger().info(String.format("AvgWriteTime {%.2f} Samples {%d} Writes {%d}", avgTime, samples, writes));
-                avgTime = 0;
-                samples = 0;
-                writes = 0;
+        if (isStarted()) {
+            long now = getCache().getNow();
+            if (now - lastStats > 30000) {
+                lastStats = now;
+                synchronized (this) {
+                    getLogBuilder().wO("stats").wV("avgWriteTime", "%.2f", avgTime).wV("samples", samples).wV("written", writes).info(log);
+                    avgTime = 0;
+                    samples = 0;
+                    writes = 0;
+                }
             }
         }
     }

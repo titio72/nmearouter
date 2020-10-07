@@ -17,19 +17,21 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.NMEARouter;
+import com.aboni.utils.Log;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class AutoPilotService extends JSONWebService {
 
     private final AutoPilotDriver auto;
 
     @Inject
-    public AutoPilotService(NMEARouter router) {
-        super();
+    public AutoPilotService(NMEARouter router, @NotNull Log log) {
+        super(log);
         this.auto = (AutoPilotDriver) router.getAgent("SmartPilot");
         setLoader((ServiceConfig config) -> {
-            if (auto!=null) {
+            if (auto != null) {
                 String command = config.getParameter("command");
                 switch (command) {
                     case CMD_PORT_10:

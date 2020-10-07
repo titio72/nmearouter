@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.Event;
 
@@ -39,13 +38,12 @@ public class DBMeteoEventWriter implements DBEventWriter {
     }
 
     @Override
-    public void reset() {
-        try {
-            stm.close();
-        } catch (Exception e) {
-            ServerLog.getLogger().error("Error closing statement in " + getClass().getSimpleName(), e);
-        }
+    public void reset() throws SQLException {
+        PreparedStatement s = stm;
         stm = null;
+        if (s != null) {
+            s.close();
+        }
     }
 
     @Override

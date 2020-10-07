@@ -20,6 +20,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.Log;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
@@ -39,6 +40,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
     private static final int PORT_WAIT_FOR_DATA = 500;
+    private final Log log;
 
     private static class Config {
         private String portName;
@@ -91,17 +93,14 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private long lastPortRetryTime;
 
-    private String logTag = "";
-    private String logError = "";
-
     private final NMEAInputManager input;
 
-
     @Inject
-    public NMEASerial(@NotNull NMEACache cache) {
+    public NMEASerial(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
+        this.log = log;
         config = new Config();
-        input = new NMEAInputManager(getLogger());
+        input = new NMEAInputManager(log);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired);
         stats = new NMEATrafficStats(this::onStatsExpired);
     }
@@ -113,8 +112,6 @@ public class NMEASerial extends NMEAAgentImpl {
         config.setReceive(rec);
         config.setTransmit(tran);
         setSourceTarget(rec, tran);
-        logTag = "Port {" + config.getPortName() + "}";
-        logError = logTag + " read error {%s}";
         fastStats.setup(FAST_STATS_PERIOD, rec, tran);
         stats.setup(STATS_PERIOD, rec, tran);
 
@@ -133,7 +130,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            getLogger().info(logTag + " " + s.toString(time));
+            getLogBuilder().wO("stats").w(" " + s.toString(time));
         }
     }
 
@@ -164,7 +161,7 @@ public class NMEASerial extends NMEAAgentImpl {
             }
             return true;
         } catch (Exception e) {
-            getLogger().error(logTag + " error initializing serial agent {" + config.getPortName() + "}", e);
+            getLogBuilder().w("activate").wV("device", toString()).error(log, e);
             port = null;
             bufferedReader = null;
         }
@@ -176,8 +173,7 @@ public class NMEASerial extends NMEAAgentImpl {
             long now = getCache().getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
                 resetPortAndReader();
-                getLogger().info(logTag + " creating with params Speed {" + config.getSpeed() + "} " +
-                        "Mode {" + (config.isReceive() ? "R" : "") + (config.isTransmit() ? "X" : "") + "}");
+                getLogBuilder().wO("create port").wV("device", toString());
                 SerialPort p = SerialPort.getCommPort(config.getPortName());
                 p.setComPortParameters(config.getSpeed(), 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, PORT_TIMEOUT, PORT_TIMEOUT);
@@ -195,7 +191,6 @@ public class NMEASerial extends NMEAAgentImpl {
     private BufferedReader getBufferedReader() {
         synchronized (this) {
             if (bufferedReader == null && getPort() != null) {
-                getLogger().info(logTag + " open, creating reader");
                 bufferedReader = new BufferedReader(new InputStreamReader(port.getInputStream()));
             }
             return bufferedReader;
@@ -222,15 +217,15 @@ public class NMEASerial extends NMEAAgentImpl {
             s = reader.readLine();
             handleStringMessage(s);
         } catch (SerialPortTimeoutException e) {
-            getLogger().debug(logTag + " read timeout, waiting");
+            getLogBuilder().wO("read").wV("status", "timeout").info(log);
             Utils.pause(PORT_WAIT_FOR_DATA);
         } catch (SerialPortIOException e) {
-            getLogger().warning(String.format(logError, e.getMessage()) + ", resetting");
+            getLogBuilder().wO("read").wV("status", "reset").error(log, e);
             resetPortAndReader();
         } catch (IllegalArgumentException e) {
-            getLogger().error(String.format(logError, e) + String.format(" string {%s}", s));
+            getLogBuilder().wO("read").wV("line", s).error(log, e);
         } catch (Exception e) {
-            getLogger().errorForceStacktrace(String.format(logError, e.getMessage()), e);
+            getLogBuilder().wO("read").error(log, e);
         }
     }
 
@@ -288,7 +283,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 port.closePort();
             }
         } catch (Exception e) {
-            getLogger().error(logTag + " error closing", e);
+            getLogBuilder().wO("deactivate").error(log, e);
         } finally {
             resetPortAndReader();
         }
@@ -305,7 +300,7 @@ public class NMEASerial extends NMEAAgentImpl {
                     updateWriteStats(strSentence);
                     updateWriteStats();
                 } else {
-                    getLogger().warning(logTag + " write failure, resetting");
+                    getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").error(log);
                     resetPortAndReader();
                 }
             }

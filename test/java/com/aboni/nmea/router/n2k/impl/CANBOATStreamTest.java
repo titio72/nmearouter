@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.utils.ConsoleLog;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,14 +11,14 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        N2KMessage o = new N2KStreamImpl().getMessage(ss[0]);
+        N2KMessage o = new N2KStreamImpl(ConsoleLog.getLogger()).getMessage(ss[0]);
         assertNotNull(o);
         assertEquals(127250, o.getHeader().getPgn());
     }
 
     @Test
     public void skipNewMessageTooSoon() {
-        N2KStreamImpl stream = new N2KStreamImpl(null, true);
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true);
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[1]));
     }
@@ -25,7 +26,7 @@ public class CANBOATStreamTest {
     @Test
     public void skipNewMessageUnchanged() {
         // skip the second because the long timeout (1000ms) is not expired and the values are the same
-        N2KStreamImpl stream = new N2KStreamImpl(null, true);
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true);
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[2]));
     }
@@ -33,7 +34,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageBecauseChanged() {
         // send second because the short timeout is expired (350ms) and the value is different
-        N2KStreamImpl stream = new N2KStreamImpl();
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[3]));
     }
@@ -41,7 +42,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageTimeout() {
         // send second because the long timeout is expired (so no matter the values are changed or not
-        N2KStreamImpl stream = new N2KStreamImpl();
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[4]));
     }

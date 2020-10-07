@@ -17,8 +17,9 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -27,22 +28,26 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.util.FaaMode;
 
+import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 /**
  * Used to produce a VTG sentence from a RMC to match requirement of NKE
+ *
  * @author aboni
  */
 public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
+    private final Log log;
 
-    public NMEARMC2VTGProcessor() {
-        this(OffsetDateTime.now().getYear());
+    public NMEARMC2VTGProcessor(@NotNull Log lg) {
+        this(lg, OffsetDateTime.now().getYear());
     }
 
-    public NMEARMC2VTGProcessor(double year) {
+    public NMEARMC2VTGProcessor(@NotNull Log log, double year) {
         m = new NMEAMagnetic2TrueConverter(year);
+        this.log = log;
     }
 
     @Override
@@ -59,7 +64,7 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
                 return new Pair<>(Boolean.TRUE, new Sentence[] {vtg});
             }
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot convert message to vtg {" + sentence + "} error {" + e.getMessage() + "}");
+            LogStringBuilder.start("RMC2VTGProc").wO("convert").wV("sentence", sentence).error(log, e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }

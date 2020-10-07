@@ -15,12 +15,14 @@
 
 package com.aboni.utils;
 
+import javax.validation.constraints.NotNull;
+
 public class LogStringBuilder {
 
     public static final String BLANK = " ";
 
     public static LogStringBuilder start(String category) {
-        return new LogStringBuilder().withCategory(category);
+        return new LogStringBuilder().wC(category);
     }
 
     private String category;
@@ -29,54 +31,132 @@ public class LogStringBuilder {
 
     private final StringBuilder messageBuilder = new StringBuilder();
 
-    public LogStringBuilder withCategory(String category) {
+    /**
+     * Add a "category" to the log line.
+     * <Category>: Op {<Operation>} ...
+     *
+     * @param category
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wC(String category) {
         this.category = category;
         return this;
     }
 
-    public LogStringBuilder withOperation(String operation) {
+    /**
+     * Add an "operation" to the log line.
+     * <Category>: Op {<Operation>} ...
+     *
+     * @param operation
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wO(String operation) {
         this.operation = operation;
         return this;
     }
 
-    public LogStringBuilder withValue(String key, String value) {
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, String value) {
         messageBuilder.append(String.format("%s%s {%s}", first, key, value));
         first = BLANK;
         return this;
     }
 
-    public LogStringBuilder withValue(String key, double value) {
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, double value) {
         messageBuilder.append(String.format("%s%s {%f}", first, key, value));
         first = BLANK;
         return this;
     }
 
-    public LogStringBuilder withValue(String key, String fmt, double value) {
-        return withValue(key, String.format(fmt, value));
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, String fmt, double value) {
+        return wV(key, String.format(fmt, value));
     }
 
-    public LogStringBuilder withValue(String key, String fmt, int value) {
-        return withValue(key, String.format(fmt, value));
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, String fmt, int value) {
+        return wV(key, String.format(fmt, value));
     }
 
-    public LogStringBuilder withValue(String key, int value) {
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, int value) {
         messageBuilder.append(String.format("%s%s {%d}", first, key, value));
         first = BLANK;
         return this;
     }
 
-    public LogStringBuilder withValue(String key, String fmt, long value) {
-        return withValue(key, String.format(fmt, value));
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, String fmt, long value) {
+        return wV(key, String.format(fmt, value));
     }
 
-    public LogStringBuilder withValue(String key, long value) {
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, long value) {
         messageBuilder.append(String.format("%s%s {%d}", first, key, value));
         first = BLANK;
         return this;
     }
 
-    public LogStringBuilder withValue(String key, Object value) {
-        return withValue(key, "" + value);
+    /**
+     * Add a category to the log line.
+     * <Category>: Op {<Operation>} <key> {<value>} ...
+     *
+     * @param key
+     * @param value
+     * @return The original LogStringBuilder for fluent interface.
+     */
+    public LogStringBuilder wV(String key, Object value) {
+        return wV(key, "" + value);
     }
 
     public String get() {
@@ -86,5 +166,34 @@ public class LogStringBuilder {
     @Override
     public String toString() {
         return get();
+    }
+
+    public void info(@NotNull Log log) {
+        log.info(get());
+    }
+
+    public void error(@NotNull Log log) {
+        log.error(get());
+    }
+
+    public void error(@NotNull Log log, Exception e) {
+        log.error(get(), e);
+    }
+
+    public void errorForceStacktrace(@NotNull Log log, Exception e) {
+        log.errorForceStacktrace(get(), e);
+    }
+
+    public void warn(@NotNull Log log) {
+        log.warning(get());
+    }
+
+    public void warn(@NotNull Log log, Exception e) {
+        log.warning(get(), e);
+    }
+
+    public LogStringBuilder w(String s) {
+        messageBuilder.append(s);
+        return this;
     }
 }

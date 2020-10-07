@@ -38,7 +38,7 @@ public class Track2JSON implements TrackDumper {
 
         private TrackPoint previous;
 
-        PointWriter() {
+        private PointWriter() {
         }
 
         @Override

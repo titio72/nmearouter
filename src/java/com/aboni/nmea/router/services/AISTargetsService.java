@@ -23,21 +23,22 @@ public class AISTargetsService extends JSONWebService {
 
     @Inject
     public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache, @NotNull Log log) {
+        super(log);
         this.cache = cache;
         findService(router);
         setLoader((ServiceConfig config) -> {
             if (targetsProvider != null) {
-                log.info(LogStringBuilder.start("WebService").withOperation("invoke").withValue("service", "AISTarget").toString());
+                log.info(LogStringBuilder.start("WebService").wO("invoke").wV("service", "AISTarget").toString());
                 List<AISPositionReport> reports = targetsProvider.getAISTargets();
                 JSONObject res = new JSONObject();
                 List<JSONObject> targets = getListOfTargets(cache, reports);
                 res.put("targets", new JSONArray(targets));
-                if (cache.getLastHeading()!=null) {
+                if (cache.getLastHeading() != null) {
                     double heading = cache.getLastHeading().getData().getHeading();
                     res.put("heading", Utils.round(heading, 1));
                 }
-                log.info(LogStringBuilder.start("WebService").withOperation("load").withValue("service", "AISTarget").
-                        withValue("targets", targets.size()).toString());
+                log.info(LogStringBuilder.start("WebService").wO("load").wV("service", "AISTarget").
+                        wV("targets", targets.size()).toString());
                 return res;
             }
             return null;

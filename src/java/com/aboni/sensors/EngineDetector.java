@@ -36,9 +36,10 @@ public class EngineDetector {
 
     private EngineDetector() {
         Pin p = RaspiPin.getPinByName(HWSettings.getProperty("engine.pin", "GPIO 24"));
-        pin = new PinDetector(p, false);
-        ThingsFactory.getInstance(Log.class).info(LogStringBuilder.start("Engine").withOperation("create")
-                .withValue("pin", pin.getName()).toString());
+        Log log = ThingsFactory.getInstance(Log.class);
+        pin = new PinDetector(log, p, false);
+        log.info(LogStringBuilder.start("Engine").wO("create")
+                .wV("pin", pin.getName()).toString());
     }
 
     public void refresh() {

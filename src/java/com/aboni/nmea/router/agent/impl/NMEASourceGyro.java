@@ -22,6 +22,8 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
@@ -41,17 +43,19 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final long SEND_HD_IDLE_TIME = 15L * 1000L; //ms
 
     private static final boolean USE_CMPS11 = true;
+    public static final String GYRO_AGENT_CATEGORY = "GyroAgent";
 
     private SensorCompass compassSensor;
 
     private final DeviationManager deviationManager;
-
+    private final Log log;
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(NMEACache cache, @NotNull DeviationManager deviationManager) {
+    public NMEASourceGyro(NMEACache cache, @NotNull DeviationManager deviationManager, @NotNull Log log) {
         super(cache);
+        this.log = log;
         this.deviationManager = deviationManager;
         setSourceTarget(true, true);
     }
@@ -91,13 +95,13 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private SensorCompass createCompass() {
         try {
-            SensorCompass r = new SensorCompass(
-                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(),
+            SensorCompass r = new SensorCompass(log,
+                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(log),
                     deviationManager);
             r.init();
             return r;
         } catch (Exception e) {
-            getLogger().error("Error creating compass sensor ", e);
+            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("init").toString(), e);
             return null;
         }
     }
@@ -109,7 +113,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 compassSensor = (SensorCompass) readSensor(compassSensor);
             }
         } catch (Exception e) {
-            getLogger().error("Error reading sensor data", e);
+            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
         }
     }
 
@@ -118,7 +122,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
             try {
                 s.read();
             } catch (SensorException e) {
-                getLogger().error("Trying to read from a not initialized sensor {" + s.getSensorName() + "} - disabling it ");
+                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
                 return null;
             }
         }
@@ -167,7 +171,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 }
             }
         } catch (Exception e) {
-            getLogger().error("Cannot post heading data", e);
+            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message").toString(), e);
         }
 
     }
@@ -185,7 +189,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
                 notify(xdr);
             } catch (Exception e) {
-                getLogger().error("Cannot post XDR data", e);
+                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message xdr").toString(), e);
             }
         }
     }
@@ -202,7 +206,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 double headingSens = compassSensor.getUnfilteredSensorHeading();
                 dump(headingSens, headingBoat);
             } catch (Exception e) {
-                getLogger().error("Error dumping compass readings", e);
+                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("learn").toString(), e);
             }
         }
     }

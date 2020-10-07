@@ -20,10 +20,14 @@ import com.aboni.nmea.router.OnJSONMessage;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.json.JSONObject;
 
-import javax.websocket.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @WebSocket
@@ -45,26 +49,25 @@ public class EventSocket {
         this.stream = stream;
     }
 
-    @OnOpen
+    @OnWebSocketConnect
     public void onWebSocketConnect(Session s) {
-        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("connect").withValue("id", s.getId()).toString());
         session = s;
-        sessions.incrementAndGet();
-        id = s.getId();
+        int i = sessions.incrementAndGet();
+        id = "S" + i;
+        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("connect").wV("id", id).toString());
         stream.subscribe(this);
     }
 
-    @OnClose
-    public void onWebSocketClose(Session s) {
-        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("close").withValue("id", s.getId()).toString());
+    @OnWebSocketClose
+    public void onWebSocketClose(int i, String str) {
+        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("close").wV("id", id).toString());
         stream.unsubscribe(this);
         sessions.decrementAndGet();
     }
 
-    @SuppressWarnings("unused")
-    @OnError
-    public void onWebSocketError(Throwable cause) {
-        log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("error").toString(), cause);
+    @OnWebSocketError
+    public void onWebSocketError(Throwable t) {
+        log.error(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("error").toString(), t);
         stream.unsubscribe(this);
         sessions.decrementAndGet();
     }
@@ -74,11 +77,10 @@ public class EventSocket {
     public void onSentence(JSONObject obj) {
         if (obj != null) {
             try {
-                RemoteEndpoint.Async remote = session.getAsyncRemote();
-                remote.setSendTimeout(1000);
-                remote.sendText(obj.toString());
+                RemoteEndpoint remote = session.getRemote();
+                remote.sendString(obj.toString());
             } catch (Exception e) {
-                log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).withOperation("message").withValue("id", id).toString(), e);
+                log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("message").wV("id", id).toString(), e);
             }
         }
     }

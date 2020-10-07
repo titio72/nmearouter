@@ -22,7 +22,10 @@ import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
 import com.aboni.nmea.router.data.track.TrackReader;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.*;
+import com.aboni.utils.Query;
+import com.aboni.utils.QueryByDate;
+import com.aboni.utils.QueryById;
+import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -68,7 +71,6 @@ public class DBTrackReader implements TrackReader {
                 }
             }
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            ServerLog.getLogger().error(ERROR_READING_TRACK, e);
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }
     }
@@ -85,7 +87,6 @@ public class DBTrackReader implements TrackReader {
                 }
             }
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            ServerLog.getLogger().error(ERROR_READING_TRACK, e);
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }
     }

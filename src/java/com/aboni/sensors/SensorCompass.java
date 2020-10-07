@@ -19,7 +19,8 @@ import com.aboni.geo.DeviationManager;
 import com.aboni.misc.DataFilter;
 import com.aboni.nmea.router.Constants;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,8 @@ import java.io.File;
 import java.io.FileInputStream;
 
 public class SensorCompass extends I2CSensor {
+
+    public static final String COMPASS_SENSOR_CATEGORY = "CompassSensor";
 
     public static class Data {
         private double pitch;
@@ -43,7 +46,8 @@ public class SensorCompass extends I2CSensor {
     private final DeviationManager devManager;
 
     @Inject
-    public SensorCompass(@NotNull CompassDataProvider provider, DeviationManager deviationManager) {
+    public SensorCompass(@NotNull Log log, @NotNull CompassDataProvider provider, DeviationManager deviationManager) {
+        super(log);
         this.provider = provider;
         this.devManager = deviationManager;
     }
@@ -127,17 +131,17 @@ public class SensorCompass extends I2CSensor {
         try {
             File f = new File(Constants.DEVIATION);
             if (f.exists() && f.lastModified() > lastModifiedDevTable) {
-                ServerLog.getLogger().info("Reloading deviation table.");
+                log(LogStringBuilder.start(COMPASS_SENSOR_CATEGORY).wO("load deviation table").toString());
                 lastModifiedDevTable = f.lastModified();
                 try (FileInputStream s = new FileInputStream(f)) {
                     devManager.reset();
                     if (!devManager.load(s)) {
-                        ServerLog.getLogger().error("CompassSensor cannot load deviation table!");
+                        log(LogStringBuilder.start(COMPASS_SENSOR_CATEGORY).wO("fail load deviation table").toString());
                     }
                 }
             }
         } catch (Exception e) {
-            error("Cannot load deviation table!", e);
+            error(LogStringBuilder.start(COMPASS_SENSOR_CATEGORY).wO("load deviation table").toString(), e);
         }
     }
 

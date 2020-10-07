@@ -8,7 +8,7 @@ import com.aboni.nmea.router.data.track.impl.DBTripEventWriter;
 import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
 import com.aboni.nmea.router.data.track.impl.TripManagerXImpl;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,10 +25,11 @@ public class LoadGPX {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
 
+
         int counter = 0;
         String file = "/home/aboni/Downloads/nn.gpx";
         try (FileReader reader = new FileReader(file)) {
-            // <trkpt
+            tripManager.init();
             byte[] buffer = new byte[6];
             StringBuilder b = null;
             int c;
@@ -56,7 +57,7 @@ public class LoadGPX {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            ConsoleLog.getLogger().error("Error", e);
         }
     }
 
@@ -76,7 +77,7 @@ public class LoadGPX {
             process(g, speed);
 
 
-            ServerLog.getLogger().console(String.format("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4)));
+            ConsoleLog.getLogger().console(String.format("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4)));
         }
     }
 
@@ -94,7 +95,7 @@ public class LoadGPX {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                e.printStackTrace();
+                ConsoleLog.getLogger().error("Error handling point", e);
             }
         }
     }

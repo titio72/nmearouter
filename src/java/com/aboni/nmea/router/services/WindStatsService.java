@@ -20,7 +20,8 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.nmea.router.data.meteo.WindStats;
 import com.aboni.nmea.router.data.meteo.WindStatsReader;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,7 +34,8 @@ import java.util.List;
 public class WindStatsService extends JSONWebService {
 
     @Inject
-    public WindStatsService(@NotNull NMEARouter router, @NotNull final WindStatsReader reader) {
+    public WindStatsService(@NotNull NMEARouter router, @NotNull final WindStatsReader reader, @NotNull Log log) {
+        super(log);
         setLoader((ServiceConfig config) -> {
             Instant from = config.getParamAsInstant("from", Instant.now().minusSeconds(86400L), 0);
             Instant to = config.getParamAsInstant("to", Instant.now(), 0);
@@ -66,7 +68,7 @@ public class WindStatsService extends JSONWebService {
                 res.put("tot", stats.getTot());
                 return res;
             } catch (MeteoManagementException e) {
-                ServerLog.getLogger().errorForceStacktrace("Error extracting wind stats", e);
+                log.errorForceStacktrace(LogStringBuilder.start("WindStatService").wO("execute").toString(), e);
                 return null;
             }
         });

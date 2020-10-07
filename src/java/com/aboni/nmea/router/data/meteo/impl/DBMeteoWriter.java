@@ -15,28 +15,35 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.StatsSample;
 import com.aboni.utils.StatsWriter;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 public class DBMeteoWriter implements StatsWriter {
 
+    private final Log log;
     private DBHelper db;
     private final DBEventWriter ee;
 
-    public DBMeteoWriter() {
+    @Inject
+    public DBMeteoWriter(@NotNull Log log) {
+        this.log = log;
         ee = new DBMeteoEventWriter();
     }
 
     @Override
     public void init() {
-        if (db==null) {
+        if (db == null) {
             try {
                 db = new DBHelper(true);
             } catch (Exception e) {
-                ServerLog.getLogger().error("Cannot initialize meteo stats writer!", e);
+                LogStringBuilder.start("DBMeteoWriter").wO("init").error(log, e);
             }
         }
     }

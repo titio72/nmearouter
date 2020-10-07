@@ -7,6 +7,7 @@ import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
@@ -18,12 +19,16 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static tel.schich.javacan.CanSocketOptions.SO_RCVTIMEO;
 
 public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     public static final String ERROR_READING_FRAME = "Error reading frame";
+    public static final String ERROR_TYPE_KEY_NAME = "error type";
+    public static final String READ_KEY_NAME = "read";
+    private final Log log;
     private String netDeviceName;
     private RawCanChannel channel;
     private final N2KFastCache fastCache;
@@ -32,7 +37,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final N2KMessageFactory messageFactory;
     private long lastStats;
     private String description;
-    private static final String STATS_TAG = "STATS ";
+    private final AtomicBoolean run = new AtomicBoolean();
 
     private class Stats {
         long messages;
@@ -67,10 +72,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSocketAgent(@NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
+    public NMEACANBusSocketAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
                                  @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
                                  @NotNull N2KMessageFactory messageFactory) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
         stats.reset();
         this.messageFactory = messageFactory;
@@ -78,7 +84,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
         fastCache.setCallback(this::onReceive);
 
-        srcFilter = new PGNSourceFilter(getLogger());
+        srcFilter = new PGNSourceFilter(log);
         this.converter = converter;
     }
 
@@ -123,19 +129,21 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     protected boolean onActivate() {
         if (super.onActivate()) {
             try {
+                run.set(true);
                 channel = CanChannels.newRawChannel();
                 channel.bind(NetworkDevice.lookup(netDeviceName));
                 Duration timeout = Duration.ofMillis(50);
                 channel.setOption(SO_RCVTIMEO, timeout);
                 Thread t = new Thread(() -> {
                     byte[] data = new byte[32];
-                    while (isStarted()) {
+                    while (run.get()) {
                         readFrame(data);
                     }
                 });
                 t.start();
             } catch (IOException e) {
-                getLogger().error("Error creating CAN network channel", e);
+                run.set(false);
+                getLogBuilder().wO("activate").error(log, e);
                 channel = null;
                 return false;
             }
@@ -153,12 +161,12 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             fastCache.onMessage(msg);
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
-                getLogger().error(ERROR_READING_FRAME, e);
+                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").error(log, e);
             }
         } catch (IOException e) {
-            getLogger().error(ERROR_READING_FRAME, e);
+            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
         } catch (PGNDataParseException e) {
-            getLogger().warning(ERROR_READING_FRAME, e);
+            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "parsing").error(log, e);
         }
     }
 
@@ -166,10 +174,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     protected void onDeactivate() {
         super.onDeactivate();
         if (channel != null) {
+            run.set(false);
             try {
                 channel.close();
             } catch (IOException e) {
-                getLogger().error("Error closing CAN network channel", e);
+                getLogBuilder().wO("deactivate").error(log, e);
             }
             channel = null;
         }
@@ -178,14 +187,16 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        long t = getCache().getNow();
-        if ((Utils.isOlderThan(lastStats, t, 30000))) {
-            synchronized (this) {
-                description = getType() + " " + stats.toString(t);
+        if (isStarted()) {
+            long t = getCache().getNow();
+            if ((Utils.isOlderThan(lastStats, t, 30000))) {
+                synchronized (this) {
+                    description = getType() + " " + stats.toString(t);
+                }
+                getLogBuilder().wO("stats").w(" " + stats.toString(t)).info(log);
+                stats.reset();
+                lastStats = t;
             }
-            getLogger().info(STATS_TAG + stats.toString(t));
-            stats.reset();
-            lastStats = t;
         }
     }
 }

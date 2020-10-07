@@ -19,7 +19,7 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
@@ -41,10 +41,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
     private final SimpleDateFormat fmt;
+    private final Log log;
     private GeoPositionT prevPos;
     private long t0Play;
     private long t0;
@@ -52,18 +52,19 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     private boolean stop;
 
     @Inject
-    public NMEAGPXPlayerAgent(@NotNull NMEACache cache) {
+    public NMEAGPXPlayerAgent(@NotNull Log log, @NotNull NMEACache cache) {
         super(cache);
+        this.log = log;
         fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public void setFile(@NotNull String file) {
         if (this.file == null) {
-            getLogger().info("Setting file {" + file + "}");
+            getLogBuilder().wO("init").wV("file", file).info(log);
             this.file = file;
         } else {
-            getLogger().info("Cannot set file - already set");
+            getLogBuilder().wO("init").wV("error", file).wV("error", "already initialized").error(log);
         }
     }
 
@@ -81,7 +82,6 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     public String toString() {
         return getType();
     }
-
 
     @Override
     protected boolean onActivate() {
@@ -108,7 +108,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
             d = builder.parse(new InputSource(file));
             d.getDocumentElement().normalize();
         } catch (Exception e) {
-            ServerLog.getLogger().error("Cannot parse GPX file " + file, e);
+            getLogBuilder().wO("play gpx").error(log, e);
             return false;
         }
 
@@ -130,7 +130,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
                         GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
                         doIt(pos);
                     } catch (Exception e) {
-                        ServerLog.getLogger().error("Error reading gpx", e);
+                        getLogBuilder().wO("play gpx").error(log, e);
                     }
                 }
             }

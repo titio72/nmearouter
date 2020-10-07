@@ -18,12 +18,16 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.sampledquery.SampledQuery;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Query;
 import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
 public class MeteoService extends JSONWebService {
 
@@ -36,9 +40,12 @@ public class MeteoService extends JSONWebService {
     QueryFactory queryFactory;
     private SampledQuery sampledQuery;
 
+    private final Log log;
+
     @Inject
-    public MeteoService() {
-        super();
+    public MeteoService(@NotNull Log log) {
+        super(log);
+        this.log = log;
         setLoader(this::getResult);
     }
 
@@ -46,7 +53,12 @@ public class MeteoService extends JSONWebService {
         Query q = queryFactory.getQuery(config);
         if (q != null) {
             SampledQuery sq = getSampledQuery();
-            return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
+            try {
+                return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
+            } catch (SampledQueryException e) {
+                LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).errorForceStacktrace(log, e);
+                return getError("Error executing query");
+            }
         } else {
             return getError("No valid query specified!");
         }

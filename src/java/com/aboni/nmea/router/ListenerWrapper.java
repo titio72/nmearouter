@@ -16,10 +16,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +34,10 @@ public class ListenerWrapper {
     private final List<Method> listenersN2K;
     private final List<Method> listenersMsg;
     private final Object listenerObject;
+    private final Log log;
 
-    public ListenerWrapper(Object listener) {
+    public ListenerWrapper(Object listener, @NotNull Log log) {
+        this.log = log;
         listeners = new ArrayList<>();
         listenersJSON = new ArrayList<>();
         listenersN2K = new ArrayList<>();
@@ -96,7 +100,7 @@ public class ListenerWrapper {
                     else if (m.getParameterCount() == 2)
                         m.invoke(listenerObject, payload, src);
                 } catch (Exception e) {
-                    ServerLog.getLogger().error("Error pushing message", e);
+                    log.error(LogStringBuilder.start("MessageDispatcher").wO("push message").toString(), e);
                 }
             }
         }

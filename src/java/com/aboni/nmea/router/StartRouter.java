@@ -82,7 +82,7 @@ public class StartRouter {
     }
 
     private static void startCalibration() {
-        SensorHMC5883 m = new SensorHMC5883();
+        SensorHMC5883 m = new SensorHMC5883(logAdmin);
         m.setDefaultSmoothingAlpha(1.0);
         try {
             m.init(1);

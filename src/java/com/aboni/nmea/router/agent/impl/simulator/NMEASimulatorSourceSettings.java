@@ -16,10 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.ServerLog;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 @SuppressWarnings({"OverlyComplexClass", "ClassWithTooManyFields"})
@@ -410,19 +410,15 @@ public class NMEASimulatorSourceSettings {
         this.confFile = confFile;
     }
 
-    public void loadConf() {
-        try {
-            File f = new File(Constants.CONF_DIR, confFile);
-            if (f.exists() && f.lastModified() > lastConfModified) {
-                lastConfModified = f.lastModified();
-                Properties p = new Properties();
-                try (FileInputStream fi = new FileInputStream(f)) {
-                    p.load(fi);
-                }
-                readConf(p);
+    public void loadConf() throws IOException {
+        File f = new File(Constants.CONF_DIR, confFile);
+        if (f.exists() && f.lastModified() > lastConfModified) {
+            lastConfModified = f.lastModified();
+            Properties p = new Properties();
+            try (FileInputStream fi = new FileInputStream(f)) {
+                p.load(fi);
             }
-        } catch (Exception e) {
-            ServerLog.getLogger().error("Error reading simulator conf", e);
+            readConf(p);
         }
     }
 

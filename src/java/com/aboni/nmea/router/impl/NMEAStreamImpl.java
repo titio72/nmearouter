@@ -19,35 +19,41 @@ import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.sentences.NMEA2JSONb;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
 public class NMEAStreamImpl implements NMEAStream {
 
-	private final Map<Object, ListenerWrapper> annotatedListeners;
-	private final NMEA2JSONb jsonConverter;
+    private final Map<Object, ListenerWrapper> annotatedListeners;
+    private final NMEA2JSONb jsonConverter;
+    private final Log log;
 
-	public NMEAStreamImpl() {
-		annotatedListeners = new HashMap<>();
-		jsonConverter = new NMEA2JSONb();
-	}
+    @Inject
+    public NMEAStreamImpl(@NotNull Log log) {
+        annotatedListeners = new HashMap<>();
+        jsonConverter = new NMEA2JSONb();
+        this.log = log;
+    }
 
-	@Override
-	public void pushSentence(RouterMessage msg) {
-		synchronized (this) {
-			push(msg);
-		}
+    @Override
+    public void pushSentence(RouterMessage msg) {
+        synchronized (this) {
+            push(msg);
+        }
 	}
 
 	@Override
 	public void subscribe(Object b) {
 		synchronized (annotatedListeners) {
-			annotatedListeners.put(b, new ListenerWrapper(b));
-		}
+            annotatedListeners.put(b, new ListenerWrapper(b, log));
+        }
 	}
 
 	@Override
@@ -67,7 +73,7 @@ public class NMEAStreamImpl implements NMEAStream {
                     sendNMEASentence(message, s, i);
                     msg = sendJsonObject(msg, s, message.getSource(), i);
                 } catch (Exception e) {
-                    ServerLog.getLogger().warning("Error dispatching event to listener {" + s + "} error {" + e.getMessage() + "}");
+                    log.warning(LogStringBuilder.start("Stream").wO("push message").wV("listener", s).toString(), e);
                 }
             }
         }

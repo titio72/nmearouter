@@ -20,6 +20,11 @@ import java.util.List;
 
 public interface TripManagerX {
 
+    /**
+     * Initialize before using the interface
+     */
+    void init() throws TripManagerException;
+
     void onTrackPoint(TrackEvent point) throws TripManagerException;
 
     Trip getTrip(Instant timestamp);

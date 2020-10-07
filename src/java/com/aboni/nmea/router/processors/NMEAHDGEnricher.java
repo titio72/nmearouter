@@ -19,13 +19,16 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +46,16 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
     private final boolean doHDM;
     private final boolean doHDT;
     private final NMEACache cache;
+    private final Log log;
 
-    public NMEAHDGEnricher(NMEACache cache) {
-        this(cache, true, true);
+    @Inject
+    public NMEAHDGEnricher(@NotNull Log log, @NotNull NMEACache cache) {
+        this(log, cache, true, true);
     }
 
-    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt) {
+    public NMEAHDGEnricher(Log log, NMEACache cache, boolean hdm, boolean hdt) {
         m = new NMEAMagnetic2TrueConverter();
+        this.log = log;
         this.cache = cache;
         this.doHDM = hdm;
         this.doHDT = hdt;
@@ -75,7 +81,7 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
                 return new Pair<>(Boolean.FALSE, new Sentence[]{});
             }
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
+            LogStringBuilder.start("HDGEnricher").wO("process sentence").wV("sentence", sentence).error(log, e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }

@@ -15,26 +15,36 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 public class ServiceShutdown extends JSONWebService {
 
-    public ServiceShutdown() {
-        super();
+    public static final String SHUTDOWN_SERVICE_CATEGORY = "ShutdownService";
+    public static final String SHUTDOWN_KEY_NAME = "Shutdown";
+    private final Log log;
+
+    @Inject
+    public ServiceShutdown(@NotNull Log log) {
+        super(log);
+        this.log = log;
         setLoader(this::getResult);
     }
 
     private JSONObject getResult(ServiceConfig config) {
         try {
-            ServerLog.getLogger().info("Shutdown");
+            log.info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString());
             ProcessBuilder b = new ProcessBuilder("./shutdown");
             Process process = b.start();
             int retCode = process.waitFor();
-            ServerLog.getLogger().info("Shutdown Return code {" + retCode + "}");
+            log.info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).wV("return code", retCode).toString());
             return getOk();
         } catch (Exception e) {
-            ServerLog.getLogger().error("Error during shutdown", e);
+            log.errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
             return getError("Error " + e.getMessage());
         }
     }

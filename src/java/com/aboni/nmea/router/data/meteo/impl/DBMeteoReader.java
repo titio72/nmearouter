@@ -19,7 +19,6 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.nmea.router.data.meteo.MeteoReader;
 import com.aboni.nmea.router.data.meteo.MeteoSample;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
 import javax.validation.constraints.NotNull;
@@ -46,7 +45,6 @@ public class DBMeteoReader implements MeteoReader {
                 }
             }
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            ServerLog.getLogger().error("Error reading meteo", e);
             throw new MeteoManagementException("Error reading meteo", e);
         }
 

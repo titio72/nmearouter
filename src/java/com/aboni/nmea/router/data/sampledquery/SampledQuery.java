@@ -1,18 +1,4 @@
-package com.aboni.nmea.router.data.sampledquery;
-
-import com.aboni.utils.Query;
-import com.aboni.utils.ServerLog;
-import com.aboni.utils.TimeSeries;
-import com.aboni.utils.TimeSeriesSample;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class /*
+/*
 (C) 2020, Andrea Boni
 This file is part of NMEARouter.
 NMEARouter is free software: you can redistribute it and/or modify
@@ -27,7 +13,20 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-SampledQuery {
+package com.aboni.nmea.router.data.sampledquery;
+
+import com.aboni.utils.Query;
+import com.aboni.utils.TimeSeries;
+import com.aboni.utils.TimeSeriesSample;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SampledQuery {
 
     private SampledQueryConf conf;
     private SampleWriterFactory sampleWriterFactory;
@@ -70,7 +69,7 @@ SampledQuery {
         this.sampleWriterFactory = sampleWriterFactory;
     }
 
-    public JSONObject execute(Query q, int maxSamples) {
+    public JSONObject execute(Query q, int maxSamples) throws SampledQueryException {
         if (conf != null) {
             Range range = rangeFinder.getRange(conf.getTable(), q);
             if (range != null) {
@@ -85,12 +84,10 @@ SampledQuery {
                 }
                 return ctx.res;
             } else {
-                ServerLog.getLogger().error("SampledQuery: Could not extract valid range!");
-                return null;
+                throw new SampledQueryException("Could not extract valid range");
             }
         } else {
-            ServerLog.getLogger().error("SampledQuery: not initialized!");
-            return null;
+            throw new SampledQueryException("Query not initialized");
         }
     }
 

@@ -19,10 +19,10 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.utils.Query;
 import com.aboni.utils.QueryByDate;
 import com.aboni.utils.QueryById;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.db.DBHelper;
 
 import javax.inject.Inject;
@@ -64,7 +64,7 @@ public class DBRangeFinder implements RangeFinder {
     }
 
     @Override
-    public Range getRange(String table, Query q) {
+    public Range getRange(String table, Query q) throws SampledQueryException {
         try (DBHelper h = new DBHelper(true)) {
             String sql = getSQL(table, q);
             if (sql != null) {
@@ -82,10 +82,10 @@ public class DBRangeFinder implements RangeFinder {
                     }
                 }
             } else {
-                ServerLog.getLogger().error("SampledQuery: Unsupported query type " + q);
+                throw new SampledQueryException("Unsupported query type " + q);
             }
         } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
-            ServerLog.getLogger().error("SampledQuery: Cannot create time range for {" + table + "} because connection is not established!", e);
+            throw new SampledQueryException("Cannot create time range for {" + table + "}", e);
         }
         return null;
     }

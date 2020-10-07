@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 public interface TrackReader {
 
     interface TrackReaderListener {
-        void onRead(TrackPoint sample);
+        void onRead(TrackPoint sample) throws TrackManagementException;
     }
 
     void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException;

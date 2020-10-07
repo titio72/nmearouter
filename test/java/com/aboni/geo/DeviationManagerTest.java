@@ -1,6 +1,7 @@
 package com.aboni.geo;
 
 import com.aboni.geo.impl.DeviationManagerImpl;
+import com.aboni.utils.ConsoleLog;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,8 +18,8 @@ public class DeviationManagerTest {
 	
 	@Before
 	public void setUp() {
-		m = new DeviationManagerImpl(); 
-	}
+        m = new DeviationManagerImpl(ConsoleLog.getLogger());
+    }
 
 	@Test
 	public void testNorth() {

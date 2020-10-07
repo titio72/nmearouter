@@ -13,6 +13,7 @@ import com.google.inject.Injector;
 
 public class TestSerialReader {
 
+    private static final boolean DUMP_N2K = false;
     private static final String PORT_NAME = "COM8";
     private static final int SPEED = 115200;
 
@@ -33,7 +34,7 @@ public class TestSerialReader {
 
         cache.setCallback(TestSerialReader::onMsg);
         reader.setCallback(cache::onMessage);
-        //reader.setFrameCallback(TestSerialReader::onFrame);
+        if (DUMP_N2K) reader.setFrameCallback(TestSerialReader::onFrame);
         s.setup(PORT_NAME, SPEED, reader::onRead);
         s.activate();
     }

@@ -23,6 +23,8 @@ import com.aboni.sensors.SensorPressureTemp;
 import com.aboni.sensors.SensorTemp;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.utils.HWSettings;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
@@ -33,18 +35,22 @@ import java.util.*;
 
 public class NMEASourceSensor extends NMEAAgentImpl {
 
-    private static final String ERROR_POST_XDR_DATA = "Cannot post XDR data";
     private static final long READING_AGE_TIMEOUT = 600;
+    public static final String SENSOR_AGENT_CATEGORY = "SensorAgent";
+    public static final String SENSOR_KEY_NAME = "sensor";
+    public static final String MESSAGE_KEY_NAME = "message";
     private boolean started;
     private int readCounter;
 
     private SensorPressureTemp pressureTempSensor;
     private SensorTemp tempSensor;
     private final Map<String, Measurement> xDrMap;
+    private final Log log;
 
     @Inject
-    public NMEASourceSensor(@NotNull NMEACache cache) {
+    public NMEASourceSensor(@NotNull NMEACache cache, @NotNull Log log) {
         super(cache);
+        this.log = log;
         setSourceTarget(true, false);
         xDrMap = new HashMap<>();
     }
@@ -78,7 +84,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             try {
                 if (s != null) s.init();
             } catch (SensorException e) {
-                getLogger().error("Error initializing sensor {" + s.getSensorName() + "}", e);
+                log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO("init").wV(SENSOR_KEY_NAME, s.getSensorName()).toString(), e);
             }
         }
         return true;
@@ -118,18 +124,18 @@ public class NMEASourceSensor extends NMEAAgentImpl {
 
     private SensorTemp createTempSensor() {
         try {
-            return new SensorTemp();
+            return new SensorTemp(log);
         } catch (Exception e) {
-            getLogger().errorForceStacktrace("Error creating temp sensor ", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO("create sensor").wV(SENSOR_KEY_NAME, "temperature").toString(), e);
             return null;
         }
     }
 
     private SensorPressureTemp createTempPressure() {
         try {
-            return new SensorPressureTemp(SensorPressureTemp.Sensor.BME280);
+            return new SensorPressureTemp(log);
         } catch (Exception e) {
-            getLogger().errorForceStacktrace("Error creating temp/press sensor", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO("create sensor").wV(SENSOR_KEY_NAME, "pressure").toString(), e);
             return null;
         }
     }
@@ -139,7 +145,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             tempSensor = (SensorTemp) readSensor(tempSensor);
             pressureTempSensor = (SensorPressureTemp) readSensor(pressureTempSensor);
         } catch (Exception e) {
-            getLogger().error("Error reading sensor data", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO("read").toString(), e);
         }
     }
 
@@ -148,7 +154,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             try {
                 s.read();
             } catch (SensorException e) {
-                getLogger().error("Trying to read from a not initialized sensor {" + s.getSensorName() + "} - disabling it ");
+                log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO("read").toString(), e);
                 return null;
             }
         }
@@ -169,7 +175,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 notify(mmb);
             }
         } catch (Exception e) {
-            getLogger().error("Cannot post pressure data", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "pressure").toString(), e);
         }
     }
 
@@ -183,7 +189,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 notify(mhu);
             }
         } catch (Exception e) {
-            getLogger().error("Cannot post pressure data", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "humidity").toString(), e);
         }
     }
 
@@ -197,7 +203,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 notify(mta);
             }
         } catch (Exception e) {
-            getLogger().error("Cannot post temperature data", e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "air temperature").toString(), e);
         }
     }
 
@@ -207,7 +213,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
             addXDR(xdr, new Measurement("C", Utils.round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
             notify(xdr);
         } catch (Exception e) {
-            getLogger().error(ERROR_POST_XDR_DATA, e);
+            log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "cpu temperature").toString(), e);
         }
     }
 
@@ -229,7 +235,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 addXDR(xdr, new Measurement("P", Utils.round(h, 2), "H", "Humidity"));
                 notify(xdr);
             } catch (Exception e) {
-                getLogger().error(ERROR_POST_XDR_DATA, e);
+                log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "xdr").toString(), e);
             }
         }
     }
@@ -251,7 +257,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 }
                 if (!empty) notify(xdr);
             } catch (Exception e) {
-                getLogger().error(ERROR_POST_XDR_DATA, e);
+                log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "xdr temperature").toString(), e);
             }
         }
     }

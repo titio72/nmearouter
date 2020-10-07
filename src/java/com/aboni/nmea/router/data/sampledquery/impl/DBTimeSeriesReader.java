@@ -18,8 +18,8 @@ package com.aboni.nmea.router.data.sampledquery.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.TimeSeries;
 import com.aboni.utils.db.DBHelper;
 
@@ -33,7 +33,7 @@ import java.util.Map;
 public class DBTimeSeriesReader implements TimeSeriesReader {
 
     @Override
-    public Map<String, TimeSeries> getTimeSeries(SampledQueryConf conf, int maxSamples, Range range) {
+    public Map<String, TimeSeries> getTimeSeries(SampledQueryConf conf, int maxSamples, Range range) throws SampledQueryException {
         try (DBHelper db = new DBHelper(true)) {
             Map<String, TimeSeries> res = new HashMap<>();
             Timestamp cFrom = new Timestamp(range.getMin().toEpochMilli());
@@ -47,8 +47,7 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
             }
             return res;
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            ServerLog.getLogger().error("TimeSeriesReader: cannot read time series", e);
-            return null;
+            throw new SampledQueryException("Cannot read time series", e);
         }
     }
 

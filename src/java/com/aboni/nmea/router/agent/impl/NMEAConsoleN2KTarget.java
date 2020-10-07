@@ -18,7 +18,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnN2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.ConsoleLog;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -35,7 +35,7 @@ public class NMEAConsoleN2KTarget extends NMEAAgentImpl {
 
     @OnN2KMessage
     public void onSentence(N2KMessage s, String src) {
-        ServerLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
+        ConsoleLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
                 " [" + src + "] " + s);
     }
 

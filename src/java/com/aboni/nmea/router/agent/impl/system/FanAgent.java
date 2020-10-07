@@ -77,7 +77,7 @@ public class FanAgent extends NMEAAgentImpl {
     }
 
     private void fan(boolean on) {
-        log.info(LogStringBuilder.start("Fan Manager").withOperation("switch").withValue("status", on).toString());
+        log.info(LogStringBuilder.start("Fan Manager").wO("switch").wV("status", on).toString());
         fan.switchFan(on);
     }
 
@@ -87,8 +87,8 @@ public class FanAgent extends NMEAAgentImpl {
             xdr.addMeasurement(new Measurement("C", Utils.round(temp, 2), "C", "CPUTemp"));
             notify(xdr);
         } catch (Exception e) {
-            log.debug(() -> LogStringBuilder.start("Fan Manager").withOperation("read temperature")
-                    .withValue("error", e.getMessage()).toString());
+            log.debug(() -> LogStringBuilder.start("Fan Manager").wO("read temperature")
+                    .wV("error", e.getMessage()).toString());
         }
     }
 

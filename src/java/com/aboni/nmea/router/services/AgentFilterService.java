@@ -22,6 +22,7 @@ import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
+import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -49,8 +50,8 @@ public class AgentFilterService extends JSONWebService {
     }
 
     @Inject
-    public AgentFilterService(@NotNull NMEARouter router, @NotNull AgentListSerializer serializer, @NotNull AgentStatusManager agentStatusManager) {
-        super();
+    public AgentFilterService(@NotNull Log log, @NotNull NMEARouter router, @NotNull AgentListSerializer serializer, @NotNull AgentStatusManager agentStatusManager) {
+        super(log);
         setLoader((ServiceConfig config) -> {
             try {
                 String agentName = config.getParameter("agent");

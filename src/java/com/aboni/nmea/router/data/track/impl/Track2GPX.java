@@ -22,7 +22,6 @@ import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
 import com.aboni.utils.Query;
-import com.aboni.utils.ServerLog;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -63,7 +62,7 @@ public class Track2GPX implements TrackDumper {
         }
 
         @Override
-        public void onRead(TrackPoint sample) {
+        public void onRead(TrackPoint sample) throws TrackManagementException {
             try {
                 GeoPositionT p = sample.getPosition();
                 if (TRACK_THEM_ALL) {
@@ -80,7 +79,7 @@ public class Track2GPX implements TrackDumper {
                 }
                 previous = p;
             } catch (IOException e) {
-                ServerLog.getLogger().error("Track2GPX Error writing GPX", e);
+                throw new TrackManagementException("Track2GPX Error writing GPX", e);
             }
         }
     }
