@@ -16,8 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -36,6 +36,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     private static final int OPEN_SOCKET_RETRY_TIME = 3000;
     private static final int SOCKET_READ_TIMEOUT = 60000;
+    private final TimestampProvider timestampProvider;
 
     private int port;
     private boolean stop;
@@ -48,10 +49,10 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     private String description;
 
     @Inject
-    public NMEAUDPReceiver(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(true, false);
+    public NMEAUDPReceiver(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, false);
         this.log = log;
+        this.timestampProvider = tp;
         input = new NMEAInputManager(log);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, true, false);
         stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, true, false);
@@ -179,7 +180,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         if (isStarted()) {
-            long t = getCache().getNow();
+            long t = timestampProvider.getNow();
             synchronized (stats) {
                 stats.onTimer(t);
                 fastStats.onTimer(t);

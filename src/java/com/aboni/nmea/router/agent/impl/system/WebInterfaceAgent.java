@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.services.*;
 import com.aboni.utils.Log;
@@ -46,11 +46,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private final NMEAStream stream;
 
     @Inject
-    public WebInterfaceAgent(@NotNull NMEACache cache, @NotNull NMEAStream stream, @NotNull Log log) {
-        super(cache);
+    public WebInterfaceAgent(@NotNull TimestampProvider tp, @NotNull NMEAStream stream, @NotNull Log log) {
+        super(log, tp, false, true);
         this.log = log;
         this.stream = stream;
-        setSourceTarget(false, true);
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {

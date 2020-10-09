@@ -20,8 +20,8 @@ import com.aboni.misc.PolarTable;
 import com.aboni.misc.PolarTableImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.sentences.VWRSentence;
@@ -72,14 +72,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private final Log log;
 
     @Inject
-    public NMEASimulatorSource(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(true, true);
+    public NMEASimulatorSource(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, true);
         this.log = log;
         id = TalkerId.GP;
         polars = null;
     }
-
 
     @Override
     public String getType() {

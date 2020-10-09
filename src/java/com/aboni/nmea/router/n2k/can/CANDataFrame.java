@@ -5,6 +5,7 @@ import com.google.common.hash.HashCode;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
+@SuppressWarnings("UnstableApiUsage")
 public class CANDataFrame {
 
     private final long id;

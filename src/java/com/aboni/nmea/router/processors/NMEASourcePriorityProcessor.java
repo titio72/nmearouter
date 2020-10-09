@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -34,11 +34,11 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
     private String currentSource;
     private int currentPriority;
 
-    private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEASourcePriorityProcessor(@NotNull NMEACache cache) {
-        this.cache = cache;
+    public NMEASourcePriorityProcessor(@NotNull TimestampProvider timestampProvider) {
+        this.timestampProvider = timestampProvider;
         priorities = new HashMap<>();
         lastSourceTimestamp = new HashMap<>();
         sentences = Collections.synchronizedSet(new HashSet<>());
@@ -64,7 +64,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     private void recordInput(@NotNull Sentence sentence, @NotNull String source) {
         if (sentences.contains(sentence.getSentenceId())) {
-            lastSourceTimestamp.put(source, cache.getNow());
+            lastSourceTimestamp.put(source, timestampProvider.getNow());
 
             if (currentSource == null) {
                 currentSource = source;
@@ -76,7 +76,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
                     currentSource = source;
                     currentPriority = priority;
                 } else {
-                    long now = cache.getNow();
+                    long now = timestampProvider.getNow();
                     long currentLastSourceTimestamp = lastSourceTimestamp.getOrDefault(currentSource, 0L);
                     if ((now - currentLastSourceTimestamp) > THRESHOLD) {
                         // switch to a lower priority source because the higher priority has not been available for a while

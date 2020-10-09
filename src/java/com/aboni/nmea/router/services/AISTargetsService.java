@@ -19,12 +19,12 @@ import java.util.List;
 public class AISTargetsService extends JSONWebService {
 
     private AISTargets targetsProvider;
-    private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
 
     @Inject
-    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache, @NotNull Log log) {
+    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
         super(log);
-        this.cache = cache;
+        this.timestampProvider = tp;
         findService(router);
         setLoader((ServiceConfig config) -> {
             if (targetsProvider != null) {
@@ -68,7 +68,7 @@ public class AISTargetsService extends JSONWebService {
             j.put("s_latitude", Utils.formatLatitude(r.getGPSInfo().getPosition().getLatitude()));
             j.put("s_longitude", Utils.formatLongitude(r.getGPSInfo().getPosition().getLongitude()));
 
-            long age = r.getAge(cache.getNow());
+            long age = r.getAge(timestampProvider.getNow());
             j.put("age", age);
             j.put("s_age", String.format("%02d:%02d", age / 60000, (age / 1000) % 60));
 

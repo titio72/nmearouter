@@ -20,6 +20,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.EngineStatus;
@@ -37,14 +38,17 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private final TrackManager tracker;
     private final TripManagerX tripManager;
-
+    private final TimestampProvider timestampProvider;
+    private final NMEACache cache;
     private final Log log;
 
     @Inject
-    public NMEATrackAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
-        super(cache);
+    public NMEATrackAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull NMEACache cache,
+                          @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
+        super(log, tp, true, true);
         this.log = log;
-        setSourceTarget(true, true);
+        this.timestampProvider = tp;
+        this.cache = cache;
         this.tracker = trackManager;
         this.tripManager = tripManager;
     }
@@ -91,13 +95,13 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     }
 
     private void processPosition(GeoPositionT posT, double sog) {
-        long t0 = getCache().getNow();
+        long t0 = timestampProvider.getNow();
 
         TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
         if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
-            point = builder.withPoint(point).withEngine(getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN)).getPoint();
+            point = builder.withPoint(point).withEngine(cache.getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN)).getPoint();
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
@@ -109,7 +113,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             }
         }
 
-        long t = getCache().getNow() - t0;
+        long t = timestampProvider.getNow() - t0;
         synchronized (this) {
             avgTime = ((avgTime * samples) + t) / (samples + 1);
             samples++;
@@ -118,7 +122,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     private void notifyAnchorStatus() {
         Position avgPos = tracker.getAverage();
-        getCache().setStatus(NMEARouterStatuses.ANCHOR_STATUS, tracker.isStationary());
+        cache.setStatus(NMEARouterStatuses.ANCHOR_STATUS, tracker.isStationary());
         if (avgPos!=null) {
             JSONObject msg = new JSONObject();
             msg.put("topic", "anchor");
@@ -149,7 +153,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         if (isStarted()) {
-            long now = getCache().getNow();
+            long now = timestampProvider.getNow();
             if (now - lastStats > 30000) {
                 lastStats = now;
                 synchronized (this) {

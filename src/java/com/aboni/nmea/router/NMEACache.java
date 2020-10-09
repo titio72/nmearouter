@@ -20,7 +20,7 @@ import net.sf.marineapi.nmea.sentence.HeadingSentence;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-public interface NMEACache extends TimestampProvider {
+public interface NMEACache {
 
     DataEvent<HeadingSentence> getLastHeading();
 

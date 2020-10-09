@@ -17,6 +17,7 @@ package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import com.aboni.nmea.sentences.NMEATimestampExtractor.GPSTimeException;
 import com.aboni.utils.Log;
@@ -36,6 +37,7 @@ public class SystemTimeChecker {
     private boolean synced;
     private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
+    private final TimestampProvider timestampProvider;
     private final NMEACache cache;
     private final Log log;
     private final SystemTimeChanger changer;
@@ -45,15 +47,17 @@ public class SystemTimeChecker {
     }
 
     @Inject
-    public SystemTimeChecker(NMEACache cache, @NotNull Log log) {
+    public SystemTimeChecker(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
+        this.timestampProvider = tp;
         this.cache = cache;
         this.log = log;
         this.changer = this::doChangeTime;
     }
 
-    public SystemTimeChecker(NMEACache cache, SystemTimeChanger changer, @NotNull Log log) {
-        this.cache = cache;
+    public SystemTimeChecker(@NotNull NMEACache cache, @NotNull TimestampProvider timestampProvider, SystemTimeChanger changer, @NotNull Log log) {
+        this.timestampProvider = timestampProvider;
         this.changer = changer;
+        this.cache = cache;
         this.log = log;
     }
 
@@ -61,13 +65,13 @@ public class SystemTimeChecker {
         try {
             if (s instanceof TimeSentence) {
                 OffsetDateTime gpsTime = NMEATimestampExtractor.extractTimestamp(s);
-                if (gpsTime != null && !checkAndSetTimeSkew(cache.getNow(), gpsTime)) {
+                if (gpsTime != null && !checkAndSetTimeSkew(timestampProvider.getNow(), gpsTime)) {
                     // time skew from GPS is too high - reset time stamp
                     log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").wV("new time", gpsTime).toString());
                     if (changer != null) {
                         changer.doChangeTime(gpsTime);
                     }
-                    checkAndSetTimeSkew(cache.getNow(), gpsTime);
+                    checkAndSetTimeSkew(timestampProvider.getNow(), gpsTime);
                 }
             }
         } catch (GPSTimeException e) {

@@ -39,7 +39,7 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
     private final Map<String, String> filterOut;
     private final Map<String, String> filterIn;
 
-    private Log log;
+    private final Log log;
 
     @Inject
     public AgentStatusManagerImpl(@NotNull Log log) {

@@ -38,7 +38,7 @@ public class TripManagerXImpl implements TripManagerX {
     private final String trackTable;
     private final DBEventWriter trackEventWriter;
     private final DBEventWriter tripEventWriter;
-    private AtomicBoolean initialized;
+    private final AtomicBoolean initialized;
 
     @Inject
     public TripManagerXImpl(@Named(Constants.TAG_TRIP) String tripTableName,

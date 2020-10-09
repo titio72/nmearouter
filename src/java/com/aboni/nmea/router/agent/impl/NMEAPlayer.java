@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -30,13 +30,14 @@ import java.io.FileReader;
 public class NMEAPlayer extends NMEAAgentImpl {
 
     private final Log log;
+    private final TimestampProvider timestampProvider;
     private String file;
 
     @Inject
-    public NMEAPlayer(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NMEAPlayer(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, false);
         this.log = log;
-        setSourceTarget(true, false);
+        this.timestampProvider = tp;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
                     while ((line = r.readLine()) != null) {
                         if (line.startsWith("[")) {
                             long logT = readLineWithTimestamp(line, logT0, t0);
-                            t0 = getCache().getNow();
+                            t0 = timestampProvider.getNow();
                             logT0 = logT;
                         } else {
                             readLine(line);
@@ -122,7 +123,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
         long logT = logT0;
         try {
             NMEASentenceItem itm = new NMEASentenceItem(line);
-            long t = getCache().getNow();
+            long t = timestampProvider.getNow();
             logT = itm.getTimestamp();
             long dt = t - t0;
             long dLogT = logT - logT0;

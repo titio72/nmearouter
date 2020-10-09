@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
@@ -35,6 +35,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
+    private final TimestampProvider timestampProvider;
     private long lastStats;
     private String description;
     private final AtomicBoolean run = new AtomicBoolean();
@@ -60,7 +61,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             synchronized (this) {
                 messagesAccepted = 0;
                 messages = 0;
-                lastReset = getCache().getNow();
+                lastReset = timestampProvider.getNow();
             }
         }
 
@@ -72,20 +73,18 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSocketAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
+    public NMEACANBusSocketAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
                                  @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
                                  @NotNull N2KMessageFactory messageFactory) {
-        super(cache);
+        super(log, tp, true, false);
         this.log = log;
-        setSourceTarget(true, false);
-        stats.reset();
+        this.timestampProvider = tp;
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
-
-        fastCache.setCallback(this::onReceive);
-
-        srcFilter = new PGNSourceFilter(log);
+        this.srcFilter = new PGNSourceFilter(log);
         this.converter = converter;
+        stats.reset();
+        fastCache.setCallback(this::onReceive);
     }
 
     private void onReceive(@NotNull N2KMessage msg) {
@@ -190,7 +189,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long t = getCache().getNow();
+            long t = timestampProvider.getNow();
             if ((Utils.isOlderThan(lastStats, t, 30000))) {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);

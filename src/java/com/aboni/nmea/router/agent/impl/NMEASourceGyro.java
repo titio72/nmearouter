@@ -20,6 +20,7 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Log;
@@ -48,16 +49,19 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private SensorCompass compassSensor;
 
     private final DeviationManager deviationManager;
+    private final TimestampProvider timestampProvider;
+    private final NMEACache cache;
     private final Log log;
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(NMEACache cache, @NotNull DeviationManager deviationManager, @NotNull Log log) {
-        super(cache);
+    public NMEASourceGyro(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull DeviationManager deviationManager, @NotNull Log log) {
+        super(log, tp, true, false);
         this.log = log;
+        this.timestampProvider = tp;
+        this.cache = cache;
         this.deviationManager = deviationManager;
-        setSourceTarget(true, true);
     }
 
     @Override
@@ -132,10 +136,10 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private boolean headingNotPresentOnStream() {
         return (
                 /* another source may have provided a heading but it's too old, presumably the source is down*/
-                getCache().isHeadingOlderThan(getCache().getNow(), SEND_HD_IDLE_TIME) ||
+                cache.isHeadingOlderThan(timestampProvider.getNow(), SEND_HD_IDLE_TIME) ||
 
                         /* there is a heading but it's mine (so no other sources are providing a heading  */
-                        getName().equals(getCache().getLastHeading().getSource()));
+                        getName().equals(cache.getLastHeading().getSource()));
     }
 
     private void sendHDx() {
@@ -150,9 +154,9 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                     notify(hdm);
                 }
 
-                if (getCache().getLastPosition().getData() != null) {
+                if (cache.getLastPosition().getData() != null) {
                     NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
-                    m.setPosition(getCache().getLastPosition().getData().getPosition());
+                    m.setPosition(cache.getLastPosition().getData().getPosition());
 
                     if (SEND_HDT) {
                         HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);

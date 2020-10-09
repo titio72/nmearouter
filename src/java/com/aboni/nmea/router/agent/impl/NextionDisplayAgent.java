@@ -4,6 +4,7 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Log;
@@ -61,6 +62,8 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private final Dimmer dimmer = new Dimmer();
     private final NextionReader reader = new NextionReader();
     private final Log log;
+    private final TimestampProvider timestampProvider;
+    private final NMEACache cache;
 
     private long lastPortRetryTime;
     private long lastInput;
@@ -72,8 +75,10 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private String src;
 
     @Inject
-    public NextionDisplayAgent(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NextionDisplayAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
+        this.timestampProvider = tp;
+        this.cache = cache;
         this.log = log;
     }
 
@@ -118,7 +123,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private SerialPort getPort() {
         synchronized (this) {
-            long now = getCache().getNow();
+            long now = timestampProvider.getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
                 LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).info(log);
                 SerialPort p = SerialPort.getCommPort(portName);
@@ -169,7 +174,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private void setData(Sentence s, int field, ExtractString e) {
         try {
             sendCommand(FIELDS[field] + ".txt=\"" + e.getValue(s) + "\"");
-            lastTime[field] = getCache().getNow();
+            lastTime[field] = timestampProvider.getNow();
         } catch (DataNotAvailableException ee) {
             reset(field);
         }
@@ -180,7 +185,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         if (!run.get()) return;
 
         if (src.isEmpty() || src.equals(source)) {
-            lastInput = getCache().getNow();
+            lastInput = timestampProvider.getNow();
         }
 
         if (s instanceof RMCSentence) {
@@ -231,7 +236,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
             log.console("Nextion input:" + dump(b));
         }
         if (isDisplayTouched(b)) {
-            dimmer.lightUp(getCache().getNow());
+            dimmer.lightUp(timestampProvider.getNow());
         }
     }
 
@@ -246,16 +251,16 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
         if (!run.get()) return;
 
-        long now = getCache().getNow();
+        long now = timestampProvider.getNow();
 
         final ZonedDateTime dt = ZonedDateTime.now();
         final DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
         setData(null, Fields.TIME, (Sentence s) -> String.format("%s", f.format(dt)));
 
-        boolean engine = getCache().getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN) == EngineStatus.ON;
+        boolean engine = cache.getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN) == EngineStatus.ON;
         sendCommand(String.format("engine.pic=%d", engine ? 5 : 3));
 
-        Boolean anchor = getCache().getStatus(NMEARouterStatuses.ANCHOR_STATUS, null);
+        Boolean anchor = cache.getStatus(NMEARouterStatuses.ANCHOR_STATUS, null);
         int anchorIcon;
         if (anchor == null) anchorIcon = 0;
         else if (Boolean.TRUE.equals(anchor)) anchorIcon = 1;

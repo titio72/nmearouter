@@ -15,9 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.ConsoleLog;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -28,9 +29,8 @@ import java.util.Date;
 public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @Inject
-    public NMEAConsoleTarget(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAConsoleTarget(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
     }
 
     @OnSentence

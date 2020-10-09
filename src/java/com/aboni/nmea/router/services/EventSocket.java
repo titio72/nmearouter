@@ -60,7 +60,8 @@ public class EventSocket {
 
     @OnWebSocketClose
     public void onWebSocketClose(int i, String str) {
-        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("close").wV("id", id).toString());
+        log.info(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("close").wV("id", id)
+                .wV("status", i).wV("reason", str).toString());
         stream.unsubscribe(this);
         sessions.decrementAndGet();
     }

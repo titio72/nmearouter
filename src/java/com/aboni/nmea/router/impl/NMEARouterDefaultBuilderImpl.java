@@ -108,7 +108,7 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private void configureGPSPriority(List<String> gpsPriority, NMEARouter r) {
         if (gpsPriority != null && !gpsPriority.isEmpty()) {
-            NMEASourcePriorityProcessor processor = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(NMEACache.class));
+            NMEASourcePriorityProcessor processor = new NMEASourcePriorityProcessor(ThingsFactory.getInstance(TimestampProvider.class));
             processor.addAllGPS();
             for (int i = 0; i < gpsPriority.size(); i++) {
                 processor.setPriority(gpsPriority.get(i), gpsPriority.size() - i /* first has the highest priority */);

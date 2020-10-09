@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.Log;
@@ -72,8 +72,8 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketServer(@NotNull NMEACache cache, @NotNull Log log) {
-        super(cache);
+    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log) {
+        super(log, tp, false, true);
         this.log = log;
         writeBuffer = ByteBuffer.allocate(16384);
         readBuffer = ByteBuffer.allocate(16384);

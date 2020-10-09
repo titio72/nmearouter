@@ -13,21 +13,28 @@ import static org.junit.Assert.assertEquals;
 
 public class NMEAHDGEnricherTest {
 
-	static class MyCache implements NMEACache {
+    static long getNow() {
+        return System.currentTimeMillis();
+    }
 
-		boolean hasPosition = true;
-		
-		MyCache(boolean hasPosition) {
-			this.hasPosition = hasPosition;
-		}
-		
-		MyCache() {}
-		
-		@Override
-		public DataEvent<HeadingSentence> getLastHeading() { return null; }
+    static class MyCache implements NMEACache {
 
-		@Override
-		public DataEvent<PositionSentence> getLastPosition() {
+        boolean hasPosition = true;
+
+        MyCache(boolean hasPosition) {
+            this.hasPosition = hasPosition;
+        }
+
+        MyCache() {
+        }
+
+        @Override
+        public DataEvent<HeadingSentence> getLastHeading() {
+            return null;
+        }
+
+        @Override
+        public DataEvent<PositionSentence> getLastPosition() {
             GLLSentence gll = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, "GLL");
             gll.setPosition(new Position(43.68008333, 10.28983333));
             return new DataEvent<>(gll, getNow() - 1000, "SRCGPS");
@@ -47,11 +54,6 @@ public class NMEAHDGEnricherTest {
         @Override
         public <T> T getStatus(String statusKey, T defV) {
             return null;
-        }
-
-        @Override
-        public long getNow() {
-            return System.currentTimeMillis();
         }
     }
 

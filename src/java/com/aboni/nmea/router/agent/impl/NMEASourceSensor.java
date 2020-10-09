@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.sensors.Sensor;
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorPressureTemp;
@@ -39,6 +39,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     public static final String SENSOR_AGENT_CATEGORY = "SensorAgent";
     public static final String SENSOR_KEY_NAME = "sensor";
     public static final String MESSAGE_KEY_NAME = "message";
+    private final TimestampProvider timestampProvider;
     private boolean started;
     private int readCounter;
 
@@ -48,10 +49,10 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public NMEASourceSensor(@NotNull NMEACache cache, @NotNull Log log) {
-        super(cache);
+    public NMEASourceSensor(@NotNull TimestampProvider tp, @NotNull Log log) {
+        super(log, tp, true, false);
         this.log = log;
-        setSourceTarget(true, false);
+        this.timestampProvider = tp;
         xDrMap = new HashMap<>();
     }
 
@@ -162,7 +163,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     }
 
     private boolean checkReadingAge(Sensor sensor) {
-        return sensor != null && (getCache().getNow() - sensor.getLastReadingTimestamp()) < READING_AGE_TIMEOUT;
+        return sensor != null && (timestampProvider.getNow() - sensor.getLastReadingTimestamp()) < READING_AGE_TIMEOUT;
     }
 
     private void sendMMB() {
@@ -247,7 +248,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
                 Collection<SensorTemp.Reading> r = tempSensor.getReadings();
                 for (SensorTemp.Reading tr : r) {
-                    if ((getCache().getNow() - tr.getTimestamp()) < 1000) {
+                    if ((timestampProvider.getNow() - tr.getTimestamp()) < 1000) {
                         String name = tr.getKey().substring(tr.getKey().length() - 4, tr.getKey().length() - 1);
                         String mappedName = HWSettings.getProperty("temp.map." + name);
                         if (mappedName == null) mappedName = name;

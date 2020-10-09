@@ -16,9 +16,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.Log;
 import com.fazecast.jSerialComm.SerialPort;
@@ -95,10 +95,13 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private final NMEAInputManager input;
 
+    private final TimestampProvider timestampProvider;
+
     @Inject
-    public NMEASerial(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, false);
         this.log = log;
+        this.timestampProvider = tp;
         config = new Config();
         input = new NMEAInputManager(log);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired);
@@ -170,7 +173,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private SerialPort getPort() {
         synchronized (this) {
-            long now = getCache().getNow();
+            long now = timestampProvider.getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
                 resetPortAndReader();
                 getLogBuilder().wO("create port").wV("device", toString());
@@ -317,7 +320,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
-        long t = getCache().getNow();
+        long t = timestampProvider.getNow();
         synchronized (stats) {
             stats.onTimer(t);
             fastStats.onTimer(t);

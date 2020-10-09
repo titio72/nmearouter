@@ -15,9 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.utils.Log;
 import com.pi4j.io.gpio.*;
 import net.sf.marineapi.nmea.sentence.PositionSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -33,23 +34,24 @@ public class PowerLedAgent extends NMEAAgentImpl {
     private static final Pin PWR = RaspiPin.GPIO_02;
     private final GpioPinDigitalOutput pin;
     private final GpioPinDigitalOutput pinGps;
+    private final TimestampProvider timestampProvider;
     private long lastGps;
 
     @Inject
-    public PowerLedAgent(@NotNull NMEACache cache) {
-        super(cache);
+    public PowerLedAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
+        this.timestampProvider = tp;
         lastGps = 0;
         GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
         pinGps = gpio.provisionDigitalOutputPin(GPS, "gps", PinState.LOW);
         pin.setShutdownOptions(true, PinState.LOW);
         pinGps.setShutdownOptions(true, PinState.LOW);
-        setSourceTarget(false, true);
     }
 
     @Override
     public String getDescription() {
-        return ((getCache().getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
+        return ((timestampProvider.getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
     }
 
     @Override
@@ -59,7 +61,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
             @Override
             public void run() {
-                if ((getCache().getNow() - lastGps) > 2000) {
+                if ((timestampProvider.getNow() - lastGps) > 2000) {
                     powerGPSDown();
                 }
             }
@@ -88,7 +90,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     @OnSentence
     public void onSentence(Sentence s, String source) {
         if (s instanceof PositionSentence) {
-            lastGps = getCache().getNow();
+            lastGps = timestampProvider.getNow();
             powerGPSUp();
         }
     }

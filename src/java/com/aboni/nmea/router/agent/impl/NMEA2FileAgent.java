@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -38,12 +38,13 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     private final Log log;
     private long lastDump = 0;
     private final List<NMEASentenceItem> queue = new LinkedList<>();
+    private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEA2FileAgent(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NMEA2FileAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
         this.log = log;
-        setSourceTarget(false, true);
+        this.timestampProvider = tp;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
     @OnSentence
     public void onSentence(Sentence s, String source) {
-        NMEASentenceItem e = new NMEASentenceItem(s, getCache().getNow(), "  ");
+        NMEASentenceItem e = new NMEASentenceItem(s, timestampProvider.getNow(), "  ");
         synchronized (queue) {
             if (isStarted()) {
                 queue.add(e);
@@ -77,7 +78,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     }
 
     private void dump() throws IOException {
-        long t = getCache().getNow();
+        long t = timestampProvider.getNow();
         if (t - lastDump > DUMP_PERIOD) {
             lastDump = t;
             File f = new File("nmea" + df.format(new Date()) + ".log");

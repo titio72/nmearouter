@@ -15,9 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -29,9 +30,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     private final SystemTimeChecker systemTimeCHecker;
 
     @Inject
-    public NMEASystemTimeGPS(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEASystemTimeGPS(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
         systemTimeCHecker = ThingsFactory.getInstance(SystemTimeChecker.class);
     }
 

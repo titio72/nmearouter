@@ -5,6 +5,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBImpl;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
+import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -39,20 +40,21 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     private final Map<String, PositionReport> reports = new HashMap<>();
     private final Map<String, AISStaticData> data = new HashMap<>();
+    private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEAAISAgent(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAAISAgent(@NotNull Log log, @NotNull TimestampProvider timestampProvider) {
+        super(log, timestampProvider, false, true);
+        this.timestampProvider = timestampProvider;
     }
 
     @OnN2KMessage
     public void onMessage(N2KMessage message) {
         if (message instanceof AISPositionReport) {
             String mmsi = ((AISPositionReport) message).getMMSI();
-            ((AISPositionReport) message).setOverrideTime(getCache().getNow());
+            ((AISPositionReport) message).setOverrideTime(timestampProvider.getNow());
             synchronized (reports) {
-                reports.put(mmsi, new PositionReport(getCache().getNow(), (AISPositionReport) message));
+                reports.put(mmsi, new PositionReport(timestampProvider.getNow(), (AISPositionReport) message));
             }
         }
 
@@ -86,7 +88,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     @Override
     public void onTimer() {
-        long now = getCache().getNow();
+        long now = timestampProvider.getNow();
         synchronized (reports) {
             Collection<PositionReport> reportsCopy = new ArrayList<>(reports.values());
             for (PositionReport rep : reportsCopy) {

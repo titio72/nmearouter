@@ -151,7 +151,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private final InternalTarget targetIf;
     private final InternalSource sourceIf;
     private final NMEAProcessorSet processorSet;
-    private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
     private final AgentAttributes attributes;
     private final RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
@@ -163,15 +163,16 @@ public class NMEAAgentImpl implements NMEAAgent {
     }
 
     @Inject
-    public NMEAAgentImpl(@NotNull NMEACache cache) {
-        this.cache = cache;
+    public NMEAAgentImpl(@NotNull Log log, @NotNull TimestampProvider timestampProvider, boolean source, boolean target) {
+        this.timestampProvider = timestampProvider;
+        this.log = log;
         targetIf = new InternalTarget();
         sourceIf = new InternalSource();
         attributes = new AgentAttributes();
         processorSet = new NMEAProcessorSet();
         messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
         attributes.canStartStop = true;
-        log = ThingsFactory.getInstance(Log.class);
+        setSourceTarget(source, target);
     }
 
     @Override
@@ -267,7 +268,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     private boolean checkSourceFilter(Sentence sentence) {
         NMEASource s = getSource();
         if (s!=null && s.getFilter()!=null)
-            return s.getFilter().match(messageFactory.createMessage(sentence, getName(), cache.getNow()));
+            return s.getFilter().match(messageFactory.createMessage(sentence, getName(), timestampProvider.getNow()));
         return true;
     }
 
@@ -286,7 +287,7 @@ public class NMEAAgentImpl implements NMEAAgent {
             }
             if (toSend != null)
                 for (Sentence s : toSend)
-                    sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), cache.getNow()));
+                    sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
         }
     }
 
@@ -297,7 +298,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(JSONObject m) {
         if (isStarted()) {
-            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
+            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }
     }
 
@@ -311,7 +312,7 @@ public class NMEAAgentImpl implements NMEAAgent {
             log.debug(
                     getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("notify")
                             .wV("msgType", "N2K").wV("message", m).toString());
-            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), cache.getNow()));
+            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }
     }
 
@@ -367,9 +368,5 @@ public class NMEAAgentImpl implements NMEAAgent {
         if (isStarted()) {
             processorSet.onTimer();
         }
-    }
-
-    protected NMEACache getCache() {
-        return cache;
     }
 }

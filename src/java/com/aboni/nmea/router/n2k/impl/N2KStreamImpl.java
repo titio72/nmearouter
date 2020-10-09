@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("UnstableApiUsage")
 public class N2KStreamImpl implements N2KStream {
 
     private static final long MAX_AGE = 750L;

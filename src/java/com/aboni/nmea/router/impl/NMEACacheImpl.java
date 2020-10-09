@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
@@ -30,16 +31,18 @@ public class NMEACacheImpl implements NMEACache {
 
 
     private final Log log;
+    private final TimestampProvider timestampProvider;
     private DataEvent<HeadingSentence> lastHeading;
     private DataEvent<PositionSentence> lastPosition;
     private final Map<String, Object> statuses;
 
     @Inject
-    public NMEACacheImpl(@NotNull Log log) {
+    public NMEACacheImpl(@NotNull Log log, @NotNull TimestampProvider tp) {
         lastHeading = new DataEvent<>(null, 0, "");
         lastPosition = new DataEvent<>(null, 0, "");
         statuses = new HashMap<>();
         this.log = log;
+        this.timestampProvider = tp;
     }
 
     @Override
@@ -48,9 +51,9 @@ public class NMEACacheImpl implements NMEACache {
             if (s instanceof HDGSentence ||
                     s instanceof HDTSentence ||
                     s instanceof HDMSentence) {
-                lastHeading = new DataEvent<>((HeadingSentence) s, getNow(), src);
+                lastHeading = new DataEvent<>((HeadingSentence) s, timestampProvider.getNow(), src);
             } else if (s instanceof PositionSentence && s.isValid()) {
-                lastPosition = new DataEvent<>((PositionSentence) s, getNow(), src);
+                lastPosition = new DataEvent<>((PositionSentence) s, timestampProvider.getNow(), src);
             }
         } catch (Exception e) {
             LogStringBuilder.start("Cache").wO("cache sentence").wV("sentence", s).error(log, e);
@@ -85,10 +88,5 @@ public class NMEACacheImpl implements NMEACache {
         synchronized (statuses) {
             return (T) statuses.getOrDefault(statusKey, defaultValue);
         }
-    }
-
-    @Override
-    public long getNow() {
-        return System.currentTimeMillis();
     }
 }

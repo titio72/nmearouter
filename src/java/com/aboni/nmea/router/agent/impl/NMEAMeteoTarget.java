@@ -15,10 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.*;
 import net.sf.marineapi.nmea.sentence.*;
@@ -32,6 +29,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private final StatsWriter writer;
 
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
+    private final TimestampProvider timestampProvider;
+    private final NMEACache cache;
     private int timerCount;
 
     private static final int TEMP = 0;
@@ -41,7 +40,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private static final int WIND_D = 4;
     private static final int HUM = 5;
 
-    private final StatsSample[] series = new StatsSample[] {
+    private final StatsSample[] series = new StatsSample[]{
             new ScalarStatsSample("AT0", -20.0, 50.0),
             new ScalarStatsSample("WT_", -20.0, 50.0),
             new ScalarStatsSample("PR_", 800.0, 1100.0),
@@ -74,11 +73,12 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public NMEAMeteoTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAMeteoTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
+        super(log, tp, false, true);
+        this.timestampProvider = tp;
+        this.cache = cache;
         this.log = log;
-        writer = w;
+        this.writer = w;
     }
 
     @Override
@@ -123,7 +123,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private void dumpStats() {
         synchronized (series) {
-            long ts = getCache().getNow();
+            long ts = timestampProvider.getNow();
             for (int i = 0; i < series.length; i++) {
                 statsPeriodCounter[i]++;
                 if (statsPeriodCounter[i] >= periods[i]) {
@@ -146,7 +146,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     @OnSentence
     public void onSentence(Sentence s, String source) {
         try {
-            if (Boolean.TRUE.equals(getCache().getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
+            if (Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
                 if (s instanceof MTASentence) {
                     processTemp((MTASentence) s);
                 } else if (s instanceof MMBSentence) {
@@ -194,8 +194,8 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     private void processWind(MWVSentence s) {
         if (s.isTrue()) {
-            DataEvent<HeadingSentence> e = getCache().getLastHeading();
-            if (e != null && (getCache().getNow() - e.getTimestamp()) < 800) {
+            DataEvent<HeadingSentence> e = cache.getLastHeading();
+            if (e != null && (timestampProvider.getNow() - e.getTimestamp()) < 800) {
                 double windDir = e.getData().getHeading() + s.getAngle();
                 double windSpd;
                 switch (s.getSpeedUnit().toChar()) {

@@ -18,7 +18,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
@@ -44,6 +44,7 @@ import java.util.TimeZone;
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
     private final SimpleDateFormat fmt;
+    private final TimestampProvider timestampProvider;
     private final Log log;
     private GeoPositionT prevPos;
     private long t0Play;
@@ -52,11 +53,12 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     private boolean stop;
 
     @Inject
-    public NMEAGPXPlayerAgent(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NMEAGPXPlayerAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, false);
         this.log = log;
-        fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.timestampProvider = tp;
+        this.fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        this.fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public void setFile(@NotNull String file) {
@@ -153,12 +155,12 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
     private void doIt(GeoPositionT pos) {
         if (t0==0) {
-            t0 = getCache().getNow();
+            t0 = timestampProvider.getNow();
             t0Play = pos.getTimestamp();
         }
         if (prevPos!=null) {
             long dt = pos.getTimestamp() - t0Play;
-            long elapsed = getCache().getNow() - t0;
+            long elapsed = timestampProvider.getNow() - t0;
             Utils.pause((int) (dt - elapsed));
             Course c = new Course(prevPos, pos);
             RMCSentence s = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);

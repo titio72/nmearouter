@@ -15,9 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -43,6 +43,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private boolean setup = false;
 
     private final Log log;
+    private final TimestampProvider timestampProvider;
 
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
@@ -50,9 +51,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private String baseDescription;
 
     @Inject
-    public NMEAUDPSender(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAUDPSender(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
+        this.timestampProvider = tp;
         this.log = log;
         targets = new HashSet<>();
         baseDescription = "UDP Sender";
@@ -183,7 +184,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         if (isStarted()) {
-            long t = getCache().getNow();
+            long t = timestampProvider.getNow();
             synchronized (stats) {
                 stats.onTimer(t);
                 fastStats.onTimer(t);

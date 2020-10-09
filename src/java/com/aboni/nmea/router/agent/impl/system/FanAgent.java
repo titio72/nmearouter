@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
@@ -40,11 +40,10 @@ public class FanAgent extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public FanAgent(@NotNull NMEACache cache, @NotNull Log log) {
-        super(cache);
+    public FanAgent(@NotNull TimestampProvider tp, @NotNull Log log) {
+        super(log, tp, true, false);
         this.log = log;
-        setSourceTarget(true, false);
-        fan = new Fan();
+        this.fan = new Fan();
     }
 
     @Override

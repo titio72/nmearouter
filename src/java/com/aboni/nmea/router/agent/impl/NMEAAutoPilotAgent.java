@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.PilotMode;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -96,8 +96,8 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     private final Log log;
 
     @Inject
-    public NMEAAutoPilotAgent(@NotNull Log log, @NotNull NMEACache cache) {
-        super(cache);
+    public NMEAAutoPilotAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, false);
         this.log = log;
     }
 

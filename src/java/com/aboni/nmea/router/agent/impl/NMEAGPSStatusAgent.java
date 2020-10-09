@@ -2,12 +2,13 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.GPSStatus;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnN2KMessage;
 import com.aboni.nmea.router.SatInfo;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.Satellite;
 import com.aboni.nmea.router.n2k.messages.*;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
@@ -47,6 +48,8 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     private final SOGAndCOG sogAndCog = new SOGAndCOG();
 
+    private final TimestampProvider timestampProvider;
+
     private final List<SatInfo> satellites = new ArrayList<>();
     private long lastSatTime;
     private int nSat;
@@ -58,9 +61,9 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     public static final long DEFAULT_PERIOD = 30L * SECOND;
 
     @Inject
-    public NMEAGPSStatusAgent(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAGPSStatusAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
+        this.timestampProvider = tp;
     }
 
     @OnN2KMessage
@@ -113,7 +116,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     private void handleSatellitesMessage(N2KSatellites message) {
         synchronized (satellites) {
-            lastSatTime = getCache().getNow();
+            lastSatTime = timestampProvider.getNow();
             satellites.clear();
             nSat = 0;
             for (Satellite s : message.getSatellites()) {
@@ -131,7 +134,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     }
 
     private void handleSOGMessage(N2KSOGAdCOGRapid message) {
-        sogAndCog.update(message, getCache().getNow());
+        sogAndCog.update(message, timestampProvider.getNow());
     }
 
     private void setPosition(Instant timestamp, Position pos) {
@@ -200,7 +203,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     @Override
     public void onTimer() {
-        long now = getCache().getNow();
+        long now = timestampProvider.getNow();
         if ((now - sogAndCog.lastSogTime) > 10000) {
             sogAndCog.reset();
         }

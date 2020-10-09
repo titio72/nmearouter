@@ -16,9 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.NMEAMWDConverter;
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.*;
 
 import javax.inject.Inject;
@@ -27,13 +28,14 @@ import javax.validation.constraints.NotNull;
 public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
 
     private final NMEAMWDConverter converter;
+    private final TimestampProvider timestampProvider;
     private long threshold;
 
     @Inject
-    public NMEAMWDSentenceCalculator(@NotNull NMEACache cache) {
-        super(cache);
+    public NMEAMWDSentenceCalculator(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, true);
+        timestampProvider = tp;
         converter = new NMEAMWDConverter(TalkerId.II);
-        setSourceTarget(true, true);
     }
 
     @Override
@@ -48,9 +50,9 @@ public class NMEAMWDSentenceCalculator extends NMEAAgentImpl {
     @OnSentence
     public void onSentence(Sentence s, String source) {
         if (s instanceof HDGSentence) {
-            converter.setHeading((HDGSentence) s, getCache().getNow());
+            converter.setHeading((HDGSentence) s, timestampProvider.getNow());
         } else if (s instanceof MWVSentence && ((MWVSentence) s).isTrue()) {
-            converter.setWind((MWVSentence) s, getCache().getNow());
+            converter.setWind((MWVSentence) s, timestampProvider.getNow());
         } else {
             return;
         }

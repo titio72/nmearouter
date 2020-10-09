@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
@@ -35,7 +34,6 @@ public class ProcessorsBuilder {
     static List<NMEAPostProcess> load(QOS qos, Log log) {
         List<NMEAPostProcess> res = new ArrayList<>();
         if (qos != null) {
-            NMEACache cache = ThingsFactory.getInstance(NMEACache.class);
             TimestampProvider timestampProvider = ThingsFactory.getInstance(TimestampProvider.class);
             for (String q : qos.getKeys()) {
                 switch (q) {
@@ -54,11 +52,11 @@ public class ProcessorsBuilder {
                         break;
                     case "truewind_sog":
                         log.info("QoS {True wind SOG}");
-                        res.add(new NMEAMWVTrue(cache, true));
+                        res.add(new NMEAMWVTrue(timestampProvider, true));
                         break;
                     case "truewind":
                         log.info("QoS {True wind}");
-                        res.add(new NMEAMWVTrue(cache, false));
+                        res.add(new NMEAMWVTrue(timestampProvider, false));
                         break;
                     case "enrich_hdg":
                         log.info("QoS {Enrich HDG}");

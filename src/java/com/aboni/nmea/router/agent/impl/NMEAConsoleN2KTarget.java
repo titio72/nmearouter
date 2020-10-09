@@ -15,10 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnN2KMessage;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.utils.ConsoleLog;
+import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -28,9 +29,8 @@ import java.util.Date;
 public class NMEAConsoleN2KTarget extends NMEAAgentImpl {
 
     @Inject
-    public NMEAConsoleN2KTarget(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(false, true);
+    public NMEAConsoleN2KTarget(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, false, true);
     }
 
     @OnN2KMessage

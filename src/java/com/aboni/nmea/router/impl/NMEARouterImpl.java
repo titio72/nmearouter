@@ -15,10 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -51,6 +48,7 @@ public class NMEARouterImpl implements NMEARouter {
     private final BlockingQueue<RouterMessage> sentenceQueue;
     private final NMEAProcessorSet processors;
     private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
     private final RouterMessageFactory messageFactory;
     private final Log log;
 
@@ -63,11 +61,12 @@ public class NMEARouterImpl implements NMEARouter {
     private static final long STATS_PERIOD = 60; // seconds
 
     @Inject
-    public NMEARouterImpl(NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
+    public NMEARouterImpl(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
         agents = new HashMap<>();
         this.log = log;
         this.messageFactory = messageFactory;
         this.cache = cache;
+        this.timestampProvider = tp;
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
@@ -98,7 +97,7 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     private void dumpStats() {
-        long t = cache.getNow();
+        long t = timestampProvider.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
@@ -111,7 +110,7 @@ public class NMEARouterImpl implements NMEARouter {
         msg.put("topic", "diagnostic");
         msg.put("queue", sentenceQueue.size());
         msg.put("free_memory", Runtime.getRuntime().freeMemory() / 1024 / 1024);
-        RouterMessage m = messageFactory.createMessage(msg, "SYS", cache.getNow());
+        RouterMessage m = messageFactory.createMessage(msg, "SYS", timestampProvider.getNow());
         privateQueueUpSentence(m);
     }
 

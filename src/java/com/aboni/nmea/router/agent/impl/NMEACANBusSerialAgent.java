@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -25,6 +25,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
+    private final TimestampProvider timestampProvider;
     private final Log log;
     private long lastStats;
     private String description;
@@ -58,7 +59,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
                 messagesAccepted = 0;
                 messages = 0;
                 errors = 0;
-                lastReset = getCache().getNow();
+                lastReset = timestampProvider.getNow();
             }
         }
 
@@ -70,21 +71,21 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSerialAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull N2KFastCache fastCache,
+    public NMEACANBusSerialAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
                                  @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
                                  @NotNull N2KMessageFactory msgFactory) {
-        super(cache);
+        super(log, tp, true, false);
         this.log = log;
-        messageFactory = msgFactory;
-        setSourceTarget(true, false);
-        stats.reset();
-        serialReader = new SerialReader(cache, log);
-        fastCache.setCallback(this::onReceive);
+        this.timestampProvider = tp;
+        this.messageFactory = msgFactory;
+        this.serialReader = new SerialReader(tp, log);
         this.serialCanReader = serialCanReader;
+        this.srcFilter = new PGNSourceFilter(log);
+        this.converter = converter;
+        stats.reset();
+        fastCache.setCallback(this::onReceive);
         serialCanReader.setCallback(fastCache::onMessage);
         serialCanReader.setErrCallback(this::onError);
-        srcFilter = new PGNSourceFilter(log);
-        this.converter = converter;
     }
 
     private void onError(byte[] buffer, String errorMessage) {
@@ -153,7 +154,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long t = getCache().getNow();
+            long t = timestampProvider.getNow();
             if ((Utils.isOlderThan(lastStats, t, 30000))) {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);

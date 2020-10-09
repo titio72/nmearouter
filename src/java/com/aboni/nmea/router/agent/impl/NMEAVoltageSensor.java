@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorVoltage;
 import com.aboni.utils.Log;
@@ -38,10 +38,9 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public NMEAVoltageSensor(@NotNull NMEACache cache, @NotNull Log log) {
-        super(cache);
+    public NMEAVoltageSensor(@NotNull TimestampProvider tp, @NotNull Log log) {
+        super(log, tp, true, false);
         this.log = log;
-        setSourceTarget(true, false);
     }
 
     @Override

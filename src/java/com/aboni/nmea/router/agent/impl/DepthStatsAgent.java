@@ -15,10 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.sentences.XDPParser;
 import com.aboni.nmea.sentences.XDPSentence;
+import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DPTSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -30,6 +31,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 public class DepthStatsAgent extends NMEAAgentImpl {
+
+    private final TimestampProvider timestampProvider;
 
     private static class DepthT {
         int depth;
@@ -44,9 +47,9 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
     @Inject
-    public DepthStatsAgent(@NotNull NMEACache cache) {
-        super(cache);
-        setSourceTarget(true, true);
+    public DepthStatsAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+        super(log, tp, true, true);
+        timestampProvider = tp;
         queue = new LinkedList<>();
     }
 
@@ -70,7 +73,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     @OnSentence
     public void onSentence(Sentence s, String source) {
         if (s instanceof DPTSentence) {
-            DepthT d = handleDepth(((DPTSentence) s).getDepth(), getCache().getNow());
+            DepthT d = handleDepth(((DPTSentence) s).getDepth(), timestampProvider.getNow());
 
             XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
             x.setDepth((float) d.depth / 10f);
