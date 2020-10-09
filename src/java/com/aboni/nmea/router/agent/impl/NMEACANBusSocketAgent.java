@@ -39,6 +39,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private long lastStats;
     private String description;
     private final AtomicBoolean run = new AtomicBoolean();
+    private boolean debug = false;
 
     private class Stats {
         long messages;
@@ -156,8 +157,10 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             CanFrame frame = channel.read();
             frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            N2KMessage msg = messageFactory.newInstance(h, data);
-            fastCache.onMessage(msg);
+            if (h.getDest()==0xFF) {
+                N2KMessage msg = messageFactory.newInstance(h, data);
+                fastCache.onMessage(msg);
+            }
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
                 getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").error(log, e);
@@ -166,8 +169,10 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
         } catch (PGNDataParseException e) {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "parsing").error(log, e);
-        } catch (Exception e) {
-            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, e);
+        } catch (Exception ignore) {
+            if (debug) {
+                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, ignore);
+            }
         }
     }
 
