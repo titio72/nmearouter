@@ -25,6 +25,7 @@ import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
@@ -146,76 +147,12 @@ public class NMEAAgentImpl implements NMEAAgent {
         boolean canStartStop;
     }
 
-    protected class PrivateLog implements Log {
-
-        private final Log log;
-
-        private PrivateLog() {
-            log = ThingsFactory.getInstance(Log.class);
-        }
-
-        private String getMsg(NMEAAgentImpl a, String msg) {
-            return String.format("Agent {%s} Name {%s} %s", a.toString(), a.getName(), msg);
-        }
-
-        @Override
-        public boolean isDebug() {
-            return log.isDebug();
-        }
-
-        @Override
-        public void error(String msg) {
-            log.error(getMsg(NMEAAgentImpl.this, msg));
-        }
-
-        @Override
-        public void error(String msg, Throwable t) {
-            log.error(getMsg(NMEAAgentImpl.this, msg), t);
-        }
-
-        @Override
-        public void errorForceStacktrace(String msg, Throwable t) {
-            log.errorForceStacktrace(getMsg(NMEAAgentImpl.this, msg), t);
-        }
-
-        @Override
-        public void warning(String msg) {
-            log.warning(getMsg(NMEAAgentImpl.this, msg));
-        }
-
-        @Override
-        public void warning(String msg, Exception e) {
-            log.warning(getMsg(NMEAAgentImpl.this, msg), e);
-        }
-
-        @Override
-        public void info(String msg) {
-            log.info(getMsg(NMEAAgentImpl.this, msg));
-        }
-
-        @Override
-        public void infoFill(String msg) {
-            log.infoFill(getMsg(NMEAAgentImpl.this, msg));
-        }
-
-        @Override
-        public void debug(String msg) {
-            log.debug(getMsg(NMEAAgentImpl.this, msg));
-        }
-
-        @Override
-        public void console(String msg) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     private NMEAAgentStatusListener sl;
     private final InternalTarget targetIf;
     private final InternalSource sourceIf;
     private final NMEAProcessorSet processorSet;
     private final NMEACache cache;
     private final AgentAttributes attributes;
-    private final Log internalLog;
     private final RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
 
@@ -232,7 +169,6 @@ public class NMEAAgentImpl implements NMEAAgent {
         sourceIf = new InternalSource();
         attributes = new AgentAttributes();
         processorSet = new NMEAProcessorSet();
-        internalLog = new PrivateLog();
         messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
         attributes.canStartStop = true;
         log = ThingsFactory.getInstance(Log.class);
@@ -262,14 +198,6 @@ public class NMEAAgentImpl implements NMEAAgent {
     protected void setSourceTarget(boolean isSource, boolean isTarget) {
         attributes.target = isTarget;
         attributes.source = isSource;
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    protected Log getLogger() {
-        return internalLog;
     }
 
     @Override
@@ -350,9 +278,15 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(Sentence sentence) {
         if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
-            List<Sentence> toSend = processorSet.getSentences(sentence, getName());
-            for (Sentence s : toSend)
-                sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), cache.getNow()));
+            List<Sentence> toSend = null;
+            try {
+                toSend = processorSet.getSentences(sentence, getName());
+            } catch (NMEARouterProcessorException e) {
+                getLogBuilder().wO("dispatch message").wV("sentence", sentence).error(log, e);
+            }
+            if (toSend != null)
+                for (Sentence s : toSend)
+                    sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), cache.getNow()));
         }
     }
 

@@ -29,7 +29,6 @@ public class LoadGPX {
         int counter = 0;
         String file = "/home/aboni/Downloads/nn.gpx";
         try (FileReader reader = new FileReader(file)) {
-            tripManager.init();
             byte[] buffer = new byte[6];
             StringBuilder b = null;
             int c;

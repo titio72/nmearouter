@@ -18,9 +18,8 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.DataStatus;
@@ -37,14 +36,14 @@ import javax.validation.constraints.NotNull;
 public class NMEAMWVTrue implements NMEAPostProcess {
 
     @Inject
-    public NMEAMWVTrue(@NotNull NMEACache cache, boolean useSOG) {
+    public NMEAMWVTrue(@NotNull TimestampProvider timestampProvider, boolean useSOG) {
         this.useRMC = useSOG;
-        this.cache = cache;
+        this.timestampProvider = timestampProvider;
     }
 
     private static final long AGE_THRESHOLD = 5000;
 
-    private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
 
     private double lastTrueHeading;
     private double lastMagHeading;
@@ -57,9 +56,9 @@ public class NMEAMWVTrue implements NMEAPostProcess {
     private double lastSentTWindSpeed = Double.NaN;
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
-            long time = cache.getNow();
+            long time = timestampProvider.getNow();
             if (sentence instanceof MWVSentence) {
                 return processWind((MWVSentence) sentence, time);
             } else if (!useRMC && sentence instanceof VHWSentence) {
@@ -74,9 +73,8 @@ public class NMEAMWVTrue implements NMEAPostProcess {
                 lastTrueHeading = new NMEAMagnetic2TrueConverter().getTrue(lastMagHeading);
                 lastHeadingTime = time;
             }
-            return null;
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich wind message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
+            throw new NMEARouterProcessorException("Error processing sentence \"" + sentence + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }
@@ -119,5 +117,4 @@ public class NMEAMWVTrue implements NMEAPostProcess {
     public void onTimer() {
         // nothing to do here
     }
-
 }

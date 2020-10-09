@@ -28,6 +28,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TripManagerXImpl implements TripManagerX {
 
@@ -37,12 +38,14 @@ public class TripManagerXImpl implements TripManagerX {
     private final String trackTable;
     private final DBEventWriter trackEventWriter;
     private final DBEventWriter tripEventWriter;
+    private AtomicBoolean initialized;
 
     @Inject
     public TripManagerXImpl(@Named(Constants.TAG_TRIP) String tripTableName,
                             @Named(Constants.TAG_TRACK) String trackTableName,
                             @Named(Constants.TAG_TRACK) DBEventWriter trackEventWriter,
                             @Named(Constants.TAG_TRIP) DBEventWriter tripEventWriter) {
+        initialized = new AtomicBoolean();
         tripTable = tripTableName;
         trackTable = trackTableName;
         archive = new TripArchive();
@@ -50,9 +53,13 @@ public class TripManagerXImpl implements TripManagerX {
         this.tripEventWriter = tripEventWriter;
     }
 
-    @Override
     public void init() throws TripManagerException {
-        loadArchive(archive);
+        if (!initialized.get()) {
+            synchronized (archive) {
+                loadArchive(archive);
+                initialized.set(true);
+            }
+        }
     }
 
     private void loadArchive(TripArchive archive) throws TripManagerException {
@@ -97,6 +104,7 @@ public class TripManagerXImpl implements TripManagerX {
 
     @Override
     public void onTrackPoint(TrackEvent event) throws TripManagerException {
+        init();
         synchronized (archive) {
             TrackPoint point = event.getPoint();
             TripImpl t = getCurrentTrip(point.getPosition().getInstant());
@@ -131,17 +139,20 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     @Override
-    public Trip getTrip(Instant timestamp) {
+    public Trip getTrip(Instant timestamp) throws TripManagerException {
+        init();
         return archive.getTrip(timestamp);
     }
 
     @Override
-    public Trip getTrip(int id) {
+    public Trip getTrip(int id) throws TripManagerException {
+        init();
         return archive.getTrip(id);
     }
 
     @Override
     public void deleteTrip(int id) throws TripManagerException {
+        init();
         Trip t = getTrip(id);
         if (t == null) throw new TripManagerException("Unknown trip " + id);
         else {
@@ -165,6 +176,7 @@ public class TripManagerXImpl implements TripManagerX {
 
     @Override
     public void setTripDescription(int id, @NotNull String description) throws TripManagerException {
+        init();
         TripImpl t = (TripImpl) archive.getTrip(id);
         if (t == null) throw new TripManagerException("Unknown trip " + id);
         else {
@@ -178,7 +190,8 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     @Override
-    public List<Trip> getTrips(boolean desc) {
+    public List<Trip> getTrips(boolean desc) throws TripManagerException {
+        init();
         synchronized (archive) {
             int sz = archive.tripsByDate.size();
             List<Trip> l = new ArrayList<>(sz);
@@ -190,7 +203,8 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     @Override
-    public List<Trip> getTrips(int year, boolean desc) {
+    public List<Trip> getTrips(int year, boolean desc) throws TripManagerException {
+        init();
         synchronized (archive) {
             int sz = archive.tripsByDate.size();
             List<Trip> l = new ArrayList<>(sz);

@@ -23,7 +23,8 @@ import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.Satellite;
 import com.aboni.nmea.router.n2k.messages.*;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.LogAdmin;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
@@ -48,7 +49,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
     private N2KGNSSPositionUpdate lastPos;
 
     public N2KMessage2NMEA0183Impl() {
-        geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
+        geo = new TSAGeoMag(Constants.WMM, ThingsFactory.getInstance(LogAdmin.class).getBaseLogger());
     }
 
     @Override

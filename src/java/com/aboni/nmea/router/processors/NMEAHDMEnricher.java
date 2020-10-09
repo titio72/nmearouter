@@ -20,7 +20,6 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -48,22 +47,22 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
     }
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
             if (sentence instanceof HDMSentence) {
                 HDMSentence hdm = (HDMSentence) sentence;
                 HDGSentence hdg = getHDG(hdm);
                 if (fillVariation(hdg, getLastPosition())) {
-                    return new Pair<>(Boolean.TRUE, new Sentence[] {hdg, getHDT(hdg)});
+                    return new Pair<>(Boolean.TRUE, new Sentence[]{hdg, getHDT(hdg)});
                 } else {
-                    return new Pair<>(Boolean.TRUE, new Sentence[] {hdg});
+                    return new Pair<>(Boolean.TRUE, new Sentence[]{hdg});
                 }
             } else if (sentence instanceof HDGSentence || sentence instanceof HDTSentence) {
                 // skip HDG and HDT as they are produced by the enricher
                 return new Pair<>(Boolean.FALSE, new Sentence[] {});
             }
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich heading process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
+            throw new NMEARouterProcessorException("Cannot enrich heading process message \"" + sentence + "\"", e);
         }
         return null;
     }

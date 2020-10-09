@@ -17,8 +17,6 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
-import com.aboni.utils.Log;
-import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -28,7 +26,6 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.util.FaaMode;
 
-import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 /**
@@ -39,32 +36,30 @@ import java.time.OffsetDateTime;
 public class NMEARMC2VTGProcessor implements NMEAPostProcess {
 
     private final NMEAMagnetic2TrueConverter m;
-    private final Log log;
 
-    public NMEARMC2VTGProcessor(@NotNull Log lg) {
-        this(lg, OffsetDateTime.now().getYear());
+    public NMEARMC2VTGProcessor() {
+        this(OffsetDateTime.now().getYear());
     }
 
-    public NMEARMC2VTGProcessor(@NotNull Log log, double year) {
+    public NMEARMC2VTGProcessor(double year) {
         m = new NMEAMagnetic2TrueConverter(year);
-        this.log = log;
     }
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
 
             if (sentence instanceof RMCSentence) {
-                RMCSentence rmc = (RMCSentence)sentence;
+                RMCSentence rmc = (RMCSentence) sentence;
                 VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(sentence.getTalkerId(), SentenceId.VTG);
                 vtg.setMode(FaaMode.AUTOMATIC);
                 vtg.setSpeedKnots(rmc.getSpeed());
                 vtg.setSpeedKmh(rmc.getSpeed() * 1.852);
                 setHeading(rmc, vtg);
-                return new Pair<>(Boolean.TRUE, new Sentence[] {vtg});
+                return new Pair<>(Boolean.TRUE, new Sentence[]{vtg});
             }
         } catch (Exception e) {
-            LogStringBuilder.start("RMC2VTGProc").wO("convert").wV("sentence", sentence).error(log, e);
+            throw new NMEARouterProcessorException("Error converting RMC sentence \"" + sentence + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }

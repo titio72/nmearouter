@@ -15,11 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.filters.impl.NMEAPositionFilter;
 import com.aboni.utils.Log;
-import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -29,14 +28,14 @@ import javax.validation.constraints.NotNull;
 public class NMEARMCFilterProcessor implements NMEAPostProcess {
 
     private final NMEAPositionFilter filter;
-    private final NMEACache cache;
-    private final RouterMessageFactory messageFactory;
+    private final TimestampProvider timestampProvider;
     private final Log log;
+    private final RouterMessageFactory messageFactory;
 
     @Inject
-    public NMEARMCFilterProcessor(@NotNull Log log, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory) {
-        this.cache = cache;
+    public NMEARMCFilterProcessor(@NotNull Log log, @NotNull TimestampProvider timestampProvider, @NotNull RouterMessageFactory messageFactory) {
         this.log = log;
+        this.timestampProvider = timestampProvider;
         this.filter = new NMEAPositionFilter();
         this.messageFactory = messageFactory;
     }
@@ -45,12 +44,11 @@ public class NMEARMCFilterProcessor implements NMEAPostProcess {
     private static final Pair<Boolean, Sentence[]> KO = new Pair<>(false, null);
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
-            return (filter.match(messageFactory.createMessage(sentence, src, cache.getNow())) ? OK : KO);
+            return (filter.match(messageFactory.createMessage(sentence, src, timestampProvider.getNow())) ? OK : KO);
         } catch (Exception e) {
-            LogStringBuilder.start("RMCFilterProc").wO("process sentence").wV("sentence", sentence).error(log, e);
-            return KO;
+            throw new NMEARouterProcessorException("Cannot process RMC sentence for filtering \"" + sentence + "\"", e);
         }
     }
 
@@ -63,5 +61,4 @@ public class NMEARMCFilterProcessor implements NMEAPostProcess {
             filter.dumpStats(log);
         }
     }
-
 }

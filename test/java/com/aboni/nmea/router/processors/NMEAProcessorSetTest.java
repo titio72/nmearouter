@@ -48,7 +48,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testEmptyProcSet() {
+    public void testEmptyProcSet() throws NMEARouterProcessorException {
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
         List<Sentence> res = theSet.getSentences(s, "MySrc");
 
@@ -59,7 +59,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testSimpleProc() {
+    public void testSimpleProc() throws NMEARouterProcessorException {
         theSet.addProcessor(new MyProc());
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
@@ -72,13 +72,13 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testSimpleProc1() {
+    public void testSimpleProc1() throws NMEARouterProcessorException {
         MyProc p = new MyProc();
         theSet.addProcessor(p);
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
 
-        p.setNextAnswer(true, new Sentence[] {});
+        p.setNextAnswer(true, new Sentence[]{});
         List<Sentence> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
@@ -88,7 +88,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testSimpleProcDrop() {
+    public void testSimpleProcDrop() throws NMEARouterProcessorException {
         MyProc p = new MyProc();
         theSet.addProcessor(p);
 
@@ -104,7 +104,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testSimpleProcAdd() {
+    public void testSimpleProcAdd() throws NMEARouterProcessorException {
         MyProc p = new MyProc();
         theSet.addProcessor(p);
 
@@ -125,7 +125,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testTwoSimpleProcsAccept() {
+    public void testTwoSimpleProcsAccept() throws NMEARouterProcessorException {
         theSet.addProcessor(new MyProc());
         theSet.addProcessor(new MyProc());
 
@@ -139,7 +139,7 @@ public class NMEAProcessorSetTest {
     }
 
     @Test
-    public void testTwoSimpleProcsDrop() {
+    public void testTwoSimpleProcsDrop() throws NMEARouterProcessorException {
         MyProc p = new MyProc();
         theSet.addProcessor(new MyProc());
         theSet.addProcessor(p);

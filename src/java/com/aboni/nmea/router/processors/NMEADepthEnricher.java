@@ -17,7 +17,6 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Pair;
-import com.aboni.utils.ServerLog;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.DBTSentence;
 import net.sf.marineapi.nmea.sentence.DPTSentence;
@@ -34,20 +33,20 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 public class NMEADepthEnricher implements NMEAPostProcess {
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
             if (sentence instanceof DBTSentence) {
                 double offset = HWSettings.getPropertyAsDouble("depth.offset", 0.0);
-                DBTSentence dbt = (DBTSentence)sentence;
-                DPTSentence dpt = (DPTSentence)SentenceFactory.getInstance().createParser(dbt.getTalkerId(), SentenceId.DPT);
+                DBTSentence dbt = (DBTSentence) sentence;
+                DPTSentence dpt = (DPTSentence) SentenceFactory.getInstance().createParser(dbt.getTalkerId(), SentenceId.DPT);
                 dpt.setDepth(dbt.getDepth());
                 dpt.setOffset(offset);
-                return new Pair<>(Boolean.TRUE, new Sentence[] {dpt});
+                return new Pair<>(Boolean.TRUE, new Sentence[]{dpt});
             }
+            return new Pair<>(Boolean.TRUE, null);
         } catch (Exception e) {
-            ServerLog.getLogger().warning("Cannot enrich depth process message {" + sentence + "} error {" + e.getLocalizedMessage() + "}");
+            throw new NMEARouterProcessorException("Cannot enrich depth process message \"" + sentence + "\"", e);
         }
-        return new Pair<>(Boolean.TRUE, null);
     }
 
     @Override

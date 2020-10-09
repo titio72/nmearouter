@@ -1,17 +1,16 @@
 package com.aboni.geo;
 
-import static org.junit.Assert.*;
-
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.utils.ThingsFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.*;
+import net.sf.marineapi.nmea.util.Position;
 import org.junit.Before;
 import org.junit.Test;
 
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HDGSentence;
-import net.sf.marineapi.nmea.sentence.HDMSentence;
-import net.sf.marineapi.nmea.sentence.HDTSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.util.Position;
+import static org.junit.Assert.assertEquals;
 
 public class NMEAMagnetic2TrueConverterTest {
 
@@ -19,6 +18,8 @@ public class NMEAMagnetic2TrueConverterTest {
     
     @Before
     public void setUp() {
+        Injector injector = Guice.createInjector(new NMEARouterModule());
+        ThingsFactory.setInjector(injector);
         conv = new NMEAMagnetic2TrueConverter(2016);
     }
 

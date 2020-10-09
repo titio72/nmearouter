@@ -31,7 +31,7 @@ public class NMEAProcessorSet {
         processors = new ArrayList<>();
     }
 
-    public List<Sentence> getSentences(Sentence sentence, String source) {
+    public List<Sentence> getSentences(Sentence sentence, String source) throws NMEARouterProcessorException {
         List<Sentence> toSend = new ArrayList<>();
         toSend.add(sentence);
         synchronized (processors) {

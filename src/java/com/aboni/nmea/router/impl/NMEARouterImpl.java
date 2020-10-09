@@ -24,6 +24,7 @@ import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -204,15 +205,22 @@ public class NMEARouterImpl implements NMEARouter {
                 routeToTarget(new RouterMessage[]{m});
             } else if (m.getPayload() instanceof Sentence) {
                 Sentence s = (Sentence) m.getPayload();
-                Collection<Sentence> toSend = processors.getSentences(s, m.getSource());
-                final RouterMessage[] messages = new RouterMessage[toSend.size()];
-                int counter = 0;
-                for (Sentence ss : toSend) {
-                    cache.onSentence(ss, m.getSource());
-                    RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
-                    messages[counter] = mm;
+                Collection<Sentence> toSend = null;
+                try {
+                    toSend = processors.getSentences(s, m.getSource());
+                } catch (NMEARouterProcessorException e) {
+                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("route message").wV("message", m.getPayload()).toString(), e);
                 }
-                routeToTarget(messages);
+                if (toSend != null) {
+                    final RouterMessage[] messages = new RouterMessage[toSend.size()];
+                    int counter = 0;
+                    for (Sentence ss : toSend) {
+                        cache.onSentence(ss, m.getSource());
+                        RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
+                        messages[counter] = mm;
+                    }
+                    routeToTarget(messages);
+                }
             }
         }
     }

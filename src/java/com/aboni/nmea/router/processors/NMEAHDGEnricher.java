@@ -19,8 +19,6 @@ import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.utils.DataEvent;
-import com.aboni.utils.Log;
-import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -46,26 +44,24 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
     private final boolean doHDM;
     private final boolean doHDT;
     private final NMEACache cache;
-    private final Log log;
 
     @Inject
-    public NMEAHDGEnricher(@NotNull Log log, @NotNull NMEACache cache) {
-        this(log, cache, true, true);
+    public NMEAHDGEnricher(@NotNull NMEACache cache) {
+        this(cache, true, true);
     }
 
-    public NMEAHDGEnricher(Log log, NMEACache cache, boolean hdm, boolean hdt) {
+    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt) {
         m = new NMEAMagnetic2TrueConverter();
-        this.log = log;
         this.cache = cache;
         this.doHDM = hdm;
         this.doHDT = hdt;
     }
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
             if (sentence instanceof HDGSentence) {
-                HDGSentence hdg = (HDGSentence)sentence;
+                HDGSentence hdg = (HDGSentence) sentence;
                 List<Sentence> out = new ArrayList<>(2);
                 boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDM) {
@@ -81,7 +77,7 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
                 return new Pair<>(Boolean.FALSE, new Sentence[]{});
             }
         } catch (Exception e) {
-            LogStringBuilder.start("HDGEnricher").wO("process sentence").wV("sentence", sentence).error(log, e);
+            throw new NMEARouterProcessorException("Cannot enrich heading \"" + sentence + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }

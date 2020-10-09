@@ -31,7 +31,7 @@ public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
 
     @Override
     public Pair<Boolean, Sentence[]> process(Sentence s, String src) {
-        if (fromTalker==null|| fromTalker.equals(s.getTalkerId())) {
+        if (fromTalker == null || fromTalker.equals(s.getTalkerId())) {
             s.setTalkerId(toTalker);
         }
         return new Pair<>(Boolean.TRUE, new Sentence[] {s});

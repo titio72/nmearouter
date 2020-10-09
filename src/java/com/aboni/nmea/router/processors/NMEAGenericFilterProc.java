@@ -15,11 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.utils.Log;
-import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -28,15 +26,13 @@ import javax.validation.constraints.NotNull;
 
 public class NMEAGenericFilterProc implements NMEAPostProcess {
 
-    private final Log log;
     private final NMEAFilter filter;
-    private final NMEACache cache;
+    private final TimestampProvider timestampProvider;
     private final RouterMessageFactory messageFactory;
 
     @Inject
-    public NMEAGenericFilterProc(@NotNull Log log, @NotNull NMEACache cache, @NotNull NMEAFilter filter, @NotNull RouterMessageFactory messageFactory) {
-        this.log = log;
-        this.cache = cache;
+    public NMEAGenericFilterProc(@NotNull TimestampProvider timestampProvider, @NotNull NMEAFilter filter, @NotNull RouterMessageFactory messageFactory) {
+        this.timestampProvider = timestampProvider;
         this.filter = filter;
         this.messageFactory = messageFactory;
     }
@@ -45,12 +41,11 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
     private static final Pair<Boolean, Sentence[]> KO = new Pair<>(false, null);
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
+    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
         try {
-            return (filter.match(messageFactory.createMessage(sentence, src, cache.getNow())) ? OK : KO);
+            return (filter.match(messageFactory.createMessage(sentence, src, timestampProvider.getNow())) ? OK : KO);
         } catch (Exception e) {
-            LogStringBuilder.start("FilterProc").wO("proc sentence").wV("sentence", sentence).error(log, e);
-            return KO;
+            throw new NMEARouterProcessorException("Error processing filter for sentence \"" + sentence + "\"", e);
         }
     }
 

@@ -51,12 +51,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     protected boolean onActivate() {
-        try {
-            tripManager.init();
-        } catch (TripManagerException e) {
-            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
-            return false;
-        }
         return true;
     }
 

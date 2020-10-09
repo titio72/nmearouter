@@ -17,7 +17,8 @@ package com.aboni.geo;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.ServerLog;
+import com.aboni.utils.LogAdmin;
+import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
@@ -31,7 +32,7 @@ public class NMEAMagnetic2TrueConverter {
     private final double year;
 
     public NMEAMagnetic2TrueConverter() {
-        geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
+        geo = new TSAGeoMag(Constants.WMM, ThingsFactory.getInstance(LogAdmin.class).getBaseLogger());
         pos = new Position(43.0, 10.0);
 
         OffsetDateTime odt = OffsetDateTime.now();
@@ -39,7 +40,7 @@ public class NMEAMagnetic2TrueConverter {
     }
 
     public NMEAMagnetic2TrueConverter(double year) {
-        geo = new TSAGeoMag(Constants.WMM, ServerLog.getLoggerAdmin().getBaseLogger());
+        geo = new TSAGeoMag(Constants.WMM, ThingsFactory.getInstance(LogAdmin.class).getBaseLogger());
         pos = new Position(43.0, 10.0);
         this.year = year;
     }

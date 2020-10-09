@@ -17,6 +17,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.impl.NMEASpeedFilter;
 import com.aboni.nmea.router.processors.*;
@@ -35,11 +36,12 @@ public class ProcessorsBuilder {
         List<NMEAPostProcess> res = new ArrayList<>();
         if (qos != null) {
             NMEACache cache = ThingsFactory.getInstance(NMEACache.class);
+            TimestampProvider timestampProvider = ThingsFactory.getInstance(TimestampProvider.class);
             for (String q : qos.getKeys()) {
                 switch (q) {
                     case "speed_filter":
                         log.info("QoS {Speed filter}");
-                        res.add(new NMEAGenericFilterProc(log, cache, ThingsFactory.getInstance(NMEASpeedFilter.class),
+                        res.add(new NMEAGenericFilterProc(timestampProvider, ThingsFactory.getInstance(NMEASpeedFilter.class),
                                 ThingsFactory.getInstance(RouterMessageFactory.class)));
                         break;
                     case "dpt":

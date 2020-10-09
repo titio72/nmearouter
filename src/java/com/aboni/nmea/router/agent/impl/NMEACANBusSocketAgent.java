@@ -167,6 +167,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
         } catch (PGNDataParseException e) {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "parsing").error(log, e);
+        } catch (Exception e) {
+            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, e);
         }
     }
 

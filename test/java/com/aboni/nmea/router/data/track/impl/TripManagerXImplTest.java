@@ -1,11 +1,15 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
+import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
 import com.aboni.utils.db.Event;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,11 +44,14 @@ public class TripManagerXImplTest {
 
     @Before
     public void setUp() throws Exception {
+        Injector injector = Guice.createInjector(new NMEARouterModule());
+        ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
         TrackTestTableManager.addTestData();
         trackWriter = new MockDBEventWriter();
         tripWriter = new MockDBEventWriter();
         tm = new TripManagerXImpl("trip_test", "track_test", trackWriter, tripWriter);
+        tm.init();
     }
 
     @After
@@ -61,7 +68,7 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testLoad() {
+    public void testLoad() throws TripManagerException {
         boolean atLeastOne = false;
         for (Object[] t : TrackTestTableManager.testTrips) {
             Trip test = TrackTestTableManager.getTrip(t);
@@ -74,34 +81,34 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testGetTripById() {
+    public void testGetTripById() throws TripManagerException {
         Trip t = tm.getTrip(136);
         Trip test = TrackTestTableManager.getTrip(136);
         assertTrips(test, t);
     }
 
     @Test
-    public void testGetTripById_notFound() {
+    public void testGetTripById_notFound() throws TripManagerException {
         Trip t = tm.getTrip(999);
         assertNull(t);
     }
 
     @Test
-    public void testGetTripByTimeExactStart() {
+    public void testGetTripByTimeExactStart() throws TripManagerException {
         Trip test = TrackTestTableManager.getTrip(135);
         Trip t = tm.getTrip(test.getStartTS());
         assertTrips(test, t);
     }
 
     @Test
-    public void testGetTripByTimeExactEnd() {
+    public void testGetTripByTimeExactEnd() throws TripManagerException {
         Trip test = TrackTestTableManager.getTrip(135);
         Trip t = tm.getTrip(test.getEndTS());
         assertTrips(test, t);
     }
 
     @Test
-    public void testGetTripByTimeMidOfaTrip() {
+    public void testGetTripByTimeMidOfaTrip() throws TripManagerException {
         Trip test = TrackTestTableManager.getTrip(135);
         Instant midOfTheTrip = Instant.ofEpochMilli((test.getEndTS().toEpochMilli() + test.getEndTS().toEpochMilli()) / 2);
         Trip t = tm.getTrip(midOfTheTrip);
@@ -109,21 +116,21 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testGetTripByTimeNoTripHere() {
+    public void testGetTripByTimeNoTripHere() throws TripManagerException {
         Instant betweenTwoTrips = Instant.parse("2020-03-01T00:00:00Z");
         Trip t = tm.getTrip(betweenTwoTrips);
         assertNull(t);
     }
 
     @Test
-    public void testGetTripByTimeBeforeAnyTrip() {
+    public void testGetTripByTimeBeforeAnyTrip() throws TripManagerException {
         Instant betweenTwoTrips = Instant.parse("2010-03-01T00:00:00Z");
         Trip t = tm.getTrip(betweenTwoTrips);
         assertNull(t);
     }
 
     @Test
-    public void testGetTripByTimeAfterAnyTrip() {
+    public void testGetTripByTimeAfterAnyTrip() throws TripManagerException {
         Instant betweenTwoTrips = Instant.parse("2020-03-30T00:00:00Z");
         Trip t = tm.getTrip(betweenTwoTrips);
         assertNull(t);
@@ -225,13 +232,13 @@ public class TripManagerXImplTest {
     }
 
     @Test
-    public void testList() {
+    public void testList() throws TripManagerException {
         List<Trip> l = tm.getTrips(false);
         assertEquals(8, l.size());
     }
 
     @Test
-    public void testListPerYear() {
+    public void testListPerYear() throws TripManagerException {
         List<Trip> l = tm.getTrips(2019, false);
         assertEquals(2, l.size());
     }

@@ -20,22 +20,17 @@ import java.util.List;
 
 public interface TripManagerX {
 
-    /**
-     * Initialize before using the interface
-     */
-    void init() throws TripManagerException;
-
     void onTrackPoint(TrackEvent point) throws TripManagerException;
 
-    Trip getTrip(Instant timestamp);
+    Trip getTrip(Instant timestamp) throws TripManagerException;
 
-    Trip getTrip(int id);
+    Trip getTrip(int id) throws TripManagerException;
 
     void deleteTrip(int id) throws TripManagerException;
 
     void setTripDescription(int id, String description) throws TripManagerException;
 
-    List<Trip> getTrips(boolean sortDescendant);
+    List<Trip> getTrips(boolean sortDescendant) throws TripManagerException;
 
-    List<Trip> getTrips(int year, boolean sortDescendant);
+    List<Trip> getTrips(int year, boolean sortDescendant) throws TripManagerException;
 }

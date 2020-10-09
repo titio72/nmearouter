@@ -2,7 +2,7 @@ package com.aboni.nmea.router.filters;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.processors.NMEAHDGEnricher;
-import com.aboni.utils.ConsoleLog;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.DataEvent;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -54,10 +54,10 @@ public class NMEAHDGEnricherTest {
             return System.currentTimeMillis();
         }
     }
-	
-	@Test
-	public void testEnrichVariation() {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), false, false);
+
+    @Test
+    public void testEnrichVariation() throws NMEARouterProcessorException {
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, false);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -65,9 +65,9 @@ public class NMEAHDGEnricherTest {
         assertEquals(2.5, hdg.getVariation(), 0.1);
     }
 
-	@Test
-	public void testEnrichVariationFail() {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(false), false, false);
+    @Test
+    public void testEnrichVariationFail() throws NMEARouterProcessorException {
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(false), false, false);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -75,9 +75,9 @@ public class NMEAHDGEnricherTest {
         assertEquals(2.5, hdg.getVariation(), 0.1);
     }
 
-	@Test
-	public void testHDT() {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), false, true);
+    @Test
+    public void testHDT() throws NMEARouterProcessorException {
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, true);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -87,9 +87,9 @@ public class NMEAHDGEnricherTest {
         assertEquals(322.5, hdt.getHeading(), 0.1);
     }
 
-	@Test
-	public void testHDM() {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(ConsoleLog.getLogger(), new MyCache(), true, false);
+    @Test
+    public void testHDM() throws NMEARouterProcessorException {
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), true, false);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);

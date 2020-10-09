@@ -21,7 +21,6 @@ import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
 import com.aboni.utils.LogAdmin;
-import com.aboni.utils.ServerLog;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -115,21 +114,22 @@ public class StartRouter {
 
 
     private static void configureLog(LogLevelType level) {
+        LogAdmin logger = ThingsFactory.getInstance(LogAdmin.class);
         switch (level) {
             case DEBUG:
-                ServerLog.getLoggerAdmin().setDebug();
+                logger.setDebug();
                 break;
             case WARNING:
-                ServerLog.getLoggerAdmin().setWarning();
+                logger.setWarning();
                 break;
             case ERROR:
-                ServerLog.getLoggerAdmin().setError();
+                logger.setError();
                 break;
             case NONE:
-                ServerLog.getLoggerAdmin().setNone();
+                logger.setNone();
                 break;
             default:
-                ServerLog.getLoggerAdmin().setInfo();
+                logger.setInfo();
                 break;
         }
     }
