@@ -22,11 +22,11 @@ public class AISTargetsService extends JSONWebService {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public AISTargetsService(@NotNull NMEARouter router, @NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
+    public AISTargetsService(@NotNull final NMEARouter router, @NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
         super(log);
         this.timestampProvider = tp;
-        findService(router);
         setLoader((ServiceConfig config) -> {
+            findService(router);
             if (targetsProvider != null) {
                 log.info(LogStringBuilder.start("WebService").wO("invoke").wV("service", "AISTarget").toString());
                 List<AISPositionReport> reports = targetsProvider.getAISTargets();
@@ -120,11 +120,13 @@ public class AISTargetsService extends JSONWebService {
     }
 
     private void findService(@NotNull NMEARouter router) {
-        for (String ag_id : router.getAgents()) {
-            NMEAAgent ag = router.getAgent(ag_id);
-            if (ag instanceof AISTargets) {
-                targetsProvider = (AISTargets) ag;
-                break;
+        if (targetsProvider==null) {
+            for (String ag_id : router.getAgents()) {
+                NMEAAgent ag = router.getAgent(ag_id);
+                if (ag instanceof AISTargets) {
+                    targetsProvider = (AISTargets) ag;
+                    break;
+                }
             }
         }
     }

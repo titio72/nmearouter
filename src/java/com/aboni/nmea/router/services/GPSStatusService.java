@@ -20,41 +20,52 @@ import java.util.List;
 
 public class GPSStatusService extends JSONWebService {
 
+    private final Log log;
     private GPSStatus statusProvider;
+    private final NMEARouter router;
+
+    private GPSStatus findService() {
+        if (statusProvider==null) {
+            for (String ag_id : router.getAgents()) {
+                NMEAAgent ag = router.getAgent(ag_id);
+                if (ag instanceof GPSStatus) {
+                    statusProvider = (GPSStatus) ag;
+                    break;
+                }
+            }
+        }
+        return statusProvider;
+    }
 
     @Inject
     public GPSStatusService(@NotNull NMEARouter router, @NotNull Log log) {
         super(log);
-        for (String ag_id : router.getAgents()) {
-            NMEAAgent ag = router.getAgent(ag_id);
-            if (ag instanceof GPSStatus) {
-                statusProvider = (GPSStatus) ag;
-                break;
-            }
-        }
+        this.log = log;
+        this.router = router;
         setLoader((ServiceConfig config) -> {
-            if (statusProvider != null) {
+            GPSStatus st = findService();
+            if (st != null) {
                 JSONObject res = new JSONObject();
                 List<JSONObject> l = new ArrayList<>();
-                for (SatInfo s : statusProvider.getSatellites()) {
+                for (SatInfo s : st.getSatellites()) {
                     l.add(getJsonSat(s));
                 }
                 res.put("satsList", new JSONArray(l));
 
-                GeoPositionT p = statusProvider.getPosition();
+                GeoPositionT p = st.getPosition();
                 if (p != null) {
                     res.put("latitude", Utils.formatLatitude(p.getLatitude()));
                     res.put("longitude", Utils.formatLongitude(p.getLongitude()));
                 }
 
-                Instant time = statusProvider.getPositionTime();
+                Instant time = st.getPositionTime();
                 if (time != null) {
                     res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(time));
                 }
-                setDoubleValue(res, statusProvider.getCOG(), "COG");
-                setDoubleValue(res, statusProvider.getSOG(), "SOG");
-                setDoubleValue(res, statusProvider.getHDOP(), "HDOP");
-                res.put("fix", statusProvider.getGPSFix());
+                setDoubleValue(res, st.getCOG(), "COG");
+                setDoubleValue(res, st.getSOG(), "SOG");
+                setDoubleValue(res, st.getHDOP(), "HDOP");
+                res.put("fix", st.getGPSFix());
                 return res;
             }
             return null;

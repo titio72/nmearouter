@@ -48,7 +48,13 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
         this.timestampProvider = timestampProvider;
     }
 
-    @OnN2KMessage
+    @OnRouterMessage
+    public void onRouterMessage(RouterMessage m) {
+        if (m.getN2KMessage()!=null) {
+            onMessage(m.getN2KMessage());
+        }
+    }
+
     public void onMessage(N2KMessage message) {
         if (message instanceof AISPositionReport) {
             String mmsi = ((AISPositionReport) message).getMMSI();
