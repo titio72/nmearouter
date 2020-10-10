@@ -81,60 +81,18 @@ public class NMEAAgentImpl implements NMEAAgent {
         public void pushMessage(RouterMessage mm) {
             try {
                 if (mm != null && isStarted()) {
-                    lazyLoadListenerWrapper();
-                    if (handleRouterMsg(mm)) return;
-                    if (handleNMEA0183(mm)) return;
-                    if (handleNMEA2000(mm)) return;
-                    if (handleJSON(mm)) return;
-                    log.warning(getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("receive")
-                            .wV("error", "Unknown message type").wV("message", mm.getPayload()).toString());
+                    getListenerWrapper().dispatchAll(mm);
                 }
             } catch (Exception t) {
                 log.warning(getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("receive").toString(), t);
             }
         }
 
-        private boolean handleJSON(RouterMessage mm) {
-            if (mm.getPayload() instanceof JSONObject) {
-                if (listenerWrapper.isJSON()) listenerWrapper.onSentence((JSONObject) mm.getPayload(), mm.getSource());
-                return true;
-            }
-            return false;
-        }
-
-        private boolean handleRouterMsg(RouterMessage mm) {
-            if (listenerWrapper.isRouterMessage()) {
-                listenerWrapper.onSentence(mm);
-                return true;
-            }
-            return false;
-        }
-
-        private boolean handleNMEA2000(RouterMessage mm) {
-            if (mm.getPayload() instanceof N2KMessage) {
-                if (listenerWrapper.isN2K() && (getFilter()==null || getFilter().match(mm))) {
-                    listenerWrapper.onSentence((N2KMessage) mm.getPayload(), mm.getSource());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private boolean handleNMEA0183(RouterMessage mm) {
-            if (mm.getPayload() instanceof Sentence) {
-                Sentence s = (Sentence) mm.getPayload();
-                if (listenerWrapper.isNMEA() && (getFilter() == null || getFilter().match(mm))) {
-                    listenerWrapper.onSentence(s, mm.getSource());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private void lazyLoadListenerWrapper() {
+        private ListenerWrapper getListenerWrapper() {
             if (listenerWrapper == null) {
                 listenerWrapper = new ListenerWrapper(NMEAAgentImpl.this, log);
             }
+            return listenerWrapper;
         }
     }
 

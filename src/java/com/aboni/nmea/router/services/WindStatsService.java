@@ -16,7 +16,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.nmea.router.data.meteo.WindStats;
 import com.aboni.nmea.router.data.meteo.WindStatsReader;
@@ -34,7 +33,7 @@ import java.util.List;
 public class WindStatsService extends JSONWebService {
 
     @Inject
-    public WindStatsService(@NotNull NMEARouter router, @NotNull final WindStatsReader reader, @NotNull Log log) {
+    public WindStatsService(@NotNull final WindStatsReader reader, @NotNull Log log) {
         super(log);
         setLoader((ServiceConfig config) -> {
             Instant from = config.getParamAsInstant("from", Instant.now().minusSeconds(86400L), 0);

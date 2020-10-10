@@ -25,14 +25,10 @@ import javax.validation.constraints.NotNull;
 
 public class TrackAnalyticsService extends JSONWebService {
 
-    private @Inject
-    QueryFactory queryFactory;
-    private @Inject
-    JSONTrackAnalytics analytics;
-
     @Inject
-    public TrackAnalyticsService(@NotNull Log log) {
+    public TrackAnalyticsService(@NotNull Log log, @NotNull QueryFactory queryFactory, @NotNull JSONTrackAnalytics analytics) {
         super(log);
+
         setLoader((ServiceConfig config) -> {
             try {
                 Query q = queryFactory.getQuery(config);
@@ -42,5 +38,4 @@ public class TrackAnalyticsService extends JSONWebService {
             }
         });
     }
-
 }

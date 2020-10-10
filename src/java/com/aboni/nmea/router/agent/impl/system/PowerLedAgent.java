@@ -88,7 +88,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String source) {
+    public void onSentence(Sentence s) {
         if (s instanceof PositionSentence) {
             lastGps = timestampProvider.getNow();
             powerGPSUp();

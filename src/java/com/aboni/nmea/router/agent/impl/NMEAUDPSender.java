@@ -147,7 +147,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String src) {
+    public void onSentence(Sentence s) {
         String toSend = getOutSentence(s);
         try {
             updateStats(toSend);

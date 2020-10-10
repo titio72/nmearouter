@@ -20,10 +20,13 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.services.*;
+import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
+import net.sf.marineapi.nmea.sentence.Sentence;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -45,12 +48,14 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     private final Log log;
     private final NMEAStream stream;
+    private final NMEA2JSONb jsonConverter;
 
     @Inject
     public WebInterfaceAgent(@NotNull TimestampProvider tp, @NotNull NMEAStream stream, @NotNull Log log) {
         super(log, tp, false, true);
         this.log = log;
         this.stream = stream;
+        this.jsonConverter = new NMEA2JSONb();
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {
@@ -144,6 +149,58 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentenceMessage(RouterMessage msg) {
-        stream.pushSentence(msg);
+        AutoJSONMessage m = new AutoJSONMessage(msg);
+        stream.pushSentence(m);
+    }
+
+    /**
+     * Wraps a RouterMessage and automatically convert to JSON all the NMEA sentences (note: N2K are ignored)
+     */
+    private class AutoJSONMessage implements RouterMessage {
+
+        private final RouterMessage message;
+        private JSONObject jsonMessage;
+
+        private AutoJSONMessage(RouterMessage message) {
+            this.message = message;
+            this.jsonMessage = (message.getPayload() instanceof JSONObject)? (JSONObject) message.getPayload() :null;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return message.getTimestamp();
+        }
+
+        @Override
+        public String getSource() {
+            return message.getSource();
+        }
+
+        @Override
+        public Object getPayload() {
+            return getJSON();
+        }
+
+        @Override
+        public N2KMessage getN2KMessage() {
+            return null;
+        }
+
+        @Override
+        public Sentence getSentence() {
+            return null;
+        }
+
+        @Override
+        public JSONObject getJSON() {
+            if (jsonMessage==null && message.getSentence()!=null) {
+                try {
+                    jsonMessage = jsonConverter.convert(message.getSentence());
+                } catch (Exception e) {
+                    getLogBuilder().wO("convert to JSON").wV("sentence", message.getSentence()).error(log, e);
+                }
+            }
+            return jsonMessage;
+        }
     }
 }

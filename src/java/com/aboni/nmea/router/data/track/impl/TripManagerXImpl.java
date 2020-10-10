@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TripManagerXImpl implements TripManagerX {
 
-    public static final String ERROR_LOADING_TRIPS = "Error loading trips";
     private final TripArchive archive;
     private final String tripTable;
     private final String trackTable;

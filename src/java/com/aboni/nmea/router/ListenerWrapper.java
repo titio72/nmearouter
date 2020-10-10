@@ -75,20 +75,13 @@ public class ListenerWrapper {
         }
     }
 
-    public void onSentence(RouterMessage m) {
-        dispatch(m, null, listenersMsg);
-    }
-
-    public void onSentence(Sentence s, String src) {
-        dispatch(s, src, listeners);
-    }
-
-    public void onSentence(N2KMessage s, String src) {
-        dispatch(s, src, listenersN2K);
-    }
-
-    public void onSentence(JSONObject s, String src) {
-        dispatch(s, src, listenersJSON);
+    public void dispatchAll(RouterMessage message) {
+        // it is important to check if the listeners set is empty because the getXXX may lazy load stuff, in this way
+        // we avoid executing code that is not needed (because no one would listen)
+        if (!listenersMsg.isEmpty()) dispatch(message, message.getSource(), listenersMsg);
+        if (message.getN2KMessage()!=null && !listenersN2K.isEmpty()) dispatch(message.getN2KMessage(), message.getSource(), listenersN2K);
+        if (message.getSentence()!=null && !listeners.isEmpty()) dispatch(message.getSentence(), message.getSource(), listeners);
+        if (message.getJSON()!=null && !listenersJSON.isEmpty()) dispatch(message.getJSON(), message.getSource(), listenersJSON);
     }
 
     private <T> void dispatch(T payload, String src, List<Method> listenerMethods) {
@@ -104,21 +97,5 @@ public class ListenerWrapper {
                 }
             }
         }
-    }
-
-    public boolean isRouterMessage() {
-        return !listenersMsg.isEmpty();
-    }
-
-    public boolean isJSON() {
-        return !listenersJSON.isEmpty();
-    }
-
-    public boolean isNMEA() {
-        return !listeners.isEmpty();
-    }
-
-    public boolean isN2K() {
-        return !listenersN2K.isEmpty();
     }
 }

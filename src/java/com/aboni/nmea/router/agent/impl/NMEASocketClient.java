@@ -137,7 +137,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String source) {
+    public void onSentence(Sentence s) {
         try {
             if (socket != null && transmit) {
                 socket.getOutputStream().write(s.toSentence().getBytes());

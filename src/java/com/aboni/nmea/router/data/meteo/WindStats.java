@@ -36,10 +36,6 @@ public class WindStats {
         this.t = new long[sectors];
     }
 
-    public WindStats() {
-        this(360);
-    }
-
     public void addSample(int intervalInSecond, double angle, double windSpeedInKnots) {
         angle = Utils.normalizeDegrees0To360(angle);
         int iAngle = (int) Math.round(angle / sectorSize) % sectors;

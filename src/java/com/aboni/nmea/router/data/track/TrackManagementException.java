@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track;
 
 public class TrackManagementException extends Exception {
+
     public TrackManagementException(String msg) {
         super(msg);
     }

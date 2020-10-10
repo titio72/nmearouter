@@ -20,7 +20,6 @@ import java.util.List;
 
 public class GPSStatusService extends JSONWebService {
 
-    private final Log log;
     private GPSStatus statusProvider;
     private final NMEARouter router;
 
@@ -40,7 +39,6 @@ public class GPSStatusService extends JSONWebService {
     @Inject
     public GPSStatusService(@NotNull NMEARouter router, @NotNull Log log) {
         super(log);
-        this.log = log;
         this.router = router;
         setLoader((ServiceConfig config) -> {
             GPSStatus st = findService();

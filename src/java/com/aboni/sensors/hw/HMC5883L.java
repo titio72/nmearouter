@@ -30,7 +30,6 @@ public class HMC5883L {
 
     public static final int HMC5883_I2C_ADDRESS = 0x1e;
 
-    @SuppressWarnings("unused")
     public static class Scale {
         private final double value;
         private final int reg;
@@ -58,7 +57,6 @@ public class HMC5883L {
         public static final Scale Gauss_8_10 = new Scale(4.65, 0x07);
     }
 
-    @SuppressWarnings("unused")
     public static class Constants {
         private Constants() {}
 

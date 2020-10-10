@@ -16,7 +16,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -54,19 +53,6 @@ public interface ServiceConfig {
             }
         } else {
             return defaultValue;
-        }
-    }
-
-    default LocalDate getParamAsDate(String param, LocalDate def) {
-        String f = getParameter(param);
-        if (f == null || f.length() == 0) {
-            return def;
-        } else {
-            try {
-                return LocalDate.parse(f, DateTimeFormatter.ofPattern("yyyyMMdd"));
-            } catch (DateTimeParseException e) {
-                return def;
-            }
         }
     }
 

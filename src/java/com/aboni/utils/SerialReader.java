@@ -14,6 +14,7 @@ public class SerialReader {
 
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
+    private static final int DEFAUL_BUFFER_SIZE = 256;
 
     public class Stats {
         private long bytesRead;
@@ -21,23 +22,18 @@ public class SerialReader {
         private long lastBytesReadReset;
         private int timeouts;
 
-        public long getBytesRead() {
-            synchronized (this) {
-                return bytesRead;
-            }
-        }
-
-        public long getOverFlows() {
-            synchronized (this) {
-                return overFlows;
-            }
-        }
-
         public void reset() {
             synchronized (this) {
                 bytesRead = 0;
                 overFlows = 0;
                 lastBytesReadReset = ts.getNow();
+            }
+        }
+
+        public String toString(long t) {
+            synchronized (this) {
+                return String.format("Bytes {%d} Overflows {%d} Timeouts {%d} Period {%d} Last read {%d}",
+                        bytesRead, overFlows, timeouts, t - lastBytesReadReset, t - lastSuccessfulLoop);
             }
         }
 
@@ -53,26 +49,7 @@ public class SerialReader {
             }
         }
 
-        public long getLastResetTime() {
-            synchronized (this) {
-                return lastBytesReadReset;
-            }
-        }
-
-        public int getTimeouts() {
-            synchronized (this) {
-                return timeouts;
-            }
-        }
-
-        public String toString(long t) {
-            synchronized (this) {
-                return String.format("Bytes {%d} Overflows {%d} Timeouts {%d} Period {%d} Last read {%d}",
-                        bytesRead, overFlows, timeouts, t - lastBytesReadReset, t - lastSuccessfulLoop);
-            }
-        }
-
-        public void incrementTimeouts(int i) {
+        private void incrementTimeouts(int i) {
             synchronized (this) {
                 timeouts += i;
             }
@@ -86,7 +63,7 @@ public class SerialReader {
     private static class Config {
         private String portName;
         private int speed;
-        private int bufferSize = 256;
+        private int bufferSize = DEFAUL_BUFFER_SIZE;
 
         String getPortName() {
             return portName;
@@ -135,8 +112,8 @@ public class SerialReader {
         this(ThingsFactory.getInstance(TimestampProvider.class), logger);
     }
 
-
     public void setup(String portName, int speed, ReaderCallback callback) {
+        setup(portName, speed, DEFAUL_BUFFER_SIZE, callback);
         config.setPortName(portName);
         config.setSpeed(speed);
         this.callback = callback;
@@ -145,7 +122,7 @@ public class SerialReader {
     public void setup(String portName, int speed, int bufferSize, ReaderCallback callback) {
         config.setPortName(portName);
         config.setSpeed(speed);
-        config.bufferSize = bufferSize;
+        config.setBufferSize(bufferSize);
         this.callback = callback;
     }
 
@@ -190,7 +167,7 @@ public class SerialReader {
     private void startReader() {
         Thread thread = new Thread(() -> {
             int offset = 0;
-            int[] b = new int[config.bufferSize];
+            int[] b = new int[config.getBufferSize()];
             while (run.get()) {
                 try {
                     SerialPort p = getPort();

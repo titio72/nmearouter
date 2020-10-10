@@ -22,7 +22,6 @@ import org.json.JSONObject;
 
 public class RouterMessageImpl<T> implements RouterMessage {
 
-    public static final byte INVALID = 0;
     public static final byte N2K = 1;
     public static final byte NMEA = 2;
     public static final byte JSON = 3;

@@ -21,7 +21,6 @@ public class N2KFastCacheImpl implements N2KFastCache {
     public static final String MESSAGE_KEY_NAME = "message";
     public static final String FAST_MESSAGE_HANDLING_KEY_NAME = "fast message handling";
     public static final String ERROR_TYPE_KEY_NAME = "error type";
-    private final Log log;
 
     private static class Payload {
         N2KMessageParser parser;
@@ -47,16 +46,17 @@ public class N2KFastCacheImpl implements N2KFastCache {
         }
     }
 
-    private final Map<N2KFastEnvelope, Payload> cache = new HashMap<>();
-
     private N2KMessageCallback callback;
 
     private final TimestampProvider timestampProvider;
     private final N2KMessageFactory messageFactory;
+    private final Log log;
+    private final Map<N2KFastEnvelope, Payload> cache;
 
     @Inject
     public N2KFastCacheImpl(@NotNull Log log, TimestampProvider tsp, @NotNull N2KMessageFactory messageFactory) {
-        timestampProvider = tsp;
+        this.cache = new HashMap<>();
+        this.timestampProvider = tsp;
         this.log = log;
         this.messageFactory = messageFactory;
     }

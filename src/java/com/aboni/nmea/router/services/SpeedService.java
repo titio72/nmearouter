@@ -29,11 +29,8 @@ public class SpeedService extends JSONWebService {
 
     private static final int DEFAULT_MAX_SAMPLES = 500;
 
-    private @Inject
-    @Named(Constants.TAG_SPEED)
-    SampledQueryConf conf;
-    private @Inject
-    QueryFactory queryFactory;
+    private final SampledQueryConf conf;
+    private final QueryFactory queryFactory;
     private SampledQuery sampledQuery;
 
     private final Log log;
@@ -117,9 +114,11 @@ public class SpeedService extends JSONWebService {
     }
 
     @Inject
-    public SpeedService(@NotNull Log log) {
+    public SpeedService(@NotNull Log log, @NotNull QueryFactory queryFactory, @Named(Constants.TAG_SPEED) SampledQueryConf conf) {
         super(log);
         this.log = log;
+        this.queryFactory = queryFactory;
+        this.conf = conf;
         setLoader(this::getResult);
     }
 

@@ -18,11 +18,8 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -32,20 +29,26 @@ import java.util.Map;
 public class NMEAStreamImpl implements NMEAStream {
 
     private final Map<Object, ListenerWrapper> annotatedListeners;
-    private final NMEA2JSONb jsonConverter;
     private final Log log;
 
     @Inject
     public NMEAStreamImpl(@NotNull Log log) {
-        annotatedListeners = new HashMap<>();
-        jsonConverter = new NMEA2JSONb();
+        this.annotatedListeners = new HashMap<>();
         this.log = log;
     }
 
     @Override
-    public void pushSentence(RouterMessage msg) {
-        synchronized (this) {
-            push(msg);
+    public void pushSentence(RouterMessage message) {
+        if (message!=null) {
+            synchronized (annotatedListeners) {
+                for (ListenerWrapper i : annotatedListeners.values()) {
+                    try {
+                        i.dispatchAll(message);
+                    } catch (Exception e) {
+                        log.warning(LogStringBuilder.start("Stream").wO("push message").toString(), e);
+                    }
+                }
+            }
         }
 	}
 
@@ -63,42 +66,10 @@ public class NMEAStreamImpl implements NMEAStream {
 		}
 	}
 
-	private void push(RouterMessage message) {
-		synchronized (annotatedListeners) {
-			Object payload = message.getPayload();
-			JSONObject msg = (payload instanceof JSONObject)?(JSONObject)payload:null;
-			Sentence s = (payload instanceof Sentence)?(Sentence)payload:null;
-			for (ListenerWrapper i: annotatedListeners.values()) {
-                try {
-                    sendNMEASentence(message, s, i);
-                    msg = sendJsonObject(msg, s, message.getSource(), i);
-                } catch (Exception e) {
-                    log.warning(LogStringBuilder.start("Stream").wO("push message").wV("listener", s).toString(), e);
-                }
-            }
+    @Override
+    public int getSubscribersCount() {
+        synchronized (annotatedListeners) {
+            return annotatedListeners.size();
         }
     }
-
-    private JSONObject sendJsonObject(JSONObject msg, Sentence s, String src, ListenerWrapper i) {
-        if (i.isJSON()) {
-            msg = getJsonObject(msg, s);
-            if (msg != null) {
-                i.onSentence(msg, src);
-            }
-        }
-        return msg;
-    }
-
-    private void sendNMEASentence(RouterMessage message, Sentence s, ListenerWrapper i) {
-		if (i.isNMEA() && s != null) {
-			i.onSentence(s, message.getSource());
-		}
-	}
-
-	private JSONObject getJsonObject(JSONObject msg, Sentence s) {
-		if (msg==null && s!=null) {
-			msg = jsonConverter.convert(s);
-		}
-		return msg;
-	}
 }

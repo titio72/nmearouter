@@ -20,7 +20,6 @@ import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 
 import java.io.IOException;
 
-@SuppressWarnings("unused")
 public class ADS1115 {
 
 
@@ -116,7 +115,6 @@ public class ADS1115 {
             ADS1X15_REG_CONFIG_MUX_SINGLE_3
     };
 
-    @SuppressWarnings("unused")
     protected enum ProgrammableGainAmplifierValue{
         PGA_6_144V(6.144,ADS1X15_REG_CONFIG_PGA_6_144V),  // +/-6.144V range
         PGA_4_096V(4.096,ADS1X15_REG_CONFIG_PGA_4_096V),  // +/-4.096V range

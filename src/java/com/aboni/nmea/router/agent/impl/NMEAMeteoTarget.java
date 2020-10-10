@@ -144,7 +144,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String source) {
+    public void onSentence(Sentence s) {
         try {
             if (Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
                 if (s instanceof MTASentence) {

@@ -22,7 +22,6 @@ public class Constants {
 
     public static final String LOG = "log/router.log";
     public static final String CONF_DIR = "conf";
-    public static final String ROUTER_CONF = CONF_DIR + "/router.xml";
     public static final String ROUTER_CONF_JSON = CONF_DIR + "/router.json";
     public static final String WMM = CONF_DIR + "/WMM.cof";
     public static final String DEVIATION = CONF_DIR + "/deviation.csv";
@@ -35,7 +34,6 @@ public class Constants {
     public static final String TAG_METEO = "meteo";
     public static final String TAG_AGENT = "agent";
 
-    public static final String TAG_UI_STRING = "ui";
     public static final String TAG_JSON = "json";
 
 }

@@ -5,7 +5,6 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
-import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -39,7 +38,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private long lastStats;
     private String description;
     private final AtomicBoolean run = new AtomicBoolean();
-    private boolean debug = false;
+    private static final boolean DEBUG = false;
 
     private class Stats {
         long messages;
@@ -75,8 +74,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     @Inject
     public NMEACANBusSocketAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
-                                 @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
-                                 @NotNull N2KMessageFactory messageFactory) {
+                                 @NotNull N2KMessage2NMEA0183 converter, @NotNull N2KMessageFactory messageFactory) {
         super(log, tp, true, false);
         this.log = log;
         this.timestampProvider = tp;
@@ -90,15 +88,12 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     private void onReceive(@NotNull N2KMessage msg) {
         stats.incrementMessages();
-        if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
-                && messageFactory.isSupported(msg.getHeader().getPgn())) {
-            stats.incrementAccepted();
-            notify(msg);
-            if (converter != null) {
-                Sentence[] s = converter.getSentence(msg);
-                if (s != null) {
-                    for (Sentence ss : s) notify(ss);
-                }
+        stats.incrementAccepted();
+        notify(msg);
+        if (converter != null) {
+            Sentence[] s = converter.getSentence(msg);
+            if (s != null) {
+                for (Sentence ss : s) notify(ss);
             }
         }
     }
@@ -135,9 +130,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 Duration timeout = Duration.ofMillis(50);
                 channel.setOption(SO_RCVTIMEO, timeout);
                 Thread t = new Thread(() -> {
-                    byte[] data = new byte[32];
                     while (run.get()) {
-                        readFrame(data);
+                        readFrame();
                     }
                 });
                 t.start();
@@ -152,13 +146,14 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         return false;
     }
 
-    private void readFrame(byte[] data) {
+    private void readFrame() {
         try {
             CanFrame frame = channel.read();
+            byte[] data = new byte[frame.getDataLength()];
             frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            if (h.getDest()==0xFF && messageFactory.isSupported(h.getPgn())) {
-                N2KMessage msg = messageFactory.newInstance(h, data);
+            if (srcFilter.accept(h.getSource(), h.getPgn()) && messageFactory.isSupported(h.getPgn()) && h.getDest()==0xFF) {
+                N2KMessage msg = messageFactory.newUntypedInstance(h, data);
                 fastCache.onMessage(msg);
             }
         } catch (LinuxNativeOperationException e) {
@@ -167,11 +162,9 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             }
         } catch (IOException e) {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
-        } catch (PGNDataParseException e) {
-            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "parsing").error(log, e);
-        } catch (Exception ignore) {
-            if (debug) {
-                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, ignore);
+        } catch (Exception e) {
+            if (DEBUG) {
+                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, e);
             }
         }
     }

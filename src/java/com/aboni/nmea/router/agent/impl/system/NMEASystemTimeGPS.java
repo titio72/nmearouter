@@ -46,7 +46,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String src) {
+    public void onSentence(Sentence s) {
         systemTimeCHecker.checkAndSetTime(s);
     }
 

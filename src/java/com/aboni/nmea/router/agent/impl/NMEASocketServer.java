@@ -217,7 +217,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String src) {
+    public void onSentence(Sentence s) {
         synchronized (clients) {
             if (serializer != null && isTarget() && !clients.isEmpty()) {
                 String output = serializer.getOutSentence(s);

@@ -293,7 +293,7 @@ public class NMEASerial extends NMEAAgentImpl {
     }
 
     @OnSentence
-    public void onSentence(Sentence s, String src) {
+    public void onSentence(Sentence s) {
         if (run.get() && config.isTransmit()) {
             String strSentence = s.toSentence() + "\r\n";
             byte[] b = strSentence.getBytes();

@@ -140,13 +140,11 @@ public class NMEARouterDefaultBuilderImpl implements NMEARouterBuilder {
 
     private boolean handleActivation(NMEAAgent agent) {
         boolean active = false;
-        if (agentStatusManager != null) {
-            AgentStatusManager.STATUS requestedStatus = agentStatusManager.getStartMode(agent.getName());
-            if (requestedStatus == STATUS.UNKNOWN) {
-                agentStatusManager.setStartMode(agent.getName(), STATUS.MANUAL);
-            } else {
-                active = (requestedStatus == STATUS.AUTO);
-            }
+        AgentStatusManager.STATUS requestedStatus = agentStatusManager.getStartMode(agent.getName());
+        if (requestedStatus == STATUS.UNKNOWN) {
+            agentStatusManager.setStartMode(agent.getName(), STATUS.MANUAL);
+        } else {
+            active = (requestedStatus == STATUS.AUTO);
         }
         return active;
     }

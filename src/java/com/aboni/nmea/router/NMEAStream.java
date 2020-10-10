@@ -44,4 +44,5 @@ public interface NMEAStream {
      */
     void unsubscribe(Object observer);
 
+    int getSubscribersCount();
 }
