@@ -54,7 +54,7 @@ public class FanAgent extends NMEAAgentImpl {
 
     @Override
     protected boolean onActivate() {
-        return true;
+        return CPUTemp.getInstance().isSupported();
     }
 
     @Override

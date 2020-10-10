@@ -60,6 +60,10 @@ public class CPUTemp {
         return 0;
     }
 
+    public boolean isSupported() {
+        return arm;
+    }
+
     public double getTemp() {
         synchronized (this) {
             if (arm) {

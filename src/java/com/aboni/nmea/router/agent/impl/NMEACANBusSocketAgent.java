@@ -157,7 +157,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             CanFrame frame = channel.read();
             frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            if (h.getDest()==0xFF) {
+            if (h.getDest()==0xFF && messageFactory.isSupported(h.getPgn())) {
                 N2KMessage msg = messageFactory.newInstance(h, data);
                 fastCache.onMessage(msg);
             }

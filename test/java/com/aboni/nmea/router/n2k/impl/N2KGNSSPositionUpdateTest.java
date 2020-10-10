@@ -11,6 +11,21 @@ import static org.junit.Assert.assertTrue;
 
 public class N2KGNSSPositionUpdateTest {
 
+
+    @Test
+    public void test1() {
+        byte[] bbb = new byte[] {
+                (byte)0x45,(byte)0x70,(byte)0x48,(byte)0x50,(byte)0x77,(byte)0xd5,(byte)0x2b,(byte)0x00,(byte)0x31,(byte)0xe6,(byte)0xb2,
+                (byte)0xbc,(byte)0xbc,(byte)0x0f,(byte)0x06,(byte)0x80,(byte)0xd5,(byte)0xc4,(byte)0x57,(byte)0x28,(byte)0x01,(byte)0x6d,
+                (byte)0x01,(byte)0xff,(byte)0xff,(byte)0xff,(byte)0xff,(byte)0xff,(byte)0xff,(byte)0xff,(byte)0x7f,(byte)0x10,(byte)0xfd,
+                (byte)0x11,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0xff,(byte)0xff,
+                (byte)0xff,(byte)0xff,(byte)0xff
+        };
+        N2KGNSSPositionUpdate s = new N2KGNSSPositionUpdateImpl(bbb);
+        System.out.println(s);
+    }
+
+
     @Test
     public void testGNSSUpdateOk() {
         N2KGNSSPositionUpdate s = new N2KGNSSPositionUpdateImpl(new byte[]{
@@ -55,3 +70,5 @@ public class N2KGNSSPositionUpdateTest {
         assertTrue(Double.isNaN(d));
     }
 }
+
+

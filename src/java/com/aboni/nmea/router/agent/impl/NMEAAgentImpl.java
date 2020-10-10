@@ -309,9 +309,6 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void notify(N2KMessage m) {
         if (isStarted()) {
-            log.debug(
-                    getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("notify")
-                            .wV("msgType", "N2K").wV("message", m).toString());
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }
     }

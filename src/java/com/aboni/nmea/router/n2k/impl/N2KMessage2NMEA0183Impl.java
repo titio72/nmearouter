@@ -66,6 +66,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     return handleHeading((N2KHeading) message); // Vessel Heading
                 case 129029:
                     return handlePosition((N2KGNSSPositionUpdate) message); // Position & time
+                case 129025:
+                    return handlePositionR((N2KPositionRapid) message); // Position & time
                 case 129540:
                     return handleSatellites((N2KSatellites) message); // Sats to GSV
                 case 129026:
@@ -86,6 +88,10 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
                     return TEMPLATE;
             }
         }
+        return TEMPLATE;
+    }
+
+    private Sentence[] handlePositionR(N2KPositionRapid message) {
         return TEMPLATE;
     }
 
@@ -165,7 +171,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
             vtg.setTrueCourse(cog);
             if (lastPos != null && lastPos.getPosition() != null)
-                vtg.setMagneticCourse(geo.getDeclination(lastPos.getPosition().getLatitude(), lastPos.getPosition().getLongitude()) + cog);
+                        vtg.setMagneticCourse(
+                                Utils.normalizeDegrees0To360(geo.getDeclination(lastPos.getPosition().getLatitude(), lastPos.getPosition().getLongitude()) + cog));
             vtg.setSpeedKnots(sog);
             vtg.setSpeedKmh(sog * 1.852);
             ss.add(vtg);

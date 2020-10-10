@@ -200,7 +200,7 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
-            if (m.getPayload() instanceof N2KMessage) {
+            if (m.getPayload() instanceof N2KMessage || m.getPayload() instanceof JSONObject) {
                 routeToTarget(new RouterMessage[]{m});
             } else if (m.getPayload() instanceof Sentence) {
                 Sentence s = (Sentence) m.getPayload();
