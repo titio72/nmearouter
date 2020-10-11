@@ -1,6 +1,6 @@
-package com.aboni.nmea.router.n2k.messages;
+package com.aboni.nmea.router.message;
 
-public interface N2KSpeed {
+public interface MsgSpeed extends Message {
 
     int getSID();
 
@@ -8,7 +8,7 @@ public interface N2KSpeed {
 
     double getSpeedGroundRef();
 
-    String getWaterRefType();
+    String getSpeedSensorType();
 
     int getSpeedDirection();
 }

@@ -3,7 +3,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KGNSSPositionUpdate;
+import com.aboni.nmea.router.message.MsgGNSSPosition;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;
@@ -12,7 +12,7 @@ import java.time.ZoneId;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN;
 
-public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements N2KGNSSPositionUpdate {
+public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSSPosition {
 
     private int sid;
     private Instant timestamp;

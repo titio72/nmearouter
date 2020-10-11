@@ -17,13 +17,13 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.PilotMode;
-import com.aboni.nmea.router.n2k.SeatalkPilotMode;
-import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotMode;
+import com.aboni.nmea.router.message.PilotMode;
+import com.aboni.nmea.router.message.SeatalkPilotMode;
+import com.aboni.nmea.router.message.MsgSeatalkPilotMode;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_MODE_PGN;
 
-public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements N2KSeatalkPilotMode {
+public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements MsgSeatalkPilotMode {
 
     private SeatalkPilotMode mode;
 

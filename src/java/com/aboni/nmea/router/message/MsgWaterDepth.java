@@ -1,6 +1,6 @@
-package com.aboni.nmea.router.n2k.messages;
+package com.aboni.nmea.router.message;
 
-public interface N2KWaterDepth {
+public interface MsgWaterDepth extends Message {
 
     int getSID();
 

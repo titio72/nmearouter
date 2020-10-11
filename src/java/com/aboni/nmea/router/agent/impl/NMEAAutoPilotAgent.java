@@ -17,7 +17,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.n2k.PilotMode;
+import com.aboni.nmea.router.message.PilotMode;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.STALKSentence;

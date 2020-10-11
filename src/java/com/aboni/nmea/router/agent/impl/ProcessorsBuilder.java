@@ -39,7 +39,8 @@ public class ProcessorsBuilder {
                 switch (q) {
                     case "speed_filter":
                         log.info("QoS {Speed filter}");
-                        res.add(new NMEAGenericFilterProc(timestampProvider, ThingsFactory.getInstance(NMEASpeedFilter.class),
+                        res.add(new NMEAGenericFilterProc(timestampProvider,
+                                ThingsFactory.getInstance(NMEASpeedFilter.class),
                                 ThingsFactory.getInstance(RouterMessageFactory.class)));
                         break;
                     case "dpt":

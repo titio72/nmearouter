@@ -44,8 +44,8 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private static class InternalSource implements NMEASource {
 
-        NMEAFilterSet filterSet;
-        NMEASentenceListener listener;
+        private NMEAFilterSet filterSet;
+        private NMEASentenceListener listener;
 
         @Override
         public NMEAFilterSet getFilter() {
@@ -65,7 +65,7 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private class InternalTarget implements NMEATarget {
 
-        NMEAFilterSet filterSet;
+        private NMEAFilterSet filterSet;
 
         @Override
         public NMEAFilterSet getFilter() {
@@ -84,7 +84,7 @@ public class NMEAAgentImpl implements NMEAAgent {
                     getListenerWrapper().dispatchAll(mm);
                 }
             } catch (Exception t) {
-                log.warning(getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("receive").toString(), t);
+                log.warning(getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("receive from router").toString(), t);
             }
         }
 

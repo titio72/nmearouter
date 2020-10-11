@@ -18,11 +18,11 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KSeatalkPilotWindDatum;
+import com.aboni.nmea.router.message.MsgSeatalkPilotWindDatum;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_WIND_DATUM_PGN;
 
-public class N2KSeatalkPilotWindDatumImpl extends N2KMessageImpl implements N2KSeatalkPilotWindDatum {
+public class N2KSeatalkPilotWindDatumImpl extends N2KMessageImpl implements MsgSeatalkPilotWindDatum {
 
     private double windDatum;
     private double rollingAverageWind;

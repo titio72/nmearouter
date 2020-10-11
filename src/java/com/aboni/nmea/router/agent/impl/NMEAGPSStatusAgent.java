@@ -5,8 +5,9 @@ import com.aboni.nmea.router.GPSStatus;
 import com.aboni.nmea.router.OnN2KMessage;
 import com.aboni.nmea.router.SatInfo;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.Satellite;
+import com.aboni.nmea.router.message.Satellite;
 import com.aboni.nmea.router.n2k.messages.*;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
@@ -31,7 +32,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
             }
         }
 
-        private void update(N2KSOGAdCOGRapid msg, long now) {
+        private void update(MsgSOGAdCOG msg, long now) {
             synchronized (this) {
                 lastSogTime = now;
                 sog = msg.getSOG();
@@ -72,19 +73,19 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
             int pgn = message.getHeader().getPgn();
             switch (pgn) {
                 case N2kMessagePGNs.SYSTEM_TIME_PGN:
-                    handleSystemTime((N2KSystemTime) message);
+                    handleSystemTime((MsgSystemTime) message);
                     break;
                 case N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN:
-                    handlePositionMessage((N2KGNSSPositionUpdate) message);
+                    handlePositionMessage((MsgGNSSPosition) message);
                     break;
                 case N2kMessagePGNs.SOG_COG_RAPID_PGN:
-                    handleSOGMessage((N2KSOGAdCOGRapid) message);
+                    handleSOGMessage((MsgSOGAdCOG) message);
                     break;
                 case N2kMessagePGNs.SATELLITES_IN_VIEW_PGN:
-                    handleSatellitesMessage((N2KSatellites) message);
+                    handleSatellitesMessage((MsgSatellites) message);
                     break;
                 case N2kMessagePGNs.GNSS_DOP_PGN:
-                    handleDOPs((N2KGNSSDOPs) message);
+                    handleDOPs((MsgGNSSDOPs) message);
                     break;
                 default:
                     break;
@@ -92,7 +93,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         }
     }
 
-    private void handleDOPs(N2KGNSSDOPs message) {
+    private void handleDOPs(MsgGNSSDOPs message) {
         synchronized (this) {
             setHDOP(message.getHDOP());
             setGPSFix(message.getFixDescription());
@@ -100,13 +101,13 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         }
     }
 
-    private void handleSystemTime(N2KSystemTime message) {
+    private void handleSystemTime(MsgSystemTime message) {
         synchronized (this) {
             timestamp = message.getTime();
         }
     }
 
-    private void handlePositionMessage(N2KGNSSPositionUpdate message) {
+    private void handlePositionMessage(MsgGNSSPosition message) {
         synchronized (this) {
             if (message.getPosition() != null) {
                 setPosition(message.getTimestamp(), message.getPosition());
@@ -114,7 +115,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         }
     }
 
-    private void handleSatellitesMessage(N2KSatellites message) {
+    private void handleSatellitesMessage(MsgSatellites message) {
         synchronized (satellites) {
             lastSatTime = timestampProvider.getNow();
             satellites.clear();
@@ -133,7 +134,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         }
     }
 
-    private void handleSOGMessage(N2KSOGAdCOGRapid message) {
+    private void handleSOGMessage(MsgSOGAdCOG message) {
         sogAndCog.update(message, timestampProvider.getNow());
     }
 

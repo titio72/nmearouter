@@ -18,11 +18,11 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KEnvironment310;
+import com.aboni.nmea.router.message.MsgEnvironmentTempAndPressure;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_130310_PGN;
 
-public class N2KEnvironment310Impl extends N2KMessageImpl implements N2KEnvironment310 {
+public class N2KEnvironment310Impl extends N2KMessageImpl implements MsgEnvironmentTempAndPressure {
 
     private int sid;
     private double waterTemp;

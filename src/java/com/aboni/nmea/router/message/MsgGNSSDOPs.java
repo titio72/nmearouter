@@ -1,8 +1,6 @@
-package com.aboni.nmea.router.n2k.messages;
+package com.aboni.nmea.router.message;
 
-import com.aboni.nmea.router.n2k.GNSSFix;
-
-public interface N2KGNSSDOPs {
+public interface MsgGNSSDOPs extends Message {
 
     int getSid();
 

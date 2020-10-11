@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.messages.N2KGNSSPositionUpdate;
+import com.aboni.nmea.router.message.MsgGNSSPosition;
 import com.aboni.nmea.router.n2k.messages.impl.N2KGNSSPositionUpdateImpl;
 import org.junit.Test;
 
@@ -21,14 +21,14 @@ public class N2KGNSSPositionUpdateTest {
                 (byte)0x11,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0xff,(byte)0xff,
                 (byte)0xff,(byte)0xff,(byte)0xff
         };
-        N2KGNSSPositionUpdate s = new N2KGNSSPositionUpdateImpl(bbb);
+        MsgGNSSPosition s = new N2KGNSSPositionUpdateImpl(bbb);
         System.out.println(s);
     }
 
 
     @Test
     public void testGNSSUpdateOk() {
-        N2KGNSSPositionUpdate s = new N2KGNSSPositionUpdateImpl(new byte[]{
+        MsgGNSSPosition s = new N2KGNSSPositionUpdateImpl(new byte[]{
                 (byte) 0x2a, (byte) 0x02, (byte) 0x48, (byte) 0xc0, (byte) 0x45, (byte) 0xbb,
                 (byte) 0x11, (byte) 0x00, (byte) 0xb0, (byte) 0x6d, (byte) 0xa6, (byte) 0x1c, (byte) 0xb1,
                 (byte) 0xf9, (byte) 0x05, (byte) 0x00, (byte) 0x96, (byte) 0x59, (byte) 0xf2, (byte) 0xc5,

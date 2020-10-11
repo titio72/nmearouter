@@ -1,8 +1,8 @@
-package com.aboni.nmea.router.n2k.messages;
+package com.aboni.nmea.router.message;
 
 import java.time.Instant;
 
-public interface N2KSystemTime {
+public interface MsgSystemTime extends Message {
 
     int getSID();
 

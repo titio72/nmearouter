@@ -4,12 +4,12 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KHeading;
+import com.aboni.nmea.router.message.MsgHeading;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.HEADING_PGN;
 
-public class N2KHeadingImpl extends N2KMessageImpl implements N2KHeading {
+public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
 
     private int sid;
     private double heading;

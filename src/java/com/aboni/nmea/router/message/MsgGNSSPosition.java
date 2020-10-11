@@ -1,18 +1,14 @@
-package com.aboni.nmea.router.n2k.messages;
-
-import net.sf.marineapi.nmea.util.Position;
+package com.aboni.nmea.router.message;
 
 import java.time.Instant;
 
-public interface N2KGNSSPositionUpdate {
+public interface MsgGNSSPosition extends MsgPosition {
 
     int getSID();
 
     boolean isValidSID();
 
     Instant getTimestamp();
-
-    Position getPosition();
 
     double getAltitude();
 

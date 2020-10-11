@@ -17,12 +17,12 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KPositionRapid;
+import com.aboni.nmea.router.message.MsgPosition;
 import net.sf.marineapi.nmea.util.Position;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.POSITION_UPDATE_RAPID;
 
-public class N2KPositionRapidImpl extends N2KMessageImpl implements N2KPositionRapid {
+public class N2KPositionRapidImpl extends N2KMessageImpl implements MsgPosition {
 
     private double latitude;
     private double longitude;

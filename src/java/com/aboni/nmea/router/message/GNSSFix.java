@@ -1,4 +1,4 @@
-package com.aboni.nmea.router.n2k;
+package com.aboni.nmea.router.message;
 
 public enum GNSSFix {
     FIX_1D,

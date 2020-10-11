@@ -34,6 +34,7 @@ public interface NMEAStream {
      * @see com.aboni.nmea.router.OnSentence
      * @see com.aboni.nmea.router.OnN2KMessage
      * @see com.aboni.nmea.router.OnJSONMessage
+     * @see com.aboni.nmea.router.OnRouterMessage
      */
     void subscribe(Object observer);
 
@@ -44,5 +45,9 @@ public interface NMEAStream {
      */
     void unsubscribe(Object observer);
 
+    /**
+     * The number of active subscribers.
+     * @return the number of observers registered to the stream
+     */
     int getSubscribersCount();
 }

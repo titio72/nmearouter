@@ -18,7 +18,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KSystemTime;
+import com.aboni.nmea.router.message.MsgSystemTime;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -26,7 +26,7 @@ import java.time.ZoneId;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.SYSTEM_TIME;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SYSTEM_TIME_PGN;
 
-public class N2KSystemTimeImpl extends N2KMessageImpl implements N2KSystemTime {
+public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
 
     private int sid;
     private Instant time;

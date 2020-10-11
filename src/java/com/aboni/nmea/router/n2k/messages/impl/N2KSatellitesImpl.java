@@ -17,8 +17,8 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.Satellite;
-import com.aboni.nmea.router.n2k.messages.N2KSatellites;
+import com.aboni.nmea.router.message.Satellite;
+import com.aboni.nmea.router.message.MsgSatellites;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import java.util.List;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SATELLITES_IN_VIEW_PGN;
 
-public class N2KSatellitesImpl extends N2KMessageImpl implements N2KSatellites {
+public class N2KSatellitesImpl extends N2KMessageImpl implements MsgSatellites {
 
     private int sid;
     private final List<Satellite> satellites = new ArrayList<>();

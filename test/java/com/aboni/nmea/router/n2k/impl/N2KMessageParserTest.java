@@ -2,7 +2,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KHeading;
+import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class N2KMessageParserTest {
         N2KMessageParser p = new N2KMessageParserImpl(new N2KMessageFactoryImpl());
         p.addString("2020-06-21-08:23:52.452,2,127250,204,255,8,ff,f7,12,ff,7f,ff,7f,fd");
         assertNotNull(p.getMessage());
-        assertTrue(p.getMessage() instanceof N2KHeading);
+        assertTrue(p.getMessage() instanceof MsgHeading);
     }
 
     public void testUnsupported() throws PGNDataParseException {

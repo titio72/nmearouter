@@ -18,11 +18,11 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KRudder;
+import com.aboni.nmea.router.message.MsgRudder;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.RUDDER_PGN;
 
-public class N2KRudderImpl extends N2KMessageImpl implements N2KRudder {
+public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
 
     private int instance;
     private double position;
@@ -61,7 +61,7 @@ public class N2KRudderImpl extends N2KMessageImpl implements N2KRudder {
     }
 
     @Override
-    public double getPosition() {
+    public double getAngle() {
         return position;
     }
 
@@ -78,7 +78,7 @@ public class N2KRudderImpl extends N2KMessageImpl implements N2KRudder {
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d}  Rudder Instance {%d} Position {%.1f} Angle Order {%.1f} Direction Order {%d}",
-                RUDDER_PGN, getHeader().getSource(), getInstance(), getPosition(), getAngleOrder(), getDirectionOrder());
+                RUDDER_PGN, getHeader().getSource(), getInstance(), getAngle(), getAngleOrder(), getDirectionOrder());
     }
 
 }

@@ -18,10 +18,10 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.geo.TSAGeoMag;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
-import com.aboni.nmea.router.n2k.Satellite;
-import com.aboni.nmea.router.n2k.messages.*;
+import com.aboni.nmea.router.message.Satellite;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ThingsFactory;
@@ -45,8 +45,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
     private final TSAGeoMag geo;
     private double lastHeading;
     private long lastHeadingTime = 0;
-    private N2KSOGAdCOGRapid lastSOG;
-    private N2KGNSSPositionUpdate lastPos;
+    private MsgSOGAdCOG lastSOG;
+    private MsgGNSSPosition lastPos;
 
     public N2KMessage2NMEA0183Impl() {
         geo = new TSAGeoMag(Constants.WMM, ThingsFactory.getInstance(LogAdmin.class).getBaseLogger());
@@ -57,31 +57,31 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         if (message != null) {
             switch (message.getHeader().getPgn()) {
                 case 130306:
-                    return handleWindData((N2KWindData) message); // Wind Data
+                    return handleWindData((MsgWindData) message); // Wind Data
                 case 128267:
-                    return handleWaterDepth((N2KWaterDepth) message); // Water Depth
+                    return handleWaterDepth((MsgWaterDepth) message); // Water Depth
                 case 128259:
-                    return handleSpeed((N2KSpeed) message); // Speed
+                    return handleSpeed((MsgSpeed) message); // Speed
                 case 127250:
-                    return handleHeading((N2KHeading) message); // Vessel Heading
+                    return handleHeading((MsgHeading) message); // Vessel Heading
                 case 129029:
-                    return handlePosition((N2KGNSSPositionUpdate) message); // Position & time
+                    return handlePosition((MsgGNSSPosition) message); // Position & time
                 case 129540:
-                    return handleSatellites((N2KSatellites) message); // Sats to GSV
+                    return handleSatellites((MsgSatellites) message); // Sats to GSV
                 case 129026:
-                    return handleSOGAdCOGRapid((N2KSOGAdCOGRapid) message); // COG & SOG, Rapid Update
+                    return handleSOGAdCOGRapid((MsgSOGAdCOG) message); // COG & SOG, Rapid Update
                 case 126992:
-                    return handleSystemTime((N2KSystemTime) message); // System time
+                    return handleSystemTime((MsgSystemTime) message); // System time
                 case 127257:
-                    return handleAttitude((N2KAttitude) message); // Attitude)
+                    return handleAttitude((MsgAttitude) message); // Attitude)
                 case 130310:
-                    return handleEnvironment310((N2KEnvironment310) message); // Env parameter: Water temp, air temp, pressure
+                    return handleEnvironment310((MsgEnvironmentTempAndPressure) message); // Env parameter: Water temp, air temp, pressure
                 case 130311:
-                    return handleEnvironment311((N2KEnvironment311) message); // Env parameter: temperature, humidity, pressure
+                    return handleEnvironment311((MsgEnvironment) message); // Env parameter: temperature, humidity, pressure
                 case 127245:
-                    return handleRudder((N2KRudder) message); // Rudder
+                    return handleRudder((MsgRudder) message); // Rudder
                 case 127251:
-                    return handleRateOfTurn((N2KRateOfTurn) message); // Rate of turn
+                    return handleRateOfTurn((MsgRateOfTurn) message); // Rate of turn
                 default:
                     return TEMPLATE;
             }
@@ -89,7 +89,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleSatellites(N2KSatellites message) {
+    private Sentence[] handleSatellites(MsgSatellites message) {
         List<Sentence> res = new ArrayList<>();
         int nSat = message.getNumberOfSats();
         int nGroups = nSat / 12;
@@ -140,7 +140,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return satIx;
     }
 
-    private Sentence[] handleSystemTime(N2KSystemTime message) {
+    private Sentence[] handleSystemTime(MsgSystemTime message) {
         if (message.getTime() != null) {
             ZDASentence zda = (ZDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ZDA);
             Time t = new Time(message.getTime().atZone(ZoneId.of("UTC")).format(fTIME));
@@ -154,7 +154,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleSOGAdCOGRapid(N2KSOGAdCOGRapid message) {
+    private Sentence[] handleSOGAdCOGRapid(MsgSOGAdCOG message) {
         lastSOG = message;
 
         List<Sentence> ss = new ArrayList<>();
@@ -199,7 +199,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handlePosition(N2KGNSSPositionUpdate message) {
+    private Sentence[] handlePosition(MsgGNSSPosition message) {
         lastPos = message;
         List<Sentence> ss = new ArrayList<>();
         if (message.getPosition() != null) {
@@ -215,7 +215,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return ss.toArray(TEMPLATE);
     }
 
-    private Sentence[] handleHeading(N2KHeading message) {
+    private Sentence[] handleHeading(MsgHeading message) {
         double heading = message.getHeading();
         String ref = message.getReference();
         if (!Double.isNaN(heading) && ref != null) {
@@ -237,7 +237,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleSpeed(N2KSpeed message) {
+    private Sentence[] handleSpeed(MsgSpeed message) {
         double speed = message.getSpeedWaterRef();
         if (!Double.isNaN(speed)) {
             VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
@@ -251,7 +251,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleWaterDepth(N2KWaterDepth message) {
+    private Sentence[] handleWaterDepth(MsgWaterDepth message) {
         double depth = message.getDepth();
         double offset = message.getOffset();
         double range = message.getRange();
@@ -265,7 +265,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleWindData(N2KWindData message) {
+    private Sentence[] handleWindData(MsgWindData message) {
         double windSpeed = message.getSpeed();
         double windAngle = message.getAngle();
         boolean apparent = message.isApparent();
@@ -281,7 +281,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleAttitude(N2KAttitude message) {
+    private Sentence[] handleAttitude(MsgAttitude message) {
         XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
         boolean send = false;
         if (!Double.isNaN(message.getYaw())) {
@@ -305,7 +305,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             return TEMPLATE;
     }
 
-    private Sentence[] handleEnvironment310(N2KEnvironment310 message) {
+    private Sentence[] handleEnvironment310(MsgEnvironmentTempAndPressure message) {
         double waterTemp = message.getWaterTemp();
         if (!Double.isNaN(waterTemp)) {
             MTWSentence s = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
@@ -315,7 +315,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleEnvironment311(N2KEnvironment311 message) {
+    private Sentence[] handleEnvironment311(MsgEnvironment message) {
         double humidity = message.getHumidity();
         double airTemp = message.getTemperature();
         double pressure = message.getAtmosphericPressure();
@@ -352,9 +352,9 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return res.toArray(TEMPLATE);
     }
 
-    private Sentence[] handleRudder(N2KRudder message) {
+    private Sentence[] handleRudder(MsgRudder message) {
         int instance = message.getInstance();
-        double angle = message.getPosition();
+        double angle = message.getAngle();
         if (instance == 0 && !Double.isNaN(angle)) {
             RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
             rsa.setRudderAngle(Side.STARBOARD, Utils.normalizeDegrees180To180(angle));
@@ -365,8 +365,8 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         }
     }
 
-    private Sentence[] handleRateOfTurn(N2KRateOfTurn message) {
-        double rate = message.getRate();
+    private Sentence[] handleRateOfTurn(MsgRateOfTurn message) {
+        double rate = message.getRateOfTurn();
         if (!Double.isNaN(rate)) {
             ROTSentence rot = (ROTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ROT);
             rot.setStatus(DataStatus.ACTIVE);

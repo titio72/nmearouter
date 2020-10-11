@@ -4,12 +4,12 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KSOGAdCOGRapid;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SOG_COG_RAPID_PGN;
 
-public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements N2KSOGAdCOGRapid {
+public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements MsgSOGAdCOG {
 
     private int sid;
     private double sog;

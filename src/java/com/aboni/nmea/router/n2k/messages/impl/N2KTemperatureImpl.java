@@ -4,12 +4,12 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KTemperature;
+import com.aboni.nmea.router.message.MsgTemperature;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
 
-public class N2KTemperatureImpl extends N2KMessageImpl implements N2KTemperature {
+public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature {
 
     private String source;
     private int sid;

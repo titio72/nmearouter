@@ -17,11 +17,11 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KWaterDepth;
+import com.aboni.nmea.router.message.MsgWaterDepth;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.DEPTH_PGN;
 
-public class N2KWaterDepthImpl extends N2KMessageImpl implements N2KWaterDepth {
+public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
 
     private int sid;
     private double depth;

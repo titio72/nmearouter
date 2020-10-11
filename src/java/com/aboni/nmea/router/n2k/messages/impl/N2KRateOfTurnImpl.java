@@ -18,11 +18,11 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KRateOfTurn;
+import com.aboni.nmea.router.message.MsgRateOfTurn;
 
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.RATE_OF_TURN_PGN;
 
-public class N2KRateOfTurnImpl extends N2KMessageImpl implements N2KRateOfTurn {
+public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
 
     private int sid;
     private double rate;
@@ -53,13 +53,13 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements N2KRateOfTurn {
     }
 
     @Override
-    public double getRate() {
+    public double getRateOfTurn() {
         return rate;
     }
 
     @Override
     public String toString() {
-        return String.format("PGN {%d} Source {%d} RateOfTurn {%.1f}", getHeader().getPgn(), getHeader().getSource(), getRate());
+        return String.format("PGN {%d} Source {%d} RateOfTurn {%.1f}", getHeader().getPgn(), getHeader().getSource(), getRateOfTurn());
     }
 
 }

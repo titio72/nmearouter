@@ -4,13 +4,13 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.n2k.messages.N2KEnvironment311;
+import com.aboni.nmea.router.message.MsgEnvironment;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.HUMIDITY_SOURCE;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_130311_PGN;
 
-public class N2KEnvironment311Impl extends N2KMessageImpl implements N2KEnvironment311 {
+public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironment {
 
     private String humiditySource;
     private String tempSource;
