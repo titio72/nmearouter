@@ -19,8 +19,8 @@ public class ConsoleLog implements Log {
         lgConsole.setLevel(Level.INFO);
         lgConsole.setUseParentHandlers(false);
         ConsoleHandler c = new ConsoleHandler();
-        lgConsole.addHandler(c);
         c.setFormatter(new LogFormatter());
+        lgConsole.addHandler(c);
     }
 
     @Override
@@ -86,11 +86,6 @@ public class ConsoleLog implements Log {
     @Override
     public void debug(String msg) {
         lgConsole.log(Level.FINER, msg);
-    }
-
-    @Override
-    public void console(String msg) {
-        lgConsole.log(Level.INFO, msg);
     }
 
     private static final String FILLER = "--------------------------------------------------------------------------------";

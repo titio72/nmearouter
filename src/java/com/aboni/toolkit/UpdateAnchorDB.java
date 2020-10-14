@@ -91,9 +91,9 @@ public class UpdateAnchorDB {
                             }
                             db.getConnection().commit();
                             final int count = i;
-                            log.console("Processed %d points " + count);
-                            log.console("wrong ids   " + idDiscrepancies);
-                            log.console("anchor      " + anchorDiscrepancies);
+                            log.info("Processed %d points " + count);
+                            log.info("wrong ids   " + idDiscrepancies);
+                            log.info("anchor      " + anchorDiscrepancies);
                         }
                     }
                 }
@@ -115,9 +115,9 @@ public class UpdateAnchorDB {
         if (filter(item)) {
             if (isLastValid(item)) {
                 // very bad issue... consecutive points are not ordered with time
-                log.console("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
-                log.console("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
-                log.console("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
+                log.info("Discrepancy id: " + new Date(item.position.getTimestamp()) + " " + item.id);
+                log.info("            id: " + new Date(last.position.getTimestamp()) + " " + last.id);
+                log.info("            id: " + (item.position.getTimestamp() - last.position.getTimestamp()));
                 idDiscrepancies++;
             } else if (isRecent(item)) {
                 updateSameLeg(item, tp, stUpd);
@@ -165,7 +165,7 @@ public class UpdateAnchorDB {
 
 
     private void logItem(TrackItem item, boolean expectedAnchor) {
-        log.console(String.format("Discrepancy: %s %s %d %s Speed %f.2 %n",
+        log.info(String.format("Discrepancy: %s %s %d %s Speed %f.2 %n",
                 item.anchor ? "Y" : "N", expectedAnchor ? "Y" : "N", item.id,
                 new Date(item.position.getTimestamp()), item.speed));
     }

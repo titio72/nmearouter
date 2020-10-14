@@ -8,6 +8,7 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
 import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.fazecast.jSerialComm.SerialPort;
@@ -237,7 +238,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private void onInput(byte[] b) {
         if (CONSOLE_OUT) {
-            log.console("Nextion input:" + dump(b));
+            ConsoleLog.getLogger().info("Nextion input:" + dump(b));
         }
         if (isDisplayTouched(b)) {
             dimmer.lightUp(timestampProvider.getNow());

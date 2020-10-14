@@ -18,11 +18,11 @@ public class TestSerialReader {
     private static final int SPEED = 115200;
 
     public static void onMsg(N2KMessage msg) {
-        ConsoleLog.getLogger().console(msg.toString());
+        ConsoleLog.getLogger().info(msg.toString());
     }
 
     public static void onFrame(CANDataFrame msg) {
-        ConsoleLog.getLogger().console(msg.toString());
+        ConsoleLog.getLogger().info(msg.toString());
     }
 
     public static void main(String[] args) {

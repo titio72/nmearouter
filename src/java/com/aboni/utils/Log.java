@@ -41,7 +41,7 @@ public interface Log {
         if (isDebug()) debug(supplier.get());
     }
 
-    void console(String msg);
+    //void console(String msg);
 
 
 }

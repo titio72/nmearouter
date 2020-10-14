@@ -76,7 +76,7 @@ public class LoadGPX {
             process(g, speed);
 
 
-            ConsoleLog.getLogger().console(String.format("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4)));
+            ConsoleLog.getLogger().info(String.format("%s %s %s %s%n", m.group(1), m.group(2), m.group(3), m.group(4)));
         }
     }
 

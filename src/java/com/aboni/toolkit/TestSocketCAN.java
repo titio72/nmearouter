@@ -27,7 +27,7 @@ public class TestSocketCAN {
     public static final String ERROR_READING_FRAME = "Error reading frame";
 
     public static void onMsg(N2KMessage msg) {
-        ConsoleLog.getLogger().console(msg.toString());
+        ConsoleLog.getLogger().info(msg.toString());
     }
 
     public static void main(String... args) {
@@ -41,7 +41,7 @@ public class TestSocketCAN {
             channel = CanChannels.newRawChannel();
             channel.bind(lookupDev());
             channel.setOption(SO_RCVTIMEO, timeout);
-            ConsoleLog.getLogger().console("start");
+            ConsoleLog.getLogger().info("start");
             while (System.in.available() == 0) {
                 readLoop(cache, channel);
             }
