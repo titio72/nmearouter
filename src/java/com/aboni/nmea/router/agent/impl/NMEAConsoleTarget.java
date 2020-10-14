@@ -23,8 +23,6 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.text.DateFormat;
-import java.util.Date;
 
 public class NMEAConsoleTarget extends NMEAAgentImpl {
 
@@ -35,8 +33,7 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @OnSentence
     public void onSentence(Sentence s, String src) {
-        ConsoleLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
-                " [" + src + "] " + s);
+        ConsoleLog.getLogger().info("[" + src + "] " + s);
     }
 
     @Override

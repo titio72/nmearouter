@@ -24,7 +24,6 @@ public class RouterLog implements LogAdmin {
     private boolean debug = false;
 
     private final Logger lg;
-    private final Logger lgConsole;
 
     public RouterLog() {
         lg = Logger.getLogger("NMEARouter");
@@ -42,18 +41,6 @@ public class RouterLog implements LogAdmin {
         } catch (SecurityException | IOException e) {
             Logger.getGlobal().log(Level.SEVERE, "Error", e);
         }
-
-        lgConsole = Logger.getLogger("NMEAConsole");
-        lgConsole.setLevel(Level.INFO);
-        lgConsole.setUseParentHandlers(false);
-        ConsoleHandler c = new ConsoleHandler();
-        lgConsole.addHandler(c);
-        c.setFormatter(new Formatter() {
-            @Override
-            public String format(LogRecord logRecord) {
-                return logRecord.getMessage() + "\n";
-            }
-        });
     }
 
     @Override
@@ -135,11 +122,6 @@ public class RouterLog implements LogAdmin {
     @Override
     public void debug(String msg) {
         lg.log(Level.FINER, msg);
-    }
-
-    @Override
-    public void console(String msg) {
-        lgConsole.log(Level.INFO, msg);
     }
 
     @Override

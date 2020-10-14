@@ -23,8 +23,6 @@ import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.text.DateFormat;
-import java.util.Date;
 
 public class NMEAConsoleN2KTarget extends NMEAAgentImpl {
 
@@ -35,8 +33,7 @@ public class NMEAConsoleN2KTarget extends NMEAAgentImpl {
 
     @OnN2KMessage
     public void onSentence(N2KMessage s, String src) {
-        ConsoleLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
-                " [" + src + "] " + s);
+        ConsoleLog.getLogger().info(" [" + src + "] " + s);
     }
 
     @Override

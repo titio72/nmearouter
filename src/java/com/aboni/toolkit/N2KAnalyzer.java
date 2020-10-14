@@ -16,7 +16,7 @@ import java.io.FileReader;
 public class N2KAnalyzer {
 
     public static void onMsg(N2KMessage msg) {
-        ConsoleLog.getLogger().console(msg.toString());
+        ConsoleLog.getLogger().info(msg.toString());
     }
 
     public static void main(String... args) {

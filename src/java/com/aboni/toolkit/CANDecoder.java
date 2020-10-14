@@ -26,16 +26,16 @@ public class CANDecoder {
     }
 
     private static void onFrame(CANDataFrame frame) {
-        ConsoleLog.getLogger().console(frame.toString());
+        ConsoleLog.getLogger().info(frame.toString());
     }
 
 
     private static void onRead(N2KMessage n2KMessage) {
-        ConsoleLog.getLogger().console(n2KMessage.toString());
+        ConsoleLog.getLogger().info(n2KMessage.toString());
     }
 
     private static void onError(byte[] bytes, String error) {
-        ConsoleLog.getLogger().console(error);
+        ConsoleLog.getLogger().info(error);
     }
 
 }

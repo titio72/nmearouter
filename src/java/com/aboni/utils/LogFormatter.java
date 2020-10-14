@@ -13,7 +13,7 @@ public class LogFormatter extends Formatter {
     private final DateFormat df;
 
     public LogFormatter() {
-        df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
+        df = new SimpleDateFormat("HH:mm:ss.SSS");
     }
 
     @Override

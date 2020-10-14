@@ -20,6 +20,7 @@ import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
+import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
@@ -45,7 +46,7 @@ public class StartRouter {
     }
 
     private static void consoleOut(String s) {
-        logAdmin.console(s);
+        ConsoleLog.getLogger().info(s);
     }
 
     private static LogAdmin logAdmin = null;
