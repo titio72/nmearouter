@@ -16,9 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.*;
 import com.aboni.utils.*;
-import net.sf.marineapi.nmea.sentence.*;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -68,8 +67,6 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
             /*HUM*/ 0
     };
 
-    private boolean useMWD;
-
     private final Log log;
 
     @Inject
@@ -79,11 +76,6 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         this.cache = cache;
         this.log = log;
         this.writer = w;
-    }
-
-    @Override
-    protected final void onSetup(String name, QOS qos) {
-        useMWD = qos != null && qos.get("useMWD");
     }
 
     @Override
@@ -143,26 +135,35 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         }
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
+    @OnRouterMessage
+    public void onSentence(RouterMessage msg) {
+        Message m = msg.getMessage();
         try {
             if (Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
-                if (s instanceof MTASentence) {
-                    processTemp((MTASentence) s);
-                } else if (s instanceof MMBSentence) {
-                    processPressure((MMBSentence) s);
-                } else if (s instanceof MTWSentence) {
-                    processWaterTemp((MTWSentence) s);
-                } else if (s instanceof MHUSentence) {
-                    processHumidity((MHUSentence) s);
-                } else if (useMWD && s instanceof MWDSentence) {
-                    processWind((MWDSentence) s);
-                } else if (!useMWD && s instanceof MWVSentence) {
-                    processWind((MWVSentence)s);
+                if (m instanceof MsgGenericTemperature &&
+                        "Main Cabin Temperature".equals(((MsgGenericTemperature) m).getTemperatureSource())) {
+                    processTemp(((MsgGenericTemperature) m).getTemperature());
+                }
+
+                if (m instanceof MsgGenericAtmosphericPressure) {
+                    processPressure(((MsgGenericAtmosphericPressure) m).getAtmosphericPressure());
+                }
+
+                if (m instanceof MsgGenericTemperature &&
+                        "Sea Temperature".equals(((MsgGenericTemperature) m).getTemperatureSource())) {
+                    processWaterTemp(((MsgGenericTemperature) m).getTemperature());
+                }
+
+                if (m instanceof MsgGenericHumidity) {
+                    processHumidity(((MsgGenericHumidity) m).getHumidity());
+                }
+
+                if (m instanceof MsgWindData) {
+                    processWind((MsgWindData) m);
                 }
             }
         } catch (Exception e) {
-            getLogBuilder().wO("process sentence").wV("sentence", s).error(log, e);
+            getLogBuilder().wO("process sentence").wV("sentence", m).error(log, e);
         }
     }
 
@@ -183,53 +184,31 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         }
     }
 
-    private void processWind(MWDSentence s) {
-        if (Double.isNaN(s.getWindSpeedKnots())) {
-            collect(WIND, s.getWindSpeed() * 1.94384);
-        } else {
-            collect(WIND, s.getWindSpeedKnots());
-        }
-        collect(WIND_D, s.getMagneticWindDirection());
-    }
-
-    private void processWind(MWVSentence s) {
+    private void processWind(MsgWindData s) {
         if (s.isTrue()) {
-            DataEvent<HeadingSentence> e = cache.getLastHeading();
-            if (e != null && (timestampProvider.getNow() - e.getTimestamp()) < 800) {
+            DataEvent<MsgHeading> e = cache.getLastHeading();
+            if (!cache.isHeadingOlderThan(timestampProvider.getNow(), 800)) {
                 double windDir = e.getData().getHeading() + s.getAngle();
-                double windSpd;
-                switch (s.getSpeedUnit().toChar()) {
-                    case 'N':
-                        windSpd = s.getSpeed();
-                        break;
-                    case 'K':
-                        windSpd = s.getSpeed() / 1.852;
-                        break;
-                    case 'M':
-                        windSpd = s.getSpeed() * 1.94384;
-                        break;
-                    default:
-                        windSpd = 0.0;
-                }
+                double windSpd = s.getSpeed();
                 collect(WIND, windSpd);
                 collect(WIND_D, windDir);
             }
         }
     }
 
-    private void processWaterTemp(MTWSentence s) {
-        collect(W_TEMP, s.getTemperature());
+    private void processWaterTemp(double temperature) {
+        if (!Double.isNaN(temperature)) collect(W_TEMP, temperature);
     }
 
-    private void processPressure(MMBSentence s) {
-        collect(PRESS, s.getBars() * 1000);
+    private void processPressure(double pressure) {
+        if (!Double.isNaN(pressure)) collect(PRESS, pressure);
     }
 
-    private void processTemp(MTASentence s) {
-        collect(TEMP, s.getTemperature());
+    private void processTemp(double temperature) {
+        if (!Double.isNaN(temperature)) collect(TEMP, temperature);
     }
 
-    private void processHumidity(MHUSentence s) {
-        collect(HUM, s.getRelativeHumidity());
+    private void processHumidity(double humidity) {
+        if (!Double.isNaN(humidity)) collect(HUM, humidity);
     }
 }

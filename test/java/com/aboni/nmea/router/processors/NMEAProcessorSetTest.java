@@ -1,8 +1,7 @@
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Pair;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,11 +18,11 @@ public class NMEAProcessorSetTest {
 
     private static class MyProc implements NMEAPostProcess {
 
-        private Pair<Boolean, Sentence[]> nextAnswer;
+        private Pair<Boolean, Message[]> nextAnswer;
 
         @Override
-        public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
-            Pair<Boolean, Sentence[]> res = nextAnswer;
+        public Pair<Boolean, Message[]> process(Message message, String src) {
+            Pair<Boolean, Message[]> res = nextAnswer;
             nextAnswer = null;
             return res;
         }
@@ -33,13 +32,17 @@ public class NMEAProcessorSetTest {
 
         }
 
-        void setNextAnswer(boolean accept, Sentence s) {
-            setNextAnswer(accept, new Sentence[] {s});
+        void setNextAnswer(boolean accept, Message s) {
+            setNextAnswer(accept, new Message[] {s});
         }
 
-        void setNextAnswer(boolean accept, Sentence[] s) {
+        void setNextAnswer(boolean accept, Message[] s) {
             nextAnswer = new Pair<>(accept, s);
         }
+    }
+
+    private static class MyMessage implements Message {
+
     }
 
     @Before
@@ -49,8 +52,8 @@ public class NMEAProcessorSetTest {
 
     @Test
     public void testEmptyProcSet() throws NMEARouterProcessorException {
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        Message s = new MyMessage();
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -62,8 +65,8 @@ public class NMEAProcessorSetTest {
     public void testSimpleProc() throws NMEARouterProcessorException {
         theSet.addProcessor(new MyProc());
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        Message s = new MyMessage();
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -76,10 +79,10 @@ public class NMEAProcessorSetTest {
         MyProc p = new MyProc();
         theSet.addProcessor(p);
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
+        Message s = new MyMessage();
 
-        p.setNextAnswer(true, new Sentence[]{});
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        p.setNextAnswer(true, new Message[]{});
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -93,10 +96,10 @@ public class NMEAProcessorSetTest {
         theSet.addProcessor(p);
 
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
+        Message s = new MyMessage();
 
         p.setNextAnswer(false, s);
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -109,12 +112,12 @@ public class NMEAProcessorSetTest {
         theSet.addProcessor(p);
 
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,R,10.7,N,A");
+        Message s = new MyMessage();
 
-        Sentence s1 = SentenceFactory.getInstance().createParser("$IIMWV,95.2,T,7.7,N,A");
+        Message s1 = new MyMessage();
 
         p.setNextAnswer(true, s1);
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -129,8 +132,8 @@ public class NMEAProcessorSetTest {
         theSet.addProcessor(new MyProc());
         theSet.addProcessor(new MyProc());
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,R,10.7,N,A");
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        Message s = new MyMessage();
+        List<Message> res = theSet.getSentences(s, "MySrc");
 
         // check accepted
         assertNotNull(res);
@@ -144,9 +147,9 @@ public class NMEAProcessorSetTest {
         theSet.addProcessor(new MyProc());
         theSet.addProcessor(p);
 
-        Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,R,10.7,N,A");
+        Message s = new MyMessage();
         p.setNextAnswer(false, s);
-        List<Sentence> res = theSet.getSentences(s, "MySrc");
+        List<Message> res = theSet.getSentences(s, "MySrc");
         // check accepted
         assertNotNull(res);
         assertTrue(res.isEmpty());

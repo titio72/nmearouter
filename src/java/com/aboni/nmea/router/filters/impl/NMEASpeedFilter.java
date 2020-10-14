@@ -19,10 +19,9 @@ import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
-import net.sf.marineapi.nmea.sentence.VHWSentence;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
+import com.aboni.nmea.router.message.MsgSpeed;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -51,10 +50,9 @@ public class NMEASpeedFilter implements NMEAFilter {
 
     private boolean checkGPS(double speed) {
         if (USE_GPS && speed > SPEED_CHECK_GPS_THRESHOLD) {
-            PositionSentence posSentence = cache.getLastPosition().getData();
-            if (posSentence instanceof RMCSentence) {
-                RMCSentence rmc = (RMCSentence) posSentence;
-                return (speed <= (rmc.getSpeed() * SPEED_TOLERANCE_FACTOR));
+            MsgSOGAdCOG vector = cache.getLastVector().getData();
+            if (vector!=null && !Double.isNaN(vector.getSOG())) {
+                return (speed <= (vector.getSOG() * SPEED_TOLERANCE_FACTOR));
             } else {
                 return true;
             }
@@ -82,14 +80,18 @@ public class NMEASpeedFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        Sentence s = m.getSentence();
-        if (s instanceof VHWSentence) {
-            VHWSentence vhw = (VHWSentence) s;
-            double speed = vhw.getSpeedKnots();
-            speedMovingAverage.setSample(System.currentTimeMillis(), speed);
-            return checkThresholds(speed)
-                    && checkGPS(speed)
-                    && checkMovingAverage(speed);
+        Message s = m.getMessage();
+        if (s instanceof MsgSpeed) {
+            MsgSpeed msgSpeed = (MsgSpeed) s;
+            double speed = msgSpeed.getSpeedWaterRef();
+            if (Double.isNaN(speed)) {
+                return false;
+            } else {
+                speedMovingAverage.setSample(System.currentTimeMillis(), speed);
+                return checkThresholds(speed)
+                        && checkGPS(speed)
+                        && checkMovingAverage(speed);
+            }
         } else {
             return true;
         }

@@ -17,17 +17,13 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.OnSentence;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.sentences.NMEAUtils;
+import com.aboni.nmea.router.message.MsgPositionAndVector;
+import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -40,6 +36,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private final TripManagerX tripManager;
     private final TimestampProvider timestampProvider;
     private final NMEACache cache;
+    private final PositionAndVectorStream posStream;
     private final Log log;
 
     @Inject
@@ -51,6 +48,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         this.cache = cache;
         this.tracker = trackManager;
         this.tripManager = tripManager;
+        this.posStream = new PositionAndVectorStream(tp);
+        this.posStream.setListener(this::onPosition);
     }
 
     @Override
@@ -75,22 +74,25 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         tracker.setStaticPeriod(period);
     }
 
-    @OnSentence
-    public void onSentence(Sentence s, String src) {
+    @OnRouterMessage
+    public void onRouterMessage(RouterMessage msg) {
         if (isStarted()) {
-            try {
-                if (s instanceof RMCSentence) {
-                    RMCSentence rmc = (RMCSentence) s;
-                    Position pos = NMEAUtils.getPosition((RMCSentence) s);
-                    if (pos != null) {
-                        GeoPositionT posT = new GeoPositionT(
-                                NMEAUtils.getTimestampOptimistic(rmc).getTimeInMillis(), pos);
-                        processPosition(posT, rmc.getSpeed());
-                    }
-                }
-            } catch (Exception e) {
-                getLogBuilder().wO("process sentence").wV("sentence", s).error(log, e);
+            posStream.onMessage(msg);
+        }
+    }
+
+    private void onPosition(MsgPositionAndVector p) {
+        try {
+            Position pos = p.getPosition();
+            double sog = p.getSOG();
+            if (pos != null && !Double.isNaN(sog)) {
+                GeoPositionT posT = new GeoPositionT(
+                        (p.getTimestamp()==null)?timestampProvider.getNow():p.getTimestamp().toEpochMilli(),
+                        pos);
+                processPosition(posT, p.getSOG());
             }
+        } catch (Exception e) {
+            getLogBuilder().wO("process sentence").wV("sentence", p).error(log, e);
         }
     }
 

@@ -18,6 +18,9 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgPosition;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -57,12 +60,17 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
         this.doHDT = hdt;
     }
 
+    private static <T extends Sentence> boolean isA(Class<T> type, Message m) {
+        return m instanceof NMEA0183Message &&
+                type.isInstance(((NMEA0183Message)m).getSentence());
+    }
+
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
+    public Pair<Boolean, Message[]> process(Message message, String src) throws NMEARouterProcessorException {
         try {
-            if (sentence instanceof HDGSentence) {
-                HDGSentence hdg = (HDGSentence) sentence;
-                List<Sentence> out = new ArrayList<>(2);
+            if (isA(HDGSentence.class, message)) {
+                HDGSentence hdg = (HDGSentence) ((NMEA0183Message) message).getSentence();
+                List<Message> out = new ArrayList<>(2);
                 boolean canDoT = fillVariation(hdg, getLastPosition());
                 if (doHDM) {
                     out.add(getHDM(hdg));
@@ -71,13 +79,14 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
                     out.add(getHDT(hdg));
                 }
 
-                return new Pair<>(Boolean.TRUE, out.toArray(new Sentence[0]));
-            } else if ((doHDM && sentence instanceof HDMSentence) || (doHDT && sentence instanceof HDTSentence)) {
+                return new Pair<>(Boolean.TRUE, out.toArray(new Message[0]));
+            } else if ((doHDM && isA(HDMSentence.class, message))
+                    || (doHDT && isA(HDTSentence.class, message))) {
                 // skip HDT & HDM if they are supposed to be produced by the enricher
-                return new Pair<>(Boolean.FALSE, new Sentence[]{});
+                return new Pair<>(Boolean.FALSE, new Message[]{});
             }
         } catch (Exception e) {
-            throw new NMEARouterProcessorException("Cannot enrich heading \"" + sentence + "\"", e);
+            throw new NMEARouterProcessorException("Cannot enrich heading \"" + message + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }
@@ -100,27 +109,27 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
 
     private Position getLastPosition() {
         Position lastPosition = null;
-        DataEvent<PositionSentence> ev = cache.getLastPosition();
+        DataEvent<MsgPosition> ev = cache.getLastPosition();
         if (ev!=null && ev.getData()!=null) {
             lastPosition = ev.getData().getPosition();
         }
         return lastPosition;
     }
 
-    private HDMSentence getHDM(HDGSentence hdg) {
+    private Message getHDM(HDGSentence hdg) {
         HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDM);
         hdm.setHeading(hdg.getHeading());
-        return hdm;
+        return new NMEA0183Message(hdm);
     }
 
-    private HDTSentence getHDT(HDGSentence hdg) {
+    private Message getHDT(HDGSentence hdg) {
         HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(hdg.getTalkerId(), SentenceId.HDT);
         double var;
         double dev;
         try { var = hdg.getVariation(); } catch (DataNotAvailableException e) { var = 0.0; }
         try { dev = hdg.getDeviation(); } catch (DataNotAvailableException e) { dev = 0.0; }
         hdt.setHeading(Utils.normalizeDegrees0To360(hdg.getHeading() + var + dev));
-        return hdt;
+        return new NMEA0183Message(hdt);
     }
 
     @Override

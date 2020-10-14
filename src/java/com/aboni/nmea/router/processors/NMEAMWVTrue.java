@@ -15,13 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
+import com.aboni.nmea.router.message.MsgSpeed;
+import com.aboni.nmea.router.message.MsgWindData;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.*;
+import net.sf.marineapi.nmea.sentence.MWVSentence;
+import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.util.DataStatus;
 import net.sf.marineapi.nmea.util.Units;
 
@@ -45,9 +51,6 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 
     private final TimestampProvider timestampProvider;
 
-    private double lastTrueHeading;
-    private double lastMagHeading;
-    private long lastHeadingTime;
     private double lastSpeed;
     private long lastSpeedTime;
 
@@ -56,36 +59,31 @@ public class NMEAMWVTrue implements NMEAPostProcess {
     private double lastSentTWindSpeed = Double.NaN;
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
+    public Pair<Boolean, Message[]> process(Message message, String src) throws NMEARouterProcessorException {
         try {
             long time = timestampProvider.getNow();
-            if (sentence instanceof MWVSentence) {
-                return processWind((MWVSentence) sentence, time);
-            } else if (!useRMC && sentence instanceof VHWSentence) {
-                lastSpeed = ((VHWSentence) sentence).getSpeedKnots();
+            if (message instanceof MsgWindData) {
+                return processWind((MsgWindData) message, time);
+            } else if (!useRMC && message instanceof MsgSpeed) {
+                lastSpeed = ((MsgSpeed) message).getSpeedWaterRef();
                 lastSpeedTime = time;
-            } else if (useRMC && sentence instanceof RMCSentence) {
-                lastSpeed = ((RMCSentence) sentence).getSpeed();
+            } else if (useRMC && message instanceof MsgSOGAdCOG) {
+                lastSpeed = ((MsgSOGAdCOG) message).getSOG();
                 lastSpeedTime = time;
-            } else if (sentence instanceof HDMSentence) {
-                HDMSentence hdm = (HDMSentence) sentence;
-                lastMagHeading = hdm.getHeading();
-                lastTrueHeading = new NMEAMagnetic2TrueConverter().getTrue(lastMagHeading);
-                lastHeadingTime = time;
             }
         } catch (Exception e) {
-            throw new NMEARouterProcessorException("Error processing sentence \"" + sentence + "\"", e);
+            throw new NMEARouterProcessorException("Error processing sentence \"" + message + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }
 
-    private Pair<Boolean, Sentence[]> processWind(MWVSentence sentence, long time) {
-        if (sentence.isTrue()) {
+    private Pair<Boolean, Message[]> processWind(MsgWindData windMessage, long time) {
+        if (windMessage.isTrue()) {
             // skip it (filter out true wind)
-            return new Pair<>(Boolean.FALSE, new Sentence[]{});
+            return new Pair<>(Boolean.FALSE, new Message[]{});
         } else if ((time - lastSpeedTime) < AGE_THRESHOLD) {
             // calculate true wind
-            TrueWind t = new TrueWind(lastSpeed, sentence.getAngle(), sentence.getSpeed());
+            TrueWind t = new TrueWind(lastSpeed, windMessage.getAngle(), windMessage.getSpeed());
             MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
             mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
             mwvTrue.setTrue(true);
@@ -98,19 +96,9 @@ public class NMEAMWVTrue implements NMEAPostProcess {
             mwvTrue.setSpeed(speed);
             mwvTrue.setSpeedUnit(Units.KNOT);
             mwvTrue.setStatus(DataStatus.ACTIVE);
-
-            if ((time - lastHeadingTime) < AGE_THRESHOLD) {
-                MWDSentence mwd = (MWDSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWD);
-                mwd.setMagneticWindDirection(Utils.normalizeDegrees0To360(lastMagHeading + mwvTrue.getAngle()));
-                mwd.setTrueWindDirection(Utils.normalizeDegrees0To360(lastTrueHeading + mwvTrue.getAngle()));
-                mwd.setWindSpeed(Math.round(speed * 51.4444) / 100.0);
-                mwd.setWindSpeedKnots(speed);
-                return new Pair<>(Boolean.TRUE, new Sentence[]{mwvTrue, mwd});
-            } else {
-                return new Pair<>(Boolean.TRUE, new Sentence[]{mwvTrue});
-            }
+            return new Pair<>(Boolean.TRUE, new Message[]{new NMEA0183Message(mwvTrue)});
         }
-        return null;
+        return new Pair<>(Boolean.TRUE, new Message[]{});
     }
 
     @Override

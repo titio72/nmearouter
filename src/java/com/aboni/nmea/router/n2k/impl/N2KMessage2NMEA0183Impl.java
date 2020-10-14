@@ -21,7 +21,6 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
-import com.aboni.nmea.router.message.Satellite;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ThingsFactory;
@@ -324,7 +323,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
         boolean send = false;
         if (!Double.isNaN(airTemp)
-                && "Main Cabin Temperature".equals(message.getTempSource())) {
+                && "Main Cabin Temperature".equals(message.getTemperatureSource())) {
             MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTA);
             mta.setTemperature(airTemp);
             xdr.addMeasurement(new Measurement("C", Utils.round(airTemp, 1), "C", "CabinTemp"));

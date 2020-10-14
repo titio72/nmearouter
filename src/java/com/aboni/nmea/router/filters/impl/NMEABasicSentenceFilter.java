@@ -62,7 +62,7 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
     @Override
     public boolean match(RouterMessage m) {
         if (m.getPayload() instanceof N2KMessage) {
-            return matchN2K(m.getN2KMessage(), m.getSource());
+            return matchN2K((N2KMessage) m.getMessage(), m.getSource());
         } else {
             return match(m.getSentence(), m.getSource());
         }

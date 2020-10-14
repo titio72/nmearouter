@@ -16,26 +16,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 public class RouterMessageImpl<T> implements RouterMessage {
 
-    public static final byte N2K = 1;
-    public static final byte NMEA = 2;
-    public static final byte JSON = 3;
-
     private final long timestamp;
-    private final T message;
+    private final T theMessage;
     private final String source;
-    private final byte type;
 
-    RouterMessageImpl(T msg, byte type, String source, long timestamp) {
+    RouterMessageImpl(T msg, String source, long timestamp) {
         this.timestamp = timestamp;
-        this.message = msg;
+        this.theMessage = msg;
         this.source = source;
-        this.type = type;
     }
 
     @Override
@@ -45,33 +40,29 @@ public class RouterMessageImpl<T> implements RouterMessage {
 
     @Override
     public Object getPayload() {
-        return getMessage();
+        return theMessage;
     }
 
     @Override
-    public N2KMessage getN2KMessage() {
-        if (N2K == type) return (N2KMessage) message;
+    public Message getMessage() {
+        if (theMessage instanceof Message) return (Message) theMessage;
         return null;
     }
 
     @Override
     public Sentence getSentence() {
-        if (NMEA == type) return (Sentence) message;
+        if (theMessage instanceof NMEA0183Message) return ((NMEA0183Message)theMessage).getSentence();
         return null;
     }
 
     @Override
     public JSONObject getJSON() {
-        if (JSON == type) return (JSONObject) message;
+        if (theMessage instanceof JSONObject) return (JSONObject) theMessage;
         return null;
     }
 
     @Override
     public String getSource() {
         return source;
-    }
-
-    public T getMessage() {
-        return message;
     }
 }

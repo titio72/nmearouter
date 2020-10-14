@@ -18,6 +18,9 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgPosition;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -47,22 +50,25 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
     }
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
+    public Pair<Boolean, Message[]> process(Message message, String src) throws NMEARouterProcessorException {
         try {
-            if (sentence instanceof HDMSentence) {
-                HDMSentence hdm = (HDMSentence) sentence;
-                HDGSentence hdg = getHDG(hdm);
-                if (fillVariation(hdg, getLastPosition())) {
-                    return new Pair<>(Boolean.TRUE, new Sentence[]{hdg, getHDT(hdg)});
-                } else {
-                    return new Pair<>(Boolean.TRUE, new Sentence[]{hdg});
+            if (message instanceof NMEA0183Message) {
+                Sentence sentence = ((NMEA0183Message) message).getSentence();
+                if (sentence instanceof HDMSentence) {
+                    HDMSentence hdm = (HDMSentence) sentence;
+                    HDGSentence hdg = getHDG(hdm);
+                    if (fillVariation(hdg, getLastPosition())) {
+                        return new Pair<>(Boolean.TRUE, new Message[]{new NMEA0183Message(hdg), new NMEA0183Message(getHDT(hdg))});
+                    } else {
+                        return new Pair<>(Boolean.TRUE, new Message[]{new NMEA0183Message(hdg)});
+                    }
+                } else if (sentence instanceof HDGSentence || sentence instanceof HDTSentence) {
+                    // skip HDG and HDT as they are produced by the enricher
+                    return new Pair<>(Boolean.FALSE, new Message[]{});
                 }
-            } else if (sentence instanceof HDGSentence || sentence instanceof HDTSentence) {
-                // skip HDG and HDT as they are produced by the enricher
-                return new Pair<>(Boolean.FALSE, new Sentence[] {});
             }
         } catch (Exception e) {
-            throw new NMEARouterProcessorException("Cannot enrich heading process message \"" + sentence + "\"", e);
+            throw new NMEARouterProcessorException("Cannot enrich heading process message \"" + message + "\"", e);
         }
         return null;
     }
@@ -86,7 +92,7 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 
     private Position getLastPosition() {
         Position lastPosition = null;
-        DataEvent<PositionSentence> ev = cache.getLastPosition();
+        DataEvent<MsgPosition> ev = cache.getLastPosition();
         if (ev!=null && ev.getData()!=null) {
             lastPosition = ev.getData().getPosition();
         }

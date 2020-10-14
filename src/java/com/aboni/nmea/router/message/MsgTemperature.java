@@ -1,14 +1,10 @@
 package com.aboni.nmea.router.message;
 
-public interface MsgTemperature extends Message {
+public interface MsgTemperature extends MsgGenericTemperature {
 
     int getSID();
 
     int getInstance();
-
-    String getSource();
-
-    double getTemperature();
 
     double getSetTemperature();
 }

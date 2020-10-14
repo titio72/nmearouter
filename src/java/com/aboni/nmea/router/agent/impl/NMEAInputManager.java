@@ -15,9 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.N2KStream;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -25,48 +26,38 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * Extract a Message from a string, typically received from a stream.
+ * The expected format is NMEA0183 or the N2K Actisense format.
+ * Example of N2K:
+ *   2020-06-21-08:12:31.400,2,127251,204,255,8,ff,74,2d,fd,ff,ff,ff,ff
+ */
 public class NMEAInputManager {
 
-    public static class Output {
-        Output(Sentence[] ss, N2KMessage m) {
-            nmeaSentences = ss;
-            n2KMessage = m;
-        }
-
-        final N2KMessage n2KMessage;
-        final Sentence[] nmeaSentences;
-
-        public boolean hasMessages() {
-            return n2KMessage != null || (nmeaSentences != null && nmeaSentences.length != 0);
-        }
-    }
-
     private interface StringInputHandler {
-        Output getSentences(String pgn);
+        Message[] getSentences(String str);
     }
+
+    private static final Message[] EMPTY = new Message[0];
 
     private static class N2KHandlerExp implements StringInputHandler {
-        private final N2KMessage2NMEA0183 decoder;
         private final N2KStream stream;
         private final Log logger;
 
         N2KHandlerExp(Log logger) {
             this.logger = logger;
-            decoder = ThingsFactory.getInstance(N2KMessage2NMEA0183.class);
             stream = ThingsFactory.getInstance(N2KStream.class, logger);
         }
 
         @Override
-        public Output getSentences(String pgn) {
+        public Message[] getSentences(String pgn) {
             try {
                 N2KMessage msg = stream.getMessage(pgn);
-                if (msg != null) {
-                    return new Output(decoder.getSentence(msg), msg);
-                }
+                if (msg!=null) return new Message[] {msg};
             } catch (Exception e) {
                 logger.warning(String.format("Cannot parse n2k sentence {%s} {%s}", pgn, e.getMessage()));
             }
-            return getEmpty();
+            return EMPTY;
         }
 
     }
@@ -80,13 +71,14 @@ public class NMEAInputManager {
         }
 
         @Override
-        public Output getSentences(String sSentence) {
+        public Message[] getSentences(String sSentence) {
             try {
-                return new Output(new Sentence[]{SentenceFactory.getInstance().createParser(sSentence)}, null);
+                Sentence s = SentenceFactory.getInstance().createParser(sSentence);
+                return new Message[] {NMEA0183Message.get(s)};
             } catch (Exception e) {
                 logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
             }
-            return getEmpty();
+            return EMPTY;
         }
     }
 
@@ -100,18 +92,14 @@ public class NMEAInputManager {
         this.logger = logger;
     }
 
-    private static Output getEmpty() {
-        return new Output(new Sentence[0], null);
-    }
-
-    public Output getMessage(String sSentence) {
-        if (sSentence.charAt(0) == '$' || sSentence.charAt(0) == '!') {
-            return nmeaHandler.getSentences(sSentence);
-        } else if (sSentence.charAt(0) >= '1' && sSentence.charAt(0) <= '2') {
-            return n2kHandler.getSentences(sSentence);
+    public Message[] getMessage(String string) {
+        if (string.charAt(0) == '$' /* regular NMEA0183 */ || string.charAt(0) == '!' /* AIS extension to NMEA0183 */ ) {
+            return nmeaHandler.getSentences(string);
+        } else if (string.charAt(0) >= '1' && string.charAt(0) <= '2') {
+            return n2kHandler.getSentences(string);
         } else {
-            logger.debug("Cannot find a suitable handler for {" + sSentence + "}");
-            return getEmpty();
+            logger.debug("Cannot find a suitable handler for {" + string + "}");
+            return EMPTY;
         }
     }
 }

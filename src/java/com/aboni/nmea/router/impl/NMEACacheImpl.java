@@ -17,10 +17,10 @@ package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.*;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import net.sf.marineapi.nmea.sentence.*;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -32,8 +32,9 @@ public class NMEACacheImpl implements NMEACache {
 
     private final Log log;
     private final TimestampProvider timestampProvider;
-    private DataEvent<HeadingSentence> lastHeading;
-    private DataEvent<PositionSentence> lastPosition;
+    private DataEvent<MsgHeading> lastHeading;
+    private DataEvent<MsgPosition> lastPosition;
+    private DataEvent<MsgSOGAdCOG> lastVector;
     private final Map<String, Object> statuses;
 
     @Inject
@@ -46,14 +47,14 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
-    public void onSentence(Sentence s, String src) {
+    public void onSentence(Message s, String src) {
         try {
-            if (s instanceof HDGSentence ||
-                    s instanceof HDTSentence ||
-                    s instanceof HDMSentence) {
-                lastHeading = new DataEvent<>((HeadingSentence) s, timestampProvider.getNow(), src);
-            } else if (s instanceof PositionSentence && s.isValid()) {
-                lastPosition = new DataEvent<>((PositionSentence) s, timestampProvider.getNow(), src);
+            if (s instanceof MsgHeading && !((MsgHeading)s).isTrueHeading()) {
+                // save magnetic heading
+                lastHeading = new DataEvent<>((MsgHeading) s, timestampProvider.getNow(), src);
+            } else if (s instanceof MsgPositionAndVector && ((MsgPositionAndVector) s).getPosition()!=null) {
+                lastPosition = new DataEvent<>((MsgPosition) s, timestampProvider.getNow(), src);
+                lastVector = new DataEvent<>((MsgSOGAdCOG) s, timestampProvider.getNow(), src);
             }
         } catch (Exception e) {
             LogStringBuilder.start("Cache").wO("cache sentence").wV("sentence", s).error(log, e);
@@ -61,13 +62,18 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
-    public DataEvent<HeadingSentence> getLastHeading() {
+    public DataEvent<MsgHeading> getLastHeading() {
         return lastHeading;
     }
 
     @Override
-    public DataEvent<PositionSentence> getLastPosition() {
+    public DataEvent<MsgPosition> getLastPosition() {
         return lastPosition;
+    }
+
+    @Override
+    public DataEvent<MsgSOGAdCOG> getLastVector() {
+        return lastVector;
     }
 
     @Override

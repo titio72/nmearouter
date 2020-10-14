@@ -20,12 +20,10 @@ import com.aboni.misc.PolarTable;
 import com.aboni.misc.PolarTableImpl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.OnSentence;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.sentences.VWRSentence;
-import com.aboni.seatalk.Stalk84;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -40,7 +38,6 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.TimeZone;
 
-@SuppressWarnings("OverlyComplexClass")
 public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDriver {
 
     private static NMEASimulatorSource simulator;
@@ -57,7 +54,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         Position pos = new Position(43.9599, 09.7745);
         double distance = 0;
         double trip = 0;
-        int headingAuto = Integer.MIN_VALUE;
         double refHeading = Double.NaN;
     }
 
@@ -203,7 +199,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             sendMeteo(hdg, absoluteWindSpeed, tWDirection, temp, press);
             sendGyro(hdg, roll, pitch);
             sendVoltage();
-            sendAP();
             sendRSA();
         }
     }
@@ -228,12 +223,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             speed = Utils.round(data.getSpeed() * (1.0 + r.nextDouble() / 10.0), 1);
         }
         return speed;
-    }
-
-    private void sendAP() {
-        if (data.isAutoPilot()) {
-            sendAutopilotStatus();
-        }
     }
 
     private void sendRSA() {
@@ -478,71 +467,6 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             s.setTrip(navData.trip);
             s.setTripUnits('N');
             NMEASimulatorSource.this.notify(s);
-        }
-    }
-
-    private void sendAutopilotStatus() {
-        Stalk84 s84 = new Stalk84(
-                (int) navData.refHeading, (navData.headingAuto == Integer.MIN_VALUE) ? 0 : navData.headingAuto, 0,
-                (navData.headingAuto == Integer.MIN_VALUE) ? Stalk84.STATUS.STATUS_STANDBY : Stalk84.STATUS.STATUS_AUTO,
-                Stalk84.ERROR.ERROR_NONE, Stalk84.TURN.STARBOARD);
-        STALKSentence stalk = (STALKSentence) SentenceFactory.getInstance().createParser(s84.getSTALKSentence());
-        NMEASimulatorSource.this.notify(stalk);
-    }
-
-    @OnSentence
-    public void onSentence(Sentence s, String source) {
-        if (!source.equals(getName()) && s instanceof STALKSentence) {
-            STALKSentence t = (STALKSentence) s;
-            if ("86".equals(t.getCommand())) {
-                String[] p = t.getParameters();
-                if ("21".equals(p[0])) {
-                    handleAPStatusCommands(p);
-                } else if ("11".equals(p[0])) {
-                    handleAPDirectionCommands(p);
-                }
-            }
-
-        }
-
-    }
-
-    private void handleAPStatusCommands(String[] p) {
-        String disc = p[1] + p[2];
-        switch (disc) {
-            case "01FE":
-                if (navData.headingAuto == Integer.MIN_VALUE) {
-                    navData.headingAuto = (int) navData.refHeading;
-                    sendAutopilotStatus();
-                }
-                break;
-            case "02FD":
-                if (navData.headingAuto != Integer.MIN_VALUE) {
-                    navData.headingAuto = Integer.MIN_VALUE;
-                    sendAutopilotStatus();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void  handleAPDirectionCommands(String[] p) {
-        String disc = p[1] + p[2];
-        int delta;
-        switch (disc) {
-            case "05FA": delta = -1; break;
-            case "06F9": delta = -10; break;
-            case "07F8": delta = 1; break;
-            case "08F7": delta = 10; break;
-            default: delta = 0; break;
-        }
-        if (delta != 0) {
-            if (navData.headingAuto != Integer.MIN_VALUE) {
-                navData.headingAuto += delta;
-                sendAutopilotStatus();
-            }
-            navData.refHeading += delta;
         }
     }
 

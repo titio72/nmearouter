@@ -15,14 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.nmea.sentences.XDPParser;
 import com.aboni.nmea.sentences.XDPSentence;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.DPTSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 import javax.inject.Inject;
@@ -70,10 +70,10 @@ public class DepthStatsAgent extends NMEAAgentImpl {
                 ((max == Integer.MIN_VALUE) ? "" : String.format(" %.1f", max / 10f));
     }
 
-    @OnSentence
-    public void onSentence(Sentence s, String source) {
-        if (s instanceof DPTSentence) {
-            DepthT d = handleDepth(((DPTSentence) s).getDepth(), timestampProvider.getNow());
+    @OnRouterMessage
+    public void onMessage(RouterMessage msg) {
+        if (msg.getPayload() instanceof MsgWaterDepth) {
+            DepthT d = handleDepth(((MsgWaterDepth) msg.getMessage()).getDepth(), timestampProvider.getNow());
 
             XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
             x.setDepth((float) d.depth / 10f);

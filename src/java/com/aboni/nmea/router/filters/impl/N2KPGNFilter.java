@@ -66,7 +66,10 @@ public class N2KPGNFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        return match(m.getN2KMessage(), m.getSource());
+        if (m.getMessage() instanceof N2KMessage)
+            return match((N2KMessage) m.getMessage(), m.getSource());
+        else
+            return true;
     }
 
     public boolean match(N2KMessage s, String src) {

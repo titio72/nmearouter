@@ -18,9 +18,9 @@ package com.aboni.nmea.router.processors;
 import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.filters.impl.NMEAPositionFilter;
+import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -40,11 +40,11 @@ public class NMEARMCFilterProcessor implements NMEAPostProcess {
         this.messageFactory = messageFactory;
     }
 
-    private static final Pair<Boolean, Sentence[]> OK = new Pair<>(true, null);
-    private static final Pair<Boolean, Sentence[]> KO = new Pair<>(false, null);
+    private static final Pair<Boolean, Message[]> OK = new Pair<>(true, null);
+    private static final Pair<Boolean, Message[]> KO = new Pair<>(false, null);
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
+    public Pair<Boolean, Message[]> process(Message sentence, String src) throws NMEARouterProcessorException {
         try {
             return (filter.match(messageFactory.createMessage(sentence, src, timestampProvider.getNow())) ? OK : KO);
         } catch (Exception e) {

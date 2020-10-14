@@ -19,8 +19,10 @@ import com.aboni.geo.DeviationManager;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Log;
@@ -202,11 +204,13 @@ public class NMEASourceGyro extends NMEAAgentImpl {
         return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
-        if (HWSettings.getPropertyAsInteger("compass.dump", 0) > 0 && s instanceof HDMSentence && compassSensor != null) {
+    @OnRouterMessage
+    public void onMessage(RouterMessage s) {
+        if (HWSettings.getPropertyAsInteger("compass.dump", 0) > 0 &&
+                s.getMessage() instanceof MsgHeading &&
+                compassSensor != null) {
             try {
-                double headingBoat = ((HDMSentence) s).getHeading();
+                double headingBoat = ((MsgHeading) s.getMessage()).getHeading();
                 double headingSens = compassSensor.getUnfilteredSensorHeading();
                 dump(headingSens, headingBoat);
             } catch (Exception e) {

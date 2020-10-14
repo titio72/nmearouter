@@ -38,6 +38,5 @@ public class AgentTypes {
     public static final String JSON = "JSON";
     public static final String GPX_PLAYER = "GPXPlayerAgent";
     public static final String PLAYER = "PlayerAgent";
-    public static final String MWD = "MWDSynthesizer";
     public static final String NEXTION = "Nextion";
 }

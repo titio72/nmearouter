@@ -20,7 +20,7 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.services.*;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.Log;
@@ -182,7 +182,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         }
 
         @Override
-        public N2KMessage getN2KMessage() {
+        public Message getMessage() {
             return null;
         }
 

@@ -1,6 +1,8 @@
 package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -14,7 +16,7 @@ public class NMEASourcePriorityProcessorTest {
     private NMEASourcePriorityProcessor proc;
     private MyTimestampProvider timestampProvider;
 
-    private class MyTimestampProvider implements TimestampProvider {
+    private static class MyTimestampProvider implements TimestampProvider {
 
         @Override
         public long getNow() {
@@ -33,7 +35,7 @@ public class NMEASourcePriorityProcessorTest {
     @Test
     public void testProcessEmpty() {
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -46,7 +48,7 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("OtherSrc", 10);
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -59,7 +61,7 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("OtherSrc", 10);
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -72,7 +74,7 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MySrc", 10);
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A*0B");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -85,10 +87,10 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MySrc", 10);
 
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        proc.process(s0, "MySrc");
+        proc.process(NMEA0183Message.get(s0), "MySrc");
 
         Sentence s2 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        Pair<Boolean, Sentence[]> res = proc.process(s2, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s2), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -102,10 +104,10 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MyOtherSrc", 5);
 
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        proc.process(s0, "MySrc");
+        proc.process(NMEA0183Message.get(s0), "MySrc");
 
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MyOtherSrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MyOtherSrc");
         assertNotNull(res);
         assertFalse(res.first);
     }
@@ -119,11 +121,11 @@ public class NMEASourcePriorityProcessorTest {
         long t0 = 10000000L;
         timestampProvider.timestamp = t0;
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        proc.process(s0, "MySrc");
+        proc.process(NMEA0183Message.get(s0), "MySrc");
 
         timestampProvider.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MyOtherSrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MyOtherSrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);
@@ -139,11 +141,11 @@ public class NMEASourcePriorityProcessorTest {
         long t0 = 10000000L;
         timestampProvider.timestamp = t0;
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        proc.process(s0, "MySrc");
+        proc.process(NMEA0183Message.get(s0), "MySrc");
 
         timestampProvider.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
-        Pair<Boolean, Sentence[]> res = proc.process(s, "MySrc");
+        Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);
         assertTrue(res.first);
         assertNotNull(res.second);

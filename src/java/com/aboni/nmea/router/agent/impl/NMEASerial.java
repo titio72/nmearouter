@@ -17,9 +17,14 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEATrafficStats;
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Log;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
@@ -41,6 +46,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
     private static final int PORT_WAIT_FOR_DATA = 500;
     private final Log log;
+    private final N2KMessage2NMEA0183 converter;
 
     private static class Config {
         private String portName;
@@ -98,9 +104,10 @@ public class NMEASerial extends NMEAAgentImpl {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KMessage2NMEA0183 converter) {
         super(log, tp, true, false);
         this.log = log;
+        this.converter = converter;
         this.timestampProvider = tp;
         config = new Config();
         input = new NMEAInputManager(log);
@@ -235,16 +242,11 @@ public class NMEASerial extends NMEAAgentImpl {
     private void handleStringMessage(String s) {
         if (s != null) {
             updateReadStats(s);
-            NMEAInputManager.Output out = input.getMessage(s);
-            if (out != null && out.hasMessages()) {
-                for (Sentence sentence : out.nmeaSentences) {
-                    if (sentence != null) {
-                        updateReadStats();
-                        notify(sentence);
-                    }
-                }
-                if (out.n2KMessage != null) {
-                    notify(out.n2KMessage);
+            Message[] out = input.getMessage(s);
+            if (out != null) {
+                for (Message m: out) {
+                    updateReadStats();
+                    notify(m);
                 }
             }
         }
@@ -292,19 +294,32 @@ public class NMEASerial extends NMEAAgentImpl {
         }
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
+    private Sentence[] getSentenceToSend(RouterMessage rm) {
+        Sentence[] s = new Sentence[] {};
+        if (rm.getMessage() instanceof NMEA0183Message) {
+            s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
+        } else if (rm.getMessage() instanceof N2KMessage) {
+            s = converter.getSentence((N2KMessage) rm.getMessage());
+        }
+        return s;
+    }
+
+    @OnRouterMessage
+    public void onSentence(RouterMessage rm) {
         if (run.get() && config.isTransmit()) {
-            String strSentence = s.toSentence() + "\r\n";
-            byte[] b = strSentence.getBytes();
-            SerialPort p = getPort();
-            if (p != null) {
-                if (p.writeBytes(b, b.length) != -1) {
-                    updateWriteStats(strSentence);
-                    updateWriteStats();
-                } else {
-                    getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").error(log);
-                    resetPortAndReader();
+            Sentence[] toSend = getSentenceToSend(rm);
+            for (Sentence s: toSend) {
+                String strSentence = s.toSentence() + "\r\n";
+                byte[] b = strSentence.getBytes();
+                SerialPort p = getPort();
+                if (p != null) {
+                    if (p.writeBytes(b, b.length) != -1) {
+                        updateWriteStats(strSentence);
+                        updateWriteStats();
+                    } else {
+                        getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").error(log);
+                        resetPortAndReader();
+                    }
                 }
             }
         }

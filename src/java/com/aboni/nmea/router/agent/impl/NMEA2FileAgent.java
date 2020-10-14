@@ -15,11 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.Log;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -62,16 +63,18 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
         return "NMEA2FileAgent";
     }
 
-    @OnSentence
-    public void onSentence(Sentence s, String source) {
-        NMEASentenceItem e = new NMEASentenceItem(s, timestampProvider.getNow(), "  ");
-        synchronized (queue) {
-            if (isStarted()) {
-                queue.add(e);
-                try {
-                    dump();
-                } catch (IOException e1) {
-                    getLogBuilder().wO("dump sentence").wV("sentence", s).error(log, e1);
+    @OnRouterMessage
+    public void onSentence(RouterMessage rm) {
+        if (rm.getMessage() instanceof NMEA0183Message) {
+            NMEASentenceItem e = new NMEASentenceItem(((NMEA0183Message) rm.getMessage()).getSentence(), timestampProvider.getNow(), "  ");
+            synchronized (queue) {
+                if (isStarted()) {
+                    queue.add(e);
+                    try {
+                        dump();
+                    } catch (IOException e1) {
+                        getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).error(log, e1);
+                    }
                 }
             }
         }

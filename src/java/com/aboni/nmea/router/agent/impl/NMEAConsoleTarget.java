@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.Log;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -33,10 +33,10 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
         super(log, tp, false, true);
     }
 
-    @OnSentence
-    public void onSentence(Sentence s, String src) {
+    @OnRouterMessage
+    public void onSentence(RouterMessage s) {
         ConsoleLog.getLogger().console(DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date()) +
-                " [" + src + "] " + s);
+                " [" + s.getPayload() + "] " + s);
     }
 
     @Override

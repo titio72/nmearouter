@@ -1,11 +1,12 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.OnSentence;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.nmea.router.message.MsgPositionAndVector;
+import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
@@ -168,10 +169,10 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     }
 
     private interface ExtractString {
-        String getValue(Sentence s);
+        String getValue(Object s);
     }
 
-    private void setData(Sentence s, int field, ExtractString e) {
+    private <T> void setData(T s, int field, ExtractString e) {
         try {
             sendCommand(FIELDS[field] + ".txt=\"" + e.getValue(s) + "\"");
             lastTime[field] = timestampProvider.getNow();
@@ -180,30 +181,33 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         }
     }
 
-    @OnSentence
-    public void onSentence(Sentence s, String source) {
+
+    @OnRouterMessage
+    public void onSentence(RouterMessage rm) {
         if (!run.get()) return;
 
-        if (src.isEmpty() || src.equals(source)) {
+        if (src.isEmpty() || src.equals(rm.getSource())) {
             lastInput = timestampProvider.getNow();
         }
 
-        if (s instanceof RMCSentence) {
-            sendPosition(((RMCSentence) s).getPosition());
-            setData(s, Fields.COG, (Sentence ss) -> String.format("%d°", Math.round(((RMCSentence) ss).getCourse())));
-            setData(s, Fields.SOG, (Sentence ss) -> String.format("%.1f Kn", ((RMCSentence) ss).getSpeed()));
-        } else if (s instanceof DPTSentence) {
-            setData(s, Fields.DEPTH, (Sentence ss) -> String.format("%.1f m", ((DPTSentence) ss).getDepth()));
+        Message m = rm.getMessage();
+        Sentence s = rm.getSentence();
+        if (m instanceof MsgPositionAndVector) {
+            sendPosition(((MsgPositionAndVector)m).getPosition());
+            setData(m, Fields.COG, (Object ss) -> String.format("%d°", Math.round(((MsgPositionAndVector) ss).getCOG())));
+            setData(m, Fields.SOG, (Object ss) -> String.format("%.1f Kn", ((MsgPositionAndVector) ss).getSOG()));
+        } else if (m instanceof MsgWaterDepth) {
+            setData(m, Fields.DEPTH, (Object ss) -> String.format("%.1f m", ((MsgWaterDepth) m).getDepth()));
+        } else if (m instanceof MsgHeading) {
+            setData(m, Fields.HEAD, (Object ss) -> String.format("%d°", Math.round(((MsgHeading) m).getHeading())));
         } else if (s instanceof MMBSentence) {
-            setData(s, Fields.ATMO, (Sentence ss) -> String.format("%d mb", Math.round(((MMBSentence) ss).getBars() * 1000)));
+            setData(s, Fields.ATMO, (Object ss) -> String.format("%d mb", Math.round(((MMBSentence) ss).getBars() * 1000)));
         } else if (s instanceof MTWSentence) {
-            setData(s, Fields.WATER_TEMP, (Sentence ss) -> String.format("%.1f C°", ((MTWSentence) ss).getTemperature()));
+            setData(s, Fields.WATER_TEMP, (Object ss) -> String.format("%.1f C°", ((MTWSentence) ss).getTemperature()));
         } else if (s instanceof MTASentence) {
-            setData(s, Fields.AIR_TEMP, (Sentence ss) -> String.format("%.1f C°", ((MTASentence) ss).getTemperature()));
+            setData(s, Fields.AIR_TEMP, (Object ss) -> String.format("%.1f C°", ((MTASentence) ss).getTemperature()));
         } else if (s instanceof MHUSentence) {
-            setData(s, Fields.HUM, (Sentence ss) -> String.format("%.1f%%", ((MHUSentence) ss).getRelativeHumidity()));
-        } else if (s instanceof HDMSentence) {
-            setData(s, Fields.HEAD, (Sentence ss) -> String.format("%d°", Math.round(((HDMSentence) ss).getHeading())));
+            setData(s, Fields.HUM, (Object ss) -> String.format("%.1f%%", ((MHUSentence) ss).getRelativeHumidity()));
         }
     }
 
@@ -215,10 +219,10 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         for (int i = 0; i < N_FIELDS; i++) reset(i);
     }
 
-    private void sendPosition(final Position p) {
-        if (p != null) {
-            setData(null, Fields.LAT, (Sentence s) -> Utils.formatLatitude(p.getLatitude()));
-            setData(null, Fields.LON, (Sentence s) -> Utils.formatLongitude(p.getLongitude()));
+    private void sendPosition(final Position position) {
+        if (position != null) {
+            setData(position, Fields.LAT, (Object p) -> Utils.formatLatitude(((Position)p).getLatitude()));
+            setData(position, Fields.LON, (Object p) -> Utils.formatLongitude(((Position)p).getLongitude()));
         } else {
             reset(Fields.LAT);
             reset(Fields.LON);
@@ -255,7 +259,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
         final ZonedDateTime dt = ZonedDateTime.now();
         final DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");
-        setData(null, Fields.TIME, (Sentence s) -> String.format("%s", f.format(dt)));
+        setData(null, Fields.TIME, (Object s) -> String.format("%s", f.format(dt)));
 
         boolean engine = cache.getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN) == EngineStatus.ON;
         sendCommand(String.format("engine.pic=%d", engine ? 5 : 3));

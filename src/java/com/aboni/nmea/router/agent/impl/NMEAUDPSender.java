@@ -16,9 +16,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.NMEATrafficStats;
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -44,6 +48,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     private final Log log;
     private final TimestampProvider timestampProvider;
+    private final N2KMessage2NMEA0183 converter;
 
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
@@ -51,10 +56,11 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private String baseDescription;
 
     @Inject
-    public NMEAUDPSender(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAUDPSender(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KMessage2NMEA0183 converter) {
         super(log, tp, false, true);
         this.timestampProvider = tp;
         this.log = log;
+        this.converter = converter;
         targets = new HashSet<>();
         baseDescription = "UDP Sender";
         description = baseDescription;
@@ -146,20 +152,33 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         }
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
-        String toSend = getOutSentence(s);
-        try {
-            updateStats(toSend);
-            for (InetAddress i : targets) {
-                byte[] bytes = toSend.getBytes();
-                DatagramPacket packet = new DatagramPacket(bytes, bytes.length, i, portTarget);
-                serverSocket.send(packet);
+    private Sentence[] getSentenceToSend(RouterMessage rm) {
+        Sentence[] s = new Sentence[] {};
+        if (rm.getMessage() instanceof NMEA0183Message) {
+            s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
+        } else if (rm.getMessage() instanceof N2KMessage) {
+            s = converter.getSentence((N2KMessage) rm.getMessage());
+        }
+        return s;
+    }
+
+    @OnRouterMessage
+    public void onMessage(RouterMessage rm) {
+        Sentence[] sending = getSentenceToSend(rm);
+        for (Sentence s: sending) {
+            String toSend = getOutSentence(s);
+            try {
+                updateStats(toSend);
+                for (InetAddress i : targets) {
+                    byte[] bytes = toSend.getBytes();
+                    DatagramPacket packet = new DatagramPacket(bytes, bytes.length, i, portTarget);
+                    serverSocket.send(packet);
+                }
+                updateStats(false);
+            } catch (IOException e) {
+                updateStats(true);
+                getLogBuilder().wO("message").errorForceStacktrace(log, e);
             }
-            updateStats(false);
-        } catch (IOException e) {
-            updateStats(true);
-            getLogBuilder().wO("message").errorForceStacktrace(log, e);
         }
     }
 

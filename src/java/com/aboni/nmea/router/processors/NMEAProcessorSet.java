@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Pair;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,18 +25,18 @@ import java.util.List;
 public class NMEAProcessorSet {
 
     private final List<NMEAPostProcess> processors;
-    private static final List<Sentence> EMPTY = new ArrayList<>();
+    private static final List<Message> EMPTY = new ArrayList<>();
 
     public NMEAProcessorSet() {
         processors = new ArrayList<>();
     }
 
-    public List<Sentence> getSentences(Sentence sentence, String source) throws NMEARouterProcessorException {
-        List<Sentence> toSend = new ArrayList<>();
-        toSend.add(sentence);
+    public List<Message> getSentences(Message message, String source) throws NMEARouterProcessorException {
+        List<Message> toSend = new ArrayList<>();
+        toSend.add(message);
         synchronized (processors) {
             for (NMEAPostProcess pp : processors) {
-                Pair<Boolean, Sentence[]> res = pp.process(sentence, source);
+                Pair<Boolean, Message[]> res = pp.process(message, source);
                 if (res != null) {
                     if (!Boolean.TRUE.equals(res.first)) {
                         return EMPTY;

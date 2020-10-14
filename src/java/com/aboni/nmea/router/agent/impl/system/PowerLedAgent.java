@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.utils.Log;
 import com.pi4j.io.gpio.*;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -87,9 +87,9 @@ public class PowerLedAgent extends NMEAAgentImpl {
         pin.high();
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
-        if (s instanceof PositionSentence) {
+    @OnRouterMessage
+    public void onMessage(RouterMessage s) {
+        if (s.getPayload() instanceof MsgPosition) {
             lastGps = timestampProvider.getNow();
             powerGPSUp();
         }

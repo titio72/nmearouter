@@ -15,20 +15,23 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.nmea.router.message.MsgPosition;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.utils.DataEvent;
-import net.sf.marineapi.nmea.sentence.HeadingSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 public interface NMEACache {
 
-    DataEvent<HeadingSentence> getLastHeading();
+    DataEvent<MsgHeading> getLastHeading();
 
-    DataEvent<PositionSentence> getLastPosition();
+    DataEvent<MsgPosition> getLastPosition();
+
+    DataEvent<MsgSOGAdCOG> getLastVector();
 
     boolean isHeadingOlderThan(long time, long threshold);
 
-    void onSentence(Sentence s, String src);
+    void onSentence(Message s, String src);
 
     <T> void setStatus(String statusKey, T status);
 

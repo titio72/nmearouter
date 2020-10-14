@@ -3,11 +3,13 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.n2k.*;
+import com.aboni.nmea.router.n2k.N2KFastCache;
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessageHeader;
+import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
 import tel.schich.javacan.NetworkDevice;
@@ -31,7 +33,6 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private String netDeviceName;
     private RawCanChannel channel;
     private final N2KFastCache fastCache;
-    private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
     private final TimestampProvider timestampProvider;
@@ -74,14 +75,13 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     @Inject
     public NMEACANBusSocketAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
-                                 @NotNull N2KMessage2NMEA0183 converter, @NotNull N2KMessageFactory messageFactory) {
+                                 @NotNull N2KMessageFactory messageFactory) {
         super(log, tp, true, false);
         this.log = log;
         this.timestampProvider = tp;
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
         this.srcFilter = new PGNSourceFilter(log);
-        this.converter = converter;
         stats.reset();
         fastCache.setCallback(this::onReceive);
     }
@@ -90,12 +90,6 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         stats.incrementMessages();
         stats.incrementAccepted();
         notify(msg);
-        if (converter != null) {
-            Sentence[] s = converter.getSentence(msg);
-            if (s != null) {
-                for (Sentence ss : s) notify(ss);
-            }
-        }
     }
 
     public void setup(String name, QOS qos, String netDevice) {

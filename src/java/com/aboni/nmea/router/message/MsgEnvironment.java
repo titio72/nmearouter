@@ -1,16 +1,5 @@
 package com.aboni.nmea.router.message;
 
-public interface MsgEnvironment extends Message {
+public interface MsgEnvironment extends MsgGenericTemperature, MsgGenericAtmosphericPressure, MsgGenericHumidity {
 
-    int getSID();
-
-    String getHumiditySource();
-
-    String getTempSource();
-
-    double getTemperature();
-
-    double getHumidity();
-
-    double getAtmosphericPressure();
 }

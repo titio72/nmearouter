@@ -16,6 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -88,22 +90,23 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
         }
     }
 
-    private static final Sentence[] EMPTY = new Sentence[] {};
+    private static final Message[] EMPTY = new Message[] {};
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) {
-        if (sentences.contains(sentence.getSentenceId())) {
-            recordInput(sentence, src);
-            if (src.equals(currentSource)) {
-                return new Pair<>(true, EMPTY);
-            } else {
-                // force skip the sentence
-                return new Pair<>(false, EMPTY);
+    public Pair<Boolean, Message[]> process(Message message, String src) {
+        if (message instanceof NMEA0183Message) {
+            Sentence sentence = ((NMEA0183Message) message).getSentence();
+            if (sentences.contains(sentence.getSentenceId())) {
+                recordInput(sentence, src);
+                if (src.equals(currentSource)) {
+                    return new Pair<>(true, EMPTY);
+                } else {
+                    // force skip the sentence
+                    return new Pair<>(false, EMPTY);
+                }
             }
-        } else {
-            return new Pair<>(true, EMPTY);
         }
-
+        return new Pair<>(true, EMPTY);
     }
 
     @Override

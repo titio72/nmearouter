@@ -15,10 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -49,6 +53,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     private final ByteBuffer readBuffer;
     private final Map<SocketChannel, ClientDescriptor> clients;
     private final Log log;
+    private final N2KMessage2NMEA0183 converter;
     private SentenceSerializer serializer;
 
     public interface SentenceSerializer {
@@ -72,9 +77,10 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log) {
+    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log, @NotNull N2KMessage2NMEA0183 converter) {
         super(log, tp, false, true);
         this.log = log;
+        this.converter = converter;
         writeBuffer = ByteBuffer.allocate(16384);
         readBuffer = ByteBuffer.allocate(16384);
         clients = new HashMap<>();
@@ -216,26 +222,38 @@ public class NMEASocketServer extends NMEAAgentImpl {
         }
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
+    @OnRouterMessage
+    public void onMessage(RouterMessage rm) {
         synchronized (clients) {
             if (serializer != null && isTarget() && !clients.isEmpty()) {
-                String output = serializer.getOutSentence(s);
-                writeBuffer.clear();
-                writeBuffer.put(output.getBytes());
-                writeBuffer.put("\r\n".getBytes());
-                int p = writeBuffer.position();
-                Iterator<Entry<SocketChannel, ClientDescriptor>> iterator = clients.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Entry<SocketChannel, ClientDescriptor> itm = iterator.next();
-                    SocketChannel sc = itm.getKey();
-                    ClientDescriptor cd = itm.getValue();
-                    if (!sendMessageToClient(output, p, sc, cd)) {
-                        iterator.remove();
+                for (Sentence s: getSentenceToSend(rm)) {
+                    String output = serializer.getOutSentence(s);
+                    writeBuffer.clear();
+                    writeBuffer.put(output.getBytes());
+                    writeBuffer.put("\r\n".getBytes());
+                    int p = writeBuffer.position();
+                    Iterator<Entry<SocketChannel, ClientDescriptor>> iterator = clients.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Entry<SocketChannel, ClientDescriptor> itm = iterator.next();
+                        SocketChannel sc = itm.getKey();
+                        ClientDescriptor cd = itm.getValue();
+                        if (!sendMessageToClient(output, p, sc, cd)) {
+                            iterator.remove();
+                        }
                     }
                 }
             }
         }
+    }
+
+    private Sentence[] getSentenceToSend(RouterMessage rm) {
+        Sentence[] s = new Sentence[] {};
+        if (rm.getMessage() instanceof NMEA0183Message) {
+            s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
+        } else if (rm.getMessage() instanceof N2KMessage) {
+            s = converter.getSentence((N2KMessage) rm.getMessage());
+        }
+        return s;
     }
 
     private boolean sendMessageToClient(String output, int p, SocketChannel sc, ClientDescriptor cd) {

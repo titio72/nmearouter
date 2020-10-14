@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.MsgEnvironment;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgEnvironment;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.HUMIDITY_SOURCE;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
@@ -63,7 +63,7 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironm
     }
 
     @Override
-    public String getTempSource() {
+    public String getTemperatureSource() {
         return tempSource;
     }
 
@@ -85,6 +85,6 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironm
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Humidity {%.1f} Hum. Source {%s} Temperature {%.1f} Temp. Source {%s} Atmo. Pressure {%.1f}",
-                ENVIRONMENT_130311_PGN, getHeader().getSource(), getHumidity(), getHumiditySource(), getTemperature(), getTempSource(), getAtmosphericPressure());
+                ENVIRONMENT_130311_PGN, getHeader().getSource(), getHumidity(), getHumiditySource(), getTemperature(), getTemperatureSource(), getAtmosphericPressure());
     }
 }

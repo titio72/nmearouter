@@ -7,9 +7,13 @@ import javax.validation.constraints.NotNull;
 
 public class NMEA0183Message implements Message {
 
+    public static NMEA0183Message get(@NotNull Sentence sentence) {
+        return new NMEA0183Message(sentence);
+    }
+
     private Sentence sentence;
 
-    protected NMEA0183Message(@NotNull Sentence sentence) {
+    public NMEA0183Message(@NotNull Sentence sentence) {
         this.sentence = sentence;
     }
 
@@ -17,4 +21,8 @@ public class NMEA0183Message implements Message {
         return sentence;
     }
 
+    @Override
+    public String toString() {
+        return String.format("Message {%s}", sentence);
+    }
 }

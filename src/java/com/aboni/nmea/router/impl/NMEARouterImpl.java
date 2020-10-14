@@ -18,13 +18,12 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -200,11 +199,11 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
-            if (m.getPayload() instanceof N2KMessage || m.getPayload() instanceof JSONObject) {
+            if (m.getPayload() instanceof JSONObject) {
                 routeToTarget(new RouterMessage[]{m});
-            } else if (m.getPayload() instanceof Sentence) {
-                Sentence s = (Sentence) m.getPayload();
-                Collection<Sentence> toSend = null;
+            } else if (m.getPayload() instanceof Message) {
+                Message s = (Message) m.getPayload();
+                Collection<Message> toSend = null;
                 try {
                     toSend = processors.getSentences(s, m.getSource());
                 } catch (NMEARouterProcessorException e) {
@@ -213,7 +212,7 @@ public class NMEARouterImpl implements NMEARouter {
                 if (toSend != null) {
                     final RouterMessage[] messages = new RouterMessage[toSend.size()];
                     int counter = 0;
-                    for (Sentence ss : toSend) {
+                    for (Message ss : toSend) {
                         cache.onSentence(ss, m.getSource());
                         RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
                         messages[counter] = mm;

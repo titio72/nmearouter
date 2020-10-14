@@ -22,7 +22,8 @@ import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
@@ -223,10 +224,10 @@ public class NMEAAgentImpl implements NMEAAgent {
         // override if necessary
     }
 
-    private boolean checkSourceFilter(Sentence sentence) {
+    private boolean checkSourceFilter(Message m) {
         NMEASource s = getSource();
         if (s!=null && s.getFilter()!=null)
-            return s.getFilter().match(messageFactory.createMessage(sentence, getName(), timestampProvider.getNow()));
+            return s.getFilter().match(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         return true;
     }
 
@@ -236,16 +237,19 @@ public class NMEAAgentImpl implements NMEAAgent {
      * @param sentence The sentence to be notified to agents
      */
     protected final void notify(Sentence sentence) {
-        if (isStarted() && checkSourceFilter(sentence) && sourceIf.listener != null) {
-            List<Sentence> toSend = null;
-            try {
-                toSend = processorSet.getSentences(sentence, getName());
-            } catch (NMEARouterProcessorException e) {
-                getLogBuilder().wO("dispatch message").wV("sentence", sentence).error(log, e);
+        if (sentence!=null) {
+            Message m = NMEA0183Message.get(sentence);
+            if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
+                List<Message> toSend = null;
+                try {
+                    toSend = processorSet.getSentences(m, getName());
+                } catch (NMEARouterProcessorException e) {
+                    getLogBuilder().wO("dispatch message").wV("sentence", sentence).error(log, e);
+                }
+                if (toSend != null)
+                    for (Message s : toSend)
+                        sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
             }
-            if (toSend != null)
-                for (Sentence s : toSend)
-                    sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
         }
     }
 
@@ -265,7 +269,19 @@ public class NMEAAgentImpl implements NMEAAgent {
      *
      * @param m The message to be notified to agents
      */
-    protected final void notify(N2KMessage m) {
+    protected final void notify(Message m) {
+        if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
+            List<Message> toSend = null;
+            try {
+                toSend = processorSet.getSentences(m, getName());
+            } catch (NMEARouterProcessorException e) {
+                getLogBuilder().wO("dispatch message").wV("sentence", m).error(log, e);
+            }
+            if (toSend != null)
+                for (Message s : toSend)
+                    sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
+        }
+
         if (isStarted()) {
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }

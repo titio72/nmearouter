@@ -50,8 +50,8 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     @OnRouterMessage
     public void onRouterMessage(RouterMessage m) {
-        if (m.getN2KMessage()!=null) {
-            onMessage(m.getN2KMessage());
+        if (m.getMessage() instanceof N2KMessage) {
+            onMessage((N2KMessage) m.getMessage());
         }
     }
 

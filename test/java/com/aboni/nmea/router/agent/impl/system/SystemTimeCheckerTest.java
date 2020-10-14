@@ -2,12 +2,12 @@ package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.nmea.router.message.MsgPosition;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.DataEvent;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.HeadingSentence;
-import net.sf.marineapi.nmea.sentence.PositionSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.junit.Test;
 
 import java.time.OffsetDateTime;
@@ -21,12 +21,17 @@ public class SystemTimeCheckerTest {
     private static class NMEACacheMock implements NMEACache {
 
         @Override
-        public DataEvent<HeadingSentence> getLastHeading() {
+        public DataEvent<MsgHeading> getLastHeading() {
             return null;
         }
 
         @Override
-        public DataEvent<PositionSentence> getLastPosition() {
+        public DataEvent<MsgPosition> getLastPosition() {
+            return null;
+        }
+
+        @Override
+        public DataEvent<MsgSOGAdCOG> getLastVector() {
             return null;
         }
 
@@ -36,7 +41,7 @@ public class SystemTimeCheckerTest {
         }
 
         @Override
-        public void onSentence(Sentence s, String src) {
+        public void onSentence(Message s, String src) {
         }
 
         @Override
@@ -71,14 +76,14 @@ public class SystemTimeCheckerTest {
         MyTimestampProvider tp = new MyTimestampProvider();
         AtomicBoolean attemptedChanged = new AtomicBoolean(false);
         SystemTimeChecker checker = new SystemTimeChecker(cache, tp, timestamp -> {
-            tp.setNow(timestamp.toEpochSecond() * 1000);
+            tp.setNow(timestamp.toEpochMilli());
             attemptedChanged.set(true);
         }, ConsoleLog.getLogger());
 
         // the sentence is 1 second behind the system time - expected to be considered ok
-        Sentence s = SentenceFactory.getInstance().createParser("$IIRMC,103021.00,A,5046.305,N,00132.959,W,5.30,107.3,030220,0.9,W,A");
+        OffsetDateTime t = OffsetDateTime.parse("2020-02-03T10:30:21+00:00");
         tp.setNow(now.toEpochSecond() * 1000);
-        checker.checkAndSetTime(s);
+        checker.checkAndSetTime(t.toInstant());
         assertTrue(checker.isSynced()); // check if synced
         assertFalse(attemptedChanged.get()); // check that an attempt to change the system date was NOT made
         assertTrue(checker.getTimeSkew() < SystemTimeChecker.TOLERANCE_MS); // check skew
@@ -91,14 +96,14 @@ public class SystemTimeCheckerTest {
         MyTimestampProvider tp = new MyTimestampProvider();
         AtomicBoolean attemptedChanged = new AtomicBoolean(false);
         SystemTimeChecker checker = new SystemTimeChecker(cache, tp, timestamp -> {
-            tp.setNow(timestamp.toEpochSecond() * 1000);
+            tp.setNow(timestamp.toEpochMilli());
             attemptedChanged.set(true);
         }, ConsoleLog.getLogger());
 
         // the sentence is 10 minutes ahead of the system time - the checker should try to change the system time
-        Sentence s = SentenceFactory.getInstance().createParser("$IIRMC,104021.00,A,5046.305,N,00132.959,W,5.30,107.3,030220,0.9,W,A");
+        OffsetDateTime t = OffsetDateTime.parse("2020-02-03T10:40:21+00:00");
         tp.setNow(now.toEpochSecond() * 1000);
-        checker.checkAndSetTime(s);
+        checker.checkAndSetTime(t.toInstant());
         assertTrue(checker.isSynced()); // check if synced
         assertTrue(attemptedChanged.get()); // check that an attempt to change the system date was made
         assertTrue(checker.getTimeSkew() < SystemTimeChecker.TOLERANCE_MS); // check skew

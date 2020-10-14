@@ -17,11 +17,12 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VTGSentence;
 import net.sf.marineapi.nmea.util.FaaMode;
@@ -45,21 +46,29 @@ public class NMEARMC2VTGProcessor implements NMEAPostProcess {
         m = new NMEAMagnetic2TrueConverter(year);
     }
 
-    @Override
-    public Pair<Boolean, Sentence[]> process(Sentence sentence, String src) throws NMEARouterProcessorException {
-        try {
+    private static RMCSentence getRMC(Message m)  {
+        if (m instanceof NMEA0183Message &&
+                ((NMEA0183Message) m).getSentence() instanceof RMCSentence) {
+            return (RMCSentence)((NMEA0183Message)m).getSentence();
+        } else {
+            return null;
+        }
+    }
 
-            if (sentence instanceof RMCSentence) {
-                RMCSentence rmc = (RMCSentence) sentence;
-                VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(sentence.getTalkerId(), SentenceId.VTG);
+    @Override
+    public Pair<Boolean, Message[]> process(Message message, String src) throws NMEARouterProcessorException {
+        try {
+            RMCSentence rmc = getRMC(message);
+            if (rmc!=null) {
+                VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(rmc.getTalkerId(), SentenceId.VTG);
                 vtg.setMode(FaaMode.AUTOMATIC);
                 vtg.setSpeedKnots(rmc.getSpeed());
                 vtg.setSpeedKmh(rmc.getSpeed() * 1.852);
                 setHeading(rmc, vtg);
-                return new Pair<>(Boolean.TRUE, new Sentence[]{vtg});
+                return new Pair<>(Boolean.TRUE, new Message[]{new NMEA0183Message(vtg)});
             }
         } catch (Exception e) {
-            throw new NMEARouterProcessorException("Error converting RMC sentence \"" + sentence + "\"", e);
+            throw new NMEARouterProcessorException("Error converting RMC sentence \"" + message + "\"", e);
         }
         return new Pair<>(Boolean.TRUE, null);
     }

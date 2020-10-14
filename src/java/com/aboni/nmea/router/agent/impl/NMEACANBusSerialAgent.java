@@ -5,14 +5,12 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.SerialReader;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -22,7 +20,6 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     public static final String STATS_KEY_NAME = "stats";
     private final SerialReader serialReader;
     private final SerialCANReader serialCanReader;
-    private final N2KMessage2NMEA0183 converter;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
     private final TimestampProvider timestampProvider;
@@ -72,7 +69,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
     @Inject
     public NMEACANBusSerialAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
-                                 @NotNull SerialCANReader serialCanReader, @NotNull N2KMessage2NMEA0183 converter,
+                                 @NotNull SerialCANReader serialCanReader,
                                  @NotNull N2KMessageFactory msgFactory) {
         super(log, tp, true, false);
         this.log = log;
@@ -81,7 +78,6 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
         this.serialReader = new SerialReader(tp, log);
         this.serialCanReader = serialCanReader;
         this.srcFilter = new PGNSourceFilter(log);
-        this.converter = converter;
         stats.reset();
         fastCache.setCallback(this::onReceive);
         serialCanReader.setCallback(fastCache::onMessage);
@@ -104,12 +100,6 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
                 && messageFactory.isSupported(msg.getHeader().getPgn())) {
             stats.incrementAccepted();
             notify(msg);
-            if (converter != null) {
-                Sentence[] s = converter.getSentence(msg);
-                if (s != null) {
-                    for (Sentence ss : s) notify(ss);
-                }
-            }
         }
     }
 

@@ -19,8 +19,8 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -116,18 +116,10 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             socket.receive(p);
             sSentence = new String(p.getData(), 0, p.getLength());
             updateReadStats(sSentence);
-            NMEAInputManager.Output out = input.getMessage(sSentence);
-            if (out != null && out.hasMessages()) {
-                for (Sentence sentence : out.nmeaSentences) {
-                    if (sentence != null) {
-                        updateReadSentencesStats(false);
-                        notify(sentence);
-                    }
-                }
-                if (out.n2KMessage != null) {
-                    notify(out.n2KMessage);
-                }
-
+            Message[] out = input.getMessage(sSentence);
+            if (out != null) {
+                updateReadSentencesStats(false);
+                for (Message m: out) notify(m);
             }
         } catch (SocketTimeoutException e) {
             // read timeout

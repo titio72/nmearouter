@@ -9,4 +9,8 @@ public interface MsgWindData extends Message {
     double getAngle();
 
     boolean isApparent();
+
+    default boolean isTrue() {
+        return !isApparent();
+    }
 }

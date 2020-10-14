@@ -15,6 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -24,17 +26,22 @@ public class NMEAChangeTalkerProcessor implements NMEAPostProcess {
     private final TalkerId fromTalker;
     private final TalkerId toTalker;
 
+    private static final Pair<Boolean, Message[]> EMPTY = new Pair<>(true, new Message[] {});
+
     public NMEAChangeTalkerProcessor(TalkerId fromTalker, TalkerId toTalker) {
         this.fromTalker = fromTalker;
         this.toTalker = toTalker;
     }
 
     @Override
-    public Pair<Boolean, Sentence[]> process(Sentence s, String src) {
-        if (fromTalker == null || fromTalker.equals(s.getTalkerId())) {
-            s.setTalkerId(toTalker);
+    public Pair<Boolean, Message[]> process(Message message, String src) {
+        if (message instanceof NMEA0183Message) {
+            Sentence s = ((NMEA0183Message) message).getSentence();
+            if (fromTalker == null || fromTalker.equals(s.getTalkerId())) {
+                s.setTalkerId(toTalker);
+            }
         }
-        return new Pair<>(Boolean.TRUE, new Sentence[] {s});
+        return EMPTY;
     }
 
     @Override

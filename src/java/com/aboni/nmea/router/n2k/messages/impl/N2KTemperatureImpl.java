@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.MsgTemperature;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgTemperature;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
 import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
@@ -57,7 +57,7 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
     }
 
     @Override
-    public String getSource() {
+    public String getTemperatureSource() {
         return source;
     }
 
@@ -74,6 +74,6 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Instance {%d} TempSource {%s} Temperature {%.1f} SetTemperature {%.1f}",
-                ENVIRONMENT_TEMPERATURE_PGN, getHeader().getSource(), getInstance(), getSource(), getTemperature(), getSetTemperature());
+                ENVIRONMENT_TEMPERATURE_PGN, getHeader().getSource(), getInstance(), getTemperatureSource(), getTemperature(), getSetTemperature());
     }
 }

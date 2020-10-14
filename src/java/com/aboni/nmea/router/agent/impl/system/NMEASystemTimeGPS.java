@@ -15,12 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.OnSentence;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgSystemTime;
 import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
-import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -45,9 +47,12 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
         return "Sync up system time with GPS UTC time feed [" + (systemTimeCHecker.isSynced() ? "Sync " + systemTimeCHecker.getTimeSkew() : "Not Sync") + "]";
     }
 
-    @OnSentence
-    public void onSentence(Sentence s) {
-        systemTimeCHecker.checkAndSetTime(s);
+    @OnRouterMessage
+    public void onSentence(RouterMessage msg) {
+        Message m = msg.getMessage();
+        if (m instanceof MsgSystemTime) {
+            systemTimeCHecker.checkAndSetTime(((MsgSystemTime) m).getTime());
+        }
     }
 
     @Override
