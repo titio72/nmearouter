@@ -15,12 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
+import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgPosition;
 import net.sf.marineapi.nmea.util.Position;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.POSITION_UPDATE_RAPID;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.POSITION_UPDATE_RAPID;
 
 public class N2KPositionRapidImpl extends N2KMessageImpl implements MsgPosition {
 

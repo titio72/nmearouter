@@ -13,13 +13,13 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.nmea0183;
 
-public interface MsgGenericTemperature {
+import com.aboni.nmea.router.message.Message;
+import net.sf.marineapi.nmea.sentence.Sentence;
 
-    int getSID();
+public interface Message2NMEA0183 {
 
-    String getTemperatureSource();
+    Sentence[] convert(Message message);
 
-    double getTemperature();
 }

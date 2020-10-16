@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 import static org.junit.Assert.*;
 
-public class SerialCANReaderTest {
+public class SerialHL340SerialCANReaderTest {
 
     private static class FrameListener implements CANFrameCallback {
 

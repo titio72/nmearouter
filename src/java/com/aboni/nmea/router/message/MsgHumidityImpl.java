@@ -15,10 +15,33 @@
 
 package com.aboni.nmea.router.message;
 
-public interface MsgGenericAtmosphericPressure extends Message {
+public class MsgHumidityImpl implements MsgHumidity {
 
-    int getSID();
+    private final double humidity;
+    private final HumiditySource src;
 
-    double getAtmosphericPressure();
+    public MsgHumidityImpl(HumiditySource src, double humidity) {
+        this.src = src;
+        this.humidity = humidity;
+    }
 
+    @Override
+    public int getSID() {
+        return -1;
+    }
+
+    @Override
+    public HumiditySource getHumiditySource() {
+        return src;
+    }
+
+    @Override
+    public double getHumidity() {
+        return humidity;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Humidity: Source {%s} Humidity {%.1f}", getHumiditySource(), getHumidity());
+    }
 }

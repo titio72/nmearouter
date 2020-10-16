@@ -18,7 +18,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_POSITION_REPORT_CLASS_B_EXT_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.AIS_POSITION_REPORT_CLASS_B_EXT_PGN;
 
 @SuppressWarnings("ClassTooDeepInInheritanceTree")
 public class N2KAISPositionReportBExt extends N2KAISPositionReportBImpl {

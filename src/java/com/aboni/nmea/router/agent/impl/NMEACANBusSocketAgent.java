@@ -3,6 +3,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
@@ -30,6 +31,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     public static final String ERROR_TYPE_KEY_NAME = "error type";
     public static final String READ_KEY_NAME = "read";
     private final Log log;
+    private final PositionAndVectorStream posAndVectorStream;
     private String netDeviceName;
     private RawCanChannel channel;
     private final N2KFastCache fastCache;
@@ -82,6 +84,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
         this.srcFilter = new PGNSourceFilter(log);
+        this.posAndVectorStream = new PositionAndVectorStream(tp);
+        this.posAndVectorStream.setListener(this::notify);
         stats.reset();
         fastCache.setCallback(this::onReceive);
     }
@@ -89,6 +93,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private void onReceive(@NotNull N2KMessage msg) {
         stats.incrementMessages();
         stats.incrementAccepted();
+        posAndVectorStream.onMessage(msg);
         notify(msg);
     }
 

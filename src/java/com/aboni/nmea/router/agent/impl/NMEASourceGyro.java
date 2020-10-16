@@ -22,6 +22,8 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.message.MsgAttitude;
+import com.aboni.nmea.router.message.MsgAttitudeImpl;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
@@ -29,7 +31,6 @@ import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
-import net.sf.marineapi.nmea.util.Measurement;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -182,26 +183,18 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     }
 
-
     private void sendXDR() {
         if (compassSensor!=null) {
             try {
-                XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
                 double roll = compassSensor.getUnfilteredRoll();
                 double pitch = compassSensor.getUnfilteredPitch();
                 double hd = compassSensor.getHeading();
-                xdr.addMeasurement(new Measurement("A", round(hd), "D", "HEAD"));
-                xdr.addMeasurement(new Measurement("A", round(roll), "D", "ROLL"));
-                xdr.addMeasurement(new Measurement("A", round(pitch), "D", "PITCH"));
-                notify(xdr);
+                MsgAttitude msgAttitude = new MsgAttitudeImpl(hd, pitch, roll);
+                notify(msgAttitude);
             } catch (Exception e) {
                 log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message xdr").toString(), e);
             }
         }
-    }
-
-    private double round(double d) {
-        return Math.round(d * Math.pow(10, 0)) / Math.pow(10, 0);
     }
 
     @OnRouterMessage

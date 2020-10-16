@@ -1,7 +1,8 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.nmea.router.message.DirectionReference;
 import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.impl.N2KHeadingImpl;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class N2KHeadingTest {
         assertEquals(27.8, h.getHeading(), 0.1);
         assertTrue(Double.isNaN(h.getVariation()));
         assertTrue(Double.isNaN(h.getDeviation()));
-        assertEquals("Magnetic", h.getReference());
+        assertEquals(DirectionReference.MAGNETIC, h.getReference());
         assertFalse(h.isTrueHeading());
     }
 }

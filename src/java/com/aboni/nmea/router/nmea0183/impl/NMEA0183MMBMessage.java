@@ -15,14 +15,15 @@
 
 package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.nmea.router.message.MsgGenericAtmosphericPressure;
+import com.aboni.nmea.router.message.MsgPressure;
+import com.aboni.nmea.router.message.PressureSource;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.MMBSentence;
 
 import javax.validation.constraints.NotNull;
 
-public class NMEA0183MMBMessage extends NMEA0183Message implements MsgGenericAtmosphericPressure {
+public class NMEA0183MMBMessage extends NMEA0183Message implements MsgPressure {
 
     public NMEA0183MMBMessage(@NotNull MMBSentence sentence) {
         super(sentence);
@@ -34,9 +35,14 @@ public class NMEA0183MMBMessage extends NMEA0183Message implements MsgGenericAtm
     }
 
     @Override
-    public double getAtmosphericPressure() {
+    public PressureSource getPressureSource() {
+        return PressureSource.ATMOSPHERIC;
+    }
+
+    @Override
+    public double getPressure() {
         try {
-            return ((MMBSentence)getSentence()).getBars() * 1000.0;
+            return ((MMBSentence) getSentence()).getBars() * 1000.0;
         } catch (DataNotAvailableException e) {
             return Double.NaN;
         }

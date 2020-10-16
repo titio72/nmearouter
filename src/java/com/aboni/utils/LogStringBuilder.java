@@ -35,7 +35,7 @@ public class LogStringBuilder {
      * Add a "category" to the log line.
      * <Category>: Op {<Operation>} ...
      *
-     * @param category
+     * @param category The string for the category.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wC(String category) {
@@ -47,7 +47,7 @@ public class LogStringBuilder {
      * Add an "operation" to the log line.
      * <Category>: Op {<Operation>} ...
      *
-     * @param operation
+     * @param operation The string for the operation.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wO(String operation) {
@@ -56,11 +56,11 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, String value) {
@@ -70,11 +70,11 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, double value) {
@@ -84,11 +84,12 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param fmt   The format (as in String.format(...)).
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, String fmt, double value) {
@@ -96,11 +97,12 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param fmt   The format (as in String.format(...)).
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, String fmt, int value) {
@@ -108,11 +110,11 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, int value) {
@@ -122,11 +124,12 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param fmt   The format (as in String.format(...)).
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, String fmt, long value) {
@@ -134,11 +137,11 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, long value) {
@@ -148,11 +151,11 @@ public class LogStringBuilder {
     }
 
     /**
-     * Add a category to the log line.
+     * Add a value to the log line.
      * <Category>: Op {<Operation>} <key> {<value>} ...
      *
-     * @param key
-     * @param value
+     * @param key   The identifier to the value to be traced.
+     * @param value The value to be traced.
      * @return The original LogStringBuilder for fluent interface.
      */
     public LogStringBuilder wV(String key, Object value) {

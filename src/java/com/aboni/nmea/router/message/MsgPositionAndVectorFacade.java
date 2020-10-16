@@ -22,8 +22,8 @@ import java.time.Instant;
 
 public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
 
-    private MsgSOGAdCOG vector;
-    private MsgGNSSPosition position;
+    private final MsgSOGAdCOG vector;
+    private final MsgGNSSPosition position;
 
     public MsgPositionAndVectorFacade(@NotNull MsgGNSSPosition position, @NotNull MsgSOGAdCOG vector) {
         this.position = position;
@@ -68,5 +68,10 @@ public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
     @Override
     public boolean isTrueCOG() {
         return vector.isTrueCOG();
+    }
+
+    @Override
+    public String toString() {
+        return position.toString() + " " + vector.toString();
     }
 }

@@ -1,14 +1,8 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.GPSStatus;
-import com.aboni.nmea.router.OnN2KMessage;
-import com.aboni.nmea.router.SatInfo;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.message.Satellite;
-import com.aboni.nmea.router.n2k.messages.*;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -67,28 +61,19 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         this.timestampProvider = tp;
     }
 
-    @OnN2KMessage
-    public void onMessage(N2KMessage message) {
-        if (message != null) {
-            int pgn = message.getHeader().getPgn();
-            switch (pgn) {
-                case N2kMessagePGNs.SYSTEM_TIME_PGN:
-                    handleSystemTime((MsgSystemTime) message);
-                    break;
-                case N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN:
-                    handlePositionMessage((MsgGNSSPosition) message);
-                    break;
-                case N2kMessagePGNs.SOG_COG_RAPID_PGN:
-                    handleSOGMessage((MsgSOGAdCOG) message);
-                    break;
-                case N2kMessagePGNs.SATELLITES_IN_VIEW_PGN:
-                    handleSatellitesMessage((MsgSatellites) message);
-                    break;
-                case N2kMessagePGNs.GNSS_DOP_PGN:
-                    handleDOPs((MsgGNSSDOPs) message);
-                    break;
-                default:
-                    break;
+    @OnRouterMessage
+    public void onMessage(RouterMessage rm) {
+        if (rm != null && rm.getMessage() != null) {
+            Message message = rm.getMessage();
+            if (message instanceof MsgSystemTime) {
+                handleSystemTime((MsgSystemTime) message);
+            } else if (message instanceof MsgPositionAndVector) {
+                handleSOGMessage((MsgPositionAndVector) message);
+                handlePositionMessage((MsgPositionAndVector) message);
+            } else if (message instanceof MsgSatellites) {
+                handleSatellitesMessage((MsgSatellites) message);
+            } else if (message instanceof MsgGNSSDOPs) {
+                handleDOPs((MsgGNSSDOPs) message);
             }
         }
     }
@@ -107,7 +92,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
         }
     }
 
-    private void handlePositionMessage(MsgGNSSPosition message) {
+    private void handlePositionMessage(MsgPositionAndVector message) {
         synchronized (this) {
             if (message.getPosition() != null) {
                 setPosition(message.getTimestamp(), message.getPosition());

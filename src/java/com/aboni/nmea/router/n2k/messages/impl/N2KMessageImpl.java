@@ -11,10 +11,6 @@ public abstract class N2KMessageImpl implements N2KMessage {
     protected final N2KMessageHeader header;
     protected final byte[] data;
 
-    protected boolean isValidByte(int b) {
-        return b != 0xFF;
-    }
-
     protected boolean isValidDouble(double d) {
         return !Double.isNaN(d);
     }

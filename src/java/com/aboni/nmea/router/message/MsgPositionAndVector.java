@@ -23,4 +23,8 @@ public interface MsgPositionAndVector extends MsgPosition, MsgSOGAdCOG {
 
     double getVariation();
 
+    default boolean isValid() {
+        return getPosition() != null && !Double.isNaN(getCOG()) && !Double.isNaN(getSOG());
+    }
+
 }

@@ -15,11 +15,40 @@
 
 package com.aboni.nmea.router.message;
 
-public interface MsgGenericHumidity extends Message {
+public class MsgAttitudeImpl implements MsgAttitude {
 
-    int getSID();
+    private final double pitch;
+    private final double roll;
+    private final double yaw;
 
-    String getHumiditySource();
+    public MsgAttitudeImpl(double yaw, double roll, double pitch) {
+        this.pitch = pitch;
+        this.roll = roll;
+        this.yaw = yaw;
+    }
 
-    double getHumidity();
+    @Override
+    public double getPitch() {
+        return pitch;
+    }
+
+    @Override
+    public int getSID() {
+        return -1;
+    }
+
+    @Override
+    public double getYaw() {
+        return yaw;
+    }
+
+    @Override
+    public double getRoll() {
+        return roll;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Attitude: Yaw {%.1f} Pitch {%.1f} Roll {%.1f} ", getYaw(), getPitch(), getRoll());
+    }
 }

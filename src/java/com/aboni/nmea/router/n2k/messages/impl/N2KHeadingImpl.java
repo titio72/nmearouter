@@ -1,13 +1,12 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.n2k.N2KLookupTables;
+import com.aboni.nmea.router.message.DirectionReference;
+import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgHeading;
 
-import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.HEADING_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.HEADING_PGN;
 
 public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
 
@@ -15,7 +14,7 @@ public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
     private double heading;
     private double deviation;
     private double variation;
-    private String reference;
+    private DirectionReference reference;
 
     public N2KHeadingImpl(byte[] data) {
         super(getDefaultHeader(HEADING_PGN), data);
@@ -42,7 +41,7 @@ public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
         Double dV = parseDouble(data, 40, 16, 0.0001, true);
         variation = dV == null ? Double.NaN : Utils.round(Math.toDegrees(dV), 1);
 
-        reference = parseEnum(data, 56, 0, 2, N2KLookupTables.getTable(DIRECTION_REFERENCE));
+        reference = DirectionReference.valueOf((int) parseIntegerSafe(data, 56, 0, 2, 0));
     }
 
     @Override
@@ -66,13 +65,13 @@ public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
     }
 
     @Override
-    public String getReference() {
+    public DirectionReference getReference() {
         return reference;
     }
 
     @Override
     public boolean isTrueHeading() {
-        return "True".equals(reference);
+        return DirectionReference.TRUE == reference;
     }
 
     @Override

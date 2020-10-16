@@ -20,9 +20,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
@@ -45,7 +43,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     private boolean transmit;
 
     private final Log log;
-    private final N2KMessage2NMEA0183 converter;
+    private final Message2NMEA0183 converter;
 
     private class InternalSentenceReader implements SentenceListener {
 
@@ -71,7 +69,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketClient(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KMessage2NMEA0183 converter) {
+    public NMEASocketClient(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull Message2NMEA0183 converter) {
         super(log, tp, true, false);
         this.log = log;
         this.converter = converter;
@@ -146,12 +144,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     public void onMessage(RouterMessage rm) {
         try {
             if (socket != null && transmit) {
-                Sentence[] s = null;
-                if (rm.getMessage() instanceof NMEA0183Message) {
-                    s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
-                } else if (rm.getMessage() instanceof N2KMessage) {
-                    s = converter.getSentence((N2KMessage) rm.getMessage());
-                }
+                Sentence[] s = converter.convert(rm.getMessage());
                 if (s!=null) {
                     for (Sentence sentence: s) {
                         socket.getOutputStream().write(sentence.toSentence().getBytes());

@@ -1,16 +1,16 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
+import com.aboni.nmea.router.message.MsgGNSSPosition;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgGNSSPosition;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;
 import java.time.ZoneId;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.GNSS_POSITION_UPDATE_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.GNSS_POSITION_UPDATE_PGN;
 
 public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSSPosition {
 
@@ -74,11 +74,6 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSS
     @Override
     public int getSID() {
         return sid;
-    }
-
-    @Override
-    public boolean isValidSID() {
-        return isValidByte(sid);
     }
 
     @Override

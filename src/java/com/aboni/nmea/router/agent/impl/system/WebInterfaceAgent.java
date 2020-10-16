@@ -21,6 +21,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.impl.Message2NMEA0183Impl;
 import com.aboni.nmea.router.services.*;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.Log;
@@ -49,6 +50,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private final Log log;
     private final NMEAStream stream;
     private final NMEA2JSONb jsonConverter;
+    private final Message2NMEA0183Impl nmeaConverter;
 
     @Inject
     public WebInterfaceAgent(@NotNull TimestampProvider tp, @NotNull NMEAStream stream, @NotNull Log log) {
@@ -56,6 +58,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         this.log = log;
         this.stream = stream;
         this.jsonConverter = new NMEA2JSONb();
+        this.nmeaConverter = new Message2NMEA0183Impl();
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {
@@ -187,17 +190,15 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         }
 
         @Override
-        public Sentence getSentence() {
-            return null;
-        }
-
-        @Override
         public JSONObject getJSON() {
-            if (jsonMessage==null && message.getSentence()!=null) {
+            if (jsonMessage == null && message.getMessage() != null) {
+                Sentence[] ss = nmeaConverter.convert(message.getMessage());
                 try {
-                    jsonMessage = jsonConverter.convert(message.getSentence());
+                    if (ss != null && ss.length != 0) {
+                        jsonMessage = jsonConverter.convert(ss[0]);
+                    }
                 } catch (Exception e) {
-                    getLogBuilder().wO("convert to JSON").wV("sentence", message.getSentence()).error(log, e);
+                    getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).error(log, e);
                 }
             }
             return jsonMessage;

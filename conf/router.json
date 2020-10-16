@@ -8,8 +8,9 @@
             "name": "NEXTION"
         },
         {
-            "type": "Simulator",
-            "name": "SIM1"
+          "type": "SimulatorX",
+          "name": "SIM1",
+          "qos": "truewind_sog;enrich_hdm;rmc_filter;speed_filter"
         },
         {
             "type": "Simulator",

@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
@@ -29,7 +28,6 @@ import java.util.List;
 public class ListenerWrapper {
 
     private final List<Method> listenersJSON;
-    private final List<Method> listenersN2K;
     private final List<Method> listenersMsg;
     private final Object listenerObject;
     private final Log log;
@@ -37,7 +35,6 @@ public class ListenerWrapper {
     public ListenerWrapper(Object listener, @NotNull Log log) {
         this.log = log;
         listenersJSON = new ArrayList<>();
-        listenersN2K = new ArrayList<>();
         listenersMsg = new ArrayList<>();
         fillMethodsAnnotatedWith(listener);
         listenerObject = listener;
@@ -49,9 +46,7 @@ public class ListenerWrapper {
             // iterate though the list of methods declared in the class represented by aClass variable, and add those annotated with the specified annotation
             final List<Method> allMethods = new ArrayList<>(Arrays.asList(aClass.getDeclaredMethods()));
             for (final Method method : allMethods) {
-                if (method.isAnnotationPresent(OnN2KMessage.class)) {
-                    scanMethod(method, N2KMessage.class, listenersN2K);
-                } else if (method.isAnnotationPresent(OnJSONMessage.class)) {
+                if (method.isAnnotationPresent(OnJSONMessage.class)) {
                     scanMethod(method, JSONObject.class, listenersJSON);
                 } else if (method.isAnnotationPresent(OnRouterMessage.class)) {
                     scanMethod(method, RouterMessage.class, listenersMsg);
@@ -74,7 +69,6 @@ public class ListenerWrapper {
         // it is important to check if the listeners set is empty because the getXXX may lazy load stuff, in this way
         // we avoid executing code that is not needed (because no one would listen)
         if (!listenersMsg.isEmpty()) dispatch(message, message.getSource(), listenersMsg);
-        if (message.getMessage()!=null && !listenersN2K.isEmpty()) dispatch(message.getMessage(), message.getSource(), listenersN2K);
         if (message.getJSON()!=null && !listenersJSON.isEmpty()) dispatch(message.getJSON(), message.getSource(), listenersJSON);
     }
 
@@ -87,7 +81,7 @@ public class ListenerWrapper {
                     else if (m.getParameterCount() == 2)
                         m.invoke(listenerObject, payload, src);
                 } catch (Exception e) {
-                    log.error(LogStringBuilder.start("MessageDispatcher").wO("push message").toString(), e);
+                    log.errorForceStacktrace(LogStringBuilder.start("MessageDispatcher").wO("push message").toString(), e);
                 }
             }
         }

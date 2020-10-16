@@ -15,14 +15,15 @@
 
 package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.nmea.router.message.MsgGenericTemperature;
+import com.aboni.nmea.router.message.MsgTemperature;
+import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.MTASentence;
 
 import javax.validation.constraints.NotNull;
 
-public class NMEA0183MTAMessage extends NMEA0183Message implements MsgGenericTemperature {
+public class NMEA0183MTAMessage extends NMEA0183Message implements MsgTemperature {
 
     public NMEA0183MTAMessage(@NotNull MTASentence sentence) {
         super(sentence);
@@ -34,16 +35,26 @@ public class NMEA0183MTAMessage extends NMEA0183Message implements MsgGenericTem
     }
 
     @Override
-    public String getTemperatureSource() {
-        return "Main Cabin Temperature";
+    public TemperatureSource getTemperatureSource() {
+        return TemperatureSource.MAIN_CABIN_ROOM;
+    }
+
+    @Override
+    public int getInstance() {
+        return 0;
     }
 
     @Override
     public double getTemperature() {
         try {
-            return ((MTASentence)getSentence()).getTemperature();
+            return ((MTASentence) getSentence()).getTemperature();
         } catch (DataNotAvailableException e) {
             return Double.NaN;
         }
+    }
+
+    @Override
+    public double getSetTemperature() {
+        return Double.NaN;
     }
 }

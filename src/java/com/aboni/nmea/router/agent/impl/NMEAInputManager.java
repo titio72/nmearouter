@@ -86,6 +86,7 @@ public class NMEAInputManager {
     private final StringInputHandler n2kHandler;
     private final StringInputHandler nmeaHandler;
 
+
     public NMEAInputManager(@NotNull Log logger) {
         n2kHandler = new N2KHandlerExp(logger);
         nmeaHandler = new NMEA0183Handler(logger);

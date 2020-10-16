@@ -61,7 +61,7 @@ public class NMEAMagnetic2TrueConverter {
     }
 
     public double getDeclination(Position p) {
-        return geo.getDeclination(p.getLatitude(), p.getLongitude(), 2016.5, 0);
+        return geo.getDeclination(p.getLatitude(), p.getLongitude(), year, 0);
     }
 
     public Position getPosition() {

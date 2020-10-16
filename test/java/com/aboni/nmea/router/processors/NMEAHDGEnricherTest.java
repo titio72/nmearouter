@@ -102,7 +102,7 @@ public class NMEAHDGEnricherTest {
 
     @Test
     public void testEnrichVariation() throws NMEARouterProcessorException {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, false, 2016);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -112,7 +112,7 @@ public class NMEAHDGEnricherTest {
 
     @Test
     public void testEnrichVariationFail() throws NMEARouterProcessorException {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(false), false, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(false), false, false, 2016);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -122,7 +122,7 @@ public class NMEAHDGEnricherTest {
 
     @Test
     public void testHDT() throws NMEARouterProcessorException {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, true);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), false, true, 2016);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
@@ -134,7 +134,7 @@ public class NMEAHDGEnricherTest {
 
     @Test
     public void testHDM() throws NMEARouterProcessorException {
-        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), true, false);
+        NMEAHDGEnricher filler = new NMEAHDGEnricher(new MyCache(), true, false, 2016);
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);

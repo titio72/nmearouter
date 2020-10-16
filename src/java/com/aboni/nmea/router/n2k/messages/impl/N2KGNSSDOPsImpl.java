@@ -1,11 +1,11 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.GNSSFix;
+import com.aboni.nmea.router.message.MsgGNSSDOPs;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgGNSSDOPs;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.GNSS_DOP_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.GNSS_DOP_PGN;
 
 public class N2KGNSSDOPsImpl extends N2KMessageImpl implements MsgGNSSDOPs {
 
@@ -54,7 +54,7 @@ public class N2KGNSSDOPsImpl extends N2KMessageImpl implements MsgGNSSDOPs {
     }
 
     @Override
-    public int getSid() {
+    public int getSID() {
         return sid;
     }
 

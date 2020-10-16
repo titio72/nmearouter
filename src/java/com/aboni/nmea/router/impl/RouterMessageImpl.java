@@ -17,8 +17,6 @@ package com.aboni.nmea.router.impl;
 
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 public class RouterMessageImpl<T> implements RouterMessage {
@@ -46,12 +44,6 @@ public class RouterMessageImpl<T> implements RouterMessage {
     @Override
     public Message getMessage() {
         if (theMessage instanceof Message) return (Message) theMessage;
-        return null;
-    }
-
-    @Override
-    public Sentence getSentence() {
-        if (theMessage instanceof NMEA0183Message) return ((NMEA0183Message)theMessage).getSentence();
         return null;
     }
 

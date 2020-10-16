@@ -11,7 +11,7 @@ import net.sf.marineapi.nmea.util.Position;
 import java.time.Instant;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_ATON_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.AIS_ATON_PGN;
 
 public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AISStaticData {
 

@@ -16,11 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.MsgSeatalkPilotLockedHeading;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgSeatalkPilotLockedHeading;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SEATALK_PILOT_LOCKED_HEADING_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.SEATALK_PILOT_LOCKED_HEADING_PGN;
 
 public class N2KSeatalkPilotLockedHeadingImpl extends N2KMessageImpl implements MsgSeatalkPilotLockedHeading {
 

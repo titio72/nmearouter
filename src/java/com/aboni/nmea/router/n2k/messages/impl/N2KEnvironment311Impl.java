@@ -1,16 +1,15 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.message.MsgEnvironment;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.HUMIDITY_SOURCE;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_130311_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_130311_PGN;
 
-public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironment {
+public class N2KEnvironment311Impl extends N2KMessageImpl {
 
     private String humiditySource;
     private String tempSource;
@@ -18,7 +17,6 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironm
     private double temperature;
     private double humidity;
     private double atmosphericPressure;
-
 
     public N2KEnvironment311Impl(byte[] data) {
         super(getDefaultHeader(ENVIRONMENT_130311_PGN), data);
@@ -52,32 +50,26 @@ public class N2KEnvironment311Impl extends N2KMessageImpl implements MsgEnvironm
 
     }
 
-    @Override
     public int getSID() {
         return sid;
     }
 
-    @Override
     public String getHumiditySource() {
         return humiditySource;
     }
 
-    @Override
     public String getTemperatureSource() {
         return tempSource;
     }
 
-    @Override
     public double getTemperature() {
         return temperature;
     }
 
-    @Override
     public double getHumidity() {
         return humidity;
     }
 
-    @Override
     public double getAtmosphericPressure() {
         return atmosphericPressure;
     }

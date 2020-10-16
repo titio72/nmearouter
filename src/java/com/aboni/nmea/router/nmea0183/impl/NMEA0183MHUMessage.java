@@ -15,14 +15,15 @@
 
 package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.nmea.router.message.MsgGenericHumidity;
+import com.aboni.nmea.router.message.HumiditySource;
+import com.aboni.nmea.router.message.MsgHumidity;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.MHUSentence;
 
 import javax.validation.constraints.NotNull;
 
-public class NMEA0183MHUMessage extends NMEA0183Message implements MsgGenericHumidity {
+public class NMEA0183MHUMessage extends NMEA0183Message implements MsgHumidity {
 
     public NMEA0183MHUMessage(@NotNull MHUSentence sentence) {
         super(sentence);
@@ -34,8 +35,8 @@ public class NMEA0183MHUMessage extends NMEA0183Message implements MsgGenericHum
     }
 
     @Override
-    public String getHumiditySource() {
-        return "Inside";
+    public HumiditySource getHumiditySource() {
+        return HumiditySource.INSIDE;
     }
 
     @Override

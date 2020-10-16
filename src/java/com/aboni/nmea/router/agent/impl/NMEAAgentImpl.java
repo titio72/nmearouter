@@ -281,10 +281,6 @@ public class NMEAAgentImpl implements NMEAAgent {
                 for (Message s : toSend)
                     sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
         }
-
-        if (isStarted()) {
-            sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
-        }
     }
 
     /**

@@ -16,11 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.MsgRudder;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgRudder;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.RUDDER_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.RUDDER_PGN;
 
 public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
 

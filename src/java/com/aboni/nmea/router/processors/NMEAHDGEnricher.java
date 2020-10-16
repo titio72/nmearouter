@@ -31,6 +31,7 @@ import net.sf.marineapi.nmea.util.Position;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -53,16 +54,20 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
         this(cache, true, true);
     }
 
-    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt) {
-        m = new NMEAMagnetic2TrueConverter();
+    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt, int year) {
+        m = new NMEAMagnetic2TrueConverter(year);
         this.cache = cache;
         this.doHDM = hdm;
         this.doHDT = hdt;
     }
 
+    public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt) {
+        this(cache, hdm, hdt, Calendar.getInstance().get(Calendar.YEAR));
+    }
+
     private static <T extends Sentence> boolean isA(Class<T> type, Message m) {
         return m instanceof NMEA0183Message &&
-                type.isInstance(((NMEA0183Message)m).getSentence());
+                type.isInstance(((NMEA0183Message) m).getSentence());
     }
 
     @Override

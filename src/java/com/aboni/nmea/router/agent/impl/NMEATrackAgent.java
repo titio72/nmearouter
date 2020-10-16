@@ -20,7 +20,6 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
-import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
@@ -36,7 +35,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private final TripManagerX tripManager;
     private final TimestampProvider timestampProvider;
     private final NMEACache cache;
-    private final PositionAndVectorStream posStream;
     private final Log log;
 
     @Inject
@@ -48,8 +46,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         this.cache = cache;
         this.tracker = trackManager;
         this.tripManager = tripManager;
-        this.posStream = new PositionAndVectorStream(tp);
-        this.posStream.setListener(this::onPosition);
     }
 
     @Override
@@ -76,8 +72,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onRouterMessage(RouterMessage msg) {
-        if (isStarted()) {
-            posStream.onMessage(msg);
+        if (isStarted() && msg.getMessage() instanceof MsgPositionAndVector) {
+            onPosition((MsgPositionAndVector) msg.getMessage());
         }
     }
 

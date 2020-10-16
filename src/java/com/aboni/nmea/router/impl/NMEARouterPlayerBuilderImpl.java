@@ -19,60 +19,15 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
-import com.aboni.nmea.router.conf.AgentConfJSON;
 import com.aboni.nmea.router.conf.AgentTypes;
-import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.conf.SimpleConf;
 import com.aboni.utils.ThingsFactory;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.Properties;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
-
-    private static class SimpleConf implements AgentConfJSON {
-
-        private final String name;
-        private final String type;
-        private final JSONObject cfg = new JSONObject();
-
-        private SimpleConf(String type, String name) {
-            this.type = type;
-            this.name = name;
-        }
-
-        SimpleConf setAttribute(String key, int value) {
-            cfg.put(key, value);
-            return this;
-        }
-
-        SimpleConf setAttribute(String key, String value) {
-            cfg.put(key, value);
-            return this;
-        }
-
-
-        @Override
-        public String getType() {
-            return type;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public QOS getQos() {
-            return null;
-        }
-
-        @Override
-        public JSONObject getConfiguration() {
-            return null;
-        }
-    }
 
     @Inject
     public NMEARouterPlayerBuilderImpl() {

@@ -7,7 +7,7 @@ import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.AIS_TRANSCEIVER;
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.REPEAT_INDICATOR;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_STATIC_DATA_CLASS_B_PART_A_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.AIS_STATIC_DATA_CLASS_B_PART_A_PGN;
 
 public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISStaticData {
 

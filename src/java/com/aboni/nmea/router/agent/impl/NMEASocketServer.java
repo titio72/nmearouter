@@ -20,9 +20,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -53,7 +51,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     private final ByteBuffer readBuffer;
     private final Map<SocketChannel, ClientDescriptor> clients;
     private final Log log;
-    private final N2KMessage2NMEA0183 converter;
+    private final Message2NMEA0183 converter;
     private SentenceSerializer serializer;
 
     public interface SentenceSerializer {
@@ -77,7 +75,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log, @NotNull N2KMessage2NMEA0183 converter) {
+    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log, @NotNull Message2NMEA0183 converter) {
         super(log, tp, false, true);
         this.log = log;
         this.converter = converter;
@@ -247,13 +245,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     private Sentence[] getSentenceToSend(RouterMessage rm) {
-        Sentence[] s = new Sentence[] {};
-        if (rm.getMessage() instanceof NMEA0183Message) {
-            s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
-        } else if (rm.getMessage() instanceof N2KMessage) {
-            s = converter.getSentence((N2KMessage) rm.getMessage());
-        }
-        return s;
+        return converter.convert(rm.getMessage());
     }
 
     private boolean sendMessageToClient(String output, int p, SocketChannel sc, ClientDescriptor cd) {

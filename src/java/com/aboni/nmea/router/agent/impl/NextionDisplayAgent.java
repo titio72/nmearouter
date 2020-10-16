@@ -3,17 +3,13 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.message.MsgPositionAndVector;
-import com.aboni.nmea.router.message.MsgWaterDepth;
+import com.aboni.nmea.router.message.*;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.ConsoleLog;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
-import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
@@ -192,7 +188,6 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         }
 
         Message m = rm.getMessage();
-        Sentence s = rm.getSentence();
         if (m instanceof MsgPositionAndVector) {
             sendPosition(((MsgPositionAndVector)m).getPosition());
             setData(m, Fields.COG, (Object ss) -> String.format("%d°", Math.round(((MsgPositionAndVector) ss).getCOG())));
@@ -201,14 +196,14 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
             setData(m, Fields.DEPTH, (Object ss) -> String.format("%.1f m", ((MsgWaterDepth) m).getDepth()));
         } else if (m instanceof MsgHeading) {
             setData(m, Fields.HEAD, (Object ss) -> String.format("%d°", Math.round(((MsgHeading) m).getHeading())));
-        } else if (s instanceof MMBSentence) {
-            setData(s, Fields.ATMO, (Object ss) -> String.format("%d mb", Math.round(((MMBSentence) ss).getBars() * 1000)));
-        } else if (s instanceof MTWSentence) {
-            setData(s, Fields.WATER_TEMP, (Object ss) -> String.format("%.1f C°", ((MTWSentence) ss).getTemperature()));
-        } else if (s instanceof MTASentence) {
-            setData(s, Fields.AIR_TEMP, (Object ss) -> String.format("%.1f C°", ((MTASentence) ss).getTemperature()));
-        } else if (s instanceof MHUSentence) {
-            setData(s, Fields.HUM, (Object ss) -> String.format("%.1f%%", ((MHUSentence) ss).getRelativeHumidity()));
+        } else if (m instanceof MsgPressure && PressureSource.ATMOSPHERIC == ((MsgPressure) m).getPressureSource()) {
+            setData(m, Fields.ATMO, (Object ss) -> String.format("%d mb", Math.round(((MsgPressure) ss).getPressure())));
+        } else if (m instanceof MsgTemperature && TemperatureSource.SEA == ((MsgTemperature) m).getTemperatureSource()) {
+            setData(m, Fields.WATER_TEMP, (Object ss) -> String.format("%.1f C°", ((MsgTemperature) ss).getTemperature()));
+        } else if (m instanceof MsgTemperature && TemperatureSource.MAIN_CABIN_ROOM == ((MsgTemperature) m).getTemperatureSource()) {
+            setData(m, Fields.AIR_TEMP, (Object ss) -> String.format("%.1f C°", ((MsgTemperature) ss).getTemperature()));
+        } else if (m instanceof MsgHumidity && HumiditySource.INSIDE == (((MsgHumidity) m).getHumiditySource())) {
+            setData(m, Fields.HUM, (Object ss) -> String.format("%.1f%%", ((MsgHumidity) ss).getHumidity()));
         }
     }
 

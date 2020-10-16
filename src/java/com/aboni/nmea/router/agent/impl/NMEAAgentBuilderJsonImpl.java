@@ -19,6 +19,7 @@ import com.aboni.nmea.router.agent.BuiltInAgents;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
+import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSourceX;
 import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.*;
 import com.aboni.nmea.sentences.NMEA2JSONb;
@@ -79,6 +80,9 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             case AgentTypes.NEXTION:
                 agent = buildNextion(a, q);
                 break;
+            case AgentTypes.SIMULATOR_X:
+                agent = buildStandard(a, q, NMEASimulatorSourceX.class, AgentTypes.SIMULATOR);
+                break;
             case AgentTypes.SIMULATOR:
                 agent = buildStandard(a, q, NMEASimulatorSource.class, AgentTypes.SIMULATOR);
                 break;
@@ -108,9 +112,6 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 break;
             case AgentTypes.CONSOLE:
                 agent = buildStandard(a, q, NMEAConsoleTarget.class, AgentTypes.CONSOLE);
-                break;
-            case AgentTypes.CONSOLE_N2K:
-                agent = buildStandard(a, q, NMEAConsoleN2KTarget.class, AgentTypes.CONSOLE_N2K);
                 break;
             case AgentTypes.TRACK:
                 agent = buildTrackTarget(a, q);

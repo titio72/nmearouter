@@ -1,14 +1,16 @@
 package com.aboni.nmea.router.n2k.messages;
 
-public class N2kMessagePGNs {
+public class N2KMessagePGNs {
 
-    private N2kMessagePGNs() {
+    private N2KMessagePGNs() {
     }
 
     public static final int ATTITUDE_PGN = 127257;
     public static final int ENVIRONMENT_130310_PGN = 130310;
     public static final int ENVIRONMENT_130311_PGN = 130311;
     public static final int ENVIRONMENT_TEMPERATURE_PGN = 130312;
+    public static final int ENVIRONMENT_HUMIDITY_PGN = 130313;
+    public static final int ENVIRONMENT_PRESSURE_PGN = 130314;
     public static final int GNSS_POSITION_UPDATE_PGN = 129029;
     public static final int POSITION_UPDATE_RAPID = 129025;
     public static final int RATE_OF_TURN_PGN = 127251;

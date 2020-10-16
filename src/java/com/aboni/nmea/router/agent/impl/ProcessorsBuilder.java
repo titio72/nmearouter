@@ -47,10 +47,6 @@ public class ProcessorsBuilder {
                         log.info("QoS {Depth}");
                         res.add(ThingsFactory.getInstance(NMEADepthEnricher.class));
                         break;
-                    case "rmc2vtg":
-                        log.info("QoS {RMC to VTG}");
-                        res.add(ThingsFactory.getInstance(NMEARMC2VTGProcessor.class));
-                        break;
                     case "truewind_sog":
                         log.info("QoS {True wind SOG}");
                         res.add(new NMEAMWVTrue(timestampProvider, true));

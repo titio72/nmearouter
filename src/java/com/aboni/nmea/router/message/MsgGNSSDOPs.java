@@ -2,7 +2,7 @@ package com.aboni.nmea.router.message;
 
 public interface MsgGNSSDOPs extends Message {
 
-    int getSid();
+    int getSID();
 
     double getHDOP();
 

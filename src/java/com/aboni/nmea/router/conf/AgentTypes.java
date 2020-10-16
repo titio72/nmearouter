@@ -20,9 +20,9 @@ public class AgentTypes {
     private AgentTypes() {
     }
 
+    public static final String SIMULATOR_X = "SimulatorX";
     public static final String SIMULATOR = "Simulator";
     public static final String CONSOLE = "Console";
-    public static final String CONSOLE_N2K = "ConsoleN2K";
     public static final String METEO = "Meteo";
     public static final String TCP = "TCP";
     public static final String UDP = "UDP";

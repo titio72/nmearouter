@@ -16,8 +16,6 @@
 package com.aboni.nmea.router.message;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.DataEvent;
 
@@ -44,18 +42,15 @@ public class PositionAndVectorStream {
         this.listener = listener;
     }
 
-    @OnRouterMessage
-    public void onMessage(RouterMessage rm) {
-        Message m = rm.getMessage();
-        if (listener!=null &&
-                m instanceof MsgGNSSPosition &&
-                lastVector!=null &&
-                !Utils.isOlderThan(lastVector.getTimestamp(), timestampProvider.getNow(), 750)) {
-
-            MsgPositionAndVectorFacade res = new MsgPositionAndVectorFacade((MsgGNSSPosition)m, lastVector.getData());
-            listener.onPosAndVector(res);
-        } else if (m instanceof MsgSOGAdCOG) {
-            lastVector = new DataEvent<>((MsgSOGAdCOG) m, timestampProvider.getNow(), rm.getSource());
+    public void onMessage(Message m) {
+        if (listener != null) {
+            if (m instanceof MsgGNSSPosition && lastVector != null &&
+                    !Utils.isOlderThan(lastVector.getTimestamp(), timestampProvider.getNow(), 600)) {
+                MsgPositionAndVectorFacade res = new MsgPositionAndVectorFacade((MsgGNSSPosition) m, lastVector.getData());
+                listener.onPosAndVector(res);
+            } else if (m instanceof MsgSOGAdCOG) {
+                lastVector = new DataEvent<>((MsgSOGAdCOG) m, timestampProvider.getNow(), "");
+            }
         }
     }
 }

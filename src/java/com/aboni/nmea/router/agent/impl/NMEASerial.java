@@ -22,9 +22,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
 import com.aboni.utils.Log;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
@@ -46,7 +44,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
     private static final int PORT_WAIT_FOR_DATA = 500;
     private final Log log;
-    private final N2KMessage2NMEA0183 converter;
+    private final Message2NMEA0183 converter;
 
     private static class Config {
         private String portName;
@@ -104,7 +102,7 @@ public class NMEASerial extends NMEAAgentImpl {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KMessage2NMEA0183 converter) {
+    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull Message2NMEA0183 converter) {
         super(log, tp, true, false);
         this.log = log;
         this.converter = converter;
@@ -295,13 +293,7 @@ public class NMEASerial extends NMEAAgentImpl {
     }
 
     private Sentence[] getSentenceToSend(RouterMessage rm) {
-        Sentence[] s = new Sentence[] {};
-        if (rm.getMessage() instanceof NMEA0183Message) {
-            s = new Sentence[] {((NMEA0183Message) rm.getMessage()).getSentence()};
-        } else if (rm.getMessage() instanceof N2KMessage) {
-            s = converter.getSentence((N2KMessage) rm.getMessage());
-        }
-        return s;
+        return converter.convert(rm.getMessage());
     }
 
     @OnRouterMessage

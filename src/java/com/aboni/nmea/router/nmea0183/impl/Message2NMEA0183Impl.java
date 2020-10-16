@@ -13,82 +13,95 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.n2k.impl;
+package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.geo.TSAGeoMag;
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessage2NMEA0183;
+import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.LogAdmin;
-import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
+import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
+import static com.aboni.nmea.router.message.HumiditySource.INSIDE;
+
+public class Message2NMEA0183Impl implements Message2NMEA0183 {
 
     private static final Sentence[] TEMPLATE = new Sentence[0];
 
     private static final DateTimeFormatter fTIME = DateTimeFormatter.ofPattern("HHmmss");
     private static final DateTimeFormatter fDATE = DateTimeFormatter.ofPattern("ddMMyyyy");
 
-    private final TSAGeoMag geo;
     private double lastHeading;
     private long lastHeadingTime = 0;
-    private MsgSOGAdCOG lastSOG;
-    private MsgGNSSPosition lastPos;
 
-    public N2KMessage2NMEA0183Impl() {
-        geo = new TSAGeoMag(Constants.WMM, ThingsFactory.getInstance(LogAdmin.class).getBaseLogger());
+    @Inject
+    public Message2NMEA0183Impl() {
+        // do nothing
     }
 
     @Override
-    public Sentence[] getSentence(N2KMessage message) {
-        if (message != null) {
-            switch (message.getHeader().getPgn()) {
-                case 130306:
-                    return handleWindData((MsgWindData) message); // Wind Data
-                case 128267:
-                    return handleWaterDepth((MsgWaterDepth) message); // Water Depth
-                case 128259:
-                    return handleSpeed((MsgSpeed) message); // Speed
-                case 127250:
-                    return handleHeading((MsgHeading) message); // Vessel Heading
-                case 129029:
-                    return handlePosition((MsgGNSSPosition) message); // Position & time
-                case 129540:
-                    return handleSatellites((MsgSatellites) message); // Sats to GSV
-                case 129026:
-                    return handleSOGAdCOGRapid((MsgSOGAdCOG) message); // COG & SOG, Rapid Update
-                case 126992:
-                    return handleSystemTime((MsgSystemTime) message); // System time
-                case 127257:
-                    return handleAttitude((MsgAttitude) message); // Attitude)
-                case 130310:
-                    return handleEnvironment310((MsgEnvironmentTempAndPressure) message); // Env parameter: Water temp, air temp, pressure
-                case 130311:
-                    return handleEnvironment311((MsgEnvironment) message); // Env parameter: temperature, humidity, pressure
-                case 127245:
-                    return handleRudder((MsgRudder) message); // Rudder
-                case 127251:
-                    return handleRateOfTurn((MsgRateOfTurn) message); // Rate of turn
-                default:
-                    return TEMPLATE;
-            }
+    public Sentence[] convert(Message message) {
+        if (message instanceof NMEA0183Message) {
+            return new Sentence[]{((NMEA0183Message) message).getSentence()};
+        } else if (message instanceof MsgPositionAndVector) {
+            return handlePositionAndVector((MsgPositionAndVector) message);
+        } else if (message instanceof MsgWindData) {
+            return handleWindData((MsgWindData) message); // Wind Data
+        } else if (message instanceof MsgWaterDepth) {
+            return handleWaterDepth((MsgWaterDepth) message); // Water Depth
+        } else if (message instanceof MsgSpeed) {
+            return handleSpeed((MsgSpeed) message); // Speed
+        } else if (message instanceof MsgHeading) {
+            return handleHeading((MsgHeading) message); // Vessel Heading
+        } else if (message instanceof MsgSatellites) {
+            return handleSatellites((MsgSatellites) message); // Sats to GSV
+        } else if (message instanceof MsgSystemTime) {
+            return handleSystemTime((MsgSystemTime) message); // System time
+        } else if (message instanceof MsgAttitude) {
+            return handleAttitude((MsgAttitude) message); // Attitude)
+        } else if (message instanceof MsgRudder) {
+            return handleRudder((MsgRudder) message); // Rudder
+        } else if (message instanceof MsgRateOfTurn) {
+            return handleRateOfTurn((MsgRateOfTurn) message); // Rate of turn
+        } else if (message instanceof MsgTemperature) {
+            return handleTemperature((MsgTemperature) message);
+        } else if (message instanceof MsgPressure) {
+            return handlePressure((MsgPressure) message);
+        } else if (message instanceof MsgHumidity) {
+            return handleHumidity((MsgHumidity) message);
         }
         return TEMPLATE;
     }
 
-    private Sentence[] handleSatellites(MsgSatellites message) {
+    private static Sentence[] handlePositionAndVector(MsgPositionAndVector message) {
+        if (message.getPosition() != null && message.getTimestamp() != null
+                && !Double.isNaN(message.getSOG()) && !Double.isNaN(message.getCOG())) {
+            RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RMC);
+            rmc.setPosition(message.getPosition());
+            rmc.setVariation(0.0);
+            rmc.setDirectionOfVariation(CompassPoint.EAST);
+            rmc.setMode(FaaMode.AUTOMATIC);
+            rmc.setStatus(DataStatus.ACTIVE);
+            rmc.setCourse(message.getCOG());
+            rmc.setSpeed(message.getSOG());
+            Time t = new Time(message.getTimestamp().atZone(ZoneId.of("UTC")).format(fTIME));
+            Date d = new Date(message.getTimestamp().atZone(ZoneId.of("UTC")).format(fDATE));
+            rmc.setTime(t);
+            rmc.setDate(d);
+            return new Sentence[]{rmc};
+        }
+        return TEMPLATE;
+    }
+
+    private static Sentence[] handleSatellites(MsgSatellites message) {
         List<Sentence> res = new ArrayList<>();
         int nSat = message.getNumberOfSats();
         int nGroups = nSat / 12;
@@ -112,7 +125,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return res.toArray(TEMPLATE);
     }
 
-    private int handleSatellitesGroup(List<Sentence> res, int nSat, int satIx, List<Satellite> satsList, List<String> satInUse, int group) {
+    private static int handleSatellitesGroup(List<Sentence> res, int nSat, int satIx, List<Satellite> satsList, List<String> satInUse, int group) {
         int satsInGroup = Math.min(nSat - (group * 12), 12);
         int sentences = satsInGroup / 4;
         sentences = (sentences * 4) < satsInGroup ? sentences + 1 : sentences;
@@ -139,7 +152,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return satIx;
     }
 
-    private Sentence[] handleSystemTime(MsgSystemTime message) {
+    private static Sentence[] handleSystemTime(MsgSystemTime message) {
         if (message.getTime() != null) {
             ZDASentence zda = (ZDASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ZDA);
             Time t = new Time(message.getTime().atZone(ZoneId.of("UTC")).format(fTIME));
@@ -153,79 +166,18 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleSOGAdCOGRapid(MsgSOGAdCOG message) {
-        lastSOG = message;
-
-        List<Sentence> ss = new ArrayList<>();
-        double cog = message.getCOG();
-        double sog = message.getSOG();
-
-        if (!Double.isNaN(sog) && !Double.isNaN(cog)) {
-            VTGSentence vtg = (VTGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VTG);
-            vtg.setTrueCourse(cog);
-            if (lastPos != null && lastPos.getPosition() != null)
-                        vtg.setMagneticCourse(
-                                Utils.normalizeDegrees0To360(geo.getDeclination(lastPos.getPosition().getLatitude(), lastPos.getPosition().getLongitude()) + cog));
-            vtg.setSpeedKnots(sog);
-            vtg.setSpeedKmh(sog * 1.852);
-            ss.add(vtg);
-        }
-        Collections.addAll(ss, handleRMC());
-        return ss.toArray(TEMPLATE);
-    }
-
-    private Sentence[] handleRMC() {
-        if (lastSOG != null && lastPos != null && lastSOG.getSID() == lastPos.getSID()) {
-            Position p = lastPos.getPosition();
-            if (p != null) {
-                RMCSentence rmc = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RMC);
-                rmc.setPosition(p);
-                rmc.setVariation(0.0);
-                rmc.setDirectionOfVariation(CompassPoint.EAST);
-                rmc.setMode(FaaMode.AUTOMATIC);
-                rmc.setStatus(DataStatus.ACTIVE);
-                if (!Double.isNaN(lastSOG.getCOG())) rmc.setCourse(lastSOG.getCOG());
-                if (!Double.isNaN(lastSOG.getSOG())) rmc.setSpeed(lastSOG.getSOG());
-                if (lastPos.getTimestamp() != null) {
-                    Time t = new Time(lastPos.getTimestamp().atZone(ZoneId.of("UTC")).format(fTIME));
-                    Date d = new Date(lastPos.getTimestamp().atZone(ZoneId.of("UTC")).format(fDATE));
-                    rmc.setTime(t);
-                    rmc.setDate(d);
-                }
-                return new Sentence[]{rmc};
-            }
-        }
-        return TEMPLATE;
-    }
-
-    private Sentence[] handlePosition(MsgGNSSPosition message) {
-        lastPos = message;
-        List<Sentence> ss = new ArrayList<>();
-        if (message.getPosition() != null) {
-            GLLSentence gll = (GLLSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.GLL);
-            gll.setStatus(DataStatus.ACTIVE);
-            gll.setMode(FaaMode.AUTOMATIC);
-            gll.setPosition(message.getPosition());
-            Time t = new Time(message.getTimestamp().atZone(ZoneId.of("UTC")).format(fTIME));
-            gll.setTime(t);
-            ss.add(gll);
-        }
-        Collections.addAll(ss, handleRMC());
-        return ss.toArray(TEMPLATE);
-    }
-
     private Sentence[] handleHeading(MsgHeading message) {
         double heading = message.getHeading();
-        String ref = message.getReference();
+        DirectionReference ref = message.getReference();
         if (!Double.isNaN(heading) && ref != null) {
             switch (ref) {
-                case "Magnetic":
+                case MAGNETIC:
                     lastHeading = heading;
                     lastHeadingTime = System.currentTimeMillis();
                     HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
                     hdm.setHeading(heading);
                     return new Sentence[]{hdm};
-                case "True":
+                case TRUE:
                     HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
                     hdt.setHeading(heading);
                     return new Sentence[]{hdt};
@@ -250,7 +202,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleWaterDepth(MsgWaterDepth message) {
+    private static Sentence[] handleWaterDepth(MsgWaterDepth message) {
         double depth = message.getDepth();
         double offset = message.getOffset();
         double range = message.getRange();
@@ -264,7 +216,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleWindData(MsgWindData message) {
+    private static Sentence[] handleWindData(MsgWindData message) {
         double windSpeed = message.getSpeed();
         double windAngle = message.getAngle();
         boolean apparent = message.isApparent();
@@ -280,7 +232,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleAttitude(MsgAttitude message) {
+    private static Sentence[] handleAttitude(MsgAttitude message) {
         XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
         boolean send = false;
         if (!Double.isNaN(message.getYaw())) {
@@ -304,54 +256,53 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
             return TEMPLATE;
     }
 
-    private Sentence[] handleEnvironment310(MsgEnvironmentTempAndPressure message) {
-        double waterTemp = message.getWaterTemp();
-        if (!Double.isNaN(waterTemp)) {
-            MTWSentence s = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
-            s.setTemperature(waterTemp);
-            return new Sentence[]{s};
-        }
-        return TEMPLATE;
-    }
-
-    private Sentence[] handleEnvironment311(MsgEnvironment message) {
-        double humidity = message.getHumidity();
-        double airTemp = message.getTemperature();
-        double pressure = message.getAtmosphericPressure();
-
-        List<Sentence> res = new ArrayList<>();
-        XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
-        boolean send = false;
-        if (!Double.isNaN(airTemp)
-                && "Main Cabin Temperature".equals(message.getTemperatureSource())) {
-            MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTA);
-            mta.setTemperature(airTemp);
-            xdr.addMeasurement(new Measurement("C", Utils.round(airTemp, 1), "C", "CabinTemp"));
-            res.add(mta);
-            send = true;
-        }
-        if (!Double.isNaN(humidity)) {
-            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MHU);
-            mhu.setRelativeHumidity(humidity);
-            xdr.addMeasurement(new Measurement("P", Utils.round(humidity, 2), "H", "Humidity"));
-            res.add(mhu);
-            send = true;
-        }
-        if (!Double.isNaN(pressure)) {
+    private static Sentence[] handlePressure(MsgPressure message) {
+        double pressure = message.getPressure();
+        if (PressureSource.ATMOSPHERIC == message.getPressureSource() && !Double.isNaN(pressure)) {
+            XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MMB);
             mmb.setBars(pressure / 1000.0);
             mmb.setInchesOfMercury(Math.round(pressure * 760));
             xdr.addMeasurement(new Measurement("B", pressure, "B", "Barometer"));
-            res.add(mmb);
-            send = true;
+            return new Sentence[]{xdr, mmb};
         }
-        if (send) {
-            res.add(xdr);
-        }
-        return res.toArray(TEMPLATE);
+        return TEMPLATE;
     }
 
-    private Sentence[] handleRudder(MsgRudder message) {
+    private static Sentence[] handleHumidity(MsgHumidity message) {
+        double humidity = message.getHumidity();
+        if (INSIDE == (message.getHumiditySource()) && !Double.isNaN(humidity)) {
+            XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
+            MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MHU);
+            mhu.setRelativeHumidity(humidity);
+            xdr.addMeasurement(new Measurement("P", Utils.round(humidity, 2), "H", "Humidity"));
+            return new Sentence[]{xdr, mhu};
+        }
+        return TEMPLATE;
+    }
+
+    private static Sentence[] handleTemperature(MsgTemperature message) {
+        double temp = message.getTemperature();
+        if (!Double.isNaN(temp)) {
+            switch (message.getTemperatureSource()) {
+                case MAIN_CABIN_ROOM:
+                    XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
+                    MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTA);
+                    xdr.addMeasurement(new Measurement("C", Utils.round(temp, 1), "C", "CabinTemp"));
+                    mta.setTemperature(temp);
+                    return new Sentence[]{xdr, mta};
+                case SEA:
+                    MTWSentence mtw = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
+                    mtw.setTemperature(temp);
+                    return new Sentence[]{mtw};
+                default:
+                    return TEMPLATE;
+            }
+        }
+        return TEMPLATE;
+    }
+
+    private static Sentence[] handleRudder(MsgRudder message) {
         int instance = message.getInstance();
         double angle = message.getAngle();
         if (instance == 0 && !Double.isNaN(angle)) {
@@ -364,7 +315,7 @@ public class N2KMessage2NMEA0183Impl implements N2KMessage2NMEA0183 {
         }
     }
 
-    private Sentence[] handleRateOfTurn(MsgRateOfTurn message) {
+    private static Sentence[] handleRateOfTurn(MsgRateOfTurn message) {
         double rate = message.getRateOfTurn();
         if (!Double.isNaN(rate)) {
             ROTSentence rot = (ROTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.ROT);

@@ -140,22 +140,22 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         Message m = msg.getMessage();
         try {
             if (Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
-                if (m instanceof MsgGenericTemperature &&
-                        "Main Cabin Temperature".equals(((MsgGenericTemperature) m).getTemperatureSource())) {
-                    processTemp(((MsgGenericTemperature) m).getTemperature());
+                if (m instanceof MsgTemperature &&
+                        TemperatureSource.MAIN_CABIN_ROOM == ((MsgTemperature) m).getTemperatureSource()) {
+                    processTemp(((MsgTemperature) m).getTemperature());
                 }
 
-                if (m instanceof MsgGenericAtmosphericPressure) {
-                    processPressure(((MsgGenericAtmosphericPressure) m).getAtmosphericPressure());
+                if (m instanceof MsgPressure) {
+                    processPressure(((MsgPressure) m).getPressure());
                 }
 
-                if (m instanceof MsgGenericTemperature &&
-                        "Sea Temperature".equals(((MsgGenericTemperature) m).getTemperatureSource())) {
-                    processWaterTemp(((MsgGenericTemperature) m).getTemperature());
+                if (m instanceof MsgTemperature &&
+                        TemperatureSource.SEA == ((MsgTemperature) m).getTemperatureSource()) {
+                    processWaterTemp(((MsgTemperature) m).getTemperature());
                 }
 
-                if (m instanceof MsgGenericHumidity) {
-                    processHumidity(((MsgGenericHumidity) m).getHumidity());
+                if (m instanceof MsgHumidity) {
+                    processHumidity(((MsgHumidity) m).getHumidity());
                 }
 
                 if (m instanceof MsgWindData) {

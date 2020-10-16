@@ -15,6 +15,7 @@
 
 package com.aboni.nmea.router.nmea0183.impl;
 
+import com.aboni.nmea.router.message.DirectionReference;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -53,8 +54,8 @@ public class NMEA0183HDMMessage extends NMEA0183Message implements MsgHeading {
     }
 
     @Override
-    public String getReference() {
-        return "Magnetic";
+    public DirectionReference getReference() {
+        return DirectionReference.MAGNETIC;
     }
 
     @Override

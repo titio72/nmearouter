@@ -200,7 +200,7 @@ public class NMEARouterImpl implements NMEARouter {
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
             if (m.getPayload() instanceof JSONObject) {
-                routeToTarget(new RouterMessage[]{m});
+                routeToTargets(new RouterMessage[]{m});
             } else if (m.getPayload() instanceof Message) {
                 Message s = (Message) m.getPayload();
                 Collection<Message> toSend = null;
@@ -217,29 +217,38 @@ public class NMEARouterImpl implements NMEARouter {
                         RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
                         messages[counter] = mm;
                     }
-                    routeToTarget(messages);
+                    routeToTargets(messages);
                 }
             }
         }
     }
 
-    private void routeToTarget(final RouterMessage[] mm) {
+    private void routeToTargets(final RouterMessage[] mm) {
         synchronized (agents) {
             for (NMEAAgent nmeaAgent : agents.values()) {
                 try {
                     final NMEATarget target = nmeaAgent.getTarget();
+                    final String name = nmeaAgent.getName();
                     if (target != null) {
                         exec.execute(() -> {
                             for (RouterMessage m : mm) {
-                                if (!m.getSource().equals(nmeaAgent.getName())) {
-                                    target.pushMessage(m);
-                                }
+                                routeToTarget(name, target, m);
                             }
                         });
                     }
                 } catch (Exception e) {
                     log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("dispatch message").toString(), e);
                 }
+            }
+        }
+    }
+
+    private void routeToTarget(String targetName, NMEATarget targetInterface, RouterMessage m) {
+        if (!m.getSource().equals(targetName)) {
+            try {
+                targetInterface.pushMessage(m);
+            } catch (Exception e) {
+                log.errorForceStacktrace("PHAVA", e);
             }
         }
     }

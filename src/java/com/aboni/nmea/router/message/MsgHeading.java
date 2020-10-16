@@ -10,7 +10,7 @@ public interface MsgHeading extends Message {
 
     double getVariation();
 
-    String getReference();
+    DirectionReference getReference();
 
     boolean isTrueHeading();
 }

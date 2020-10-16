@@ -6,8 +6,6 @@ public interface MsgGNSSPosition extends MsgPosition {
 
     int getSID();
 
-    boolean isValidSID();
-
     Instant getTimestamp();
 
     double getAltitude();

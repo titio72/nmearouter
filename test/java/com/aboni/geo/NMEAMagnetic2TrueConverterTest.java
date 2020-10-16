@@ -58,7 +58,7 @@ public class NMEAMagnetic2TrueConverterTest {
         conv.setPosition(new Position(43.34, 10.01));
         HDGSentence t = conv.getSentence(TalkerId.HC, 315.4, 1.0);
         assertEquals(315.4, t.getHeading(), 0.001);
-        assertEquals(2.5, t.getVariation(), 0.001);
+        assertEquals(2.4, t.getVariation(), 0.001);
         assertEquals(1.0, t.getDeviation(), 0.001);
     }
 }

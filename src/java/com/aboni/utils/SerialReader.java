@@ -14,7 +14,7 @@ public class SerialReader {
 
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
-    private static final int DEFAUL_BUFFER_SIZE = 256;
+    private static final int DEFAULT_BUFFER_SIZE = 256;
 
     public class Stats {
         private long bytesRead;
@@ -49,9 +49,9 @@ public class SerialReader {
             }
         }
 
-        private void incrementTimeouts(int i) {
+        private void incrementTimeouts() {
             synchronized (this) {
-                timeouts += i;
+                timeouts++;
             }
         }
     }
@@ -63,7 +63,7 @@ public class SerialReader {
     private static class Config {
         private String portName;
         private int speed;
-        private int bufferSize = DEFAUL_BUFFER_SIZE;
+        private int bufferSize = DEFAULT_BUFFER_SIZE;
 
         String getPortName() {
             return portName;
@@ -113,7 +113,7 @@ public class SerialReader {
     }
 
     public void setup(String portName, int speed, ReaderCallback callback) {
-        setup(portName, speed, DEFAUL_BUFFER_SIZE, callback);
+        setup(portName, speed, DEFAULT_BUFFER_SIZE, callback);
         config.setPortName(portName);
         config.setSpeed(speed);
         this.callback = callback;
@@ -201,7 +201,7 @@ public class SerialReader {
             }
         } catch (SerialPortTimeoutException e) {
             Utils.pause(250);
-            stats.incrementTimeouts(1);
+            stats.incrementTimeouts();
         } catch (IOException e) {
             logger.error("Serial port read error: resetting", e);
             resetPortAndReader();

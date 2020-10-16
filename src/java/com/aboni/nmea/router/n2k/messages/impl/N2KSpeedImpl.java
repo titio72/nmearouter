@@ -1,13 +1,13 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
+import com.aboni.nmea.router.message.MsgSpeed;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgSpeed;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.WATER_REFERENCE;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.SPEED_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.SPEED_PGN;
 
 public class N2KSpeedImpl extends N2KMessageImpl implements MsgSpeed {
 

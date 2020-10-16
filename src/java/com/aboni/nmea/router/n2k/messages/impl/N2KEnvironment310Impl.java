@@ -18,11 +18,10 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgEnvironmentTempAndPressure;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_130310_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_130310_PGN;
 
-public class N2KEnvironment310Impl extends N2KMessageImpl implements MsgEnvironmentTempAndPressure {
+public class N2KEnvironment310Impl extends N2KMessageImpl {
 
     private int sid;
     private double waterTemp;
@@ -56,22 +55,18 @@ public class N2KEnvironment310Impl extends N2KMessageImpl implements MsgEnvironm
 
     }
 
-    @Override
     public int getSID() {
         return sid;
     }
 
-    @Override
     public double getWaterTemp() {
         return waterTemp;
     }
 
-    @Override
     public double getAirTemp() {
         return airTemp;
     }
 
-    @Override
     public double getAtmosphericPressure() {
         return atmosphericPressure;
     }

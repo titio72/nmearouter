@@ -18,18 +18,8 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.message.MsgSpeed;
-import com.aboni.nmea.router.message.MsgWindData;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Pair;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.util.DataStatus;
-import net.sf.marineapi.nmea.util.Units;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -84,19 +74,15 @@ public class NMEAMWVTrue implements NMEAPostProcess {
         } else if ((time - lastSpeedTime) < AGE_THRESHOLD) {
             // calculate true wind
             TrueWind t = new TrueWind(lastSpeed, windMessage.getAngle(), windMessage.getSpeed());
-            MWVSentence mwvTrue = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
-            mwvTrue.setAngle(Utils.normalizeDegrees0To360(t.getTrueWindDeg()));
-            mwvTrue.setTrue(true);
 
+            double angle = Utils.normalizeDegrees0To360(t.getTrueWindSpeed());
             double speed = t.getTrueWindSpeed();
             if (!Double.isNaN(lastSentTWindSpeed)) {
                 speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
             }
             lastSentTWindSpeed = speed;
-            mwvTrue.setSpeed(speed);
-            mwvTrue.setSpeedUnit(Units.KNOT);
-            mwvTrue.setStatus(DataStatus.ACTIVE);
-            return new Pair<>(Boolean.TRUE, new Message[]{new NMEA0183Message(mwvTrue)});
+            MsgWindData trueWindMsg = new MsgWindDataImpl(speed, angle, false);
+            return new Pair<>(Boolean.TRUE, new Message[]{trueWindMsg});
         }
         return new Pair<>(Boolean.TRUE, new Message[]{});
     }

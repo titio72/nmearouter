@@ -17,15 +17,18 @@ package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.sentences.NMEAUtils;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgPositionAndVector;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import net.sf.marineapi.nmea.sentence.RMCSentence;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class NMEAPositionFilter implements NMEAFilter {
 
@@ -77,15 +80,10 @@ public class NMEAPositionFilter implements NMEAFilter {
         return positions.size() == SIZE;
     }
 
-    private boolean acceptPoint(RMCSentence rmc) {
+    private boolean acceptPoint(MsgPositionAndVector rmc) {
         synchronized (stats) {
             if (rmc.isValid()) {
-                Position pos = NMEAUtils.getPosition(rmc);
-                if (pos!=null) {
-                    if (checkPosition(rmc)) return true;
-                } else {
-                    stats.totInvalid++;
-                }
+                return checkPosition(rmc);
             } else {
                 stats.totInvalid++;
             }
@@ -94,12 +92,12 @@ public class NMEAPositionFilter implements NMEAFilter {
         }
     }
 
-    private boolean checkPosition(RMCSentence rmc) {
-        Calendar timestamp = NMEAUtils.getTimestampOptimistic(rmc);
-        if (timestamp!=null && timestamp.getTimeInMillis()>lastTime) {
-            if (rmc.getSpeed()<SPEED_GATE) {
-                resetOnTimeout(timestamp.getTimeInMillis());
-                lastTime = timestamp.getTimeInMillis();
+    private boolean checkPosition(MsgPositionAndVector rmc) {
+        Instant timestamp = rmc.getTimestamp();
+        if (timestamp != null && timestamp.toEpochMilli() > lastTime) {
+            if (rmc.getSOG() < SPEED_GATE) {
+                resetOnTimeout(timestamp.toEpochMilli());
+                lastTime = timestamp.toEpochMilli();
                 addPos(rmc.getPosition());
                 if (ready()) {
                     if (checkDistance(rmc.getPosition())) {
@@ -181,9 +179,9 @@ public class NMEAPositionFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        Sentence s = m.getSentence();
-        if (s instanceof RMCSentence) {
-            return acceptPoint((RMCSentence) s);
+        Message s = m.getMessage();
+        if (s instanceof MsgPositionAndVector) {
+            return acceptPoint((MsgPositionAndVector) s);
         } else {
             return true;
         }

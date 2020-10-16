@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.*;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.AIS_UTC_REPORT_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.AIS_UTC_REPORT_PGN;
 
 public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
 

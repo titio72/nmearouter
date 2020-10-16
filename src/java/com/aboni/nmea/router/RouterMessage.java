@@ -16,7 +16,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.message.Message;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 public interface RouterMessage {
@@ -28,8 +27,6 @@ public interface RouterMessage {
     Object getPayload();
 
     Message getMessage();
-
-    Sentence getSentence();
 
     JSONObject getJSON();
 }

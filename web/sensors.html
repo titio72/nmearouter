@@ -257,12 +257,12 @@
       controllerScope['wind'] = absoluteWind;
 
       controllerScope.$evalAsync();
-    } else if (msg.topic == 'HDG') {
+    } else if (msg.topic == 'HDM') {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
       msg.s_dir = direction(msg.angle);
       heading = msg.angle;
-      controllerScope['hdg'] = msg;
+      controllerScope['hdm'] = msg;
       controllerScope.$evalAsync();
     }
   }
@@ -364,7 +364,7 @@
       arrow.setAttributeNS(null, "transform", "rotate(" + a + " 105 105)");
       newInstance.firstElementChild.appendChild(arrow);
       this.appendChild(newInstance);
-      //<path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{hdg.angle}} 105 105)"></path>
+      //<path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{hdm.angle}} 105 105)"></path>
     }
   });
 
@@ -385,14 +385,14 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="card-sensor-text-small">{{hdg.angle|numberFixedLen:3:0}}&deg;
-                                        {{hdg.s_dir}}
+                                    <div class="card-sensor-text-small">{{hdm.angle|numberFixedLen:3:0}}&deg;
+                                        {{hdm.s_dir}}
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="text-align: center;">
-                                    <my-dial angle="{{hdg.angle}}"></my-dial>
+                                    <my-dial angle="{{hdm.angle}}"></my-dial>
                                 </td>
                             </tr>
                         </table>

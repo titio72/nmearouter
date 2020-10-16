@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
+import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import com.aboni.nmea.router.message.MsgWaterDepth;
 
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.DEPTH_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.DEPTH_PGN;
 
 public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
 

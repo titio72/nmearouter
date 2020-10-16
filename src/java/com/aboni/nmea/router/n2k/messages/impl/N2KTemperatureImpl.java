@@ -2,16 +2,15 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgTemperature;
-import com.aboni.nmea.router.n2k.N2KLookupTables;
+import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
-import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.TEMPERATURE_SOURCE;
-import static com.aboni.nmea.router.n2k.messages.N2kMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
 
 public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature {
 
-    private String source;
+    private TemperatureSource source;
     private int sid;
     private int instance;
     private double temperature;
@@ -36,7 +35,7 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
         sid = getByte(data, 0, 0xFF);
         instance = getByte(data, 1, 0xFF);
 
-        source = parseEnum(data, 16, 0, 8, N2KLookupTables.getTable(TEMPERATURE_SOURCE));
+        source = TemperatureSource.valueOf(getByte(data, 2, 0));
 
         Double dT = parseDouble(data, 24, 16, 0.01, false);
         temperature = (dT == null) ? Double.NaN : Utils.round(dT - 273.15, 1);
@@ -57,7 +56,7 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
     }
 
     @Override
-    public String getTemperatureSource() {
+    public TemperatureSource getTemperatureSource() {
         return source;
     }
 

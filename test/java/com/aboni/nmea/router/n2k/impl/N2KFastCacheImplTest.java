@@ -3,7 +3,6 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.nmea.router.n2k.messages.N2kMessagePGNs;
 import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -13,7 +12,7 @@ import org.junit.Test;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class N2KFastCacheImplTest {
 
