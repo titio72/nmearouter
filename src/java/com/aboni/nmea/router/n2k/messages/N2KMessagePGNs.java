@@ -13,6 +13,7 @@ public class N2KMessagePGNs {
     public static final int ENVIRONMENT_PRESSURE_PGN = 130314;
     public static final int GNSS_POSITION_UPDATE_PGN = 129029;
     public static final int POSITION_UPDATE_RAPID = 129025;
+    public static final int NAV_DATA = 129284;
     public static final int RATE_OF_TURN_PGN = 127251;
     public static final int RUDDER_PGN = 127245;
     public static final int SATELLITES_IN_VIEW_PGN = 129540;

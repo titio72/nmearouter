@@ -171,6 +171,10 @@ public class LogStringBuilder {
         return get();
     }
 
+    public void debug(@NotNull Log log) {
+        log.debug(get());
+    }
+
     public void info(@NotNull Log log) {
         log.info(get());
     }

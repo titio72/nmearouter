@@ -8,4 +8,6 @@ public interface N2KFastCache {
     void onMessage(@NotNull N2KMessage msg);
 
     void cleanUp();
+
+    void onTimer();
 }

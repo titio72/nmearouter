@@ -21,6 +21,79 @@ public class N2KFastCacheImpl implements N2KFastCache {
     public static final String MESSAGE_KEY_NAME = "message";
     public static final String FAST_MESSAGE_HANDLING_KEY_NAME = "fast message handling";
     public static final String ERROR_TYPE_KEY_NAME = "error type";
+    private long lastStatsTime;
+
+    private static class Stats {
+        private long fast;
+        private long recv;
+        private long outOfSequenceErrors;
+        private long parseErrors;
+        private long unknownErrors;
+
+
+        public long getFast() {
+            return fast;
+        }
+
+        public long getRecv() {
+            return recv;
+        }
+
+        public long getOutOfSequenceErrors() {
+            return outOfSequenceErrors;
+        }
+
+        public long getParseErrors() {
+            return parseErrors;
+        }
+
+        public long getUnknownErrors() {
+            return unknownErrors;
+        }
+
+        void reset() {
+            synchronized (this) {
+                recv = 0;
+                fast = 0;
+                unknownErrors = 0;
+                parseErrors = 0;
+                outOfSequenceErrors = 0;
+            }
+        }
+
+        void incrFast() {
+            synchronized (this) {
+                fast++;
+            }
+        }
+
+        void incrRecv() {
+            synchronized (this) {
+                recv++;
+            }
+        }
+
+        void incrOutOfSeq() {
+            synchronized (this) {
+                outOfSequenceErrors++;
+            }
+        }
+
+
+        void incrParse() {
+            synchronized (this) {
+                parseErrors++;
+            }
+        }
+
+
+        void incrUnknown() {
+            synchronized (this) {
+                unknownErrors++;
+            }
+        }
+    }
+    private final Stats stats = new Stats();
 
     private static class Payload {
         N2KMessageParser parser;
@@ -71,6 +144,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
         N2KFastEnvelope id = new N2KFastEnvelope();
         id.pgn = msg.getHeader().getPgn();
         id.src = msg.getHeader().getSource();
+        stats.incrRecv();
         if (messageFactory.isSupported(id.pgn)) {
             if (messageFactory.isFast(id.pgn)) {
                 handleFastMessage(msg, id);
@@ -87,6 +161,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
     }
 
     private void handleFastMessage(N2KMessage msg, N2KFastEnvelope id) {
+        stats.incrFast();
         int seqId = msg.getData()[0] & 0xFF;
         N2KMessageParser p = getN2KMessageParser(id);
         if (!isEmpty(p) && seqId != (p.getFastSequenceNo() + 1) && isPotentialFirstMessage(msg)) {
@@ -104,12 +179,15 @@ public class N2KFastCacheImpl implements N2KFastCache {
                 if (callback != null) callback.onMessage(p.getMessage());
             }
         } catch (PGNFastException e) {
-            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "out of sequence message").error(log, e);
+            stats.incrOutOfSeq();
+            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "out of sequence message").debug(log);
             remove = true;
         } catch (PGNDataParseException e) {
-            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "parsing").error(log, e);
+            stats.incrParse();
+            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "parsing").debug(log);
             remove = true;
         } catch (Exception e) {
+            stats.incrUnknown();
             LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).errorForceStacktrace(log, e);
             remove = true;
         }
@@ -167,6 +245,20 @@ public class N2KFastCacheImpl implements N2KFastCache {
         long now = (timestampProvider != null) ? timestampProvider.getNow() : System.currentTimeMillis();
         synchronized (cache) {
             cache.entrySet().removeIf(e -> Utils.isOlderThan(e.getValue().lastTS, now, REMOVE_TIMEOUT));
+        }
+    }
+
+    @Override
+    public void onTimer() {
+        long now = timestampProvider.getNow();
+        if (Utils.isOlderThan(lastStatsTime, now, 30000)) {
+            lastStatsTime = now;
+            synchronized (stats) {
+                LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("Stats").wV("recv", stats.getRecv()).wV("fast", stats.fast)
+                        .wV("oosError", stats.getOutOfSequenceErrors()).wV("parseError", stats.getParseErrors())
+                        .wV("unknownErros", stats.getUnknownErrors()).info(log);
+                stats.reset();
+            }
         }
     }
 }
