@@ -185,6 +185,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
+        fastCache.onTimer();
         if (isStarted()) {
             long t = timestampProvider.getNow();
             if ((Utils.isOlderThan(lastStats, t, 30000))) {
