@@ -38,10 +38,12 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
         source = TemperatureSource.valueOf(getByte(data, 2, 0));
 
         Double dT = parseDouble(data, 24, 16, 0.01, false);
-        temperature = (dT == null) ? Double.NaN : Utils.round(dT - 273.15, 1);
+        temperature = (dT == null) ? Double.NaN : Utils.round(
+                dT>200.0?(dT - 273.15):dT, 1);
 
         Double dST = parseDouble(data, 40, 16, 0.01, false);
-        setTemperature = (dST == null) ? Double.NaN : Utils.round(dST - 273.15, 1);
+        setTemperature = (dST == null) ? Double.NaN : Utils.round(
+                dST>200.0?(dST - 273.15):dST, 1);
 
     }
 

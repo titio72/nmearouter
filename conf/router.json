@@ -25,10 +25,6 @@
             "name": "CONSOLE"
         },
         {
-            "type": "ConsoleN2K",
-            "name": "CONSOLE_N2K"
-        },
-        {
             "type": "UDP",
             "inout": "IN",
             "port": 1222,
@@ -65,7 +61,7 @@
             "type": "CanSerial",
             "name": "CANBUS",
             "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "device": "/dev/ttyUSB0",
+            "device": "COM8",
             "bps": 115200
         },
         {

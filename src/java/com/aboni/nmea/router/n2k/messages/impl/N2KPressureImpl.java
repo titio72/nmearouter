@@ -36,7 +36,7 @@ public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
         source = PressureSource.valueOf(getByte(data, 2, 0));
 
         Double dT = parseDouble(data, 24, 32, 0.1, false);
-        pressure = (dT == null) ? Double.NaN : Utils.round(dT * 10.0, 1);
+        pressure = (dT == null) ? Double.NaN : Utils.round(dT / 100.0, 1);
     }
 
     @Override
