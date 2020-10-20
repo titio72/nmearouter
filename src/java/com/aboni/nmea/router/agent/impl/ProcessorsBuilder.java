@@ -65,7 +65,7 @@ public class ProcessorsBuilder {
                         break;
                     case "rmc_filter":
                         log.info("QoS {RMC filter}");
-                        res.add(ThingsFactory.getInstance(NMEARMCFilterProcessor.class));
+                        res.add(ThingsFactory.getInstance(PositionFilterProcessor.class));
                         break;
                     default:
                         break;

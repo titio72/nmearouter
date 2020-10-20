@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
-import com.aboni.nmea.router.GNSSInfo;
+import com.aboni.nmea.router.message.GNSSInfo;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;

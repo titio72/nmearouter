@@ -77,7 +77,7 @@ public class TestSocketCAN {
 
     private static NetworkDevice lookupDev() {
         try {
-            return NetworkDevice.lookup("can9");
+            return NetworkDevice.lookup("vcan0");
         } catch (IOException e) {
             ConsoleLog.getLogger().warning("Error finding device", e);
         }

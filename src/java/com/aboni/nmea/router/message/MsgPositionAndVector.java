@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.message;
 
+import net.sf.marineapi.nmea.util.Position;
+
 import java.time.Instant;
 
 public interface MsgPositionAndVector extends MsgPosition, MsgSOGAdCOG {
@@ -24,7 +26,26 @@ public interface MsgPositionAndVector extends MsgPosition, MsgSOGAdCOG {
     double getVariation();
 
     default boolean isValid() {
-        return getPosition() != null && !Double.isNaN(getCOG()) && !Double.isNaN(getSOG());
+        return getPosition() != null && !Double.isNaN(getCOG()) && !Double.isNaN(getSOG()) && getTimestamp() != null;
+    }
+
+    default GNSSInfo getGNSSInfo() {
+        return new GNSSInfo() {
+            @Override
+            public Position getPosition() {
+                return MsgPositionAndVector.this.getPosition();
+            }
+
+            @Override
+            public double getCOG() {
+                return MsgPositionAndVector.this.getCOG();
+            }
+
+            @Override
+            public double getSOG() {
+                return MsgPositionAndVector.this.getSOG();
+            }
+        };
     }
 
 }

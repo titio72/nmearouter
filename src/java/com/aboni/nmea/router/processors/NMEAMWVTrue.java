@@ -33,7 +33,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
 
     @Inject
     public NMEAMWVTrue(@NotNull TimestampProvider timestampProvider, boolean useSOG) {
-        this.useRMC = useSOG;
+        this.useSOG = useSOG;
         this.timestampProvider = timestampProvider;
     }
 
@@ -44,7 +44,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
     private double lastSpeed;
     private long lastSpeedTime;
 
-    private final boolean useRMC;
+    private final boolean useSOG;
 
     private double lastSentTWindSpeed = Double.NaN;
 
@@ -54,10 +54,10 @@ public class NMEAMWVTrue implements NMEAPostProcess {
             long time = timestampProvider.getNow();
             if (message instanceof MsgWindData) {
                 return processWind((MsgWindData) message, time);
-            } else if (!useRMC && message instanceof MsgSpeed) {
+            } else if (!useSOG && message instanceof MsgSpeed) {
                 lastSpeed = ((MsgSpeed) message).getSpeedWaterRef();
                 lastSpeedTime = time;
-            } else if (useRMC && message instanceof MsgSOGAdCOG) {
+            } else if (useSOG && message instanceof MsgSOGAdCOG) {
                 lastSpeed = ((MsgSOGAdCOG) message).getSOG();
                 lastSpeedTime = time;
             }
@@ -75,7 +75,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
             // calculate true wind
             TrueWind t = new TrueWind(lastSpeed, windMessage.getAngle(), windMessage.getSpeed());
 
-            double angle = Utils.normalizeDegrees0To360(t.getTrueWindSpeed());
+            double angle = Utils.normalizeDegrees0To360(t.getTrueWindDeg());
             double speed = t.getTrueWindSpeed();
             if (!Double.isNaN(lastSentTWindSpeed)) {
                 speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);

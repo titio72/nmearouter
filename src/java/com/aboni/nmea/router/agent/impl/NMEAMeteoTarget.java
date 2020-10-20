@@ -104,14 +104,12 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
         }
     }
 
-
     @Override
     public void onTimer() {
         timerCount = (timerCount+1) % SAMPLING_FACTOR;
         if (timerCount==0) dumpStats();
         super.onTimer();
     }
-
 
     private void dumpStats() {
         synchronized (series) {

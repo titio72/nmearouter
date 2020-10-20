@@ -13,22 +13,24 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router;
+package com.aboni.toolkit;
 
-public interface GPSSat {
+import com.aboni.nmea.router.TimestampProvider;
 
-    int getPrn();
+public class ProgrammableTimeStampProvider implements TimestampProvider {
 
-    int getSvn();
+    private long timestamp;
 
-    String getName();
+    public void setTimestamp(long ts) {
+        timestamp = ts;
+    }
 
-    String getDate();
+    public void incrementBy(long ms) {
+        timestamp += ms;
+    }
 
-    String getOrbit();
-
-    String getSignal();
-
-    String getClock();
-
+    @Override
+    public long getNow() {
+        return timestamp;
+    }
 }

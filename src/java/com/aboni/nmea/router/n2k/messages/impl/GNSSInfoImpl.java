@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.n2k.messages.impl;
 
-import com.aboni.nmea.router.GNSSInfo;
+import com.aboni.nmea.router.message.GNSSInfo;
 import net.sf.marineapi.nmea.util.Position;
 
 class GNSSInfoImpl implements GNSSInfo {

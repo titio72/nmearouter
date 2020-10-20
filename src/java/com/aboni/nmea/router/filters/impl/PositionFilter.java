@@ -30,15 +30,16 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NMEAPositionFilter implements NMEAFilter {
+public class PositionFilter implements NMEAFilter {
 
     private static final int RESET_TIMEOUT = 5 * 60000;    // 5 minutes
     private static final int SPEED_GATE = 35;            // Kn - if faster reject
     private static final int MAGIC_DISTANCE = 15;        // Points farther from the median of samples will be discarded
-    private static final double SMALL_MAGIC_DISTANCE = 0.5; // Points farther from the last valid point will be discarded
+    private static final double SMALL_MAGIC_DISTANCE = 0.3; // Points farther from the last valid point will be discarded
     private static final int SIZE = 30;                    // ~30s of samples
 
     private final List<Position> positions = new LinkedList<>();
+    private final int queueSize;
     private Position lastValid;
     private long lastTime = 0;
 
@@ -72,18 +73,51 @@ public class NMEAPositionFilter implements NMEAFilter {
     }
 
     @Inject
-    public NMEAPositionFilter() {
+    public PositionFilter() {
+        this(SIZE);
+    }
+
+    public PositionFilter(int queueSize) {
         stats = new FilterStats();
+        this.queueSize = queueSize;
     }
 
-    private boolean ready() {
-        return positions.size() == SIZE;
+    public static double getMaxIncrementalDistance() {
+        return SMALL_MAGIC_DISTANCE;
     }
 
-    private boolean acceptPoint(MsgPositionAndVector rmc) {
+    public static double getMaxDistanceFromMedian() {
+        return MAGIC_DISTANCE;
+    }
+
+    public static double getMaxAllowedSpeed() {
+        return SPEED_GATE;
+    }
+
+    public boolean isReady() {
+        return positions.size() == queueSize;
+    }
+
+    private static boolean isValid(MsgPositionAndVector message) {
+        // duplicate some of the tests in MsgPositionAndVector but we should not rely on the implementation of the message class.
+        // The concept of "valid" may be different in this context.
+        return message != null && message.isValid() && message.getPosition() != null && message.getTimestamp() != null
+                && !Double.isNaN(message.getCOG()) && !Double.isNaN(message.getSOG());
+    }
+
+    /**
+     * Accept or reject the a position message, basing the decision on speed, timing and distance.
+     * History is also considered so to avoid "jumps".
+     * Use this method for testing - when integrated the entry point is the NMEAFilter interface.
+     *
+     * @param positionAndVector The message containing position, time and vector.
+     * @return True if the position is to be accepted or false otherwise.
+     */
+    public boolean acceptPoint(MsgPositionAndVector positionAndVector) {
         synchronized (stats) {
-            if (rmc.isValid()) {
-                return checkPosition(rmc);
+            resetOnTimeout(positionAndVector);
+            if (isValid(positionAndVector)) {
+                return checkPosition(positionAndVector);
             } else {
                 stats.totInvalid++;
             }
@@ -92,15 +126,14 @@ public class NMEAPositionFilter implements NMEAFilter {
         }
     }
 
-    private boolean checkPosition(MsgPositionAndVector rmc) {
-        Instant timestamp = rmc.getTimestamp();
-        if (timestamp != null && timestamp.toEpochMilli() > lastTime) {
-            if (rmc.getSOG() < SPEED_GATE) {
-                resetOnTimeout(timestamp.toEpochMilli());
-                lastTime = timestamp.toEpochMilli();
-                addPos(rmc.getPosition());
-                if (ready()) {
-                    if (checkDistance(rmc.getPosition())) {
+    private boolean checkPosition(MsgPositionAndVector positionAndVector) {
+        addPos(positionAndVector.getPosition());
+        long timestamp = positionAndVector.getTimestamp().toEpochMilli();
+        if (timestamp > lastTime) {
+            lastTime = timestamp;
+            if (positionAndVector.getSOG() < SPEED_GATE) {
+                if (isReady()) {
+                    if (checkDistance(positionAndVector.getPosition())) {
                         stats.totProcessed++;
                         stats.q = positions.size();
                         return true;
@@ -118,28 +151,30 @@ public class NMEAPositionFilter implements NMEAFilter {
     }
 
     private boolean checkDistance(Position p) {
-        boolean valid = false;
-        if (lastValid==null) {
-            Position pMedian = getMedian();
-            if (pMedian!=null) {
-                double d = pMedian.distanceTo(p) / 1852;
-                if (d<MAGIC_DISTANCE) {
-                    lastValid = p;
-                    valid = true;
-                }
-            }
-        } else {
-            double d = lastValid.distanceTo(p) / 1852;
-            if (d<SMALL_MAGIC_DISTANCE) {
-                lastValid = p;
-                valid = true;
-            }
-        }
+        boolean valid = (lastValid == null) ?
+                /* no last valid position - check against the median of the last N seconds */
+                checkDistanceConstraints(getMedian(), p, MAGIC_DISTANCE) :
+                /* last position is valid, check that the distance is not too great */
+                checkDistanceConstraints(lastValid, p, SMALL_MAGIC_DISTANCE);
+        lastValid = valid ? p : null;
         return valid;
     }
 
-    private void resetOnTimeout(long t) {
-        if (Math.abs(t-lastTime)>RESET_TIMEOUT) {
+    private boolean checkDistanceConstraints(Position prev, Position current, double distance) {
+        if (prev == null) return false;
+        else return (prev.distanceTo(current) / 1852) < distance;
+    }
+
+    /**
+     * When no valid positions come through in RESET_TIMEOUT wipe out the position vector used to calc the median and
+     * blank out the reference to the last valid position.
+     * This will trigger starting fresh.
+     *
+     * @param positionAndVector The current message.
+     */
+    private void resetOnTimeout(MsgPositionAndVector positionAndVector) {
+        Instant t = positionAndVector.getTimestamp();
+        if (t == null || Math.abs(t.toEpochMilli() - lastTime) > RESET_TIMEOUT) {
             positions.clear();
             lastValid = null;
         }
@@ -147,20 +182,20 @@ public class NMEAPositionFilter implements NMEAFilter {
 
     private void addPos(Position pos) {
         positions.add(pos);
-        while (positions.size()>SIZE) {
+        while (positions.size() > SIZE) {
             positions.remove(0);
         }
     }
 
     private double getMedian(boolean isLat) {
-        List<Double> lat = new ArrayList<>(SIZE);
-        for (Position p: positions) lat.add(isLat?p.getLatitude():p.getLongitude());
-        Collections.sort(lat);
-        return lat.get(SIZE/2);
+        List<Double> list = new ArrayList<>(SIZE);
+        for (Position p : positions) list.add(isLat ? p.getLatitude() : p.getLongitude());
+        Collections.sort(list);
+        return list.get(SIZE/2);
     }
 
     private Position getMedian() {
-        if (ready()) {
+        if (isReady()) {
             stats.medianRecalculation++;
             return new Position(getMedian(true), getMedian(false));
         } else {

@@ -13,22 +13,15 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router;
+package com.aboni.nmea.router.message;
 
-public interface GPSSat {
+import net.sf.marineapi.nmea.util.Position;
 
-    int getPrn();
+public interface GNSSInfo {
 
-    int getSvn();
+    Position getPosition();
 
-    String getName();
+    double getCOG();
 
-    String getDate();
-
-    String getOrbit();
-
-    String getSignal();
-
-    String getClock();
-
+    double getSOG();
 }

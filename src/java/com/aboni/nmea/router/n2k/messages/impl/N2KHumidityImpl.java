@@ -36,10 +36,10 @@ public class N2KHumidityImpl extends N2KMessageImpl implements MsgHumidity {
 
         source = HumiditySource.valueOf(getByte(data, 2, 0));
 
-        Double dT = parseDouble(data, 24, 16, 0.004, false);
+        Double dT = parseDouble(data, 24, 16, 0.004, true);
         humidity = (dT == null) ? Double.NaN : Utils.round(dT, 1);
 
-        Double dST = parseDouble(data, 40, 16, 0.004, false);
+        Double dST = parseDouble(data, 40, 16, 0.004, true);
         setHumidity = (dST == null) ? Double.NaN : Utils.round(dST, 1);
 
     }

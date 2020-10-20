@@ -68,7 +68,7 @@
             "type": "CanSocket",
             "name": "CANBUS_S",
             "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "device": "can9"
+            "device": "vcan0"
         }
     ]
 }

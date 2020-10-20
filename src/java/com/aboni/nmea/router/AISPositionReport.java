@@ -15,6 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.router.message.GNSSInfo;
+
 public interface AISPositionReport {
 
     String getAISClass();

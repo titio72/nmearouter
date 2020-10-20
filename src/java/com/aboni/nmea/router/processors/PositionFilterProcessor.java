@@ -17,7 +17,7 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.filters.impl.NMEAPositionFilter;
+import com.aboni.nmea.router.filters.impl.PositionFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
@@ -25,18 +25,18 @@ import com.aboni.utils.Pair;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-public class NMEARMCFilterProcessor implements NMEAPostProcess {
+public class PositionFilterProcessor implements NMEAPostProcess {
 
-    private final NMEAPositionFilter filter;
+    private final PositionFilter filter;
     private final TimestampProvider timestampProvider;
     private final Log log;
     private final RouterMessageFactory messageFactory;
 
     @Inject
-    public NMEARMCFilterProcessor(@NotNull Log log, @NotNull TimestampProvider timestampProvider, @NotNull RouterMessageFactory messageFactory) {
+    public PositionFilterProcessor(@NotNull Log log, @NotNull TimestampProvider timestampProvider, @NotNull RouterMessageFactory messageFactory) {
         this.log = log;
         this.timestampProvider = timestampProvider;
-        this.filter = new NMEAPositionFilter();
+        this.filter = new PositionFilter();
         this.messageFactory = messageFactory;
     }
 
