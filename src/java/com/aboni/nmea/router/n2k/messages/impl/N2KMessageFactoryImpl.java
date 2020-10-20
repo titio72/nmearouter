@@ -50,7 +50,7 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
         supported.put(N2KMessagePGNs.SPEED_PGN, N2KDef.getInstance(N2KSpeedImpl.class, false)); // Speed
         supported.put(N2KMessagePGNs.HEADING_PGN, N2KDef.getInstance(N2KHeadingImpl.class, false)); // Vessel Heading
         supported.put(N2KMessagePGNs.POSITION_UPDATE_RAPID, N2KDef.getInstance(N2KPositionRapidImpl.class, false)); // Position, Rapid update
-        supported.put(N2KMessagePGNs.NAV_DATA, N2KDef.getInstance(N2KNavDataImpl.class, true)); // Navigation data
+        supported.put(N2KMessagePGNs.NAV_DATA, N2KDef.getInstance(N2KNavDataImpl.class, true)); // Navigation data (nav to waypoint)
         supported.put(N2KMessagePGNs.SOG_COG_RAPID_PGN, N2KDef.getInstance(N2KSOGAdCOGRapidImpl.class, false)); // COG & SOG, Rapid Update
         supported.put(N2KMessagePGNs.GNSS_POSITION_UPDATE_PGN, N2KDef.getInstance(N2KGNSSPositionUpdateImpl.class, true)); // GNSS Pos update
         supported.put(N2KMessagePGNs.GNSS_DOP_PGN, N2KDef.getInstance(N2KGNSSDOPsImpl.class, false)); // GNSS DOPs

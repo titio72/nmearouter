@@ -24,7 +24,7 @@ public interface MsgNavData extends Message {
 
     Instant getETA();
 
-    DirectionReference getBtwReference();
+    DirectionReference getBTWReference();
 
     String getCalculationType();
 

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.DirectionReference;
 import com.aboni.nmea.router.message.MsgNavData;
+import com.aboni.nmea.router.message.MsgNavDataImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
@@ -10,87 +11,74 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.NAV_DATA;
-import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.POSITION_UPDATE_RAPID;
 
 public class N2KNavDataImpl extends N2KMessageImpl implements MsgNavData {
 
-    private int sid;
-    private double dtw;
-    private Position waypoint;
-    private int originWaypointNo;
-    private int destinationWaypointNo;
-    private double waypointClosingVelocity;
-    private double btw;
-    private double bearingFromOriginToDestination;
-    private Instant tETA;
-    private DirectionReference btwReference;
-    private String calculationType;
-    private boolean arrived;
-    private boolean perpendicularCrossed;
+    private final MsgNavDataImpl navData = new MsgNavDataImpl();
 
     @Override
     public int getSID() {
-        return sid;
+        return navData.getSID();
     }
 
     @Override
     public double getDTW() {
-        return dtw;
+        return navData.getDTW();
     }
 
     @Override
     public Position getWaypoint() {
-        return waypoint;
+        return navData.getWaypoint();
     }
 
     @Override
     public int getOriginWaypointNo() {
-        return originWaypointNo;
+        return navData.getOriginWaypointNo();
     }
 
     @Override
     public int getDestinationWaypointNo() {
-        return destinationWaypointNo;
+        return navData.getDestinationWaypointNo();
     }
 
     @Override
     public double getWaypointClosingVelocity() {
-        return waypointClosingVelocity;
+        return navData.getWaypointClosingVelocity();
     }
 
     @Override
     public boolean isPerpendicularCrossed() {
-        return perpendicularCrossed;
+        return navData.isPerpendicularCrossed();
     }
 
     @Override
     public double getBTW() {
-        return btw;
+        return navData.getBTW();
     }
 
     @Override
     public double getBearingFromOriginToDestination() {
-        return bearingFromOriginToDestination;
+        return navData.getBearingFromOriginToDestination();
     }
 
     @Override
     public Instant getETA() {
-        return tETA;
+        return navData.getETA();
     }
 
     @Override
-    public DirectionReference getBtwReference() {
-        return btwReference;
+    public DirectionReference getBTWReference() {
+        return navData.getBTWReference();
     }
 
     @Override
     public String getCalculationType() {
-        return calculationType;
+        return navData.getCalculationType();
     }
 
     @Override
     public boolean isArrived() {
-        return arrived;
+        return navData.isArrived();
     }
 
 
@@ -108,34 +96,33 @@ public class N2KNavDataImpl extends N2KMessageImpl implements MsgNavData {
     }
 
     private void fill() {
-        sid = getByte(data, 0, 0xFF);
-        dtw = parseDoubleSafe(data, 8, 32, 0.01, false);
-        btwReference = DirectionReference.valueOf((int) parseIntegerSafe(data, 40, 0, 2, 0));
-        perpendicularCrossed = 1==parseIntegerSafe(data, 42, 2, 2, 0);
-        arrived = 1==parseIntegerSafe(data, 44, 4, 2, 0);
+        navData.setSID(getByte(data, 0, 0xFF));
+        navData.setDTW(parseDoubleSafe(data, 8, 32, 0.01, false));
+        navData.setBTWReference(DirectionReference.valueOf((int) parseIntegerSafe(data, 40, 0, 2, 0)));
+        navData.setPerpendicularCrossed(1==parseIntegerSafe(data, 42, 2, 2, 0));
+        navData.setArrived(1==parseIntegerSafe(data, 44, 4, 2, 0));
         switch ((int) parseIntegerSafe(data, 46, 6, 2, 0xFF)) {
-            case 0: calculationType = "Great CIrcle"; break;
-            case 1: calculationType = "Rhumb Line"; break;
-            default: calculationType = "Unknown";
+            case 0: navData.setCalculationType("Great Circle"); break;
+            case 1: navData.setCalculationType("Rhumb Line"); break;
+            default: navData.setCalculationType("Unknown");
         }
-        bearingFromOriginToDestination = Math.toDegrees(parseDoubleSafe(data, 96, 16, 0.0001, false));
-        btw = Math.toDegrees(parseDoubleSafe(data, 112, 16, 0.0001, false));
-        originWaypointNo = (int) parseIntegerSafe(data, 128, 0, 32, 0xFF);
-        destinationWaypointNo = (int) parseIntegerSafe(data, 160, 0, 32, 0xFF);
+        navData.setBearingFromOriginToDestination(Math.toDegrees(parseDoubleSafe(data, 96, 16, 0.0001, false)));
+        navData.setBTW(Math.toDegrees(parseDoubleSafe(data, 112, 16, 0.0001, false)));
+        navData.setOriginWaypointNo((int) parseIntegerSafe(data, 128, 0, 32, 0xFF));
+        navData.setDestinationWaypointNo((int) parseIntegerSafe(data, 160, 0, 32, 0xFF));
         double lat = parseDoubleSafe(data, 192, 32, 0.0000001, true);
         double lon = parseDoubleSafe(data, 224, 32, 0.0000001, true);
-        waypoint = (Double.isNaN(lat) || Double.isNaN(lon))?null:new Position(lat, lon);
-        waypointClosingVelocity = parseDoubleSafe(data, 256, 16, 0.01, true) * 3600.0 / 1852.0;
+        navData.setWaypoint((Double.isNaN(lat) || Double.isNaN(lon))?null:new Position(lat, lon));
+        navData.setWaypointClosingVelocity(parseDoubleSafe(data, 256, 16, 0.01, true) * 3600.0 / 1852.0);
 
         Long lDate = parseInteger(data, 80, 16);
         Double dTime = parseDouble(data, 48, 32, 0.0001, false);
 
         if (lDate != null && dTime != null && !dTime.isNaN()) {
             Instant i = Instant.ofEpochMilli(0);
-            tETA = i.atZone(ZoneId.of("UTC")).plusDays(lDate).plusNanos((long) (dTime * 1000000000L)).toInstant();
+            navData.setETA(i.atZone(ZoneId.of("UTC")).plusDays(lDate).plusNanos((long) (dTime * 1000000000L)).toInstant());
         } else {
-            tETA = null;
+            navData.setETA(null);
         }
     }
-
 }
