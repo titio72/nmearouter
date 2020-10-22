@@ -19,7 +19,12 @@ public interface MsgHumidity extends Message {
 
     int getSID();
 
+    int getInstance();
+
     HumiditySource getHumiditySource();
 
     double getHumidity();
+
+    double getSetHumidity();
+
 }

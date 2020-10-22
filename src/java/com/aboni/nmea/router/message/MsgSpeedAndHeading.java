@@ -15,14 +15,9 @@
 
 package com.aboni.nmea.router.message;
 
-public interface MsgPressure extends Message {
+public interface MsgSpeedAndHeading extends MsgHeading, MsgSpeed {
 
-    int getSID();
-
-    int getInstance();
-
-    double getPressure();
-
-    PressureSource getPressureSource();
-
+    default boolean isValid() {
+        return !Double.isNaN(getHeading()) && !Double.isNaN(getSpeedWaterRef());
+    }
 }

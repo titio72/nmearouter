@@ -46,38 +46,38 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     }
 
     private void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gnssInfo.setPosition(new Position(lat, lon));
         }
 
-        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) parseIntegerSafe(data, 106, 2, 6, 0xFF);
+        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        gnssInfo.setCOG(parseDoubleSafe(data, 112, 16, 0.0001, false));
+        gnssInfo.setCOG(BitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false));
         gnssInfo.setCOG(Double.isNaN(gnssInfo.getCOG()) ? gnssInfo.getCOG() : Utils.round(Math.toDegrees(gnssInfo.getCOG()), 1));
-        gnssInfo.setCOG(parseDoubleSafe(data, 128, 16, 0.01, false));
+        gnssInfo.setCOG(BitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
         if (!Double.isNaN(gnssInfo.getSOG())) gnssInfo.setSOG(Utils.round(gnssInfo.getSOG() * 3600.0 / 1852.0, 1));
 
-        heading = parseDoubleSafe(data, 168, 16, 0.0001, false);
+        heading = BitUtils.parseDoubleSafe(data, 168, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
-        rateOfTurn = parseDoubleSafe(data, 184, 16, 0.0001, false);
+        rateOfTurn = BitUtils.parseDoubleSafe(data, 184, 16, 0.0001, false);
         rateOfTurn = Double.isNaN(rateOfTurn) ? heading : Utils.round(Math.toDegrees(rateOfTurn), 1);
 
-        aisSpare = (int) parseIntegerSafe(data, 208, 0, 3, 0xFF);
-        seqId = (int) parseIntegerSafe(data, 216, 0, 8, 0xFF);
+        aisSpare = (int) BitUtils.parseIntegerSafe(data, 208, 0, 3, 0xFF);
+        seqId = (int) BitUtils.parseIntegerSafe(data, 216, 0, 8, 0xFF);
 
-        aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisTransceiverInfo = BitUtils.parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
-        navStatus = parseEnum(data, 200, 0, 4, N2KLookupTables.getTable(NAV_STATUS));
+        navStatus = BitUtils.parseEnum(data, 200, 0, 4, N2KLookupTables.getTable(NAV_STATUS));
 
-        specialManeuverIndicator = parseEnum(data, 204, 4, 2, N2KLookupTables.getTable(AIS_SPECIAL_MANEUVER));
+        specialManeuverIndicator = BitUtils.parseEnum(data, 204, 4, 2, N2KLookupTables.getTable(AIS_SPECIAL_MANEUVER));
     }
 
     @Override

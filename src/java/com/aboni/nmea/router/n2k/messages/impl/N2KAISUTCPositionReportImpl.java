@@ -41,24 +41,24 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
     }
 
     protected void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gpsInfo.setPosition(new Position(lat, lon));
         }
 
-        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
 
-        aisCommunicationState = parseIntegerSafe(data, 144, 0, 19, 0) == 0 ? "SOTDMA" : "ITDMA";
-        aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisCommunicationState = BitUtils.parseIntegerSafe(data, 144, 0, 19, 0) == 0 ? "SOTDMA" : "ITDMA";
+        aisTransceiverInfo = BitUtils.parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
-        double secsToMidnight = parseDoubleSafe(data, 112, 32, 0.0001, false);
-        long daysSince1970 = parseIntegerSafe(data, 168, 0, 16, -1);
+        double secsToMidnight = BitUtils.parseDoubleSafe(data, 112, 32, 0.0001, false);
+        long daysSince1970 = BitUtils.parseIntegerSafe(data, 168, 0, 16, -1);
         if (!Double.isNaN(secsToMidnight) && daysSince1970 > 0) {
             LocalDateTime s = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             s = s.plusDays(daysSince1970);
@@ -66,7 +66,7 @@ public class N2KAISUTCPositionReportImpl extends N2KMessageImpl {
             utc = s.toInstant(ZoneOffset.UTC);
         }
 
-        gnssType = parseEnum(data, 188, 4, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
+        gnssType = BitUtils.parseEnum(data, 188, 4, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
     }
 
     public int getMessageId() {

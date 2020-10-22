@@ -89,7 +89,7 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
 
     @Override
     public N2KMessage newUntypedInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) {
-        return new N2KMessageDefaultImpl(h, data);
+        return new N2KGenericMessageImpl(h, data);
     }
 
     @Override

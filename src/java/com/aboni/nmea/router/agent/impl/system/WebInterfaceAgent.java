@@ -15,12 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.nmea0183.impl.Message2NMEA0183Impl;
 import com.aboni.nmea.router.services.*;
 import com.aboni.nmea.sentences.NMEA2JSONb;
@@ -51,6 +53,43 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private final NMEAStream stream;
     private final NMEA2JSONb jsonConverter;
     private final Message2NMEA0183Impl nmeaConverter;
+    private final TimestampProvider timestampProvider;
+
+    private static class Stats {
+        long jsonFromMsgToNMEA0183;
+        long jsonDirectConversion;
+        long jsonFromNMEA1083;
+        long lastStatsTime;
+
+        void incrNMEA083() {
+            synchronized (this) {
+                jsonFromNMEA1083++;
+            }
+        }
+
+        void incrMsgToNMEA083() {
+            synchronized (this) {
+                jsonFromMsgToNMEA0183++;
+            }
+        }
+
+        void incrDirect() {
+            synchronized (this) {
+                jsonDirectConversion++;
+            }
+        }
+
+        void reset(long t) {
+            synchronized (this) {
+                lastStatsTime = t;
+                jsonDirectConversion = 0;
+                jsonFromMsgToNMEA0183 = 0;
+                jsonFromNMEA1083 = 0;
+            }
+        }
+    }
+
+    private final Stats stats = new Stats();
 
     @Inject
     public WebInterfaceAgent(@NotNull TimestampProvider tp, @NotNull NMEAStream stream, @NotNull Log log) {
@@ -59,6 +98,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         this.stream = stream;
         this.jsonConverter = new NMEA2JSONb();
         this.nmeaConverter = new Message2NMEA0183Impl();
+        this.timestampProvider = tp;
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {
@@ -105,6 +145,8 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                     log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("start").toString(), e);
                     return false;
                 }
+
+                stats.reset(timestampProvider.getNow());
             }
             return true;
         }
@@ -156,6 +198,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         stream.pushSentence(m);
     }
 
+
     /**
      * Wraps a RouterMessage and automatically convert to JSON all the NMEA sentences (note: N2K are ignored)
      */
@@ -191,17 +234,47 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
         @Override
         public JSONObject getJSON() {
-            if (jsonMessage == null && message.getMessage() != null) {
-                Sentence[] ss = nmeaConverter.convert(message.getMessage());
-                try {
-                    if (ss != null && ss.length != 0) {
-                        jsonMessage = jsonConverter.convert(ss[0]);
+            if (jsonMessage == null) {
+                if (message.getMessage() instanceof NMEA0183Message) {
+                    jsonMessage = jsonConverter.convert(((NMEA0183Message) message.getMessage()).getSentence());
+                    stats.incrNMEA083();
+                } else if (message.getMessage() != null) {
+                    try {
+                        jsonMessage = message.getMessage().toJSON();
+                        stats.incrDirect();
+                    } catch (UnsupportedOperationException ignored) {
+                        fallbackStrategy();
                     }
-                } catch (Exception e) {
-                    getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).error(log, e);
                 }
             }
             return jsonMessage;
+        }
+
+        private void fallbackStrategy() {
+            Sentence[] ss = nmeaConverter.convert(message.getMessage());
+            try {
+                if (ss != null && ss.length != 0) {
+                    // just take the first... to be removed anyway
+                    stats.incrMsgToNMEA083();
+                    jsonMessage = jsonConverter.convert(ss[0]);
+                }
+            } catch (Exception e) {
+                getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).error(log, e);
+            }
+        }
+    }
+
+    @Override
+    public void onTimer() {
+        super.onTimer();
+        long t = timestampProvider.getNow();
+        synchronized (stats) {
+            if (Utils.isOlderThan(stats.lastStatsTime, t, 29999)) {
+                getLogBuilder().wO("stats").wV("NMEA0183", stats.jsonFromNMEA1083).
+                        wV("direct", stats.jsonDirectConversion).
+                        wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).info(log);
+                stats.reset(t);
+            }
         }
     }
 }

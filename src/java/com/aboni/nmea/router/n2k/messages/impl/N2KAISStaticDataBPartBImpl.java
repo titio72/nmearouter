@@ -33,14 +33,14 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
     }
 
     private void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
-        typeOfShip = parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
-        callSign = getText(data, 13, 7);
-        length = parseDoubleSafe(data, 160, 16, 0.1, false);
-        beam = parseDoubleSafe(data, 176, 16, 0.1, false);
-        aisTransceiverInformation = parseEnum(data, 264, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        typeOfShip = BitUtils.parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
+        callSign = BitUtils.getText(data, 13, 7);
+        length = BitUtils.parseDoubleSafe(data, 160, 16, 0.1, false);
+        beam = BitUtils.parseDoubleSafe(data, 176, 16, 0.1, false);
+        aisTransceiverInformation = BitUtils.parseEnum(data, 264, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
     }
 
     @Override

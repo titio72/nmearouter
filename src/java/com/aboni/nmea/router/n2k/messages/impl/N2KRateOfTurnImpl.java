@@ -41,9 +41,9 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
     }
 
     private void fill() {
-        sid = getByte(data, 0, 0xFF);
+        sid = BitUtils.getByte(data, 0, 0xFF);
 
-        Double dRate = parseDouble(data, 8, 32, 3.125e-08, true);
+        Double dRate = BitUtils.parseDouble(data, 8, 32, 3.125e-08, true);
         rate = dRate == null ? Double.NaN : Utils.round(Math.toDegrees(dRate), 4);
     }
 

@@ -18,14 +18,26 @@ package com.aboni.nmea.router.message;
 public class MsgSpeedImpl implements MsgSpeed {
 
     private final double speed;
+    private final double speedGround;
+    private final String sensorType;
+    private final int direction;
+    private final int sid;
 
     public MsgSpeedImpl(double speed) {
+        this(-1, speed, Double.NaN, "Paddle Wheel", 1);
+    }
+
+    public MsgSpeedImpl(int sid, double speed, double speedGround, String sensorType, int direction) {
         this.speed = speed;
+        this.speedGround = speedGround;
+        this.sensorType = sensorType;
+        this.direction = direction;
+        this.sid = sid;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
@@ -35,17 +47,17 @@ public class MsgSpeedImpl implements MsgSpeed {
 
     @Override
     public double getSpeedGroundRef() {
-        return Double.NaN;
+        return speedGround;
     }
 
     @Override
     public String getSpeedSensorType() {
-        return "Paddle Wheel";
+        return sensorType;
     }
 
     @Override
     public int getSpeedDirection() {
-        return 1;
+        return direction;
     }
 
     @Override

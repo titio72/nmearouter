@@ -4,7 +4,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.nmea.router.n2k.messages.impl.N2KMessageDefaultImpl;
+import com.aboni.nmea.router.n2k.messages.impl.N2KGenericMessageImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class SerialHL340SerialCANReaderTest {
 
             @Override
             public N2KMessage newUntypedInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) {
-                return new N2KMessageDefaultImpl(h, data);
+                return new N2KGenericMessageImpl(h, data);
             }
 
             @Override

@@ -15,19 +15,31 @@
 
 package com.aboni.nmea.router.message;
 
+import org.json.JSONObject;
+
 public class MsgHumidityImpl implements MsgHumidity {
 
+    private final int sid;
+    private final int instance;
     private final double humidity;
+    private final double setHumidity;
     private final HumiditySource src;
 
     public MsgHumidityImpl(HumiditySource src, double humidity) {
+        this(-1, 0, src, humidity, Double.NaN);
+    }
+
+    public MsgHumidityImpl(int sid, int instance, HumiditySource src, double humidity, double setHumidity) {
         this.src = src;
         this.humidity = humidity;
+        this.setHumidity = setHumidity;
+        this.sid = sid;
+        this.instance = instance;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
@@ -41,7 +53,29 @@ public class MsgHumidityImpl implements MsgHumidity {
     }
 
     @Override
+    public double getSetHumidity() {
+        return setHumidity;
+    }
+
+    @Override
+    public int getInstance() {
+        return instance;
+    }
+
+    @Override
     public String toString() {
         return String.format("Humidity: Source {%s} Humidity {%.1f}", getHumiditySource(), getHumidity());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject res = new JSONObject();
+        res.put("topic", "XDR");
+        JSONObject mJ = new JSONObject();
+        mJ.put("type", "P");
+        mJ.put("value", (!Double.isNaN(getHumidity()) ? getHumidity() : 0.0));
+        mJ.put("unit", "H");
+        res.append("Humidity", mJ);
+        return res;
     }
 }

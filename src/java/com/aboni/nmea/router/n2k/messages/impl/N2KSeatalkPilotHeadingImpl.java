@@ -38,10 +38,10 @@ public class N2KSeatalkPilotHeadingImpl extends N2KMessageImpl implements MsgSea
     }
 
     private void fill() {
-        Double d = parseDouble(data, 40, 16, 0.0001, false);
+        Double d = BitUtils.parseDouble(data, 40, 16, 0.0001, false);
         headingMagnetic = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
 
-        d = parseDouble(data, 24, 16, 0.0001, false);
+        d = BitUtils.parseDouble(data, 24, 16, 0.0001, false);
         headingTrue = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
     }
 

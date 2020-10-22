@@ -2,18 +2,19 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgPressure;
+import com.aboni.nmea.router.message.MsgPressureImpl;
 import com.aboni.nmea.router.message.PressureSource;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_PRESSURE_PGN;
 
 public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
 
-    private PressureSource source;
+    private MsgPressure pressureData;
     private int instance;
     private int sid;
-    private double pressure;
 
     public N2KPressureImpl(byte[] data) {
         super(getDefaultHeader(ENVIRONMENT_PRESSURE_PGN), data);
@@ -30,13 +31,15 @@ public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
 
     private void fill() {
 
-        sid = getByte(data, 0, 0xFF);
-        instance = getByte(data, 1, 0xFF);
+        sid = BitUtils.getByte(data, 0, 0xFF);
+        instance = BitUtils.getByte(data, 1, 0xFF);
 
-        source = PressureSource.valueOf(getByte(data, 2, 0));
+        PressureSource source = PressureSource.valueOf(BitUtils.getByte(data, 2, 0));
 
-        Double dT = parseDouble(data, 24, 32, 0.1, false);
-        pressure = (dT == null) ? Double.NaN : Utils.round(dT / 100.0, 1);
+        Double dT = BitUtils.parseDouble(data, 24, 32, 0.1, false);
+        double pressure = (dT == null) ? Double.NaN : Utils.round(dT / 100.0, 1);
+
+        pressureData = new MsgPressureImpl(source, pressure);
     }
 
     @Override
@@ -50,17 +53,22 @@ public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
 
     @Override
     public PressureSource getPressureSource() {
-        return source;
+        return pressureData.getPressureSource();
     }
 
     @Override
     public double getPressure() {
-        return pressure;
+        return pressureData.getPressure();
     }
 
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Instance {%d} PressureSource {%s} Pressure {%.1f}",
                 ENVIRONMENT_PRESSURE_PGN, getHeader().getSource(), getInstance(), getPressureSource(), getPressure());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return pressureData.toJSON();
     }
 }

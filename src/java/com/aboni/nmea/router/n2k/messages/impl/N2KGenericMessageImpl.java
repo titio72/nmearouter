@@ -6,14 +6,14 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class N2KMessageDefaultImpl implements N2KMessage {
+public class N2KGenericMessageImpl implements N2KMessage {
 
     private static final DateTimeFormatter timeF = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss.SSS");
 
     private final N2KMessageHeader header;
     private final byte[] data;
 
-    public N2KMessageDefaultImpl(N2KMessageHeader header, byte[] data) {
+    public N2KGenericMessageImpl(N2KMessageHeader header, byte[] data) {
         this.header = header;
         this.data = data;
     }

@@ -47,38 +47,38 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
     }
 
     protected void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gpsInfo.setPosition(new Position(lat, lon));
         }
 
-        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) parseIntegerSafe(data, 106, 2, 6, 0xFF);
+        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        gpsInfo.setCOG(parseDoubleSafe(data, 112, 16, 0.0001, false));
+        gpsInfo.setCOG(BitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false));
         gpsInfo.setCOG(Double.isNaN(gpsInfo.getCOG()) ? gpsInfo.getCOG() : Utils.round(Math.toDegrees(gpsInfo.getCOG()), 1));
-        gpsInfo.setSOG(parseDoubleSafe(data, 128, 16, 0.01, false));
+        gpsInfo.setSOG(BitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
         if (!Double.isNaN(gpsInfo.getSOG())) gpsInfo.setSOG(Utils.round(gpsInfo.getSOG() * 3600.0 / 1852.0, 1));
-        heading = parseDoubleSafe(data, 168, 16, 0.0001, false);
+        heading = BitUtils.parseDoubleSafe(data, 168, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
 
-        aisTransceiverInfo = parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisTransceiverInfo = BitUtils.parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
-        int i = (int) parseIntegerSafe(data, 194, 2, 1, 0xFF);
+        int i = (int) BitUtils.parseIntegerSafe(data, 194, 2, 1, 0xFF);
         unitType = getUnitType(i);
 
-        sDSC = parseIntegerSafe(data, 196, 4, 1, 0) == 1;
-        canHandleMsg22 = parseIntegerSafe(data, 198, 6, 1, 0) == 1;
+        sDSC = BitUtils.parseIntegerSafe(data, 196, 4, 1, 0) == 1;
+        canHandleMsg22 = BitUtils.parseIntegerSafe(data, 198, 6, 1, 0) == 1;
 
-        band = parseIntegerSafe(data, 197, 5, 1, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
-        aisMode = parseIntegerSafe(data, 199, 7, 1, 0) == 0 ? "Autonomous" : "Assigned";
-        aisCommunicationState = parseIntegerSafe(data, 200, 0, 1, 0) == 0 ? "SOTDMA" : "ITDMA";
+        band = BitUtils.parseIntegerSafe(data, 197, 5, 1, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
+        aisMode = BitUtils.parseIntegerSafe(data, 199, 7, 1, 0) == 0 ? "Autonomous" : "Assigned";
+        aisCommunicationState = BitUtils.parseIntegerSafe(data, 200, 0, 1, 0) == 0 ? "SOTDMA" : "ITDMA";
 
     }
 

@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.message;
 
+import org.json.JSONObject;
+
 public class MsgPressureImpl implements MsgPressure {
 
     private final double pressure;
@@ -31,6 +33,11 @@ public class MsgPressureImpl implements MsgPressure {
     }
 
     @Override
+    public int getInstance() {
+        return 0;
+    }
+
+    @Override
     public PressureSource getPressureSource() {
         return src;
     }
@@ -43,5 +50,14 @@ public class MsgPressureImpl implements MsgPressure {
     @Override
     public String toString() {
         return String.format("Pressure: Source {%s} Pressure {%.1f}", getPressureSource(), getPressure());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject res = new JSONObject();
+        res.put("topic", "MMB");
+        res.put("pressure", getPressure());
+        res.put("source", getPressureSource().toString());
+        return res;
     }
 }

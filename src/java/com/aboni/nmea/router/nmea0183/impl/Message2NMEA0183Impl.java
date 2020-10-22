@@ -39,9 +39,6 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
     private static final DateTimeFormatter fTIME = DateTimeFormatter.ofPattern("HHmmss");
     private static final DateTimeFormatter fDATE = DateTimeFormatter.ofPattern("ddMMyyyy");
 
-    private double lastHeading;
-    private long lastHeadingTime = 0;
-
     @Inject
     public Message2NMEA0183Impl() {
         // do nothing
@@ -57,8 +54,8 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
             return handleWindData((MsgWindData) message); // Wind Data
         } else if (message instanceof MsgWaterDepth) {
             return handleWaterDepth((MsgWaterDepth) message); // Water Depth
-        } else if (message instanceof MsgSpeed) {
-            return handleSpeed((MsgSpeed) message); // Speed
+        } else if (message instanceof MsgSpeedAndHeading) {
+            return handleSpeedHeading((MsgSpeedAndHeading) message); // Speed & Heading
         } else if (message instanceof MsgHeading) {
             return handleHeading((MsgHeading) message); // Vessel Heading
         } else if (message instanceof MsgSatellites) {
@@ -166,14 +163,26 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
         return TEMPLATE;
     }
 
-    private Sentence[] handleHeading(MsgHeading message) {
+    private static Sentence[] handleSpeedHeading(MsgSpeedAndHeading message) {
+        double heading = message.getHeading();
+        double speed = message.getSpeedWaterRef();
+        DirectionReference ref = message.getReference();
+        if (!Double.isNaN(speed) && !Double.isNaN(heading) && ref != DirectionReference.MAGNETIC) {
+            VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
+            vhw.setMagneticHeading(heading);
+            vhw.setSpeedKnots(speed);
+            vhw.setSpeedKmh(speed * 1.852);
+            return new Sentence[]{vhw};
+        }
+        return TEMPLATE;
+    }
+
+    private static Sentence[] handleHeading(MsgHeading message) {
         double heading = message.getHeading();
         DirectionReference ref = message.getReference();
         if (!Double.isNaN(heading) && ref != null) {
             switch (ref) {
                 case MAGNETIC:
-                    lastHeading = heading;
-                    lastHeadingTime = System.currentTimeMillis();
                     HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
                     hdm.setHeading(heading);
                     return new Sentence[]{hdm};
@@ -184,20 +193,6 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
                 default:
                     return TEMPLATE;
             }
-        }
-        return TEMPLATE;
-    }
-
-    private Sentence[] handleSpeed(MsgSpeed message) {
-        double speed = message.getSpeedWaterRef();
-        if (!Double.isNaN(speed)) {
-            VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
-            if (System.currentTimeMillis() - lastHeadingTime <= 1000) {
-                vhw.setMagneticHeading(lastHeading);
-            }
-            vhw.setSpeedKnots(speed);
-            vhw.setSpeedKmh(speed * 1.852);
-            return new Sentence[]{vhw};
         }
         return TEMPLATE;
     }

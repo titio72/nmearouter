@@ -41,9 +41,9 @@ public class N2KSeatalkPilotModeImpl extends N2KMessageImpl implements MsgSeatal
     }
 
     private void fill() {
-        int m = (int) parseIntegerSafe(data, 16, 0, 8, 0xFF);
-        int sm = (int) parseIntegerSafe(data, 16, 0, 8, 0xFF);
-        int d = (int) parseIntegerSafe(data, 16, 0, 8, 0xFF);
+        int m = (int) BitUtils.parseIntegerSafe(data, 16, 0, 8, 0xFF);
+        int sm = (int) BitUtils.parseIntegerSafe(data, 16, 0, 8, 0xFF);
+        int d = (int) BitUtils.parseIntegerSafe(data, 16, 0, 8, 0xFF);
         mode = new SeatalkPilotMode(m, sm, d);
     }
 

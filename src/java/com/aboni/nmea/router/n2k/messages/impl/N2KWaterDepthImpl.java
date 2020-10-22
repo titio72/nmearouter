@@ -16,21 +16,20 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.MsgWaterDepth;
+import com.aboni.nmea.router.message.MsgWaterDepthImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.DEPTH_PGN;
 
 public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
 
-    private int sid;
-    private double depth;
-    private double offset;
-    private double range;
+    private final MsgWaterDepth theMessage;
 
     public N2KWaterDepthImpl(byte[] data) {
         super(getDefaultHeader(DEPTH_PGN), data);
-        fill();
+        theMessage = fill(data);
     }
 
     public N2KWaterDepthImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -38,45 +37,45 @@ public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != DEPTH_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", DEPTH_PGN, header.getPgn()));
-        fill();
+        theMessage = fill(data);
     }
 
-    private void fill() {
-        sid = getByte(data, 0, 0);
-
-        Double dDepth = parseDouble(data, 8, 32, 0.01, false);
-        depth = dDepth == null ? Double.NaN : dDepth;
-
-        Double dOffset = parseDouble(data, 40, 8, 0.001, false);
-        offset = dOffset == null ? Double.NaN : dOffset;
-
-        Double dRange = parseDouble(data, 56, 8, 10, false);
-        range = dRange == null ? Double.NaN : dRange;
+    private static MsgWaterDepth fill(byte[] data) {
+        int sid = BitUtils.getByte(data, 0, 0);
+        double depth = BitUtils.parseDoubleSafe(data, 8, 32, 0.01, false);
+        double offset = BitUtils.parseDoubleSafe(data, 40, 8, 0.001, false);
+        double range = BitUtils.parseDoubleSafe(data, 56, 8, 10, false);
+        return new MsgWaterDepthImpl(sid, depth, offset, range);
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return theMessage.getSID();
     }
 
     @Override
     public double getDepth() {
-        return depth;
+        return theMessage.getDepth();
     }
 
     @Override
     public double getOffset() {
-        return offset;
+        return theMessage.getOffset();
     }
 
     @Override
     public double getRange() {
-        return range;
+        return theMessage.getRange();
     }
 
     @Override
     public String toString() {
         return String.format("PGN {%s} Source {%d} Depth {%.1f} Offset {%.1f} Range {%.1f}",
                 DEPTH_PGN, getHeader().getSource(), getDepth(), getOffset(), getRange());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return theMessage.toJSON();
     }
 }

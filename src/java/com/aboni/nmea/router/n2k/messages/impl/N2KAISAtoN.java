@@ -44,28 +44,28 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     }
 
     private void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gpsInfo.setPosition(new Position(lat, lon));
         }
         gpsInfo.setCOG(0.0);
         gpsInfo.setSOG(0.0);
 
-        positionAccuracy = parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) parseIntegerSafe(data, 106, 2, 6, 0xFF);
+        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        sAtoNType = parseEnum(data, 176, 0, 5, N2KLookupTables.getTable(ATON_TYPE));
+        sAtoNType = BitUtils.parseEnum(data, 176, 0, 5, N2KLookupTables.getTable(ATON_TYPE));
 
-        name = getText(data, 26, 34);
-        aisTransceiverInfo = parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
-        aisSpare = (int) parseIntegerSafe(data, 184, 0, 1, 0xFF);
-        positionFixingDeviceType = parseEnum(data, 185, 1, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
+        name = BitUtils.getText(data, 26, 34);
+        aisTransceiverInfo = BitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisSpare = (int) BitUtils.parseIntegerSafe(data, 184, 0, 1, 0xFF);
+        positionFixingDeviceType = BitUtils.parseEnum(data, 185, 1, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
     }
 
     @Override

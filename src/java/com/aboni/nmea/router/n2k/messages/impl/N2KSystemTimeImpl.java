@@ -16,9 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.MsgSystemTime;
+import com.aboni.nmea.router.message.MsgSystemTimeImpl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,13 +30,11 @@ import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.SYSTEM_TIME_PGN;
 
 public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
 
-    private int sid;
-    private Instant time;
-    private String timeSourceType;
+    private final MsgSystemTime theTime;
 
     public N2KSystemTimeImpl(byte[] data) {
         super(getDefaultHeader(SYSTEM_TIME_PGN), data);
-        fill();
+        theTime = fill(data);
     }
 
     public N2KSystemTimeImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -42,16 +42,17 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != SYSTEM_TIME_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", SYSTEM_TIME_PGN, header.getPgn()));
-        fill();
+        theTime = fill(data);
     }
 
-    private void fill() {
+    private MsgSystemTime fill(byte[] data) {
 
-        sid = getByte(data, 0, 0xFF);
+        int sid = BitUtils.getByte(data, 0, 0xFF);
 
-        Long lDate = parseInteger(data, 16, 16);
-        Double dTime = parseDouble(data, 32, 32, 0.0001, false);
+        Long lDate = BitUtils.parseInteger(data, 16, 16);
+        Double dTime = BitUtils.parseDouble(data, 32, 32, 0.0001, false);
 
+        Instant time;
         if (lDate != null && dTime != null && !dTime.isNaN()) {
             Instant i = Instant.ofEpochMilli(0);
             time = i.atZone(ZoneId.of("UTC")).plusDays(lDate).plusNanos((long) (dTime * 1000000000L)).toInstant();
@@ -59,22 +60,24 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
             time = null;
         }
 
-        timeSourceType = parseEnum(data, 8, 0, 4, N2KLookupTables.getTable(SYSTEM_TIME));
+        String timeSourceType = BitUtils.parseEnum(data, 8, 0, 4, N2KLookupTables.getTable(SYSTEM_TIME));
+
+        return new MsgSystemTimeImpl(sid, timeSourceType, time);
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return theTime.getSID();
     }
 
     @Override
     public Instant getTime() {
-        return time;
+        return theTime.getTime();
     }
 
     @Override
     public String getTimeSourceType() {
-        return timeSourceType;
+        return theTime.getTimeSourceType();
     }
 
     @Override
@@ -82,4 +85,10 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
         return String.format("PGN {%s} Source {%d} Time {%s} Time Source {%s}",
                 SYSTEM_TIME_PGN, getHeader().getSource(), getTime(), getTimeSourceType());
     }
+
+    @Override
+    public JSONObject toJSON() {
+        return theTime.toJSON();
+    }
+
 }

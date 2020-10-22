@@ -15,19 +15,29 @@
 
 package com.aboni.nmea.router.message;
 
+import org.json.JSONObject;
+
 public class MsgWaterDepthImpl implements MsgWaterDepth {
 
+    private final int sid;
     private final double depth;
     private final double offset;
+    private final double range;
 
     public MsgWaterDepthImpl(double depth, double offset) {
+        this(-1, depth, offset, Double.NaN);
+    }
+
+    public MsgWaterDepthImpl(int sid, double depth, double offset, double range) {
+        this.sid = sid;
         this.depth = depth;
         this.offset = offset;
+        this.range = range;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
@@ -42,11 +52,24 @@ public class MsgWaterDepthImpl implements MsgWaterDepth {
 
     @Override
     public double getRange() {
-        return Double.NaN;
+        return range;
     }
 
     @Override
     public String toString() {
         return String.format("Depth: Depth {%.1f} Offset {%.1f}", getDepth(), getOffset());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("topic", "DPT");
+        double d = getDepth();
+        double o = getOffset();
+        if (!Double.isNaN(getDepth())) json.put("raw_depth", d);
+        if (!Double.isNaN(getOffset())) json.put("offset", o);
+        if (!Double.isNaN(getOffset()) && !Double.isNaN(getDepth())) json.put("depth", d + o);
+        if (!Double.isNaN(getRange())) json.put("range", getRange());
+        return json;
     }
 }

@@ -15,24 +15,36 @@
 
 package com.aboni.nmea.router.message;
 
+import org.json.JSONObject;
+
 public class MsgTemperatureImpl implements MsgTemperature {
 
+    private final int instance;
     private final double temperature;
+    private final double setTemperature;
     private final TemperatureSource src;
+    private final int sid;
 
     public MsgTemperatureImpl(TemperatureSource src, double temperature) {
+        this(-1, 0, src, temperature, Double.NaN);
+    }
+
+    public MsgTemperatureImpl(int sid, int instance, TemperatureSource src, double temperature, double setTemperature) {
+        this.sid = sid;
+        this.instance = instance;
         this.src = src;
         this.temperature = temperature;
+        this.setTemperature = setTemperature;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
     public int getInstance() {
-        return 0;
+        return instance;
     }
 
     @Override
@@ -47,11 +59,28 @@ public class MsgTemperatureImpl implements MsgTemperature {
 
     @Override
     public double getSetTemperature() {
-        return 0;
+        return setTemperature;
     }
 
     @Override
     public String toString() {
         return String.format("Temperature: Source {%s} Temperature {%.1f}", getTemperatureSource(), getTemperature());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject res = new JSONObject();
+        if (getTemperatureSource() == TemperatureSource.SEA) {
+            res.put("topic", "MTW");
+            res.put("temperature", getTemperature());
+        } else {
+            res.put("topic", "XDR");
+            JSONObject mJ = new JSONObject();
+            mJ.put("type", "C");
+            mJ.put("value", getTemperature());
+            mJ.put("unit", "C");
+            res.put((getTemperatureSource() == TemperatureSource.MAIN_CABIN_ROOM) ? "CabinTemp" : getTemperatureSource().toString(), mJ);
+        }
+        return res;
     }
 }

@@ -33,19 +33,19 @@ public class N2KEnvironment311Impl extends N2KMessageImpl {
 
     private void fill() {
 
-        sid = getByte(data, 0, 0xFF);
+        sid = BitUtils.getByte(data, 0, 0xFF);
 
-        tempSource = parseEnum(data, 8, 0, 6, N2KLookupTables.getTable(TEMPERATURE_SOURCE));
+        tempSource = BitUtils.parseEnum(data, 8, 0, 6, N2KLookupTables.getTable(TEMPERATURE_SOURCE));
 
-        humiditySource = parseEnum(data, 14, 6, 2, N2KLookupTables.getTable(HUMIDITY_SOURCE));
+        humiditySource = BitUtils.parseEnum(data, 14, 6, 2, N2KLookupTables.getTable(HUMIDITY_SOURCE));
 
-        Double dT = parseDouble(data, 16, 16, 0.01, false);
+        Double dT = BitUtils.parseDouble(data, 16, 16, 0.01, false);
         temperature = (dT == null) ? Double.NaN : Utils.round(dT - 273.15, 1);
 
-        Double dH = parseDouble(data, 32, 16, 0.004, true);
+        Double dH = BitUtils.parseDouble(data, 32, 16, 0.004, true);
         humidity = (dH == null) ? Double.NaN : dH;
 
-        Long dP = parseInteger(data, 48, 16);
+        Long dP = BitUtils.parseInteger(data, 48, 16);
         atmosphericPressure = (dP == null) ? Double.NaN : dP;
 
     }

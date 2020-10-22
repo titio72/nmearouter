@@ -17,21 +17,20 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgWindData;
+import com.aboni.nmea.router.message.MsgWindDataImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.WIND_PGN;
 
 public class N2KWindDataImpl extends N2KMessageImpl implements MsgWindData {
 
-    private int sid;
-    private double speed = Double.NaN;
-    private double angle = Double.NaN;
-    private boolean apparent = true;
+    private final MsgWindData windData;
 
     public N2KWindDataImpl(byte[] data) {
         super(getDefaultHeader(WIND_PGN), data);
-        fill();
+        windData = fill(data);
     }
 
     public N2KWindDataImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -39,39 +38,41 @@ public class N2KWindDataImpl extends N2KMessageImpl implements MsgWindData {
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != WIND_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", WIND_PGN, header.getPgn()));
-        fill();
+        windData = fill(data);
     }
 
-    private void fill() {
-        sid = getByte(data, 0, 0xFF);
+    private static MsgWindData fill(byte[] data) {
+        int sid = BitUtils.getByte(data, 0, 0xFF);
 
-        Double dSpeed = parseDouble(data, 8, 16, 0.01, false);
-        if (dSpeed != null) speed = Utils.round(dSpeed * 3600.0 / 1852.0, 2);
+        Double dSpeed = BitUtils.parseDouble(data, 8, 16, 0.01, false);
+        double speed = (dSpeed != null) ? Utils.round(dSpeed * 3600.0 / 1852.0, 2) : Double.NaN;
 
-        Double dAngleRad = parseDouble(data, 24, 16, 0.0001, false);
-        if (dAngleRad != null) angle = Utils.round(Math.toDegrees(dAngleRad), 1);
+        Double dAngleRad = BitUtils.parseDouble(data, 24, 16, 0.0001, false);
+        double angle = (dAngleRad != null) ? Utils.round(Math.toDegrees(dAngleRad), 1) : Double.NaN;
 
-        apparent = (getByte(data, 5, 1) & 0x07) != 0;
+        boolean apparent = (BitUtils.getByte(data, 5, 1) & 0x07) != 0;
+
+        return new MsgWindDataImpl(sid, speed, angle, apparent);
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return windData.getSID();
     }
 
     @Override
     public double getSpeed() {
-        return speed;
+        return windData.getSpeed();
     }
 
     @Override
     public double getAngle() {
-        return angle;
+        return windData.getAngle();
     }
 
     @Override
     public boolean isApparent() {
-        return apparent;
+        return windData.isApparent();
     }
 
     @Override
@@ -80,4 +81,8 @@ public class N2KWindDataImpl extends N2KMessageImpl implements MsgWindData {
                 WIND_PGN, getHeader().getSource(), getSpeed(), getAngle(), isApparent() ? "A" : "T");
     }
 
+    @Override
+    public JSONObject toJSON() {
+        return windData.toJSON();
+    }
 }

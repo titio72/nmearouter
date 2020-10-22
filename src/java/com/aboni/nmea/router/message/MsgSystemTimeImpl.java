@@ -19,17 +19,25 @@ import java.time.Instant;
 
 public class MsgSystemTimeImpl implements MsgSystemTime {
 
+    private final int sid;
     private final String type;
     private final Instant time;
 
     public MsgSystemTimeImpl(String src, Instant time) {
+        this.sid = -1;
+        this.type = src;
+        this.time = time;
+    }
+
+    public MsgSystemTimeImpl(int sid, String src, Instant time) {
+        this.sid = sid;
         this.type = src;
         this.time = time;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override

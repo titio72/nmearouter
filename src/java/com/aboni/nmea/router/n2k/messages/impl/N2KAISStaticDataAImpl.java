@@ -35,16 +35,16 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
     }
 
     private void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
-        imo = (int) parseIntegerSafe(data, 40, 0, 32, 0xFFFFFF);
-        callSign = getText(data, 9, 7);
-        name = getText(data, 16, 20);
-        typeOfShip = parseEnum(data, 288, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
-        length = parseDoubleSafe(data, 296, 16, 0.1, false);
-        beam = parseDoubleSafe(data, 312, 16, 0.1, false);
-        aisTransceiverInformation = parseEnum(data, 592, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        imo = (int) BitUtils.parseIntegerSafe(data, 40, 0, 32, 0xFFFFFF);
+        callSign = BitUtils.getText(data, 9, 7);
+        name = BitUtils.getText(data, 16, 20);
+        typeOfShip = BitUtils.parseEnum(data, 288, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
+        length = BitUtils.parseDoubleSafe(data, 296, 16, 0.1, false);
+        beam = BitUtils.parseDoubleSafe(data, 312, 16, 0.1, false);
+        aisTransceiverInformation = BitUtils.parseEnum(data, 592, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
     }
 

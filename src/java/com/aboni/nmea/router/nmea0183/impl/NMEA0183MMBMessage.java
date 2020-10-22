@@ -35,6 +35,11 @@ public class NMEA0183MMBMessage extends NMEA0183Message implements MsgPressure {
     }
 
     @Override
+    public int getInstance() {
+        return 0;
+    }
+
+    @Override
     public PressureSource getPressureSource() {
         return PressureSource.ATMOSPHERIC;
     }

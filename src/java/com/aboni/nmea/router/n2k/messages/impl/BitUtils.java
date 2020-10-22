@@ -15,9 +15,155 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
+import java.util.Map;
+
 public class BitUtils {
 
     private BitUtils() {
+    }
+
+    public static int getByte(byte[] data, int ix, int def) {
+        if (ix < data.length)
+            return data[ix] & 0xFF;
+        else
+            return def;
+    }
+
+    public static String parseEnum(byte[] data, int offset, int start, int length, Map<Integer, String> map) {
+        if (offset + length > (data.length * 8)) return null;
+
+        Res e = extractBits(data, start, offset, length, false);
+        int reserved = 0;
+        if (e.m >= 15) {
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATA FIELD_UNKNOWN */
+        }
+
+        String ret = null;
+        if (e.v <= (e.m - reserved)) {
+            ret = map.getOrDefault((int) e.v, String.format("%d", e.v));
+        }
+        return ret;
+    }
+
+    public static long parseIntegerSafe(byte[] data, int offset, int start, int length, long def) {
+        if (offset + length > (data.length * 8)) return def;
+
+        Res e = extractBits(data, start, offset, length, false);
+        int reserved = 0;
+        if (e.v >= 15) {
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATA FIELD_UNKNOWN */
+        }
+        if (e.v <= e.m - reserved) {
+            return e.v;
+        } else {
+            return def;
+        }
+    }
+
+    public static Long parseInteger(byte[] data, int offset, int length) {
+        if (offset + length > (data.length * 8)) return null;
+
+        Res e = extractBits(data, 0, offset, length, false);
+        int reserved = 0;
+        if (e.v >= 15) {
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATA FIELD_UNKNOWN */
+        }
+        if (e.v <= e.m - reserved) {
+            return e.v;
+        } else {
+            return null;
+        }
+    }
+
+    public static double parseDoubleSafe(byte[] data, int offset, int length, double precision, boolean signed) {
+        Double d = parseDouble(data, offset, length, precision, signed);
+        return d == null ? Double.NaN : d;
+    }
+
+    public static Double parseDouble(byte[] data, int offset, int length, double precision, boolean signed) {
+        if (offset + length > (data.length * 8)) return null;
+
+        Res e = extractBits(data, 0, offset, length, signed);
+        int reserved = 0;
+        if (e.v >= 15) {
+            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
+        } else if (e.m > 1) {
+            reserved = 1; /* DATA FIELD_UNKNOWN */
+        }
+        if (length == 64) {
+            if (e.v != 0x7FFFFFFFFFFFFFFFL)
+                return (double) e.v * precision;
+            else
+                return null;
+        } else {
+            if (e.v <= e.m - reserved) {
+                return (double) e.v * precision;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public static String getText(byte[] data, int byteStart, int byteLength) {
+
+        if (byteStart < 0 || byteStart >= data.length) return "";
+
+        byteLength = Math.min(byteLength, data.length - byteStart);
+
+        // remove padding
+        int l = byteLength;
+        byte last = data[byteStart + l - 1];
+        while (last == (byte) 0xff || last == ' ' || last == 0 || last == '@') {
+            l--;
+            if (l == 0) return "";
+            last = data[byteStart + l - 1];
+        }
+        char c;
+        int k;
+
+        StringBuilder sb = new StringBuilder(l);
+        // escape
+        for (k = 0; k < l; k++) {
+            c = (char) data[byteStart + k];
+            switch (c) {
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '/':
+                    sb.append("\\/");
+                    break;
+                default:
+                    if (c >= ' ' && c <= '~') {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
+    }
+
+    public static boolean isValidDouble(double d) {
+        return !Double.isNaN(d);
     }
 
     public static class Res {

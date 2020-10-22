@@ -2,24 +2,22 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgTemperature;
+import com.aboni.nmea.router.message.MsgTemperatureImpl;
 import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
 
 public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature {
 
-    private TemperatureSource source;
-    private int sid;
-    private int instance;
-    private double temperature;
-    private double setTemperature;
+    private final MsgTemperature temperatureMessage;
 
 
     public N2KTemperatureImpl(byte[] data) {
         super(getDefaultHeader(ENVIRONMENT_TEMPERATURE_PGN), data);
-        fill();
+        temperatureMessage = fill(data);
     }
 
     public N2KTemperatureImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -27,49 +25,52 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != ENVIRONMENT_TEMPERATURE_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", ENVIRONMENT_TEMPERATURE_PGN, header.getPgn()));
-        fill();
+        temperatureMessage = fill(data);
     }
 
-    private void fill() {
+    private MsgTemperature fill(byte[] data) {
 
-        sid = getByte(data, 0, 0xFF);
-        instance = getByte(data, 1, 0xFF);
+        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int instance = BitUtils.getByte(data, 1, 0xFF);
 
-        source = TemperatureSource.valueOf(getByte(data, 2, 0));
+        TemperatureSource source = TemperatureSource.valueOf(BitUtils.getByte(data, 2, 0));
 
-        Double dT = parseDouble(data, 24, 16, 0.01, false);
-        temperature = (dT == null) ? Double.NaN : Utils.round(
-                dT>200.0?(dT - 273.15):dT, 1);
+        Double dT = BitUtils.parseDouble(data, 24, 16, 0.01, false);
+        double temperature = (dT == null) ? Double.NaN : Utils.round(kelvinToCelsius(dT), 1);
 
-        Double dST = parseDouble(data, 40, 16, 0.01, false);
-        setTemperature = (dST == null) ? Double.NaN : Utils.round(
-                dST>200.0?(dST - 273.15):dST, 1);
+        Double dST = BitUtils.parseDouble(data, 40, 16, 0.01, false);
+        double setTemperature = (dST == null) ? Double.NaN : Utils.round(kelvinToCelsius(dST), 1);
 
+        return new MsgTemperatureImpl(sid, instance, source, temperature, setTemperature);
+    }
+
+    private static double kelvinToCelsius(double t) {
+        return t > 200.0 ? (t - 273.15) : t;
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return temperatureMessage.getSID();
     }
 
     @Override
     public int getInstance() {
-        return instance;
+        return temperatureMessage.getInstance();
     }
 
     @Override
     public TemperatureSource getTemperatureSource() {
-        return source;
+        return temperatureMessage.getTemperatureSource();
     }
 
     @Override
     public double getTemperature() {
-        return temperature;
+        return temperatureMessage.getSetTemperature();
     }
 
     @Override
     public double getSetTemperature() {
-        return setTemperature;
+        return temperatureMessage.getSetTemperature();
     }
 
     @Override
@@ -77,4 +78,10 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
         return String.format("PGN {%s} Source {%d} Instance {%d} TempSource {%s} Temperature {%.1f} SetTemperature {%.1f}",
                 ENVIRONMENT_TEMPERATURE_PGN, getHeader().getSource(), getInstance(), getTemperatureSource(), getTemperature(), getSetTemperature());
     }
+
+    @Override
+    public JSONObject toJSON() {
+        return temperatureMessage.toJSON();
+    }
+
 }

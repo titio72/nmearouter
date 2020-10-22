@@ -19,15 +19,23 @@ public class MsgSOGAndCOGImpl implements MsgSOGAdCOG {
 
     private final double cog;
     private final double sog;
+    private final String ref;
+    private final int sid;
 
     public MsgSOGAndCOGImpl(double sog, double cog) {
+        this(-1, sog, cog, "True");
+    }
+
+    public MsgSOGAndCOGImpl(int sid, double sog, double cog, String cogReference) {
+        this.sid = sid;
         this.cog = cog;
         this.sog = sog;
+        this.ref = cogReference;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
@@ -42,12 +50,12 @@ public class MsgSOGAndCOGImpl implements MsgSOGAdCOG {
 
     @Override
     public String getCOGReference() {
-        return "True";
+        return ref;
     }
 
     @Override
     public boolean isTrueCOG() {
-        return true;
+        return "True".equals(ref);
     }
 
     @Override

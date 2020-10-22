@@ -74,7 +74,6 @@
     </svg>
 </template>
 
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
@@ -170,12 +169,17 @@
 
   function processEvent(event) {
     var msg = JSON.parse(event.data);
-    if (msg.topic == 'MTW') {
+    if (msg.topic == 'nav') {
+      var controllerElement = document.getElementById('sensorPanel');
+      var controllerScope = angular.element(controllerElement).scope();
+      controllerScope.nav_info = msg;
+      controllerScope.$evalAsync();
+    } else if (msg.topic == 'MTW') {
         var controllerElement = document.getElementById('sensorPanel');
         var controllerScope = angular.element(controllerElement).scope();
         controllerScope['WaterTemp'] = msg.temperature;
         controllerScope.$evalAsync();
-	irr = 0;
+	      irr = 0;
     } else if (msg.topic == 'XDR') {
       for (var prop in msg) {
         if (prop != 'XDR') {
@@ -191,7 +195,6 @@
       controllerScope.free_memory = msg.free_memory;
       controllerScope.queue = msg.queue;
       controllerScope.$evalAsync();
-
     } else if (msg.topic == "anchor") {
       var controllerElement = document.getElementById('sensorPanel');
       var controllerScope = angular.element(controllerElement).scope();
@@ -242,17 +245,18 @@
 
       trueWind = calcTrueWind(speed, msg.angle, msg.speed);
       if (trueWind.angle > 180) {
-        trueWind.show_angle = 360 - msg.angle;
+        trueWind.show_angle = 360 - trueWind.angle;
         trueWind.tack = "Port"
       } else {
-        trueWind.show_angle = msg.angle;
+        trueWind.show_angle = trueWind.angle;
         trueWind.tack = "Starboard"
       }
       controllerScope['wind_t'] = trueWind;
 
       absoluteWind = {
         mag_angle: (heading + trueWind.angle) % 360,
-        speed: trueWind.speed
+        speed: trueWind.speed,
+        s_dir: direction((heading + trueWind.angle) % 360)
       };
       controllerScope['wind'] = absoluteWind;
 
@@ -343,19 +347,26 @@
   customElements.define('my-dial', class extends HTMLElement {
 
     static get observedAttributes() {
-      return ['angle'];
+      return ['angle', 'angle_wind'];
     }
 
     get angle() {
       return this.getAttribute('angle');
     }
 
+    get angle_wind() {
+      return this.getAttribute('angle_wind');
+    }
+
     connectedCallback() {
       var a = this.getAttribute('angle');
+      var w = this.getAttribute('angle_wind');
       a = (a==null)?0:a;
+      w = (w==null)?0:w;
       let template = document.getElementById('my-dial');
       let templateContent = template.content;
       let newInstance = templateContent.cloneNode(true);
+
       let arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
       arrow.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
       arrow.setAttributeNS(null, "fill", "blue");
@@ -363,6 +374,15 @@
       arrow.setAttributeNS(null, "stroke-width", "3");
       arrow.setAttributeNS(null, "transform", "rotate(" + a + " 105 105)");
       newInstance.firstElementChild.appendChild(arrow);
+
+      let wind_arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      wind_arrow.setAttributeNS(null, "d", "M95 105 L105 45 L115 105 Z");
+      wind_arrow.setAttributeNS(null, "fill", "yellow");
+      wind_arrow.setAttributeNS(null, "stroke", "gray");
+      wind_arrow.setAttributeNS(null, "stroke-width", "3");
+      wind_arrow.setAttributeNS(null, "transform", "rotate(" + w + " 105 105)");
+      newInstance.firstElementChild.appendChild(wind_arrow);
+
       this.appendChild(newInstance);
       //<path d="M95 105 L105 45 L115 105 Z" fill="blue" stroke="gray" stroke-width="3" transform="rotate({{hdm.angle}} 105 105)"></path>
     }
@@ -385,28 +405,9 @@
                         <table width="100%">
                             <tr>
                                 <td>
-                                    <div class="card-sensor-text-small">{{hdm.angle|numberFixedLen:3:0}}&deg;
-                                        {{hdm.s_dir}}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: center;">
-                                    <my-dial angle="{{hdm.angle}}"></my-dial>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <div class="card-router card-sensor">
-                    <div class="card-router-header card-sensor-header">Abs. Wind</div>
-                    <div class="card-router-body card-sensor-body">
-                        <table width="100%">
-                            <tr>
-                                <td>
-                                    <div class="card-sensor-textall">{{wind.speed | number:1}}Kn {{wind.mag_angle |
+                                    <div class="card-sensor-text-small">Head {{hdm.angle|numberFixedLen:3:0}}&deg;
+                                        {{hdm.s_dir}}<br>
+                                        Wind {{wind.speed | number:1}}Kn {{wind.mag_angle |
                                         numberFixedLen:3:0}}&deg;
                                         {{wind.s_dir}}
                                     </div>
@@ -414,7 +415,8 @@
                             </tr>
                             <tr>
                                 <td style="text-align: center;">
-                                    <my-dial angle="{{wind.mag_angle}}"></my-dial>
+                                    <my-dial angle="{{hdm.angle}}"
+                                             angle_wind="{{wind.mag_angle}}"></my-dial>
                                 </td>
                             </tr>
                         </table>
@@ -482,6 +484,47 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div class="card-router card-sensor">
+                    <div class="card-router-header card-sensor-header">Waypoint</div>
+                    <div class="card-router-body card-sensor-body">
+                        <table class="panelTable">
+                            <tr>
+                                <td>Destination</td>
+                                <td style="text-align: right">{{nav_info.waypoint.latitude}}</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">{{nav_info.waypoint.longitude}}</td>
+                            </tr>
+                            <tr>
+                                <td>BTW/DTW</td>
+                                <td style="text-align: right">{{nav_info.btw | number:1}}&deg; {{nav_info.dtw |
+                                    number:2}} NM
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>VMG</td>
+                                <td style="text-align: right">{{nav_info.vmg | number:1}} KN</td>
+                            </tr>
+                            <tr>
+                                <td>ETA</td>
+                                <td style="text-align: right">{{nav_info.eta_date}}</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td style="text-align: right">{{nav_info.eta_time}}</td>
+                            </tr>
+                            <tr>
+                                <td>Time</td>
+                                <td style="text-align: right">{{nav_info.time_to_dest}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="card-router card-sensor">
                     <div class="card-router-header card-sensor-header">Navi</div>

@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "C:\\Users\\aboni\\IdeaProjects\\router"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../src"
 		}
 	]
 }

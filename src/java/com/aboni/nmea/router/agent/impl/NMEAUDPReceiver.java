@@ -21,6 +21,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
+import com.aboni.nmea.router.message.SpeedAndHeadingStream;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.utils.Log;
 
@@ -48,6 +49,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     private final NMEATrafficStats stats;
     private final Log log;
     private final PositionAndVectorStream positionAndVectorStream;
+    private final SpeedAndHeadingStream speedAndHeadingStream;
     private final byte[] buffer = new byte[2048];
     private String description;
 
@@ -59,6 +61,8 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         input = new NMEAInputManager(log);
         positionAndVectorStream = new PositionAndVectorStream(tp);
         positionAndVectorStream.setListener(this::notify);
+        speedAndHeadingStream = new SpeedAndHeadingStream(tp);
+        speedAndHeadingStream.setListener(this::notify);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, true, false);
         stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, true, false);
         description = "UDP Receiver";
@@ -125,7 +129,10 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             if (out != null) {
                 updateReadSentencesStats(false);
                 for (Message m : out) {
-                    if (m instanceof N2KMessage) positionAndVectorStream.onMessage(m);
+                    if (m instanceof N2KMessage) {
+                        positionAndVectorStream.onMessage(m);
+                        speedAndHeadingStream.onMessage(m);
+                    }
                     notify(m);
                 }
             }

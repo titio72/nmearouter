@@ -15,13 +15,22 @@
 
 package com.aboni.nmea.router.message;
 
+import com.aboni.utils.HWSettings;
+import org.json.JSONObject;
+
 public class MsgAttitudeImpl implements MsgAttitude {
 
+    private final int sid;
     private final double pitch;
     private final double roll;
     private final double yaw;
 
     public MsgAttitudeImpl(double yaw, double roll, double pitch) {
+        this(-1, yaw, roll, pitch);
+    }
+
+    public MsgAttitudeImpl(int sid, double yaw, double roll, double pitch) {
+        this.sid = sid;
         this.pitch = pitch;
         this.roll = roll;
         this.yaw = yaw;
@@ -34,7 +43,7 @@ public class MsgAttitudeImpl implements MsgAttitude {
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
@@ -50,5 +59,25 @@ public class MsgAttitudeImpl implements MsgAttitude {
     @Override
     public String toString() {
         return String.format("Attitude: Yaw {%.1f} Pitch {%.1f} Roll {%.1f} ", getYaw(), getPitch(), getRoll());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("topic", "XDR");
+        addMeasure(json, getYaw(), "YAW");
+        addMeasure(json, getRoll() - HWSettings.getPropertyAsDouble("gyro.roll", 0.0), "ROLL");
+        addMeasure(json, getPitch() - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0), "PITCH");
+        return json;
+    }
+
+    private static void addMeasure(JSONObject json, double value, String name) {
+        if (!Double.isNaN(value)) {
+            JSONObject m = new JSONObject();
+            m.put("type", "A");
+            m.put("value", value);
+            m.put("unit", "D");
+            json.put(name, m);
+        }
     }
 }

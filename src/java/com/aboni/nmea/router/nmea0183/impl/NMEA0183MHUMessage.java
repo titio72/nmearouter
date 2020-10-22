@@ -35,6 +35,11 @@ public class NMEA0183MHUMessage extends NMEA0183Message implements MsgHumidity {
     }
 
     @Override
+    public int getInstance() {
+        return 0;
+    }
+
+    @Override
     public HumiditySource getHumiditySource() {
         return HumiditySource.INSIDE;
     }
@@ -42,9 +47,14 @@ public class NMEA0183MHUMessage extends NMEA0183Message implements MsgHumidity {
     @Override
     public double getHumidity() {
         try {
-            return ((MHUSentence)getSentence()).getRelativeHumidity();
+            return ((MHUSentence) getSentence()).getRelativeHumidity();
         } catch (DataNotAvailableException e) {
             return Double.NaN;
         }
+    }
+
+    @Override
+    public double getSetHumidity() {
+        return Double.NaN;
     }
 }

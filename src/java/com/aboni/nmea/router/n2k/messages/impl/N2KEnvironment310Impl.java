@@ -42,15 +42,15 @@ public class N2KEnvironment310Impl extends N2KMessageImpl {
     }
 
     private void fill() {
-        sid = getByte(data, 0, 0xFF);
+        sid = BitUtils.getByte(data, 0, 0xFF);
 
-        Double dWT = parseDouble(data, 8, 16, 0.01, false);
+        Double dWT = BitUtils.parseDouble(data, 8, 16, 0.01, false);
         waterTemp = (dWT == null) ? Double.NaN : Utils.round(dWT - 273.15, 1);
 
-        Double dAT = parseDouble(data, 24, 16, 0.01, false);
+        Double dAT = BitUtils.parseDouble(data, 24, 16, 0.01, false);
         airTemp = (dAT == null) ? Double.NaN : Utils.round(dAT - 273.15, 1);
 
-        Long dP = parseInteger(data, 40, 16);
+        Long dP = BitUtils.parseInteger(data, 40, 16);
         atmosphericPressure = (dP == null) ? Double.NaN : Utils.round(dP / 100.0, 1);
 
     }

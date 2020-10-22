@@ -46,11 +46,11 @@ public class N2KGNSSDOPsImpl extends N2KMessageImpl implements MsgGNSSDOPs {
     }
 
     private void fill() {
-        sid = getByte(data, 0, 0xFF);
-        fix = of((int) parseIntegerSafe(data, 11, 3, 3, 6));
-        hDOP = parseDoubleSafe(data, 16, 16, 0.01, true);
-        vDOP = parseDoubleSafe(data, 32, 16, 0.01, true);
-        tDOP = parseDoubleSafe(data, 48, 16, 0.01, true);
+        sid = BitUtils.getByte(data, 0, 0xFF);
+        fix = of((int) BitUtils.parseIntegerSafe(data, 11, 3, 3, 6));
+        hDOP = BitUtils.parseDoubleSafe(data, 16, 16, 0.01, true);
+        vDOP = BitUtils.parseDoubleSafe(data, 32, 16, 0.01, true);
+        tDOP = BitUtils.parseDoubleSafe(data, 48, 16, 0.01, true);
     }
 
     @Override

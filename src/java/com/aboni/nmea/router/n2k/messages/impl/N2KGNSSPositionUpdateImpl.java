@@ -44,31 +44,31 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSS
     }
 
     private void fill() {
-        sid = getByte(data, 0, 0xFF);
+        sid = BitUtils.getByte(data, 0, 0xFF);
 
-        Double dLat = parseDouble(data, 56, 64, 0.0000000000000001, true);
-        Double dLon = parseDouble(data, 120, 64, 0.0000000000000001, true);
+        Double dLat = BitUtils.parseDouble(data, 56, 64, 0.0000000000000001, true);
+        Double dLon = BitUtils.parseDouble(data, 120, 64, 0.0000000000000001, true);
         if (dLat != null && dLon != null) position = new Position(dLat, dLon);
 
-        altitude = parseDoubleSafe(data, 184, 64, 1e-06, true);
-        nSV = getByte(data, 264 / 8, 0xFF);
-        hdop = parseDoubleSafe(data, 272, 16, 0.01, true);
-        pdop = parseDoubleSafe(data, 288, 16, 0.01, true);
-        geoidalSeparation = parseDoubleSafe(data, 304, 32, 0.01, true);
-        ageOfDgnssCorrections = parseDoubleSafe(data, 360, 16, 0.01, false);
-        referenceStationId = (int) parseIntegerSafe(data, 348, 4, 12, 0x0FFF);
-        referenceStations = (int) parseIntegerSafe(data, 336, 0, 8, 0xFF);
+        altitude = BitUtils.parseDoubleSafe(data, 184, 64, 1e-06, true);
+        nSV = BitUtils.getByte(data, 264 / 8, 0xFF);
+        hdop = BitUtils.parseDoubleSafe(data, 272, 16, 0.01, true);
+        pdop = BitUtils.parseDoubleSafe(data, 288, 16, 0.01, true);
+        geoidalSeparation = BitUtils.parseDoubleSafe(data, 304, 32, 0.01, true);
+        ageOfDgnssCorrections = BitUtils.parseDoubleSafe(data, 360, 16, 0.01, false);
+        referenceStationId = (int) BitUtils.parseIntegerSafe(data, 348, 4, 12, 0x0FFF);
+        referenceStations = (int) BitUtils.parseIntegerSafe(data, 336, 0, 8, 0xFF);
 
-        int daysSince1970 = (int) parseIntegerSafe(data, 8, 0, 16, 0);
-        double secsSinceMidnight = parseDoubleSafe(data, 24, 32, 0.0001, false);
-        if (daysSince1970 > 0 && isValidDouble(secsSinceMidnight)) {
+        int daysSince1970 = (int) BitUtils.parseIntegerSafe(data, 8, 0, 16, 0);
+        double secsSinceMidnight = BitUtils.parseDoubleSafe(data, 24, 32, 0.0001, false);
+        if (daysSince1970 > 0 && BitUtils.isValidDouble(secsSinceMidnight)) {
             timestamp = Instant.ofEpochMilli(0).atZone(ZoneId.of("UTC")).plusDays(daysSince1970).plusNanos((long) (secsSinceMidnight * 1e9)).toInstant();
         }
 
-        gnssType = parseEnum(data, 248, 0, 4, N2KLookupTables.getTable(GNS));
-        method = parseEnum(data, 252, 4, 4, N2KLookupTables.getTable(GNS_METHOD));
-        integrity = parseEnum(data, 256, 0, 2, N2KLookupTables.getTable(GNS_INTEGRITY));
-        referenceStationType = parseEnum(data, 344, 0, 4, N2KLookupTables.getTable(GNS));
+        gnssType = BitUtils.parseEnum(data, 248, 0, 4, N2KLookupTables.getTable(GNS));
+        method = BitUtils.parseEnum(data, 252, 4, 4, N2KLookupTables.getTable(GNS_METHOD));
+        integrity = BitUtils.parseEnum(data, 256, 0, 2, N2KLookupTables.getTable(GNS_INTEGRITY));
+        referenceStationType = BitUtils.parseEnum(data, 344, 0, 4, N2KLookupTables.getTable(GNS));
     }
 
     @Override
@@ -118,7 +118,7 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSS
 
     @Override
     public boolean isHDOP() {
-        return isValidDouble(hdop);
+        return BitUtils.isValidDouble(hdop);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class N2KGNSSPositionUpdateImpl extends N2KMessageImpl implements MsgGNSS
 
     @Override
     public boolean isPDOP() {
-        return isValidDouble(pdop);
+        return BitUtils.isValidDouble(pdop);
     }
 
     @Override

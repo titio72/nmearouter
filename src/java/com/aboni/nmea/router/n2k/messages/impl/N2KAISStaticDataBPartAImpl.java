@@ -32,12 +32,12 @@ public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISSta
     }
 
     private void fill() {
-        messageId = (int) parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", parseIntegerSafe(data, 8, 0, 32, 0));
-        name = getText(data, 5, 20);
-        transceiverInfo = parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
-        seqId = (int) parseIntegerSafe(data, 208, 0, 8, 0xFF);
+        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
+        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        name = BitUtils.getText(data, 5, 20);
+        transceiverInfo = BitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        seqId = (int) BitUtils.parseIntegerSafe(data, 208, 0, 8, 0xFF);
     }
 
     @Override
