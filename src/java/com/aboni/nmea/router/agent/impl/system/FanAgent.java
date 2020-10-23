@@ -18,6 +18,9 @@ package com.aboni.nmea.router.agent.impl.system;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.router.message.MsgTemperature;
+import com.aboni.nmea.router.message.MsgTemperatureImpl;
+import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
@@ -82,14 +85,10 @@ public class FanAgent extends NMEAAgentImpl {
 
     private void sendCPUTemp(double temp) {
         try {
-            XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-            xdr.addMeasurement(new Measurement("C", Utils.round(temp, 2), "C", "CPUTemp"));
-            notify(xdr);
+            notify(new MsgTemperatureImpl(0, 0, TemperatureSource.CPU, temp, 60.0));
         } catch (Exception e) {
             log.debug(() -> LogStringBuilder.start("Fan Manager").wO("read temperature")
                     .wV("error", e.getMessage()).toString());
         }
     }
-
-
 }

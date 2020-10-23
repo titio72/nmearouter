@@ -26,28 +26,17 @@ public class JSONUtils {
         if (Double.isNaN(v) || json == null || attribute == null || attribute.isEmpty()) {
             return false;
         } else {
-            json.put("attribute", v);
-            return true;
-        }
-    }
-
-    public static boolean addDoubleForceNull(JSONObject json, double v, String attribute) {
-        if (json == null || attribute == null || attribute.isEmpty()) {
-            return false;
-        } else {
-            if (Double.isNaN(v))
-                json.put(attribute, JSONObject.NULL);
-            else
-                json.put(attribute, v);
+            json.put(attribute, v);
             return true;
         }
     }
 
     public static void main(String[] args) {
         JSONObject o = new JSONObject();
-        addDoubleForceNull(o, Double.NaN, "a");
-        double d = o.getDouble("a");
+        addDouble(o, Double.NaN, "a");
+        double d = o.optDouble("a", Double.NaN);
         System.out.println(o.toString());
+        System.out.printf("%03.1f", d);
 
     }
 }

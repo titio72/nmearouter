@@ -66,9 +66,4 @@ public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
         return String.format("PGN {%s} Source {%d} Instance {%d} PressureSource {%s} Pressure {%.1f}",
                 ENVIRONMENT_PRESSURE_PGN, getHeader().getSource(), getInstance(), getPressureSource(), getPressure());
     }
-
-    @Override
-    public JSONObject toJSON() {
-        return pressureData.toJSON();
-    }
 }

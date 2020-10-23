@@ -6,7 +6,6 @@ import com.aboni.nmea.router.message.MsgTemperatureImpl;
 import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN;
 
@@ -65,7 +64,7 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
 
     @Override
     public double getTemperature() {
-        return temperatureMessage.getSetTemperature();
+        return temperatureMessage.getTemperature();
     }
 
     @Override
@@ -78,10 +77,4 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
         return String.format("PGN {%s} Source {%d} Instance {%d} TempSource {%s} Temperature {%.1f} SetTemperature {%.1f}",
                 ENVIRONMENT_TEMPERATURE_PGN, getHeader().getSource(), getInstance(), getTemperatureSource(), getTemperature(), getSetTemperature());
     }
-
-    @Override
-    public JSONObject toJSON() {
-        return temperatureMessage.toJSON();
-    }
-
 }

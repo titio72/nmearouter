@@ -15,6 +15,7 @@
 
 package com.aboni.nmea.router.message;
 
+import com.aboni.utils.JSONUtils;
 import org.json.JSONObject;
 
 public interface MsgPressure extends Message {
@@ -28,14 +29,12 @@ public interface MsgPressure extends Message {
     PressureSource getPressureSource();
 
     default @Override
-    JSONObject toJSON() {
+        JSONObject toJSON() {
         JSONObject res = new JSONObject();
         res.put("topic", "pressure");
-        JSONObject mJ = new JSONObject();
-        mJ.put("value", (!Double.isNaN(getPressure()) ? getPressure() : 0.0));
-        mJ.put("source", getPressureSource().toString());
-        mJ.put("instance", getInstance());
-        res.put("Barometer", mJ);
+        JSONUtils.addDouble(res, getPressure(), "pressure");
+        res.put("source", getPressureSource().toString());
+        res.put("instance", getInstance());
         return res;
     }
 }

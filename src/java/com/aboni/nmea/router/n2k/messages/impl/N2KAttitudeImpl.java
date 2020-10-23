@@ -20,6 +20,7 @@ import com.aboni.nmea.router.message.MsgAttitude;
 import com.aboni.nmea.router.message.MsgAttitudeImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.utils.HWSettings;
 import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ATTITUDE_PGN;
@@ -48,10 +49,14 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements MsgAttitude {
         double yaw = (dYaw == null) ? Double.NaN : Utils.round(Math.toDegrees(dYaw), 1);
 
         Double dPitch = BitUtils.parseDouble(data, 24, 16, 0.0001, true);
-        double pitch = (dPitch == null) ? Double.NaN : Utils.round(Math.toDegrees(dPitch), 1);
+        double pitch = (dPitch == null) ?
+                Double.NaN :
+                Utils.round(Math.toDegrees(dPitch), 1) - HWSettings.getPropertyAsDouble("gyro.roll", 0.0);
 
         Double dRoll = BitUtils.parseDouble(data, 40, 16, 0.0001, true);
-        double roll = (dRoll == null) ? Double.NaN : Utils.round(Math.toDegrees(dRoll), 1);
+        double roll = (dRoll == null) ?
+                Double.NaN :
+                Utils.round(Math.toDegrees(dRoll), 1) - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0);
 
         return new MsgAttitudeImpl(sid, yaw, roll, pitch);
     }
@@ -80,10 +85,5 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements MsgAttitude {
     public String toString() {
         return String.format("PGN {%s} Source {%d} Roll {%.1f} Yaw {%.1f} Pitch {%.1f}",
                 ATTITUDE_PGN, getHeader().getSource(), getRoll(), getYaw(), getPitch());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return msgAttitude.toJSON();
     }
 }

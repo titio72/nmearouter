@@ -32,7 +32,8 @@ public enum TemperatureSource {
     THEORETICAL_WIND_CHILL(11),
     HEAT_INDEX(12),
     FREEZER(13),
-    EXHAUST_GAS(14);
+    EXHAUST_GAS(14),
+    CPU(32);
 
     private final int value;
 
@@ -72,6 +73,8 @@ public enum TemperatureSource {
                 return FREEZER;
             case 14:
                 return EXHAUST_GAS;
+            case 32:
+                return CPU;
             default:
                 return UNKNOWN;
 
@@ -111,6 +114,8 @@ public enum TemperatureSource {
                 return "Freezer Temperature";
             case 14:
                 return "Exhaust Gas Temperature";
+            case 32:
+                return "CPU Temperature";
             default:
                 return "Unknown";
         }

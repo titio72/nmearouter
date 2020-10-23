@@ -66,21 +66,4 @@ public class MsgTemperatureImpl implements MsgTemperature {
     public String toString() {
         return String.format("Temperature: Source {%s} Temperature {%.1f}", getTemperatureSource(), getTemperature());
     }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject res = new JSONObject();
-        if (getTemperatureSource() == TemperatureSource.SEA) {
-            res.put("topic", "MTW");
-            res.put("temperature", getTemperature());
-        } else {
-            res.put("topic", "XDR");
-            JSONObject mJ = new JSONObject();
-            mJ.put("type", "C");
-            mJ.put("value", getTemperature());
-            mJ.put("unit", "C");
-            res.put((getTemperatureSource() == TemperatureSource.MAIN_CABIN_ROOM) ? "CabinTemp" : getTemperatureSource().toString(), mJ);
-        }
-        return res;
-    }
 }
