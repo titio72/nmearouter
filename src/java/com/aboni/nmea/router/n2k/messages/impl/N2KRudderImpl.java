@@ -17,21 +17,20 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgRudder;
+import com.aboni.nmea.router.message.MsgRudderImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.RUDDER_PGN;
 
 public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
 
-    private int instance;
-    private double position;
-    private double angleOrder;
-    private int directionOrder;
+    private final MsgRudder msg;
 
     public N2KRudderImpl(byte[] data) {
         super(getDefaultHeader(RUDDER_PGN), data);
-        fill();
+        msg = fill(data);
     }
 
     public N2KRudderImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -39,40 +38,43 @@ public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != RUDDER_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", RUDDER_PGN, header.getPgn()));
-        fill();
+        msg = fill(data);
     }
 
-    private void fill() {
-        instance = BitUtils.getByte(data, 0, 0xFF);
+    private static MsgRudder fill(byte[] data) {
+
+        int instance = BitUtils.getByte(data, 0, 0xFF);
 
         Long i = BitUtils.parseInteger(data, 8, 2);
-        directionOrder = i == null ? -1 : i.intValue();
+        int directionOrder = (i == null) ? -1 : i.intValue();
 
         Double dAO = BitUtils.parseDouble(data, 16, 16, 0.0001, true);
-        angleOrder = dAO == null ? Double.NaN : Utils.round(Math.toDegrees(dAO), 1);
+        double angleOrder = dAO == null ? Double.NaN : Utils.round(Math.toDegrees(dAO), 1);
 
         Double dP = BitUtils.parseDouble(data, 32, 16, 0.0001, true);
-        position = dP == null ? Double.NaN : Utils.round(Math.toDegrees(dP), 1);
+        double position = dP == null ? Double.NaN : Utils.round(Math.toDegrees(dP), 1);
+
+        return new MsgRudderImpl(instance, position, angleOrder, directionOrder);
     }
 
     @Override
     public int getInstance() {
-        return instance;
+        return msg.getInstance();
     }
 
     @Override
     public double getAngle() {
-        return position;
+        return msg.getAngle();
     }
 
     @Override
     public double getAngleOrder() {
-        return angleOrder;
+        return msg.getAngleOrder();
     }
 
     @Override
     public int getDirectionOrder() {
-        return directionOrder;
+        return msg.getDirectionOrder();
     }
 
     @Override
@@ -81,4 +83,8 @@ public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
                 RUDDER_PGN, getHeader().getSource(), getInstance(), getAngle(), getAngleOrder(), getDirectionOrder());
     }
 
+    @Override
+    public JSONObject toJSON() {
+        return msg.toJSON();
+    }
 }

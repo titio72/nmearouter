@@ -15,38 +15,38 @@
 
 package com.aboni.nmea.router.message;
 
-public class MsgPressureImpl implements MsgPressure {
+import org.json.JSONObject;
 
-    private final double pressure;
-    private final PressureSource src;
+public class MsgRateOfTurnImpl implements MsgRateOfTurn {
 
-    public MsgPressureImpl(PressureSource src, double pressure) {
-        this.src = src;
-        this.pressure = pressure;
+    private final int sid;
+    private final double rateOfTurn;
+
+    public MsgRateOfTurnImpl(int sid, double rateOfTurn) {
+        this.sid = sid;
+        this.rateOfTurn = rateOfTurn;
     }
 
     @Override
     public int getSID() {
-        return -1;
+        return sid;
     }
 
     @Override
-    public int getInstance() {
-        return 0;
-    }
-
-    @Override
-    public PressureSource getPressureSource() {
-        return src;
-    }
-
-    @Override
-    public double getPressure() {
-        return pressure;
+    public double getRateOfTurn() {
+        return rateOfTurn;
     }
 
     @Override
     public String toString() {
-        return String.format("Pressure: Source {%s} Pressure {%.1f}", getPressureSource(), getPressure());
+        return String.format("Rate of turn: rate {%.1f}", getRateOfTurn());
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject j = new JSONObject();
+        j.put("topic", "ROT");
+        if (!Double.isNaN(getRateOfTurn())) j.put("rate", getRateOfTurn());
+        return j;
     }
 }

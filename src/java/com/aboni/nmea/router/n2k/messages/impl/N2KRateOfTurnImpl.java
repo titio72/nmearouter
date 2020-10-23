@@ -17,19 +17,20 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgRateOfTurn;
+import com.aboni.nmea.router.message.MsgRateOfTurnImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.RATE_OF_TURN_PGN;
 
 public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
 
-    private int sid;
-    private double rate;
+    private final MsgRateOfTurn msg;
 
     public N2KRateOfTurnImpl(byte[] data) {
         super(getDefaultHeader(RATE_OF_TURN_PGN), data);
-        fill();
+        msg = fill(data);
     }
 
     public N2KRateOfTurnImpl(N2KMessageHeader header, byte[] data) throws PGNDataParseException {
@@ -37,24 +38,26 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
         if (header == null) throw new PGNDataParseException("Null message header!");
         if (header.getPgn() != RATE_OF_TURN_PGN)
             throw new PGNDataParseException(String.format("Incompatible header: expected %d, received %d", RATE_OF_TURN_PGN, header.getPgn()));
-        fill();
+        msg = fill(data);
     }
 
-    private void fill() {
-        sid = BitUtils.getByte(data, 0, 0xFF);
+    private static MsgRateOfTurn fill(byte[] data) {
+        int sid = BitUtils.getByte(data, 0, 0xFF);
 
         Double dRate = BitUtils.parseDouble(data, 8, 32, 3.125e-08, true);
-        rate = dRate == null ? Double.NaN : Utils.round(Math.toDegrees(dRate), 4);
+        double rate = dRate == null ? Double.NaN : Utils.round(Math.toDegrees(dRate), 4);
+
+        return new MsgRateOfTurnImpl(sid, rate);
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return msg.getSID();
     }
 
     @Override
     public double getRateOfTurn() {
-        return rate;
+        return msg.getRateOfTurn();
     }
 
     @Override
@@ -62,4 +65,8 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
         return String.format("PGN {%d} Source {%d} RateOfTurn {%.1f}", getHeader().getPgn(), getHeader().getSource(), getRateOfTurn());
     }
 
+    @Override
+    public JSONObject toJSON() {
+        return msg.toJSON();
+    }
 }

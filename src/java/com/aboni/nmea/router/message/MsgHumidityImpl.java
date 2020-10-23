@@ -75,7 +75,7 @@ public class MsgHumidityImpl implements MsgHumidity {
         mJ.put("type", "P");
         mJ.put("value", (!Double.isNaN(getHumidity()) ? getHumidity() : 0.0));
         mJ.put("unit", "H");
-        res.append("Humidity", mJ);
+        res.put("Humidity", mJ);
         return res;
     }
 }
