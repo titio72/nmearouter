@@ -6,7 +6,6 @@ import com.aboni.nmea.router.message.MsgPressureImpl;
 import com.aboni.nmea.router.message.PressureSource;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_PRESSURE_PGN;
 

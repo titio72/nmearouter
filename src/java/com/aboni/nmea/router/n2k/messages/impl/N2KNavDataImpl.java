@@ -6,7 +6,6 @@ import com.aboni.nmea.router.message.MsgNavDataImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;
-import org.json.JSONObject;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -136,10 +135,5 @@ public class N2KNavDataImpl extends N2KMessageImpl implements MsgNavData {
     public String toString() {
         return String.format("PGN {%d} Source {%d} Waypoint {%s} ETA {%s} DTW {%.1f} BTW {%.1f} vmg {%.1f}",
                 NAV_DATA, getHeader().getSource(), getWaypoint(), getETA(), getDTW(), getBTW(), getWaypointClosingVelocity());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return navData.toJSON();
     }
 }

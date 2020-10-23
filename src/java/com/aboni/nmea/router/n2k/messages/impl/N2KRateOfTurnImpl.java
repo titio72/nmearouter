@@ -20,7 +20,6 @@ import com.aboni.nmea.router.message.MsgRateOfTurn;
 import com.aboni.nmea.router.message.MsgRateOfTurnImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.RATE_OF_TURN_PGN;
 
@@ -63,10 +62,5 @@ public class N2KRateOfTurnImpl extends N2KMessageImpl implements MsgRateOfTurn {
     @Override
     public String toString() {
         return String.format("PGN {%d} Source {%d} RateOfTurn {%.1f}", getHeader().getPgn(), getHeader().getSource(), getRateOfTurn());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return msg.toJSON();
     }
 }

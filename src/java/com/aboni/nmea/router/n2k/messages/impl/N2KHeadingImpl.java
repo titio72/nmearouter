@@ -6,7 +6,6 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgHeadingImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.HEADING_PGN;
 
@@ -78,10 +77,5 @@ public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
     public String toString() {
         return String.format("PGN {%s} Source {%d} Heading {%.1f} Ref {%s}",
                 HEADING_PGN, getHeader().getSource(), getHeading(), getReference());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return msgHeading.toJSON();
     }
 }

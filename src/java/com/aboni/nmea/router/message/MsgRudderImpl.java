@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgRudderImpl implements MsgRudder {
 
     private final int instance;
@@ -51,14 +49,4 @@ public class MsgRudderImpl implements MsgRudder {
         return orderDirection;
     }
 
-    @Override
-    public JSONObject toJSON() {
-        JSONObject j = new JSONObject();
-        j.put("topic", "RSA");
-        j.put("instance", getInstance());
-        if (!Double.isNaN(getAngle())) j.put(
-                (getInstance() == 0) ? "starboard_angle" : "port_angle",
-                getAngle());
-        return j;
-    }
 }

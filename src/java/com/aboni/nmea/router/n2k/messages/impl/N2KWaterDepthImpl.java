@@ -19,7 +19,6 @@ import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.nmea.router.message.MsgWaterDepthImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.DEPTH_PGN;
 
@@ -72,10 +71,5 @@ public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
     public String toString() {
         return String.format("PGN {%s} Source {%d} Depth {%.1f} Offset {%.1f} Range {%.1f}",
                 DEPTH_PGN, getHeader().getSource(), getDepth(), getOffset(), getRange());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return theMessage.toJSON();
     }
 }

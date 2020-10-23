@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgWaterDepthImpl implements MsgWaterDepth {
 
     private final int sid;
@@ -60,16 +58,4 @@ public class MsgWaterDepthImpl implements MsgWaterDepth {
         return String.format("Depth: Depth {%.1f} Offset {%.1f}", getDepth(), getOffset());
     }
 
-    @Override
-    public JSONObject toJSON() {
-        JSONObject json = new JSONObject();
-        json.put("topic", "DPT");
-        double d = getDepth();
-        double o = getOffset();
-        if (!Double.isNaN(getDepth())) json.put("raw_depth", d);
-        if (!Double.isNaN(getOffset())) json.put("offset", o);
-        if (!Double.isNaN(getOffset()) && !Double.isNaN(getDepth())) json.put("depth", d + o);
-        if (!Double.isNaN(getRange())) json.put("range", getRange());
-        return json;
-    }
 }

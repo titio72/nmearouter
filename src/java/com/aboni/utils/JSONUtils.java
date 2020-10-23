@@ -30,13 +30,4 @@ public class JSONUtils {
             return true;
         }
     }
-
-    public static void main(String[] args) {
-        JSONObject o = new JSONObject();
-        addDouble(o, Double.NaN, "a");
-        double d = o.optDouble("a", Double.NaN);
-        System.out.println(o.toString());
-        System.out.printf("%03.1f", d);
-
-    }
 }

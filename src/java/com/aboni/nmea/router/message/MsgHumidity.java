@@ -15,6 +15,9 @@
 
 package com.aboni.nmea.router.message;
 
+import com.aboni.utils.JSONUtils;
+import org.json.JSONObject;
+
 public interface MsgHumidity extends Message {
 
     int getSID();
@@ -27,4 +30,14 @@ public interface MsgHumidity extends Message {
 
     double getSetHumidity();
 
+    @Override
+    default JSONObject toJSON() {
+        JSONObject res = new JSONObject();
+        res.put("topic", "humidity");
+        res.put("source", getHumiditySource().toString());
+        res.put("instance", getInstance());
+        JSONUtils.addDouble(res, getHumidity(), "humidity");
+        JSONUtils.addDouble(res, getSetHumidity(), "set_humidity");
+        return res;
+    }
 }

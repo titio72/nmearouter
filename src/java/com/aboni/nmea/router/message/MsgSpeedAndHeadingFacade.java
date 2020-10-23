@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 import javax.validation.constraints.NotNull;
 
 public class MsgSpeedAndHeadingFacade implements MsgSpeedAndHeading {
@@ -78,22 +76,6 @@ public class MsgSpeedAndHeadingFacade implements MsgSpeedAndHeading {
     @Override
     public boolean isTrueHeading() {
         return heading.isTrueHeading();
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject json = new JSONObject();
-        json.put("topic", "VHW");
-        if (getReference() == DirectionReference.MAGNETIC && !Double.isNaN(getHeading())) {
-            json.put("mag_angle", getHeading());
-        } else if (getReference() == DirectionReference.TRUE && !Double.isNaN(getHeading())) {
-            json.put("true_angle", getHeading());
-        }
-        if (!Double.isNaN(getSpeedWaterRef())) {
-            json.put("speed", getSpeedWaterRef());
-        }
-        json.put("sensor", getSpeedSensorType());
-        return json;
     }
 
     @Override

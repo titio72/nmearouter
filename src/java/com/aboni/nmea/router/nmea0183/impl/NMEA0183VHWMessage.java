@@ -15,14 +15,15 @@
 
 package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.nmea.router.message.MsgSpeed;
+import com.aboni.nmea.router.message.DirectionReference;
+import com.aboni.nmea.router.message.MsgSpeedAndHeading;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
 
 import javax.validation.constraints.NotNull;
 
-public class NMEA0183VHWMessage extends NMEA0183Message implements MsgSpeed {
+public class NMEA0183VHWMessage extends NMEA0183Message implements MsgSpeedAndHeading {
 
     public NMEA0183VHWMessage(@NotNull VHWSentence sentence) {
         super(sentence);
@@ -31,6 +32,31 @@ public class NMEA0183VHWMessage extends NMEA0183Message implements MsgSpeed {
     @Override
     public int getSID() {
         return -1;
+    }
+
+    @Override
+    public double getHeading() {
+        return ((VHWSentence)getSentence()).getHeading();
+    }
+
+    @Override
+    public double getDeviation() {
+        return Double.NaN;
+    }
+
+    @Override
+    public double getVariation() {
+        return Double.NaN;
+    }
+
+    @Override
+    public DirectionReference getReference() {
+        return ((VHWSentence)getSentence()).isTrue()?DirectionReference.TRUE:DirectionReference.MAGNETIC;
+    }
+
+    @Override
+    public boolean isTrueHeading() {
+        return false;
     }
 
     @Override

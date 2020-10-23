@@ -15,9 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.utils.HWSettings;
-import org.json.JSONObject;
-
 public class MsgAttitudeImpl implements MsgAttitude {
 
     private final int sid;

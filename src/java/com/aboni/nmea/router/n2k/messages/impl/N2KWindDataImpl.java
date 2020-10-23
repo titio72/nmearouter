@@ -20,7 +20,6 @@ import com.aboni.nmea.router.message.MsgWindData;
 import com.aboni.nmea.router.message.MsgWindDataImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.WIND_PGN;
 
@@ -79,10 +78,5 @@ public class N2KWindDataImpl extends N2KMessageImpl implements MsgWindData {
     public String toString() {
         return String.format("PGN {%s} Source {%d} Wind Speed {%.1f} Angle {%.1f} Ref {%s}",
                 WIND_PGN, getHeader().getSource(), getSpeed(), getAngle(), isApparent() ? "A" : "T");
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return windData.toJSON();
     }
 }

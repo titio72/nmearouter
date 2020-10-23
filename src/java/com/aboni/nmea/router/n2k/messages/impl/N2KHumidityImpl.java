@@ -6,7 +6,6 @@ import com.aboni.nmea.router.message.MsgHumidity;
 import com.aboni.nmea.router.message.MsgHumidityImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_HUMIDITY_PGN;
 
@@ -70,10 +69,5 @@ public class N2KHumidityImpl extends N2KMessageImpl implements MsgHumidity {
     public String toString() {
         return String.format("PGN {%s} Source {%d} Instance {%d} HumiditySource {%s} Humidity {%.1f} SetHumidity {%.1f}",
                 ENVIRONMENT_HUMIDITY_PGN, getHeader().getSource(), getInstance(), getHumiditySource(), getHumidity(), getSetHumidity());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return msgHumidity.toJSON();
     }
 }

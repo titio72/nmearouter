@@ -15,9 +15,27 @@
 
 package com.aboni.nmea.router.message;
 
+import org.json.JSONObject;
+
 public interface MsgSpeedAndHeading extends MsgHeading, MsgSpeed {
 
     default boolean isValid() {
         return !Double.isNaN(getHeading()) && !Double.isNaN(getSpeedWaterRef());
+    }
+
+    @Override
+    default JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("topic", "VHW");
+        if (getReference() == DirectionReference.MAGNETIC && !Double.isNaN(getHeading())) {
+            json.put("mag_angle", getHeading());
+        } else if (getReference() == DirectionReference.TRUE && !Double.isNaN(getHeading())) {
+            json.put("true_angle", getHeading());
+        }
+        if (!Double.isNaN(getSpeedWaterRef())) {
+            json.put("speed", getSpeedWaterRef());
+        }
+        json.put("sensor", getSpeedSensorType());
+        return json;
     }
 }

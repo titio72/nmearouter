@@ -15,10 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.message.MsgTemperature;
 import com.aboni.nmea.router.message.MsgTemperatureImpl;
 import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.sensors.hw.CPUTemp;
@@ -26,11 +24,6 @@ import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.SentenceId;
-import net.sf.marineapi.nmea.sentence.TalkerId;
-import net.sf.marineapi.nmea.sentence.XDRSentence;
-import net.sf.marineapi.nmea.util.Measurement;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

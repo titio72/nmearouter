@@ -20,7 +20,6 @@ import com.aboni.nmea.router.message.MsgRudder;
 import com.aboni.nmea.router.message.MsgRudderImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.RUDDER_PGN;
 
@@ -81,10 +80,5 @@ public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
     public String toString() {
         return String.format("PGN {%s} Source {%d}  Rudder Instance {%d} Position {%.1f} Angle Order {%.1f} Direction Order {%d}",
                 RUDDER_PGN, getHeader().getSource(), getInstance(), getAngle(), getAngleOrder(), getDirectionOrder());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return msg.toJSON();
     }
 }

@@ -15,7 +15,9 @@
 
 package com.aboni.nmea.router.message;
 
+import com.aboni.misc.Utils;
 import net.sf.marineapi.nmea.util.Position;
+import org.json.JSONObject;
 
 import java.time.Instant;
 
@@ -48,4 +50,20 @@ public interface MsgPositionAndVector extends MsgPosition, MsgSOGAdCOG {
         };
     }
 
+
+    @Override
+    default JSONObject toJSON() {
+        JSONObject j = new JSONObject();
+        j.put("topic", "RMC");
+        if (getTimestamp() != null) j.put("UTC", getTimestamp().toString());
+        if (!Double.isNaN(getCOG())) j.put("COG", getCOG());
+        if (!Double.isNaN(getSOG())) j.put("SOG", getSOG());
+        if (getPosition() != null) {
+            j.put("latitude", Utils.formatLatitude(getPosition().getLatitude()));
+            j.put("longitude", Utils.formatLongitude(getPosition().getLongitude()));
+            j.put("dec_latitude", getPosition().getLatitude());
+            j.put("dec_longitude", getPosition().getLongitude());
+        }
+        return j;
+    }
 }

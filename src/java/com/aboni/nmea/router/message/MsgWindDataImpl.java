@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgWindDataImpl implements MsgWindData {
 
     private final int sid;
@@ -61,15 +59,5 @@ public class MsgWindDataImpl implements MsgWindData {
     @Override
     public String toString() {
         return String.format("Wind: Ref {%s} Speed {%.1f} Angle {%.1f}", isApparent() ? "Apparent" : "True", getSpeed(), getAngle());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject json = new JSONObject();
-        json.put("topic", isTrue() ? "MWV_T" : "MWV_R");
-        json.put("angle", getAngle());
-        json.put("speed", getSpeed());
-        json.put("unit", "K");
-        return json;
     }
 }

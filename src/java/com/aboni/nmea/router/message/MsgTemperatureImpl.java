@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgTemperatureImpl implements MsgTemperature {
 
     private final int instance;

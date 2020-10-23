@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgHeadingImpl implements MsgHeading {
 
     private final double heading;
@@ -82,17 +80,5 @@ public class MsgHeadingImpl implements MsgHeading {
     @Override
     public String toString() {
         return String.format("Heading: Head {%.1f} Variation {%.1f} Ref {%s}", getHeading(), getVariation(), getReference());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        if (!Double.isNaN(getHeading())) {
-            JSONObject json = new JSONObject();
-            json.put("topic", DirectionReference.TRUE == getReference() ? "HDT" : "HDM");
-            json.put("angle", getHeading());
-            return json;
-        } else {
-            return null;
-        }
     }
 }

@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgHumidityImpl implements MsgHumidity {
 
     private final int sid;
@@ -65,17 +63,5 @@ public class MsgHumidityImpl implements MsgHumidity {
     @Override
     public String toString() {
         return String.format("Humidity: Source {%s} Humidity {%.1f}", getHumiditySource(), getHumidity());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject res = new JSONObject();
-        res.put("topic", "XDR");
-        JSONObject mJ = new JSONObject();
-        mJ.put("type", "P");
-        mJ.put("value", (!Double.isNaN(getHumidity()) ? getHumidity() : 0.0));
-        mJ.put("unit", "H");
-        res.put("Humidity", mJ);
-        return res;
     }
 }

@@ -15,8 +15,6 @@
 
 package com.aboni.nmea.router.message;
 
-import org.json.JSONObject;
-
 public class MsgRateOfTurnImpl implements MsgRateOfTurn {
 
     private final int sid;
@@ -40,13 +38,5 @@ public class MsgRateOfTurnImpl implements MsgRateOfTurn {
     @Override
     public String toString() {
         return String.format("Rate of turn: rate {%.1f}", getRateOfTurn());
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        JSONObject j = new JSONObject();
-        j.put("topic", "ROT");
-        if (!Double.isNaN(getRateOfTurn())) j.put("rate", getRateOfTurn());
-        return j;
     }
 }

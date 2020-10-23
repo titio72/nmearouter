@@ -21,7 +21,6 @@ import com.aboni.nmea.router.message.MsgAttitudeImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.utils.HWSettings;
-import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ATTITUDE_PGN;
 
