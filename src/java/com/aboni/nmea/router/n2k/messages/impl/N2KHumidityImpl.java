@@ -3,7 +3,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.HumiditySource;
 import com.aboni.nmea.router.message.MsgHumidity;
-import com.aboni.nmea.router.message.MsgHumidityImpl;
+import com.aboni.nmea.router.message.beans.MsgHumidityImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 

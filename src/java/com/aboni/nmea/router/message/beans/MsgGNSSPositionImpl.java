@@ -13,8 +13,9 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
+import com.aboni.nmea.router.message.MsgGNSSPosition;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;

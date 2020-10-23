@@ -16,7 +16,12 @@
 package com.aboni.toolkit;
 
 import com.aboni.geo.Course;
-import com.aboni.nmea.router.message.*;
+import com.aboni.nmea.router.message.MsgGNSSPosition;
+import com.aboni.nmea.router.message.MsgPositionAndVector;
+import com.aboni.nmea.router.message.MsgPositionAndVectorFacade;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
+import com.aboni.nmea.router.message.beans.MsgGNSSPositionImpl;
+import com.aboni.nmea.router.message.beans.MsgSOGAndCOGImpl;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;

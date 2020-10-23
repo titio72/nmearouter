@@ -24,6 +24,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.*;
+import com.aboni.nmea.router.message.beans.*;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
 

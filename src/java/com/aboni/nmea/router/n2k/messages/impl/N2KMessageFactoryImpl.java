@@ -57,8 +57,6 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
         supported.put(N2KMessagePGNs.SATELLITES_IN_VIEW_PGN, N2KDef.getInstance(N2KSatellitesImpl.class, true)); // List of sats
         supported.put(N2KMessagePGNs.SYSTEM_TIME_PGN, N2KDef.getInstance(N2KSystemTimeImpl.class, false)); // System time
         supported.put(N2KMessagePGNs.ATTITUDE_PGN, N2KDef.getInstance(N2KAttitudeImpl.class, false)); // Attitude)
-        supported.put(N2KMessagePGNs.ENVIRONMENT_130310_PGN, N2KDef.getInstance(N2KEnvironment310Impl.class, false)); // Env parameter: Water temp, air temp, pressure
-        supported.put(N2KMessagePGNs.ENVIRONMENT_130311_PGN, N2KDef.getInstance(N2KEnvironment311Impl.class, false)); // Env parameter: temperature, humidity, pressure
         supported.put(N2KMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN, N2KDef.getInstance(N2KTemperatureImpl.class, false)); // Env parameter: temperature
         supported.put(N2KMessagePGNs.ENVIRONMENT_HUMIDITY_PGN, N2KDef.getInstance(N2KHumidityImpl.class, false)); // Env parameter: humidity
         supported.put(N2KMessagePGNs.ENVIRONMENT_PRESSURE_PGN, N2KDef.getInstance(N2KPressureImpl.class, false)); // Env parameter: pressure

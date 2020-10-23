@@ -3,7 +3,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.DirectionReference;
 import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.message.MsgHeadingImpl;
+import com.aboni.nmea.router.message.beans.MsgHeadingImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 

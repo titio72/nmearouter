@@ -6,8 +6,6 @@ public class N2KMessagePGNs {
     }
 
     public static final int ATTITUDE_PGN = 127257;
-    public static final int ENVIRONMENT_130310_PGN = 130310;
-    public static final int ENVIRONMENT_130311_PGN = 130311;
     public static final int ENVIRONMENT_TEMPERATURE_PGN = 130312;
     public static final int ENVIRONMENT_HUMIDITY_PGN = 130313;
     public static final int ENVIRONMENT_PRESSURE_PGN = 130314;

@@ -13,7 +13,10 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
+
+import com.aboni.nmea.router.message.MsgTemperature;
+import com.aboni.nmea.router.message.TemperatureSource;
 
 public class MsgTemperatureImpl implements MsgTemperature {
 

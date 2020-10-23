@@ -13,26 +13,26 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
-public class MsgSpeedImpl implements MsgSpeed {
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
 
-    private final double speed;
-    private final double speedGround;
-    private final String sensorType;
-    private final int direction;
+public class MsgSOGAndCOGImpl implements MsgSOGAdCOG {
+
+    private final double cog;
+    private final double sog;
+    private final String ref;
     private final int sid;
 
-    public MsgSpeedImpl(double speed) {
-        this(-1, speed, Double.NaN, "Paddle Wheel", 1);
+    public MsgSOGAndCOGImpl(double sog, double cog) {
+        this(-1, sog, cog, "True");
     }
 
-    public MsgSpeedImpl(int sid, double speed, double speedGround, String sensorType, int direction) {
-        this.speed = speed;
-        this.speedGround = speedGround;
-        this.sensorType = sensorType;
-        this.direction = direction;
+    public MsgSOGAndCOGImpl(int sid, double sog, double cog, String cogReference) {
         this.sid = sid;
+        this.cog = cog;
+        this.sog = sog;
+        this.ref = cogReference;
     }
 
     @Override
@@ -41,27 +41,27 @@ public class MsgSpeedImpl implements MsgSpeed {
     }
 
     @Override
-    public double getSpeedWaterRef() {
-        return speed;
+    public double getSOG() {
+        return sog;
     }
 
     @Override
-    public double getSpeedGroundRef() {
-        return speedGround;
+    public double getCOG() {
+        return cog;
     }
 
     @Override
-    public String getSpeedSensorType() {
-        return sensorType;
+    public String getCOGReference() {
+        return ref;
     }
 
     @Override
-    public int getSpeedDirection() {
-        return direction;
+    public boolean isTrueCOG() {
+        return "True".equals(ref);
     }
 
     @Override
     public String toString() {
-        return String.format("Speed: Sensor {%s} Water Speed {%.1f}", getSpeedSensorType(), getSpeedWaterRef());
+        return String.format("SOG/COG: SOG {%.1f} COG {%.1f} COGRef {%s}", getSOG(), getCOG(), getCOGReference());
     }
 }

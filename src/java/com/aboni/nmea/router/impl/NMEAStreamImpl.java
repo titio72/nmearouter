@@ -38,8 +38,8 @@ public class NMEAStreamImpl implements NMEAStream {
     }
 
     @Override
-    public void pushSentence(RouterMessage message) {
-        if (message!=null) {
+    public void pushMessage(RouterMessage message) {
+        if (message != null) {
             synchronized (annotatedListeners) {
                 for (ListenerWrapper i : annotatedListeners.values()) {
                     try {

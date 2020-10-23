@@ -13,26 +13,29 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
-import java.time.Instant;
+import com.aboni.nmea.router.message.MsgWindData;
 
-public class MsgSystemTimeImpl implements MsgSystemTime {
+public class MsgWindDataImpl implements MsgWindData {
 
     private final int sid;
-    private final String type;
-    private final Instant time;
+    private final double speed;
+    private final double angle;
+    private final boolean apparent;
 
-    public MsgSystemTimeImpl(String src, Instant time) {
+    public MsgWindDataImpl(double speed, double angle, boolean apparent) {
         this.sid = -1;
-        this.type = src;
-        this.time = time;
+        this.speed = speed;
+        this.angle = angle;
+        this.apparent = apparent;
     }
 
-    public MsgSystemTimeImpl(int sid, String src, Instant time) {
+    public MsgWindDataImpl(int sid, double speed, double angle, boolean apparent) {
         this.sid = sid;
-        this.type = src;
-        this.time = time;
+        this.speed = speed;
+        this.angle = angle;
+        this.apparent = apparent;
     }
 
     @Override
@@ -41,17 +44,22 @@ public class MsgSystemTimeImpl implements MsgSystemTime {
     }
 
     @Override
-    public Instant getTime() {
-        return time;
+    public double getSpeed() {
+        return speed;
     }
 
     @Override
-    public String getTimeSourceType() {
-        return type;
+    public double getAngle() {
+        return angle;
+    }
+
+    @Override
+    public boolean isApparent() {
+        return apparent;
     }
 
     @Override
     public String toString() {
-        return String.format("Time: time {%s} Source {%s}", getTime(), getTimeSourceType());
+        return String.format("Wind: Ref {%s} Speed {%.1f} Angle {%.1f}", isApparent() ? "Apparent" : "True", getSpeed(), getAngle());
     }
 }

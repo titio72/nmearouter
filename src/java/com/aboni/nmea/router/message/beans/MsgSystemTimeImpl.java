@@ -13,24 +13,28 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
-public class MsgWaterDepthImpl implements MsgWaterDepth {
+import com.aboni.nmea.router.message.MsgSystemTime;
+
+import java.time.Instant;
+
+public class MsgSystemTimeImpl implements MsgSystemTime {
 
     private final int sid;
-    private final double depth;
-    private final double offset;
-    private final double range;
+    private final String type;
+    private final Instant time;
 
-    public MsgWaterDepthImpl(double depth, double offset) {
-        this(-1, depth, offset, Double.NaN);
+    public MsgSystemTimeImpl(String src, Instant time) {
+        this.sid = -1;
+        this.type = src;
+        this.time = time;
     }
 
-    public MsgWaterDepthImpl(int sid, double depth, double offset, double range) {
+    public MsgSystemTimeImpl(int sid, String src, Instant time) {
         this.sid = sid;
-        this.depth = depth;
-        this.offset = offset;
-        this.range = range;
+        this.type = src;
+        this.time = time;
     }
 
     @Override
@@ -39,23 +43,17 @@ public class MsgWaterDepthImpl implements MsgWaterDepth {
     }
 
     @Override
-    public double getDepth() {
-        return depth;
+    public Instant getTime() {
+        return time;
     }
 
     @Override
-    public double getOffset() {
-        return offset;
-    }
-
-    @Override
-    public double getRange() {
-        return range;
+    public String getTimeSourceType() {
+        return type;
     }
 
     @Override
     public String toString() {
-        return String.format("Depth: Depth {%.1f} Offset {%.1f}", getDepth(), getOffset());
+        return String.format("Time: time {%s} Source {%s}", getTime(), getTimeSourceType());
     }
-
 }

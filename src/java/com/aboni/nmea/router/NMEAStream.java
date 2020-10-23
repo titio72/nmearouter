@@ -23,7 +23,7 @@ public interface NMEAStream {
      * @param msg The message to be distributed.
      * @see com.aboni.nmea.router.agent.NMEASource
      */
-    void pushSentence(RouterMessage msg);
+    void pushMessage(RouterMessage msg);
 
     /**
      * Subscribe to NMEA stream.

@@ -17,7 +17,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgRateOfTurn;
-import com.aboni.nmea.router.message.MsgRateOfTurnImpl;
+import com.aboni.nmea.router.message.beans.MsgRateOfTurnImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 

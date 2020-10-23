@@ -13,53 +13,43 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
-public class MsgSOGAndCOGImpl implements MsgSOGAdCOG {
+import com.aboni.nmea.router.message.MsgPressure;
+import com.aboni.nmea.router.message.PressureSource;
 
-    private final double cog;
-    private final double sog;
-    private final String ref;
-    private final int sid;
+public class MsgPressureImpl implements MsgPressure {
 
-    public MsgSOGAndCOGImpl(double sog, double cog) {
-        this(-1, sog, cog, "True");
-    }
+    private final double pressure;
+    private final PressureSource src;
 
-    public MsgSOGAndCOGImpl(int sid, double sog, double cog, String cogReference) {
-        this.sid = sid;
-        this.cog = cog;
-        this.sog = sog;
-        this.ref = cogReference;
+    public MsgPressureImpl(PressureSource src, double pressure) {
+        this.src = src;
+        this.pressure = pressure;
     }
 
     @Override
     public int getSID() {
-        return sid;
+        return -1;
     }
 
     @Override
-    public double getSOG() {
-        return sog;
+    public int getInstance() {
+        return 0;
     }
 
     @Override
-    public double getCOG() {
-        return cog;
+    public PressureSource getPressureSource() {
+        return src;
     }
 
     @Override
-    public String getCOGReference() {
-        return ref;
-    }
-
-    @Override
-    public boolean isTrueCOG() {
-        return "True".equals(ref);
+    public double getPressure() {
+        return pressure;
     }
 
     @Override
     public String toString() {
-        return String.format("SOG/COG: SOG {%.1f} COG {%.1f} COGRef {%s}", getSOG(), getCOG(), getCOGReference());
+        return String.format("Pressure: Source {%s} Pressure {%.1f}", getPressureSource(), getPressure());
     }
 }

@@ -2,8 +2,8 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgPressure;
-import com.aboni.nmea.router.message.MsgPressureImpl;
 import com.aboni.nmea.router.message.PressureSource;
+import com.aboni.nmea.router.message.beans.MsgPressureImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 

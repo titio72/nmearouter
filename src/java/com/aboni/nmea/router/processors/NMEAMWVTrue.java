@@ -18,7 +18,11 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.TrueWind;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.*;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgSOGAdCOG;
+import com.aboni.nmea.router.message.MsgSpeed;
+import com.aboni.nmea.router.message.MsgWindData;
+import com.aboni.nmea.router.message.beans.MsgWindDataImpl;
 import com.aboni.utils.Pair;
 
 import javax.inject.Inject;

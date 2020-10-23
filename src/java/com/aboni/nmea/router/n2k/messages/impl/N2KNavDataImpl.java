@@ -2,7 +2,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.DirectionReference;
 import com.aboni.nmea.router.message.MsgNavData;
-import com.aboni.nmea.router.message.MsgNavDataImpl;
+import com.aboni.nmea.router.message.beans.MsgNavDataImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import net.sf.marineapi.nmea.util.Position;

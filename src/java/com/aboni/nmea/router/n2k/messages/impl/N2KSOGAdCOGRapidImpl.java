@@ -2,7 +2,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.message.MsgSOGAndCOGImpl;
+import com.aboni.nmea.router.message.beans.MsgSOGAndCOGImpl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;

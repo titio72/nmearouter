@@ -117,20 +117,16 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private final Log log;
 
-    protected LogStringBuilder getLogBuilder() {
-        return LogStringBuilder.start("Agent").wV("Agent", getName()).wV("Type", getType());
-    }
-
     @Inject
     public NMEAAgentImpl(@NotNull Log log, @NotNull TimestampProvider timestampProvider, boolean source, boolean target) {
         this.timestampProvider = timestampProvider;
         this.log = log;
-        targetIf = new InternalTarget();
-        sourceIf = new InternalSource();
-        attributes = new AgentAttributes();
-        processorSet = new NMEAProcessorSet();
-        messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
-        attributes.canStartStop = true;
+        this.targetIf = new InternalTarget();
+        this.sourceIf = new InternalSource();
+        this.attributes = new AgentAttributes();
+        this.processorSet = new NMEAProcessorSet();
+        this.messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
+        this.attributes.canStartStop = true;
         setSourceTarget(source, target);
     }
 
@@ -155,7 +151,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
     }
 
-    protected void setSourceTarget(boolean isSource, boolean isTarget) {
+    protected final void setSourceTarget(boolean isSource, boolean isTarget) {
         attributes.target = isTarget;
         attributes.source = isSource;
     }
@@ -290,6 +286,10 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void addProcessor(NMEAPostProcess f) {
         processorSet.addProcessor(f);
+    }
+
+    protected LogStringBuilder getLogBuilder() {
+        return LogStringBuilder.start("Agent").wV("Agent", getName()).wV("Type", getType());
     }
 
     @Override

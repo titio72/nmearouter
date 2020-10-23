@@ -21,6 +21,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
+import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -158,8 +159,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
         try {
             int readBytes = client.read(readBuffer);
             if (readBytes>2) {
-                String sentence = new String(readBuffer.array(), 0, readBytes).trim();
-                NMEASocketServer.this.notify(SentenceFactory.getInstance().createParser(sentence));
+                String sSentence = new String(readBuffer.array(), 0, readBytes).trim();
+                Sentence sentence = SentenceFactory.getInstance().createParser(sSentence);
+                NMEASocketServer.this.notify(new NMEA0183Message(sentence));
             } else if (readBytes==0) {
                 handleDisconnection(client);
             }

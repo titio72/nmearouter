@@ -19,11 +19,8 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.MsgWaterDepth;
-import com.aboni.nmea.sentences.XDPParser;
-import com.aboni.nmea.sentences.XDPSentence;
 import com.aboni.utils.Log;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -75,11 +72,12 @@ public class DepthStatsAgent extends NMEAAgentImpl {
         if (msg.getPayload() instanceof MsgWaterDepth) {
             DepthT d = handleDepth(((MsgWaterDepth) msg.getMessage()).getDepth(), timestampProvider.getNow());
 
-            XDPSentence x = (XDPSentence) SentenceFactory.getInstance().createParser(TalkerId.P, XDPParser.NMEA_SENTENCE_TYPE);
-            x.setDepth((float) d.depth / 10f);
-            if (min != Integer.MAX_VALUE) x.setMinDepth1h((float) min / 10f);
-            if (max != Integer.MIN_VALUE) x.setMaxDepth1h((float) max / 10f);
-            notify(x);
+            JSONObject j = new JSONObject();
+            j.put("topic", "depth_stats");
+            j.put("depth", (float) d.depth / 10f);
+            if (min != Integer.MAX_VALUE) j.put("min_1h", (float) min / 10f);
+            if (max != Integer.MIN_VALUE) j.put("max_1h", (float) max / 10f);
+            notify(j);
         }
     }
 

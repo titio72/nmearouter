@@ -13,27 +13,31 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message;
+package com.aboni.nmea.router.message.beans;
 
-public class MsgWindDataImpl implements MsgWindData {
+import com.aboni.nmea.router.message.MsgAttitude;
+
+public class MsgAttitudeImpl implements MsgAttitude {
 
     private final int sid;
-    private final double speed;
-    private final double angle;
-    private final boolean apparent;
+    private final double pitch;
+    private final double roll;
+    private final double yaw;
 
-    public MsgWindDataImpl(double speed, double angle, boolean apparent) {
-        this.sid = -1;
-        this.speed = speed;
-        this.angle = angle;
-        this.apparent = apparent;
+    public MsgAttitudeImpl(double yaw, double roll, double pitch) {
+        this(-1, yaw, roll, pitch);
     }
 
-    public MsgWindDataImpl(int sid, double speed, double angle, boolean apparent) {
+    public MsgAttitudeImpl(int sid, double yaw, double roll, double pitch) {
         this.sid = sid;
-        this.speed = speed;
-        this.angle = angle;
-        this.apparent = apparent;
+        this.pitch = pitch;
+        this.roll = roll;
+        this.yaw = yaw;
+    }
+
+    @Override
+    public double getPitch() {
+        return pitch;
     }
 
     @Override
@@ -42,22 +46,17 @@ public class MsgWindDataImpl implements MsgWindData {
     }
 
     @Override
-    public double getSpeed() {
-        return speed;
+    public double getYaw() {
+        return yaw;
     }
 
     @Override
-    public double getAngle() {
-        return angle;
-    }
-
-    @Override
-    public boolean isApparent() {
-        return apparent;
+    public double getRoll() {
+        return roll;
     }
 
     @Override
     public String toString() {
-        return String.format("Wind: Ref {%s} Speed {%.1f} Angle {%.1f}", isApparent() ? "Apparent" : "True", getSpeed(), getAngle());
+        return String.format("Attitude: Yaw {%.1f} Pitch {%.1f} Roll {%.1f} ", getYaw(), getPitch(), getRoll());
     }
 }
