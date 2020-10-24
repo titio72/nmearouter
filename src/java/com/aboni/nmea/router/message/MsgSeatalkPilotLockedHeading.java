@@ -12,7 +12,7 @@ public interface MsgSeatalkPilotLockedHeading extends Message {
     @Override
     default JSONObject toJSON() {
         JSONObject j = new JSONObject();
-        j.put("topic", "pilot_lock_heading");
+        j.put("topic", "pilot_locked_heading");
         JSONUtils.addDouble(j, getLockedHeadingMagnetic(), "heading_magnetic");
         JSONUtils.addDouble(j, getLockedHeadingTrue(), "heading_true");
         return j;

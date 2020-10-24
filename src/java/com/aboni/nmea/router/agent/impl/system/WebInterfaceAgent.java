@@ -255,8 +255,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
             try {
                 if (ss != null && ss.length != 0) {
                     // just take the first... to be removed anyway
-                    stats.incrMsgToNMEA083();
                     jsonMessage = jsonConverter.convert(ss[0]);
+                    if (jsonMessage!=null) {
+                        stats.incrMsgToNMEA083();
+                    }
                 }
             } catch (Exception e) {
                 getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).error(log, e);

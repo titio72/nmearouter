@@ -50,12 +50,12 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements MsgAttitude {
         Double dPitch = BitUtils.parseDouble(data, 24, 16, 0.0001, true);
         double pitch = (dPitch == null) ?
                 Double.NaN :
-                Utils.round(Math.toDegrees(dPitch), 1) - HWSettings.getPropertyAsDouble("gyro.roll", 0.0);
+                Utils.round(Math.toDegrees(dPitch), 1) - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0);
 
         Double dRoll = BitUtils.parseDouble(data, 40, 16, 0.0001, true);
         double roll = (dRoll == null) ?
                 Double.NaN :
-                Utils.round(Math.toDegrees(dRoll), 1) - HWSettings.getPropertyAsDouble("gyro.pitch", 0.0);
+                Utils.round(Math.toDegrees(dRoll), 1) - HWSettings.getPropertyAsDouble("gyro.roll", 0.0);
 
         return new MsgAttitudeImpl(sid, yaw, roll, pitch);
     }

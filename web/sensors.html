@@ -167,6 +167,13 @@
   function socketClosed(event) {
   }
 
+  function doWithScope(msg, doer) {
+      var controllerElement = document.getElementById('sensorPanel');
+      var controllerScope = angular.element(controllerElement).scope();
+      doer(msg, controllerScope);
+      controllerScope.$evalAsync();
+  }
+
   function processEvent(event) {
     var msg = JSON.parse(event.data);
     if (msg.topic == 'nav') {
@@ -184,122 +191,109 @@
         }
       }
     } else if (msg.topic == "diagnostic") {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope.free_memory = msg.free_memory;
-      controllerScope.queue = msg.queue;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{      
+        scope.free_memory = m.free_memory;
+        scope.queue = m.queue;
+      });
     } else if (msg.topic == "anchor") {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      if (msg.stationary) {
-        msg.anchor_lat = msg.lat;
-        msg.anchor_lon = msg.lon;
-      } else {
-        msg.anchor_lat = "";
-        msg.anchor_lon = "";
-      }
-      controllerScope['xmc'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{
+        if (m.stationary) {
+          m.anchor_lat = m.lat;
+          m.anchor_lon = m.lon;
+        } else {
+          m.anchor_lat = "";
+          m.anchor_lon = "";
+        }
+        scope['xmc'] = m;
+      });
     } else if (msg.topic == "engine") {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope['engine'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{scope['engine'] = m;});
     } else if (msg.topic == 'RMC') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.COG);
-      msg.s_time = new Date(Date.parse(msg.UTC)).toLocaleTimeString();
-      controllerScope['rmc'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{
+        m.s_dir = direction(m.COG);
+        m.s_time = new Date(Date.parse(m.UTC)).toLocaleTimeString();
+        scope['rmc'] = m;
+      });
     } else if (msg.topic == 'DPT') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope['depth'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{ scope['depth'] = m;});
     } else if (msg.topic == 'VHW') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.mag_angle);
-      speed = msg.speed;
-      controllerScope['vector'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{ 
+        m.s_dir = direction(m.mag_angle);
+        speed = m.speed;
+        scope['vector'] = m;
+      });
     } else if (msg.topic == 'MWV_R') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope['wind_r'] = msg;
-      if (msg.angle > 180) {
-        msg.show_angle = 360 - msg.angle;
-        msg.tack = "Port"
-      } else {
-        msg.show_angle = msg.angle;
-        msg.tack = "Starboard"
-      }
+      doWithScope(msg, (m, scope)=>{
+        scope['wind_r'] = m;
+        if (m.angle > 180) {
+          m.show_angle = 360 - m.angle;
+          m.tack = "Port"
+        } else {
+          m.show_angle = m.angle;
+          m.tack = "Starboard"
+        }
 
-      trueWind = calcTrueWind(speed, msg.angle, msg.speed);
-      if (trueWind.angle > 180) {
-        trueWind.show_angle = 360 - trueWind.angle;
-        trueWind.tack = "Port"
-      } else {
-        trueWind.show_angle = trueWind.angle;
-        trueWind.tack = "Starboard"
-      }
-      controllerScope['wind_t'] = trueWind;
+        trueWind = calcTrueWind(speed, m.angle, m.speed);
+        if (trueWind.angle > 180) {
+          trueWind.show_angle = (720 - trueWind.angle) % 360;
+          trueWind.tack = "Port"
+        } else {
+          trueWind.show_angle = trueWind.angle;
+          trueWind.tack = "Starboard"
+        }
+        scope['wind_t'] = trueWind;
 
-      absoluteWind = {
-        mag_angle: (heading + trueWind.angle) % 360,
-        speed: trueWind.speed,
-        s_dir: direction((heading + trueWind.angle) % 360)
-      };
-      controllerScope['wind'] = absoluteWind;
-
-      controllerScope.$evalAsync();
+        absoluteWind = {
+          mag_angle: (heading + trueWind.angle + 360) % 360,
+          speed: trueWind.speed,
+          s_dir: direction((heading + trueWind.angle) % 360)
+        };
+        scope['wind'] = absoluteWind;
+      });
     } else if (msg.topic == 'heading' && msg.reference == 'Magnetic') {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      msg.s_dir = direction(msg.heading);
-      heading = msg.heading;
-      controllerScope['heading'] = msg;
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{
+        m.s_dir = direction(m.heading);
+        heading = m.heading;
+        scope['heading'] = m;
+      });
     } else if (msg.topic == "humidity") {
       if (msg.source=="Inside" && msg.instance==0) {
-        var controllerElement = document.getElementById('sensorPanel');
-        var controllerScope = angular.element(controllerElement).scope();
-        controllerScope["Humidity"] = { value: msg.humidity };
-        controllerScope.$evalAsync();
+        doWithScope(msg, (m, scope)=>scope["Humidity"] = { value: m.humidity });
       }
     } else if (msg.topic == "pressure") {
       if (msg.source=="Atmospheric" && msg.instance==0) {
-        var controllerElement = document.getElementById('sensorPanel');
-        var controllerScope = angular.element(controllerElement).scope();
-        controllerScope["Barometer"] = { value: msg.pressure };
-        controllerScope.$evalAsync();
+        doWithScope(msg, (m, scope)=>scope["Barometer"] = { value: m.pressure });
       }
     } else if (msg.topic == "temperature") {
       if (msg.source=="Sea Temperature" && msg.instance==0) {
-        var controllerElement = document.getElementById('sensorPanel');
-        var controllerScope = angular.element(controllerElement).scope();
-        controllerScope['WaterTemp'] = msg.temperature;
-        controllerScope.$evalAsync();
+        doWithScope(msg, (m, scope)=>scope['WaterTemp'] = m.temperature);
       } else if (msg.source=="Main Cabin Temperature" && msg.instance==0) {
-        var controllerElement = document.getElementById('sensorPanel');
-        var controllerScope = angular.element(controllerElement).scope();
-        controllerScope['CabinTemp'] = { value: msg.temperature };
-        controllerScope.$evalAsync();
+        doWithScope(msg, (m, scope)=>scope['CabinTemp'] = { value: m.temperature });
       } else if (msg.source=="CPU Temperature" && msg.instance==0) {
-        var controllerElement = document.getElementById('sensorPanel');
-        var controllerScope = angular.element(controllerElement).scope();
-        controllerScope['CPUTemp'] = { value: msg.temperature };
-        controllerScope.$evalAsync();
+        doWithScope(msg, (m, scope)=>scope['CPUTemp'] = { value: m.temperature });
       }
     } else if (msg.topic == "attitude") {
-      var controllerElement = document.getElementById('sensorPanel');
-      var controllerScope = angular.element(controllerElement).scope();
-      controllerScope["YAW"] = { value: msg.yaw };
-      controllerScope["ROLL"] = { value: msg.roll };
-      controllerScope["PITCH"] = { value: msg.pitch };
-      controllerScope.$evalAsync();
+      doWithScope(msg, (m, scope)=>{
+        scope["YAW"] = { value: m.yaw };
+        scope["ROLL"] = { value: m.roll };
+        scope["PITCH"] = { value: m.pitch };
+      });
+    } else if (msg.topic=="pilot_mode" || msg.topic=="pilot_wind_datum" || msg.topic=="pilot_locked_heading" || msg.topic=="pilot_heading") {
+      doWithScope(msg, (m, scope)=>{
+        scope[m.topic] = m;
+        if (m.topic=='pilot_mode' && m.mode!='VANE') {
+          scope['pilot_wind_datum'] = {
+            rolling_average_wind: null,
+            wind_datum: null
+          };
+        } 
+        if (m.topic=='pilot_mode' && m.mode!='AUTO') {
+          scope['pilot_locked_heading'] = {
+            heading_magnetic: null,
+            heading_true: null
+          }
+        }
+      });
     }
   }
 
@@ -674,7 +668,37 @@
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+              <div class="card-router card-sensor">
+                  <div class="card-router-header card-sensor-header">Pilot</div>
+                  <div class="card-router-body card-sensor-body">
+                      <table class="panelTable">
+                        <tr>
+                          <td>Mode</td>
+                          <td style="text-align: right">{{pilot_mode.mode}}</td>
+                        </tr>
+                        <tr>
+                          <td>Wind Datum</td>
+                          <td style="text-align: right">{{pilot_wind_datum.wind_datum | number:1}}&deg;</td>
+                        </tr>
+                        <tr>
+                          <td>Wind Average</td>
+                          <td style="text-align: right">{{pilot_wind_datum.rolling_average_wind | number:1}}&deg;</td>
+                        </tr>
+                        <tr>
+                          <td>Heading</td>
+                          <td style="text-align: right">{{pilot_heading.heading_magnetic | number:1}}&deg;</td>
+                        </tr>
+                        <tr>
+                          <td>Lock Heading</td>
+                          <td style="text-align: right">{{pilot_locked_heading.heading_magnetic | number:1}}&deg;</td>
+                        </tr>
+                      </table>
+                  </div>
+              </div>
+            </div>
+       </div>
     </div>
 </div>
 </body>
