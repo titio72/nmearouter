@@ -60,6 +60,8 @@ public class NMEARouterImpl implements NMEARouter {
 
     private long lastStatsTime;
     private static final long STATS_PERIOD = 60; // seconds
+    private long last_totalGarbageCollections = 0;
+    private long last_garbageCollectionTime = 0;
 
     @Inject
     public NMEARouterImpl(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
@@ -97,7 +99,7 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private static void printGCStats(Log log) {
+    private void printGCStats() {
         long totalGarbageCollections = 0;
         long garbageCollectionTime = 0;
 
@@ -107,7 +109,11 @@ public class NMEARouterImpl implements NMEARouter {
             long time = gc.getCollectionTime();
             if(time >= 0) garbageCollectionTime += time;
         }
-        LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").wV("count", totalGarbageCollections).wV("time", garbageCollectionTime).info(log);
+        LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").
+                wV("count", totalGarbageCollections - last_totalGarbageCollections).
+                wV("time", garbageCollectionTime - last_garbageCollectionTime).info(log);
+        last_totalGarbageCollections = totalGarbageCollections;
+        last_garbageCollectionTime = garbageCollectionTime;
     }
 
     private void dumpStats() {
@@ -116,7 +122,7 @@ public class NMEARouterImpl implements NMEARouter {
             lastStatsTime = t;
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
                     wV("mem", Runtime.getRuntime().freeMemory()).toString());
-            printGCStats(log);
+            printGCStats();
         }
     }
 
