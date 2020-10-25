@@ -21,11 +21,6 @@ public class SeatalkPilotMode {
     private int subMode = 0xFF;
     private int data = 0xFF;
 
-    public SeatalkPilotMode(int m, int s) {
-        setMode(m);
-        setSubMode(s);
-    }
-
     public SeatalkPilotMode(int m, int s, int d) {
         setMode(m);
         setSubMode(s);

@@ -234,6 +234,7 @@
         }
 
         trueWind = calcTrueWind(speed, m.angle, m.speed);
+        trueWind.angle = (360 + trueWind.angle) % 360;
         if (trueWind.angle > 180) {
           trueWind.show_angle = (720 - trueWind.angle) % 360;
           trueWind.tack = "Port"
@@ -308,11 +309,13 @@
     wTx = wAx;
     wTy = wAy - v;
 
+    a = 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI;
     var r = {
-      angle: 180.0 * ((Math.PI / 2) - Math.atan2(wTy, wTx)) / Math.PI,
-      speed: Math.sqrt(wTx * wTx + wTy * wTy)
+      angle: a,
+      speed: Math.sqrt(wTx * wTx + wTy * wTy),
+      show_angle: Math.abs(a)
     }
-    return r;
+   return r;
   }
 
   customElements.define('my-wind-dial', class extends HTMLElement {

@@ -28,6 +28,8 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -95,12 +97,26 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
+    private static void printGCStats(Log log) {
+        long totalGarbageCollections = 0;
+        long garbageCollectionTime = 0;
+
+        for(GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
+            long count = gc.getCollectionCount();
+            if(count >= 0) totalGarbageCollections += count;
+            long time = gc.getCollectionTime();
+            if(time >= 0) garbageCollectionTime += time;
+        }
+        LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").wV("count", totalGarbageCollections).wV("time", garbageCollectionTime).info(log);
+    }
+
     private void dumpStats() {
         long t = timestampProvider.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
                     wV("mem", Runtime.getRuntime().freeMemory()).toString());
+            printGCStats(log);
         }
     }
 
