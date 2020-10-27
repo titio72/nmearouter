@@ -43,6 +43,7 @@ public class EventSocket {
     private final Log log;
     private Session session;
     private String id;
+    private boolean err;
 
     public EventSocket(NMEAStream stream) {
         log = ThingsFactory.getInstance(Log.class);
@@ -69,10 +70,14 @@ public class EventSocket {
     @OnWebSocketError
     public void onWebSocketError(Throwable t) {
         log.error(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("error").toString(), t);
-        stream.unsubscribe(this);
+        err = true;
+        //stream.unsubscribe(this);
         sessions.decrementAndGet();
     }
 
+    public boolean isErr() {
+        return err;
+    }
 
     @OnJSONMessage
     public void onSentence(JSONObject obj) {

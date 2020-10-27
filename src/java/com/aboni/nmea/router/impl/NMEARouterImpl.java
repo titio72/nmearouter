@@ -31,10 +31,7 @@ import javax.validation.constraints.NotNull;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
@@ -60,8 +57,9 @@ public class NMEARouterImpl implements NMEARouter {
 
     private long lastStatsTime;
     private static final long STATS_PERIOD = 60; // seconds
-    private long last_totalGarbageCollections = 0;
-    private long last_garbageCollectionTime = 0;
+    private long lastTotalGarbageCollections = 0;
+    private long lastGarbageCollectionTime = 0;
+    private static int threadN = 0;
 
     @Inject
     public NMEARouterImpl(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
@@ -73,7 +71,11 @@ public class NMEARouterImpl implements NMEARouter {
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
-        exec = Executors.newFixedThreadPool(THREADS_POOL);
+        exec = Executors.newFixedThreadPool(THREADS_POOL, r -> {
+            Thread t = new Thread(r, "Router thread " + threadN);
+            threadN++;
+            return t;
+        });
         timer = null;
     }
 
@@ -110,10 +112,10 @@ public class NMEARouterImpl implements NMEARouter {
             if(time >= 0) garbageCollectionTime += time;
         }
         LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").
-                wV("count", totalGarbageCollections - last_totalGarbageCollections).
-                wV("time", garbageCollectionTime - last_garbageCollectionTime).info(log);
-        last_totalGarbageCollections = totalGarbageCollections;
-        last_garbageCollectionTime = garbageCollectionTime;
+                wV("count", totalGarbageCollections - lastTotalGarbageCollections).
+                wV("time", garbageCollectionTime - lastGarbageCollectionTime).info(log);
+        lastTotalGarbageCollections = totalGarbageCollections;
+        lastGarbageCollectionTime = garbageCollectionTime;
     }
 
     private void dumpStats() {
@@ -141,7 +143,7 @@ public class NMEARouterImpl implements NMEARouter {
             if (!started.get()) {
                 started.set(true);
                 if (timer == null) {
-                    timer = new Timer(true);
+                    timer = new Timer("Router timer", true);
                     timer.scheduleAtFixedRate(new TimerTask() {
 
                         @Override
@@ -154,6 +156,7 @@ public class NMEARouterImpl implements NMEARouter {
                     try {
                         routeSentence(sentenceQueue.take());
                     } catch (InterruptedException e1) {
+                        LogStringBuilder.start(ROUTER_CATEGORY).wO("route loop").error(log, e1);
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -222,7 +225,7 @@ public class NMEARouterImpl implements NMEARouter {
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
             if (m.getPayload() instanceof JSONObject) {
-                routeToTargets(new RouterMessage[]{m});
+                routeToTargets(new RouterMessage[] {m});
             } else if (m.getPayload() instanceof Message) {
                 Message s = (Message) m.getPayload();
                 Collection<Message> toSend = null;
@@ -238,6 +241,7 @@ public class NMEARouterImpl implements NMEARouter {
                         cache.onSentence(ss, m.getSource());
                         RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
                         messages[counter] = mm;
+                        counter++;
                     }
                     routeToTargets(messages);
                 }

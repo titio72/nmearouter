@@ -310,7 +310,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
                     }
                 }
                 resetPortAndDisplay();
-            });
+            }, "Nextion [" + getName() + "]");
             thread.start();
         }
 

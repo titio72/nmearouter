@@ -138,7 +138,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
                     }
                 }
             }
-        });
+        }, "Socket server selector [" + getName() + "]");
         t.setDaemon(true);
         t.start();
     }

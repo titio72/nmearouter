@@ -137,7 +137,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                     while (run.get()) {
                         readFrame();
                     }
-                });
+                }, "CANBus Socket [" + getName() + "]");
                 t.start();
             } catch (IOException e) {
                 run.set(false);

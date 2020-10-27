@@ -73,7 +73,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
     @Override
     public boolean onActivate() {
         if (file!=null) {
-            Thread t = new Thread(this::go);
+            Thread t = new Thread(this::go, "NMEA Player [" + getName() + "]");
             t.setDaemon(true);
             t.start();
             return true;

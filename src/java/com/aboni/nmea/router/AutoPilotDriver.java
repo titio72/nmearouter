@@ -20,11 +20,11 @@ import org.json.JSONObject;
 
 public interface AutoPilotDriver {
 
-    void enable();
+    void setAuto();
 
-    void standBy();
+    void setStdby();
 
-    void windVane();
+    void setWindVane();
 
     void port1();
 

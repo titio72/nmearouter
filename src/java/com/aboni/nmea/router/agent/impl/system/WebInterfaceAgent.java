@@ -195,7 +195,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     @OnRouterMessage
     public void onSentenceMessage(RouterMessage msg) {
         AutoJSONMessage m = new AutoJSONMessage(msg);
-        stream.pushMessage(m);
+        stream.pushMessage(m,  (Object listener)->{
+            EventSocket eventSocket = (EventSocket)listener;
+            return !eventSocket.isErr();
+        });
     }
 
 

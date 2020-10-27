@@ -139,7 +139,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
             if (!isStop()) {
                 stop();
             }
-        });
+        }, "GPX Player [" + getName() + "]");
         t.setDaemon(true);
         t.start();
 

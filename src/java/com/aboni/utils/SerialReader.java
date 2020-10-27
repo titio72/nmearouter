@@ -15,6 +15,7 @@ public class SerialReader {
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
     private static final int DEFAULT_BUFFER_SIZE = 256;
+    private String threadName = "Serial reader";
 
     public class Stats {
         private long bytesRead;
@@ -112,8 +113,9 @@ public class SerialReader {
         this(ThingsFactory.getInstance(TimestampProvider.class), logger);
     }
 
-    public void setup(String portName, int speed, ReaderCallback callback) {
+    public void setup(@NotNull String threadName, @NotNull String portName, int speed, ReaderCallback callback) {
         setup(portName, speed, DEFAULT_BUFFER_SIZE, callback);
+        this.threadName = threadName;
         config.setPortName(portName);
         config.setSpeed(speed);
         this.callback = callback;
@@ -181,7 +183,7 @@ public class SerialReader {
                     logger.errorForceStacktrace("Serial port reading loop stopped unexpectedly", e);
                 }
             }
-        });
+        }, threadName);
         thread.start();
     }
 

@@ -150,7 +150,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     protected boolean onActivate() {
         synchronized (this) {
             if (!isStarted()) {
-                Thread t = new Thread(this::loop);
+                Thread t = new Thread(this::loop, "UDP receiver [" + getName() + "]");
                 t.start();
                 return true;
             }

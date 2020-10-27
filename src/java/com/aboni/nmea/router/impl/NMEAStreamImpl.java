@@ -23,13 +23,16 @@ import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NMEAStreamImpl implements NMEAStream {
 
     private final Map<Object, ListenerWrapper> annotatedListeners;
     private final Log log;
+    private final List<Object> toRemove = new ArrayList<>();
 
     @Inject
     public NMEAStreamImpl(@NotNull Log log) {
@@ -38,18 +41,29 @@ public class NMEAStreamImpl implements NMEAStream {
     }
 
     @Override
-    public void pushMessage(RouterMessage message) {
+    public void pushMessage(RouterMessage message, @NotNull ListenerChecker checker) {
         if (message != null) {
             synchronized (annotatedListeners) {
+                toRemove.clear();
                 for (ListenerWrapper i : annotatedListeners.values()) {
-                    try {
-                        i.dispatchAll(message);
-                    } catch (Exception e) {
-                        log.warning(LogStringBuilder.start("Stream").wO("push message").toString(), e);
+                    if (checker.isValid(i.getListenerObject())) {
+                        try {
+                            i.dispatchAll(message);
+                        } catch (Exception e) {
+                            log.warning(LogStringBuilder.start("Stream").wO("push message").toString(), e);
+                        }
+                    } else {
+                        toRemove.add(i.getListenerObject());
                     }
                 }
+                for (Object listener: toRemove) annotatedListeners.remove(listener);
             }
         }
+    }
+
+    @Override
+    public void pushMessage(RouterMessage message) {
+        pushMessage(message, (observer -> true));
 	}
 
 	@Override

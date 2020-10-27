@@ -116,7 +116,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
     public void setup(String name, QOS qos, String port, int speed) {
         super.setup(name, qos);
-        serialReader.setup(port, speed, serialCanReader::onRead);
+        serialReader.setup("CANBus Serial [" + name + "]", port, speed, serialCanReader::onRead);
     }
 
     @Override

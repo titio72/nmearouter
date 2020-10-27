@@ -86,4 +86,8 @@ public class ListenerWrapper {
             }
         }
     }
+
+    public Object getListenerObject() {
+        return listenerObject;
+    }
 }

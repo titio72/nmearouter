@@ -35,7 +35,7 @@ public class TestSerialReader {
         cache.setCallback(TestSerialReader::onMsg);
         reader.setCallback(cache::onMessage);
         if (DUMP_N2K) reader.setFrameCallback(TestSerialReader::onFrame);
-        s.setup(PORT_NAME, SPEED, reader::onRead);
+        s.setup("Reader", PORT_NAME, SPEED, reader::onRead);
         s.activate();
     }
 }

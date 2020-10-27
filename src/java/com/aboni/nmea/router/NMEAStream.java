@@ -17,6 +17,12 @@ package com.aboni.nmea.router;
 
 public interface NMEAStream {
 
+    interface ListenerChecker {
+        boolean isValid(Object observer);
+    }
+
+    void pushMessage(RouterMessage msg, ListenerChecker checker);
+
     /**
      * Push a sentence into the stream.
      *

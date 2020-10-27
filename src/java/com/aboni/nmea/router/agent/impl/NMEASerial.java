@@ -215,7 +215,7 @@ public class NMEASerial extends NMEAAgentImpl {
                     Utils.pause(PORT_OPEN_RETRY_TIMEOUT);
                 }
             }
-        });
+        }, "Serial [" + getName() + "]");
         thread.start();
     }
 

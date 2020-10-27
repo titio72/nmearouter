@@ -123,7 +123,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
 
 
     @Override
-    public void enable() {
+    public void setAuto() {
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "01", "FE");
@@ -132,7 +132,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     }
 
     @Override
-    public void standBy() {
+    public void setStdby() {
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "02", "FD");
@@ -141,7 +141,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     }
 
     @Override
-    public void windVane() {
+    public void setWindVane() {
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "23", "DC");
