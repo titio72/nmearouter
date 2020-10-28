@@ -17,13 +17,11 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.PilotMode;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -196,15 +194,5 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setParameters("11", "08", "F7");
         logDirection(false, 10);
         this.notify(s);
-    }
-
-    @Override
-    public PilotMode getMode() {
-        return null;
-    }
-
-    @Override
-    public JSONObject getModeDescription() {
-        return null;
     }
 }

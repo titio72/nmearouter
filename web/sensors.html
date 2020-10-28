@@ -417,6 +417,14 @@
     }
   });
 
+function setAP(apCommand) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/ap?command=" + apCommand,
+      false);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+  return JSON.parse(xmlHttp.responseText);
+}
 </script>
 
 <body ng-app="nmearouter">
@@ -513,7 +521,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="card-router card-sensor">
                     <div class="card-router-header card-sensor-header">Waypoint</div>
@@ -553,7 +560,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <div class="card-router card-sensor">
                     <div class="card-router-header card-sensor-header">Navi</div>
@@ -671,7 +677,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
               <div class="card-router card-sensor">
                   <div class="card-router-header card-sensor-header">Pilot</div>
@@ -683,19 +688,34 @@
                         </tr>
                         <tr>
                           <td>Wind Datum</td>
-                          <td style="text-align: right">{{pilot_wind_datum.wind_datum | number:1}}&deg;</td>
+                          <td style="text-align: right">{{pilot_wind_datum.wind_datum_view | number:0}}&deg; {{pilot_wind_datum.wind_datum_side}}</td>
                         </tr>
                         <tr>
                           <td>Wind Average</td>
-                          <td style="text-align: right">{{pilot_wind_datum.rolling_average_wind | number:1}}&deg;</td>
+                          <td style="text-align: right">{{pilot_wind_datum.rolling_average_wind_view | number:0}}&deg; {{pilot_wind_datum.rolling_average_wind_side}}</td>
                         </tr>
                         <tr>
                           <td>Heading</td>
-                          <td style="text-align: right">{{pilot_heading.heading_magnetic | number:1}}&deg;</td>
+                          <td style="text-align: right">{{pilot_heading.heading_magnetic | number:0}}&deg;</td>
                         </tr>
                         <tr>
                           <td>Lock Heading</td>
-                          <td style="text-align: right">{{pilot_locked_heading.heading_magnetic | number:1}}&deg;</td>
+                          <td style="text-align: right">{{pilot_locked_heading.heading_magnetic | number:0}}&deg;</td>
+                        </tr>
+                      </table>
+                      <table class="panelTable">
+                        <tr>                          
+                          <td colspan="2"><button style="width: 100%;" onclick="setAP('STANDBY')">Standby</button></td>
+                          <td colspan="2"><button style="width: 100%;" onclick="setAP('AUTO')">Auto</button></td>
+                          <td colspan="2"><button style="width: 100%;" onclick="setAP('VANE')">Vane</button></td>
+                        </tr>
+                        <tr>                          
+                          <td colspan="3"><button style="width: 100%;" onclick="setAP('P1')">&minus;1</button></td>
+                          <td colspan="3"><button style="width: 100%;" onclick="setAP('S1')">&plus;1</button></td>
+                        </tr>
+                        <tr>                          
+                          <td colspan="3"><button style="width: 100%;" onclick="setAP('P10')">&minus;10</button></td>
+                          <td colspan="3"><button style="width: 100%;" onclick="setAP('S10')">&plus;10</button></td>
                         </tr>
                       </table>
                   </div>

@@ -71,7 +71,6 @@ public class EventSocket {
     public void onWebSocketError(Throwable t) {
         log.error(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("error").toString(), t);
         err = true;
-        //stream.unsubscribe(this);
         sessions.decrementAndGet();
     }
 

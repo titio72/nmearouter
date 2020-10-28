@@ -22,6 +22,7 @@ public enum BuiltInAgents {
     POWER_LED,
     ENGINE_DETECTOR,
     AUTO_PILOT,
+    EVO_AUTO_PILOT,
     FAN_MANAGER,
     WEB_UI
 }

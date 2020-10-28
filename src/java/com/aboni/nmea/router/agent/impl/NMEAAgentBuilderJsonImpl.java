@@ -57,6 +57,8 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 return buildPowerLedTarget();
             case AUTO_PILOT:
                 return buildAutoPilot();
+            case EVO_AUTO_PILOT:
+                return buildEvoAutoPilot();
             case DEPTH_STATS:
                 return buildDPTStats();
             case FAN_MANAGER:
@@ -408,6 +410,13 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
         QOS q = createBuiltInQOS();
         NMEAAutoPilotAgent ap = ThingsFactory.getInstance(NMEAAutoPilotAgent.class);
         ap.setup("SmartPilot", q);
+        return ap;
+    }
+
+    private NMEAAgent buildEvoAutoPilot() {
+        QOS q = createBuiltInQOS();
+        EvoAutoPilotAgent ap = ThingsFactory.getInstance(EvoAutoPilotAgent.class);
+        ap.setup("EvoAP", q);
         return ap;
     }
 

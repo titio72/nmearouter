@@ -15,9 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.PilotMode;
-import org.json.JSONObject;
-
 public interface AutoPilotDriver {
 
     void setAuto();
@@ -33,9 +30,5 @@ public interface AutoPilotDriver {
     void starboard1();
 
     void starboard10();
-
-    PilotMode getMode();
-
-    JSONObject getModeDescription();
 
 }
