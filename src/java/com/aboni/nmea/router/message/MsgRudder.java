@@ -17,9 +17,12 @@ public interface MsgRudder extends Message {
         JSONObject j = new JSONObject();
         j.put("topic", "RSA");
         j.put("instance", getInstance());
-        if (!Double.isNaN(getAngle())) j.put(
-                (getInstance() == 0) ? "starboard_angle" : "port_angle",
-                getAngle());
+        if (!Double.isNaN(getAngle())) {
+            j.put("angle", getAngle());
+            j.put(
+                    (getInstance() == 0) ? "starboard_angle" : "port_angle",
+                    getAngle());
+        }
         return j;
     }
 }
