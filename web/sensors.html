@@ -565,23 +565,39 @@ function setAP(apCommand) {
                     <div class="card-router-header card-sensor-header">Navi</div>
                     <div class="card-router-body card-sensor-body">
                         <table class="panelTable">
-                            <tr>
-                                <td>Speed</td>
-                                <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
-                            </tr>
-                            <tr>
-                                <td>Head (mag)</td>
-                                <td style="text-align: right">{{vector.s_dir}} {{vector.mag_angle | number:1}}&deg;
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                                <td style="text-align: right">&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td>Depth</td>
-                                <td style="text-align: right">{{depth.depth | number:1}} m</td>
-                            </tr>
+                          <tr>
+                              <td>Speed</td>
+                              <td style="text-align: right">{{vector.speed | number:1}} Kn</td>
+                          </tr>
+                          <tr>
+                              <td>Head (mag)</td>
+                              <td style="text-align: right">{{vector.s_dir}} {{vector.mag_angle | number:1}}&deg;
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>&nbsp;</td>
+                              <td style="text-align: right">&nbsp;</td>
+                          </tr>
+                          <tr>
+                              <td>Depth</td>
+                              <td style="text-align: right">{{depth.depth | number:1}} m</td>
+                          </tr>
+                          <tr>
+                              <td>&nbsp;</td>
+                              <td style="text-align: right">&nbsp;</td>
+                          </tr>
+                          <tr>
+                              <td>Head</td>
+                              <td style="text-align: right">{{YAW.value | number:1}}&deg;</td>
+                          </tr>
+                          <tr>
+                              <td>Roll</td>
+                              <td style="text-align: right">{{ROLL.value | number:1}}&deg;</td>
+                          </tr>
+                          <tr>
+                              <td>Pitch</td>
+                              <td style="text-align: right">{{PITCH.value | number:1}}&deg;</td>
+                          </tr>
                         </table>
                     </div>
                 </div>
@@ -651,27 +667,6 @@ function setAP(apCommand) {
                             <tr>
                                 <td>Humidity</td>
                                 <td style="text-align: right">{{Humidity.value | number:1}}%</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <div class="card-router card-sensor">
-                    <div class="card-router-header card-sensor-header">Gyro</div>
-                    <div class="card-router-body card-sensor-body">
-                        <table class="panelTable">
-                            <tr>
-                                <td>Head</td>
-                                <td style="text-align: right">{{YAW.value | number:1}}&deg;</td>
-                            </tr>
-                            <tr>
-                                <td>Roll</td>
-                                <td style="text-align: right">{{ROLL.value | number:1}}&deg;</td>
-                            </tr>
-                            <tr>
-                                <td>Pitch</td>
-                                <td style="text-align: right">{{PITCH.value | number:1}}&deg;</td>
                             </tr>
                         </table>
                     </div>
