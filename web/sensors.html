@@ -281,8 +281,8 @@
       });
     } else if (msg.topic=="RSA" && msg.instance==0) {
       doWithScope(msg, (m, scope)=>{
-        m.show_angle0 = m.angle>0?105:(105 + m.angle*105.0/45.0);
-        m.show_angle1 = m.angle>0?(105 + m.angle*105.0/45.0):105;
+        m.show_angle0 = m.angle>0?0:m.angle;
+        m.show_angle1 = m.angle>0?m.angle:0;
         m.show_side = m.angle>0?"S":"P";
         scope[m.topic] = m;
       });
@@ -719,15 +719,14 @@ function setAP(apCommand) {
                         </tr>
                       </table>
                       <div style="margin: 5px;">
-                        <svg width="210" height="20" style="display: block; margin: auto;">
-                          <path d="M0 0 L210 0 L210 20 L0 20 Z" fill="white"></path>
+                        <svg viewBox="-45 0 90 20" preserveAspectRatio="none" width="100%" height="20" style="display: block; margin: auto;">
+                          <path d="M-45 0 L45 0 L45 20 L-45 20 Z" fill="white"></path>
                           <path d="M{{RSA.show_angle0}} 0 L{{RSA.show_angle1}} 0 L{{RSA.show_angle1}} 20 L{{RSA.show_angle0}} 20 Z" fill="red"></path>
-                          <path d="M35 0 L35 20" stroke="black" stroke-width="1"></path>
-                          <path d="M70 0 L70 20" stroke="black" stroke-width="1"></path>
-                          <path d="M105 0 L105 20" stroke="black" stroke-width="1"></path>
-                          <path d="M140 0 L140 20" stroke="black" stroke-width="1"></path>
-                          <path d="M175 0 L175 20" stroke="black" stroke-width="1"></path>
-                          <path d="M175 0 L175 20" stroke="black" stroke-width="1"></path>
+                          <path d="M-30 0 L-30 20" stroke="black" stroke-width="1"></path>
+                          <path d="M-15 0 L-15 20" stroke="black" stroke-width="1"></path>
+                          <path d="M0 0 L0 20" stroke="black" stroke-width="1"></path>
+                          <path d="M15 0 L15 20" stroke="black" stroke-width="1"></path>
+                          <path d="M30 0 L30 20" stroke="black" stroke-width="1"></path>
                         </svg>
                       </div>
                   </div>
