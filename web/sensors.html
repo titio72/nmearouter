@@ -689,25 +689,37 @@ function setAP(apCommand) {
                           <td style="text-align: right">{{pilot_mode.mode}}</td>
                         </tr>
                         <tr>
-                          <td>Wind Datum</td>
-                          <td style="text-align: right">{{pilot_wind_datum.wind_datum_view | number:0}}&deg; {{pilot_wind_datum.wind_datum_side}}</td>
-                        </tr>
-                        <tr>
-                          <td>Wind Average</td>
-                          <td style="text-align: right">{{pilot_wind_datum.rolling_average_wind_view | number:0}}&deg; {{pilot_wind_datum.rolling_average_wind_side}}</td>
-                        </tr>
-                        <tr>
                           <td>Heading</td>
                           <td style="text-align: right">{{pilot_heading.heading_magnetic | number:0}}&deg;</td>
                         </tr>
-                        <tr>
+                        <tr ng-if="pilot_mode.mode=='VANE'">
+                          <td>Wind Datum</td>
+                          <td style="text-align: right">{{pilot_wind_datum.wind_datum_view | number:0}}&deg; {{pilot_wind_datum.wind_datum_side}}</td>
+                        </tr>
+                        <tr ng-if="pilot_mode.mode=='VANE'">
+                          <td>Wind Average</td>
+                          <td style="text-align: right">{{pilot_wind_datum.rolling_average_wind_view | number:0}}&deg; {{pilot_wind_datum.rolling_average_wind_side}}</td>
+                        </tr>
+                        <tr ng-if="pilot_mode.mode=='AUTO'">
                           <td>Lock Heading</td>
                           <td style="text-align: right">{{pilot_locked_heading.heading_magnetic | number:0}}&deg;</td>
+                        </tr>
+                        <tr ng-if="pilot_mode.mode=='AUTO'">
+                          <td>&nbsp;</td>
+                          <td style="text-align: right">&nbsp;</td>
+                        </tr>
+                        <tr ng-if="pilot_mode.mode=='STANDBY'">
+                          <td>&nbsp;</td>
+                          <td style="text-align: right">&nbsp;</td>
+                        </tr>
+                        <tr ng-if="pilot_mode.mode=='STANDBY'">
+                          <td>&nbsp;</td>
+                          <td style="text-align: right">&nbsp;</td>
                         </tr>
                       </table>
                       <table class="panelTable">
                         <tr>                          
-                          <td colspan="4"><button type="button" class="btn btn-secondary tile-button" style="width: 100%;" onclick="setAP('STANDBY')">Standby</button></td>
+                          <td colspan="4"><button type="button" class="btn btn-secondary tile-button" style="width: 100%;" onclick="setAP('STANDBY')">Off</button></td>
                           <td colspan="4"><button type="button" class="btn btn-secondary tile-button" style="width: 100%;" onclick="setAP('AUTO')">Auto</button></td>
                           <td colspan="4"><button type="button" class="btn btn-secondary tile-button" style="width: 100%;" onclick="setAP('VANE')">Vane</button></td>
                         </tr>

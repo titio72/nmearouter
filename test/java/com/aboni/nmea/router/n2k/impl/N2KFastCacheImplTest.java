@@ -58,7 +58,7 @@ public class N2KFastCacheImplTest {
     @Test
     public void test() throws PGNDataParseException {
         final AtomicInteger i = new AtomicInteger();
-        cache.setCallback(new N2KMessageCallback() {
+        cache.setCallback(new N2KMessageHandler() {
             @Override
             public void onMessage(N2KMessage msg) {
                 System.out.println(msg);

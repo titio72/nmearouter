@@ -119,7 +119,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
         }
     }
 
-    private N2KMessageCallback callback;
+    private N2KMessageHandler callback;
 
     private final TimestampProvider timestampProvider;
     private final N2KMessageFactory messageFactory;
@@ -135,7 +135,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
     }
 
     @Override
-    public void setCallback(N2KMessageCallback callback) {
+    public void setCallback(N2KMessageHandler callback) {
         this.callback = callback;
     }
 

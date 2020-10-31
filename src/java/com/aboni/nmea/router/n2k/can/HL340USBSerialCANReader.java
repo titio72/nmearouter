@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.n2k.can;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageCallback;
+import com.aboni.nmea.router.n2k.N2KMessageHandler;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 
 import javax.inject.Inject;
@@ -170,7 +170,7 @@ Byte(s) Description
 
 public class HL340USBSerialCANReader implements SerialCANReader {
 
-    private N2KMessageCallback callback;
+    private N2KMessageHandler callback;
     private CANErrorCallback errCallback;
     private CANFrameCallback frameCallback;
     private final N2KMessageFactory msgFactory;
@@ -187,7 +187,7 @@ public class HL340USBSerialCANReader implements SerialCANReader {
     }
 
     @Override
-    public void setCallback(N2KMessageCallback callback) {
+    public void setCallback(N2KMessageHandler callback) {
         this.callback = callback;
     }
 

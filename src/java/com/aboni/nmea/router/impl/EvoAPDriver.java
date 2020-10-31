@@ -4,11 +4,15 @@ import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.n2k.EVO;
+import com.aboni.nmea.router.message.PilotMode;
+import com.aboni.nmea.router.n2k.evo.EVO;
 import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.nmea.router.n2k.N2KMessageHandler;
+import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -21,12 +25,50 @@ public class EvoAPDriver implements AutoPilotDriver {
     private final EvoAutoPilotStatus evoAutoPilotStatus;
     private final EVO evo;
     private final Log log;
+    private static final int SOURCE = 1;
+    private static final String DRIVER_HOST = "192.168.3.99";
+    private final TimestampProvider tp;
+    private final N2KMessageHandler msgSender;
+
+    private class Request {
+        double requestValue = Double.NaN;
+        long reqestTime = 0;
+
+        public double getValue(long now) {
+            if (Utils.isOlderThan(reqestTime, now, 250)) {
+                if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) return evoAutoPilotStatus.getApLockedHeading();
+                else if (evoAutoPilotStatus.getMode()==PilotMode.VANE) return evoAutoPilotStatus.getApWindDatum();
+                else return Double.NaN;
+            } else {
+                return requestValue;
+            }
+        }
+
+        public void update(double head, long now) {
+            reqestTime = now;
+            requestValue = head;
+        }
+    }
+
+    private final Request windRequest = new Request();
+    private final Request headRequest = new Request();
 
     @Inject
     public EvoAPDriver(@NotNull Log log, @NotNull EvoAutoPilotStatus autoPilotStatus, @NotNull TimestampProvider tp) {
-        this.evoAutoPilotStatus = autoPilotStatus;
         this.log = log;
-        evo = new EVO(tp);
+        this.tp = tp;
+        this.evoAutoPilotStatus = autoPilotStatus;
+        this.msgSender = this::sendMessageToPilot;
+        evo = new EVO(tp, SOURCE);
+    }
+
+    public EvoAPDriver(@NotNull Log log, @NotNull EvoAutoPilotStatus autoPilotStatus,
+                       @NotNull TimestampProvider tp, @NotNull N2KMessageHandler msgSender) {
+        this.log = log;
+        this.tp = tp;
+        this.evoAutoPilotStatus = autoPilotStatus;
+        this.msgSender = msgSender;
+        evo = new EVO(tp, SOURCE);
     }
 
     @Override
@@ -34,87 +76,36 @@ public class EvoAPDriver implements AutoPilotDriver {
         N2KMessage m = evo.getAUTOMessage();
         try {
             LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").info(log);
-            handle(m);
+            msgSender.onMessage(m);
         } catch (Exception e) {
             LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").error(log, e);
         }
     }
 
-    private void handle(N2KMessage m) throws IOException {
-        String sURL = "http://192.168.3.99/message?pgn=126208&src=1&dest=204&priority=3&data=";
+
+    @Nonnull
+    private String getURL(N2KMessage m) {
+        N2KMessageHeader h = m.getHeader();
+        String sURL = String.format("http://%s/message?pgn=%d&src=%d&dest=%d&priority=%d&data=",
+                DRIVER_HOST, h.getPgn(), h.getSource(), h.getDest(), h.getPriority());
         StringBuilder builder = new StringBuilder(sURL);
         for (byte b : m.getData()) builder.append(String.format("%02x", b));
         sURL = builder.toString();
-        URL url = new URL(sURL);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setConnectTimeout(5000);
-        con.setReadTimeout(5000);
-        int res = con.getResponseCode();
-        if (res == 200) {
-            LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).info(log);
-        } else {
-            LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).warn(log);
-        }
-        con.disconnect();
+        return sURL;
     }
 
     @Override
     public void setStdby() {
         N2KMessage m = evo.getSTDBYMessage();
-        try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").info(log);
-            handle(m);
-        } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").error(log, e);
-        }
+        LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").info(log);
+        msgSender.onMessage(m);
     }
 
     @Override
     public void setWindVane() {
         N2KMessage m = evo.getVANEMessage();
-        try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set WINDVANE").info(log);
-            handle(m);
-        } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set WINDVANE").error(log, e);
-        }
-    }
-
-    private void setHeading(double head) {
-        head = Utils.normalizeDegrees0To360(Math.round(head));
-        N2KMessage m = evo.getLockHeadingMessage(head);
-        try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set locked heading").wV("head", head).info(log);
-            handle(m);
-        } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set Set locked heading").error(log, e);
-        }
-    }
-
-    private void handlePlusMinus(int incr) {
-        double datum = evoAutoPilotStatus.getApWindDatum();
-        if (!Double.isNaN(datum)) {
-            datum += incr;
-            setWindDatum(datum);
-        } else {
-            double head = evoAutoPilotStatus.getApLockedHeading();
-            if (!Double.isNaN(head)) {
-                head += incr;
-                setHeading(head);
-            }
-        }
-    }
-
-    private void setWindDatum(double datum) {
-        datum = Utils.normalizeDegrees0To360(Math.round(datum));
-        N2KMessage m = evo.getWindDatumMessage(datum);
-        try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").wV("wind datum", datum).info(log);
-            handle(m);
-        } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").error(log, e);
-        }
+        LogStringBuilder.start(AP_DRIVER).wO("Set WINDVANE").info(log);
+        msgSender.onMessage(m);
     }
 
     @Override
@@ -135,5 +126,67 @@ public class EvoAPDriver implements AutoPilotDriver {
     @Override
     public void starboard10() {
         handlePlusMinus(10);
+    }
+
+    private void handlePlusMinus(int incr) {
+        if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) {
+            long now = tp.getNow();
+            double v = headRequest.getValue(now);
+            if (!Double.isNaN(v)) {
+                v += incr;
+                setHeading(v);
+            }
+            headRequest.update(v, now);
+        } else if (evoAutoPilotStatus.getMode()==PilotMode.VANE) {
+            long now = tp.getNow();
+            double datum = windRequest.getValue(now);
+            if (!Double.isNaN(datum)) {
+                datum -= incr;
+                setWindDatum(datum);
+            }
+            windRequest.update(datum, now);
+        }
+    }
+
+    private void setHeading(double head) {
+        head = Utils.normalizeDegrees0To360(Math.round(head));
+        N2KMessage m = evo.getLockHeadingMessage(head);
+        try {
+            LogStringBuilder.start(AP_DRIVER).wO("Set locked heading").wV("head", head).info(log);
+            msgSender.onMessage(m);
+        } catch (Exception e) {
+            LogStringBuilder.start(AP_DRIVER).wO("Set Set locked heading").error(log, e);
+        }
+    }
+
+    private void setWindDatum(double datum) {
+        datum = Utils.normalizeDegrees0To360(Math.round(datum));
+        N2KMessage m = evo.getWindDatumMessage(datum);
+        try {
+            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").wV("wind datum", datum).info(log);
+            msgSender.onMessage(m);
+        } catch (Exception e) {
+            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").error(log, e);
+        }
+    }
+
+    private void sendMessageToPilot(N2KMessage m) {
+        try {
+            String sURL = getURL(m);
+            URL url = new URL(sURL);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setConnectTimeout(5000);
+            con.setReadTimeout(5000);
+            int res = con.getResponseCode();
+            if (res == 200) {
+                LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).info(log);
+            } else {
+                LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).warn(log);
+            }
+            con.disconnect();
+        } catch (IOException e) {
+            LogStringBuilder.start(AP_DRIVER).wO("send msg to AP").wV("msg", m).error(log, e);
+        }
     }
 }

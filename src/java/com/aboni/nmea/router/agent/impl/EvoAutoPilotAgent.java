@@ -24,6 +24,7 @@ import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.util.*;
 
 public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStatus {
 
@@ -66,19 +67,89 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
         if (m instanceof MsgSeatalkPilotHeading) {
             apHeading = ((MsgSeatalkPilotHeading) m).getHeadingMagnetic();
         } else if (m instanceof MsgSeatalkPilotLockedHeading) {
-            apLockedHeading = ((MsgSeatalkPilotLockedHeading) m).getLockedHeadingMagnetic();
+            handleLockedHeadingMessage(routerMessage.getTimestamp(), (MsgSeatalkPilotLockedHeading) m);
         } else if (m instanceof MsgSeatalkPilotWindDatum) {
-            apAverageWind = ((MsgSeatalkPilotWindDatum) m).getRollingAverageWind();
-            apWindDatum = ((MsgSeatalkPilotWindDatum) m).getWindDatum();
+            handleWindDatumMessage(routerMessage.getTimestamp(), (MsgSeatalkPilotWindDatum) m);
         } else if (m instanceof MsgSeatalkPilotMode) {
-            mode = ((MsgSeatalkPilotMode) m).getMode();
-            if (mode!=PilotMode.VANE) {
+            handlePilotModeMessage(routerMessage.getTimestamp(), (MsgSeatalkPilotMode) m);
+        }
+    }
+
+    private void handleLockedHeadingMessage(long timestamp, MsgSeatalkPilotLockedHeading m) {
+        double newLockedHeading = m.getLockedHeadingMagnetic();
+        if (Math.abs(newLockedHeading - apLockedHeading)>0.1) {
+            apLockedHeading = newLockedHeading;
+            notifyLockedHeading(timestamp);
+        }
+    }
+
+    private void handleWindDatumMessage(long timestamp, MsgSeatalkPilotWindDatum m) {
+        apAverageWind = m.getRollingAverageWind();
+        double newDatum = m.getWindDatum();
+        if (Math.abs(newDatum - apWindDatum)>0.1) {
+            apWindDatum = newDatum;
+            notifyWindDatum(timestamp);
+        }
+    }
+
+    private void handlePilotModeMessage(long timestamp, MsgSeatalkPilotMode m) {
+        if (m.getMode()!=mode) {
+            PilotMode oldMode = mode;
+            mode = m.getMode();
+            if (mode != PilotMode.VANE) {
                 apWindDatum = Double.NaN;
                 apAverageWind = Double.NaN;
             }
-            if (mode!=PilotMode.AUTO) {
+            if (mode != PilotMode.AUTO) {
                 apLockedHeading = Double.NaN;
             }
+            notifyMode(oldMode, timestamp);
+        }
+    }
+
+    private void notifyWindDatum(long timestamp) {
+        List<PilotStatusListener> copy;
+        synchronized (listenerSet) {
+            copy = new ArrayList<>(listenerSet);
+        }
+        for (PilotStatusListener l: copy) {
+            l.onPilotStatus(null, mode, getApWindDatum(), timestamp);
+        }
+    }
+
+    private void notifyLockedHeading(long timestamp) {
+        List<PilotStatusListener> copy;
+        synchronized (listenerSet) {
+            copy = new ArrayList<>(listenerSet);
+        }
+        for (PilotStatusListener l: copy) {
+            l.onPilotStatus(null, mode, getApLockedHeading(), timestamp);
+        }
+    }
+
+    private void notifyMode(PilotMode oldMode, long timestamp) {
+        List<PilotStatusListener> copy;
+        synchronized (listenerSet) {
+            copy = new ArrayList<>(listenerSet);
+        }
+        for (PilotStatusListener l: copy) {
+            l.onPilotStatus(oldMode, mode, Double.NaN, timestamp);
+        }
+    }
+
+    private final Set<PilotStatusListener> listenerSet = new HashSet<>();
+
+    @Override
+    public void listen(PilotStatusListener listener) {
+        synchronized (listenerSet) {
+            listenerSet.add(listener);
+        }
+    }
+
+    @Override
+    public void stopListening(PilotStatusListener listener) {
+        synchronized (listenerSet) {
+            listenerSet.remove(listener);
         }
     }
 
