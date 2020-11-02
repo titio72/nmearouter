@@ -19,6 +19,7 @@ public class N2KMessagePGNs {
     public static final int SEATALK_PILOT_LOCKED_HEADING_PGN = 65360;
     public static final int SEATALK_PILOT_MODE_PGN = 65379;
     public static final int SEATALK_PILOT_WIND_DATUM_PGN = 65345;
+    public static final int SEATALK_ALARM_PGN = 65288;
     public static final int SPEED_PGN = 128259;
     public static final int SOG_COG_RAPID_PGN = 129026;
     public static final int SYSTEM_TIME_PGN = 126992;

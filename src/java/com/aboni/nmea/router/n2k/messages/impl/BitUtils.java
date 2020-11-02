@@ -31,20 +31,8 @@ public class BitUtils {
 
     public static String parseEnum(byte[] data, int offset, int start, int length, Map<Integer, String> map) {
         if (offset + length > (data.length * 8)) return null;
-
         Res e = extractBits(data, start, offset, length, false);
-        int reserved = 0;
-        if (e.m >= 15) {
-            reserved = 2; /* DATA FIELD_ERROR and DATA FIELD_UNKNOWN */
-        } else if (e.m > 1) {
-            reserved = 1; /* DATA FIELD_UNKNOWN */
-        }
-
-        String ret = null;
-        if (e.v <= (e.m - reserved)) {
-            ret = map.getOrDefault((int) e.v, String.format("%d", e.v));
-        }
-        return ret;
+        return map.getOrDefault((int) e.v, String.format("%d", e.v));
     }
 
     public static long parseIntegerSafe(byte[] data, int offset, int start, int length, long def) {

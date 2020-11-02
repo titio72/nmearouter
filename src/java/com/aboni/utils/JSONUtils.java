@@ -30,4 +30,13 @@ public class JSONUtils {
             return true;
         }
     }
+
+    public static boolean addString(JSONObject json, Object v, String attribute) {
+        if (v==null || json == null || attribute == null || attribute.isEmpty()) {
+            return false;
+        } else {
+            json.put(attribute, v.toString());
+            return true;
+        }
+    }
 }

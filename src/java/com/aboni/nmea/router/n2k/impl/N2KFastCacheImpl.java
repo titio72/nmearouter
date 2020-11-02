@@ -6,7 +6,6 @@ import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -125,13 +124,16 @@ public class N2KFastCacheImpl implements N2KFastCache {
     private final N2KMessageFactory messageFactory;
     private final Log log;
     private final Map<N2KFastEnvelope, Payload> cache;
+    private final N2KMessageParserFactory parserFactory;
 
     @Inject
-    public N2KFastCacheImpl(@NotNull Log log, TimestampProvider tsp, @NotNull N2KMessageFactory messageFactory) {
+    public N2KFastCacheImpl(@NotNull Log log, TimestampProvider tsp, @NotNull N2KMessageFactory messageFactory,
+                            @NotNull N2KMessageParserFactory parserFactory) {
         this.cache = new HashMap<>();
         this.timestampProvider = tsp;
         this.log = log;
         this.messageFactory = messageFactory;
+        this.parserFactory = parserFactory;
     }
 
     @Override
@@ -149,7 +151,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
             if (messageFactory.isFast(id.pgn)) {
                 handleFastMessage(msg, id);
             } else if (callback != null) {
-                N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
+                N2KMessageParser p = parserFactory.getNewParser();
                 try {
                     p.addMessage(msg);
                     callback.onMessage(p.getMessage());
@@ -229,7 +231,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
             Payload entry = cache.getOrDefault(id, null);
             if (entry == null) {
                 entry = new Payload();
-                p = ThingsFactory.getInstance(N2KMessageParser.class);
+                p = parserFactory.getNewParser();
                 entry.parser = p;
                 cache.put(id, entry);
             } else {

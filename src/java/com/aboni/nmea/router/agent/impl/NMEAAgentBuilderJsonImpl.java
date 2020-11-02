@@ -115,6 +115,9 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             case AgentTypes.CONSOLE:
                 agent = buildStandard(a, q, NMEAConsoleTarget.class, AgentTypes.CONSOLE);
                 break;
+            case AgentTypes.SEATALK_ALARMS:
+                agent = buildStandard(a, q, NMEASeatalkAlarmAgentImpl.class, AgentTypes.SEATALK_ALARMS);
+                break;
             case AgentTypes.TRACK:
                 agent = buildTrackTarget(a, q);
                 break;

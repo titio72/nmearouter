@@ -61,8 +61,8 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
         timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
         sAtoNType = BitUtils.parseEnum(data, 176, 0, 5, N2KLookupTables.getTable(ATON_TYPE));
-
         name = BitUtils.getText(data, 26, 34);
+
         aisTransceiverInfo = BitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
         aisSpare = (int) BitUtils.parseIntegerSafe(data, 184, 0, 1, 0xFF);
         positionFixingDeviceType = BitUtils.parseEnum(data, 185, 1, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
@@ -85,7 +85,7 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
 
     @Override
     public String getTypeOfShip() {
-        return "AtoN";
+        return getAtoNType();
     }
 
     @Override

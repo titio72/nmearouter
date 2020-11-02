@@ -16,6 +16,7 @@ public class N2KAISPositionReportATest {
     @Test
     public void test() {
         N2KAISPositionReportAImpl p = new N2KAISPositionReportAImpl(data);
+        System.out.println(p);
         assertEquals("247228600", p.getMMSI());
         assertEquals("A", p.getAISClass());
         assertEquals(43.0530014, p.getPosition().getLatitude(), 0.00001);

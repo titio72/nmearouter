@@ -66,6 +66,7 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
         supported.put(N2KMessagePGNs.SEATALK_PILOT_LOCKED_HEADING_PGN, N2KDef.getInstance(N2KSeatalkPilotLockedHeadingImpl.class, false)); // Seatalk: Pilot Locked Heading
         supported.put(N2KMessagePGNs.SEATALK_PILOT_MODE_PGN, N2KDef.getInstance(N2KSeatalkPilotModeImpl.class, false)); // Seatalk: Pilot Mode
         supported.put(N2KMessagePGNs.SEATALK_PILOT_WIND_DATUM_PGN, N2KDef.getInstance(N2KSeatalkPilotWindDatumImpl.class, false)); // Seatalk: wind datum
+        supported.put(N2KMessagePGNs.SEATALK_ALARM_PGN, N2KDef.getInstance(N2KSeatalkAlarmImpl.class, false)); // Seatalk: alarm
         supported.put(N2KMessagePGNs.AIS_POSITION_REPORT_CLASS_A_PGN, N2KDef.getInstance(N2KAISPositionReportAImpl.class, true)); // AIS position report class A
         supported.put(N2KMessagePGNs.AIS_POSITION_REPORT_CLASS_B_PGN, N2KDef.getInstance(N2KAISPositionReportBImpl.class, true)); // AIS Class B position report
         supported.put(N2KMessagePGNs.AIS_POSITION_REPORT_CLASS_B_EXT_PGN, N2KDef.getInstance(N2KAISPositionReportBExt.class, true)); // AIS Class B position report

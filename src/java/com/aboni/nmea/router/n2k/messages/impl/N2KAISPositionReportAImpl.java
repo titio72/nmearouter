@@ -62,7 +62,7 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
 
         gnssInfo.setCOG(BitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false));
         gnssInfo.setCOG(Double.isNaN(gnssInfo.getCOG()) ? gnssInfo.getCOG() : Utils.round(Math.toDegrees(gnssInfo.getCOG()), 1));
-        gnssInfo.setCOG(BitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
+        gnssInfo.setSOG(BitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
         if (!Double.isNaN(gnssInfo.getSOG())) gnssInfo.setSOG(Utils.round(gnssInfo.getSOG() * 3600.0 / 1852.0, 1));
 
         heading = BitUtils.parseDoubleSafe(data, 168, 16, 0.0001, false);

@@ -15,13 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageParser;
-import com.aboni.nmea.router.n2k.N2KStream;
-import com.aboni.nmea.router.n2k.PGNSourceFilter;
+import com.aboni.nmea.router.n2k.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
 import com.google.common.hash.HashCode;
 
 import javax.inject.Inject;
@@ -45,13 +41,15 @@ public class N2KStreamImpl implements N2KStream {
     private final Map<Integer, Payload> payloadMap;
     private Log logger;
     private final PGNSourceFilter srcFilter;
+    private final N2KMessageParserFactory parserFactory;
 
     @Inject
-    public N2KStreamImpl(@NotNull Log log) {
-        this(log, false);
+    public N2KStreamImpl(@NotNull Log log, @NotNull N2KMessageParserFactory parserFactory) {
+        this(log, false, parserFactory);
     }
 
-    public N2KStreamImpl(Log logger, boolean throttling) {
+    public N2KStreamImpl(Log logger, boolean throttling, @NotNull N2KMessageParserFactory parserFactory) {
+        this.parserFactory = parserFactory;
         this.logger = logger;
         payloadMap = new HashMap<>();
         srcFilter = new PGNSourceFilter(logger);
@@ -69,7 +67,7 @@ public class N2KStreamImpl implements N2KStream {
     @Override
     public N2KMessage getMessage(String sMessage) {
         try {
-            N2KMessageParser p = ThingsFactory.getInstance(N2KMessageParser.class);
+            N2KMessageParser p = parserFactory.getNewParser();
             p.addString(sMessage);
             int pgn = p.getHeader().getPgn();
             if (p.isSupported() && srcFilter.accept(p.getHeader().getSource(), pgn) &&

@@ -31,10 +31,9 @@ public class ProcessorsBuilder {
     private ProcessorsBuilder() {
     }
 
-    static List<NMEAPostProcess> load(QOS qos, Log log) {
+    static List<NMEAPostProcess> load(QOS qos, Log log, TimestampProvider timestampProvider) {
         List<NMEAPostProcess> res = new ArrayList<>();
         if (qos != null) {
-            TimestampProvider timestampProvider = ThingsFactory.getInstance(TimestampProvider.class);
             for (String q : qos.getKeys()) {
                 switch (q) {
                     case "speed_filter":
