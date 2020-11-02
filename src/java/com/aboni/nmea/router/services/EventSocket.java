@@ -19,7 +19,6 @@ import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnJSONMessage;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -28,6 +27,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @WebSocket
@@ -45,8 +45,8 @@ public class EventSocket {
     private String id;
     private boolean err;
 
-    public EventSocket(NMEAStream stream) {
-        log = ThingsFactory.getInstance(Log.class);
+    public EventSocket(@NotNull NMEAStream stream, @NotNull Log log) {
+        this.log = log;
         this.stream = stream;
     }
 

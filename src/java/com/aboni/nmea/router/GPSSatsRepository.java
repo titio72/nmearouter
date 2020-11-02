@@ -15,10 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.utils.Log;
-import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -116,27 +112,21 @@ public class GPSSatsRepository {
         };
         for (String line : satsRep) {
             GPSSatBean sat = getSat(line);
-            if (sat != null) sats.put(sat.prn, sat);
+            sats.put(sat.prn, sat);
         }
     }
 
     private static GPSSatBean getSat(String line) {
-        try {
-            GPSSatBean sat = new GPSSatBean();
-            StringTokenizer tok = new StringTokenizer(line, ",");
-            sat.prn = Integer.parseInt(tok.nextToken());
-            sat.svn = Integer.parseInt(tok.nextToken());
-            sat.name = tok.nextToken();
-            sat.date = tok.nextToken();
-            sat.orbit = tok.nextToken();
-            sat.signal = tok.nextToken();
-            sat.clock = tok.nextToken();
-            return sat;
-        } catch (Exception e) {
-            ThingsFactory.getInstance(Log.class).errorForceStacktrace(
-                    LogStringBuilder.start("SatRepository").wO("load").wV("string", line).toString(), e);
-            return null;
-        }
+        GPSSatBean sat = new GPSSatBean();
+        StringTokenizer tok = new StringTokenizer(line, ",");
+        sat.prn = Integer.parseInt(tok.nextToken());
+        sat.svn = Integer.parseInt(tok.nextToken());
+        sat.name = tok.nextToken();
+        sat.date = tok.nextToken();
+        sat.orbit = tok.nextToken();
+        sat.signal = tok.nextToken();
+        sat.clock = tok.nextToken();
+        return sat;
     }
 
     public static GPSSat getSat(int prn) {

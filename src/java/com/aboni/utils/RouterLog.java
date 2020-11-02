@@ -26,8 +26,11 @@ public class RouterLog implements LogAdmin {
     private final Logger lg;
 
     public RouterLog() {
-        lg = Logger.getLogger("NMEARouter");
+        lg = Logger.getLogger(Constants.LOG_CONTEXT);
         lg.setLevel(Level.INFO);
+
+        // disable global logger
+        Logger.getGlobal().setLevel(Level.OFF);
 
         FileHandler fh;
         try {

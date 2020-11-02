@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +31,8 @@ public class SampledQuery {
 
     private SampledQueryConf conf;
     private SampleWriterFactory sampleWriterFactory;
-    private @Inject
-    RangeFinder rangeFinder;
-    private @Inject
-    TimeSeriesReader reader;
+    private final RangeFinder rangeFinder;
+    private final TimeSeriesReader reader;
 
     private static class ResultContext {
         final JSONObject res = new JSONObject();
@@ -60,8 +59,9 @@ public class SampledQuery {
     }
 
     @Inject
-    public SampledQuery() {
-        // do nothing
+    public SampledQuery(@NotNull RangeFinder rangeFinder, @NotNull TimeSeriesReader reader) {
+        this.rangeFinder = rangeFinder;
+        this.reader = reader;
     }
 
     public void init(SampledQueryConf conf, SampleWriterFactory sampleWriterFactory) {

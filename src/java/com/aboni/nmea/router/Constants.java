@@ -36,4 +36,6 @@ public class Constants {
 
     public static final String TAG_JSON = "json";
 
+    public static final String LOG_CONTEXT = "NMEARouter";
+
 }

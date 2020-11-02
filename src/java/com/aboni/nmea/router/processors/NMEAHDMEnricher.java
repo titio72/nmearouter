@@ -18,6 +18,7 @@ package com.aboni.nmea.router.processors;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPosition;
@@ -47,8 +48,8 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
     private final NMEACache cache;
 
     @Inject
-    public NMEAHDMEnricher(@NotNull NMEACache cache) {
-        m = new NMEAMagnetic2TrueConverter();
+    public NMEAHDMEnricher(@NotNull NMEACache cache, @NotNull TimestampProvider tp) {
+        m = new NMEAMagnetic2TrueConverter(tp.getYear());
         this.cache = cache;
     }
 

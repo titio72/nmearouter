@@ -22,13 +22,18 @@ import com.aboni.sensors.EngineStatus;
 
 public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
 
-    GeoPositionT position;
-    boolean anchor = false;
-    double distance;
-    double averageSpeed;
-    double maxSpeed;
-    int period = 30;
-    EngineStatus engine = EngineStatus.UNKNOWN;
+    private GeoPositionT position;
+    private boolean anchor = false;
+    private double distance;
+    private double averageSpeed;
+    private double maxSpeed;
+    private int period = 30;
+    private EngineStatus engine = EngineStatus.UNKNOWN;
+
+    @Override
+    public TrackPointBuilder getNew() {
+        return new TrackPointBuilderImpl();
+    }
 
     @Override
     public synchronized TrackPointBuilderImpl withPoint(TrackPoint point) {
@@ -83,7 +88,6 @@ public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
     public synchronized TrackPoint getPoint() {
         return new TrackPointImpl(this);
     }
-
 
     @Override
     public GeoPositionT getPosition() {

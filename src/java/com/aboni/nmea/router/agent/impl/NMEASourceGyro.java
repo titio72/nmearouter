@@ -27,7 +27,7 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.beans.MsgAttitudeImpl;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
-import com.aboni.utils.Log;
+import com.aboni.utils.LogAdmin;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -54,12 +54,12 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private final DeviationManager deviationManager;
     private final TimestampProvider timestampProvider;
     private final NMEACache cache;
-    private final Log log;
+    private final LogAdmin log;
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull DeviationManager deviationManager, @NotNull Log log) {
+    public NMEASourceGyro(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull DeviationManager deviationManager, @NotNull LogAdmin log) {
         super(log, tp, true, false);
         this.log = log;
         this.timestampProvider = tp;
@@ -158,7 +158,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 }
 
                 if (cache.getLastPosition().getData() != null) {
-                    NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter();
+                    NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter(timestampProvider.getYear());
                     m.setPosition(cache.getLastPosition().getData().getPosition());
 
                     if (SEND_HDT) {

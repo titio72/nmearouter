@@ -33,19 +33,18 @@ public class MeteoService extends JSONWebService {
 
     private static final int DEFAULT_MAX_SAMPLES = 500;
 
-    private @Inject
-    @Named(Constants.TAG_METEO)
-    SampledQueryConf conf;
-    private @Inject
-    QueryFactory queryFactory;
+    private final SampledQueryConf conf;
+    private final QueryFactory queryFactory;
     private SampledQuery sampledQuery;
 
     private final Log log;
 
     @Inject
-    public MeteoService(@NotNull Log log) {
+    public MeteoService(@NotNull Log log, @NotNull QueryFactory queryFactory, @Named(Constants.TAG_METEO) SampledQueryConf conf) {
         super(log);
         this.log = log;
+        this.conf = conf;
+        this.queryFactory = queryFactory;
         setLoader(this::getResult);
     }
 

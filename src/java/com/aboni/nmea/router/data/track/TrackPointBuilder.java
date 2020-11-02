@@ -20,6 +20,8 @@ import com.aboni.sensors.EngineStatus;
 
 public interface TrackPointBuilder {
 
+    TrackPointBuilder getNew();
+
     TrackPointBuilder withPoint(TrackPoint point);
 
     TrackPointBuilder withPosition(GeoPositionT pos);

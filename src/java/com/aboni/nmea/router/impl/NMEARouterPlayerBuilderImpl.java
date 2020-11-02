@@ -21,7 +21,6 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.conf.AgentTypes;
 import com.aboni.nmea.router.conf.SimpleConf;
-import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -29,27 +28,28 @@ import java.util.Properties;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
 
+    private final NMEAAgentBuilderJson builder;
+
     @Inject
-    public NMEARouterPlayerBuilderImpl() {
-        // do nothing
+    public NMEARouterPlayerBuilderImpl(@NotNull NMEAAgentBuilderJson builder) {
+        this.builder = builder;
     }
 
     @Override
     public void init(@NotNull NMEARouter router, Properties props) {
         String playFile = props.getProperty("file");
-        NMEAAgentBuilderJson builderJson = ThingsFactory.getInstance(NMEAAgentBuilderJson.class);
 
-        NMEAAgent sock = builderJson.createAgent(new SimpleConf(AgentTypes.TCP, "TCP").
+        NMEAAgent sock = builder.createAgent(new SimpleConf(AgentTypes.TCP, "TCP").
                 setAttribute("inout", "OUT").
                 setAttribute("port", 1111));
         router.addAgent(sock);
         sock.start();
 
-        NMEAAgent console = builderJson.createAgent(new SimpleConf(AgentTypes.CONSOLE, "CONSOLE"));
+        NMEAAgent console = builder.createAgent(new SimpleConf(AgentTypes.CONSOLE, "CONSOLE"));
         router.addAgent(console);
         console.start();
 
-        NMEAAgent play = builderJson.createAgent(new SimpleConf(AgentTypes.PLAYER, "PLAYER").setAttribute("file", playFile));
+        NMEAAgent play = builder.createAgent(new SimpleConf(AgentTypes.PLAYER, "PLAYER").setAttribute("file", playFile));
 
         router.addAgent(play);
         play.start();

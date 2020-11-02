@@ -103,14 +103,16 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     public static class MyWebSocketServlet extends WebSocketServlet {
         private final NMEAStream stream;
+        private final Log log;
 
-        public MyWebSocketServlet(NMEAStream stream) {
+        public MyWebSocketServlet(NMEAStream stream, Log log) {
             this.stream = stream;
+            this.log = log;
         }
 
         @Override
         public void configure(WebSocketServletFactory wsFactory) {
-            wsFactory.setCreator((servletUpgradeRequest, servletUpgradeResponse) -> new EventSocket(stream));
+            wsFactory.setCreator((servletUpgradeRequest, servletUpgradeResponse) -> new EventSocket(stream, log));
         }
     }
 
@@ -128,7 +130,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
                 ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 context.setContextPath("/");
-                context.addServlet(new ServletHolder(new MyWebSocketServlet(stream)), "/events");
+                context.addServlet(new ServletHolder(new MyWebSocketServlet(stream, log)), "/events");
                 registerServlets(context);
 
                 HandlerList handlers = new HandlerList();

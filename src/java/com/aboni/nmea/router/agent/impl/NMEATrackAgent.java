@@ -22,7 +22,6 @@ import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Log;
-import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -36,16 +35,19 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     private final TimestampProvider timestampProvider;
     private final NMEACache cache;
     private final Log log;
+    private final TrackPointBuilder pointBuilder;
 
     @Inject
     public NMEATrackAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull NMEACache cache,
-                          @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager) {
+                          @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager,
+                          @NotNull TrackPointBuilder pointBuilder) {
         super(log, tp, true, true);
         this.log = log;
         this.timestampProvider = tp;
         this.cache = cache;
         this.tracker = trackManager;
         this.tripManager = tripManager;
+        this.pointBuilder = pointBuilder;
     }
 
     @Override
@@ -98,7 +100,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
         if (point != null) {
-            TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
+            TrackPointBuilder builder = pointBuilder.getNew();
             point = builder.withPoint(point).withEngine(cache.getStatus(NMEARouterStatuses.ENGINE_STATUS, EngineStatus.UNKNOWN)).getPoint();
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
