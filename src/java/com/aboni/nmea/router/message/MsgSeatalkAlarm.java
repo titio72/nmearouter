@@ -23,6 +23,7 @@ public interface MsgSeatalkAlarm extends Message {
         JSONObject j = new JSONObject();
         j.put("topic", "stalk_alarm");
         j.put("source", getSource());
+        j.put("status", getAlarmStatus());
         j.put("priority", getPriority());
         j.put("groupId", getGroupId());
         JSONUtils.addString(j, getGroup(), "group");

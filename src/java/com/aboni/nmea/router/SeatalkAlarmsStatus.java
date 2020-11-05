@@ -2,6 +2,7 @@ package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.message.MsgSeatalkAlarm;
 import com.aboni.nmea.router.message.SeatalkAlarm;
+import com.aboni.utils.Pair;
 
 import java.time.Instant;
 import java.util.List;
@@ -12,7 +13,7 @@ public interface SeatalkAlarmsStatus {
         void onAlarm(MsgSeatalkAlarm alarm, Instant time);
     }
 
-    int getAlarms(List<MsgSeatalkAlarm> alarms);
+    int getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> alarms);
 
     void subscribe(AlarmListener listener);
 

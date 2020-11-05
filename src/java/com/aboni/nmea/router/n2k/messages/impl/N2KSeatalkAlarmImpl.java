@@ -7,6 +7,7 @@ import com.aboni.nmea.router.message.beans.MsgSeatalkAlarmImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
+import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ENVIRONMENT_PRESSURE_PGN;
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.SEATALK_ALARM_PGN;
 
 public class N2KSeatalkAlarmImpl extends N2KMessageImpl implements MsgSeatalkAlarm {
@@ -63,5 +64,11 @@ public class N2KSeatalkAlarmImpl extends N2KMessageImpl implements MsgSeatalkAla
     @Override
     public int getSource() {
         return msg.getSource();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PGN {%s} Source {%d} AlarmPriority {%d} Alarm {%s} Status {%s} Group {%s}",
+                ENVIRONMENT_PRESSURE_PGN, getHeader().getSource(), getPriority(), getAlarm(), getAlarmStatus(), getGroup());
     }
 }

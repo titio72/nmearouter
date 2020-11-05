@@ -19,10 +19,6 @@ import org.json.JSONObject;
 
 public interface MsgSpeedAndHeading extends MsgHeading, MsgSpeed {
 
-    default boolean isValid() {
-        return !Double.isNaN(getHeading()) && !Double.isNaN(getSpeedWaterRef());
-    }
-
     @Override
     default JSONObject toJSON() {
         JSONObject json = new JSONObject();

@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 public class N2KMessageParserFactoryImpl implements N2KMessageParserFactory {
 
-    private N2KMessageFactory messageFactory;
+    private final N2KMessageFactory messageFactory;
 
     @Inject
     public N2KMessageParserFactoryImpl(@NotNull N2KMessageFactory messageFactory) {

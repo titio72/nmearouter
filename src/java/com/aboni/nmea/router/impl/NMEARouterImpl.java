@@ -84,20 +84,20 @@ public class NMEARouterImpl implements NMEARouter {
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
             for (NMEAAgent a : agents.values()) {
-                try {
-                    exec.execute(a::onTimerHR);
-                } catch (Exception e) {
-                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("timer").wV(AGENT_KEY_NAME, a.getName()).toString(), e);
-                }
+                runMe(a::onTimerHR, "timerHR", AGENT_KEY_NAME, a.getName());
                 if (timerCount == 0) {
-                    try {
-                        exec.execute(a::onTimer);
-                    } catch (Exception e) {
-                        log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("timer").wV(AGENT_KEY_NAME, a.getName()).toString(), e);
-                    }
+                    runMe(a::onTimer, "timer", AGENT_KEY_NAME, a.getName());
                     dumpStats();
                 }
             }
+        }
+    }
+
+    private void runMe(Runnable r, String logOp, String logkey, String logvalue) {
+        try {
+            exec.execute(r);
+        } catch (Exception e) {
+            log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO(logOp).wV(logkey, logvalue).toString(), e);
         }
     }
 
@@ -188,7 +188,6 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("add agent").wV(AGENT_KEY_NAME, agent.getName()).toString());
             agents.put(agent.getName(), agent);
-            agent.setStatusListener(this::privateOnStatusChange);
             if (agent.getSource()!=null) {
                 agent.getSource().setSentenceListener(this::privateQueueUpSentence);
             }
@@ -207,10 +206,6 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             return new TreeSet<>(agents.keySet());
         }
-    }
-
-    private void privateOnStatusChange(NMEAAgent src) {
-        // nothing to do... evaluate to remove the method
     }
 
     private void privateQueueUpSentence(RouterMessage s) {
@@ -256,11 +251,11 @@ public class NMEARouterImpl implements NMEARouter {
                     final NMEATarget target = nmeaAgent.getTarget();
                     final String name = nmeaAgent.getName();
                     if (target != null) {
-                        exec.execute(() -> {
+                        runMe(() -> {
                             for (RouterMessage m : mm) {
                                 routeToTarget(name, target, m);
                             }
-                        });
+                        }, "dispatch message", "messages", ""+mm.length);
                     }
                 } catch (Exception e) {
                     log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("dispatch message").toString(), e);

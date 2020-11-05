@@ -59,5 +59,4 @@ public class MsgSeatalkAlarmImpl implements MsgSeatalkAlarm {
     public int getSource() {
         return src;
     }
-
 }

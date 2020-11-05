@@ -7,9 +7,11 @@ import com.aboni.nmea.router.SeatalkAlarmsStatus;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.MsgSeatalkAlarm;
 import com.aboni.nmea.router.message.SeatalkAlarm;
+import com.aboni.nmea.router.message.SeatalkAlarmStatus;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.*;
@@ -44,6 +46,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     private final Set<AlarmListener> listeners;
     private static final long CLEANUP_TIMEOUT = 300000;
 
+    @Inject
     public NMEASeatalkAlarmAgentImpl(@NotNull Log log, @NotNull TimestampProvider tp) {
         super(log, tp, false, true);
         this.log = log;
@@ -76,10 +79,10 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     }
 
     @Override
-    public int getAlarms(List<MsgSeatalkAlarm> list) {
+    public int getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> list) {
         synchronized (alarms) {
             list.clear();
-            for (Pair<MsgSeatalkAlarm, Instant> p: alarms.values()) list.add(p.first);
+            list.addAll(alarms.values());
             return list.size();
         }
     }
@@ -117,7 +120,10 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     public void onTimer() {
         synchronized (alarms) {
             long now = tp.getNow();
-            alarms.entrySet().removeIf(e -> Utils.isOlderThan(e.getValue().second.toEpochMilli(), now, CLEANUP_TIMEOUT));
+            alarms.entrySet().removeIf(
+                    e -> e.getValue().first.getAlarmStatus()==SeatalkAlarmStatus.OFF &&
+                            Utils.isOlderThan(e.getValue().second.toEpochMilli(), now, CLEANUP_TIMEOUT)
+            );
         }
     }
 }
