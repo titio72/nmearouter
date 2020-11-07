@@ -77,7 +77,7 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
 
     private void handleLockedHeadingMessage(long timestamp, MsgSeatalkPilotLockedHeading m) {
         double newLockedHeading = m.getLockedHeadingMagnetic();
-        if (Math.abs(newLockedHeading - apLockedHeading)>0.1) {
+        if (Double.isNaN(apLockedHeading) || Math.abs(newLockedHeading - apLockedHeading)>0.1) {
             apLockedHeading = newLockedHeading;
             notifyLockedHeading(timestamp);
         }
@@ -86,7 +86,7 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
     private void handleWindDatumMessage(long timestamp, MsgSeatalkPilotWindDatum m) {
         apAverageWind = m.getRollingAverageWind();
         double newDatum = m.getWindDatum();
-        if (Math.abs(newDatum - apWindDatum)>0.1) {
+        if (Double.isNaN(apWindDatum) || Math.abs(newDatum - apWindDatum)>0.1) {
             apWindDatum = newDatum;
             notifyWindDatum(timestamp);
         }

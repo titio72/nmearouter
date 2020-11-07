@@ -13,7 +13,7 @@ public interface SeatalkAlarmsStatus {
         void onAlarm(MsgSeatalkAlarm alarm, Instant time);
     }
 
-    int getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> alarms);
+    void getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> alarms);
 
     void subscribe(AlarmListener listener);
 

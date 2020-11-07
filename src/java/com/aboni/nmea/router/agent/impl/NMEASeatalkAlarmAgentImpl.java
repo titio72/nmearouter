@@ -79,11 +79,10 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     }
 
     @Override
-    public int getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> list) {
+    public void getAlarms(List<Pair<MsgSeatalkAlarm, Instant>> list) {
         synchronized (alarms) {
             list.clear();
             list.addAll(alarms.values());
-            return list.size();
         }
     }
 

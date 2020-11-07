@@ -19,9 +19,9 @@ public interface MsgWaterDepth extends Message {
         json.put("topic", "DPT");
         double d = getDepth();
         double o = getOffset();
-        JSONUtils.addDouble(json, d, "raw_depth");
-        JSONUtils.addDouble(json, o, "offset");
-        JSONUtils.addDouble(json, Double.isNaN(o)?d:(d+o), "depth");
+        if (JSONUtils.addDouble(json, d, "raw_depth") && JSONUtils.addDouble(json, o, "offset")) {
+            JSONUtils.addDouble(json, d + o, "depth");
+        }
         JSONUtils.addDouble(json, getRange(), "range");
         return json;
     }

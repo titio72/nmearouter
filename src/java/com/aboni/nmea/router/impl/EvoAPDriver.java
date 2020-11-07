@@ -35,7 +35,7 @@ public class EvoAPDriver implements AutoPilotDriver {
         long reqestTime = 0;
 
         public double getValue(long now) {
-            if (Utils.isOlderThan(reqestTime, now, 250)) {
+            if (Utils.isOlderThan(reqestTime, now, 500)) {
                 if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) return evoAutoPilotStatus.getApLockedHeading();
                 else if (evoAutoPilotStatus.getMode()==PilotMode.VANE) return evoAutoPilotStatus.getApWindDatum();
                 else return Double.NaN;

@@ -26,7 +26,7 @@ public class SeatalkAlarmService extends JSONWebService {
         setLoader(this::getResult);
     }
 
-    private SeatalkAlarmsStatus findService() {
+    private void findService() {
         if (statusProvider==null) {
             for (String ag_id : router.getAgents()) {
                 NMEAAgent ag = router.getAgent(ag_id);
@@ -36,7 +36,6 @@ public class SeatalkAlarmService extends JSONWebService {
                 }
             }
         }
-        return statusProvider;
     }
 
     private JSONObject getResult(ServiceConfig serviceConfig) {
