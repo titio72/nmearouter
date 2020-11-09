@@ -42,10 +42,12 @@ class BestMileSpeed {
         if (distance > d) {
             // pull the first item from the rolling window
             Pair<Long, Double> p0 = sss.get(0);
-            while ((distance - p0.second) > d) {
+            while (distance > d) {
                 distance -= p0.second;
                 sss.remove(0);
-                p0 = sss.get(0);
+                if (distance>d) {
+                    p0 = sss.get(0);
+                }
             }
 
             long dT = p.first - p0.first;
@@ -74,5 +76,9 @@ class BestMileSpeed {
 
     public long getMaxSpeedT1() {
         return t1Max;
+    }
+
+    public boolean hasMax() {
+        return t1Max!=0;
     }
 }

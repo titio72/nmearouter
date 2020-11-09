@@ -198,9 +198,21 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                     description = getType() + " " + stats.toString(t);
                 }
                 getLogBuilder().wO("stats").w(" " + stats.toString(t)).info(log);
+                if (stats.messages==0) {
+                    onNoMessages();
+                }
                 stats.reset();
                 lastStats = t;
             }
+        }
+    }
+
+    private void onNoMessages() {
+        try {
+            getLogBuilder().wO("reset socket can").info(log);
+            Runtime.getRuntime().exec("./reset_can_bus.sh");
+        } catch (IOException e) {
+            getLogBuilder().wO("reset socket can").error(log, e);
         }
     }
 }

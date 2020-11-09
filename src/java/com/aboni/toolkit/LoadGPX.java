@@ -27,7 +27,7 @@ public class LoadGPX {
 
 
         int counter = 0;
-        String file = "/home/aboni/Downloads/nn.gpx";
+        String file = "/home/aboni/Downloads/Navionics_archive_export_20201108_b.gpx";
         try (FileReader reader = new FileReader(file)) {
             byte[] buffer = new byte[6];
             StringBuilder b = null;
@@ -90,7 +90,7 @@ public class LoadGPX {
         TrackPoint point = tracker.processPosition(posT, sog);
         if (point != null) {
             TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
-            point = builder.withPoint(point).withEngine(EngineStatus.UNKNOWN).getPoint();
+            point = builder.withPoint(point).withEngine(EngineStatus.OFF).getPoint();
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
@@ -98,5 +98,4 @@ public class LoadGPX {
             }
         }
     }
-
 }
