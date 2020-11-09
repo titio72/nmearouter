@@ -152,6 +152,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         if (isStarted()) {
             long now = timestampProvider.getNow();
             if (now - lastStats > 30000) {

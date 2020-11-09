@@ -106,6 +106,7 @@ public class NMEAMeteoTarget extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         timerCount = (timerCount+1) % SAMPLING_FACTOR;
         if (timerCount==0) dumpStats();
         super.onTimer();

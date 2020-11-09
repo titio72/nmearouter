@@ -186,13 +186,13 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         if (isStarted()) {
             long t = timestampProvider.getNow();
             synchronized (stats) {
                 stats.onTimer(t);
                 fastStats.onTimer(t);
             }
-            super.onTimer();
         }
     }
 }

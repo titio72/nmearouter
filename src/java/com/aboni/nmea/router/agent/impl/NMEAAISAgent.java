@@ -94,6 +94,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         long now = timestampProvider.getNow();
         synchronized (reports) {
             Collection<PositionReport> reportsCopy = new ArrayList<>(reports.values());

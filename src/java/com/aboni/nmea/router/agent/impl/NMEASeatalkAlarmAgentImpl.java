@@ -117,6 +117,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
 
     @Override
     public void onTimer() {
+        super.onTimer();
         synchronized (alarms) {
             long now = tp.getNow();
             alarms.entrySet().removeIf(

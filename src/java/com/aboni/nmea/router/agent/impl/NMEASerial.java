@@ -327,6 +327,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         long t = timestampProvider.getNow();
         synchronized (stats) {
             stats.onTimer(t);

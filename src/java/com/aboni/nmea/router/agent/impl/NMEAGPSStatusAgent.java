@@ -189,6 +189,7 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         long now = timestampProvider.getNow();
         if ((now - sogAndCog.lastSogTime) > 10000) {
             sogAndCog.reset();

@@ -138,6 +138,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                         readFrame();
                     }
                 }, "CANBus Socket [" + getName() + "]");
+                lastStats = timestampProvider.getNow();
                 t.start();
             } catch (IOException e) {
                 run.set(false);

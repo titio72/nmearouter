@@ -55,6 +55,7 @@ public class FanAgent extends NMEAAgentImpl {
 
     @Override
     public void onTimer() {
+        super.onTimer();
         if (isStarted()) {
             double temp = CPUTemp.getInstance().getTemp();
             if (fan.isFanOn() && temp<getThresholdOff()) fan(false);

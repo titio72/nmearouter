@@ -145,6 +145,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
 
     @Override
     public void onTimer() {
+        super.onTimer();
         if (isStarted()) {
             try {
                 data.loadConf();
