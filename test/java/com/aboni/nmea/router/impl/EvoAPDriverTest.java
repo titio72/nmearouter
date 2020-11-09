@@ -127,7 +127,7 @@ public class EvoAPDriverTest {
         status.setMode(from);
         tp.setTimestamp(System.currentTimeMillis());
         switch (to) {
-            case STANDBY: driver.setStdby(); break;
+            case STANDBY: driver.setStandby(); break;
             case AUTO: driver.setAuto(); break;
             case VANE: driver.setWindVane(); break;
             default: fail("Unsupported mode " + to);
@@ -197,7 +197,7 @@ public class EvoAPDriverTest {
         tp.setTimestamp(System.currentTimeMillis());
         driver.starboard10();
         status.setApLockedHeading(31); // 1 less than the expected
-        tp.setTimestamp(tp.getNow() + 500); // half a second delay between the two clicks
+        tp.setTimestamp(tp.getNow() + 750); // half a second delay between the two clicks
         driver.starboard10();
         assertEquals(2, sender.getList().size());
         assertEquals(41, ((N2K126208RequestLockedHeading)sender.getList().get(1)).getLockedHeading(), 0.01);

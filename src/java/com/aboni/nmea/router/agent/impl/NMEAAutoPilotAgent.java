@@ -130,7 +130,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     }
 
     @Override
-    public void setStdby() {
+    public void setStandby() {
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "02", "FD");

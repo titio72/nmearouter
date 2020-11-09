@@ -32,10 +32,10 @@ public class EvoAPDriver implements AutoPilotDriver {
 
     private class Request {
         double requestValue = Double.NaN;
-        long reqestTime = 0;
+        long requestTime = 0;
 
         public double getValue(long now) {
-            if (Utils.isOlderThan(reqestTime, now, 500)) {
+            if (Utils.isOlderThan(requestTime, now, 500)) {
                 if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) return evoAutoPilotStatus.getApLockedHeading();
                 else if (evoAutoPilotStatus.getMode()==PilotMode.VANE) return evoAutoPilotStatus.getApWindDatum();
                 else return Double.NaN;
@@ -45,7 +45,7 @@ public class EvoAPDriver implements AutoPilotDriver {
         }
 
         public void update(double head, long now) {
-            reqestTime = now;
+            requestTime = now;
             requestValue = head;
         }
     }
@@ -95,7 +95,7 @@ public class EvoAPDriver implements AutoPilotDriver {
     }
 
     @Override
-    public void setStdby() {
+    public void setStandby() {
         N2KMessage m = evo.getSTDBYMessage();
         LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").info(log);
         msgSender.onMessage(m);
@@ -104,7 +104,7 @@ public class EvoAPDriver implements AutoPilotDriver {
     @Override
     public void setWindVane() {
         N2KMessage m = evo.getVANEMessage();
-        LogStringBuilder.start(AP_DRIVER).wO("Set WINDVANE").info(log);
+        LogStringBuilder.start(AP_DRIVER).wO("Set WIND VANE").info(log);
         msgSender.onMessage(m);
     }
 
@@ -128,12 +128,12 @@ public class EvoAPDriver implements AutoPilotDriver {
         handlePlusMinus(10);
     }
 
-    private void handlePlusMinus(int incr) {
+    private void handlePlusMinus(int increment) {
         if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) {
             long now = tp.getNow();
             double v = headRequest.getValue(now);
             if (!Double.isNaN(v)) {
-                v += incr;
+                v += increment;
                 setHeading(v);
             }
             headRequest.update(v, now);
@@ -141,7 +141,7 @@ public class EvoAPDriver implements AutoPilotDriver {
             long now = tp.getNow();
             double datum = windRequest.getValue(now);
             if (!Double.isNaN(datum)) {
-                datum -= incr;
+                datum -= increment;
                 setWindDatum(datum);
             }
             windRequest.update(datum, now);

@@ -19,7 +19,7 @@ public interface AutoPilotDriver {
 
     void setAuto();
 
-    void setStdby();
+    void setStandby();
 
     void setWindVane();
 

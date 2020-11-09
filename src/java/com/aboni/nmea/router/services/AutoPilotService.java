@@ -19,6 +19,7 @@ import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.impl.EvoAPDriver;
 import com.aboni.utils.Log;
 
@@ -27,35 +28,52 @@ import javax.validation.constraints.NotNull;
 
 public class AutoPilotService extends JSONWebService {
 
-    private final AutoPilotDriver auto;
+    private AutoPilotDriver auto;
+    private final NMEARouter router;
+    private final Log log;
+    private final TimestampProvider tp;
+
+    private AutoPilotDriver getDriver() {
+        if (auto==null) {
+            for (String agentName : router.getAgents()) {
+                NMEAAgent agent = router.getAgent(agentName);
+                if (agent instanceof EvoAutoPilotStatus) {
+                    auto = new EvoAPDriver(log, (EvoAutoPilotStatus)agent, tp);
+                }
+            }
+        }
+        return auto;
+    }
 
     @Inject
     public AutoPilotService(NMEARouter router, @NotNull TimestampProvider tp, @NotNull Log log) {
         super(log);
-        this.auto = new EvoAPDriver(log, (EvoAutoPilotStatus)router.getAgent("EvoAP"), tp);
+        this.log = log;
+        this.router = router;
+        this.tp = tp;
         setLoader((ServiceConfig config) -> {
             String command = config.getParameter("command");
             switch (command) {
                 case CMD_PORT_10:
-                    auto.port10();
+                    getDriver().port10();
                     break;
                 case CMD_PORT_1:
-                    auto.port1();
+                    getDriver().port1();
                     break;
                 case CMD_STARBOARD_10:
-                    auto.starboard10();
+                    getDriver().starboard10();
                     break;
                 case CMD_STARBOARD_1:
-                    auto.starboard1();
+                    getDriver().starboard1();
                     break;
                 case CMD_AUTO:
-                    auto.setAuto();
+                    getDriver().setAuto();
                     break;
                 case CMD_STANDBY:
-                    auto.setStdby();
+                    getDriver().setStandby();
                     break;
                 case CMD_WIND_VANE:
-                    auto.setWindVane();
+                    getDriver().setWindVane();
                     break;
                 default:
                     break;
