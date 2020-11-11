@@ -237,6 +237,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
 
         if (data.isVhw()) {
             notify(new MsgSpeedImpl(speed));
+            notify(new MsgSpeedAndHeadingFacade(new MsgSpeedImpl(speed), new MsgHeadingImpl(hdg, true)));
         }
     }
 

@@ -167,7 +167,7 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
         double heading = message.getHeading();
         double speed = message.getSpeedWaterRef();
         DirectionReference ref = message.getReference();
-        if (!Double.isNaN(speed) && !Double.isNaN(heading) && ref != DirectionReference.MAGNETIC) {
+        if (!Double.isNaN(speed) && !Double.isNaN(heading) && ref==DirectionReference.MAGNETIC) {
             VHWSentence vhw = (VHWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.VHW);
             vhw.setMagneticHeading(heading);
             vhw.setSpeedKnots(speed);
