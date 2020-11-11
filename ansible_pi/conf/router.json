@@ -1,0 +1,83 @@
+{
+    "logLevel": "INFO",
+    "agents": [
+	{
+             "type": "Nextion",
+             "port": "/dev/ttyUSB0",
+             "src": "CANBUS_S",
+             "name": "NEXTION",
+	     "disabled": "false"
+        },	     
+        {
+            "type": "Meteo",
+            "name": "METEO"
+        },
+	{
+            "type": "ConsoleN2K",
+	    "name": "CONSOLEN2K"
+	},
+        {
+            "type": "Console",
+            "name": "CONSOLE"
+        },
+        {
+            "type": "Voltage",
+            "name": "VOLTAGE",
+            "disabled": true
+        },
+        {
+            "type": "CanSerial",
+            "name": "CANBUS",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind_sog",
+            "device": "/dev/ttyUSB0",
+            "bps": 115200,
+	    "disabled": false
+        },
+        {
+            "type": "CanSocket",
+            "name": "CANBUS_S",
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind_sog",
+            "device": "can0",
+            "disabled": false
+        },
+	{
+            "type": "UDP",
+            "inout": "IN",
+            "port": 1222,
+            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind_sog",
+            "name": "NMEA2000",
+	    "disabled": true
+        },
+        {
+            "type": "TCP",
+            "inout": "OUT",
+            "port": 1111,
+            "name": "OUT"
+        },
+        {
+            "type": "Serial",
+            "inout": "IN",
+            "bps": 38400,
+            "device": "/dev/vhfais",
+            "name": "AIS_0183",
+            "disabled": true
+        },
+        {
+            "type": "Track",
+            "name": "TRACK"
+        },
+        {
+            "type": "GPSStatus",
+            "name": "GPSStatus"
+        },
+        {
+            "type": "AIS",
+            "name": "AIS"
+        },
+        {
+            "type": "Sensor",
+            "name": "SENSOR",
+	    "disabled": true
+        }
+    ]
+}

@@ -1,0 +1,32 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+
+  - name: Add user {{ nmea_user }}
+    become: true
+    user:
+      name: "{{ nmea_user }}"
+      shell: /bin/bash
+      home: /home/{{ nmea_user }}
+      password: "{{ nmea_user_password | password_hash('sha512') }}"
+      #password: '$6$PwVlUM1oUxCb$kn8jvfuVaoPeHcgLAA3uxHIwdc9uJAOuiD48h5mHiwLqTlVAwasm81eangznKwZBLJEi/DiypwmkkYkhJIzqM/'
+      groups: sys,adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,netdev,gpio,i2c,spi
+      append: yes
+
+  - name: Change pi password
+    become: true
+    user:
+      name: pi
+      password: "{{ nmea_user_password | password_hash('sha512') }}"
+      #password: '$6$PwVlUM1oUxCb$kn8jvfuVaoPeHcgLAA3uxHIwdc9uJAOuiD48h5mHiwLqTlVAwasm81eangznKwZBLJEi/DiypwmkkYkhJIzqM/'
+      update_paasword: always
+
+  - name: Create home profile
+    file:
+      path: /home/{{ nmea_user }}
+      state: directory
+      mode: '0755'
+
+  - name: Copy home scripts
+    command:
+      cmd: cp /home/pi/* /home/{{ nmea_user }}

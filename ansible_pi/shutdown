@@ -1,0 +1,4 @@
+#!/bin/sh
+now=$(date +"%T")
+echo "Shutdown time : $now \n" >> shutdown.log
+halt

@@ -1,0 +1,44 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+  - name: Add packages
+    become: true
+    apt:
+      name:
+        - openjdk-8-jdk
+        - vim
+        - git
+        - maven
+        - build-essential
+        - mariadb-server
+        - mariadb-client
+        - python-pymysql
+        - python3-pymysql
+        - can-utils
+        - wiringpi
+      state: latest
+
+  - name: Creates directory
+    file:
+      path: ~/source
+      state: directory
+
+  - name: Download nmearouter
+    git:
+      repo: "https://github.com/titio72/nmearouter.git"
+      dest: "~/source/nmearouter"
+
+  - name: Download nmeautils
+    git:
+      repo: "https://github.com/titio72/nmeautils.git"
+      dest: "~/source/nmeautils"
+
+  - name: Build nmeautils
+    shell:
+      cmd: mvn clean install -DskipTests
+      chdir: ~/source/nmeautils
+
+  - name: Build nmearouter
+    shell:
+      cmd: mvn clean package -DskipTests
+      chdir: ~/source/nmearouter

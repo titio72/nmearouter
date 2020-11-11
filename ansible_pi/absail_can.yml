@@ -1,0 +1,25 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+
+  - name: CAN module
+    become: true
+    lineinfile:
+      state: present
+      path: /boot/config.txt
+      line: "{{ item }}"
+    with_items:
+      - 'dtoverlay=mcp2515-can0,oscillator=8000000,interrupt=12'
+      - 'dtoverlay=spi-bcm2835-overlay'
+
+
+  - name: CAN module
+    become: true
+    lineinfile:
+      state: present
+      path: /etc/network/interfaces
+      line: "{{ item }}"
+    with_items:
+      - 'auto can0'
+      - '   iface can0 can static'
+      - '   bitrate 250000'

@@ -1,0 +1,120 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+  - name: Add packages
+    become: true
+    apt:
+      name:
+        - linux-headers
+        - hostapd
+        - dnsmasq
+        - netfilter-persistent
+        - iptables-persistent
+      state: latest
+
+  - name: Download drivers
+    git:
+      repo: "https://github.com/gnab/rtl8812au.git"
+      dest: "~/source/rtl8812au"
+      force: true
+
+  - name: Modify Makefile - disable i386 build
+    lineinfile:
+      path: ~/source/rtl8812au/Makefile
+      regexp: '^CONFIG_PLATFORM_I386_PC ='
+      line: CONFIG_PLATFORM_I386_PC = n
+
+  - name: Modify Makefile - enable ARM_RPI build
+    lineinfile:
+      path: ~/source/rtl8812au/Makefile
+      regexp: '^CONFIG_PLATFORM_ARM_RPI ='
+      line: CONFIG_PLATFORM_ARM_RPI = y
+
+  - name: Check if wpa_supplicant is already defined
+    lineinfile:
+      state: absent
+      path: /etc/rc.local
+      regexp: "^\/sbin\/wpa_supplicant"
+    check_mode: true
+    changed_when: false # This just makes things look prettier in the logs
+    register: check
+
+  - name: Define wpa_supplicant if undefined
+    become: true
+    lineinfile:
+      state: present
+      path: /etc/rc.local
+      line: '{{ item }}'
+      insertbefore: exit 0
+    with_items:
+      - '/sbin/ifconfig wlan1 up'
+      - 'iptables-restore < /etc/iptables.ipv4.nat'
+      - '/sbin/wpa_supplicant -B -D wext -i wlan1 -c /etc/wpa_supplicant/wpa_supplicant.conf'
+    when: check.found == 0
+
+  - name: Copy routing rules
+    become: true
+    template:
+      src: iptables.ipv4.nat
+      dest: /etc/iptables.ipv4.nat
+
+  - name: Create rule to name wlan interfaces
+    become: true
+    template:
+      src: 70-persistent-net.rules
+      dest: /etc/udev/rules.d/70-persistent-net.rules
+
+  - name: Install drivers
+    become: true
+    shell:
+      cmd: make && cp 8812au.ko /lib/modules/$(uname -r)/kernel/drivers/net/wireless && depmod
+      chdir: /home/{{ nmea_user }}/source/rtl8812au
+
+  - name: Set static IP for wlan0
+    become: true
+    lineinfile:
+      state: present
+      path: /etc/dhcpcd.conf
+      line: '{{ item }}'
+    with_items:
+      - 'interface wlan0'
+      - 'static ip_address=192.168.3.1/24'
+      - 'nohook wpa_supplicant'
+
+  - name: Create hostapd.conf
+    become: true
+    template:
+      src: hostapd.conf
+      dest: /etc/hostapd/hostapd.conf
+
+  - name: Enable routing
+    become: true
+    ini_file:
+      path: /etc/sysctl.d/routed-ap.conf
+      section: null
+      option: net.ipv4.ip_forward
+      value: 1
+
+  - name: Hostpad activation
+    become: true
+    systemd:
+      name: hostapd
+      masked: false
+      enabled: true
+
+  - name: DNS settings
+    become: true
+    ini_file:
+      path: /ets/dnsmasq.conf
+      section: null
+      allow_no_value: yes
+      option: "{{ item.opt }}"
+      value: "{{ item.v }}"
+    with_items:
+      - { opt: "interface", v: "wlan0" }
+      - { opt: "dhcp-range", v: "192.168.3.10,192.168.3.100,255.255.255.0,24h" }
+      - { opt: "host", v: "dhcp-host=f8:59:71:84:bb:42,pisa244,192.168.3.82,infinite" }
+      - { opt: "domain-needed", v: null }
+
+
+

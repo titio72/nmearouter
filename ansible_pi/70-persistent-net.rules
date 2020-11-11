@@ -1,0 +1,3 @@
+#SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:be:ac:03:33:00", NAME="wlan1"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="74:da:38:88:b2:a0", NAME="wlan1"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="dc:a6:32:a1:a1:e2", NAME="wlan0"

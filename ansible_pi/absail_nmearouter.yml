@@ -1,0 +1,67 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+  - name: Create working dir
+    file:
+      path: ~/router
+      state: directory
+
+  - name: Create conf dir
+    file:
+      path: ~/router/conf
+      state: directory
+
+  - name: Install conf
+    template:
+      src: "{{ item.source }}"
+      dest: "{{ item.dest }}"
+    with_items:
+      - { source: "conf/db.properties", dest: "~/router/conf/db.properties" }
+      - { source: "conf/deviation.csv", dest: "~/router/conf/deviation.csv" }
+      - { source: "conf/n2k_lookup.json", dest: "~/router/conf/n2k_lookup.json" }
+      - { source: "conf/pgns.csv", dest: "~/router/conf/pgns.csv" }
+      - { source: "conf/router.json", dest: "~/router/conf/router.json" }
+      - { source: "conf/sensors.properties", dest: "~/router/conf/sensors.properties" }
+      - { source: "conf/sim.properties", dest: "~/router/conf/sim.properties" }
+      - { source: "conf/WMM.cof", dest: "~/router/conf/WMM.cof" }
+
+  - name: Install scripts
+    template:
+      src: "{{ item.source }}"
+      dest: "{{ item.dest }}"
+      mode: "0755"
+    with_items:
+      - { source: "dbBck.sh", dest: "~/router/dbBck.sh" }
+      - { source: "nmearouter", dest: "~/router/nmearouter" }
+      - { source: "reset_can_bus.sh", dest: "~/router/reset_can_bus.sh" }
+      - { source: "setGPSTime", dest: "~/router/setGPSTime" }
+      - { source: "shutdown", dest: "~/router/shutdown" }
+
+  - name: Create link to jar
+    file:
+      src: ~/source/nmearouter/target/NMEARouter-0.1.8-SNAPSHOT.jar
+      dest: ~/router/NMEARouter.jar
+      state: link
+
+  - name: Create link to web dir
+    file:
+      src: ~/source/nmearouter/web
+      dest: ~/router/web
+      state: link
+
+  - name: Install gmap key
+    template:
+      src: gmap.key
+      dest: ~/router/web
+
+  - name: Create link in init.d
+    become: true
+    file:
+      src: /home/{{ nmea_user }}/router/nmearouter
+      dest: /etc/init.d/nmearouter
+      state: link
+
+  - name: Set alias
+    lineinfile:
+      path: ~/.bashrc
+      line: "alias router='sudo /etc/init.d/nmearouter'"

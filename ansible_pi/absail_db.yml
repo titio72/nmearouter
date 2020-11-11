@@ -1,0 +1,60 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+  - name: Enable network access mysql
+    become: true
+    ini_file:
+      path: /etc/mysql/mariadb.conf.d/50-server.cnf
+      section: mysqld
+      option: bind-address
+      value: 0.0.0.0
+      backup: yes
+
+  - name: Set mysql root password
+    become: true
+    ignore_errors: yes
+    command:
+      cmd: mysqladmin -u root password absail
+
+  - name: Restart mariadb
+    become: true
+    service:
+      name: mariadb
+      enabled: true
+      state: restarted
+
+  - name: Move db dump
+    copy:
+      src: dump.sql
+      dest: dump.sql
+
+  - name: Move agents db script
+    copy:
+      src: agents.sql
+      dest: agents.sql
+
+  - name: Create a nmearouter database
+    mysql_db:
+      name: nmearouter
+      state: import
+      login_user: root
+      login_password: absail
+      target: dump.sql
+
+  - name: Create agents table
+    mysql_db:
+      name: nmearouter
+      state: import
+      login_user: root
+      login_password: absail
+      target: agents.sql
+
+  - name: Create database user with all database privileges
+    mysql_user:
+      name: nmearouter
+      password: nmearouter
+      host: '%'
+      priv: 'nmearouter.*:ALL'
+      login_user: root
+      login_password: absail
+      state: present

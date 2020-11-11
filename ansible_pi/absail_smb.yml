@@ -1,0 +1,46 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+  - name: Add packages
+    become: true
+    apt:
+      name:
+        - samba
+        - samba-common-bin
+      state: latest
+
+  - name: set NTLM auth
+    become: true
+    ini_file:
+      path: /etc/samba/smb.conf
+      section: global
+      option: 'ntlm auth'
+      value: true
+
+  - name: Share homes
+    become: true
+    ini_file:
+      path: /etc/samba/smb.conf
+      section: homes
+      option: browsable
+      value: yes
+
+  - name: RW homes
+    become: true
+    ini_file:
+      path: /etc/samba/smb.conf
+      section: homes
+      option: 'read only'
+      value: no
+
+  - name: samba_users | creating samba user passwords
+    become: true
+    shell: "(echo {{ nmea_user_password }}; echo {{ nmea_user_password }}) | smbpasswd -s -a {{ nmea_user }}"
+    become: true
+
+  - name: Restart smb
+    become: true
+    service:
+      name: smbd
+      enabled: true
+      state: restarted

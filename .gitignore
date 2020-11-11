@@ -24,3 +24,4 @@
 /gdrive_credentials.json
 /.idea/
 /NMEARouter.iml
+ansible_pi/gmap.key

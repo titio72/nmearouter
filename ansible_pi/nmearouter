@@ -1,0 +1,56 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          nmearouter
+# Required-Start:    mysql
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: NMEA router 
+### END INIT INFO
+SERVICE_NAME=NMEARouter
+JAR=NMEARouter.jar
+PATH_TO=/home/aboni/router
+PID_PATH_NAME=/var/run/NMEARouter.pid
+PATH_TO_JAR=$PATH_TO/$JAR
+case $1 in
+    start)
+        echo "Starting $SERVICE_NAME ..."
+        if [ ! -f $PID_PATH_NAME ]; then
+            echo "Changing work dir to $PATH_TO"
+            cd $PATH_TO
+            echo "Starting java "
+            nohup /usr/bin/java -Xmx1024m -jar $PATH_TO_JAR -web > $PATH_TO/out.txt 2> $PATH_TO/err.txt < /dev/null &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stopping ..."
+            kill $PID;
+            echo "$SERVICE_NAME stopped ..."
+            rm $PID_PATH_NAME
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f $PID_PATH_NAME ]; then
+            PID=$(cat $PID_PATH_NAME);
+            echo "$SERVICE_NAME stopping ...";
+            kill $PID;
+            echo "$SERVICE_NAME stopped ...";
+            rm $PID_PATH_NAME
+            echo "$SERVICE_NAME starting ..."
+            cd $PATH_TO
+            nohup /usr/bin/java -Xmx1024m -jar $PATH_TO_JAR -web /tmp 2>> /dev/null >> /dev/null &
+                        echo $! > $PID_PATH_NAME
+            echo "$SERVICE_NAME started ..."
+        else
+            echo "$SERVICE_NAME is not running ..."
+        fi
+    ;;
+esac 
