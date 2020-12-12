@@ -1,0 +1,45 @@
+- hosts: ABSail
+  remote_user: "{{ nmea_user }}"
+  tasks:
+
+  - name: RTC module
+    become: true
+    lineinfile:
+      state: present
+      path: /boot/config.txt
+      line: "dtoverlay=i2c-rtc,pcf8523"
+
+  - name: Remove fake clock packages
+    become: true
+    apt:
+      name: fake-hwclock
+      state: absent
+
+  - name: Do not start fake clock service
+    become: true
+    command: update-rc.d -f fake-hwclock remove
+
+  - name: Dsable service (when using systemd)
+    become: true
+    systemd:
+      name: fake-hwclock
+      enabled: yes
+      masked: no
+
+  - name: Configure clock scripts
+    lineinfile:
+      path: /lib/udev/hwclock-set
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - { regexp: '^/sbin/hwclock --rtc=$dev --systz --badyear',  line: '#/sbin/hwclock --rtc=$dev --systz --badyear' }
+      - { regexp: '^/sbin/hwclock --rtc=$dev --systz',  line: '#/sbin/hwclock --rtc=$dev --systz' }
+
+    - name: More config script changes
+      blockinfile:
+        path: /lib/udev/hwclock-set
+        state: absent
+        block: |
+          if [ -e /run/systemd/system ] ; then
+              exit 0
+          fi

@@ -1,0 +1,20 @@
+- hosts: localhost
+  remote_user: "{{ nmea_user }}"
+  tasks:
+    - name: Configure clock scripts
+      lineinfile:
+        path: /home/aboni/IdeaProjects/router/nmearouter/ansible_pi/hwclock-set
+        state: absent
+        line: "{{ item }}"
+      with_items:
+        - '    /sbin/hwclock --rtc=$dev --systz --badyear'
+        - '    /sbin/hwclock --rtc=$dev --systz'
+
+    - name: More config script changes
+      blockinfile:
+        path: /home/aboni/IdeaProjects/router/nmearouter/ansible_pi/hwclock-set
+        state: absent
+        block: |
+          if [ -e /run/systemd/system ] ; then
+              exit 0
+          fi
