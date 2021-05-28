@@ -17,7 +17,7 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgAttitude;
-import com.aboni.nmea.router.message.beans.MsgAttitudeImpl;
+import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 

@@ -15,9 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery;
 
-import com.aboni.utils.TimeSeriesSample;
+import com.aboni.nmea.router.data.StatsSample;
 import org.json.JSONObject;
 
 public interface SampleWriter {
-    JSONObject[] getSampleNode(TimeSeriesSample sample);
+    JSONObject[] getSampleNode(StatsSample sample);
 }

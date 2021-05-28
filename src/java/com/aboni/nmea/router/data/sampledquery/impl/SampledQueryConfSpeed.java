@@ -18,6 +18,7 @@ package com.aboni.nmea.router.data.sampledquery.impl;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 
 public class SampledQueryConfSpeed implements SampledQueryConf {
+
     @Override
     public String getTable() {
         return "track";

@@ -16,6 +16,7 @@
 package com.aboni.nmea.router.nmea0183.impl;
 
 import com.aboni.nmea.router.message.MsgPositionAndVector;
+import com.aboni.nmea.router.message.MsgSystemTime;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.sentences.NMEATimestampExtractor;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -26,9 +27,9 @@ import net.sf.marineapi.nmea.util.Position;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-public class NMEA0183RMCMessage extends NMEA0183Message implements MsgPositionAndVector {
+public class NMEA0183RMCMessage extends NMEA0183Message implements MsgPositionAndVector, MsgSystemTime {
 
-    protected NMEA0183RMCMessage(@NotNull RMCSentence sentence) {
+    public NMEA0183RMCMessage(@NotNull RMCSentence sentence) {
         super(sentence);
     }
 
@@ -37,8 +38,18 @@ public class NMEA0183RMCMessage extends NMEA0183Message implements MsgPositionAn
         return -1;
     }
 
+    @Override
+    public Instant getTime() {
+        return getTimestamp();
+    }
+
+    @Override
+    public String getTimeSourceType() {
+        return "GPS";
+    }
+
     private RMCSentence getRMC() {
-        return (RMCSentence)getSentence();
+        return (RMCSentence) getSentence();
     }
 
     @Override

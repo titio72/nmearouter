@@ -24,7 +24,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.message.beans.*;
+import com.aboni.nmea.router.message.impl.*;
 import com.aboni.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -143,6 +143,10 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
         this.data.setWindDirection(wDirection);
     }
 
+    private static double oscillator(double base, int periodMinutes, double amplitude) {
+        return base + amplitude * Math.sin(Math.PI * 0.5 * (System.currentTimeMillis() / (double) periodMinutes / 60.0 / 1000.0));
+    }
+
     @Override
     public void onTimer() {
         super.onTimer();
@@ -162,7 +166,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             double ph15m = System.currentTimeMillis() / (1000d * 60d * 15d) * 2 * Math.PI; // 15 minutes phase
             double depth = Utils.round(data.getDepth() + Math.sin(ph15m) * data.getDepthRange(), 1);
             double hdg = Utils.normalizeDegrees0To360(navData.refHeading + r.nextDouble() * 3.0);
-            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble() * 1.0;
+            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble();
             double absoluteWindDir = data.getWindDirection() + r.nextDouble() * 2.0;
             double tWDirection = Utils.normalizeDegrees0To360(absoluteWindDir - hdg);
             double speed = getSpeed((float) absoluteWindSpeed, (int) tWDirection);
@@ -171,10 +175,12 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             double aWSpeed = aWind.getApparentWindSpeed();
             double aWDirection = Utils.normalizeDegrees0To360(aWind.getApparentWindDeg());
 
-            double temp = Utils.round(data.getTemp() + (new Random().nextDouble() / 10.0), 2);
-            double press = Utils.round(data.getPress() + (new Random().nextDouble() / 10.0), 1);
-            double roll = Utils.round(new Random().nextDouble() * 5, 1);
+            double temp = Utils.round(oscillator(data.getTemp(), 60, 5.0), 2);
+            double press = Utils.round(oscillator(data.getPress(), 180, 4), 1);
+            double humidity = Utils.round(oscillator(data.getHum(), 60, 2.0), 2);
+            double roll = Utils.round(new Random().nextDouble() * 5, 1) * absoluteWindDir < 180 ? -1 : 1;
             double pitch = Utils.round((new Random().nextDouble() * 5) + 0, 1);
+            double yaw = Utils.normalizeDegrees180To180(hdg);
 
             if (lastTS != 0) {
                 double dTime = (double) (newTS - lastTS) / 1000d / 60d / 60d;
@@ -188,8 +194,9 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             sendDepth(depth);
             sendWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
             sendHeadingAndSpeed(hdg, speed);
-            sendMeteo(temp, press);
-            sendGyro(hdg, roll, pitch);
+            sendMeteo(temp, press, humidity);
+            sendGyro(yaw, roll, pitch);
+            sendVoltage();
         }
     }
 
@@ -215,12 +222,20 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
         return speed;
     }
 
-    private void sendMeteo(double temp, double press) {
+    private void sendMeteo(double temp, double press, double hum) {
         if (data.isXdrMeteo()) {
             if (data.isXdrMeteoAtm()) notify(new MsgPressureImpl(PressureSource.ATMOSPHERIC, press));
             if (data.isXdrMeteoTmp()) notify(new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, temp));
-            if (data.isXdrMeteoHum()) notify(new MsgHumidityImpl(HumiditySource.INSIDE, data.getHum()));
+            if (data.isXdrMeteoHum()) notify(new MsgHumidityImpl(HumiditySource.INSIDE, hum));
             if (data.isMtw()) notify(new MsgTemperatureImpl(TemperatureSource.SEA, temp - 5));
+        }
+    }
+
+
+    private void sendVoltage() {
+        if (data.isXdrDiagnostic()) {
+            notify(new MsgBatteryImpl(0, 13.56));
+            notify(new MsgBatteryImpl(1, 13.12));
         }
     }
 
@@ -264,7 +279,6 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             notify(s);
             notify(p);
             notify(ps);
-
             notify(new MsgSystemTimeImpl("GPS", p.getTimestamp()));
         }
     }

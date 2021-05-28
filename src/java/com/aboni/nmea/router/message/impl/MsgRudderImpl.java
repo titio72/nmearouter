@@ -13,43 +13,42 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message.beans;
+package com.aboni.nmea.router.message.impl;
 
-import com.aboni.nmea.router.message.MsgPressure;
-import com.aboni.nmea.router.message.PressureSource;
+import com.aboni.nmea.router.message.MsgRudder;
 
-public class MsgPressureImpl implements MsgPressure {
+public class MsgRudderImpl implements MsgRudder {
 
-    private final double pressure;
-    private final PressureSource src;
+    private final int instance;
+    private final int orderDirection;
+    private final double angle;
+    private final double angleOrder;
 
-    public MsgPressureImpl(PressureSource src, double pressure) {
-        this.src = src;
-        this.pressure = pressure;
-    }
-
-    @Override
-    public int getSID() {
-        return -1;
+    public MsgRudderImpl(int instance, double angle, double angleOrder, int orderDirection) {
+        this.instance = instance;
+        this.orderDirection = orderDirection;
+        this.angle = angle;
+        this.angleOrder = angleOrder;
     }
 
     @Override
     public int getInstance() {
-        return 0;
+        return instance;
     }
 
     @Override
-    public PressureSource getPressureSource() {
-        return src;
+    public double getAngle() {
+        return angle;
     }
 
     @Override
-    public double getPressure() {
-        return pressure;
+    public double getAngleOrder() {
+        return angleOrder;
     }
 
     @Override
-    public String toString() {
-        return String.format("Pressure: Source {%s} Pressure {%.1f}", getPressureSource(), getPressure());
+    public int getDirectionOrder() {
+        return orderDirection;
     }
+
 }

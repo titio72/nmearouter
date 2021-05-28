@@ -8,6 +8,10 @@
 		},
 		{
 			"path": "../src"
+		},
+		{
+			"name": "RF",
+			"path": "../../../../Documents/PlatformIO/Projects/RF"
 		}
 	]
 }

@@ -21,6 +21,10 @@
             "name": "METEO"
         },
         {
+            "type": "MeteoMonitor",
+            "name": "METEOMON"
+        },
+        {
             "type": "Console",
             "name": "CONSOLE"
         },

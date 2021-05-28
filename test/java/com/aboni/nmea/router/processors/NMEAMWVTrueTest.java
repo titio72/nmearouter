@@ -19,8 +19,8 @@ import com.aboni.nmea.router.impl.DefaultTimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.message.MsgWindData;
-import com.aboni.nmea.router.message.beans.MsgSOGAndCOGImpl;
-import com.aboni.nmea.router.message.beans.MsgWindDataImpl;
+import com.aboni.nmea.router.message.impl.MsgSOGAndCOGImpl;
+import com.aboni.nmea.router.message.impl.MsgWindDataImpl;
 import com.aboni.utils.Pair;
 import org.junit.Test;
 

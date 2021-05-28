@@ -18,7 +18,7 @@ package com.aboni.nmea.router.agent.impl.system;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.TemperatureSource;
-import com.aboni.nmea.router.message.beans.MsgTemperatureImpl;
+import com.aboni.nmea.router.message.impl.MsgTemperatureImpl;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.HWSettings;

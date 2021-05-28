@@ -13,26 +13,31 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message.beans;
+package com.aboni.nmea.router.message.impl;
 
-import com.aboni.nmea.router.message.MsgWaterDepth;
+import com.aboni.nmea.router.message.MsgAttitude;
 
-public class MsgWaterDepthImpl implements MsgWaterDepth {
+public class MsgAttitudeImpl implements MsgAttitude {
 
     private final int sid;
-    private final double depth;
-    private final double offset;
-    private final double range;
+    private final double pitch;
+    private final double roll;
+    private final double yaw;
 
-    public MsgWaterDepthImpl(double depth, double offset) {
-        this(-1, depth, offset, Double.NaN);
+    public MsgAttitudeImpl(double yaw, double roll, double pitch) {
+        this(-1, yaw, roll, pitch);
     }
 
-    public MsgWaterDepthImpl(int sid, double depth, double offset, double range) {
+    public MsgAttitudeImpl(int sid, double yaw, double roll, double pitch) {
         this.sid = sid;
-        this.depth = depth;
-        this.offset = offset;
-        this.range = range;
+        this.pitch = pitch;
+        this.roll = roll;
+        this.yaw = yaw;
+    }
+
+    @Override
+    public double getPitch() {
+        return pitch;
     }
 
     @Override
@@ -41,23 +46,17 @@ public class MsgWaterDepthImpl implements MsgWaterDepth {
     }
 
     @Override
-    public double getDepth() {
-        return depth;
+    public double getYaw() {
+        return yaw;
     }
 
     @Override
-    public double getOffset() {
-        return offset;
-    }
-
-    @Override
-    public double getRange() {
-        return range;
+    public double getRoll() {
+        return roll;
     }
 
     @Override
     public String toString() {
-        return String.format("Depth: Depth {%.1f} Offset {%.1f}", getDepth(), getOffset());
+        return String.format("Attitude: Yaw {%.1f} Pitch {%.1f} Roll {%.1f} ", getYaw(), getPitch(), getRoll());
     }
-
 }

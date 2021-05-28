@@ -13,7 +13,7 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message.beans;
+package com.aboni.nmea.router.message.impl;
 
 import com.aboni.nmea.router.message.MsgSystemTime;
 
@@ -56,4 +56,5 @@ public class MsgSystemTimeImpl implements MsgSystemTime {
     public String toString() {
         return String.format("Time: time {%s} Source {%s}", getTime(), getTimeSourceType());
     }
+
 }

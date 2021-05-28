@@ -13,32 +13,15 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message.beans;
+package com.aboni.nmea.router.data;
 
-import com.aboni.nmea.router.message.MsgRateOfTurn;
+public class StatsAlert implements StatScanner {
 
-public class MsgRateOfTurnImpl implements MsgRateOfTurn {
-
-    private final int sid;
-    private final double rateOfTurn;
-
-    public MsgRateOfTurnImpl(int sid, double rateOfTurn) {
-        this.sid = sid;
-        this.rateOfTurn = rateOfTurn;
-    }
+    private long period;
+    private double change;
 
     @Override
-    public int getSID() {
-        return sid;
-    }
-
-    @Override
-    public double getRateOfTurn() {
-        return rateOfTurn;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Rate of turn: rate {%.1f}", getRateOfTurn());
+    public boolean scan(StatsSample sample) {
+        return false;
     }
 }

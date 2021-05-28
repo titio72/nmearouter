@@ -13,42 +13,32 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.message.beans;
+package com.aboni.nmea.router.message.impl;
 
-import com.aboni.nmea.router.message.MsgRudder;
+import com.aboni.nmea.router.message.MsgRateOfTurn;
 
-public class MsgRudderImpl implements MsgRudder {
+public class MsgRateOfTurnImpl implements MsgRateOfTurn {
 
-    private final int instance;
-    private final int orderDirection;
-    private final double angle;
-    private final double angleOrder;
+    private final int sid;
+    private final double rateOfTurn;
 
-    public MsgRudderImpl(int instance, double angle, double angleOrder, int orderDirection) {
-        this.instance = instance;
-        this.orderDirection = orderDirection;
-        this.angle = angle;
-        this.angleOrder = angleOrder;
+    public MsgRateOfTurnImpl(int sid, double rateOfTurn) {
+        this.sid = sid;
+        this.rateOfTurn = rateOfTurn;
     }
 
     @Override
-    public int getInstance() {
-        return instance;
+    public int getSID() {
+        return sid;
     }
 
     @Override
-    public double getAngle() {
-        return angle;
+    public double getRateOfTurn() {
+        return rateOfTurn;
     }
 
     @Override
-    public double getAngleOrder() {
-        return angleOrder;
+    public String toString() {
+        return String.format("Rate of turn: rate {%.1f}", getRateOfTurn());
     }
-
-    @Override
-    public int getDirectionOrder() {
-        return orderDirection;
-    }
-
 }
