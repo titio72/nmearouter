@@ -113,7 +113,7 @@
     with_items:
       - { opt: "interface", v: "wlan0" }
       - { opt: "dhcp-range", v: "192.168.3.10,192.168.3.100,255.255.255.0,24h" }
-      - { opt: "host", v: "dhcp-host=f8:59:71:84:bb:42,pisa244,192.168.3.82,infinite" }
+      - { opt: "dhcp-host", v: "f8:59:71:84:bb:42,pisa244,192.168.3.82,infinite" }
       - { opt: "domain-needed", v: null }
 
 

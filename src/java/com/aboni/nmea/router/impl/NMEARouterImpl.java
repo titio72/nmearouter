@@ -50,7 +50,7 @@ public class NMEARouterImpl implements NMEARouter {
     private final RouterMessageFactory messageFactory;
     private final Log log;
 
-    private static final int THREADS_POOL  	= 4;
+    private static final int THREADS_POOL  	= 8;
     private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
     private static final int TIMER_HR		= 250;
     private int timerCount = 0;

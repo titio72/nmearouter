@@ -27,7 +27,7 @@ public class LoadGPX {
 
 
         int counter = 0;
-        String file = "/home/aboni/Downloads/Navionics_archive_export_20201108_b.gpx";
+        String file = "C:\\Users\\aboni\\Google Drive\\Vela\\20210508.gpx";
         try (FileReader reader = new FileReader(file)) {
             byte[] buffer = new byte[6];
             StringBuilder b = null;
