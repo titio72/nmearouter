@@ -22,7 +22,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPosition;
-import com.aboni.nmea.router.message.beans.MsgHeadingImpl;
+import com.aboni.nmea.router.message.impl.MsgHeadingImpl;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.DataEvent;
 import com.aboni.utils.Pair;

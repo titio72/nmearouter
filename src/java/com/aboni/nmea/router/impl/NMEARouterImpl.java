@@ -31,7 +31,10 @@ import javax.validation.constraints.NotNull;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
@@ -71,7 +74,7 @@ public class NMEARouterImpl implements NMEARouter {
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
-        exec = Executors.newFixedThreadPool(THREADS_POOL, r -> {
+        exec = Executors.newFixedThreadPool(THREADS_POOL, (Runnable r) -> {
             Thread t = new Thread(r, "Router thread " + threadN);
             threadN++;
             return t;
@@ -83,13 +86,13 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
-            for (NMEAAgent a : agents.values()) {
+            agents.values().stream().forEach((NMEAAgent a) -> {
                 runMe(a::onTimerHR, "timerHR", AGENT_KEY_NAME, a.getName());
                 if (timerCount == 0) {
                     runMe(a::onTimer, "timer", AGENT_KEY_NAME, a.getName());
                     dumpStats();
                 }
-            }
+            });
         }
     }
 

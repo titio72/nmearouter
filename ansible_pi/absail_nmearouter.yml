@@ -32,7 +32,7 @@
       mode: "0755"
     with_items:
       - { source: "dbBck.sh", dest: "~/router/dbBck.sh" }
-      - { source: "nmearouter", dest: "~/router/nmearouter" }
+      - { source: "nmearouter.sh", dest: "~/router/nmearouter.sh" }
       - { source: "reset_can_bus.sh", dest: "~/router/reset_can_bus.sh" }
       - { source: "setGPSTime", dest: "~/router/setGPSTime" }
       - { source: "shutdown", dest: "~/router/shutdown" }
@@ -54,14 +54,25 @@
       src: gmap.key
       dest: ~/router/web
 
-  - name: Create link in init.d
+  - name: Install nmearouter service
     become: true
-    file:
-      src: /home/{{ nmea_user }}/router/nmearouter
-      dest: /etc/init.d/nmearouter
-      state: link
+    template:
+      src: nmearouter.service
+      dest: /etc/systemd/system
+
+  - name: Reload services
+    become: true
+    systemd:
+      daemon_reload: yes
+
+  - name: Enable nmearouter service
+    systemd:
+      name: nmearouter
+      enabled: yes
+      masked: no
 
   - name: Set alias
     lineinfile:
       path: ~/.bashrc
-      line: "alias router='sudo /etc/init.d/nmearouter'"
+      line: "alias router='sudo service nmearouter'"
+

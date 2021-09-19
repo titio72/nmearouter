@@ -167,7 +167,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             double ph15m = System.currentTimeMillis() / (1000d * 60d * 15d) * 2 * Math.PI; // 15 minutes phase
             double depth = Utils.round(data.getDepth() + Math.sin(ph15m) * data.getDepthRange(), 1);
             double hdg = Utils.normalizeDegrees0To360(navData.refHeading + r.nextDouble() * 3.0);
-            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble() * 1.0;
+            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble();
             double absoluteWindDir = data.getWindDirection() + r.nextDouble() * 2.0;
             double tWDirection = Utils.normalizeDegrees0To360(absoluteWindDir - hdg);
             double speed = getSpeed((float) absoluteWindSpeed, (int) tWDirection);
@@ -180,7 +180,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             double aWDirection = Utils.normalizeDegrees0To360(aWind.getApparentWindDeg());
 
             double temp = Utils.round(data.getTemp() + (new Random().nextDouble() / 10.0), 2);
-            double press = Utils.round(data.getPress() + (new Random().nextDouble() / 10.0), 1);
+            double press = Utils.round(data.getPress() + Math.sin(Math.PI * (System.currentTimeMillis() / 3600000.0) / 2.0), 1);
             double roll = Utils.round(new Random().nextDouble() * 5, 1);
             double pitch = Utils.round((new Random().nextDouble() * 5) + 0, 1);
 
@@ -237,8 +237,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private void sendVoltage() {
         if (data.isXdrDiagnostic()) {
             XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
-            xdr.addMeasurement(new Measurement("V", 13.56, "V", "V0"));
-            xdr.addMeasurement(new Measurement("V", 13.12, "V", "V1"));
+            xdr.addMeasurement(new Measurement("V", 13.56, "V", "VOLTAGE0"));
+            xdr.addMeasurement(new Measurement("V", 13.12, "V", "VOLTAGE1"));
             NMEASimulatorSource.this.notify(xdr);
         }
     }

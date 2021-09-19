@@ -36,7 +36,6 @@
   - name: samba_users | creating samba user passwords
     become: true
     shell: "(echo {{ nmea_user_password }}; echo {{ nmea_user_password }}) | smbpasswd -s -a {{ nmea_user }}"
-    become: true
 
   - name: Restart smb
     become: true

@@ -82,4 +82,9 @@ public class MsgSpeedAndHeadingFacade implements MsgSpeedAndHeading {
     public String toString() {
         return heading.toString() + " " + speed.toString();
     }
+
+    @Override
+    public String getMessageOrigin() {
+        return (heading.getMessageOrigin().equals(speed.getMessageOrigin())) ? heading.getMessageOrigin() : "";
+    }
 }

@@ -1,5 +1,5 @@
 - hosts: ABSail
-  remote_user: "{{ nmea_user }}"
+  remote_user: "pi"
   tasks:
 
   - name: Add user {{ nmea_user }}

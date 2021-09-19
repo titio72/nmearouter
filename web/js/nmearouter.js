@@ -173,6 +173,19 @@ function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
   xmlHttp.send(null);
 }
 
+function httpLoadMeteo(dt0, dt1, tag, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
+      var json = JSON.parse(xmlHttp.responseText);
+      cback(json);
+    }
+  }
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo2?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1) + "&tag=" + tag, true);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
 function httpLoadAllMeteoById(id, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {

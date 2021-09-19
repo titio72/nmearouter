@@ -24,7 +24,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.MsgAttitude;
 import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.message.beans.MsgAttitudeImpl;
+import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
 import com.aboni.sensors.*;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.LogAdmin;

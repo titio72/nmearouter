@@ -29,7 +29,7 @@ public interface MsgPressure extends Message {
     PressureSource getPressureSource();
 
     default @Override
-        JSONObject toJSON() {
+    JSONObject toJSON() {
         JSONObject res = new JSONObject();
         res.put("topic", "pressure");
         JSONUtils.addDouble(res, getPressure(), "pressure");
@@ -37,4 +37,10 @@ public interface MsgPressure extends Message {
         res.put("instance", getInstance());
         return res;
     }
+
+    @Override
+    default String getMessageContentType() {
+        return "Pressure";
+    }
+
 }

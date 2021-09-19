@@ -164,6 +164,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceShutdown.class))), "/shutdown");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SimulatorService.class))), "/sim");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService.class))), "/meteo");
+        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService2.class))), "/meteo2");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
@@ -173,6 +174,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
+        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
     }
 
     @Override

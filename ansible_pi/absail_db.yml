@@ -25,7 +25,7 @@
 
   - name: Move db dump
     copy:
-      src: dump.sql
+      src: dump_empty.sql
       dest: dump.sql
 
   - name: Move agents db script
@@ -58,3 +58,4 @@
       login_user: root
       login_password: absail
       state: present
+

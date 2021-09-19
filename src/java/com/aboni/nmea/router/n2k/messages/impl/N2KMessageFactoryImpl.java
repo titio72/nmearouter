@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2020,  Andrea Boni
+ * This file is part of NMEARouter.
+ * NMEARouter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * NMEARouter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.n2k.N2KMessage;
@@ -45,6 +60,7 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
     }
 
     private void loadDB() {
+        supported.put(N2KMessagePGNs.BATTERY_PGN, N2KDef.getInstance(N2KBatteryImpl.class, false)); // battery voltage & current
         supported.put(N2KMessagePGNs.WIND_PGN, N2KDef.getInstance(N2KWindDataImpl.class, false)); // Wind Data
         supported.put(N2KMessagePGNs.DEPTH_PGN, N2KDef.getInstance(N2KWaterDepthImpl.class, false)); // Water Depth
         supported.put(N2KMessagePGNs.SPEED_PGN, N2KDef.getInstance(N2KSpeedImpl.class, false)); // Speed

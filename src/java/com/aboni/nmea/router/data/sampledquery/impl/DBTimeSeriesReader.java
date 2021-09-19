@@ -61,7 +61,7 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
                 double vMin = rs.getDouble(5);
                 TimeSeries timeSeries = res.getOrDefault(type, null);
                 if (timeSeries == null) {
-                    timeSeries = new TimeSeries(sampling, maxSamples);
+                    timeSeries = new TimeSeries(type, sampling, maxSamples);
                     res.put(type, timeSeries);
                 }
                 timeSeries.doSampling(ts.getTime(), vMax, v, vMin);

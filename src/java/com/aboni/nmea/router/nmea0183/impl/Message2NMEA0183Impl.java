@@ -74,8 +74,29 @@ public class Message2NMEA0183Impl implements Message2NMEA0183 {
             return handlePressure((MsgPressure) message);
         } else if (message instanceof MsgHumidity) {
             return handleHumidity((MsgHumidity) message);
+        } else if (message instanceof MsgBattery) {
+            return handleBattery((MsgBattery) message);
         }
         return TEMPLATE;
+    }
+
+    private Sentence[] handleBattery(MsgBattery message) {
+        XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR);
+        boolean send = false;
+        if (!Double.isNaN(message.getVoltage())) {
+            double voltage = message.getVoltage();
+            xdr.addMeasurement(new Measurement("V", voltage, "V", "VOLTAGE" + message.getInstance()));
+            send = true;
+        }
+        if (!Double.isNaN(message.getCurrent())) {
+            double current = message.getCurrent();
+            xdr.addMeasurement(new Measurement("V", current, "A", "CURRENT" + message.getInstance()));
+            send = true;
+        }
+        if (send)
+            return new Sentence[]{xdr};
+        else
+            return TEMPLATE;
     }
 
     private static Sentence[] handlePositionAndVector(MsgPositionAndVector message) {

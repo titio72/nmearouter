@@ -34,4 +34,9 @@ public interface MsgSpeedAndHeading extends MsgHeading, MsgSpeed {
         json.put("sensor", getSpeedSensorType());
         return json;
     }
+
+    @Override
+    default String getMessageContentType() {
+        return "SpeedAndHeading";
+    }
 }

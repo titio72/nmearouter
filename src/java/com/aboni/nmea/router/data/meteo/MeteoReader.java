@@ -24,5 +24,7 @@ public interface MeteoReader {
         void onRead(MeteoSample sample);
     }
 
+    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException;
+
     void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException;
 }

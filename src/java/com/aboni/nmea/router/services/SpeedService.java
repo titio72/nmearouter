@@ -17,8 +17,12 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.sampledquery.*;
-import com.aboni.utils.*;
+import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Query;
+import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -44,9 +48,9 @@ public class SpeedService extends JSONWebService {
         private int count = 0;
 
         @Override
-        public JSONObject[] getSampleNode(TimeSeriesSample s) {
+        public JSONObject[] getSampleNode(StatsSample s) {
             JSONObject[] ret;
-            if (s.getValue() <= 0.1 && lastV <= 0.1) {
+            if (s.getAvg() <= 0.1 && lastV <= 0.1) {
                 if (count > 0) {
                     if (!lastSkipped) {
                         // speed is 0 but last sample was not skipped so write a 0 to bring chart to 0
@@ -78,13 +82,16 @@ public class SpeedService extends JSONWebService {
                 lastSkipped = false;
                 lastNull = false;
             }
-            lastV = s.getValue();
-            lastTS = s.getLastTs();
+            lastV = s.getAvg();
+            lastTS = s.getT1();
             return ret;
         }
 
-        private JSONObject writeValue(TimeSeriesSample s) {
-            return write(s.getT0(), Utils.round(s.getValueMin(), 2), Utils.round(s.getValue(), 2), Utils.round(s.getValueMax(), 2));
+        private JSONObject writeValue(StatsSample s) {
+            return write(s.getT0(),
+                    Utils.round(s.getMin(), 2),
+                    Utils.round(s.getAvg(), 2),
+                    Utils.round(s.getMax(), 2));
         }
 
         private JSONObject writeNull(long ts) {
