@@ -56,10 +56,10 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
 
     @Inject
     public N2KMessageFactoryImpl() {
-        loadDB();
+        init();
     }
 
-    private void loadDB() {
+    private void init() {
         supported.put(N2KMessagePGNs.BATTERY_PGN, N2KDef.getInstance(N2KBatteryImpl.class, false)); // battery voltage & current
         supported.put(N2KMessagePGNs.WIND_PGN, N2KDef.getInstance(N2KWindDataImpl.class, false)); // Wind Data
         supported.put(N2KMessagePGNs.DEPTH_PGN, N2KDef.getInstance(N2KWaterDepthImpl.class, false)); // Water Depth

@@ -33,4 +33,6 @@ public interface TripManagerX {
     List<Trip> getTrips(boolean sortDescendant) throws TripManagerException;
 
     List<Trip> getTrips(int year, boolean sortDescendant) throws TripManagerException;
+
+    void trimTrip(int id) throws TripManagerException;
 }

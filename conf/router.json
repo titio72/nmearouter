@@ -62,17 +62,17 @@
             "name": "AIS"
         },
         {
-            "type": "CanSerial",
-            "name": "CANBUS",
-            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "device": "COM18",
-            "bps": 115200
+          "type": "CanSerial",
+          "name": "CANBUS_S",
+          "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
+          "device": "COM18",
+          "bps": 115200
         },
-        {
-            "type": "CanSocket",
-            "name": "CANBUS_S",
-            "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
-            "device": "vcan0"
-        }
+      {
+        "type": "CanSocket",
+        "name": "CANBUS",
+        "qos": "rmc_filter;speed_filter;enrich_hdm;dpt;truewind",
+        "device": "vcan0"
+      }
     ]
 }

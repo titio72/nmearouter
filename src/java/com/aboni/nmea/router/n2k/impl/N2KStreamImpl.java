@@ -44,24 +44,16 @@ public class N2KStreamImpl implements N2KStream {
     private final N2KMessageParserFactory parserFactory;
 
     @Inject
-    public N2KStreamImpl(@NotNull Log log, @NotNull N2KMessageParserFactory parserFactory) {
-        this(log, false, parserFactory);
+    public N2KStreamImpl(@NotNull Log log, @NotNull PGNSourceFilter pgnSrcFilter, @NotNull N2KMessageParserFactory parserFactory) {
+        this(log, false, pgnSrcFilter, parserFactory);
     }
 
-    public N2KStreamImpl(Log logger, boolean throttling, @NotNull N2KMessageParserFactory parserFactory) {
+    public N2KStreamImpl(Log logger, boolean throttling, @NotNull PGNSourceFilter pgnSrcFilter, @NotNull N2KMessageParserFactory parserFactory) {
+        this.srcFilter = pgnSrcFilter;
         this.parserFactory = parserFactory;
         this.logger = logger;
         payloadMap = new HashMap<>();
-        srcFilter = new PGNSourceFilter(logger);
         this.throttling = throttling;
-    }
-
-    public void setThrottling(boolean throttling) {
-        this.throttling = throttling;
-    }
-
-    public void setLogger(@NotNull Log logger) {
-        this.logger = logger;
     }
 
     @Override

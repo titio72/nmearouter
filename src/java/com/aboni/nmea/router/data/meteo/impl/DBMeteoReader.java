@@ -31,6 +31,7 @@ import java.time.Instant;
 public class DBMeteoReader implements MeteoReader {
 
     private static final String SQL_TIME = "select * from meteo where TS>=? and TS<?";
+    private static final String SQL_TIME_AND_TYPE = "select * from meteo where TS>=? and TS<? and type=?";
 
     @Override
     public void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException {
@@ -38,6 +39,25 @@ public class DBMeteoReader implements MeteoReader {
             try (PreparedStatement st = db.getConnection().prepareStatement(SQL_TIME)) {
                 st.setTimestamp(1, new Timestamp(from.toEpochMilli()));
                 st.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) {
+                        target.onRead(getSample(rs));
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            throw new MeteoManagementException("Error reading meteo", e);
+        }
+
+    }
+
+    @Override
+    public void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException {
+        try (DBHelper db = new DBHelper(true)) {
+            try (PreparedStatement st = db.getConnection().prepareStatement(SQL_TIME_AND_TYPE)) {
+                st.setTimestamp(1, new Timestamp(from.toEpochMilli()));
+                st.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+                st.setString(3, tag);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
                         target.onRead(getSample(rs));
