@@ -41,11 +41,13 @@ import com.aboni.nmea.router.impl.*;
 import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessageParserFactory;
 import com.aboni.nmea.router.n2k.N2KStream;
+import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.HL340USBSerialCANReader;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.impl.N2KFastCacheImpl;
 import com.aboni.nmea.router.n2k.impl.N2KMessageParserFactoryImpl;
 import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
+import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
@@ -111,6 +113,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(SerialCANReader.class).to(HL340USBSerialCANReader.class);
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
+        bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
 
     }
 }

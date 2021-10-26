@@ -36,6 +36,13 @@ class TripImpl implements Trip {
         this.tripId = id;
     }
 
+    TripImpl(Trip t) {
+        this.desc = t.getTripDescription();
+        this.tripId = t.getTrip();
+        this.endTS = t.getEndTS();
+        this.startTS = t.getStartTS();
+    }
+
     void setDistance(double d) {
         distance = d;
     }

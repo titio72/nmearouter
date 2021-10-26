@@ -10,6 +10,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
+import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
 import tel.schich.javacan.CanChannels;
@@ -85,11 +86,14 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         this.timestampProvider = tp;
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
-        this.srcFilter = new PGNSourceFilter(log);
+        this.srcFilter = new PGNSourceFilterImpl(log);
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
         this.posAndVectorStream.setListener(this::notify);
         this.speedAndHeadingStream.setListener(this::notify);
+
+        srcFilter.init();
+
         stats.reset();
         fastCache.setCallback(this::onReceive);
     }
@@ -157,7 +161,9 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             byte[] data = new byte[frame.getDataLength()];
             frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            if (srcFilter.accept(h.getSource(), h.getPgn()) && messageFactory.isSupported(h.getPgn()) && h.getDest()==0xFF) {
+            long now = timestampProvider.getNow();
+            if (srcFilter.accept(h.getSource(), h.getPgn(), now) && messageFactory.isSupported(h.getPgn()) && h.getDest() == 0xFF) {
+                srcFilter.setPGNTimestamp(h.getSource(), h.getPgn(), now);
                 N2KMessage msg = messageFactory.newUntypedInstance(h, data);
                 fastCache.onMessage(msg);
             }

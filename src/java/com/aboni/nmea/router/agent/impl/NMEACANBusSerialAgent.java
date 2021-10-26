@@ -9,6 +9,7 @@ import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
+import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
@@ -81,11 +82,13 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
         this.messageFactory = msgFactory;
         this.serialReader = new SerialReader(tp, log);
         this.serialCanReader = serialCanReader;
-        this.srcFilter = new PGNSourceFilter(log);
+        this.srcFilter = new PGNSourceFilterImpl(log);
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
         this.posAndVectorStream.setListener(this::notify);
         this.speedAndHeadingStream.setListener(this::notify);
+
+        srcFilter.init();
 
         stats.reset();
         fastCache.setCallback(this::onReceive);
@@ -105,8 +108,10 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
     private void onReceive(@NotNull N2KMessage msg) {
         stats.incrementMessages();
-        if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn())
+        long now = timestampProvider.getNow();
+        if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn(), now)
                 && messageFactory.isSupported(msg.getHeader().getPgn())) {
+            srcFilter.setPGNTimestamp(msg.getHeader().getSource(), msg.getHeader().getPgn(), now);
             stats.incrementAccepted();
             posAndVectorStream.onMessage(msg);
             speedAndHeadingStream.onMessage(msg);

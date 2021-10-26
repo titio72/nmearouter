@@ -110,7 +110,7 @@ public class TripManagerXImpl implements TripManagerX {
             if (t == null) {
                 t = (TripImpl) archive.getNew();
                 t.setTS(point.getPosition().getInstant());
-                t.addDistance(point.getDistance());
+                t.addDistance(event.getPoint().isAnchor() ? 0.0 : point.getDistance());
                 try (DBHelper db = new DBHelper(false)) {
                     try (Connection conn = db.getConnection()) {
                         saveTrip(t, conn);
@@ -161,15 +161,24 @@ public class TripManagerXImpl implements TripManagerX {
                     stm.setInt(1, id);
                     stm.execute();
                 }
-                try (PreparedStatement stm = db.getConnection().prepareStatement("delete from " + trackTable + " where TS>=? and TS<=?")) {
-                    stm.setTimestamp(1, new Timestamp(t.getStartTS().toEpochMilli()));
-                    stm.setTimestamp(2, new Timestamp(t.getEndTS().toEpochMilli()));
-                    stm.execute();
-                }
+                deleteFromTrack(
+                        new Timestamp(t.getStartTS().toEpochMilli()),
+                        new Timestamp(t.getStartTS().toEpochMilli()),
+                        db.getConnection(), true, true);
                 db.getConnection().commit();
             } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error deleting trip " + id, e);
             }
+        }
+    }
+
+    private void deleteFromTrack(Timestamp t0, Timestamp t1, Connection connection,
+                                 boolean includeStart, boolean includeEnd) throws SQLException {
+        try (PreparedStatement stm = connection.prepareStatement("delete from " + trackTable +
+                " where TS" + (includeStart ? ">=" : ">") + "? and TS" + (includeStart ? "<=" : "<") + "?")) {
+            stm.setTimestamp(1, t0);
+            stm.setTimestamp(2, t1);
+            stm.execute();
         }
     }
 
@@ -212,6 +221,49 @@ public class TripManagerXImpl implements TripManagerX {
                 if (t.getMaxDate().getYear() == year || t.getMinDate().getYear() == year) l.add(t);
             }
             return Collections.unmodifiableList(l);
+        }
+    }
+
+    @Override
+    public void trimTrip(int id) throws TripManagerException {
+        init();
+        Trip t = getTrip(id);
+        if (t == null) throw new TripManagerException("Unknown trip " + id);
+        else {
+            try (DBHelper db = new DBHelper(false)) {
+                TripImpl newT = queryTimeStamp(t, db.getConnection());
+                if (newT != null) {
+                    saveTrip(newT, db.getConnection());
+                    archive.setTrip(newT);
+                    deleteFromTrack(new Timestamp(t.getStartTS().toEpochMilli()),
+                            new Timestamp(newT.getStartTS().toEpochMilli()),
+                            db.getConnection(), true, false);
+                    deleteFromTrack(new Timestamp(newT.getEndTS().toEpochMilli()),
+                            new Timestamp(t.getEndTS().toEpochMilli()),
+                            db.getConnection(), false, true);
+                    db.getConnection().commit();
+                }
+            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+                throw new TripManagerException("Error saving trip", e);
+            }
+        }
+    }
+
+    private TripImpl queryTimeStamp(Trip t, Connection connection) throws SQLException {
+        try (PreparedStatement stm = connection.prepareStatement("select min(TS), max(TS), sum(dist) from " + trackTable +
+                " where TS>=? and TS<=? and anchor=0")) {
+            stm.setTimestamp(1, new Timestamp(t.getStartTS().toEpochMilli()));
+            stm.setTimestamp(2, new Timestamp(t.getEndTS().toEpochMilli()));
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                TripImpl newT = new TripImpl(t);
+                newT.setDistance(rs.getDouble(3));
+                newT.setTS(rs.getTimestamp(1).toInstant());
+                newT.setTS(rs.getTimestamp(2).toInstant());
+                return newT;
+            } else {
+                return null;
+            }
         }
     }
 
