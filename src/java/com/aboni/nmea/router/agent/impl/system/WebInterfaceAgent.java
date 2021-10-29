@@ -167,6 +167,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService2.class))), "/meteo2");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
+        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrimTripService.class))), "/trimtrip");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceDBBackup.class))), "/backup");

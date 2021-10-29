@@ -104,31 +104,40 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void printGCStats() {
-        long totalGarbageCollections = 0;
-        long garbageCollectionTime = 0;
-
-        for(GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
-            long count = gc.getCollectionCount();
-            if(count >= 0) totalGarbageCollections += count;
-            long time = gc.getCollectionTime();
-            if(time >= 0) garbageCollectionTime += time;
-        }
-        LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").
-                wV("count", totalGarbageCollections - lastTotalGarbageCollections).
-                wV("time", garbageCollectionTime - lastGarbageCollectionTime).info(log);
-        lastTotalGarbageCollections = totalGarbageCollections;
-        lastGarbageCollectionTime = garbageCollectionTime;
-    }
-
     private void dumpStats() {
         long t = timestampProvider.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
+            long[] gc = printGCStats();
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
-                    wV("mem", Runtime.getRuntime().freeMemory()).toString());
+                    wV("mem", Runtime.getRuntime().freeMemory()).
+                    wV("gc", gc[0]).
+                    wV("gcTime", gc[1]).
+                    toString());
             printGCStats();
         }
+    }
+    private static long[] printGCStats() {
+        long totalGarbageCollections = 0;
+        long garbageCollectionTime = 0;
+
+        for(GarbageCollectorMXBean gc :
+                ManagementFactory.getGarbageCollectorMXBeans()) {
+
+            long count = gc.getCollectionCount();
+
+            if(count >= 0) {
+                totalGarbageCollections += count;
+            }
+
+            long time = gc.getCollectionTime();
+
+            if(time >= 0) {
+                garbageCollectionTime += time;
+            }
+        }
+
+        return new long[] {totalGarbageCollections, garbageCollectionTime};
     }
 
     private void notifyDiagnostic() {
