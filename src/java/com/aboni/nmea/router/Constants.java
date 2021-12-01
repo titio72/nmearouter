@@ -32,6 +32,7 @@ public class Constants {
     public static final String TAG_TRIP = "trip";
     public static final String TAG_SPEED = "speed";
     public static final String TAG_METEO = "meteo";
+    public static final String TAG_METEO_MONITOR = "meteo_monitor";
     public static final String TAG_AGENT = "agent";
 
     public static final String TAG_JSON = "json";

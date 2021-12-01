@@ -17,7 +17,14 @@ package com.aboni.toolkit;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.conf.LogLevelType;
+import com.aboni.utils.LogAdmin;
+import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,7 +40,9 @@ public class UpdateDistanceAndSpeed {
     public void load() {
         try (DBHelper db = new DBHelper(false)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(
-                    "select lat, lon, TS, id from track where TS>'2020-06-27' and TS<'2020-06-30'")) {
+                    "select lat, lon, TS, id from track where " +
+                            "TS>=(select fromTS from trip where id=215) and" +
+                            "TS<=(select toTS from trip where id=215)")) {
 
                 if (st.execute()) {
                     try (ResultSet rs = st.getResultSet()) {
@@ -41,6 +50,7 @@ public class UpdateDistanceAndSpeed {
                     }
                 }
             }
+
         } catch (Exception e) {
             Logger.getGlobal().log(Level.SEVERE, "Error", e);
         }
@@ -83,6 +93,17 @@ public class UpdateDistanceAndSpeed {
     }
 
     public static void main(String[] args) {
+        Injector injector = Guice.createInjector(new NMEARouterModule());
+        ThingsFactory.setInjector(injector);
+        LogAdmin logAdmin = ThingsFactory.getInstance(LogAdmin.class);
+        ConfJSON cJ;
+        try {
+            cJ = new ConfJSON();
+            LogLevelType logLevel = cJ.getLogLevel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         new UpdateDistanceAndSpeed().load();
     }
 }

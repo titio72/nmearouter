@@ -21,13 +21,11 @@ import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.agent.impl.AgentStatusManagerImpl;
 import com.aboni.nmea.router.agent.impl.NMEAAgentBuilderJsonImpl;
+import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.meteo.Meteo;
 import com.aboni.nmea.router.data.meteo.MeteoReader;
 import com.aboni.nmea.router.data.meteo.WindStatsReader;
-import com.aboni.nmea.router.data.meteo.impl.DBMeteo;
-import com.aboni.nmea.router.data.meteo.impl.DBMeteoReader;
-import com.aboni.nmea.router.data.meteo.impl.DBMeteoWriter;
-import com.aboni.nmea.router.data.meteo.impl.DBWindStatsReader;
+import com.aboni.nmea.router.data.meteo.impl.*;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
@@ -43,11 +41,13 @@ import com.aboni.nmea.router.impl.*;
 import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessageParserFactory;
 import com.aboni.nmea.router.n2k.N2KStream;
+import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.HL340USBSerialCANReader;
 import com.aboni.nmea.router.n2k.can.SerialCANReader;
 import com.aboni.nmea.router.n2k.impl.N2KFastCacheImpl;
 import com.aboni.nmea.router.n2k.impl.N2KMessageParserFactoryImpl;
 import com.aboni.nmea.router.n2k.impl.N2KStreamImpl;
+import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
@@ -59,7 +59,6 @@ import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.RouterLog;
-import com.aboni.utils.StatsWriter;
 import com.aboni.utils.db.DBEventWriter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -97,6 +96,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named(Constants.TAG_TRIP)).toInstance("trip");
         bind(String.class).annotatedWith(Names.named(Constants.TAG_METEO)).toInstance("meteo");
         bind(String.class).annotatedWith(Names.named(Constants.TAG_AGENT)).toInstance("agent");
+        bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO_MONITOR)).to(MemoryStatsWriter.class);
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMeteoWriter.class);
         bind(SampledQueryConf.class).annotatedWith(Names.named(Constants.TAG_SPEED)).to(SampledQueryConfSpeed.class);
         bind(SampledQueryConf.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(SampledQueryConfMeteo.class);
@@ -113,6 +113,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(SerialCANReader.class).to(HL340USBSerialCANReader.class);
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
+        bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
 
     }
 }

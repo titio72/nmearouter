@@ -31,7 +31,7 @@ public abstract class BaseService extends HttpServlet {
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public BaseService() {
+    protected BaseService() {
         super();
     }
 

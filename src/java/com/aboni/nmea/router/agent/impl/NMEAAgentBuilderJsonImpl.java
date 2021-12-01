@@ -122,7 +122,10 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 agent = buildTrackTarget(a, q);
                 break;
             case AgentTypes.METEO:
-                agent = buildStandard(a, q, NMEAMeteoTarget.class, AgentTypes.METEO);
+                agent = buildStandard(a, q, NMEAMeteoDBTarget.class, AgentTypes.METEO);
+                break;
+            case AgentTypes.METEO_MON:
+                agent = buildStandard(a, q, NMEAMeteoMonitorTarget.class, AgentTypes.METEO_MON);
                 break;
             case AgentTypes.GPX_PLAYER:
                 agent = buildGPXPlayer(a, q);

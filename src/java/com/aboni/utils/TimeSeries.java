@@ -15,35 +15,40 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.utils;
 
+import com.aboni.nmea.router.data.ScalarStatsSample;
+import com.aboni.nmea.router.data.StatsSample;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimeSeries {
 
-    private final List<TimeSeriesSample> samples;
+    private final List<StatsSample> samples;
     private final long samplingPeriod;
+    private final String tag;
 
-    public TimeSeries(long samplingPeriod, int initialCapacity) {
+    public TimeSeries(String tag, long samplingPeriod, int initialCapacity) {
         this.samplingPeriod = samplingPeriod;
+        this.tag = tag;
         samples = new ArrayList<>(initialCapacity);
     }
 
     public void doSampling(long time, double vMax, double v, double vMin) {
-        TimeSeriesSample s;
+        StatsSample s;
         if (samples.isEmpty()) {
-            s = new TimeSeriesSample();
+            s = new ScalarStatsSample(tag);
             samples.add(s);
         } else {
             s = samples.get(samples.size()-1);
         }
         if (s.getT0()>0 && (time-s.getT0())> samplingPeriod) {
-            s = new TimeSeriesSample();
+            s = new ScalarStatsSample(tag);
             samples.add(s);
         }
-        s.sample(vMax, v, vMin, time);
+        s.add(vMax, v, vMin, time);
     }
 
-    public List<TimeSeriesSample> getSamples() {
+    public List<StatsSample> getSamples() {
         return samples;
     }
 }

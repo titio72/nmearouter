@@ -22,6 +22,15 @@ public class JSONUtils {
     private JSONUtils() {
     }
 
+    public static boolean addInt(JSONObject json, int v, String attribute) {
+        if (v == Integer.MAX_VALUE || v == Integer.MIN_VALUE || json == null || attribute == null || attribute.isEmpty()) {
+            return false;
+        } else {
+            json.put(attribute, v);
+            return true;
+        }
+    }
+
     public static boolean addDouble(JSONObject json, double v, String attribute) {
         if (Double.isNaN(v) || json == null || attribute == null || attribute.isEmpty()) {
             return false;

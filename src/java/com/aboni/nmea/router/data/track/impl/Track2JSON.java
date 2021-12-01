@@ -64,6 +64,7 @@ public class Track2JSON implements TrackDumper {
             pt.put("time", p.getPosition().getTimestamp());
             pt.put("eng", p.getEngine().getValue());
             pt.put("anchor", p.isAnchor());
+            pt.put("speed", p.getAverageSpeed());
             getPath().add(pt);
         }
 

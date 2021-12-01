@@ -20,8 +20,8 @@ import com.aboni.nmea.router.message.MsgGNSSPosition;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
 import com.aboni.nmea.router.message.MsgPositionAndVectorFacade;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.message.beans.MsgGNSSPositionImpl;
-import com.aboni.nmea.router.message.beans.MsgSOGAndCOGImpl;
+import com.aboni.nmea.router.message.impl.MsgGNSSPositionImpl;
+import com.aboni.nmea.router.message.impl.MsgSOGAndCOGImpl;
 import net.sf.marineapi.nmea.util.Position;
 
 import java.time.Instant;

@@ -29,6 +29,31 @@ var app = angular.module("nmearouter", ['ngSanitize'])
     };
 });
 
+function HSVtoRGB(h, s, v) {
+  var r, g, b, i, f, p, q, t;
+  if (arguments.length === 1) {
+      s = h.s, v = h.v, h = h.h;
+  }
+  i = Math.floor(h * 6);
+  f = h * 6 - i;
+  p = v * (1 - s);
+  q = v * (1 - f * s);
+  t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+      case 0: r = v, g = t, b = p; break;
+      case 1: r = q, g = v, b = p; break;
+      case 2: r = p, g = v, b = t; break;
+      case 3: r = p, g = q, b = v; break;
+      case 4: r = t, g = p, b = v; break;
+      case 5: r = v, g = p, b = q; break;
+  }
+  return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255)
+  };
+}
+
 function calcTrueWind(speed, appWindDeg, appWindSpeed) {
   var v = speed;
   var w = appWindSpeed;
@@ -173,6 +198,19 @@ function httpLoadAllMeteoDateRange(dt0, dt1, cback) {
   xmlHttp.send(null);
 }
 
+function httpLoadMeteo(dt0, dt1, tag, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.status==200 && xmlHttp.readyState==4) {
+      var json = JSON.parse(xmlHttp.responseText);
+      cback(json);
+    }
+  }
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteo2?from=" + encodeURIComponent(dt0) + "&to=" + encodeURIComponent(dt1) + "&tag=" + tag, true);
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
 function httpLoadAllMeteoById(id, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
@@ -232,6 +270,18 @@ function getGKey() {
 function dropTrip(id, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/droptrip?trip=" + id);
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.readyState==4 && xmlHttp.status==200) {
+      cback();
+    }
+  };
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
+function trimTrip(id, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trimtrip?trip=" + id);
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.readyState==4 && xmlHttp.status==200) {
       cback();

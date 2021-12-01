@@ -23,4 +23,6 @@ public interface Meteo {
 
     JSONObject getMeteoSeries(Instant from, Instant to) throws MeteoManagementException;
 
+    JSONObject getMeteoSeries(Instant from, Instant to, String tag) throws MeteoManagementException;
+
 }

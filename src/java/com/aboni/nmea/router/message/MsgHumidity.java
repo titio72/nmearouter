@@ -40,4 +40,9 @@ public interface MsgHumidity extends Message {
         JSONUtils.addDouble(res, getSetHumidity(), "set_humidity");
         return res;
     }
+
+    @Override
+    default String getMessageContentType() {
+        return "Humidity";
+    }
 }

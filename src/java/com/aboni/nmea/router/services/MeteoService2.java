@@ -21,11 +21,13 @@ import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class MeteoService2 extends JSONWebService {
 
+    @Inject
     public MeteoService2(@NotNull Log log) {
         super(log);
         setLoader(this::getResult);
@@ -34,11 +36,12 @@ public class MeteoService2 extends JSONWebService {
     private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
         Instant from = config.getParamAsInstant("dateFrom", Instant.now().minusSeconds(86400L), 0);
         Instant to = config.getParamAsInstant("dateTo", Instant.now(), 1);
+        String tag = config.getParameter("tag", null);
 
         Meteo m = ThingsFactory.getInstance(Meteo.class);
         if (m != null) {
             try {
-                return m.getMeteoSeries(from, to);
+                return (tag == null) ? m.getMeteoSeries(from, to) : m.getMeteoSeries(from, to, tag);
             } catch (MeteoManagementException e) {
                 throw new JSONGenerationException("Error loading meteo data", e);
             }

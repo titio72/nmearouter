@@ -53,7 +53,7 @@ public abstract class I2CSensor implements Sensor {
     private final Log log;
     private long lastReadingTS;
 
-    public I2CSensor(@NotNull Log log) {
+    protected I2CSensor(@NotNull Log log) {
         this.log = log;
         setDefaultSmoothingAlpha(LPF_ALPHA);
         instanceCounter++;

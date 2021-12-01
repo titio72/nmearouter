@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.n2k.messages.impl;
 
 import com.aboni.nmea.router.message.MsgSystemTime;
-import com.aboni.nmea.router.message.beans.MsgSystemTimeImpl;
+import com.aboni.nmea.router.message.impl.MsgSystemTimeImpl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;

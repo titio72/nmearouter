@@ -31,7 +31,10 @@ import javax.validation.constraints.NotNull;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NMEARouterImpl implements NMEARouter {
@@ -50,7 +53,7 @@ public class NMEARouterImpl implements NMEARouter {
     private final RouterMessageFactory messageFactory;
     private final Log log;
 
-    private static final int THREADS_POOL  	= 4;
+    private static final int THREADS_POOL  	= 8;
     private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
     private static final int TIMER_HR		= 250;
     private int timerCount = 0;
@@ -71,7 +74,7 @@ public class NMEARouterImpl implements NMEARouter {
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
-        exec = Executors.newFixedThreadPool(THREADS_POOL, r -> {
+        exec = Executors.newFixedThreadPool(THREADS_POOL, (Runnable r) -> {
             Thread t = new Thread(r, "Router thread " + threadN);
             threadN++;
             return t;
@@ -83,13 +86,13 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
-            for (NMEAAgent a : agents.values()) {
+            agents.values().stream().forEach((NMEAAgent a) -> {
                 runMe(a::onTimerHR, "timerHR", AGENT_KEY_NAME, a.getName());
                 if (timerCount == 0) {
                     runMe(a::onTimer, "timer", AGENT_KEY_NAME, a.getName());
                     dumpStats();
                 }
-            }
+            });
         }
     }
 
@@ -101,31 +104,40 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void printGCStats() {
-        long totalGarbageCollections = 0;
-        long garbageCollectionTime = 0;
-
-        for(GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
-            long count = gc.getCollectionCount();
-            if(count >= 0) totalGarbageCollections += count;
-            long time = gc.getCollectionTime();
-            if(time >= 0) garbageCollectionTime += time;
-        }
-        LogStringBuilder.start(ROUTER_CATEGORY).wO("GC stats").
-                wV("count", totalGarbageCollections - lastTotalGarbageCollections).
-                wV("time", garbageCollectionTime - lastGarbageCollectionTime).info(log);
-        lastTotalGarbageCollections = totalGarbageCollections;
-        lastGarbageCollectionTime = garbageCollectionTime;
-    }
-
     private void dumpStats() {
         long t = timestampProvider.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
+            long[] gc = printGCStats();
             log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
-                    wV("mem", Runtime.getRuntime().freeMemory()).toString());
+                    wV("mem", Runtime.getRuntime().freeMemory()).
+                    wV("gc", gc[0]).
+                    wV("gcTime", gc[1]).
+                    toString());
             printGCStats();
         }
+    }
+    private static long[] printGCStats() {
+        long totalGarbageCollections = 0;
+        long garbageCollectionTime = 0;
+
+        for(GarbageCollectorMXBean gc :
+                ManagementFactory.getGarbageCollectorMXBeans()) {
+
+            long count = gc.getCollectionCount();
+
+            if(count >= 0) {
+                totalGarbageCollections += count;
+            }
+
+            long time = gc.getCollectionTime();
+
+            if(time >= 0) {
+                garbageCollectionTime += time;
+            }
+        }
+
+        return new long[] {totalGarbageCollections, garbageCollectionTime};
     }
 
     private void notifyDiagnostic() {

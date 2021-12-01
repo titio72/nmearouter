@@ -116,6 +116,7 @@
 
   var windStatsTick = 36;
 
+
   document.addEventListener('keydown', anKeyPress);
 
   {
@@ -684,6 +685,18 @@
     return "" + hh + ":" + ("00" + mm).slice(-2) + ":" + ("00" + ss).slice(-2);
   }
 
+  const MAX_SPEED = 9.0;
+  const MIN_SPEED = 3.0;
+
+  function hue(speed) {
+    d = +1;
+    hM = 360;
+    hm = 180;
+    sM = MAX_SPEED;
+    sm = MIN_SPEED;
+    s = Math.max(sm, Math.min(speed, sM));
+    return d * (s - sm)/(sM-sm) * (hM - hm) + hm;
+  }
 
   function fillMap(p) {
     var bounds = new google.maps.LatLngBounds();
@@ -700,15 +713,31 @@
     for (i = 0; i < stints.length; i++) {
       stint = stints[i];
       if (stint.eng!=3) {
-        color = (stint.eng==0)?'blue':((stint.eng==1)?'red':'orange');
-        _path = new google.maps.Polyline({
-          path: stint.points,
-          geodesic: true,
-          strokeColor: color,
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-        _paths.push(_path);
+        color = (stint.eng==0)?'blue':((stint.eng==1)?'gray':'orange');
+        if (stint.eng==0) {
+          for (x = 1; x < stint.points.length; x++) {
+            _speed = stint.points[x].speed;
+            _hue = hue(_speed);
+            color = "hsl(" + _hue + ", 100%, 50%)"; //hsv2rgb(_hue, _saturation, 1);
+            _path = new google.maps.Polyline({
+              path: [stint.points[x-1], stint.points[x]],
+              geodesic: true,
+              strokeColor: color,
+              strokeOpacity: 1.0,
+              strokeWeight: 2
+            });
+            _paths.push(_path);
+          }
+        } else {
+          _path = new google.maps.Polyline({
+            path: stint.points,
+            geodesic: true,
+            strokeColor: color,
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+          });
+          _paths.push(_path);
+        }
       }
     }
 
@@ -716,6 +745,17 @@
       map = new google.maps.Map(document.getElementById('map'), {
         mapTypeId: 'terrain'
       });
+
+      var legend = document.getElementById("legend");
+
+      innerhtml = "<table>";
+      for (i  = MIN_SPEED; i<=MAX_SPEED; i++) {
+        innerhtml += "<tr><td style='background-color: hsl(" + hue(i) + ", 100%, 50%)'>" + i + "Kn</td></tr>";
+      }
+      innerhtml += "</table>"
+      legend.innerHTML = innerhtml;
+
+      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
     }
     var startPoint = { lat: p[0].lat, lng: p[0].lng };
     var marker = new google.maps.Marker({
@@ -745,7 +785,6 @@
     map.setCenter(bounds.getCenter());
     map.fitBounds(bounds);
   }
-
 </script>
 
 <body ng-app="nmearouter">
@@ -905,5 +944,9 @@
         </div>
     </div>
 </div>
+
+<div id="legend">
+</div>
+
 </body>
 </html>

@@ -3,6 +3,7 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KMessageParser;
 import com.aboni.nmea.router.n2k.N2KMessageParserFactory;
+import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
 import com.aboni.utils.ConsoleLog;
@@ -14,6 +15,28 @@ public class CANBOATStreamTest {
 
     private static N2KMessageFactory messageFactory = new N2KMessageFactoryImpl();
 
+    private static PGNSourceFilter filter = new PGNSourceFilter() {
+        @Override
+        public void init() {
+
+        }
+
+        @Override
+        public void setPGNTimestamp(int source, int pgn, long time) {
+
+        }
+
+        @Override
+        public boolean accept(int source, int pgn, long now) {
+            return true;
+        }
+
+        @Override
+        public boolean accept(int source, int pgn) {
+            return true;
+        }
+    };
+
     private static class ParserFactory implements N2KMessageParserFactory {
         @Override
         public N2KMessageParser getNewParser() {
@@ -23,14 +46,14 @@ public class CANBOATStreamTest {
 
     @Test
     public void sendFirstMessage() {
-        N2KMessage o = new N2KStreamImpl(ConsoleLog.getLogger(), new ParserFactory()).getMessage(ss[0]);
+        N2KMessage o = new N2KStreamImpl(ConsoleLog.getLogger(), filter, new ParserFactory()).getMessage(ss[0]);
         assertNotNull(o);
         assertEquals(127250, o.getHeader().getPgn());
     }
 
     @Test
     public void skipNewMessageTooSoon() {
-        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true, new ParserFactory());
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true, filter, new ParserFactory());
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[1]));
     }
@@ -38,7 +61,7 @@ public class CANBOATStreamTest {
     @Test
     public void skipNewMessageUnchanged() {
         // skip the second because the long timeout (1000ms) is not expired and the values are the same
-        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true, new ParserFactory());
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), true, filter, new ParserFactory());
         assertNotNull(stream.getMessage(ss[0]));
         assertNull(stream.getMessage(ss[2]));
     }
@@ -46,7 +69,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageBecauseChanged() {
         // send second because the short timeout is expired (350ms) and the value is different
-        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), new ParserFactory());
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), filter, new ParserFactory());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[3]));
     }
@@ -54,7 +77,7 @@ public class CANBOATStreamTest {
     @Test
     public void sendSecondMessageTimeout() {
         // send second because the long timeout is expired (so no matter the values are changed or not
-        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), new ParserFactory());
+        N2KStreamImpl stream = new N2KStreamImpl(ConsoleLog.getLogger(), filter, new ParserFactory());
         assertNotNull(stream.getMessage(ss[0]));
         assertNotNull(stream.getMessage(ss[4]));
     }

@@ -23,10 +23,7 @@ public class BitUtils {
     }
 
     public static int getByte(byte[] data, int ix, int def) {
-        if (ix < data.length)
-            return data[ix] & 0xFF;
-        else
-            return def;
+        return (ix < data.length) ? data[ix] & 0xFF : def;
     }
 
     public static String parseEnum(byte[] data, int offset, int start, int length, Map<Integer, String> map) {

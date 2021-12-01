@@ -66,4 +66,9 @@ public interface MsgPositionAndVector extends MsgPosition, MsgSOGAdCOG {
         }
         return j;
     }
+
+    @Override
+    default String getMessageContentType() {
+        return "PosAndVector";
+    }
 }

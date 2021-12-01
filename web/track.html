@@ -51,11 +51,6 @@
       padding-right: 12px;
     }
 
-    .chart-canvas {
-      min-height: 100%;
-      min-width: 100%;
-    }
-
     #mapToolbar {
       position: absolute;
       bottom: 30px;
@@ -144,11 +139,26 @@
   }
 
   function askDeleteTrip(d) {
+    trip = extractTrip(d);
+    askConfirmationTrip(trip, dropTrip, "Confirm deleting track for " + trip.description + "?");
+  }
+
+  function askTrimTrip(d) {
+    trip = extractTrip(d);
+    askConfirmationTrip(trip, trimTrip, "Confirm trimmin track for " + trip.description + "?");
+  }
+
+  function extractTrip(d) {
     var ss = d.split("|");
     tripId = ss[1];
     trip = searchTrip(tripId);
+    return trip;
+  }
+
+
+  function askConfirmationTrip(trip, action, message) {
     bootbox.confirm({
-      message: "Confirm deleting track for " + trip.description + "?",
+      message: message,
       buttons: {
         confirm: {
           label: 'Yes',
@@ -161,7 +171,7 @@
       },
       callback: function (result) {
         if (result) {
-          dropTrip(tripId, refreshTrips);
+          action(tripId, refreshTrips);
         }
       }
     });
@@ -176,7 +186,7 @@
 
   function refreshSpeedChart(chart) {
     var ctx = document.getElementById(chart);
-    if (tripId!=null) 
+    if (tripId!=null)
       httpLoadSpeedById(tripId, function(res) {
         drawSpeedChart(res, chart);
       });
@@ -504,6 +514,14 @@
                                             class="btn btn-circle btn-secondary" onclick="showAnalytics(this.id);">
                                       <span class="glyphicon glyphicon-info-sign circle-icon-content"
                                             aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button ng-if="t.description!=''" id="btnTrimTrip|{{t.id}}|{{t.description}}"
+                                            type="button"
+                                            class="btn btn-circle btn-secondary" onclick="askTrimTrip(this.id);">
+                                    <span class="glyphicon glyphicon-scissors circle-icon-content"
+                                          aria-hidden="true"></span>
                                     </button>
                                 </td>
                                 <td>

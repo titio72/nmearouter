@@ -74,4 +74,14 @@ public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
     public String toString() {
         return position.toString() + " " + vector.toString();
     }
+
+    @Override
+    public String getMessageType() {
+        return "";
+    }
+
+    @Override
+    public String getMessageOrigin() {
+        return (position.getMessageOrigin().equals(vector.getMessageOrigin())) ? position.getMessageOrigin() : "";
+    }
 }

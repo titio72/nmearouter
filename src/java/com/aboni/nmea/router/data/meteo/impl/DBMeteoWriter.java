@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
+import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.StatsSample;
-import com.aboni.utils.StatsWriter;
 import com.aboni.utils.db.DBEventWriter;
 import com.aboni.utils.db.DBHelper;
 
