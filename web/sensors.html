@@ -251,6 +251,8 @@
         };
         scope['wind'] = absoluteWind;
       });
+    } else if (msg.topic == 'engine') {
+      doWithScope(msg, (m, scope)=>scope['engine'] = m); 
     } else if (msg.topic == 'heading' && msg.reference == 'Magnetic') {
       doWithScope(msg, (m, scope)=>{
         m.s_dir = direction(m.heading);
@@ -636,7 +638,7 @@ function setAP(apCommand) {
                             </tr>
                             <tr>
                                 <td>Engine</td>
-                                <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
+                                <td style="text-align: right">{{engine.status}}</td>
                             </tr>
                             <tr>
                                 <td>Queue</td>
