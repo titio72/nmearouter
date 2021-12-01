@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TripManagerXImpl implements TripManagerX {
 
+    public static final int TRIM_PADDING_SECONDS = 300;
     private final TripArchive archive;
     private final String tripTable;
     private final String trackTable;
@@ -231,7 +232,7 @@ public class TripManagerXImpl implements TripManagerX {
         if (t == null) throw new TripManagerException("Unknown trip " + id);
         else {
             try (DBHelper db = new DBHelper(false)) {
-                TripImpl newT = queryTimeStamp(t, db.getConnection());
+                TripImpl newT = getTrimmedTrip(t, db.getConnection());
                 if (newT != null) {
                     saveTrip(newT, db.getConnection());
                     archive.setTrip(newT);
@@ -249,17 +250,17 @@ public class TripManagerXImpl implements TripManagerX {
         }
     }
 
-    private TripImpl queryTimeStamp(Trip t, Connection connection) throws SQLException {
+    private TripImpl getTrimmedTrip(Trip t, Connection connection) throws SQLException {
         try (PreparedStatement stm = connection.prepareStatement("select min(TS), max(TS), sum(dist) from " + trackTable +
                 " where TS>=? and TS<=? and anchor=0")) {
             stm.setTimestamp(1, new Timestamp(t.getStartTS().toEpochMilli()));
             stm.setTimestamp(2, new Timestamp(t.getEndTS().toEpochMilli()));
             ResultSet rs = stm.executeQuery();
             if (rs.next()) {
-                TripImpl newT = new TripImpl(t);
+                TripImpl newT = new TripImpl(t.getTrip(), t.getTripDescription());
                 newT.setDistance(rs.getDouble(3));
-                newT.setTS(rs.getTimestamp(1).toInstant());
-                newT.setTS(rs.getTimestamp(2).toInstant());
+                newT.setTS(rs.getTimestamp(1).toInstant().minusSeconds(TRIM_PADDING_SECONDS));
+                newT.setTS(rs.getTimestamp(2).toInstant().plusSeconds(TRIM_PADDING_SECONDS));
                 return newT;
             } else {
                 return null;

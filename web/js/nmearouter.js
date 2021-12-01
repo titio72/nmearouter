@@ -279,6 +279,18 @@ function dropTrip(id, cback) {
   xmlHttp.send(null);
 }
 
+function trimTrip(id, cback) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trimtrip?trip=" + id);
+  xmlHttp.onreadystatechange = function() {
+    if (xmlHttp.readyState==4 && xmlHttp.status==200) {
+      cback();
+    }
+  };
+  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+  xmlHttp.send(null);
+}
+
 function changeName(trip, name, cback) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + 
