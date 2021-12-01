@@ -235,6 +235,8 @@
         };
         scope['wind'] = absoluteWind;
       });
+    } else if (msg.topic == 'engine') {
+      doWithScope(msg, (m, scope)=>scope['engine'] = m); 
     } else if (msg.topic == 'heading' && msg.reference == 'Magnetic') {
       doWithScope(msg, (m, scope) => {
         m.s_dir = direction(m.heading);
@@ -848,9 +850,8 @@
               <svg viewBox="-45 0 90 20" preserveAspectRatio="none" width="100%" height="20"
                    style="display: block; margin: auto;">
                 <path d="M-45 0 L45 0 L45 20 L-45 20 Z" fill="white"></path>
-                <path
-                        d="M{{RSA.show_angle0}} 0 L{{RSA.show_angle1}} 0 L{{RSA.show_angle1}} 20 L{{RSA.show_angle0}} 20 Z"
-                        fill="red"></path>
+                <path d="M{{RSA.show_angle0}} 0 L{{RSA.show_angle1}} 0 L{{RSA.show_angle1}} 20 L{{RSA.show_angle0}} 20 Z"
+                      fill="red"></path>
                 <path d="M-30 0 L-30 20" stroke="black" stroke-width="1"></path>
                 <path d="M-15 0 L-15 20" stroke="black" stroke-width="1"></path>
                 <path d="M0 0 L0 20" stroke="black" stroke-width="1"></path>
