@@ -73,7 +73,7 @@ public class N2KAISStaticDataBImpl implements AISStaticData {
 
     @Override
     public String getAISClass() {
-        return "A";
+        return "B";
     }
 
     @Override
