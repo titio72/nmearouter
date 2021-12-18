@@ -44,8 +44,8 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
         meteoSampler.initMetric(MeteoMetrics.WATER_TEMPERATURE, 10 * 60000L, "WT_", -20.0, 60.0);
         meteoSampler.initMetric(MeteoMetrics.AIR_TEMPERATURE, 10 * 60000L, "AT0", -20.0, 60.0);
         meteoSampler.initMetric(MeteoMetrics.HUMIDITY, 10 * 60000L, "HUM", 0.0, 150.0);
-        meteoSampler.initMetric(MeteoMetrics.WIND_DIRECTION, 60000L, "TW_", 0.0, 100.0);
-        meteoSampler.initMetric(MeteoMetrics.WIND_SPEED, 60000L, "TWD", -360.0, 360.0);
+        meteoSampler.initMetric(MeteoMetrics.WIND_SPEED, 60000L, "TW_", 0.0, 100.0);
+        meteoSampler.initMetric(MeteoMetrics.WIND_DIRECTION, 60000L, "TWD", -360.0, 360.0);
     }
 
     @Override
