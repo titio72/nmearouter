@@ -31,6 +31,7 @@ import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -41,6 +42,7 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.io.File;
 
 @SuppressWarnings("OverlyCoupledClass")
 public class WebInterfaceAgent extends NMEAAgentImpl {
@@ -126,11 +128,18 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 server = new Server(1112);
                 ResourceHandler resourceHandler = new ResourceHandler();
                 resourceHandler.setWelcomeFiles(new String[]{"index.html"});
-                resourceHandler.setResourceBase("./web");
+                File base = new File("./web");
+                try {
+                    resourceHandler.setResourceBase(base.getCanonicalPath());
+                } catch (Exception e) {
+                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("start").toString(), e);
+                    return false;
+                }
 
                 ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 context.setContextPath("/");
                 context.addServlet(new ServletHolder(new MyWebSocketServlet(stream, log)), "/events");
+                context.addAliasCheck(new AllowSymLinkAliasChecker());
                 registerServlets(context);
 
                 HandlerList handlers = new HandlerList();
