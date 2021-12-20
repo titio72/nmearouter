@@ -96,9 +96,9 @@ public class SensorMPU6050 extends I2CSensor {
         int aY = device.readWord(0x3d);
         int aZ = device.readWord(0x3f);
         double[] scaledAccel1 = new double[] {
-                (double)aX / ACCELL_SCALE,
-                (double)aY / ACCELL_SCALE,
-                (double)aZ / ACCELL_SCALE
+                aX / ACCELL_SCALE,
+                aY / ACCELL_SCALE,
+                aZ / ACCELL_SCALE
         };
 
         if (scaledAccel==null) {
@@ -116,10 +116,10 @@ public class SensorMPU6050 extends I2CSensor {
         int gX = device.readWord(0x43);
         int gY = device.readWord(0x45);
         int gZ = device.readWord(0x47);
-        double[] scaledGyro1 = new double[] {
-                (double)gX / GYRO_SCALE,
-                (double)gY / GYRO_SCALE,
-                (double)gZ / GYRO_SCALE
+        double[] scaledGyro1 = new double[]{
+                gX / GYRO_SCALE,
+                gY / GYRO_SCALE,
+                gZ / GYRO_SCALE
         };
         if (scaledGyro==null) {
             scaledGyro = scaledGyro1;

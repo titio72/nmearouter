@@ -76,7 +76,7 @@ public class HMC5883Calibration {
 
         double rAvg = r2s[0];
         for (int i = 1; i<r2s.length; i++) {
-            rAvg = rAvg * ((double)(i-1)/(double)i) + r2s[i]/(double)i;
+            rAvg = rAvg * ((double) (i - 1) / (double) i) + r2s[i] / i;
         }
 
         double rStdDev = 0.0;

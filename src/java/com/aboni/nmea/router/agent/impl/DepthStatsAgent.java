@@ -74,9 +74,9 @@ public class DepthStatsAgent extends NMEAAgentImpl {
 
             JSONObject j = new JSONObject();
             j.put("topic", "depth_stats");
-            j.put("depth", (float) d.depth / 10f);
-            if (min != Integer.MAX_VALUE) j.put("min_1h", (float) min / 10f);
-            if (max != Integer.MIN_VALUE) j.put("max_1h", (float) max / 10f);
+            j.put("depth", d.depth / 10f);
+            if (min != Integer.MAX_VALUE) j.put("min_1h", min / 10f);
+            if (max != Integer.MIN_VALUE) j.put("max_1h", max / 10f);
             notify(j);
         }
     }

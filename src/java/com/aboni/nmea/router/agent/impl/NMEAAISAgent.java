@@ -70,9 +70,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
             String aisClass = s.getAISClass();
             if ("B".equals(aisClass)) {
                 synchronized (data) {
-                    if (!data.containsKey(mmsi)) {
-                        data.put(mmsi, new N2KAISStaticDataBImpl());
-                    }
+                    data.computeIfAbsent(mmsi, (String key) -> new N2KAISStaticDataBImpl());
                 }
                 AISStaticData d = data.get(mmsi);
                 if (s instanceof N2KAISStaticDataBPartAImpl)

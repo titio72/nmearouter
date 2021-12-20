@@ -61,11 +61,12 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private PolarTable polars;
     private NMEASimulatorSourceSettings data;
     private final TalkerId id;
-    private final Random r = new Random();
     private final NavData navData = new NavData();
     private long lastTS = 0;
 
     private final Log log;
+
+    private final Random rnd = new Random();
 
     @Inject
     public NMEASimulatorSource(@NotNull Log log, @NotNull TimestampProvider tp) {
@@ -166,9 +167,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             long newTS = System.currentTimeMillis();
             double ph15m = System.currentTimeMillis() / (1000d * 60d * 15d) * 2 * Math.PI; // 15 minutes phase
             double depth = Utils.round(data.getDepth() + Math.sin(ph15m) * data.getDepthRange(), 1);
-            double hdg = Utils.normalizeDegrees0To360(navData.refHeading + r.nextDouble() * 3.0);
-            double absoluteWindSpeed = data.getWindSpeed() + r.nextDouble();
-            double absoluteWindDir = data.getWindDirection() + r.nextDouble() * 2.0;
+            double hdg = Utils.normalizeDegrees0To360(navData.refHeading + rnd.nextDouble() * 3.0);
+            double absoluteWindSpeed = data.getWindSpeed() + rnd.nextDouble();
+            double absoluteWindDir = data.getWindDirection() + rnd.nextDouble() * 2.0;
             double tWDirection = Utils.normalizeDegrees0To360(absoluteWindDir - hdg);
             double speed = getSpeed((float) absoluteWindSpeed, (int) tWDirection);
 
@@ -179,13 +180,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             double aWSpeed = aWind.getApparentWindSpeed();
             double aWDirection = Utils.normalizeDegrees0To360(aWind.getApparentWindDeg());
 
-            double temp = Utils.round(data.getTemp() + (new Random().nextDouble() / 10.0), 2);
+            double temp = Utils.round(data.getTemp() + (rnd.nextDouble() / 10.0), 2);
             double press = Utils.round(data.getPress() + Math.sin(Math.PI * (System.currentTimeMillis() / 3600000.0) / 2.0), 1);
-            double roll = Utils.round(new Random().nextDouble() * 5, 1);
-            double pitch = Utils.round((new Random().nextDouble() * 5) + 0, 1);
+            double roll = Utils.round(rnd.nextDouble() * 5, 1);
+            double pitch = Utils.round((rnd.nextDouble() * 5) + 0, 1);
 
             if (lastTS != 0) {
-                double dTime = (double) (newTS - lastTS) / 1000d / 60d / 60d;
+                double dTime = (newTS - lastTS) / 1000d / 60d / 60d;
                 navData.pos = Utils.calcNewLL(navData.pos, hdg, speed * dTime);
                 posOut = new Position(navData.pos.getLatitude(), navData.pos.getLongitude());
                 addGpsNoise(posOut);
@@ -206,9 +207,9 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
 
     private void addGpsNoise(Position posOut) {
         if (data.isGpsOut()) {
-            int x = r.nextInt(25);
+            int x = rnd.nextInt(25);
             if (x == 0) {
-                if (r.nextBoolean())
+                if (rnd.nextBoolean())
                     posOut.setLongitude(navData.pos.getLongitude() + 1.0);
                 else
                     posOut.setLatitude(navData.pos.getLatitude() + 1.0);
@@ -221,7 +222,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (data.isUsePolars()) {
             speed = polars.getSpeed(tWDirection, absoluteWindSpeed) * data.getPolarCoefficient();
         } else {
-            speed = Utils.round(data.getSpeed() * (1.0 + r.nextDouble() / 10.0), 1);
+            speed = Utils.round(data.getSpeed() * (1.0 + rnd.nextDouble() / 10.0), 1);
         }
         return speed;
     }

@@ -182,7 +182,7 @@ public class TrackManagerImpl implements TrackManager {
             long dTime = Math.abs(p2.getTimestamp() - p1.getTimestamp()); // d-time in milliseconds
             // calc the speed but only if the two points are at least 500ms apart
             double speed =
-                    dTime > 500 ? ((dist / (double) dTime) * 1000.0) : 0.0; // meter/second
+                    dTime > 500 ? ((dist / dTime) * 1000.0) : 0.0; // meter/second
             speed *= 1.94384; // speed in knots
             return speed <= MOVE_THRESHOLD_SPEED_KN && dist < MOVE_THRESHOLD_POS_METERS;
         }

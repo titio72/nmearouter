@@ -17,13 +17,13 @@ public class LogFormatter extends Formatter {
     }
 
     @Override
-    public String format(LogRecord record) {
-        Date d = new Date(record.getMillis());
-        String s = df.format(d) + " " + record.getLevel() + " " + record.getMessage() + "\n";
-        if (record.getThrown() != null) {
+    public String format(LogRecord payload) {
+        Date d = new Date(payload.getMillis());
+        String s = df.format(d) + " " + payload.getLevel() + " " + payload.getMessage() + "\n";
+        if (payload.getThrown() != null) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            record.getThrown().printStackTrace(pw);
+            payload.getThrown().printStackTrace(pw);
             s += sw.toString() + "\n";
         }
         return s;

@@ -71,7 +71,7 @@ public class CMPS11CompassDataProvider implements CompassDataProvider {
             int b1 = device.readU8(3);
             int b2 = device.readU8(2) * 256;
             int h255 = (b1 & 0xFF) + b2;
-            heading = ((double) h255 / 10.0);
+            heading = h255 / 10.0;
 
             roll = device.readS8(5);
             pitch = device.readS8(4);

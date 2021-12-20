@@ -25,10 +25,37 @@ public class DBWindStatsReader implements WindStatsReader {
 
     private final MeteoReader reader;
 
-    private double wSpeed;
-    private double wAngle;
-    private long wSpeedTime;
-    private long wAngleTime;
+    private class StatsContext implements MeteoReader.MeteoReaderListener {
+
+        StatsContext(int sectors) {
+            stats = new WindStats(sectors);
+        }
+
+        double wSpeed;
+        double wAngle;
+        long wSpeedTime;
+        long wAngleTime;
+        final WindStats stats;
+
+        @Override
+        public void onRead(MeteoSample sample) {
+            if ("TW_".equals(sample.getTag())) {
+                if ((sample.getTs() - wAngleTime) < 250) {
+                    stats.addSample(60, wAngle, sample.getValue());
+                } else {
+                    wSpeed = sample.getValue();
+                    wSpeedTime = sample.getTs();
+                }
+            } else if ("TWD".equals(sample.getTag())) {
+                if ((sample.getTs() - wSpeedTime) < 250) {
+                    stats.addSample(60, sample.getValue(), wSpeed);
+                } else {
+                    wAngle = sample.getValue();
+                    wAngleTime = sample.getTs();
+                }
+            }
+        }
+    }
 
     @Inject
     public DBWindStatsReader(@NotNull MeteoReader reader) {
@@ -37,26 +64,10 @@ public class DBWindStatsReader implements WindStatsReader {
 
     @Override
     public WindStats getWindStats(Instant from, Instant to, int sectors) throws MeteoManagementException {
+
         if (360 % sectors != 0) throw new MeteoManagementException("Number of sectors must divide 360");
-        WindStats stats = new WindStats(sectors);
-        reader.readMeteo(from, to, (MeteoSample sample) -> {
-                    if ("TW_".equals(sample.getTag())) {
-                        if ((sample.getTs() - wAngleTime) < 250) {
-                            stats.addSample(60, wAngle, sample.getValue());
-                        } else {
-                            wSpeed = sample.getValue();
-                            wSpeedTime = sample.getTs();
-                        }
-                    } else if ("TWD".equals(sample.getTag())) {
-                        if ((sample.getTs() - wSpeedTime) < 250) {
-                            stats.addSample(60, sample.getValue(), wSpeed);
-                        } else {
-                            wAngle = sample.getValue();
-                            wAngleTime = sample.getTs();
-                        }
-                    }
-                }
-        );
-        return stats;
+        StatsContext ctx = new StatsContext(sectors);
+        reader.readMeteo(from, to, ctx);
+        return ctx.stats;
     }
 }

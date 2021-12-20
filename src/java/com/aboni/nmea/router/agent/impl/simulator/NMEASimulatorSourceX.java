@@ -178,12 +178,12 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             double temp = Utils.round(oscillator(data.getTemp(), 60, 5.0), 2);
             double press = Utils.round(oscillator(data.getPress(), 180, 4), 1);
             double humidity = Utils.round(oscillator(data.getHum(), 60, 2.0), 2);
-            double roll = Utils.round(new Random().nextDouble() * 5, 1) * absoluteWindDir < 180 ? -1 : 1;
-            double pitch = Utils.round((new Random().nextDouble() * 5) + 0, 1);
+            double roll = Utils.round(r.nextDouble() * 5, 1) * absoluteWindDir < 180 ? -1 : 1;
+            double pitch = Utils.round((r.nextDouble() * 5) + 0, 1);
             double yaw = Utils.normalizeDegrees180To180(hdg);
 
             if (lastTS != 0) {
-                double dTime = (double) (newTS - lastTS) / 1000d / 60d / 60d;
+                double dTime = (newTS - lastTS) / 1000d / 60d / 60d;
                 navData.pos = Utils.calcNewLL(navData.pos, hdg, speed * dTime);
                 posOut = new Position(navData.pos.getLatitude(), navData.pos.getLongitude());
                 addGpsNoise(posOut);

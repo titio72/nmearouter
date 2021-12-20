@@ -48,6 +48,8 @@ import java.io.File;
 public class WebInterfaceAgent extends NMEAAgentImpl {
 
     public static final String WEB_UI_CATEGORY = "WebUI";
+    public static final String WEB_UI_START_LOG_TOKEN = "start";
+    public static final String WEB_UI_STATS_LOG_TOKEN = "stats";
     private boolean webStarted;
     private Server server;
 
@@ -132,7 +134,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 try {
                     resourceHandler.setResourceBase(base.getCanonicalPath());
                 } catch (Exception e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("start").toString(), e);
+                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
                     return false;
                 }
 
@@ -151,9 +153,9 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 try {
                     server.start();
                     webStarted = true;
-                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).wO("start").toString());
+                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString());
                 } catch (Exception e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("start").toString(), e);
+                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
                     return false;
                 }
 
@@ -290,9 +292,11 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         long t = timestampProvider.getNow();
         synchronized (stats) {
             if (Utils.isOlderThan(stats.lastStatsTime, t, 29999)) {
-                getLogBuilder().wO("stats").wV("NMEA0183", stats.jsonFromNMEA1083).
+                getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
+                        wV("NMEA0183", stats.jsonFromNMEA1083).
                         wV("direct", stats.jsonDirectConversion).
-                        wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).info(log);
+                        wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).
+                        info(log);
                 stats.reset(t);
             }
         }

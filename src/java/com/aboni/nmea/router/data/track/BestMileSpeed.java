@@ -52,7 +52,7 @@ class BestMileSpeed {
 
             long dT = p.first - p0.first;
             if (dT > 0) {
-                double speed = distance / ((double) dT / 3600000d);
+                double speed = distance / (dT / 3600000d);
                 if (speed > speedMax) {
                     t0Max = p0.first;
                     t1Max = p.first;

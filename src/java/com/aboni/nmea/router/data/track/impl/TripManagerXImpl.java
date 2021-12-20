@@ -95,7 +95,7 @@ public class TripManagerXImpl implements TripManagerX {
 
     public TripImpl getCurrentTrip(Instant now) {
         Trip t = archive.getLastTrip();
-        if (t.getEndTS().plus(3, ChronoUnit.HOURS).isAfter(now) && t.getStartTS().minusMillis(1).isBefore(now)) {
+        if (t != null && t.getEndTS().plus(3, ChronoUnit.HOURS).isAfter(now) && t.getStartTS().minusMillis(1).isBefore(now)) {
             return (TripImpl) t;
         } else {
             return null;
@@ -154,7 +154,7 @@ public class TripManagerXImpl implements TripManagerX {
     public void deleteTrip(int id) throws TripManagerException {
         init();
         Trip t = getTrip(id);
-        if (t == null) throw new TripManagerException("Unknown trip " + id);
+        if (t == null) throwUnknownTripException(id);
         else {
             archive.delete(id);
             try (DBHelper db = new DBHelper(false)) {
@@ -165,7 +165,7 @@ public class TripManagerXImpl implements TripManagerX {
                 deleteFromTrack(
                         new Timestamp(t.getStartTS().toEpochMilli()),
                         new Timestamp(t.getStartTS().toEpochMilli()),
-                        db.getConnection(), true, true);
+                        db.getConnection(), true);
                 db.getConnection().commit();
             } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error deleting trip " + id, e);
@@ -174,7 +174,7 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     private void deleteFromTrack(Timestamp t0, Timestamp t1, Connection connection,
-                                 boolean includeStart, boolean includeEnd) throws SQLException {
+                                 boolean includeStart) throws SQLException {
         try (PreparedStatement stm = connection.prepareStatement("delete from " + trackTable +
                 " where TS" + (includeStart ? ">=" : ">") + "? and TS" + (includeStart ? "<=" : "<") + "?")) {
             stm.setTimestamp(1, t0);
@@ -187,7 +187,7 @@ public class TripManagerXImpl implements TripManagerX {
     public void setTripDescription(int id, @NotNull String description) throws TripManagerException {
         init();
         TripImpl t = (TripImpl) archive.getTrip(id);
-        if (t == null) throw new TripManagerException("Unknown trip " + id);
+        if (t == null) throwUnknownTripException(id);
         else {
             t.setTripDescription(description);
             try (Connection c = new DBHelper(true).getConnection()) {
@@ -196,6 +196,10 @@ public class TripManagerXImpl implements TripManagerX {
                 throw new TripManagerException("Error saving trip", e);
             }
         }
+    }
+
+    private static void throwUnknownTripException(int id) throws TripManagerException {
+        throw new TripManagerException("Unknown trip " + id);
     }
 
     @Override
@@ -229,7 +233,7 @@ public class TripManagerXImpl implements TripManagerX {
     public void trimTrip(int id) throws TripManagerException {
         init();
         Trip t = getTrip(id);
-        if (t == null) throw new TripManagerException("Unknown trip " + id);
+        if (t == null) throwUnknownTripException(id);
         else {
             try (DBHelper db = new DBHelper(false)) {
                 TripImpl newT = getTrimmedTrip(t, db.getConnection());
@@ -238,10 +242,10 @@ public class TripManagerXImpl implements TripManagerX {
                     archive.setTrip(newT);
                     deleteFromTrack(new Timestamp(t.getStartTS().toEpochMilli()),
                             new Timestamp(newT.getStartTS().toEpochMilli()),
-                            db.getConnection(), true, false);
+                            db.getConnection(), true);
                     deleteFromTrack(new Timestamp(newT.getEndTS().toEpochMilli()),
                             new Timestamp(t.getEndTS().toEpochMilli()),
-                            db.getConnection(), false, true);
+                            db.getConnection(), false);
                     db.getConnection().commit();
                 }
             } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {

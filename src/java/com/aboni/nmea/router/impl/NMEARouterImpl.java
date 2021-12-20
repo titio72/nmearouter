@@ -60,8 +60,6 @@ public class NMEARouterImpl implements NMEARouter {
 
     private long lastStatsTime;
     private static final long STATS_PERIOD = 60; // seconds
-    private long lastTotalGarbageCollections = 0;
-    private long lastGarbageCollectionTime = 0;
     private static int threadN = 0;
 
     @Inject

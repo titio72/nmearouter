@@ -19,7 +19,6 @@ import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.ConfJSON;
-import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
@@ -69,7 +68,7 @@ public class UpdateDistanceAndSpeed {
                 GeoPositionT p = new GeoPositionT(t, lat, lon);
                 if (last != null) {
                     Course c = new Course(last, p);
-                    double interval = (double) (c.getInterval()) / (1000.0 * 60.0 * 60.0); // interval in hours
+                    double interval = (c.getInterval()) / (1000.0 * 60.0 * 60.0); // interval in hours
                     if (interval < 5 /* less than 5 hours */) {
                         double dist = c.getDistance();
                         double speed = dist / interval;
@@ -95,11 +94,11 @@ public class UpdateDistanceAndSpeed {
     public static void main(String[] args) {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
-        LogAdmin logAdmin = ThingsFactory.getInstance(LogAdmin.class);
+        ThingsFactory.getInstance(LogAdmin.class);
         ConfJSON cJ;
         try {
             cJ = new ConfJSON();
-            LogLevelType logLevel = cJ.getLogLevel();
+            cJ.getLogLevel();
         } catch (Exception e) {
             e.printStackTrace();
         }

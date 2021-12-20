@@ -76,10 +76,6 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
             return Instant.ofEpochMilli(t1);
         }
 
-        double getPeriod() {
-            return t1 - t0;
-        }
-
         double getChange() {
             return v1 - v0;
         }
@@ -123,7 +119,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
                 for (Pair<MeteoMetrics, StatsChange> pc : alerts) {
                     if (pc.first == metric) {
                         StatsChange c = pc.second;
-                        AtomicReference<Pair<Long, Double>> res = null;
+                        AtomicReference<Pair<Long, Double>> res = new AtomicReference<>();
                         statsWriter.scan(tags[metric.getIx()], (StatsSample s) -> {
                             if (s.getT1() > (time - c.referencePeriodMs)) {
                                 return false;
@@ -144,6 +140,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
 
             @Override
             public void onSample(MeteoMetrics metric, StatsSample sample) {
+                // nothing to do onSample
             }
         });
     }

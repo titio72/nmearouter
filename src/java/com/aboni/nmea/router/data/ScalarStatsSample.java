@@ -54,20 +54,28 @@ public class ScalarStatsSample extends StatsSample {
     public void add(double vMin, double v, double vMax, long time) {
         if (isInRange(v)) {
             if (samples == 0) {
-                t0 = time;
-                t1 = time;
-                avg = v;
-                if (isInRange(vMax)) max = vMax;
-                if (isInRange(vMin)) min = vMin;
-                samples = 1;
+                initSample(vMin, v, vMax, time);
             } else {
-                avg = (avg * (t1 - t0) + v * (time - t1)) / (time - t0);
-                if (isInRange(vMin)) min = Double.isNaN(min) ? vMin : Math.min(min, vMin);
-                if (isInRange(vMax)) max = Double.isNaN(max) ? vMax : Math.max(max, vMax);
-                t1 = time;
-                samples++;
+                updateSample(vMin, v, vMax, time);
             }
         }
+    }
+
+    private void updateSample(double vMin, double v, double vMax, long time) {
+        avg = (avg * (t1 - t0) + v * (time - t1)) / (time - t0);
+        if (isInRange(vMin)) min = Double.isNaN(min) ? vMin : Math.min(min, vMin);
+        if (isInRange(vMax)) max = Double.isNaN(max) ? vMax : Math.max(max, vMax);
+        t1 = time;
+        samples++;
+    }
+
+    private void initSample(double vMin, double v, double vMax, long time) {
+        t0 = time;
+        t1 = time;
+        avg = v;
+        if (isInRange(vMax)) max = vMax;
+        if (isInRange(vMin)) min = vMin;
+        samples = 1;
     }
 
     private boolean isInRange(double v) {

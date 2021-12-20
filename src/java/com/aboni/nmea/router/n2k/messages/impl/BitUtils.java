@@ -83,12 +83,12 @@ public class BitUtils {
         }
         if (length == 64) {
             if (e.v != 0x7FFFFFFFFFFFFFFFL)
-                return (double) e.v * precision;
+                return e.v * precision;
             else
                 return null;
         } else {
             if (e.v <= e.m - reserved) {
-                return (double) e.v * precision;
+                return e.v * precision;
             } else {
                 return null;
             }
@@ -166,7 +166,7 @@ public class BitUtils {
     }
 
     public static long get4ByteInt(byte[] data, int index) {
-        return ((long)getByte(data, index + 3) << 24) | (long)get3ByteInt(data, index);
+        return ((long) getByte(data, index + 3) << 24) | get3ByteInt(data, index);
     }
 
     public static int get3ByteInt(byte[] data, int index) {

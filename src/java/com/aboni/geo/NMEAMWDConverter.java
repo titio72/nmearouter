@@ -38,11 +38,15 @@ public class NMEAMWDConverter {
     }
 
     private static double getTrueHeading(HDGSentence h) {
-        double dev = 0.0;
-        double var = 0.0;
-        try { dev = h.getDeviation(); } catch (DataNotAvailableException e) { /* optional data*/ }
-        try { var = h.getVariation(); } catch (DataNotAvailableException e) { /* optional data*/ }
-        return h.getHeading() + var + dev;
+        double deviation = 0.0;
+        double variation = 0.0;
+        try {
+            deviation = h.getDeviation();
+        } catch (DataNotAvailableException e) { /* optional data*/ }
+        try {
+            variation = h.getVariation();
+        } catch (DataNotAvailableException e) { /* optional data*/ }
+        return h.getHeading() + variation + deviation;
     }
 
     private static double getMagHeading(HDGSentence h) {
