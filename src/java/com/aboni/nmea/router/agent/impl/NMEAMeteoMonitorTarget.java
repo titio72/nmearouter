@@ -106,8 +106,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
         initMetricX(MeteoMetrics.PRESSURE, 60000L, "PR_", 800.0, 1100.0);
         initMetricX(MeteoMetrics.AIR_TEMPERATURE, 60000L, "AT0", -20.0, 60.0);
         initMetricX(MeteoMetrics.HUMIDITY, 60000L, "HUM", 0.0, 150.0);
-        initMetricX(MeteoMetrics.WIND_DIRECTION, 60000L, "TW_", 0.0, 100.0);
-        initMetricX(MeteoMetrics.WIND_SPEED, 60000L, "TWD", -360.0, 360.0);
+        initMetricX(MeteoMetrics.WIND_DIRECTION, 60000L, "TWD", 0.0, 100.0);
+        initMetricX(MeteoMetrics.WIND_SPEED, 60000L, "TW_", -360.0, 360.0);
 
         initAlert(MeteoMetrics.PRESSURE, 10, 1 / 18.0, 2 / 18.0);
         initAlert(MeteoMetrics.PRESSURE, 60, 1 / 3.0, 2 / 3.0);
