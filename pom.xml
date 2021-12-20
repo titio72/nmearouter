@@ -138,12 +138,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>[30.0-jre,)</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.38.v20210224</version>
+            <version>9.4.41.v20210516</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
