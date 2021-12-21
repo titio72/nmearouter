@@ -169,7 +169,9 @@ public class MeteoSampler implements Startable {
     private void collect(MeteoMetrics id, double d, long time) {
         synchronized (series) {
             StatsSample s = series[id.getIx()];
-            s.add(d, time);
+            if (s != null) {
+                s.add(d, time);
+            }
         }
     }
 
