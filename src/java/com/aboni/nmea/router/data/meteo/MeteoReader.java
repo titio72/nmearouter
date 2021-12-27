@@ -15,16 +15,18 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo;
 
+import com.aboni.nmea.router.data.Sample;
+
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public interface MeteoReader {
 
     interface MeteoReaderListener {
-        void onRead(MeteoSample sample);
+        void onRead(Sample sample);
     }
 
-    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException;
+    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull MeteoReaderListener target) throws MeteoManagementException;
 
-    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull MeteoReader.MeteoReaderListener target) throws MeteoManagementException;
+    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull MeteoReaderListener target) throws MeteoManagementException;
 }

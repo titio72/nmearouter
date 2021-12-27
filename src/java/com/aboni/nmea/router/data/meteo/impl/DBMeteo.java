@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.meteo.Meteo;
 import com.aboni.nmea.router.data.meteo.MeteoManagementException;
 import com.aboni.nmea.router.data.meteo.MeteoReader;
-import com.aboni.nmea.router.data.meteo.MeteoSample;
 import com.aboni.utils.ThingsFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,7 +37,7 @@ public class DBMeteo implements Meteo {
     public JSONObject getMeteoSeries(@NotNull Instant from, @NotNull Instant to, @NotNull String tag) throws MeteoManagementException {
         MeteoReader m = ThingsFactory.getInstance(MeteoReader.class);
         JSONObject res = new JSONObject();
-        m.readMeteo(from, to, tag, (MeteoSample sample) -> addSample(sample, res));
+        m.readMeteo(from, to, tag, (Sample sample) -> addSample(sample, res));
         return res;
     }
 
@@ -45,11 +45,11 @@ public class DBMeteo implements Meteo {
     public JSONObject getMeteoSeries(@NotNull Instant from, @NotNull Instant to) throws MeteoManagementException {
         MeteoReader m = ThingsFactory.getInstance(MeteoReader.class);
         JSONObject res = new JSONObject();
-        m.readMeteo(from, to, (MeteoSample sample) -> addSample(sample, res));
+        m.readMeteo(from, to, (Sample sample) -> addSample(sample, res));
         return res;
     }
 
-    private void addSample(MeteoSample sample, JSONObject res) {
+    private void addSample(Sample sample, JSONObject res) {
         JSONArray a;
         if (res.has(sample.getTag())) {
             a = res.getJSONArray(sample.getTag());

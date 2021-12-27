@@ -19,12 +19,10 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.DataChange;
-import com.aboni.nmea.router.data.StatsSample;
-import com.aboni.nmea.router.data.meteo.MeteoHistory;
-import com.aboni.nmea.router.data.meteo.MeteoMetrics;
+import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.data.meteo.MeteoSampler;
 import com.aboni.nmea.router.data.meteo.impl.MemoryStatsWriter;
+import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
 
@@ -35,9 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistory {
+public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProvider {
 
     private final MeteoSampler meteoSampler;
+
+    private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
 
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
     private int timerCount;
@@ -45,9 +45,6 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
     private final Log log;
 
     private final MemoryStatsWriter statsWriter;
-
-    private final String[] tags;
-
 
     private static class StatsChange {
 
@@ -89,63 +86,81 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
         }
     }
 
-    private final List<Pair<MeteoMetrics, StatsChange>> alerts;
+    private final List<Pair<Metric, StatsChange>> alerts;
+
+    private class AlertManager implements MeteoSampler.MeteoListener {
+
+        @Override
+        public void onCollect(Metric metric, double value, long time) {
+            for (Pair<Metric, StatsChange> pc : alerts) {
+                if (pc.first == metric) {
+                    StatsChange c = pc.second;
+                    AtomicReference<Pair<Long, Double>> res = new AtomicReference<>();
+                    statsWriter.scan(metric, (StatsSample s) -> {
+                        if (s.getT1() > (time - c.referencePeriodMs)) {
+                            return false;
+                        } else {
+                            res.set(new Pair<>(s.getT1(), s.getAvg()));
+                            return true;
+                        }
+                    }, false);
+                    if (res.get() != null) {
+                        c.t0 = res.get().first;
+                        c.t1 = time;
+                        c.v0 = res.get().second;
+                        c.v1 = value;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onSample(Metric metric, StatsSample sample) {
+            // nothing to do onSample
+        }
+    }
 
     @Inject
     public NMEAMeteoMonitorTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp) {
         super(log, tp, false, true);
         this.log = log;
         this.statsWriter = new MemoryStatsWriter();
-        this.meteoSampler = new MeteoSampler(log, cache, tp, statsWriter, "MeteoMonitor");
-        this.tags = new String[MeteoMetrics.SIZE];
+        this.meteoSampler = new MeteoSampler(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
-        initMetricX(MeteoMetrics.PRESSURE, 60000L, "PR_", 800.0, 1100.0);
-        initMetricX(MeteoMetrics.AIR_TEMPERATURE, 60000L, "AT0", -20.0, 60.0);
-        initMetricX(MeteoMetrics.HUMIDITY, 60000L, "HUM", 0.0, 150.0);
-        initMetricX(MeteoMetrics.WIND_DIRECTION, 60000L, "TWD", 0.0, 100.0);
-        initMetricX(MeteoMetrics.WIND_SPEED, 60000L, "TW_", -360.0, 360.0);
 
-        initAlert(MeteoMetrics.PRESSURE, 10, 1 / 18.0, 2 / 18.0);
-        initAlert(MeteoMetrics.PRESSURE, 60, 1 / 3.0, 2 / 3.0);
-        initAlert(MeteoMetrics.PRESSURE, 180, 1, 2);
+        initMetricX(Metrics.PRESSURE, "PR_",
+                MsgPressure.class::isInstance,
+                (Message m) -> ((MsgPressure) m).getPressure(),
+                800.0, 1100.0);
+        initMetricX(Metrics.AIR_TEMPERATURE, "AT0",
+                (Message m) -> (m instanceof MsgTemperature && AIR_TEMPERATURE_SOURCE == ((MsgTemperature) m).getTemperatureSource()),
+                (Message m) -> ((MsgTemperature) m).getTemperature(),
+                -20.0, 60.0);
+        initMetricX(Metrics.HUMIDITY, "HUM",
+                MsgHumidity.class::isInstance,
+                (Message m) -> ((MsgHumidity) m).getHumidity(),
+                0.0, 150.0);
+        initMetricX(Metrics.WIND_DIRECTION, "TWD",
+                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && cache.isHeadingOlderThan(tp.getNow(), 800)),
+                (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
+                -360.0, 360.0);
+        initMetricX(Metrics.WIND_SPEED, "TW_",
+                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue()),
+                (Message m) -> ((MsgWindData) m).getSpeed(),
+                0, 100.0);
 
-        initAlert(MeteoMetrics.HUMIDITY, 10, 5 / 18.0, 20 / 18.0);
-        initAlert(MeteoMetrics.HUMIDITY, 60, 5 / 3.0, 20 / 3.0);
-        initAlert(MeteoMetrics.HUMIDITY, 180, 5, 20);
+        initAlert(Metrics.PRESSURE, 10, 1 / 18.0, 2 / 18.0);
+        initAlert(Metrics.PRESSURE, 60, 1 / 3.0, 2 / 3.0);
+        initAlert(Metrics.PRESSURE, 180, 1, 2);
 
-        meteoSampler.setCollectListener(new MeteoSampler.MeteoListener() {
-            @Override
-            public void onCollect(MeteoMetrics metric, double value, long time) {
-                for (Pair<MeteoMetrics, StatsChange> pc : alerts) {
-                    if (pc.first == metric) {
-                        StatsChange c = pc.second;
-                        AtomicReference<Pair<Long, Double>> res = new AtomicReference<>();
-                        statsWriter.scan(tags[metric.getIx()], (StatsSample s) -> {
-                            if (s.getT1() > (time - c.referencePeriodMs)) {
-                                return false;
-                            } else {
-                                res.set(new Pair<>(s.getT1(), s.getAvg()));
-                                return true;
-                            }
-                        }, false);
-                        if (res.get() != null) {
-                            c.t0 = res.get().first;
-                            c.t1 = time;
-                            c.v0 = res.get().second;
-                            c.v1 = value;
-                        }
-                    }
-                }
-            }
+        initAlert(Metrics.HUMIDITY, 10, 5 / 18.0, 20 / 18.0);
+        initAlert(Metrics.HUMIDITY, 60, 5 / 3.0, 20 / 3.0);
+        initAlert(Metrics.HUMIDITY, 180, 5, 20);
 
-            @Override
-            public void onSample(MeteoMetrics metric, StatsSample sample) {
-                // nothing to do onSample
-            }
-        });
+        meteoSampler.setCollectListener(new AlertManager());
     }
 
-    private void initAlert(MeteoMetrics metric, long periodMinutes, double slowChangeThreshold, double rapidChangeThreshold) {
+    private void initAlert(Metric metric, long periodMinutes, double slowChangeThreshold, double rapidChangeThreshold) {
         StatsChange a = new StatsChange();
         a.slowChangeThreshold = slowChangeThreshold;
         a.rapidChangeThreshold = rapidChangeThreshold;
@@ -153,9 +168,11 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
         alerts.add(new Pair<>(metric, a));
     }
 
-    private void initMetricX(MeteoMetrics metric, long period, String tag, double min, double max) {
-        tags[metric.getIx()] = tag;
-        meteoSampler.initMetric(metric, period, tag, min, max);
+    private void initMetricX(Metric metric, String tag,
+                             MeteoSampler.MessageFilter filter,
+                             MeteoSampler.MessageValueExtractor valueExtractor,
+                             double min, double max) {
+        meteoSampler.initMetric(metric, filter, valueExtractor, 60000L, tag, min, max);
     }
 
     @Override
@@ -206,11 +223,10 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements MeteoHistor
     }
 
     @Override
-    public List<StatsSample> getHistory(MeteoMetrics ix) {
-        List<StatsSample> res = new ArrayList<>(statsWriter.getHistory(tags[ix.getIx()]));
+    public List<StatsSample> getHistory(Metric ix) {
+        List<StatsSample> res = new ArrayList<>(statsWriter.getHistory(ix));
         StatsSample current = meteoSampler.getCurrent(ix);
         if (current != null) res.add(current);
         return res;
     }
-
 }

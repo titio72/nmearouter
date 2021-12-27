@@ -15,63 +15,94 @@
 
 package com.aboni.nmea.router.data.meteo;
 
-import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.data.AngleStatsSample;
-import com.aboni.nmea.router.data.ScalarStatsSample;
-import com.aboni.nmea.router.data.StatsSample;
-import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.message.*;
-import com.aboni.utils.DataEvent;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.Startable;
+import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MeteoSampler implements Startable {
 
-    public interface MeteoListener {
-        void onCollect(MeteoMetrics metric, double value, long time);
+    public interface MessageFilter {
+        boolean match(Message msg);
+    }
 
-        void onSample(MeteoMetrics metric, StatsSample sample);
+    public interface MessageValueExtractor {
+        double getValue(Message msg);
+    }
+
+    public interface MeteoListener {
+        void onCollect(Metric metric, double value, long time);
+
+        void onSample(Metric metric, StatsSample sample);
+    }
+
+    public interface SamplesFilter {
+        boolean accept(StatsSample sample);
+    }
+
+    private static final class Series {
+        StatsSample statsSample;
+        long periodMs;
+        long lastStatTimeMs;
+        Metric metric;
+        MessageFilter filter;
+        MessageValueExtractor valueExtractor;
+
+        static Series getNew(@NotNull StatsSample series, @NotNull MessageFilter filter,
+                             @NotNull MessageValueExtractor valueExtractor,
+                             long periodMs, @NotNull Metric metric) {
+            if (series == null || metric == null) throw new NullPointerException("Series cannot be null");
+            Series s = new Series();
+            s.periodMs = periodMs;
+            s.metric = metric;
+            s.statsSample = series;
+            s.filter = filter;
+            s.valueExtractor = valueExtractor;
+            return s;
+        }
     }
 
     private MeteoListener collectListener;
-
     private final TimestampProvider timestampProvider;
-    private final NMEACache cache;
     private final StatsWriter writer;
     private final String tag;
-
-    private final StatsSample[] series = new StatsSample[MeteoMetrics.SIZE];
-    private final long[] periodsMs = new long[MeteoMetrics.SIZE];
-    private final long[] lastStatTimeMs = new long[MeteoMetrics.SIZE];
-
+    private final Map<Metric, Series> series = new HashMap<>();
+    private final Map<String, SamplesFilter> sampleFilters = new HashMap<>();
     private final Log log;
-
     private boolean started;
 
-    public MeteoSampler(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp, StatsWriter w, @NotNull String tag) {
+    public MeteoSampler(@NotNull Log log, @NotNull TimestampProvider tp, StatsWriter w, @NotNull String tag) {
         this.timestampProvider = tp;
-        this.cache = cache;
         this.log = log;
         this.writer = w;
         this.tag = tag;
     }
 
-    public void initMetric(MeteoMetrics metric, long period, String tag, double min, double max) {
+    public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
+                           long period, String tag, double min, double max) {
         synchronized (series) {
-            periodsMs[metric.getIx()] = period;
-            if (metric == MeteoMetrics.WIND_DIRECTION)
-                series[metric.getIx()] = new AngleStatsSample(tag);
-            else
-                series[metric.getIx()] = new ScalarStatsSample(tag, min, max);
+            series.put(metric, Series.getNew(
+                    (Unit.DEGREES == metric.getUnit()) ? new AngleStatsSample(tag) : new ScalarStatsSample(tag, min, max),
+                    filter, valueExtractor, period, metric));
         }
     }
 
-    public StatsSample getCurrent(MeteoMetrics metric) {
+    public void setSampleFilter(@NotNull String tag, SamplesFilter filter) {
+        sampleFilters.put(tag, filter);
+    }
+
+    public StatsSample getCurrent(Metric metric) {
         synchronized (series) {
-            return (series[metric.getIx()] != null) ? series[metric.getIx()].cloneStats() : null;
+            Series s = series.getOrDefault(metric, null);
+            return (s == null) ? null : s.statsSample.cloneStats();
         }
     }
 
@@ -85,7 +116,12 @@ public class MeteoSampler implements Startable {
             if (!started) {
                 try {
                     if (writer != null) writer.init();
-                    Arrays.fill(lastStatTimeMs, timestampProvider.getNow());
+                    synchronized (series) {
+                        long now = timestampProvider.getNow();
+                        for (Series s : series.values()) {
+                            if (s != null) s.lastStatTimeMs = now;
+                        }
+                    }
                     started = true;
                 } catch (Exception e) {
                     LogStringBuilder.start("MeteoSampler").wO("activate").wV("tag", tag).errorForceStacktrace(log, e);
@@ -98,15 +134,17 @@ public class MeteoSampler implements Startable {
     public void dumpAndReset() {
         synchronized (series) {
             long ts = timestampProvider.getNow();
-            for (int i = 0; i < series.length; i++) {
-                StatsSample series1 = series[i];
-                if (series1 != null && (ts - lastStatTimeMs[i]) >= periodsMs[i]) {
-                    write(series1, ts);
-                    if (collectListener != null) {
-                        collectListener.onSample(MeteoMetrics.valueOf(i), series1);
+            for (Series s : series.values()) {
+                if (s != null) {
+                    StatsSample statsSample = s.statsSample;
+                    if (statsSample != null && (ts - s.lastStatTimeMs) >= s.periodMs) {
+                        write(statsSample, ts);
+                        if (collectListener != null) {
+                            collectListener.onSample(s.metric, statsSample);
+                        }
+                        statsSample.reset();
+                        s.lastStatTimeMs = ts;
                     }
-                    series1.reset();
-                    lastStatTimeMs[i] = ts;
                 }
             }
         }
@@ -137,27 +175,14 @@ public class MeteoSampler implements Startable {
         synchronized (series) {
             Message m = msg.getMessage();
             try {
-                if (Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.GPS_TIME_SYNC, false))) {
-                    if (m instanceof MsgTemperature &&
-                            TemperatureSource.MAIN_CABIN_ROOM == ((MsgTemperature) m).getTemperatureSource()) {
-                        processTemp(((MsgTemperature) m).getTemperature(), msg.getTimestamp());
-                    }
+                if (timestampProvider.isSynced()) {
 
-                    if (m instanceof MsgPressure) {
-                        processPressure(((MsgPressure) m).getPressure(), msg.getTimestamp());
-                    }
-
-                    if (m instanceof MsgTemperature &&
-                            TemperatureSource.SEA == ((MsgTemperature) m).getTemperatureSource()) {
-                        processWaterTemp(((MsgTemperature) m).getTemperature(), msg.getTimestamp());
-                    }
-
-                    if (m instanceof MsgHumidity) {
-                        processHumidity(((MsgHumidity) m).getHumidity(), msg.getTimestamp());
-                    }
-
-                    if (m instanceof MsgWindData) {
-                        processWind((MsgWindData) m, msg.getTimestamp());
+                    for (Series ss : series.values()) {
+                        if (ss != null) {
+                            if (ss.filter.match(m)) {
+                                process(ss.metric, ss.valueExtractor.getValue(m), msg.getTimestamp());
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -166,71 +191,30 @@ public class MeteoSampler implements Startable {
         }
     }
 
-    private void collect(MeteoMetrics id, double d, long time) {
+    private void collect(Metric id, double d, long time) {
         synchronized (series) {
-            StatsSample s = series[id.getIx()];
-            s.add(d, time);
+            if (series.containsKey(id)) {
+                StatsSample s = series.get(id).statsSample;
+                s.add(d, time);
+            }
         }
     }
 
     private void write(StatsSample s, long ts) {
         if (writer != null && s != null && s.getSamples() > 0) {
-            if ("TW_".equals(s.getTag()) && s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)) {
-                // skip anomalous reading (like 80kn of max with avg of 4kn)
-                return;
-            }
-            writer.write(s, ts);
-        }
-    }
-
-    private void processWind(MsgWindData s, long time) {
-        if (s.isTrue()) {
-            DataEvent<MsgHeading> e = cache.getLastHeading();
-            if (!cache.isHeadingOlderThan(timestampProvider.getNow(), 800)) {
-                double windDir = e.getData().getHeading() + s.getAngle();
-                double windSpd = s.getSpeed();
-                collect(MeteoMetrics.WIND_SPEED, windSpd, time);
-                collect(MeteoMetrics.WIND_DIRECTION, windDir, time);
-                if (collectListener != null) {
-                    collectListener.onCollect(MeteoMetrics.WIND_SPEED, windSpd, time);
-                    collectListener.onCollect(MeteoMetrics.WIND_DIRECTION, windDir, time);
-                }
+            // skip anomalous reading (like 80kn of max with avg of 4kn)
+            SamplesFilter f = sampleFilters.get(s.getTag());
+            if (f == null || f.accept(s)) {
+                writer.write(s, ts);
             }
         }
     }
 
-    private void processWaterTemp(double temperature, long time) {
-        if (!Double.isNaN(temperature)) {
-            collect(MeteoMetrics.WATER_TEMPERATURE, temperature, time);
+    private void process(Metric metric, double value, long time) {
+        if (!Double.isNaN(value)) {
+            collect(metric, value, time);
             if (collectListener != null) {
-                collectListener.onCollect(MeteoMetrics.WATER_TEMPERATURE, temperature, time);
-            }
-        }
-    }
-
-    private void processPressure(double pressure, long time) {
-        if (!Double.isNaN(pressure)) {
-            collect(MeteoMetrics.PRESSURE, pressure, time);
-            if (collectListener != null) {
-                collectListener.onCollect(MeteoMetrics.PRESSURE, pressure, time);
-            }
-        }
-    }
-
-    private void processTemp(double temperature, long time) {
-        if (!Double.isNaN(temperature)) {
-            collect(MeteoMetrics.AIR_TEMPERATURE, temperature, time);
-            if (collectListener != null) {
-                collectListener.onCollect(MeteoMetrics.AIR_TEMPERATURE, temperature, time);
-            }
-        }
-    }
-
-    private void processHumidity(double humidity, long time) {
-        if (!Double.isNaN(humidity)) {
-            collect(MeteoMetrics.HUMIDITY, humidity, time);
-            if (collectListener != null) {
-                collectListener.onCollect(MeteoMetrics.HUMIDITY, humidity, time);
+                collectListener.onCollect(metric, value, time);
             }
         }
     }

@@ -1,0 +1,242 @@
+/*
+ * Copyright (c) 2021,  Andrea Boni
+ * This file is part of NMEARouter.
+ * NMEARouter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * NMEARouter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.aboni.nmea.router.data.meteo;
+
+import com.aboni.nmea.router.HeadingProvider;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.data.Metrics;
+import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.StatsWriter;
+import com.aboni.nmea.router.impl.RouterMessageImpl;
+import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.nmea.router.message.MsgTemperature;
+import com.aboni.nmea.router.message.TemperatureSource;
+import com.aboni.nmea.router.message.impl.MsgTemperatureImpl;
+import com.aboni.toolkit.ProgrammableTimeStampProvider;
+import com.aboni.utils.ConsoleLog;
+import com.aboni.utils.DataEvent;
+import com.aboni.utils.Pair;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+public class MeteoSamplerTest {
+
+    private static class MyHeadingProvider implements HeadingProvider {
+
+        DataEvent<MsgHeading> lastHeading;
+
+        @Override
+        public DataEvent<MsgHeading> getLastHeading() {
+            return lastHeading;
+        }
+    }
+
+    ;
+
+    private static class MyStatsWriter implements StatsWriter {
+
+        List<Pair<StatsSample, Long>> events = new LinkedList<>();
+
+        @Override
+        public void write(StatsSample s, long ts) {
+            StatsSample ss = s.cloneStats();
+            events.add(new Pair<>(ss, ts));
+        }
+
+        @Override
+        public void init() {
+
+        }
+
+        @Override
+        public void dispose() {
+
+        }
+
+        List<Pair<StatsSample, Long>> getEvents() {
+            return events;
+        }
+    }
+
+    ;
+
+    private MeteoSampler sampler;
+    private MyStatsWriter writer;
+    private MyHeadingProvider headingProvider;
+    private ProgrammableTimeStampProvider timeProvider;
+    private final long t0 = Instant.parse("2021-12-25T12:00:00Z").toEpochMilli(); // arbitrary
+
+    private static RouterMessage getTemperature(double t, long ts) {
+        return new RouterMessageImpl<>(
+                new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, t), "TestSource", ts);
+    }
+
+    @Before
+    public void setup() {
+        timeProvider = new ProgrammableTimeStampProvider();
+        writer = new MyStatsWriter();
+        headingProvider = new MyHeadingProvider();
+        sampler = new MeteoSampler(ConsoleLog.getLogger(), timeProvider, writer, "TestTag");
+    }
+
+    @Test
+    public void testIsStarted() {
+        assertFalse(sampler.isStarted());
+        sampler.start();
+        assertTrue(sampler.isStarted());
+    }
+
+    private static void checkSample(StatsSample sample, double value, int samples) {
+        assertNotNull(sample);
+        assertEquals(value, sample.getAvg(), 0.0001);
+        assertEquals(samples, sample.getSamples());
+    }
+
+    private void initWithTemperature() {
+        // make sure timestamp is considered reliable
+        timeProvider.setTimestamp(t0);
+        timeProvider.setSkew(t0, 100);
+
+        // init metrics
+        sampler.initMetric(Metrics.AIR_TEMPERATURE,
+                (Message m) -> (m instanceof MsgTemperature),
+                (Message m) -> ((MsgTemperature) m).getTemperature(),
+                60000L, "AT0", -100, 100);
+    }
+
+    @Test
+    public void testCurrentSampleNotStarted() {
+
+        initWithTemperature();
+
+        // post metric and check that it is NOT collected (because it is not started)
+        sampler.onSentence(getTemperature(25.2, t0));
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
+    }
+
+    @Test
+    public void testCurrentSampleOk() {
+
+        initWithTemperature();
+
+        sampler.start();
+
+        // post metric and check that it is collected
+        sampler.onSentence(getTemperature(25.2, t0));
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.2, 1);
+
+        // post metric after 1 second and check that it is collected
+        timeProvider.setTimestamp(t0 + 1000);
+        sampler.onSentence(getTemperature(25.4, t0 + 1000));
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.3, 2);
+
+        // post metric after 1 second and check that it is collected
+        timeProvider.setTimestamp(t0 + 2000);
+        sampler.onSentence(getTemperature(25.6, t0 + 2000));
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.4, 3);
+    }
+
+    @Test
+    public void testDiscardSecondMeasureOutOfRange() {
+
+        initWithTemperature();
+
+        sampler.start();
+
+        // post metric and check that it is collected
+        sampler.onSentence(getTemperature(25.2, t0));
+
+        // post invalid metric after 1 second and check that it is collected
+        timeProvider.setTimestamp(t0 + 1000);
+        sampler.onSentence(getTemperature(125.4, t0 + 1000));
+
+        // the second measurement has been discarded because out of range
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.2, 1);
+    }
+
+    @Test
+    public void testDiscardFirstMeasureOutOfRange() {
+
+        initWithTemperature();
+
+        sampler.start();
+
+        // post metric and check that it is collected
+        sampler.onSentence(getTemperature(125.2, t0));
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
+    }
+
+    @Test
+    public void testWriteSample() {
+        initWithTemperature();
+
+        sampler.start();
+
+        // post 60 measurements in 1 minute
+        for (int i = 0; i < 60; i++) {
+            timeProvider.setTimestamp(t0 + i * 1000);
+            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+        }
+
+        // one more second to let the 1m timeout to expire
+        long dumpTime = t0 + 60 * 1000;
+        timeProvider.setTimestamp(dumpTime);
+
+        sampler.dumpAndReset();
+
+        assertEquals(1, writer.getEvents().size());
+        assertEquals(dumpTime, writer.getEvents().get(0).second.longValue());
+        assertEquals(60, writer.getEvents().get(0).first.getSamples());
+        assertEquals(26.0, writer.getEvents().get(0).first.getAvg(), 0.0001);
+        assertEquals(25.0, writer.getEvents().get(0).first.getMin(), 0.0001);
+        assertEquals(27.0, writer.getEvents().get(0).first.getMax(), 0.0001);
+
+        // check reset
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
+    }
+
+    @Test
+    public void testDumpBeforeTimeoutExpire() {
+        initWithTemperature();
+
+        sampler.start();
+
+        // post 30 measurements in 30 seconds (timeout for the metric is 1m)
+        for (int i = 0; i < 30; i++) {
+            timeProvider.setTimestamp(t0 + i * 1000);
+            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+        }
+
+        sampler.dumpAndReset();
+
+        assertEquals(0, writer.getEvents().size());
+
+        // check it hasn't reset
+        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 26.0, 30);
+    }
+
+    @Test
+    public void testWindDirection() {
+        fail("TODO");
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2021,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,24 +13,22 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.toolkit;
+package com.aboni.nmea.router.data;
 
-import com.aboni.nmea.router.TimestampProvider;
+import org.junit.Test;
 
-public class ProgrammableTimeStampProvider extends TimestampProvider {
+import static org.junit.Assert.assertEquals;
 
-    private long timestamp;
+public class SampleTest {
 
-    public void setTimestamp(long ts) {
-        timestamp = ts;
-    }
-
-    public void incrementBy(long ms) {
-        timestamp += ms;
-    }
-
-    @Override
-    public long getNow() {
-        return timestamp;
+    @Test
+    public void newInstance() {
+        long now = System.currentTimeMillis();
+        Sample s = Sample.newInstance(now, "TestTag", 0.1, 0.5, 0.9);
+        assertEquals(0.1, s.getMinValue(), 0.00001);
+        assertEquals(0.5, s.getValue(), 0.00001);
+        assertEquals(0.9, s.getMaxValue(), 0.00001);
+        assertEquals("TestTag", s.getTag());
+        assertEquals(now, s.getTs());
     }
 }

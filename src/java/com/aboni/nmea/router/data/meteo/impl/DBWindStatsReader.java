@@ -15,7 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
-import com.aboni.nmea.router.data.meteo.*;
+import com.aboni.nmea.router.data.Sample;
+import com.aboni.nmea.router.data.meteo.MeteoManagementException;
+import com.aboni.nmea.router.data.meteo.MeteoReader;
+import com.aboni.nmea.router.data.meteo.WindStats;
+import com.aboni.nmea.router.data.meteo.WindStatsReader;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -38,7 +42,7 @@ public class DBWindStatsReader implements WindStatsReader {
         final WindStats stats;
 
         @Override
-        public void onRead(MeteoSample sample) {
+        public void onRead(Sample sample) {
             if ("TW_".equals(sample.getTag())) {
                 if ((sample.getTs() - wAngleTime) < 250) {
                     stats.addSample(60, wAngle, sample.getValue());

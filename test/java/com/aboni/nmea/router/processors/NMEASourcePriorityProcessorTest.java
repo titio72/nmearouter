@@ -1,8 +1,8 @@
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.toolkit.ProgrammableTimeStampProvider;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -14,21 +14,11 @@ import static org.junit.Assert.*;
 public class NMEASourcePriorityProcessorTest {
 
     private NMEASourcePriorityProcessor proc;
-    private MyTimestampProvider timestampProvider;
-
-    private static class MyTimestampProvider implements TimestampProvider {
-
-        @Override
-        public long getNow() {
-            return timestamp == -1 ? System.currentTimeMillis() : timestamp;
-        }
-
-        long timestamp = -1;
-    }
+    private ProgrammableTimeStampProvider timestampProvider;
 
     @Before
     public void setUp() {
-        timestampProvider = new MyTimestampProvider();
+        timestampProvider = new ProgrammableTimeStampProvider();
         proc = new NMEASourcePriorityProcessor(timestampProvider);
     }
 
@@ -119,11 +109,11 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MyOtherSrc", 5);
 
         long t0 = 10000000L;
-        timestampProvider.timestamp = t0;
+        timestampProvider.setTimestamp(t0);
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         proc.process(NMEA0183Message.get(s0), "MySrc");
 
-        timestampProvider.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
+        timestampProvider.setTimestamp(t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L);
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MyOtherSrc");
         assertNotNull(res);
@@ -139,11 +129,11 @@ public class NMEASourcePriorityProcessorTest {
         proc.setPriority("MyOtherSrc", 5);
 
         long t0 = 10000000L;
-        timestampProvider.timestamp = t0;
+        timestampProvider.setTimestamp(t0);
         Sentence s0 = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         proc.process(NMEA0183Message.get(s0), "MySrc");
 
-        timestampProvider.timestamp = t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L;
+        timestampProvider.setTimestamp(t0 + /* 3 minutes : 1 more than the threshold */ 3L * 60000L);
         Sentence s = SentenceFactory.getInstance().createParser("$IIMWV,102.5,T,10.7,N,A");
         Pair<Boolean, Message[]> res = proc.process(NMEA0183Message.get(s), "MySrc");
         assertNotNull(res);

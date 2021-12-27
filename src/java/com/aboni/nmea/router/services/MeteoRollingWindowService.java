@@ -17,9 +17,10 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.data.HistoryProvider;
+import com.aboni.nmea.router.data.Metric;
+import com.aboni.nmea.router.data.Metrics;
 import com.aboni.nmea.router.data.StatsSample;
-import com.aboni.nmea.router.data.meteo.MeteoHistory;
-import com.aboni.nmea.router.data.meteo.MeteoMetrics;
 import com.aboni.nmea.router.data.sampledquery.SampleWriter;
 import com.aboni.nmea.router.data.sampledquery.SamplesQueryToJSON;
 import com.aboni.utils.Log;
@@ -32,7 +33,7 @@ import java.util.List;
 public class MeteoRollingWindowService extends JSONWebService {
 
     private final NMEARouter router;
-    private MeteoHistory meteoTarget;
+    private HistoryProvider meteoTarget;
 
     @Inject
     public MeteoRollingWindowService(@NotNull NMEARouter router, @NotNull Log log) {
@@ -55,28 +56,28 @@ public class MeteoRollingWindowService extends JSONWebService {
 
     private JSONObject getJSON(String type) {
         SamplesQueryToJSON toJSON = new SamplesQueryToJSON(s -> WRITER);
-        MeteoMetrics i;
+        Metric i;
         switch (type) {
             case "HUM":
-                i = MeteoMetrics.HUMIDITY;
+                i = Metrics.HUMIDITY;
                 break;
             case "AT0":
-                i = MeteoMetrics.AIR_TEMPERATURE;
+                i = Metrics.AIR_TEMPERATURE;
                 break;
             case "WT_":
-                i = MeteoMetrics.WATER_TEMPERATURE;
+                i = Metrics.WATER_TEMPERATURE;
                 break;
             case "TW_":
-                i = MeteoMetrics.WIND_SPEED;
+                i = Metrics.WIND_SPEED;
                 break;
             case "TWD":
-                i = MeteoMetrics.WIND_DIRECTION;
+                i = Metrics.WIND_DIRECTION;
                 break;
             default:
-                i = MeteoMetrics.PRESSURE;
+                i = Metrics.PRESSURE;
 
         }
-        MeteoHistory meteoProvider = findService();
+        HistoryProvider meteoProvider = findService();
         if (meteoProvider != null) {
             List<StatsSample> series = meteoProvider.getHistory(i);
             toJSON.fillResponse(type, series);
@@ -86,12 +87,12 @@ public class MeteoRollingWindowService extends JSONWebService {
         return getError("Cannot find a suitable meteo provider");
     }
 
-    private MeteoHistory findService() {
+    private HistoryProvider findService() {
         if (meteoTarget == null) {
             for (String ag_id : router.getAgents()) {
                 NMEAAgent ag = router.getAgent(ag_id);
-                if (ag instanceof MeteoHistory) {
-                    meteoTarget = (MeteoHistory) ag;
+                if (ag instanceof HistoryProvider) {
+                    meteoTarget = (HistoryProvider) ag;
                     break;
                 }
             }

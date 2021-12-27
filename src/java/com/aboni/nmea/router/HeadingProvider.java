@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2021,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,13 +13,20 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.meteo;
+package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.message.MsgHeading;
+import com.aboni.utils.DataEvent;
 
-import java.util.List;
+public interface HeadingProvider {
+    DataEvent<MsgHeading> getLastHeading();
 
-public interface MeteoHistory {
+    default boolean isHeadingOlderThan(long time, long threshold) {
+        if (getLastHeading() == null) {
+            return true;
+        } else {
+            return (time - getLastHeading().getTimestamp()) > threshold;
+        }
+    }
 
-    List<StatsSample> getHistory(MeteoMetrics metric);
 }

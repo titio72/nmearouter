@@ -15,14 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
@@ -33,7 +32,6 @@ public class SystemTimeChecker {
     private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
     private final TimestampProvider timestampProvider;
-    private final NMEACache cache;
     private final Log log;
     private final SystemTimeChanger changer;
 
@@ -42,40 +40,37 @@ public class SystemTimeChecker {
     }
 
     @Inject
-    public SystemTimeChecker(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
+    public SystemTimeChecker(@NotNull TimestampProvider tp, @NotNull Log log) {
         this.timestampProvider = tp;
-        this.cache = cache;
         this.log = log;
         this.changer = this::doChangeTime;
     }
 
-    public SystemTimeChecker(@NotNull NMEACache cache, @NotNull TimestampProvider timestampProvider, SystemTimeChanger changer, @NotNull Log log) {
+    public SystemTimeChecker(@NotNull TimestampProvider timestampProvider, SystemTimeChanger changer, @NotNull Log log) {
         this.timestampProvider = timestampProvider;
         this.changer = changer;
-        this.cache = cache;
         this.log = log;
     }
 
     public void checkAndSetTime(Instant gpsTime) {
         try {
-            if (gpsTime != null && !checkAndSetTimeSkew(timestampProvider.getNow(), gpsTime)) {
+            if (gpsTime != null && !checkAndSetTimeSkew(timestampProvider.getInstant(), gpsTime)) {
                 // time skew from GPS is too high - reset time stamp
                 log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").wV("new time", gpsTime).toString());
                 if (changer != null) {
                     changer.doChangeTime(gpsTime);
                 }
-                checkAndSetTimeSkew(timestampProvider.getNow(), gpsTime);
+                checkAndSetTimeSkew(timestampProvider.getInstant(), gpsTime);
             }
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").toString(), e);
         }
     }
 
-    private boolean checkAndSetTimeSkew(long now, Instant gpsTime) {
-        timeSkew = Math.abs(now - gpsTime.toEpochMilli());
-        synced = (timeSkew < TOLERANCE_MS);
-        cache.setStatus(NMEARouterStatuses.GPS_TIME_SYNC, synced);
-        cache.setStatus(NMEARouterStatuses.GPS_TIME_SKEW, timeSkew);
+    private boolean checkAndSetTimeSkew(Instant now, Instant gpsTime) {
+        timeSkew = Duration.between(now, gpsTime).toMillis();
+        timestampProvider.setSkew(gpsTime.toEpochMilli(), TOLERANCE_MS);
+        synced = timestampProvider.isSynced();
         return synced;
     }
 

@@ -15,10 +15,10 @@
 
 package com.aboni.nmea.router.data.meteo.impl;
 
+import com.aboni.nmea.router.data.Metric;
 import com.aboni.nmea.router.data.StatScanner;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.data.meteo.MeteoMetrics;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -33,7 +33,7 @@ public class MemoryStatsWriter implements StatsWriter {
 
     @Inject
     public MemoryStatsWriter() {
-        history = new HashMap<>(MeteoMetrics.SIZE);
+        history = new HashMap<>();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class MemoryStatsWriter implements StatsWriter {
         // nothing to destroy
     }
 
-    public List<StatsSample> getHistory(String tag) {
+    public List<StatsSample> getHistory(Metric tag) {
         List<StatsSample> res;
         synchronized (history) {
             res = history.getOrDefault(tag, null);
@@ -64,7 +64,7 @@ public class MemoryStatsWriter implements StatsWriter {
         else return res;
     }
 
-    public void scan(String tag, StatScanner scanner, boolean backward) {
+    public void scan(Metric tag, StatScanner scanner, boolean backward) {
         List<StatsSample> list = getHistory(tag);
         synchronized (list) {
             if (list.isEmpty()) return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2021,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,24 +13,11 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.toolkit;
+package com.aboni.nmea.router.data;
 
-import com.aboni.nmea.router.TimestampProvider;
+import java.util.List;
 
-public class ProgrammableTimeStampProvider extends TimestampProvider {
+public interface HistoryProvider {
 
-    private long timestamp;
-
-    public void setTimestamp(long ts) {
-        timestamp = ts;
-    }
-
-    public void incrementBy(long ms) {
-        timestamp += ms;
-    }
-
-    @Override
-    public long getNow() {
-        return timestamp;
-    }
+    List<StatsSample> getHistory(Metric metric);
 }

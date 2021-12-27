@@ -25,7 +25,7 @@ public class RouterMessageImpl<T> implements RouterMessage {
     private final T theMessage;
     private final String source;
 
-    RouterMessageImpl(T msg, String source, long timestamp) {
+    public RouterMessageImpl(T msg, String source, long timestamp) {
         this.timestamp = timestamp;
         this.theMessage = msg;
         this.source = source;

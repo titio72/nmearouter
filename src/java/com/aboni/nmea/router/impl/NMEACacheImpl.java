@@ -77,11 +77,6 @@ public class NMEACacheImpl implements NMEACache {
     }
 
     @Override
-    public boolean isHeadingOlderThan(long time, long threshold) {
-        return (time - lastHeading.getTimestamp()) > threshold;
-    }
-
-    @Override
     public <T> void setStatus(String statusKey, T status) {
         synchronized (statuses) {
             statuses.put(statusKey, status);
