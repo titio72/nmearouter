@@ -141,7 +141,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                 (Message m) -> ((MsgHumidity) m).getHumidity(),
                 0.0, 150.0);
         initMetricX(Metrics.WIND_DIRECTION, "TWD",
-                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && cache.isHeadingOlderThan(tp.getNow(), 800)),
+                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
                 -360.0, 360.0);
         initMetricX(Metrics.WIND_SPEED, "TW_",
