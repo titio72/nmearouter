@@ -48,6 +48,7 @@ public class N2KDCDetailedStatusImpl extends N2KMessageImpl implements MsgDCDeta
         int soh = BitUtils.getByte(data, 4, 0xFF);
         int ttg = BitUtils.get2ByteInt(data, 5);
         double ripple = BitUtils.parseDoubleSafe(data, 56, 16, 0.01, false);
+        System.out.printf("SOC %d\n", soc);
         return new MsgDCDetailedStatusImpl(sid, instance, DCType.valueOf(type), soc / 100.0, soh / 100.0, ttg, ripple);
     }
 

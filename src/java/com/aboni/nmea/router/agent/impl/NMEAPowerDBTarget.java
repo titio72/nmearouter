@@ -35,9 +35,7 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
 
     private static final long ONE_MINUTE = 60000L;
     private static final int BATTERY_INSTANCE = 0;
-    private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
 
-    private int timerCount;
     private final Sampler powerSampler;
     private final Log log;
 
@@ -98,11 +96,6 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        timerCount = (timerCount + 1) % SAMPLING_FACTOR;
-        if (timerCount == 0) dumpStats();
-    }
-
-    private void dumpStats() {
         powerSampler.dumpAndReset();
     }
 

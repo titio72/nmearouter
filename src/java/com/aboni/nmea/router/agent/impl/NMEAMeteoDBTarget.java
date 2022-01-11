@@ -18,7 +18,6 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.Metrics;
 import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
@@ -31,9 +30,7 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
 
     public static final long ONE_MINUTE = 60000L;
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
-    private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
 
-    private int timerCount;
     private final Sampler meteoSampler;
     private final Log log;
 
@@ -101,11 +98,6 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        timerCount = (timerCount+1) % SAMPLING_FACTOR;
-        if (timerCount==0) dumpStats();
-    }
-
-    private void dumpStats() {
         meteoSampler.dumpAndReset();
     }
 

@@ -68,7 +68,7 @@ public class DBStatsWriter implements StatsWriter {
 
     @Override
     public void write(StatsSample s, long ts) {
-        db.write(ee, new StatsEvent(s, ts));
+        if (db != null) db.write(ee, new StatsEvent(s, ts));
     }
 
     @Override

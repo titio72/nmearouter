@@ -28,7 +28,7 @@ public class MsgDCDetailedStatusImpl implements MsgDCDetailedStatus {
     private final int ttg;
     private final DCType type;
 
-    public MsgDCDetailedStatusImpl(int instance, int sid, DCType type, double soc, double soh, int ttg, double ripple) {
+    public MsgDCDetailedStatusImpl(int sid, int instance, DCType type, double soc, double soh, int ttg, double ripple) {
         this.instance = instance;
         this.sid = sid;
         this.soh = soh;
