@@ -69,7 +69,7 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
                 ONE_MINUTE, "TWD", -360.0, 360.0);
 
         // prevents writing stats where the max is obviously off, like 4.5 times the average (why???? how did I come up with this???)
-        meteoSampler.setSampleFilter("TW_", (StatsSample s) -> !(s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)));
+        //meteoSampler.setSampleFilter("TW_", (StatsSample s) -> !(s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)));
     }
 
     @Override
