@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xml:lang="en">
+
+<head>
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Andrea Boni NMEARouter</title>
+    <script src="js/nmearouter.js?a3"></script>
+    <link href="css/nmearouter.css" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="nmeasail.png">
+    <style>
+		.time-sampling-button-bar {
+			overflow-x: scroll;
+			width: max-content;
+		}
+
+		.digit_panel_content {
+		}
+
+		.chart-canvas {
+			max-height: 350px;
+			min-width: 100%;
+		}
+
+		.card-sensor-text {
+			font-family: monospace;
+			font-size: 18pt;
+		}
+
+		.card-sensor-text-small {
+			font-family: monospace;
+			font-size: 12pt;
+		}
+
+		.card-sensor-body {
+		}
+
+		.grid_box {
+			padding: 3px;
+		}
+
+		.card-sensor {
+			height: 100%;
+		}
+
+		.card-sensor-header {}		
+
+    </style>
+    <script>
+		var theChart;
+		var data = loadPower(3600);
+		app.controller("myCtrl", function ($scope) {
+			$scope.years = [];
+			drawPowerChart(data, "powerChart");
+		});
+
+		function loadPower(period) {
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/poweranalysis?period=" + period, false);
+			xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+			xmlHttp.send(null);
+			return JSON.parse(xmlHttp.responseText);
+		}
+
+		function getSerie(data, yAxis, chartType, serie, attr, color) {
+			return {
+				type: chartType,
+				data: getDataPoints(data, serie, attr),
+				borderColor: color,
+				backgroundColor: color,
+				pointRadius: 0,
+				lineTension: 0,
+				barPercentage: 0.9,
+				yAxisID: yAxis,
+				fill: false
+			};
+		}
+
+		function getDataPoints(data, name, attr) {
+			var dt = [];
+			var sr = data[name];
+			var i;
+			var lastT = 0;
+			if (sr != null) {
+				for (i = 0; i < sr.length; i++) {
+					var item = sr[i];
+					var t = item['t'];
+					if (lastT == 0 || lastT < t) {
+						var datapoint = new Object();
+						datapoint.x = new Date(t);
+						datapoint.y = parseFloat(item[attr]);
+						lastT = t;
+					} else {
+						console.log("Out of sync items!")
+					}
+					dt.push(datapoint);
+				}
+			}
+			return dt;
+		}
+
+		function drawPowerChart(data, chart) {
+			var ctx = document.getElementById(chart);
+			var c = theChart;
+			if (c != null) {
+				c.destroy();
+			}
+			var datasets = [];
+			datasets.push(getSerie(data, "Hourly", "bar", "C_0", "Ah", "blue"));
+			datasets.push(getSerie(data, "Accumulated", "line", "C_0", "AhT", "yellow"));
+			var c1 = new Chart(ctx, {
+				type: 'line',
+				data: {
+					datasets: datasets
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					spanGaps: false,
+					legend: {
+						display: false
+					},
+					scales: {
+						xAxes: [{
+							type: 'time',
+						}],
+						yAxes: [{
+							id: "Hourly",
+							type: "linear",
+							position: "left"
+						}, {
+							id: "Accumulated",
+							type: "linear",
+							position: "right"
+						}]
+					},
+					/*plugins: {
+						zoom: {
+							pan: {
+								enabled: true,
+								mode: 'x'
+							},
+							zoom: {
+								enabled: true,
+								mode: 'x'
+							}
+						}
+					},*/
+				}
+			});
+			theChart = c1;
+		}
+
+		function set(period) {
+			data = loadPower(period);
+			drawPowerChart(data, "powerChart");
+		}
+
+    </script>
+
+</head>
+
+<body ng-app="nmearouter">
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+    <li class="breadcrumb-item active">Power</li>
+</ol>
+
+<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
+    <div class="row">
+        <div class="col-lg-10 col-md-9 col-sm-12 grid_box" style="height: 450px;">
+            <div class="card-router card-sensor">
+                <div class="card-router-header card-sensor-header">Consumption</div>
+                <div class="card-router-body card-sensor-body">
+                    <div class="btn btn-secondary"><a href="#" onclick="set(3600)">1h</a></div>
+                    <div class="btn btn-secondary"><a href="#" onclick="set(1800)">30m</a></div>
+                    <div class="btn btn-secondary"><a href="#" onclick="set(900)">15m</a></div>
+                    <div class="btn btn-secondary"><a href="#" onclick="set(300)">5m</a></div>
+                    <canvas class="chart-canvas" id="powerChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-12">
+            <div class="row" style="height: 450px;">
+                <div class="col-12 grid_box" style="height: 33%;">
+                    <div class="card-router card-sensor">
+                        <div class="card-router-header card-sensor-header">Voltage</div>
+                        <div class="card-router-body card-sensor-body">
+                            <div class="digit_panel_content">
+                                <h1>13.4V</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 grid_box" style="height: 33%;">
+                    <div class="card-router card-sensor">
+                        <div class="card-router-header card-sensor-header">Current</div>
+                        <div class="card-router-body card-sensor-body">
+                            <div class="digit_panel_content">
+                                <h1>22.1A</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 grid_box" style="height: 34%;">
+                    <div class="card-router card-sensor">
+                        <div class="card-router-header card-sensor-header">SOC</div>
+                        <div class="card-router-body card-sensor-body">
+                            <div class="digit_panel_content">
+                                <h1>56.2%</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
