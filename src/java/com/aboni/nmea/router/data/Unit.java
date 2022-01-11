@@ -20,5 +20,8 @@ public enum Unit {
     DEGREES,
     PERCENTAGE,
     CELSIUS,
-    MILLIBAR
+    VOLTS,
+    AMPERE,
+    MILLIBAR,
+    WATT
 }

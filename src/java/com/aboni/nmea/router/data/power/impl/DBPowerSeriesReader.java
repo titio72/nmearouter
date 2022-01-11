@@ -13,15 +13,24 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo;
+package com.aboni.nmea.router.data.power.impl;
 
-public class MeteoManagementException extends Exception {
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.DataReader;
+import com.aboni.nmea.router.data.impl.DBSeriesReader;
+import com.aboni.utils.ThingsFactory;
 
-    public MeteoManagementException(String message) {
-        super(message);
+import javax.inject.Inject;
+
+public class DBPowerSeriesReader extends DBSeriesReader {
+
+    @Inject
+    public DBPowerSeriesReader() {
+        // nothing to initialize
     }
 
-    public MeteoManagementException(String message, Throwable t) {
-        super(message, t);
+    @Override
+    protected DataReader getNewDataReader() {
+        return ThingsFactory.getInstance(DataReader.class, Constants.TAG_POWER);
     }
 }

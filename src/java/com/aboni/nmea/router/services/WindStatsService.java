@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
-import com.aboni.nmea.router.data.meteo.MeteoManagementException;
+import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.meteo.WindStats;
 import com.aboni.nmea.router.data.meteo.WindStatsReader;
 import com.aboni.utils.Log;
@@ -66,7 +66,7 @@ public class WindStatsService extends JSONWebService {
                 res.put("maxValueH", Utils.round(stats.getMaxWindDistance() / (stats.getTotalTime() / 3600.0), 1));
                 res.put("tot", stats.getTot());
                 return res;
-            } catch (MeteoManagementException e) {
+            } catch (DataManagementException e) {
                 log.errorForceStacktrace(LogStringBuilder.start("WindStatService").wO("execute").toString(), e);
                 return null;
             }

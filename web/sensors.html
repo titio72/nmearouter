@@ -272,6 +272,11 @@
       doWithScope(msg, (m, scope) => {
         scope[m.topic + m.instance] = m;
       });
+    } else if (msg.topic == "dc_status") {
+      doWithScope(msg, (m, scope) => {
+        m.SOC = 100.0 * m.SOC;
+        scope[m.topic + m.instance] = m;
+      });
     } else if (msg.topic == "RSA" && msg.instance == 0) {
       doWithScope(msg, (m, scope) => {
         m.show_angle0 = m.angle > 0 ? 0 : m.angle;
@@ -689,6 +694,14 @@
                 <td style="text-align: right">{{battery0.voltage | number:1}} V</td>
               </tr>
               <tr>
+                <td>&nbsp;</td>
+                <td style="text-align: right">{{battery0.current | number:1}} A</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td style="text-align: right">{{dc_status0.SOC | number:1}}%</td>
+              </tr>
+              <tr>
                 <td>Battery Eng</td>
                 <td style="text-align: right">{{battery1.voltage | number:1}} V</td>
               </tr>
@@ -703,10 +716,6 @@
               <tr>
                 <td>Equipment</td>
                 <td style="text-align: right">{{AirTemp.value | number:1}} &deg;C</td>
-              </tr>
-              <tr>
-                <td>Engine</td>
-                <td style="text-align: right">{{EngineTemp.value | number:1}} &deg;C</td>
               </tr>
               <tr>
                 <td>Queue</td>
@@ -763,6 +772,7 @@
           </div>
         </div>
       </div>
+      <!--
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" id="pilot_card">
         <div class="card-router card-sensor">
         <div class="card-router-header card-sensor-header">Pilot</div>
@@ -828,6 +838,7 @@
           </div>
         </div>
       </div>
+      -->
     </div>
   </div>
 </div>

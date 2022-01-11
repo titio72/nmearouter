@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.power.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
@@ -28,10 +28,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-public class DBMeteoReader implements DataReader {
+public class DBPowerReader implements DataReader {
 
-    private static final String SQL_TIME = "select * from meteo where TS>=? and TS<?";
-    private static final String SQL_TIME_AND_TYPE = "select * from meteo where TS>=? and TS<? and type=?";
+    private static final String SQL_TIME = "select * from power where TS>=? and TS<?";
+    private static final String SQL_TIME_AND_TYPE = "select * from power where TS>=? and TS<? and type=?";
 
     @Override
     public void readData(@NotNull Instant from, @NotNull Instant to, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
@@ -65,7 +65,7 @@ public class DBMeteoReader implements DataReader {
                 }
             }
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            throw new DataManagementException("Error reading meteo", e);
+            throw new DataManagementException("Error reading power", e);
         }
 
     }
@@ -74,8 +74,8 @@ public class DBMeteoReader implements DataReader {
         return Sample.newInstance(
                 rs.getTimestamp("TS").getTime(),
                 rs.getString("type"),
-                rs.getDouble("vMin"),
                 rs.getDouble("v"),
-                rs.getDouble("vMax"));
+                rs.getDouble("v"),
+                rs.getDouble("v"));
     }
 }

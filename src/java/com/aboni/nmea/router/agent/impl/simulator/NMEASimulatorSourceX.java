@@ -54,11 +54,24 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
         double refHeading = Double.NaN;
     }
 
+    private static class PowerData {
+        boolean charging = false;
+        double voltage = 13.2; // volt
+        double current = 3.45; // ampere
+        double temperature = 28.2; //celsius
+        double totAh = -280 * (1 - 0.365);
+
+        double getSOC() {
+            return (280.0 + totAh) / 280.0;
+        }
+    }
+
     private String lastPolarFile;
     private PolarTable polars;
     private NMEASimulatorSourceSettings data;
     private final Random r = new Random();
     private final NavData navData = new NavData();
+    private final PowerData powerData = new PowerData();
     private long lastTS = 0;
 
     private final Log log;
@@ -190,6 +203,22 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             }
             lastTS = newTS;
 
+            if (powerData.charging)
+                powerData.current = 14.45 + r.nextDouble();
+            else
+                powerData.current = -21.45 - r.nextDouble();
+
+            powerData.totAh += powerData.current / 3600;
+            powerData.voltage = 14.0 + 2.0 * (powerData.totAh / 280.0);
+            powerData.temperature = 28.2;
+
+            if (powerData.totAh < -250) powerData.charging = true;
+            else if (powerData.totAh > -10) powerData.charging = false;
+
+            System.out.printf("AH %.3fAh A %.2f V %.2f SOC %.2f\n", powerData.totAh, powerData.current, powerData.voltage, powerData.getSOC());
+
+            sendPower(powerData);
+
             sendGPS(posOut, hdg, speed);
             sendDepth(depth);
             sendWind(absoluteWindSpeed, tWDirection, aWSpeed, aWDirection);
@@ -233,10 +262,17 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
 
 
     private void sendVoltage() {
-        if (data.isXdrDiagnostic()) {
+        /*if (data.isXdrDiagnostic()) {
             notify(new MsgBatteryImpl(0, 13.56));
             notify(new MsgBatteryImpl(1, 13.12));
-        }
+        }*/
+    }
+
+    private void sendPower(PowerData powerData) {
+        notify(new MsgBatteryImpl(0, 1, 12.7, Double.NaN, Double.NaN));
+        notify(new MsgBatteryImpl(0, 0, powerData.voltage, powerData.current, powerData.temperature));
+        notify(new MsgDCDetailedStatusImpl(0, 0, DCType.BATTERY, powerData.getSOC(), 1.0,
+                -(int) ((280 + powerData.totAh) / powerData.current), Double.NaN));
     }
 
     private void sendGyro(double hdg, double roll, double pitch) {

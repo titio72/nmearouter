@@ -20,8 +20,7 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.data.*;
-import com.aboni.nmea.router.data.meteo.MeteoSampler;
-import com.aboni.nmea.router.data.meteo.impl.MemoryStatsWriter;
+import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
@@ -35,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProvider {
 
-    private final MeteoSampler meteoSampler;
+    private final Sampler meteoSampler;
 
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
 
@@ -88,7 +87,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     private final List<Pair<Metric, StatsChange>> alerts;
 
-    private class AlertManager implements MeteoSampler.MeteoListener {
+    private class AlertManager implements Sampler.MeteoListener {
 
         @Override
         public void onCollect(Metric metric, double value, long time) {
@@ -125,7 +124,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         super(log, tp, false, true);
         this.log = log;
         this.statsWriter = new MemoryStatsWriter();
-        this.meteoSampler = new MeteoSampler(log, tp, statsWriter, "MeteoMonitor");
+        this.meteoSampler = new Sampler(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
 
         initMetricX(Metrics.PRESSURE, "PR_",
@@ -141,7 +140,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                 (Message m) -> ((MsgHumidity) m).getHumidity(),
                 0.0, 150.0);
         initMetricX(Metrics.WIND_DIRECTION, "TWD",
-                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && cache.isHeadingOlderThan(tp.getNow(), 800)),
+                (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
                 -360.0, 360.0);
         initMetricX(Metrics.WIND_SPEED, "TW_",
@@ -169,8 +168,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
     }
 
     private void initMetricX(Metric metric, String tag,
-                             MeteoSampler.MessageFilter filter,
-                             MeteoSampler.MessageValueExtractor valueExtractor,
+                             Sampler.MessageFilter filter,
+                             Sampler.MessageValueExtractor valueExtractor,
                              double min, double max) {
         meteoSampler.initMetric(metric, filter, valueExtractor, 60000L, tag, min, max);
     }
@@ -224,7 +223,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     @Override
     public List<StatsSample> getHistory(Metric ix) {
-        List<StatsSample> res = new ArrayList<>(statsWriter.getHistory(ix));
+        List<StatsSample> _res = statsWriter.getHistory(ix);
+        List<StatsSample> res = new ArrayList<>(_res);
         StatsSample current = meteoSampler.getCurrent(ix);
         if (current != null) res.add(current);
         return res;

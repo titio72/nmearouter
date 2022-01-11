@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,14 +13,21 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package com.aboni.nmea.router.data.meteo.impl;
 
-package com.aboni.nmea.router.data;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.impl.DBStatsWriter;
+import com.aboni.utils.Log;
+import com.aboni.utils.db.DBEventWriter;
 
-public interface StatsWriter {
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
-    void write(StatsSample s, long ts);
+public class DBMeteoStatsWriter extends DBStatsWriter {
 
-    void init();
-
-    void dispose();
+    @Inject
+    public DBMeteoStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_METEO) String tag, @NotNull @Named(Constants.TAG_METEO) DBEventWriter writer) {
+        super(log, tag, writer);
+    }
 }

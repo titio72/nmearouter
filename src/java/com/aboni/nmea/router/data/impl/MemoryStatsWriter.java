@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.impl;
 
 import com.aboni.nmea.router.data.Metric;
 import com.aboni.nmea.router.data.StatScanner;
@@ -55,10 +55,10 @@ public class MemoryStatsWriter implements StatsWriter {
         // nothing to destroy
     }
 
-    public List<StatsSample> getHistory(Metric tag) {
+    public List<StatsSample> getHistory(Metric metric) {
         List<StatsSample> res;
         synchronized (history) {
-            res = history.getOrDefault(tag, null);
+            res = history.getOrDefault(metric.getId(), null);
         }
         if (res == null) return EMPTY;
         else return res;

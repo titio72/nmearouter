@@ -13,20 +13,39 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo;
+package com.aboni.nmea.router.data.sampledquery.impl;
 
-import com.aboni.nmea.router.data.Sample;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+public class SampledQueryConfPower implements SampledQueryConf {
 
-public interface MeteoReader {
-
-    interface MeteoReaderListener {
-        void onRead(Sample sample);
+    @Override
+    public String getTable() {
+        return "power";
     }
 
-    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull MeteoReaderListener target) throws MeteoManagementException;
+    @Override
+    public String getMaxField() {
+        return "v";
+    }
 
-    void readMeteo(@NotNull Instant from, @NotNull Instant to, @NotNull MeteoReaderListener target) throws MeteoManagementException;
+    @Override
+    public String getMinField() {
+        return "v";
+    }
+
+    @Override
+    public String getAvgField() {
+        return "v";
+    }
+
+    @Override
+    public String getSeriesNameField() {
+        return "type";
+    }
+
+    @Override
+    public String getSeriesName() {
+        return null;
+    }
 }

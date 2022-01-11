@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2021,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,13 +13,12 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.meteo;
+package com.aboni.nmea.router.data;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.Startable;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
@@ -28,7 +27,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MeteoSampler implements Startable {
+public class Sampler implements Startable {
 
     public interface MessageFilter {
         boolean match(Message msg);
@@ -79,7 +78,7 @@ public class MeteoSampler implements Startable {
     private final Log log;
     private boolean started;
 
-    public MeteoSampler(@NotNull Log log, @NotNull TimestampProvider tp, StatsWriter w, @NotNull String tag) {
+    public Sampler(@NotNull Log log, @NotNull TimestampProvider tp, StatsWriter w, @NotNull String tag) {
         this.timestampProvider = tp;
         this.log = log;
         this.writer = w;

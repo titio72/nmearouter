@@ -45,10 +45,14 @@ public class MeteoRollingWindowService extends JSONWebService {
     private static class SimpleWriter implements SampleWriter {
         @Override
         public JSONObject[] getSampleNode(StatsSample sample) {
-            JSONObject res = new JSONObject();
-            res.put("x", sample.getT1());
-            res.put("y", sample.getAvg());
-            return new JSONObject[]{res};
+            if (sample != null && !Double.isNaN(sample.getAvg())) {
+                JSONObject res = new JSONObject();
+                res.put("x", sample.getT1());
+                res.put("y", sample.getAvg());
+                return new JSONObject[]{res};
+            } else {
+                return new JSONObject[]{};
+            }
         }
     }
 

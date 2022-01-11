@@ -15,21 +15,23 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.meteo.impl;
 
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.DataManagementException;
+import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.data.meteo.MeteoManagementException;
-import com.aboni.nmea.router.data.meteo.MeteoReader;
 import com.aboni.nmea.router.data.meteo.WindStats;
 import com.aboni.nmea.router.data.meteo.WindStatsReader;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class DBWindStatsReader implements WindStatsReader {
 
-    private final MeteoReader reader;
+    private final DataReader reader;
 
-    private class StatsContext implements MeteoReader.MeteoReaderListener {
+    private static class StatsContext implements DataReader.DataReaderListener {
 
         StatsContext(int sectors) {
             stats = new WindStats(sectors);
@@ -62,16 +64,16 @@ public class DBWindStatsReader implements WindStatsReader {
     }
 
     @Inject
-    public DBWindStatsReader(@NotNull MeteoReader reader) {
+    public DBWindStatsReader(@NotNull @Named(Constants.TAG_METEO) DataReader reader) {
         this.reader = reader;
     }
 
     @Override
-    public WindStats getWindStats(Instant from, Instant to, int sectors) throws MeteoManagementException {
+    public WindStats getWindStats(Instant from, Instant to, int sectors) throws DataManagementException {
 
-        if (360 % sectors != 0) throw new MeteoManagementException("Number of sectors must divide 360");
+        if (360 % sectors != 0) throw new DataManagementException("Number of sectors must divide 360");
         StatsContext ctx = new StatsContext(sectors);
-        reader.readMeteo(from, to, ctx);
+        reader.readData(from, to, ctx);
         return ctx.stats;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,14 +13,15 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package com.aboni.nmea.router.data.power;
 
-package com.aboni.nmea.router.data;
+import com.aboni.nmea.router.data.DataManagementException;
+import org.json.JSONObject;
 
-public interface StatsWriter {
+import java.time.Instant;
 
-    void write(StatsSample s, long ts);
+public interface PowerAnalytics {
 
-    void init();
+    JSONObject getPowerUsage(int samplingPeriod, Instant from, Instant to) throws DataManagementException;
 
-    void dispose();
 }

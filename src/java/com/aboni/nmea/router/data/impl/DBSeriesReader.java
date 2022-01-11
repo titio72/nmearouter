@@ -13,39 +13,35 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.impl;
 
+import com.aboni.nmea.router.data.DataManagementException;
+import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.data.meteo.Meteo;
-import com.aboni.nmea.router.data.meteo.MeteoManagementException;
-import com.aboni.nmea.router.data.meteo.MeteoReader;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.data.SeriesReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-public class DBMeteo implements Meteo {
+public abstract class DBSeriesReader implements SeriesReader {
 
-    public DBMeteo() {
-        // nothing to initialize
-    }
-
+    protected abstract DataReader getNewDataReader();
 
     @Override
-    public JSONObject getMeteoSeries(@NotNull Instant from, @NotNull Instant to, @NotNull String tag) throws MeteoManagementException {
-        MeteoReader m = ThingsFactory.getInstance(MeteoReader.class);
+    public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to, @NotNull String tag) throws DataManagementException {
+        DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
-        m.readMeteo(from, to, tag, (Sample sample) -> addSample(sample, res));
+        m.readData(from, to, tag, (Sample sample) -> addSample(sample, res));
         return res;
     }
 
     @Override
-    public JSONObject getMeteoSeries(@NotNull Instant from, @NotNull Instant to) throws MeteoManagementException {
-        MeteoReader m = ThingsFactory.getInstance(MeteoReader.class);
+    public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to) throws DataManagementException {
+        DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
-        m.readMeteo(from, to, (Sample sample) -> addSample(sample, res));
+        m.readData(from, to, (Sample sample) -> addSample(sample, res));
         return res;
     }
 

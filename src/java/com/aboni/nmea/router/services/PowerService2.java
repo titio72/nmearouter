@@ -26,14 +26,14 @@ import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-public class MeteoService2 extends JSONWebService {
+public class PowerService2 extends JSONWebService {
 
     private final SeriesReader seriesReader;
 
     @Inject
-    public MeteoService2(@NotNull Log log, @NotNull @Named(Constants.TAG_METEO) SeriesReader reader) {
+    public PowerService2(@NotNull Log log, @NotNull @Named(Constants.TAG_POWER) SeriesReader reader) {
         super(log);
-        this.seriesReader = reader;
+        seriesReader = reader;
         setLoader(this::getResult);
     }
 

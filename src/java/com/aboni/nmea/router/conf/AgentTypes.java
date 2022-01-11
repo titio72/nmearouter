@@ -24,6 +24,7 @@ public class AgentTypes {
     public static final String SIMULATOR = "Simulator";
     public static final String CONSOLE = "Console";
     public static final String METEO = "Meteo";
+    public static final String POWER = "Power";
     public static final String METEO_MON = "MeteoMonitor";
     public static final String TCP = "TCP";
     public static final String UDP = "UDP";

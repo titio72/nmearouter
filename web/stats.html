@@ -32,7 +32,7 @@
 		/*$teal:    */ "#20c997",
 		/*$cyan:    */ "#5bc0de"
 		];
-	
+
 		function loadTrips() {
 			var xmlHttp = new XMLHttpRequest();
 			xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/distanalysis" , false);
@@ -65,11 +65,6 @@
 
 			for (var y = maxYear; y>=minYear; y--) {
 				var color = colors[y-minYear];
-					
-					/*"#" +
-					"9664" +
-					toHex(((y-minYear)*colorGrad));*/
-					
 				var dset = {
 					label: ""+ y,
 					borderColor: color,
