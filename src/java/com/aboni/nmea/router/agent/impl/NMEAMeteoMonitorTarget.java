@@ -127,23 +127,23 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         this.meteoSampler = new Sampler(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
 
-        initMetricX(Metrics.PRESSURE, "PR_",
+        initMetricX(Metrics.PRESSURE,
                 MsgPressure.class::isInstance,
                 (Message m) -> ((MsgPressure) m).getPressure(),
                 800.0, 1100.0);
-        initMetricX(Metrics.AIR_TEMPERATURE, "AT0",
+        initMetricX(Metrics.AIR_TEMPERATURE,
                 (Message m) -> (m instanceof MsgTemperature && AIR_TEMPERATURE_SOURCE == ((MsgTemperature) m).getTemperatureSource()),
                 (Message m) -> ((MsgTemperature) m).getTemperature(),
                 -20.0, 60.0);
-        initMetricX(Metrics.HUMIDITY, "HUM",
+        initMetricX(Metrics.HUMIDITY,
                 MsgHumidity.class::isInstance,
                 (Message m) -> ((MsgHumidity) m).getHumidity(),
                 0.0, 150.0);
-        initMetricX(Metrics.WIND_DIRECTION, "TWD",
+        initMetricX(Metrics.WIND_DIRECTION,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
                 -360.0, 360.0);
-        initMetricX(Metrics.WIND_SPEED, "TW_",
+        initMetricX(Metrics.WIND_SPEED,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue()),
                 (Message m) -> ((MsgWindData) m).getSpeed(),
                 0, 100.0);
@@ -167,11 +167,11 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         alerts.add(new Pair<>(metric, a));
     }
 
-    private void initMetricX(Metric metric, String tag,
+    private void initMetricX(Metric metric,
                              Sampler.MessageFilter filter,
                              Sampler.MessageValueExtractor valueExtractor,
                              double min, double max) {
-        meteoSampler.initMetric(metric, filter, valueExtractor, 60000L, tag, min, max);
+        meteoSampler.initMetric(metric, filter, valueExtractor, 60000L, metric.getId(), min, max);
     }
 
     @Override

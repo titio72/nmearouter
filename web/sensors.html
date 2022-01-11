@@ -303,7 +303,7 @@
     }
   }
 
-  function getDataPoints(orig, data, i) {
+  function getDataPoints(orig, data) {
     for (i = 0; i<data.length; i++) {
       var datapoint = new Object();
       datapoint.x = new Date(data[i].x);
@@ -323,9 +323,9 @@
   }
 
   function loadMeteo() {
-    loadMeteoChart("AT0", "meteoChart", "Temperature", 2, 0);
-    loadMeteoChart("PR_", "meteoChart", "Pressure", 2, 1);
-    loadMeteoChart("HUM", "meteoChart", "Humidity", 1, 2);
+    loadMeteoChart("AT0", "meteoChart", "Temperature", 0);
+    loadMeteoChart("PR_", "meteoChart", "Pressure", 1);
+    loadMeteoChart("HUM", "meteoChart", "Humidity", 2);
   }
 
   function createChart(chartCanvasName, definitions) {
@@ -383,7 +383,7 @@
     }
   }
 
-  function loadMeteoChart(meteoType, chartCanvasName, label, tick, i) {
+  function loadMeteoChart(meteoType, chartCanvasName, label, i) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/meteorolling?type=" + meteoType, true);
     xmlHttp.onreadystatechange = function() {
@@ -391,8 +391,8 @@
         var json = JSON.parse(xmlHttp.responseText);
         var ctx = document.getElementById(chartCanvasName);
         createChart(chartCanvasName, [
-        {id: "AT0", color: "red",    label: "Temperature", tick: 3, side: "left", min: 5, max: 35},
-        {id: "PR_", color: "yellow", label: "Pressure",    tick: 5, side: "right", min: 1000, max: 1035},
+        {id: "AT0", color: "red",    label: "Temperature", tick: 5, side: "left", min: 0, max: 35},
+        {id: "PR_", color: "yellow", label: "Pressure",    tick: 10, side: "right", min: 950, max: 1050},
         {id: "HUM", color: "blue",   label: "Humidity",    tick: 10, side: "left", min: 0, max: 100}
         ]);
         getDataPoints(charts[chartCanvasName].data.datasets[i].data, json[meteoType]);
