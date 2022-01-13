@@ -18,39 +18,56 @@ package com.aboni.nmea.router.data.power.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.data.impl.DBStatsWriter;
 import com.aboni.utils.Log;
-import com.aboni.utils.db.DBEventWriter;
+import com.aboni.utils.LogStringBuilder;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Point;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
+import java.util.concurrent.TimeUnit;
 
-public class DBPowerStatsWriter extends DBStatsWriter {
+public class DBPowerStatsWriterInflux implements StatsWriter {
 
-    private final StatsWriter secondary;
+    private InfluxDB influx;
+    private final Log log;
+    private final String tag;
 
     @Inject
-    public DBPowerStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_POWER) String tag, @NotNull @Named(Constants.TAG_POWER) DBEventWriter writer) {
-        super(log, tag, writer);
-        secondary = new DBPowerStatsWriterInflux(log, tag);
+    public DBPowerStatsWriterInflux(@NotNull Log log, @NotNull @Named(Constants.TAG_POWER) String tag) {
+        this.log = log;
+        this.tag = tag;
     }
 
     @Override
     public void init() {
-        super.init();
-        secondary.init();
+        if (influx == null) {
+            try {
+                influx = InfluxDBFactory.connect("http://localhost:8086");
+            } catch (Exception e) {
+                LogStringBuilder.start("DBPowerStatsWriterInflux").wV("type", tag).wO("init").error(log, e);
+            }
+        }
     }
 
     @Override
     public void write(StatsSample s, long ts) {
-        super.write(s, ts);
-        secondary.write(s, ts);
+        if (influx != null) {
+            influx.write(Point.measurement("battery")
+                    .time(ts, TimeUnit.MILLISECONDS)
+                    .tag("type", s.getTag())
+                    .addField("value", s.getAvg())
+                    .build());
+        }
     }
 
     @Override
     public void dispose() {
-        super.dispose();
-        secondary.dispose();
+        if (influx != null) {
+            influx.close();
+            influx = null;
+        }
     }
 }
