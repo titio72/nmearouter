@@ -16,8 +16,6 @@
 package com.aboni.nmea.router.data.power.impl;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.data.StatsSample;
-import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.impl.DBStatsWriter;
 import com.aboni.utils.Log;
 import com.aboni.utils.db.DBEventWriter;
@@ -28,29 +26,8 @@ import javax.validation.constraints.NotNull;
 
 public class DBPowerStatsWriter extends DBStatsWriter {
 
-    private final StatsWriter secondary;
-
     @Inject
     public DBPowerStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_POWER) String tag, @NotNull @Named(Constants.TAG_POWER) DBEventWriter writer) {
         super(log, tag, writer);
-        secondary = new DBPowerStatsWriterInflux(log, tag);
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        secondary.init();
-    }
-
-    @Override
-    public void write(StatsSample s, long ts) {
-        super.write(s, ts);
-        secondary.write(s, ts);
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        secondary.dispose();
     }
 }
