@@ -20,6 +20,9 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.ThingsFactory;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Point;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,13 +33,23 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class DBHelper implements AutoCloseable {
+
+    private static InfluxDB influx = null;
+    private static final Object influxSemaphore = new Object();
+
+    private static final String INFLUX_URL = "http://localhost:8086";
+    private static final String INFLUX_DB = "nmearouter";
 
     private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
     public static final String DB_HELPER_CATEGORY = "DBHelper";
+
+    private static String influxURL = INFLUX_URL;
+    private static String influxDB = INFLUX_DB;
 
     private String jdbc = JDBC_DRIVER;
     private String dbUrl = DB_URL;
@@ -47,6 +60,17 @@ public class DBHelper implements AutoCloseable {
     private Connection conn;
 
     private final Log log;
+
+    private static InfluxDB getInfluxStatic() {
+        synchronized (influxSemaphore) {
+            if (influx == null) {
+                influx = InfluxDBFactory.connect(influxURL);
+                influx.setDatabase(influxDB);
+                influx.enableBatch(2000, 10000, TimeUnit.MILLISECONDS);
+            }
+        }
+        return influx;
+    }
 
     public DBHelper(boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
         readConf();
@@ -66,6 +90,11 @@ public class DBHelper implements AutoCloseable {
                 dbUrl = p.getProperty("jdbc.url");
                 user = p.getProperty("user");
                 password = p.getProperty("pwd");
+
+                synchronized (influxSemaphore) {
+                    influxURL = p.getProperty("influx.url");
+                    influxDB = p.getProperty("influx.db");
+                }
             }
         } catch (Exception e) {
             log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Read configuration")
@@ -143,11 +172,39 @@ public class DBHelper implements AutoCloseable {
         }
     }
 
+    public InfluxDB getInflux() {
+        return getInfluxStatic();
+    }
+
     private void resetWriter(DBEventWriter writer) {
         try {
             writer.reset();
         } catch (SQLException ignored) {
             // do nothing
+        }
+    }
+
+    public void writeMetric(long time, String table, String metric, double value, double valueMin, double valueMax) {
+        InfluxDB influxDB = getInfluxStatic();
+        if (influxDB != null) {
+            influx.write(Point.measurement(table)
+                    .time(time, TimeUnit.MILLISECONDS)
+                    .tag("type", metric)
+                    .addField("value", value)
+                    .addField("max", valueMax)
+                    .addField("min", valueMin)
+                    .build());
+        }
+    }
+
+    public void writeMetric(long time, String table, String metric, double value) {
+        InfluxDB influxDB = getInfluxStatic();
+        if (influxDB != null) {
+            influx.write(Point.measurement(table)
+                    .time(time, TimeUnit.MILLISECONDS)
+                    .tag("type", metric)
+                    .addField("value", value)
+                    .build());
         }
     }
 }
