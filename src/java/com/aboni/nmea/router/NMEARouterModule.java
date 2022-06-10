@@ -105,8 +105,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO_MONITOR)).to(MemoryStatsWriter.class);
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMeteoStatsWriter.class);
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerStatsWriter.class);
-        //bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMeteoStatsWriterInflux.class);
-        //bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerStatsWriterInflux.class);
         bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMeteoEventWriter.class);
         bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerEventWriter.class);
         bind(SampledQueryConf.class).annotatedWith(Names.named(Constants.TAG_SPEED)).to(SampledQueryConfSpeed.class);
@@ -126,7 +124,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
         bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
-
 
     }
 }

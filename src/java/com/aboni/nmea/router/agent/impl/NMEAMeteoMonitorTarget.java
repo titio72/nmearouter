@@ -116,15 +116,15 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
         @Override
         public void onSample(Metric metric, StatsSample sample) {
-            JSONObject message = new JSONObject();
-            message.put("topic", "meteo_sample");
-            message.put("tag", sample.getTag());
-            message.put("time", sample.getT0());
-            message.put("min", sample.getMin());
-            message.put("avg", sample.getAvg());
-            message.put("max", sample.getMax());
-            message.put("n", sample.getSamples());
-            NMEAMeteoMonitorTarget.this.notify(message);
+            JSONObject msg = new JSONObject();
+            msg.put("topic", "meteo_sample");
+            msg.put("tag", sample.getTag());
+            msg.put("min", sample.getMin());
+            msg.put("avg", sample.getAvg());
+            msg.put("max", sample.getMax());
+            msg.put("samples", sample.getSamples());
+            msg.put("time", sample.getT0());
+            NMEAMeteoMonitorTarget.this.notify(msg);
         }
     }
 

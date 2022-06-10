@@ -56,6 +56,10 @@ public class StartRouter {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         logAdmin = ThingsFactory.getInstance(LogAdmin.class);
+        Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
+                    logAdmin.error(String.format("Uncaught error {%s} thread {%s}", e.getMessage(), t.getName()), e);
+                }
+        );
         ConfJSON cJ;
         try {
             cJ = new ConfJSON();

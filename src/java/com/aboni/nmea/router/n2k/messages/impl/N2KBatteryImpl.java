@@ -45,7 +45,6 @@ public class N2KBatteryImpl extends N2KMessageImpl implements MsgBattery {
         double current = BitUtils.parseDoubleSafe(data, 24, 16, 0.1, true);
         double temperature = BitUtils.parseDoubleSafe(data, 40, 16, 0.01, false);
         int sid = BitUtils.getByte(data, 7, 0xFF);
-        System.out.println("V " + voltage + " A " + current);
         return new MsgBatteryImpl(sid, instance, voltage, current, temperature);
     }
 
