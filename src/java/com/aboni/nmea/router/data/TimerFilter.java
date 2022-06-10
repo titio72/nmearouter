@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,7 @@
 
 package com.aboni.nmea.router.data;
 
-public enum Unit {
-    KNOTS,
-    DEGREES,
-    DEGREES_SCALAR,
-    PERCENTAGE,
-    CELSIUS,
-    VOLTS,
-    AMPERE,
-    MILLIBAR,
-    WATT
+public interface TimerFilter {
+
+    boolean accept(long timestamp, long now);
 }

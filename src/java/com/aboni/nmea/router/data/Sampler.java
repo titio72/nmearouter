@@ -15,6 +15,7 @@
 
 package com.aboni.nmea.router.data;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.Startable;
@@ -55,12 +56,15 @@ public class Sampler implements Startable {
         MessageFilter filter;
         MessageValueExtractor valueExtractor;
 
+        TimerFilter timerFilter;
+
         static Series getNew(@NotNull StatsSample series, @NotNull MessageFilter filter,
                              @NotNull MessageValueExtractor valueExtractor,
-                             long periodMs, @NotNull Metric metric) {
+                             @NotNull TimerFilter timerFilter, @NotNull Metric metric) {
             if (series == null || metric == null) throw new NullPointerException("Series cannot be null");
             Series s = new Series();
-            s.periodMs = periodMs;
+            s.timerFilter = timerFilter;
+            ;
             s.metric = metric;
             s.statsSample = series;
             s.filter = filter;
@@ -87,10 +91,15 @@ public class Sampler implements Startable {
 
     public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
                            long period, String tag, double min, double max) {
+        initMetric(metric, filter, valueExtractor, new TimerFilterFixed(period), tag, min, max);
+    }
+
+    public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
+                           @NotNull TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
             series.put(metric, Series.getNew(
                     (Unit.DEGREES == metric.getUnit()) ? new AngleStatsSample(tag) : new ScalarStatsSample(tag, min, max),
-                    filter, valueExtractor, period, metric));
+                    filter, valueExtractor, timerFilter, metric));
         }
     }
 
@@ -136,7 +145,7 @@ public class Sampler implements Startable {
             for (Series s : series.values()) {
                 if (s != null) {
                     StatsSample statsSample = s.statsSample;
-                    if (statsSample != null && (ts - s.lastStatTimeMs) >= s.periodMs) {
+                    if (statsSample != null && Utils.isOlderThan(s.lastStatTimeMs, ts, s.periodMs)) {
                         write(statsSample, ts);
                         if (collectListener != null) {
                             collectListener.onSample(s.metric, statsSample);
@@ -175,7 +184,6 @@ public class Sampler implements Startable {
             Message m = msg.getMessage();
             try {
                 if (timestampProvider.isSynced()) {
-
                     for (Series ss : series.values()) {
                         if (ss != null) {
                             if (ss.filter.match(m)) {

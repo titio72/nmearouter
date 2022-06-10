@@ -52,6 +52,7 @@ public class StartRouter {
     private static LogAdmin logAdmin = null;
 
     public static void main(@NotNull String[] args) {
+
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         logAdmin = ThingsFactory.getInstance(LogAdmin.class);
@@ -106,6 +107,10 @@ public class StartRouter {
         logAdmin.infoFill("");
         logAdmin.infoFill("Start " + ZonedDateTime.now());
         logAdmin.infoFill("");
+        Thread.setDefaultUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
+                    logAdmin.error(String.format("Uncaught exception {%s} thread {%s}", throwable.getMessage(), thread.getName()), throwable);
+                }
+        );
         NMEAUtils.registerExtraSentences();
         injector.getInstance(NMEAStream.class); // be sure the stream started
         NMEARouter router = ThingsFactory.getInstance(NMEARouter.class);

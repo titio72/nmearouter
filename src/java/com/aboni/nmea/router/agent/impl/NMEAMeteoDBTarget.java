@@ -19,6 +19,7 @@ import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.Metrics;
 import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
+import com.aboni.nmea.router.data.TimerFilterAnchorAdaptive;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 
@@ -64,6 +65,11 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
                 ONE_MINUTE, "TWD", -360.0, 360.0);
+        meteoSampler.initMetric(Metrics.ROLL,
+                (Message m) -> (m instanceof MsgAttitude && !cache.isHeadingOlderThan(tp.getNow(), 800)),
+                (Message m) -> ((MsgAttitude) m).getRoll(),
+                new TimerFilterAnchorAdaptive(cache, ONE_MINUTE, 10 * ONE_MINUTE),
+                "ROL", -180.0, 180.0);
 
         // prevents writing stats where the max is obviously off, like 4.5 times the average (why???? how did I come up with this???)
         //meteoSampler.setSampleFilter("TW_", (StatsSample s) -> !(s.getAvg() < 10.0 && s.getMax() > (s.getAvg() * 4.5)));
@@ -98,6 +104,7 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
+
         meteoSampler.dumpAndReset();
     }
 

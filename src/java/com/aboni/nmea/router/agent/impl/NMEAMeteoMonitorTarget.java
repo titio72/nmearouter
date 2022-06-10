@@ -24,6 +24,7 @@ import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -115,7 +116,15 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
         @Override
         public void onSample(Metric metric, StatsSample sample) {
-            // nothing to do onSample
+            JSONObject message = new JSONObject();
+            message.put("topic", "meteo_sample");
+            message.put("tag", sample.getTag());
+            message.put("time", sample.getT0());
+            message.put("min", sample.getMin());
+            message.put("avg", sample.getAvg());
+            message.put("max", sample.getMax());
+            message.put("n", sample.getSamples());
+            NMEAMeteoMonitorTarget.this.notify(message);
         }
     }
 
