@@ -86,8 +86,8 @@ public class DBHelper implements AutoCloseable {
             try (FileInputStream propInput = new FileInputStream(f)) {
                 Properties p = new Properties();
                 p.load(propInput);
-                jdbc = p.getProperty("jdbc.driver.class");
-                dbUrl = p.getProperty("jdbc.url");
+                jdbc = p.getProperty("jdbc.driver.class", JDBC_DRIVER);
+                dbUrl = p.getProperty("jdbc.url", DB_URL);
                 user = p.getProperty("user");
                 password = p.getProperty("pwd");
 

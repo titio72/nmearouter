@@ -23,6 +23,29 @@ public class TrackAnalyticsTest {
     }
 
     @Test
+    public void testTrip240() throws Exception {
+        TrackAnalytics a = new TrackAnalytics("test");
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("trip135.csv")))) {
+            //skip header
+            in.readLine();
+            String l = null;
+            while ((l = in.readLine()) != null) {
+                String[] p = l.split(",");
+                TrackPoint tp = new TrackPointBuilderImpl()
+                        .withPosition(new GeoPositionT(df.parse(p[2].substring(1, 20)).getTime(), Double.parseDouble(p[0]), Double.parseDouble(p[1])))
+                        .withAnchor("1".equalsIgnoreCase(p[4]))
+                        .withDistance(Double.parseDouble(p[6]))
+                        .withSpeed(Double.parseDouble(p[7]), Double.parseDouble(p[9]))
+                        .withPeriod(Integer.parseInt(p[5])).getPoint();
+                a.processSample(tp);
+            }
+            assertEquals(2, a.getStats().legs.size());
+            System.out.printf(a.getStats().toJson().toString(2));
+            //assertEquals(87.0174665, a.getStats().totalNavigation.value, 0.000001);
+        }
+    }
+
+    @Test
     public void test2LegsTrip() throws Exception {
         TrackAnalytics a = new TrackAnalytics("test");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("trip135.csv")))) {

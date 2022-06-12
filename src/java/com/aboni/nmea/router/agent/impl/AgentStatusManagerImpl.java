@@ -41,6 +41,13 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
 
     private final Log log;
 
+    private static final String SQL_CREATE = "CREATE TABLE agent (" +
+            "id VARCHAR(32) NOT NULL, " +
+            "autostart TINYINT default 1, " +
+            "filterOut VARCHAR(256), " +
+            "filterIn VARCHAR(256), " +
+            "PRIMARY KEY (`id`))";
+
     @Inject
     public AgentStatusManagerImpl(@NotNull Log log) {
         this.log = log;
@@ -48,11 +55,29 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
         filterOut = new HashMap<>();
         filterIn = new HashMap<>();
         try {
-            loadAll();
+            loadAllWithRetry();
             log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
                     .wO("Load").wV("agents", status.size()).toString());
         } catch (Exception e) {
             log.error(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).wO("Load").toString(), e);
+        }
+    }
+    private void createTable() throws SQLException, ClassNotFoundException, MalformedConfigurationException {
+        try (DBHelper db = new DBHelper(true)) {
+            try (Statement st = db.getConnection().createStatement()) {
+                st.execute(SQL_CREATE);
+            }
+        }
+    }
+
+    private void loadAllWithRetry() throws SQLException, ClassNotFoundException, MalformedConfigurationException {
+        try {
+            loadAll();
+        } catch (SQLException e) {
+            log.error(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).wO("Load").toString(), e);
+            log.info(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY).wO("Create table").toString());
+            createTable();
+            loadAll();
         }
     }
 
