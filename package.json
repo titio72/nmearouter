@@ -13,7 +13,8 @@
     "google-maps": "^3.3.0",
     "jquery": "^3.4.1",
     "locales": "0.0.2",
-    "moment": "^2.19.2"
+    "moment": "^2.19.2",
+    "color": "^4.2.3" 
   },
   "description": "Boating integrated system",
   "main": "index.js",

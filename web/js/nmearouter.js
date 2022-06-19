@@ -127,6 +127,15 @@ function httpGetAgents() {
   return JSON.parse(xmlHttp.responseText);
 }
 
+function getLabelArray(from, step, n, precision) {
+  let v = [];
+  for (i = 0; i<n; i++) {
+    let x = i * step + from;
+    v.push(x.toFixed(precision));
+  }
+  return v;
+}
+
 function httpGetGps() {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/gps",

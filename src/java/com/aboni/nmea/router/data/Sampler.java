@@ -97,9 +97,12 @@ public class Sampler implements Startable {
     public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
                            @NotNull TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
-            series.put(metric, Series.getNew(
-                    (Unit.DEGREES == metric.getUnit()) ? new AngleStatsSample(tag) : new ScalarStatsSample(tag, min, max),
-                    filter, valueExtractor, timerFilter, metric));
+            StatsSample sample = null;
+            switch (metric.getUnit()) {
+                case DEGREES: sample = new AngleStatsSample(tag); break;
+                default: sample = new ScalarStatsSample(tag, min, max); break;
+            }
+            series.put(metric, Series.getNew(sample, filter, valueExtractor, timerFilter, metric));
         }
     }
 

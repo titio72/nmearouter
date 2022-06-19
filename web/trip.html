@@ -108,6 +108,9 @@
   var speedDistrChart;
   var speedChart;
   var windStatsChart;
+  var rollChart;
+  var rollDistrChart;
+  var pressChart;
   var listVisible = false;
   var map;
   var paths;
@@ -116,6 +119,8 @@
 
   var windStatsTick = 36;
 
+  const MAX_SPEED = 9.0;
+  const MIN_SPEED = 3.0;
 
   document.addEventListener('keydown', anKeyPress);
 
@@ -180,45 +185,50 @@
   }
 
   function loadMe() {
+    speedChart = createLineChart('speedChart', 'Boat SOG');
+    windChart = createLineChart('windChart', 'Wind speed');
+    rollChart = createLineChart('rollChart', 'Boat roll');
+    pressChart = createLineChart('pressChart', 'Atmo');
+    speedDistrChart = createBarChart('speedDistrChart', getLabelArray(0.5, 0.5, 32, 1), ['Engine', 'Sail'], ['Orange', 'Blue']);    
+    rollDistrChart = createBarChart('rollDistrChart', getLabelArray(-45, 5, 19, 0), ['Roll'], ['Orange']);
+    createWindStatsChart();
     loadTimeChart();
     loadSpeedDistrChart();
-    createSpeedChart();
-    createWindStatsChart();
-    createWindChart();
   }
 
   function loadSpeedDistrChart() {
-    var ctx = document.getElementById("speedDistrChart");
-    res = [];
-    resS = [];
-    for (i = 0; i<current.speedDistribution.length; i++) {
-      res.push(current.speedDistribution[i].distance);
-    }
-    for (i = 0; i<current.speedDistributionSail.length; i++) {
-      resS.push(current.speedDistributionSail[i].distance);
-    }
-    speedDistrChart = new Chart(ctx, {
+    res = []; resS = [];
+    for (i = 0; i<current.speedDistribution.length; i++) { res.push(current.speedDistribution[i].distance); }
+    for (i = 0; i<current.speedDistributionSail.length; i++) { resS.push(current.speedDistributionSail[i].distance); }
+    speedDistrChart.data.datasets[0].data = res;
+    speedDistrChart.data.datasets[1].data = resS;
+    speedDistrChart.update();
+  }
+
+  function createBarChart(elementId, labels, datasetNames, datasetColors) {
+    let datasets = [];
+    for (i = 0; i<datasetNames.length; i++) {
+      let dataset = {
+        data: [],
+          label: datasetNames[i],
+          backgroundColor: datasetColors[i]
+      }
+      datasets.push(dataset);
+    };
+
+    ctx = document.getElementById(elementId);
+    _chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['0.5', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0',
-          '6.5', '7.0', '7.5', '8.0', '8.5', '9.0', '9.5', '10.0', '10.5', '11.0', '11.5', '12.0', 
-          '12.5', '13.0', '12.5', '13.0', '13.5', '14.0', '14.5', '15.0'],
-        datasets: [{
-          data: res,
-          label: "Distance at SOG",
-          backgroundColor: "orange"
-        },
-        {
-          data: resS,
-          label: "Distance at SOG (Sail)",
-          backgroundColor: "blue"
-        }]
+        labels: labels,
+        datasets: datasets
       },
       options: {
         responsive: true,
         maintainAspectRatio: false
       }
     });
+    return _chart;
   }
 
   function createOrFillPieChart(data, text) {
@@ -345,21 +355,19 @@
       loadDistChart();
     }
 
-    res = []; resS = [];
-    for (i = 0; i<current.speedDistribution.length; i++) { res.push(current.speedDistribution[i].distance); }
-    for (i = 0; i<current.speedDistributionSail.length; i++) { resS.push(current.speedDistributionSail[i].distance); }
-    speedDistrChart.data.datasets[0].data = res;
-    speedDistrChart.data.datasets[1].data = resS;
-    speedDistrChart.update();
+    loadSpeedDistrChart();
 
     if (currentLegIx>0) {
       httpLoadSpeedDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillSpeedChart);
       httpLoadWindStatsDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), windStatsTick, onFillWindStatsChart);
-      httpLoadAllMeteoDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillWindChart);
+      httpLoadAllMeteoDateRange(dateToYMD(new Date(current.startT)), dateToYMD(new Date(current.endT)), onFillMeteoData);
     } else {
-      resetSpeedChart();
-      resetWindStatsChart();
-      resetWindChart();
+      resetChart(speedChart);
+      resetChart(windStatsChart);
+      resetChart(windChart);
+      resetChart(rollChart);
+      resetChart(rollDistrChart);
+      resetChart(pressChart);
     }
 
     var controllerElement = document.getElementById('nmearouter');
@@ -374,18 +382,9 @@
     return panel;
   }
 
-  function resetWindChart() {
-    if (windChart!=null) {
-      windChart.data.datasets = [{
-        data: []
-      }];
-      windChart.update();
-    }
-  }
-
-  function createWindChart() {
-    ctx = document.getElementById('windChart');
-    windChart = new Chart(ctx, {
+  function createLineChart(elementName, chartTitle) {
+    ctx = document.getElementById(elementName);
+    _chart = new Chart(ctx, {
         type: 'line',
         data: {
           datasets: [{
@@ -398,30 +397,68 @@
           spanGaps: false,
           title: {
             display: true,
-            text: 'Wind speed'
+            text: chartTitle
           },
           legend: { display: false },
           scales: { xAxes: [{ type: 'time', }] }
         }
-      });
+      });    
+    return _chart;
   }
 
-  function onFillWindChart(meteoData) {
+  function onFillMeteoData(data) {
+
+    pressChart.data.datasets = [
+      getSerie(data, 'PR_', 'v', 'blue', false, 0.0)
+    ];
+    pressChart.update();
+
     windChart.data.datasets = [
-      getSerie(meteoData, "TW_", "v",    "blue"),
-      getSerie(meteoData, "TW_", "vMin", "gray"),
-      getSerie(meteoData, "TW_", "vMax", "orange")
+      getSerie(data, "TW_", "v",    "blue", false, 0.0),
+      getSerie(data, "TW_", "vMin", "gray", false, 0.0),
+      getSerie(data, "TW_", "vMax", "orange", false, 0.0)
     ];
     windChart.update();
+
+    fillRollDistrData(data, "ROL", "v", 5.5);
+
+    rollChart.data.datasets = [
+      getSerie(data, "ROL", "v", "blue", true, 5.5)
+    ];
+    rollChart.update();
   }
 
-  function resetWindStatsChart() {
-    if (windStatsChart!=null) {
-      windStatsChart.data.datasets = [{
-        data: []
-      }];
-      windStatsChart.update();
+  function fillRollDistrData(data, name, attr, correction) {
+    res = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var sr = data[name];
+    var lastT = 0;
+    
+    for (i = 0; i<sr.length; i++) {
+      var item = sr[i];
+      var t = item['time'];
+      if (lastT==0 || lastT<t) {
+        r = parseFloat(item[attr]) + correction;
+
+        rA = Math.min(Math.round(Math.abs(r) / 5), 9);
+        if (r>=0.0) {
+          rA = 9 + rA; 
+          res[rA]++;
+        } else {
+          rA = 9 - rA;
+          res[rA]--;
+        }
+        lastT = t;
+      } else {
+        console.log("Out of sync items!")
+      }
     }
+    
+    rollDistrChart.data.datasets = [{
+          data: res,
+          label: "Roll",
+          backgroundColor: "orange"
+        }];
+    rollDistrChart.update();
   }
 
   function createWindStatsChart() {
@@ -491,59 +528,36 @@
     windStatsChart.update();
   }
 
-  function resetSpeedChart() {
-    if (speedChart!=null) {
-      speedChart.data.datasets = [{
+  function resetChart(chart) {
+    if (chart!=null) {
+      chart.data.datasets = [{
         data: []
       }];
-      speedChart.update();
+      chart.update();
     }
-  }
-
-  function createSpeedChart() {
-    ctx = document.getElementById('speedChart');
-    speedChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          datasets: [{
-            data: []
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          spanGaps: false,
-          legend: { display: false },
-          title: {
-            display: true,
-            text: 'Boat SOG'
-          },
-          scales: { xAxes: [{ type: 'time', }] }
-        }
-      });
-
   }
 
   function onFillSpeedChart(speedSerie, leg) {
     speedChart.data.datasets = [
-      getSerie(speedSerie, "SOG", "v",    "blue"),
-      getSerie(speedSerie, "SOG", "vMin", "gray"),
-      getSerie(speedSerie, "SOG", "vMax", "orange")
+      getSerie(speedSerie, "SOG", "v",    "blue", false, 0.0),
+      getSerie(speedSerie, "SOG", "vMin", "gray", false, 0.0),
+      getSerie(speedSerie, "SOG", "vMax", "orange", false, 0.0)
     ];
     speedChart.update();
   }
 
-  function getSerie(data, serie, attr, color) {
+  function getSerie(data, serie, attr, color, fill, correction) {
     return {
-      		data: getDataPoints(data, serie, attr),
+      		data: getDataPoints(data, serie, attr, correction),
       		borderColor: color,
+          backgroundColor: "#FFFFFF25",
           pointRadius: 0,
           lineTension: 0,
-          fill: false
+          fill: fill
       	};
   }
 
-  function getDataPoints(data, name, attr) {
+  function getDataPoints(data, name, attr, correction) {
     var dt = [];
     var sr = data[name];
     var i;
@@ -554,7 +568,7 @@
       if (lastT==0 || lastT<t) {
         var datapoint = new Object();
         datapoint.x = new Date(t);
-        datapoint.y = parseFloat(item[attr]);
+        datapoint.y = parseFloat(item[attr]) + correction;
         lastT = t;
       } else {
         console.log("Out of sync items!")
@@ -684,9 +698,6 @@
     hh = d;
     return "" + hh + ":" + ("00" + mm).slice(-2) + ":" + ("00" + ss).slice(-2);
   }
-
-  const MAX_SPEED = 9.0;
-  const MIN_SPEED = 3.0;
 
   function hue(speed) {
     d = +1;
@@ -940,6 +951,21 @@
         <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
             <div class="chart-wrapper card-router">
                 <canvas class="chart-canvas" id="windChart"></canvas>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+          <div class="chart-wrapper card-router">
+              <canvas class="chart-canvas" id="pressChart"></canvas>
+          </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+          <div class="chart-wrapper card-router">
+              <canvas class="chart-canvas" id="rollChart"></canvas>
+          </div>
+        </div>
+        <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+            <div class="chart-wrapper card-router">
+                <canvas class="chart-canvas" id="rollDistrChart"></canvas>
             </div>
         </div>
     </div>

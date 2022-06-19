@@ -24,5 +24,4 @@ public final class Metrics {
     public static final Metric WIND_SPEED = new Metric("W_SP", "Wind speed", Unit.KNOTS);
     public static final Metric WIND_DIRECTION = new Metric("W_DR", "Wind direction", Unit.DEGREES);
     public static final Metric ROLL = new Metric("ROLL", "Boat roll", Unit.DEGREES_SCALAR);
-    ;
-}
+ }
