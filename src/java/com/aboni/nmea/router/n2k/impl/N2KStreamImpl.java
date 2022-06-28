@@ -25,13 +25,12 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
 public class N2KStreamImpl implements N2KStream {
 
     private static final long MAX_AGE = 750L;
     private static final long MIN_AGE = 250L;
 
-    private boolean throttling;
+    private final boolean throttling;
 
     private static class Payload {
         int hashcode;
@@ -39,7 +38,7 @@ public class N2KStreamImpl implements N2KStream {
     }
 
     private final Map<Integer, Payload> payloadMap;
-    private Log logger;
+    private final Log logger;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageParserFactory parserFactory;
 

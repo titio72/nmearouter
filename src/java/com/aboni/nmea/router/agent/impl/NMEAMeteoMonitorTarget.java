@@ -24,6 +24,7 @@ import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -116,15 +117,19 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
         @Override
         public void onSample(Metric metric, StatsSample sample) {
-            JSONObject msg = new JSONObject();
-            msg.put("topic", "meteo_sample");
-            msg.put("tag", sample.getTag());
-            msg.put("min", sample.getMin());
-            msg.put("avg", sample.getAvg());
-            msg.put("max", sample.getMax());
-            msg.put("samples", sample.getSamples());
-            msg.put("time", sample.getT0());
-            NMEAMeteoMonitorTarget.this.notify(msg);
+            try {
+                JSONObject msg = new JSONObject();
+                msg.put("topic", "meteo_sample");
+                msg.put("tag", sample.getTag());
+                msg.put("min", sample.getMin());
+                msg.put("avg", sample.getAvg());
+                msg.put("max", sample.getMax());
+                msg.put("samples", sample.getSamples());
+                msg.put("time", sample.getT0());
+                NMEAMeteoMonitorTarget.this.notify(msg);
+            } catch (JSONException e) {
+                getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").error(log, e);
+            }
         }
     }
 

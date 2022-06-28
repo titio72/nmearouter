@@ -63,7 +63,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     @Override
     public String getDescription() {
         return "Max and min depth over the last hour" +
-                ((min == Integer.MAX_VALUE) ? "" : String.format(" %.1f", +min / 10f)) +
+                ((min == Integer.MAX_VALUE) ? "" : String.format(" %.1f", min / 10f)) +
                 ((max == Integer.MIN_VALUE) ? "" : String.format(" %.1f", max / 10f));
     }
 

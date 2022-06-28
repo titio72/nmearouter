@@ -56,9 +56,7 @@ public class StartRouter {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         logAdmin = ThingsFactory.getInstance(LogAdmin.class);
-        Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
-                    logAdmin.error(String.format("Uncaught error {%s} thread {%s}", e.getMessage(), t.getName()), e);
-                }
+        Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> logAdmin.error(String.format("Uncaught error {%s} thread {%s}", e.getMessage(), t.getName()), e)
         );
         ConfJSON cJ;
         try {
@@ -111,9 +109,7 @@ public class StartRouter {
         logAdmin.infoFill("");
         logAdmin.infoFill("Start " + ZonedDateTime.now());
         logAdmin.infoFill("");
-        Thread.setDefaultUncaughtExceptionHandler((Thread thread, Throwable throwable) -> {
-                    logAdmin.error(String.format("Uncaught exception {%s} thread {%s}", throwable.getMessage(), thread.getName()), throwable);
-                }
+        Thread.setDefaultUncaughtExceptionHandler((Thread thread, Throwable throwable) -> logAdmin.error(String.format("Uncaught exception {%s} thread {%s}", throwable.getMessage(), thread.getName()), throwable)
         );
         NMEAUtils.registerExtraSentences();
         injector.getInstance(NMEAStream.class); // be sure the stream started

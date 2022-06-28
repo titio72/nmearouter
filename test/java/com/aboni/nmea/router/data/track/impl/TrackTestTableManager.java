@@ -31,8 +31,8 @@ public class TrackTestTableManager {
     private static String SQL_CREATE_TRIP = "CREATE TABLE `trip_test` (" +
             "`id` int(11) NOT NULL," +
             "`description` varchar(256) DEFAULT ''," +
-            "`fromTS` timestamp DEFAULT NULL," +
-            "`toTS` timestamp DEFAULT NULL," +
+            "`fromTS` timestamp NULL DEFAULT NULL," +
+            "`toTS` timestamp NULL DEFAULT NULL," +
             "`dist` decimal(16,8) DEFAULT 0," +
             " PRIMARY KEY (`id`)" +
             ");";

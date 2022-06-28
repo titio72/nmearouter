@@ -185,12 +185,12 @@
   }
 
   function loadMe() {
-    speedChart = createLineChart('speedChart', 'Boat SOG');
-    windChart = createLineChart('windChart', 'Wind speed');
-    rollChart = createLineChart('rollChart', 'Boat roll');
-    pressChart = createLineChart('pressChart', 'Atmo');
-    speedDistrChart = createBarChart('speedDistrChart', getLabelArray(0.5, 0.5, 32, 1), ['Engine', 'Sail'], ['Orange', 'Blue']);    
-    rollDistrChart = createBarChart('rollDistrChart', getLabelArray(-45, 5, 19, 0), ['Roll'], ['Orange']);
+    speedChart = createLineChart('speedChart', 'Boat SOG (Kn)');
+    windChart = createLineChart('windChart', 'Wind speed (Kn)');
+    rollChart = createLineChart('rollChart', 'Boat roll (Deg)');
+    pressChart = createLineChart('pressChart', 'Atmo (MB)');
+    speedDistrChart = createBarChart('speedDistrChart', '', getLabelArray(0.5, 0.5, 32, 1), ['Nm motoring', 'Nm sailing'], ['Orange', 'Blue'], false);    
+    rollDistrChart = createBarChart('rollDistrChart', '', getLabelArray(-45, 5, 19, 0), ['Time heeling'], ['Orange'], true);
     createWindStatsChart();
     loadTimeChart();
     loadSpeedDistrChart();
@@ -205,7 +205,7 @@
     speedDistrChart.update();
   }
 
-  function createBarChart(elementId, labels, datasetNames, datasetColors) {
+  function createBarChart(elementId, chartTitle, labels, datasetNames, datasetColors, percent) {
     let datasets = [];
     for (i = 0; i<datasetNames.length; i++) {
       let dataset = {
@@ -216,6 +216,35 @@
       datasets.push(dataset);
     };
 
+    if (percent) {
+      opt = {
+        title: {
+            display: true,
+            text: chartTitle
+          },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              callback: function (value) {
+                return value.toLocaleString('en-EN', {style:'percent'});
+              }
+            }
+          }]
+        }
+      }
+    } else {
+      opt = {
+        title: {
+            display: true,
+            text: chartTitle
+          },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    }
+
     ctx = document.getElementById(elementId);
     _chart = new Chart(ctx, {
       type: 'bar',
@@ -223,10 +252,7 @@
         labels: labels,
         datasets: datasets
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
+      options: opt
     });
     return _chart;
   }
@@ -293,26 +319,21 @@
   function nextLeg() {
     do {
       currentLegIx = (currentLegIx + 1) % (tripObject.legs.length+1);
+      // skip legs too short
     } while (document.getElementById("L" + currentLegIx)==null);
-    panel = _switchLeg();
-    legList = document.getElementById("legList");
-    viewHeight = legList.offsetHeight;
-    panelBottom = panel.offsetTop;
-    panelTop = panel.offsetTop - panel.offsetHeight;
-    viewBottom = legList.scrollTop + legList.offsetHeight;
-    viewTop = legList.scrollTop;
-    if (panelBottom > viewBottom) {
-      legList.scrollTo(0, panelBottom - viewHeight + 30);
-    } else if (panelTop < viewTop) {
-      legList.scrollTo(0, panelTop);
-    }
+    updateLegsPanels();
   }
 
   function previousLeg() {
     do {
       currentLegIx = (currentLegIx + tripObject.legs.length) % (tripObject.legs.length+1);
+      // skip legs too short
     } while (document.getElementById("L" + currentLegIx)==null);
-    panel = _switchLeg();
+    updateLegsPanels();
+  }
+
+  function updateLegsPanels() {
+    panel = updateLegViews();
     legList = document.getElementById("legList");
     viewHeight = legList.offsetHeight;
     panelBottom = panel.offsetTop;
@@ -332,10 +353,10 @@
 
   function switchLeg(leg){
     currentLegIx = getLegIx(leg);
-    _switchLeg();
+    updateLegViews();
   }
 
-  function _switchLeg() {
+  function updateLegViews() {
     for (i = 0; i<=tripObject.legs.length; i++) {
       sL = "L" + i;
       panel = document.getElementById(sL);
@@ -452,10 +473,15 @@
         console.log("Out of sync items!")
       }
     }
-    
+
+    let leg_duration_minutes = (current.endT - current.startT)/60000;
+    for (i = 0; i<res.length; i++) {
+      res[i] = res[i] / leg_duration_minutes;
+    }
+
     rollDistrChart.data.datasets = [{
           data: res,
-          label: "Roll",
+          label: "Time heeling",
           backgroundColor: "orange"
         }];
     rollDistrChart.update();

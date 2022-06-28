@@ -86,7 +86,7 @@ public abstract class N2KMessageImpl implements N2KMessage {
             for (byte b : getData()) {
                 stringBuilder.append(String.format(" %x", (b & 0xFF)));
             }
-            return String.format("PGN {%d} Source {%d} Data {%s}", getHeader().getPgn(), getHeader().getSource(), stringBuilder.toString());
+            return String.format("PGN {%d} Source {%d} Data {%s}", getHeader().getPgn(), getHeader().getSource(), stringBuilder);
         } else
             return super.toString();
     }

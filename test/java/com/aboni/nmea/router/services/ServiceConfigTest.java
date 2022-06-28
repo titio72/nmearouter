@@ -107,7 +107,7 @@ public class ServiceConfigTest {
     public void testGetParamAsInstantWithTimeAndOffset2() {
         config.setValue("p", "20200308064629+0000");
         Instant i0 = config.getParamAsInstant("p", null, 0);
-        Instant i = LocalDateTime.parse("2020-03-08T07:46:29").atZone(ZoneId.systemDefault()).toInstant();
+        Instant i = LocalDateTime.parse("2020-03-08T07:46:29").atZone(ZoneId.of("Europe/Rome")).toInstant();
         assertEquals(i, i0);
     }
 }

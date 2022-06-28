@@ -64,7 +64,6 @@ public class Sampler implements Startable {
             if (series == null || metric == null) throw new NullPointerException("Series cannot be null");
             Series s = new Series();
             s.timerFilter = timerFilter;
-            ;
             s.metric = metric;
             s.statsSample = series;
             s.filter = filter;
@@ -97,7 +96,7 @@ public class Sampler implements Startable {
     public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
                            @NotNull TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
-            StatsSample sample = null;
+            StatsSample sample;
             switch (metric.getUnit()) {
                 case DEGREES: sample = new AngleStatsSample(tag); break;
                 default: sample = new ScalarStatsSample(tag, min, max); break;

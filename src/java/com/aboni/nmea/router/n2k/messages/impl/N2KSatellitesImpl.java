@@ -106,6 +106,6 @@ public class N2KSatellitesImpl extends N2KMessageImpl implements MsgSatellites {
             b.append(String.format("[Sat {%s} El {%d} Az {%d} Status {%s}] ",
                     s.getId(), s.getElevation(), s.getAzimuth(), s.getStatus()));
         }
-        return String.format("PGN {%s} Source {%d} Sats {%s}", SATELLITES_IN_VIEW_PGN, getHeader().getSource(), b.toString());
+        return String.format("PGN {%s} Source {%d} Sats {%s}", SATELLITES_IN_VIEW_PGN, getHeader().getSource(), b);
     }
 }

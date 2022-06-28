@@ -22,6 +22,7 @@ import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.TimerFilterAnchorAdaptive;
 import com.aboni.nmea.router.message.*;
+import com.aboni.utils.HWSettings;
 import com.aboni.utils.Log;
 
 import javax.inject.Inject;
@@ -68,7 +69,7 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
                 ONE_MINUTE, "TWD", -360.0, 360.0);
         meteoSampler.initMetric(Metrics.ROLL,
                 (Message m) -> (m instanceof MsgAttitude && !cache.isHeadingOlderThan(tp.getNow(), 800)),
-                (Message m) -> Utils.normalizeDegrees180To180(((MsgAttitude) m).getRoll()),
+                (Message m) -> Utils.normalizeDegrees180To180(((MsgAttitude) m).getRoll()) + HWSettings.getPropertyAsDouble("roll.offset", 0.0),
                 new TimerFilterAnchorAdaptive(cache, ONE_MINUTE, 10 * ONE_MINUTE),
                 "ROL", -180.0, 180.0);
 

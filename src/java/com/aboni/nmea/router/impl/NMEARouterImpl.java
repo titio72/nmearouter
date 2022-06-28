@@ -84,7 +84,7 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
-            agents.values().stream().forEach((NMEAAgent a) -> {
+            agents.values().forEach((NMEAAgent a) -> {
                 runMe(a::onTimerHR, "timerHR", AGENT_KEY_NAME, a.getName());
                 if (timerCount == 0) {
                     runMe(a::onTimer, "timer", AGENT_KEY_NAME, a.getName());
@@ -94,11 +94,11 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void runMe(Runnable r, String logOp, String logkey, String logvalue) {
+    private void runMe(Runnable r, String logOp, String logKey, String logValue) {
         try {
             exec.execute(r);
         } catch (Exception e) {
-            log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO(logOp).wV(logkey, logvalue).toString(), e);
+            log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO(logOp).wV(logKey, logValue).toString(), e);
         }
     }
 
@@ -230,7 +230,7 @@ public class NMEARouterImpl implements NMEARouter {
     private void routeSentence(RouterMessage m) {
         if (started.get()) {
             if (m.getPayload() instanceof JSONObject) {
-                routeToTargets(new RouterMessage[] {m});
+                dispatchToTargets(new RouterMessage[] {m});
             } else if (m.getPayload() instanceof Message) {
                 Message s = (Message) m.getPayload();
                 Collection<Message> toSend = null;
@@ -248,13 +248,13 @@ public class NMEARouterImpl implements NMEARouter {
                         messages[counter] = mm;
                         counter++;
                     }
-                    routeToTargets(messages);
+                    dispatchToTargets(messages);
                 }
             }
         }
     }
 
-    private void routeToTargets(final RouterMessage[] mm) {
+    private void dispatchToTargets(final RouterMessage[] mm) {
         synchronized (agents) {
             for (NMEAAgent nmeaAgent : agents.values()) {
                 try {
@@ -263,7 +263,7 @@ public class NMEARouterImpl implements NMEARouter {
                     if (target != null) {
                         runMe(() -> {
                             for (RouterMessage m : mm) {
-                                routeToTarget(name, target, m);
+                                dispatchToTarget(name, target, m);
                             }
                         }, "dispatch message", "messages", ""+mm.length);
                     }
@@ -274,7 +274,7 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void routeToTarget(String targetName, NMEATarget targetInterface, RouterMessage m) {
+    private void dispatchToTarget(String targetName, NMEATarget targetInterface, RouterMessage m) {
         if (!m.getSource().equals(targetName)) {
             try {
                 targetInterface.pushMessage(m);

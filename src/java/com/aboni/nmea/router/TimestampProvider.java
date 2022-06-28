@@ -30,7 +30,7 @@ public abstract class TimestampProvider {
      *
      * @param referenceTime The reference time (UNIX time).
      * @param tolerance     The tolerance in ms.
-     * @return
+     * @return true if the time is synced
      * @see TimestampProvider:isSynced()
      */
     public boolean setSkew(long referenceTime, long tolerance) {

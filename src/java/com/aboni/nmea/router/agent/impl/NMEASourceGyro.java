@@ -34,7 +34,6 @@ import net.sf.marineapi.nmea.sentence.*;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -214,7 +213,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private void dump(double headingSens, double headingBoat) throws IOException {
         int hdg = (int)headingSens;
-        try (FileOutputStream stream = new FileOutputStream(new File(String.format("hdg%d.csv", hdg)), true)) {
+        try (FileOutputStream stream = new FileOutputStream(String.format("hdg%d.csv", hdg), true)) {
             stream.write(String.format("%d%n", (int)headingBoat).getBytes());
         }
     }

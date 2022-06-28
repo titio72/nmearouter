@@ -163,7 +163,7 @@ public class LogStringBuilder {
     }
 
     public String get() {
-        return String.format("%s: Op {%s} %s", category, operation, messageBuilder.toString());
+        return String.format("%s: Op {%s} %s", category, operation, messageBuilder);
     }
 
     @Override

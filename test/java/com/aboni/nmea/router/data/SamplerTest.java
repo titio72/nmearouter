@@ -248,10 +248,10 @@ public class SamplerTest {
 
         sampler.dumpAndReset();
 
-        assertEquals(0, writer.getEvents().size());
+        assertEquals(1, writer.getEvents().size());
 
-        // check it hasn't reset
-        checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 26.0, 30);
+        // check it reset
+        assertEquals(0, sampler.getCurrent(Metrics.AIR_TEMPERATURE).getSamples());
     }
 
     @Test

@@ -250,7 +250,7 @@ public class TrackAnalytics {
     }
 
     private static void calcSpeedDistribution(StatsLeg stats, TrackPoint sample, TrackPoint prev) {
-        long period = (prev == null) ? (sample.getPeriod() * 1000) : (sample.getPosition().getTimestamp() - prev.getPosition().getTimestamp());
+        long period = (prev == null) ? (sample.getPeriod() * 1000L) : (sample.getPosition().getTimestamp() - prev.getPosition().getTimestamp());
         if (!sample.isAnchor()) {
             stats.speedDistribution.addSample(period, sample.getDistance(), sample.getAverageSpeed());
             if (sample.getEngine() == EngineStatus.OFF) {

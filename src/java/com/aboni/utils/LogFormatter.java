@@ -24,7 +24,7 @@ public class LogFormatter extends Formatter {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             payload.getThrown().printStackTrace(pw);
-            s += sw.toString() + "\n";
+            s += sw + "\n";
         }
         return s;
     }
