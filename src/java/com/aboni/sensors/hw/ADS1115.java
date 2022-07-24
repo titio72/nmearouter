@@ -18,6 +18,7 @@ package com.aboni.sensors.hw;
 import com.aboni.sensors.I2CInterface;
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 
+
 import java.io.IOException;
 
 @SuppressWarnings("unused")

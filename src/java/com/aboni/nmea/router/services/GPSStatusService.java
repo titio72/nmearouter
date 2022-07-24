@@ -7,7 +7,9 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.SatInfo;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.utils.Log;
+import com.aboni.utils.LogStringBuilder;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.annotation.Nonnull;
@@ -46,7 +48,8 @@ public class GPSStatusService extends JSONWebService {
                 JSONObject res = new JSONObject();
                 List<JSONObject> l = new ArrayList<>();
                 for (SatInfo s : st.getSatellites()) {
-                    l.add(getJsonSat(s));
+                    JSONObject jSat = getJsonSat(s);
+                    if (jSat!=null) l.add(jSat);
                 }
                 res.put("satsList", new JSONArray(l));
 
@@ -76,19 +79,24 @@ public class GPSStatusService extends JSONWebService {
 
     @Nonnull
     private JSONObject getJsonSat(SatInfo s) {
-        JSONObject jSat = new JSONObject();
-        jSat.put("id", s.getId());
-        jSat.put("elevation", s.getElevation());
-        jSat.put("azimuth", s.getAzimuth());
-        jSat.put("noise", s.getNoise());
-        jSat.put("used", s.isUsed());
-        if (s.getSat() != null) {
-            jSat.put("name", s.getSat().getName());
-            jSat.put("clock", s.getSat().getClock());
-            jSat.put("orbit", s.getSat().getOrbit());
-            jSat.put("signal", s.getSat().getSignal());
-            jSat.put("date", s.getSat().getDate());
+        try {
+            JSONObject jSat = new JSONObject();
+            jSat.put("id", s.getId());
+            jSat.put("elevation", s.getElevation());
+            jSat.put("azimuth", s.getAzimuth());
+            jSat.put("noise", s.getNoise());
+            jSat.put("used", s.isUsed());
+            if (s.getSat() != null) {
+                jSat.put("name", s.getSat().getName());
+                jSat.put("clock", s.getSat().getClock());
+                jSat.put("orbit", s.getSat().getOrbit());
+                jSat.put("signal", s.getSat().getSignal());
+                jSat.put("date", s.getSat().getDate());
+            }
+            return jSat;
+        } catch (JSONException e) {
+            LogStringBuilder.start("GPSStatusService").w("JSON Serialization").error(getLogger(), e);
+            return null;
         }
-        return jSat;
     }
 }

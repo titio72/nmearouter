@@ -99,4 +99,8 @@ public class JSONWebService implements WebService {
         res.put("error", message);
         return res;
     }
+
+    protected Log getLogger() {
+        return log;
+    }
 }
