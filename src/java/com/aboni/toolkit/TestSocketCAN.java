@@ -15,7 +15,6 @@ import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
 import tel.schich.javacan.NetworkDevice;
 import tel.schich.javacan.RawCanChannel;
-import tel.schich.javacan.linux.LinuxNativeOperationException;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -64,10 +63,10 @@ public class TestSocketCAN {
             N2KMessageHeader h = new N2KHeader(frame.getId());
             N2KMessage msg = ThingsFactory.getInstance(N2KMessageFactory.class).newInstance(h, b);
             if (msg != null) cache.onMessage(msg);
-        } catch (LinuxNativeOperationException e) {
+        /*} catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
                 ConsoleLog.getLogger().error(ERROR_READING_FRAME, e);
-            }
+            }*/
         } catch (IOException e) {
             ConsoleLog.getLogger().error(ERROR_READING_FRAME, e);
         } catch (PGNDataParseException e) {

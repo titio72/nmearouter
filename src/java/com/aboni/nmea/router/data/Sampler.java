@@ -15,7 +15,6 @@
 
 package com.aboni.nmea.router.data;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.Startable;
@@ -27,6 +26,8 @@ import com.aboni.utils.LogStringBuilder;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.aboni.nmea.router.data.Unit.DEGREES;
 
 public class Sampler implements Startable {
 
@@ -50,7 +51,6 @@ public class Sampler implements Startable {
 
     private static final class Series {
         StatsSample statsSample;
-        long periodMs;
         long lastStatTimeMs;
         Metric metric;
         MessageFilter filter;
@@ -97,9 +97,10 @@ public class Sampler implements Startable {
                            @NotNull TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
             StatsSample sample;
-            switch (metric.getUnit()) {
-                case DEGREES: sample = new AngleStatsSample(tag); break;
-                default: sample = new ScalarStatsSample(tag, min, max); break;
+            if (DEGREES == metric.getUnit()) {
+                sample = new AngleStatsSample(tag);
+            } else {
+                sample = new ScalarStatsSample(tag, min, max);
             }
             series.put(metric, Series.getNew(sample, filter, valueExtractor, timerFilter, metric));
         }
@@ -147,7 +148,7 @@ public class Sampler implements Startable {
             for (Series s : series.values()) {
                 if (s != null) {
                     StatsSample statsSample = s.statsSample;
-                    if (statsSample != null && Utils.isOlderThan(s.lastStatTimeMs, ts, s.periodMs)) {
+                    if (statsSample != null && s.timerFilter.accept(s.lastStatTimeMs, ts)) {
                         write(statsSample, ts);
                         if (collectListener != null) {
                             collectListener.onSample(s.metric, statsSample);

@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
@@ -28,8 +29,6 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -53,14 +52,83 @@ public class NMEARouterImpl implements NMEARouter {
     private final RouterMessageFactory messageFactory;
     private final Log log;
 
-    private static final int THREADS_POOL  	= 8;
-    private static final int TIMER_FACTOR  	= 4; // every "FACTOR" HighRes timer a regular timer is invoked
-    private static final int TIMER_HR		= 250;
+    private static final int THREADS_POOL = 8;
+    private static final int TIMER_FACTOR = 4; // every "FACTOR" HighRes timer a regular timer is invoked
+    private static final int TIMER_HR = 250;
     private int timerCount = 0;
 
     private long lastStatsTime;
     private static final long STATS_PERIOD = 60; // seconds
     private static int threadN = 0;
+    private Stats stats = new Stats();
+
+    private long[] lastGC = new long[]{0, 0};
+
+    private static final class Stats {
+        long timerHR;
+        long timer;
+        long dispatchedMessages;
+        long receivedMessages;
+
+        long exec;
+
+        void onTimerHR() {
+            synchronized (this) {
+                timerHR++;
+            }
+        }
+
+        ;
+
+        void onTimer() {
+            synchronized (this) {
+                timer++;
+            }
+        }
+
+        ;
+
+        void onDispatchedMessage() {
+            synchronized (this) {
+                dispatchedMessages++;
+            }
+        }
+
+        ;
+
+        void onReceivedMessage() {
+            synchronized (this) {
+                receivedMessages++;
+            }
+        }
+
+        ;
+
+        void onExec() {
+            synchronized (this) {
+                exec++;
+            }
+        }
+
+        void reset() {
+            synchronized (this) {
+                timer = 0;
+                exec = 0;
+                timerHR = 0;
+                dispatchedMessages = 0;
+                receivedMessages = 0;
+            }
+        }
+
+        LogStringBuilder dump(LogStringBuilder l) {
+            synchronized (this) {
+                return l.wV("exec", exec).wV("timers", timer).
+                        wV("timerHRs", timerHR).
+                        wV("dispMsg", dispatchedMessages).
+                        wV("recvMsg", receivedMessages);
+            }
+        }
+    }
 
     @Inject
     public NMEARouterImpl(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
@@ -82,11 +150,14 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void onTimerHR() {
         synchronized (agents) {
+
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
             agents.values().forEach((NMEAAgent a) -> {
+                stats.onTimerHR();
                 runMe(a::onTimerHR, "timerHR", AGENT_KEY_NAME, a.getName());
                 if (timerCount == 0) {
+                    stats.onTimer();
                     runMe(a::onTimer, "timer", AGENT_KEY_NAME, a.getName());
                     dumpStats();
                 }
@@ -96,7 +167,8 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void runMe(Runnable r, String logOp, String logKey, String logValue) {
         try {
-            exec.execute(r);
+            //exec.execute(r);
+            r.run();
         } catch (Exception e) {
             log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO(logOp).wV(logKey, logValue).toString(), e);
         }
@@ -106,36 +178,18 @@ public class NMEARouterImpl implements NMEARouter {
         long t = timestampProvider.getNow();
         if (t - lastStatsTime >= (STATS_PERIOD * 1000)) {
             lastStatsTime = t;
-            long[] gc = printGCStats();
-            log.info(LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").wV("queue", sentenceQueue.size()).
+            long[] gc = Utils.printGCStats();
+            LogStringBuilder lb = LogStringBuilder.start(ROUTER_CATEGORY).wO("stats").
+                    wV("queue", sentenceQueue.size()).
                     wV("mem", Runtime.getRuntime().freeMemory()).
-                    wV("gc", gc[0]).
-                    wV("gcTime", gc[1]).
-                    toString());
-            printGCStats();
+                    wV("gc", gc[0] - lastGC[0]).
+                    wV("gcTime", gc[1] - lastGC[1]);
+            lb = stats.dump(lb);
+            log.info(lb.toString());
+            lastGC[0] = gc[0];
+            lastGC[1] = gc[1];
+            stats.reset();
         }
-    }
-    private static long[] printGCStats() {
-        long totalGarbageCollections = 0;
-        long garbageCollectionTime = 0;
-
-        for(GarbageCollectorMXBean gc :
-                ManagementFactory.getGarbageCollectorMXBeans()) {
-
-            long count = gc.getCollectionCount();
-
-            if(count >= 0) {
-                totalGarbageCollections += count;
-            }
-
-            long time = gc.getCollectionTime();
-
-            if(time >= 0) {
-                garbageCollectionTime += time;
-            }
-        }
-
-        return new long[] {totalGarbageCollections, garbageCollectionTime};
     }
 
     private void notifyDiagnostic() {
@@ -219,6 +273,7 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     private void privateQueueUpSentence(RouterMessage s) {
+        stats.onReceivedMessage();
         try {
             if (isStarted()) sentenceQueue.put(s);
         } catch (InterruptedException e1) {
@@ -256,16 +311,19 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void dispatchToTargets(final RouterMessage[] mm) {
         synchronized (agents) {
+            stats.onDispatchedMessage();
             for (NMEAAgent nmeaAgent : agents.values()) {
                 try {
-                    final NMEATarget target = nmeaAgent.getTarget();
-                    final String name = nmeaAgent.getName();
-                    if (target != null) {
-                        runMe(() -> {
-                            for (RouterMessage m : mm) {
-                                dispatchToTarget(name, target, m);
-                            }
-                        }, "dispatch message", "messages", ""+mm.length);
+                    if (nmeaAgent.isStarted()) {
+                        final NMEATarget target = nmeaAgent.getTarget();
+                        final String name = nmeaAgent.getName();
+                        if (target != null) {
+                            runMe(() -> {
+                                for (RouterMessage m : mm) {
+                                    dispatchToTarget(name, target, m);
+                                }
+                            }, "dispatch message", "messages", "" + mm.length);
+                        }
                     }
                 } catch (Exception e) {
                     log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("dispatch message").toString(), e);

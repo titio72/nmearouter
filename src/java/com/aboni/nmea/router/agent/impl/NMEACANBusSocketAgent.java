@@ -17,7 +17,7 @@ import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
 import tel.schich.javacan.NetworkDevice;
 import tel.schich.javacan.RawCanChannel;
-import tel.schich.javacan.linux.LinuxNativeOperationException;
+import tel.schich.javacan.platform.linux.LinuxNativeOperationException;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -45,6 +45,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private String description;
     private final AtomicBoolean run = new AtomicBoolean();
     private static final boolean DEBUG = false;
+
+    private long errors;
 
     private class Stats {
         long messages;
@@ -91,7 +93,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
         this.posAndVectorStream.setListener(this::notify);
         this.speedAndHeadingStream.setListener(this::notify);
-
+        this.errors = 0;
         srcFilter.init();
 
         stats.reset();
@@ -170,10 +172,17 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
                 getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").error(log, e);
+            } else {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
             }
         } catch (IOException e) {
             getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
         } catch (Exception e) {
+            errors++;
             if (DEBUG) {
                 getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, e);
             }
@@ -204,12 +213,13 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);
                 }
-                getLogBuilder().wO("stats").w(" " + stats.toString(t)).info(log);
+                getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).info(log);
                 if (stats.messages==0) {
                     onNoMessages();
                 }
                 stats.reset();
                 lastStats = t;
+                errors = 0;
             }
         }
     }
