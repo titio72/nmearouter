@@ -118,15 +118,17 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         @Override
         public void onSample(Metric metric, StatsSample sample) {
             try {
-                JSONObject msg = new JSONObject();
-                msg.put("topic", "meteo_sample");
-                msg.put("tag", sample.getTag());
-                msg.put("min", sample.getMin());
-                msg.put("avg", sample.getAvg());
-                msg.put("max", sample.getMax());
-                msg.put("samples", sample.getSamples());
-                msg.put("time", sample.getT0());
-                NMEAMeteoMonitorTarget.this.notify(msg);
+                if (sample.getSamples() > 0) {
+                    JSONObject msg = new JSONObject();
+                    msg.put("topic", "meteo_sample");
+                    msg.put("tag", sample.getTag());
+                    msg.put("min", sample.getMin());
+                    msg.put("avg", sample.getAvg());
+                    msg.put("max", sample.getMax());
+                    msg.put("samples", sample.getSamples());
+                    msg.put("time", sample.getT0());
+                    NMEAMeteoMonitorTarget.this.notify(msg);
+                }
             } catch (JSONException e) {
                 getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").error(log, e);
             }
@@ -218,7 +220,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
     public void onTimer() {
         super.onTimer();
         timerCount = (timerCount + 1) % SAMPLING_FACTOR;
-        if (timerCount == 0) dumpStats();
+        if (timerCount == 0 && isStarted()) dumpStats();
     }
 
     private void dumpStats() {

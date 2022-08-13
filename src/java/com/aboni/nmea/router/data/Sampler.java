@@ -28,6 +28,8 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.aboni.nmea.router.data.Unit.DEGREES;
+
 public class Sampler implements Startable {
 
     public interface MessageFilter {
@@ -50,7 +52,6 @@ public class Sampler implements Startable {
 
     private static final class Series {
         StatsSample statsSample;
-        long periodMs;
         long lastStatTimeMs;
         Metric metric;
         MessageFilter filter;
@@ -97,9 +98,10 @@ public class Sampler implements Startable {
                            @NotNull TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
             StatsSample sample;
-            switch (metric.getUnit()) {
-                case DEGREES: sample = new AngleStatsSample(tag); break;
-                default: sample = new ScalarStatsSample(tag, min, max); break;
+            if (DEGREES == metric.getUnit()) {
+                sample = new AngleStatsSample(tag);
+            } else {
+                sample = new ScalarStatsSample(tag, min, max);
             }
             series.put(metric, Series.getNew(sample, filter, valueExtractor, timerFilter, metric));
         }
@@ -144,6 +146,7 @@ public class Sampler implements Startable {
     public void dumpAndReset() {
         dumpAndReset(false);
     }
+
     public void dumpAndReset(boolean force) {
         synchronized (series) {
             long ts = timestampProvider.getNow();

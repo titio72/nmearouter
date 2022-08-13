@@ -182,8 +182,8 @@
         </dependency>
         <dependency>
             <groupId>tel.schich</groupId>
-            <artifactId>javacan</artifactId>
-            <version>2.3.0</version>
+            <artifactId>javacan-core</artifactId>
+            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.influxdb</groupId>
