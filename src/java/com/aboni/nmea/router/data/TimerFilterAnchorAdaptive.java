@@ -27,15 +27,22 @@ public class TimerFilterAnchorAdaptive implements TimerFilter {
     private final long period;
     private final long periodAnchor;
 
+    private final long tolerance;
+
     public TimerFilterAnchorAdaptive(@NotNull NMEACache cache, long period, long periodAnchor) {
+        this(cache, period, periodAnchor, 500);
+    }
+
+    public TimerFilterAnchorAdaptive(@NotNull NMEACache cache, long period, long periodAnchor, long tolerance) {
         this.cache = cache;
         this.periodAnchor = periodAnchor;
         this.period = period;
+        this.tolerance = tolerance;
     }
 
     @Override
     public boolean accept(long timestamp, long now) {
         long p = cache.getStatus(NMEARouterStatuses.ANCHOR_STATUS, Boolean.FALSE) ? periodAnchor : period;
-        return Utils.isOlderThan(timestamp, now, p);
+        return Utils.isNotNewerThan(timestamp, now + tolerance, p);
     }
 }
