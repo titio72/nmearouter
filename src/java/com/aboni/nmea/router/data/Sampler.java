@@ -142,12 +142,15 @@ public class Sampler implements Startable {
     }
 
     public void dumpAndReset() {
+        dumpAndReset(false);
+    }
+    public void dumpAndReset(boolean force) {
         synchronized (series) {
             long ts = timestampProvider.getNow();
             for (Series s : series.values()) {
                 if (s != null) {
                     StatsSample statsSample = s.statsSample;
-                    if (statsSample != null && Utils.isOlderThan(s.lastStatTimeMs, ts, s.periodMs)) {
+                    if (statsSample != null && (force || s.timerFilter.accept(s.lastStatTimeMs, ts))) {
                         write(statsSample, ts);
                         if (collectListener != null) {
                             collectListener.onSample(s.metric, statsSample);

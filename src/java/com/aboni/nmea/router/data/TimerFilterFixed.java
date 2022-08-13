@@ -20,13 +20,20 @@ import com.aboni.misc.Utils;
 public class TimerFilterFixed implements TimerFilter {
 
     private final long period;
+    private final long tolerance;
+
+    public TimerFilterFixed(long periodInMs, long tolerance) {
+        this.period = periodInMs;
+        this.tolerance = tolerance;
+    }
 
     public TimerFilterFixed(long periodInMs) {
-        this.period = periodInMs;
+        this(periodInMs, 0);
     }
 
     @Override
     public boolean accept(long timestamp, long now) {
-        return Utils.isOlderThan(timestamp, now, period);
+
+        return Utils.isNotNewerThan(timestamp, now + tolerance, period);
     }
 }

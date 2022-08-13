@@ -17,10 +17,7 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.data.Metrics;
-import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.data.TimerFilterAnchorAdaptive;
+import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.HWSettings;
 import com.aboni.utils.Log;
@@ -46,31 +43,37 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
         meteoSampler.initMetric(Metrics.PRESSURE,
                 MsgPressure.class::isInstance,
                 (Message m) -> ((MsgPressure) m).getPressure(),
-                5 * ONE_MINUTE, "PR_", 800.0, 1100.0);
+                new TimerFilterFixed(5 * ONE_MINUTE, 500),
+                "PR_", 800.0, 1100.0);
         meteoSampler.initMetric(Metrics.WATER_TEMPERATURE,
                 (Message m) -> (m instanceof MsgTemperature && TemperatureSource.SEA == ((MsgTemperature) m).getTemperatureSource()),
                 (Message m) -> ((MsgTemperature) m).getTemperature(),
-                10 * ONE_MINUTE, "WT_", -20.0, 60.0);
+                new TimerFilterFixed(10 * ONE_MINUTE, 500),
+                "WT_", -20.0, 60.0);
         meteoSampler.initMetric(Metrics.AIR_TEMPERATURE,
                 (Message m) -> (m instanceof MsgTemperature && AIR_TEMPERATURE_SOURCE == ((MsgTemperature) m).getTemperatureSource()),
                 (Message m) -> ((MsgTemperature) m).getTemperature(),
-                10 * ONE_MINUTE, "AT0", -20.0, 60.0);
+                new TimerFilterFixed(10 * ONE_MINUTE, 500),
+                "AT0", -20.0, 60.0);
         meteoSampler.initMetric(Metrics.HUMIDITY,
                 MsgHumidity.class::isInstance,
                 (Message m) -> ((MsgHumidity) m).getHumidity(),
-                10 * ONE_MINUTE, "HUM", 0.0, 150.0);
+                new TimerFilterFixed(10 * ONE_MINUTE, 500),
+                "HUM", 0.0, 150.0);
         meteoSampler.initMetric(Metrics.WIND_SPEED,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue()),
                 (Message m) -> ((MsgWindData) m).getSpeed(),
-                ONE_MINUTE, "TW_", 0.0, 100.0);
+                new TimerFilterFixed(ONE_MINUTE, 500),
+                "TW_", 0.0, 100.0);
         meteoSampler.initMetric(Metrics.WIND_DIRECTION,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
-                ONE_MINUTE, "TWD", -360.0, 360.0);
+                new TimerFilterFixed(ONE_MINUTE, 500),
+                "TWD", -360.0, 360.0);
         meteoSampler.initMetric(Metrics.ROLL,
                 (Message m) -> (m instanceof MsgAttitude && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> Utils.normalizeDegrees180To180(((MsgAttitude) m).getRoll()) + HWSettings.getPropertyAsDouble("roll.offset", 0.0),
-                new TimerFilterAnchorAdaptive(cache, ONE_MINUTE, 10 * ONE_MINUTE),
+                new TimerFilterAnchorAdaptive(cache, ONE_MINUTE, 10 * ONE_MINUTE, 500),
                 "ROL", -180.0, 180.0);
 
         // prevents writing stats where the max is obviously off, like 4.5 times the average (why???? how did I come up with this???)
