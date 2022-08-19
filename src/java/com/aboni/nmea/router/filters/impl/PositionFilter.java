@@ -95,7 +95,9 @@ public class PositionFilter implements NMEAFilter {
     }
 
     public boolean isReady() {
-        return positions.size() == queueSize;
+        synchronized (positions) {
+            return positions.size() >= queueSize;
+        }
     }
 
     private static boolean isValid(MsgPositionAndVector message) {

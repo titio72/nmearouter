@@ -25,14 +25,13 @@ import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.MyThreadPool;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,7 +41,7 @@ public class NMEARouterImpl implements NMEARouter {
     public static final String AGENT_KEY_NAME = "agent";
     private Timer timer;
     private final AtomicBoolean started;
-    private final ExecutorService exec;
+    private final MyThreadPool threadPool;
 
     private final Map<String, NMEAAgent> agents;
     private final BlockingQueue<RouterMessage> sentenceQueue;
@@ -59,17 +58,15 @@ public class NMEARouterImpl implements NMEARouter {
 
     private long lastStatsTime;
     private static final long STATS_PERIOD = 60; // seconds
-    private static int threadN = 0;
-    private Stats stats = new Stats();
+    private final Stats stats = new Stats();
 
-    private long[] lastGC = new long[]{0, 0};
+    private final long[] lastGC = new long[]{0, 0};
 
     private static final class Stats {
         long timerHR;
         long timer;
         long dispatchedMessages;
         long receivedMessages;
-
         long exec;
 
         void onTimerHR() {
@@ -78,15 +75,11 @@ public class NMEARouterImpl implements NMEARouter {
             }
         }
 
-        ;
-
         void onTimer() {
             synchronized (this) {
                 timer++;
             }
         }
-
-        ;
 
         void onDispatchedMessage() {
             synchronized (this) {
@@ -94,15 +87,11 @@ public class NMEARouterImpl implements NMEARouter {
             }
         }
 
-        ;
-
         void onReceivedMessage() {
             synchronized (this) {
                 receivedMessages++;
             }
         }
-
-        ;
 
         void onExec() {
             synchronized (this) {
@@ -140,11 +129,8 @@ public class NMEARouterImpl implements NMEARouter {
         sentenceQueue = new LinkedBlockingQueue<>();
         processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
-        exec = Executors.newFixedThreadPool(THREADS_POOL, (Runnable r) -> {
-            Thread t = new Thread(r, "Router thread " + threadN);
-            threadN++;
-            return t;
-        });
+        threadPool = new MyThreadPool(THREADS_POOL, -1);
+        threadPool.start();
         timer = null;
     }
 
@@ -167,8 +153,8 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void runMe(Runnable r, String logOp, String logKey, String logValue) {
         try {
-            //exec.execute(r);
-            r.run();
+            threadPool.exec(r);
+            stats.onExec();
         } catch (Exception e) {
             log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO(logOp).wV(logKey, logValue).toString(), e);
         }

@@ -118,7 +118,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         @Override
         public void onSample(Metric metric, StatsSample sample) {
             try {
-                if (sample.getSamples() > 0) {
+                if (sample.getSamples() > 0 && !Double.isNaN(sample.getAvg())) {
                     JSONObject msg = new JSONObject();
                     msg.put("topic", "meteo_sample");
                     msg.put("tag", sample.getTag());

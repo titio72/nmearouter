@@ -47,4 +47,11 @@ public class BitUtilsTest {
     public void test4BytesUnsigned() {
         assertEquals(0xf0ee005cL, BitUtils.get4ByteInt(b, 1));
     }
+
+    @Test
+    public void extractDouble() {
+        byte[] data = new byte[]{ (byte)0x00,(byte)0x9c,(byte)0x01,(byte)0x72,(byte)0xaa,(byte)0x02,(byte)0xff,(byte)0xff};
+        assertEquals(4.3634, BitUtils.parseDouble(data, 24, 16, 0.0001, false), 0.0001);
+        // it's 250 degrees in radians
+    }
 }

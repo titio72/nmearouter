@@ -1,1 +1,1 @@
-ansible-playbook $1 --extra-vars "ansible_sudo_pass=$2 nmea_user=$3 nmea_user_password=$2"
+ansible-playbook $1 -i inventory.yml  --extra-vars "ansible_sudo_pass=$2 nmea_user=$3 nmea_user_password=$2"
