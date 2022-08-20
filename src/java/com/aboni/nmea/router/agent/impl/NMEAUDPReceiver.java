@@ -60,9 +60,9 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
         this.timestampProvider = tp;
         input = new NMEAInputManager(log);
         positionAndVectorStream = new PositionAndVectorStream(tp);
-        positionAndVectorStream.setListener(this::notify);
+        positionAndVectorStream.setListener(this::postMessage);
         speedAndHeadingStream = new SpeedAndHeadingStream(tp);
-        speedAndHeadingStream.setListener(this::notify);
+        speedAndHeadingStream.setListener(this::postMessage);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired, FAST_STATS_PERIOD, true, false);
         stats = new NMEATrafficStats(this::onStatsExpired, STATS_PERIOD, true, false);
         description = "UDP Receiver";
@@ -133,7 +133,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                         positionAndVectorStream.onMessage(m);
                         speedAndHeadingStream.onMessage(m);
                     }
-                    notify(m);
+                    postMessage(m);
                 }
             }
         } catch (SocketTimeoutException e) {

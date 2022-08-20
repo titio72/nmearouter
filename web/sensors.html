@@ -190,6 +190,8 @@
         }
         scope['xmc'] = m;
       });
+    } else if (msg.topic == "time") {
+      doWithScope(msg, (m, scope) => { scope['time'] = m; });
     } else if (msg.topic == "engine") {
       doWithScope(msg, (m, scope) => { scope['engine'] = m; });
     } else if (msg.topic == 'RMC') {
@@ -235,8 +237,6 @@
         };
         scope['wind'] = absoluteWind;
       });
-    } else if (msg.topic == 'engine') {
-      doWithScope(msg, (m, scope)=>scope['engine'] = m); 
     } else if (msg.topic == 'heading' && msg.reference == 'Magnetic') {
       doWithScope(msg, (m, scope) => {
         m.s_dir = direction(m.heading);
@@ -597,6 +597,10 @@
                 <td style="text-align: right">{{rmc.s_dir}} {{rmc.COG | number:1}}&deg;</td>
               </tr>
               <tr>
+                <td>Sync/Skew</td>
+                <td style="text-align: right">{{time.synced}} {{time.skew}}</td>
+              </tr>
+              <tr>
                 <td colspan="2" style="text-align: right">{{rmc.s_time}}</td>
               </tr>
             </table>
@@ -706,8 +710,8 @@
                 <td style="text-align: right">{{battery1.voltage | number:1}} V</td>
               </tr>
               <tr>
-                <td>&nbsp;</td>
-                <td style="text-align: right">&nbsp;</td>
+                <td>Engine status</td>
+                <td style="text-align: right">{{engine.status}}</td>
               </tr>
               <tr>
                 <td>CPU</td>

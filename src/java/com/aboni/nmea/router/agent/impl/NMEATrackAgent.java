@@ -131,7 +131,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             msg.put("lonDec", avgPos.getLongitude());
             msg.put("lat", Utils.formatLatitude(avgPos.getLatitude()));
             msg.put("lon", Utils.formatLongitude(avgPos.getLongitude()));
-            notify(msg);
+            postMessage(msg);
         }
     }
 
@@ -145,7 +145,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         msg.put("period", point.getPeriod());
         msg.put("lon", point.getPosition().getLongitude());
         msg.put("lat", point.getPosition().getLatitude());
-        notify(msg);
+        postMessage(msg);
     }
 
     private long lastStats = 0;

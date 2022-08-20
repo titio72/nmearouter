@@ -161,7 +161,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
             if (readBytes>2) {
                 String sSentence = new String(readBuffer.array(), 0, readBytes).trim();
                 Sentence sentence = SentenceFactory.getInstance().createParser(sSentence);
-                NMEASocketServer.this.notify(new NMEA0183Message(sentence));
+                NMEASocketServer.this.postMessage(new NMEA0183Message(sentence));
             } else if (readBytes==0) {
                 handleDisconnection(client);
             }

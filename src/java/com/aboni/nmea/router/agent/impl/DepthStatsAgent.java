@@ -77,7 +77,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
             j.put("depth", d.depth / 10f);
             if (min != Integer.MAX_VALUE) j.put("min_1h", min / 10f);
             if (max != Integer.MIN_VALUE) j.put("max_1h", max / 10f);
-            notify(j);
+            postMessage(j);
         }
     }
 

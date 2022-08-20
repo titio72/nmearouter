@@ -253,10 +253,10 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
 
     private void sendMeteo(double temp, double press, double hum) {
         if (data.isXdrMeteo()) {
-            if (data.isXdrMeteoAtm()) notify(new MsgPressureImpl(PressureSource.ATMOSPHERIC, press));
-            if (data.isXdrMeteoTmp()) notify(new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, temp));
-            if (data.isXdrMeteoHum()) notify(new MsgHumidityImpl(HumiditySource.INSIDE, hum));
-            if (data.isMtw()) notify(new MsgTemperatureImpl(TemperatureSource.SEA, temp - 5));
+            if (data.isXdrMeteoAtm()) postMessage(new MsgPressureImpl(PressureSource.ATMOSPHERIC, press));
+            if (data.isXdrMeteoTmp()) postMessage(new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, temp));
+            if (data.isXdrMeteoHum()) postMessage(new MsgHumidityImpl(HumiditySource.INSIDE, hum));
+            if (data.isMtw()) postMessage(new MsgTemperatureImpl(TemperatureSource.SEA, temp - 5));
         }
     }
 
@@ -269,41 +269,41 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
     }
 
     private void sendPower(PowerData powerData) {
-        notify(new MsgBatteryImpl(0, 1, 12.7, Double.NaN, Double.NaN));
-        notify(new MsgBatteryImpl(0, 0, powerData.voltage, powerData.current, powerData.temperature));
-        notify(new MsgDCDetailedStatusImpl(0, 0, DCType.BATTERY, powerData.getSOC(), 1.0,
+        postMessage(new MsgBatteryImpl(0, 1, 12.7, Double.NaN, Double.NaN));
+        postMessage(new MsgBatteryImpl(0, 0, powerData.voltage, powerData.current, powerData.temperature));
+        postMessage(new MsgDCDetailedStatusImpl(0, 0, DCType.BATTERY, powerData.getSOC(), 1.0,
                 -(int) ((280 + powerData.totAh) / powerData.current), Double.NaN));
     }
 
     private void sendGyro(double hdg, double roll, double pitch) {
         if (data.isXdrGYR()) {
-            notify(new MsgAttitudeImpl(hdg, roll, pitch));
+            postMessage(new MsgAttitudeImpl(hdg, roll, pitch));
         }
     }
 
     private void sendHeadingAndSpeed(double hdg, double speed) {
         if (data.isHdm()) {
-            notify(new MsgHeadingImpl(hdg, true));
+            postMessage(new MsgHeadingImpl(hdg, true));
         }
 
         if (data.isVhw()) {
-            notify(new MsgSpeedImpl(speed));
-            notify(new MsgSpeedAndHeadingFacade(new MsgSpeedImpl(speed), new MsgHeadingImpl(hdg, true)));
+            postMessage(new MsgSpeedImpl(speed));
+            postMessage(new MsgSpeedAndHeadingFacade(new MsgSpeedImpl(speed), new MsgHeadingImpl(hdg, true)));
         }
     }
 
     private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
         if (data.isMwvA()) {
-            notify(new MsgWindDataImpl(aWSpeed, aWDirection, true));
+            postMessage(new MsgWindDataImpl(aWSpeed, aWDirection, true));
         }
         if (data.isMwvT()) {
-            notify(new MsgWindDataImpl(absoluteWindSpeed, tWDirection, false));
+            postMessage(new MsgWindDataImpl(absoluteWindSpeed, tWDirection, false));
         }
     }
 
     private void sendDepth(double depth) {
         if (data.isDpt()) {
-            notify(new MsgWaterDepthImpl(depth, data.getDepthOffset()));
+            postMessage(new MsgWaterDepthImpl(depth, data.getDepthOffset()));
         }
     }
 
@@ -312,10 +312,10 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             MsgGNSSPositionImpl p = new MsgGNSSPositionImpl(posOut, Instant.now(), 10, 0.72, Double.NaN);
             MsgSOGAndCOGImpl s = new MsgSOGAndCOGImpl(speed, hdg);
             MsgPositionAndVector ps = new MsgPositionAndVectorFacade(p, s);
-            notify(s);
-            notify(p);
-            notify(ps);
-            notify(new MsgSystemTimeImpl("GPS", p.getTimestamp()));
+            postMessage(s);
+            postMessage(p);
+            postMessage(ps);
+            postMessage(new MsgSystemTimeImpl("GPS", p.getTimestamp()));
         }
     }
 

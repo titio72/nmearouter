@@ -231,7 +231,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (data.isRsa()){
             RSASentence rsa = (RSASentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.RSA);
             rsa.setRudderAngle(Side.STARBOARD, data.getRudder());
-            NMEASimulatorSource.this.notify(rsa);
+            NMEASimulatorSource.this.postMessage(rsa);
         }
     }
 
@@ -240,7 +240,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             XDRSentence xdr = (XDRSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             xdr.addMeasurement(new Measurement("V", 13.56, "V", "VOLTAGE0"));
             xdr.addMeasurement(new Measurement("V", 13.12, "V", "VOLTAGE1"));
-            NMEASimulatorSource.this.notify(xdr);
+            NMEASimulatorSource.this.postMessage(xdr);
         }
     }
 
@@ -252,31 +252,31 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp, "C", "AirTemp"));
             if (data.isXdrMeteoTmp()) xdr.addMeasurement(new Measurement("C", temp + 1, "C", "CabinTemp"));
             if (data.isXdrMeteoHum()) xdr.addMeasurement(new Measurement("C", data.getHum(), "H", "Humidity"));
-            NMEASimulatorSource.this.notify(xdr);
+            NMEASimulatorSource.this.postMessage(xdr);
         }
 
         if (data.isMtw()) {
             MTWSentence t = (MTWSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MTW);
             t.setTemperature(temp - 5);
-            NMEASimulatorSource.this.notify(t);
+            NMEASimulatorSource.this.postMessage(t);
         }
 
         if (data.isMta()) {
             MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
             mta.setTemperature(temp);
-            NMEASimulatorSource.this.notify(mta);
+            NMEASimulatorSource.this.postMessage(mta);
         }
 
         if (data.isMbb()) {
             MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
             mmb.setBars(press / 1000.0);
-            NMEASimulatorSource.this.notify(mmb);
+            NMEASimulatorSource.this.postMessage(mmb);
         }
 
         if (data.isMhu()) {
             MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
             mhu.setRelativeHumidity(data.getHum());
-            NMEASimulatorSource.this.notify(mhu);
+            NMEASimulatorSource.this.postMessage(mhu);
         }
 
         if (data.isMda()) {
@@ -291,7 +291,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             mda.setMagneticWindDirection(tWDirection + hdg);
             mda.setTrueWindDirection(tWDirection + hdg);
             mda.setWindSpeedKnots(absoluteWindSpeed);
-            NMEASimulatorSource.this.notify(mda);
+            NMEASimulatorSource.this.postMessage(mda);
         }
     }
 
@@ -301,7 +301,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             xdr.addMeasurement(new Measurement("A", hdg, "D", "HEAD"));
             xdr.addMeasurement(new Measurement("A", roll, "D", "ROLL"));
             xdr.addMeasurement(new Measurement("A", pitch, "D", "PITCH"));
-            NMEASimulatorSource.this.notify(xdr);
+            NMEASimulatorSource.this.postMessage(xdr);
         }
     }
 
@@ -309,19 +309,19 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (data.isHdm()) {
             HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
             hdm.setHeading(hdg);
-            NMEASimulatorSource.this.notify(hdm);
+            NMEASimulatorSource.this.postMessage(hdm);
         }
 
         if (data.isHdt()) {
             HDTSentence hdt = (HDTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDT);
             hdt.setHeading(hdg);
-            NMEASimulatorSource.this.notify(hdt);
+            NMEASimulatorSource.this.postMessage(hdt);
         }
 
         if (data.isHdg()) {
             HDGSentence hdgS = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
             hdgS.setHeading(hdg);
-            NMEASimulatorSource.this.notify(hdgS);
+            NMEASimulatorSource.this.postMessage(hdgS);
         }
 
         if (data.isVhw()) {
@@ -330,7 +330,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             s.setMagneticHeading(hdg);
             s.setSpeedKnots(speed);
             s.setSpeedKmh(speed * 1.852);
-            NMEASimulatorSource.this.notify(s);
+            NMEASimulatorSource.this.postMessage(s);
         }
     }
 
@@ -340,14 +340,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         v.setTrue(false);
         v.setSpeedUnit(Units.KNOT);
         v.setStatus(DataStatus.ACTIVE);
-        NMEASimulatorSource.this.notify(v);
+        NMEASimulatorSource.this.postMessage(v);
 
         v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
         v.setTrue(false);
         v.setSpeedUnit(Units.KMH);
         v.setSpeed(aWSpeed * 1.852);
         v.setStatus(DataStatus.ACTIVE);
-        NMEASimulatorSource.this.notify(v);
+        NMEASimulatorSource.this.postMessage(v);
     }
 
     private void sendWind(double absoluteWindSpeed, double tWDirection, double aWSpeed, double aWDirection) {
@@ -369,7 +369,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             vwr.setSpeed(aWSpeed);
             vwr.setSide(Side.PORT);
             vwr.setStatus(DataStatus.ACTIVE);
-            NMEASimulatorSource.this.notify(vwr);
+            NMEASimulatorSource.this.postMessage(vwr);
         }
 
         if (data.isVwr()) {
@@ -377,7 +377,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             vwt.setWindAngle(tWDirection > 180 ? 360 - tWDirection : tWDirection);
             vwt.setSpeedKnots(absoluteWindSpeed);
             vwt.setDirectionLeftRight(tWDirection > 180 ? Direction.LEFT : Direction.RIGHT);
-            NMEASimulatorSource.this.notify(vwt);
+            NMEASimulatorSource.this.postMessage(vwt);
         }
     }
 
@@ -387,7 +387,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         v.setAngle(aWDirection);
         v.setTrue(b);
         v.setStatus(DataStatus.ACTIVE);
-        NMEASimulatorSource.this.notify(v);
+        NMEASimulatorSource.this.postMessage(v);
     }
 
     private void setWindSpeedValues(double aWSpeed, MWVSentence v) {
@@ -405,13 +405,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             DPTSentence d = (DPTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DPT);
             d.setDepth(depth);
             d.setOffset(data.getDepthOffset());
-            NMEASimulatorSource.this.notify(d);
+            NMEASimulatorSource.this.postMessage(d);
         }
 
         if (data.isDbt()) {
             DBTSentence d = (DBTSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.DBT);
             d.setDepth(depth);
-            NMEASimulatorSource.this.notify(d);
+            NMEASimulatorSource.this.postMessage(d);
         }
     }
 
@@ -439,7 +439,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             rmc.setDirectionOfVariation(CompassPoint.WEST);
             rmc.setSpeed(speed);
             rmc.setPosition(posOut);
-            NMEASimulatorSource.this.notify(rmc);
+            NMEASimulatorSource.this.postMessage(rmc);
         }
 
         if (data.isGll()) {
@@ -447,7 +447,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             s1.setPosition(posOut);
             s1.setStatus(DataStatus.ACTIVE);
             s1.setTime(new Time());
-            NMEASimulatorSource.this.notify(s1);
+            NMEASimulatorSource.this.postMessage(s1);
         }
 
         if (data.isVtg()) {
@@ -457,7 +457,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             vtg.setMode(FaaMode.AUTOMATIC);
             vtg.setSpeedKnots(speed);
             vtg.setSpeedKmh(speed * 1.852);
-            NMEASimulatorSource.this.notify(vtg);
+            NMEASimulatorSource.this.postMessage(vtg);
         }
     }
 
@@ -468,7 +468,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             s.setTotalUnits('N');
             s.setTrip(navData.trip);
             s.setTripUnits('N');
-            NMEASimulatorSource.this.notify(s);
+            NMEASimulatorSource.this.postMessage(s);
         }
     }
 

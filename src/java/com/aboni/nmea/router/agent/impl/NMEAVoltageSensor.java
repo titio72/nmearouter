@@ -131,7 +131,7 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("V", Utils.round(voltageSensor.getVoltage1(), 3), "V", "V1"));
                 xdr.addMeasurement(new Measurement("V", Utils.round(voltageSensor.getVoltage2(), 3), "V", "V2"));
                 xdr.addMeasurement(new Measurement("V", Utils.round(voltageSensor.getVoltage3(), 3), "V", "V3"));
-                notify(xdr);
+                postMessage(xdr);
             } catch (Exception e) {
                 log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("message").toString(), e);
             }

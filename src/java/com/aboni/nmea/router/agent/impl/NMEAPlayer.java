@@ -113,7 +113,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
         try {
             Sentence s = SentenceFactory.getInstance().createParser(line);
             Thread.sleep(55);
-            notify(s);
+            postMessage(s);
         } catch (Exception e) {
             getLogBuilder().wO("play").wV("line", line).error(log, e);
         }
@@ -130,7 +130,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
             if (dLogT > dt) {
                 Utils.pause((int) (dLogT - dt));
             }
-            notify(itm.getSentence());
+            postMessage(itm.getSentence());
         } catch (Exception e) {
             getLogBuilder().wO("play").wV("line", line).error(log, e);
         }

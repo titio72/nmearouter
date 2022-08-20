@@ -63,7 +63,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
         JSONObject msg = new JSONObject();
         msg.put("topic", "engine");
         msg.put("status", engineRunning);
-        notify(msg);
+        postMessage(msg);
     }
 
     @Override

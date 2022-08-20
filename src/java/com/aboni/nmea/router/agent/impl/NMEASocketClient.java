@@ -64,7 +64,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
 
         @Override
         public void sentenceRead(SentenceEvent event) {
-            NMEASocketClient.this.notify(event.getSentence());
+            NMEASocketClient.this.postMessage(event.getSentence());
         }
     }
 

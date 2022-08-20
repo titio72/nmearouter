@@ -244,7 +244,7 @@ public class NMEASerial extends NMEAAgentImpl {
             if (out != null) {
                 for (Message m: out) {
                     updateReadStats();
-                    notify(m);
+                    postMessage(m);
                 }
             }
         }

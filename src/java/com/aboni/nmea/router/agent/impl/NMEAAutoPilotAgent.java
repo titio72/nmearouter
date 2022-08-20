@@ -126,7 +126,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("21", "01", "FE");
         getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "auto").info(log);
-        this.notify(s);
+        this.postMessage(s);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("21", "02", "FD");
         getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "stand by").info(log);
-        this.notify(s);
+        this.postMessage(s);
     }
 
     @Override
@@ -144,7 +144,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("21", "23", "DC");
         getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "vane").info(log);
-        this.notify(s);
+        this.postMessage(s);
     }
     //11  05  FA     -1
     //11  06  F9    -10 
@@ -165,7 +165,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("11", "05", "FA");
         logDirection(true, 1);
-        this.notify(s);
+        this.postMessage(s);
     }
 
 
@@ -175,7 +175,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("11", "06", "F9");
         logDirection(true, 10);
-        this.notify(s);
+        this.postMessage(s);
     }
 
     @Override
@@ -184,7 +184,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("11", "07", "F8");
         logDirection(false, 1);
-        this.notify(s);
+        this.postMessage(s);
     }
 
     @Override
@@ -193,6 +193,6 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         s.setCommand("86");
         s.setParameters("11", "08", "F7");
         logDirection(false, 10);
-        this.notify(s);
+        this.postMessage(s);
     }
 }

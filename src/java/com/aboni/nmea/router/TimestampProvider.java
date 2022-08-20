@@ -36,7 +36,7 @@ public abstract class TimestampProvider {
     public boolean setSkew(long referenceTime, long tolerance) {
         skew = getNow() - referenceTime;
         synced = Math.abs(skew) < tolerance;
-        return isSynced();
+        return synced;
     }
 
     /**

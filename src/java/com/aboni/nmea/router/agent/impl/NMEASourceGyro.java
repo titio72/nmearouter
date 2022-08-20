@@ -153,7 +153,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 if (SEND_HDM) {
                     HDMSentence hdm = (HDMSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDM);
                     hdm.setHeading(Utils.normalizeDegrees0To360(b));
-                    notify(hdm);
+                    postMessage(hdm);
                 }
 
                 if (cache.getLastPosition().getData() != null) {
@@ -162,17 +162,17 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
                     if (SEND_HDT) {
                         HDTSentence hdt = m.getTrueSentence(TalkerId.II, b);
-                        notify(hdt);
+                        postMessage(hdt);
                     }
 
                     HDGSentence hdg = m.getSentence(TalkerId.II, b, 0.0);
-                    notify(hdg);
+                    postMessage(hdg);
                 } else {
                     HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.HDG);
                     hdg.setHeading(Utils.normalizeDegrees0To360(b));
                     hdg.setDeviation(0.0);
                     // do not set variation
-                    notify(hdg);
+                    postMessage(hdg);
 
                 }
             }
@@ -189,7 +189,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 double pitch = compassSensor.getUnfilteredPitch();
                 double hd = compassSensor.getHeading();
                 MsgAttitude msgAttitude = new MsgAttitudeImpl(hd, pitch, roll);
-                notify(msgAttitude);
+                postMessage(msgAttitude);
             } catch (Exception e) {
                 log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message xdr").toString(), e);
             }

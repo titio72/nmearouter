@@ -28,8 +28,8 @@ import java.time.format.DateTimeFormatter;
 public class SystemTimeChecker {
 
     public static final String SYSTEM_TIME_CHECKER_CATEGORY = "SystemTimeChecker";
-    private boolean synced;
-    private long timeSkew;
+    //private boolean synced;
+    //private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
     private final TimestampProvider timestampProvider;
     private final Log log;
@@ -68,10 +68,8 @@ public class SystemTimeChecker {
     }
 
     private boolean checkAndSetTimeSkew(Instant now, Instant gpsTime) {
-        timeSkew = Duration.between(now, gpsTime).toMillis();
         timestampProvider.setSkew(gpsTime.toEpochMilli(), TOLERANCE_MS);
-        synced = timestampProvider.isSynced();
-        return synced;
+        return timestampProvider.isSynced();
     }
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
@@ -90,7 +88,7 @@ public class SystemTimeChecker {
     }
 
     public boolean isSynced() {
-        return synced;
+        return timestampProvider.isSynced();
     }
 
     /**
@@ -99,6 +97,6 @@ public class SystemTimeChecker {
      * @return The skew in milliseconds
      */
     public long getTimeSkew() {
-        return timeSkew;
+        return timestampProvider.getSkew();
     }
 }

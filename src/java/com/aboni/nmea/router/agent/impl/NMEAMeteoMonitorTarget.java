@@ -127,7 +127,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                     msg.put("max", sample.getMax());
                     msg.put("samples", sample.getSamples());
                     msg.put("time", sample.getT0());
-                    NMEAMeteoMonitorTarget.this.notify(msg);
+                    NMEAMeteoMonitorTarget.this.postMessage(msg);
                 }
             } catch (JSONException e) {
                 getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").error(log, e);

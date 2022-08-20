@@ -79,7 +79,7 @@ public class FanAgent extends NMEAAgentImpl {
 
     private void sendCPUTemp(double temp) {
         try {
-            notify(new MsgTemperatureImpl(0, 0, TemperatureSource.CPU, temp, 60.0));
+            postMessage(new MsgTemperatureImpl(0, 0, TemperatureSource.CPU, temp, 60.0));
         } catch (Exception e) {
             log.debug(() -> LogStringBuilder.start("Fan Manager").wO("read temperature")
                     .wV("error", e.getMessage()).toString());

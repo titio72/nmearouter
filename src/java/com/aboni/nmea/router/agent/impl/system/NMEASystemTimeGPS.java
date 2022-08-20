@@ -23,6 +23,7 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSystemTime;
 import com.aboni.utils.Log;
 import com.aboni.utils.ThingsFactory;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -33,7 +34,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
     @Inject
     public NMEASystemTimeGPS(@NotNull Log log, @NotNull TimestampProvider tp) {
-        super(log, tp, false, true);
+        super(log, tp, true, true);
         systemTimeCHecker = ThingsFactory.getInstance(SystemTimeChecker.class);
     }
 
@@ -52,7 +53,19 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
         Message m = msg.getMessage();
         if (m instanceof MsgSystemTime) {
             systemTimeCHecker.checkAndSetTime(((MsgSystemTime) m).getTime());
+            postMsg();
         }
+    }
+
+    private void postMsg() {
+        long skew = systemTimeCHecker.getTimeSkew();
+        boolean sync = systemTimeCHecker.isSynced();
+        JSONObject msg = new JSONObject();
+        msg.put("topic", "time");
+        msg.put("synced", sync);
+        msg.put("skew", skew);
+        postMessage(msg);
+
     }
 
     @Override

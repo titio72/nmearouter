@@ -91,8 +91,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         this.srcFilter = new PGNSourceFilterImpl(log);
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
-        this.posAndVectorStream.setListener(this::notify);
-        this.speedAndHeadingStream.setListener(this::notify);
+        this.posAndVectorStream.setListener(this::postMessage);
+        this.speedAndHeadingStream.setListener(this::postMessage);
         this.errors = 0;
         srcFilter.init();
 
@@ -105,7 +105,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         stats.incrementAccepted();
         posAndVectorStream.onMessage(msg);
         speedAndHeadingStream.onMessage(msg);
-        notify(msg);
+        postMessage(msg);
     }
 
     public void setup(String name, QOS qos, String netDevice) {
@@ -204,12 +204,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     }
 
     @Override
-    public void onTimer() {
-        super.onTimer();
-        fastCache.onTimer();
+    public void onTimerHR() {
+        super.onTimerHR();
         if (isStarted()) {
             long t = timestampProvider.getNow();
-            if ((Utils.isOlderThan(lastStats, t, 30000))) {
+            if ((Utils.isNotNewerThan(lastStats, t, 30000))) {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);
                 }
@@ -222,6 +221,12 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 errors = 0;
             }
         }
+    }
+
+    @Override
+    public void onTimer() {
+        super.onTimer();
+        fastCache.onTimer();
     }
 
     private void onNoMessages() {

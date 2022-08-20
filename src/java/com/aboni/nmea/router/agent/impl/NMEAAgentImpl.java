@@ -232,7 +232,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      *
      * @param sentence The sentence to be notified to agents
      */
-    protected final void notify(Sentence sentence) {
+    protected final void postMessage(Sentence sentence) {
         if (sentence!=null) {
             Message m = NMEA0183Message.get(sentence);
             if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
@@ -254,7 +254,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      *
      * @param m The message to be notified to agents
      */
-    protected final void notify(JSONObject m) {
+    protected final void postMessage(JSONObject m) {
         if (isStarted()) {
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }
@@ -265,7 +265,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      *
      * @param m The message to be notified to agents
      */
-    protected final void notify(Message m) {
+    protected final void postMessage(Message m) {
         if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
             List<Message> toSend = null;
             try {

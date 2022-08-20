@@ -85,8 +85,8 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
         this.srcFilter = new PGNSourceFilterImpl(log);
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
-        this.posAndVectorStream.setListener(this::notify);
-        this.speedAndHeadingStream.setListener(this::notify);
+        this.posAndVectorStream.setListener(this::postMessage);
+        this.speedAndHeadingStream.setListener(this::postMessage);
 
         srcFilter.init();
 
@@ -115,7 +115,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
             stats.incrementAccepted();
             posAndVectorStream.onMessage(msg);
             speedAndHeadingStream.onMessage(msg);
-            notify(msg);
+            postMessage(msg);
         }
     }
 

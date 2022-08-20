@@ -173,7 +173,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 double pr = m.getValue();
                 MMBSentence mmb = (MMBSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MMB");
                 mmb.setBars(pr);
-                notify(mmb);
+                postMessage(mmb);
             }
         } catch (Exception e) {
             log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "pressure").toString(), e);
@@ -187,7 +187,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 double hum = m.getValue();
                 MHUSentence mhu = (MHUSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MHU");
                 mhu.setRelativeHumidity(hum);
-                notify(mhu);
+                postMessage(mhu);
             }
         } catch (Exception e) {
             log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "humidity").toString(), e);
@@ -201,7 +201,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 double t = m.getValue();
                 MTASentence mta = (MTASentence) SentenceFactory.getInstance().createParser(TalkerId.II, "MTA");
                 mta.setTemperature(t);
-                notify(mta);
+                postMessage(mta);
             }
         } catch (Exception e) {
             log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "air temperature").toString(), e);
@@ -212,7 +212,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
         try {
             XDRSentence xdr = (XDRSentence)SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.XDR.toString());
             addXDR(xdr, new Measurement("C", Utils.round(CPUTemp.getInstance().getTemp(), 2), "C", "CPUTemp"));
-            notify(xdr);
+            postMessage(xdr);
         } catch (Exception e) {
             log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "cpu temperature").toString(), e);
         }
@@ -234,7 +234,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                 addXDR(xdr, new Measurement("B", Math.round(pr * 10) / 10000d, "B", "Barometer"));
                 addXDR(xdr, new Measurement("C", Utils.round(t, 1), "C", "AirTemp"));
                 addXDR(xdr, new Measurement("P", Utils.round(h, 2), "H", "Humidity"));
-                notify(xdr);
+                postMessage(xdr);
             } catch (Exception e) {
                 log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "xdr").toString(), e);
             }
@@ -256,7 +256,7 @@ public class NMEASourceSensor extends NMEAAgentImpl {
                         empty = false;
                     }
                 }
-                if (!empty) notify(xdr);
+                if (!empty) postMessage(xdr);
             } catch (Exception e) {
                 log.error(LogStringBuilder.start(SENSOR_AGENT_CATEGORY).wO(MESSAGE_KEY_NAME).wV(SENSOR_KEY_NAME, "xdr temperature").toString(), e);
             }

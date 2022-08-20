@@ -176,7 +176,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
             s.setPosition(pos);
             s.setVariation(0.0);
             s.setDirectionOfVariation(CompassPoint.EAST);
-            notify(s);
+            postMessage(s);
         }
         prevPos = pos;
     }
