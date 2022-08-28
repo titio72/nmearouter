@@ -136,7 +136,6 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void onTimerHR() {
         synchronized (agents) {
-
             if (timerCount % 4 == 0) notifyDiagnostic();
             timerCount = (timerCount + 1) % TIMER_FACTOR;
             agents.values().forEach((NMEAAgent a) -> {
@@ -216,6 +215,11 @@ public class NMEARouterImpl implements NMEARouter {
 
     @Override
     public void stop() {
+        synchronized (agents) {
+            for (NMEAAgent agent: agents.values()) {
+                agent.stop();
+            };
+        }
         synchronized (this) {
             timer.cancel();
             timer.purge();
@@ -323,7 +327,7 @@ public class NMEARouterImpl implements NMEARouter {
             try {
                 targetInterface.pushMessage(m);
             } catch (Exception e) {
-                log.errorForceStacktrace("PHAVA", e);
+                log.errorForceStacktrace("Unhandled exception dispatching to agents", e);
             }
         }
     }

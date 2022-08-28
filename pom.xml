@@ -63,7 +63,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <!--plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -82,7 +81,6 @@
             </plugin-->
         </plugins>
     </build>
-
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
@@ -92,7 +90,6 @@
             <layout>default</layout>
         </repository>
     </distributionManagement>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -184,12 +181,6 @@
             <groupId>tel.schich</groupId>
             <artifactId>javacan-core</artifactId>
             <version>3.2.2</version>
-            <classifier>x86_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>tel.schich</groupId>
-            <artifactId>javacan-core</artifactId>
-            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.influxdb</groupId>
@@ -206,4 +197,40 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+    <profiles>
+        <profile>
+            <id>x86</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>tel.schich</groupId>
+                    <artifactId>javacan-core</artifactId>
+                    <version>3.2.2</version>
+                    <classifier>x86_64</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>raspberry</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>armv</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>tel.schich</groupId>
+                    <artifactId>javacan-core</artifactId>
+                    <version>3.2.2</version>
+                    <classifier>armv7l</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
