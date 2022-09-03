@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MyThreadPool implements Startable {
 
     public static class Stats {
-        long[] processed;
+        final long[] processed;
         int queue;
         int maxQueue;
 
@@ -64,10 +64,10 @@ public class MyThreadPool implements Startable {
 
     private class Worker implements Runnable {
 
-        String name;
-        AtomicLong c = new AtomicLong();
+        final String name;
+        final AtomicLong c = new AtomicLong();
 
-        AtomicBoolean active = new AtomicBoolean(false);
+        final AtomicBoolean active = new AtomicBoolean(false);
 
         Thread myThread;
 

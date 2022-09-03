@@ -218,7 +218,7 @@ public class NMEARouterImpl implements NMEARouter {
         synchronized (agents) {
             for (NMEAAgent agent: agents.values()) {
                 agent.stop();
-            };
+            }
         }
         synchronized (this) {
             timer.cancel();

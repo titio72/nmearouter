@@ -280,7 +280,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     }
 
     /**
-     * Sources can use post-process delegates to add additional elaboration to the sentences they pushes into the stream.
+     * Sources can use post-process delegates to add additional elaboration to the sentences they push into the stream.
      *
      * @param f The post processor to be added (sequence is important)
      */

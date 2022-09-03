@@ -262,7 +262,7 @@ public class HL340USBSerialCANReader implements SerialCANReader {
     }
 
     private static long getExtId(int[] b) {
-        return b[2] + (b[3] << 8) + (b[4] << 16) + ((long) b[5] << 24);
+        return b[2] + ((long) b[3] << 8) + ((long) b[4] << 16) + ((long) b[5] << 24);
     }
 
     private static long getId(int[] b) {

@@ -26,7 +26,7 @@ public interface CompassDataProvider {
 
     /**
      * Initialize the provider for use.
-     * Using the the provider may fail if not initialized.
+     * Using the provider may fail if not initialized.
      */
     void init() throws SensorException;
 

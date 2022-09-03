@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.toolkit;
 
-import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.utils.LogAdmin;
@@ -32,8 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UpdateRoll {
-
-    private GeoPositionT last = null;
 
     public void load() {
         try (DBHelper db = new DBHelper(false)) {

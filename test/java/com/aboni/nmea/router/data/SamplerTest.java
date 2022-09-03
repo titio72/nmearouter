@@ -235,6 +235,25 @@ public class SamplerTest {
     }
 
     @Test
+    public void testForceDumpBeforeTimeoutExpire() {
+        initWithTemperature();
+
+        sampler.start();
+
+        // post 30 measurements in 30 seconds (timeout for the metric is 1m)
+        for (int i = 0; i < 30; i++) {
+            timeProvider.setTimestamp(t0 + i * 1000);
+            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+        }
+
+        sampler.dumpAndReset(true);
+
+        assertEquals(1, writer.getEvents().size());
+
+        // check it reset
+        assertEquals(0, sampler.getCurrent(Metrics.AIR_TEMPERATURE).getSamples());
+    }
+    @Test
     public void testDumpBeforeTimeoutExpire() {
         initWithTemperature();
 
@@ -248,10 +267,10 @@ public class SamplerTest {
 
         sampler.dumpAndReset();
 
-        assertEquals(1, writer.getEvents().size());
+        assertEquals(0, writer.getEvents().size());
 
-        // check it reset
-        assertEquals(0, sampler.getCurrent(Metrics.AIR_TEMPERATURE).getSamples());
+        // check it didn't reset
+        assertEquals(30, sampler.getCurrent(Metrics.AIR_TEMPERATURE).getSamples());
     }
 
     @Test

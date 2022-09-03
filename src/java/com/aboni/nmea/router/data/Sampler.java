@@ -15,7 +15,6 @@
 
 package com.aboni.nmea.router.data;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.Startable;

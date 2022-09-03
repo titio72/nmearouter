@@ -21,15 +21,12 @@ import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 public class SystemTimeChecker {
 
     public static final String SYSTEM_TIME_CHECKER_CATEGORY = "SystemTimeChecker";
-    //private boolean synced;
-    //private long timeSkew;
     public static final long TOLERANCE_MS = 5000;
     private final TimestampProvider timestampProvider;
     private final Log log;

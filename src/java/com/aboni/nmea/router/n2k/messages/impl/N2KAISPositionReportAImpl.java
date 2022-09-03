@@ -185,8 +185,8 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     @Override
     public long getAge(long now) {
         if (getTimestamp()<=60) {
-            Instant l = (getOverrrideTime()>0)?
-                    Instant.ofEpochMilli(getOverrrideTime()):
+            Instant l = (getOverrideTime()>0)?
+                    Instant.ofEpochMilli(getOverrideTime()):
                     getHeader().getTimestamp().plusNanos((long) (getTimestamp() * 1E06));
             return now - l.toEpochMilli();
         } else {
@@ -200,7 +200,7 @@ public class N2KAISPositionReportAImpl extends N2KMessageImpl implements AISPosi
     }
 
     @Override
-    public long getOverrrideTime() {
+    public long getOverrideTime() {
         return overrideTime;
     }
 

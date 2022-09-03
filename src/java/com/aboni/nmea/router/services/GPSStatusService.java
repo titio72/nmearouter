@@ -12,7 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -77,7 +76,6 @@ public class GPSStatusService extends JSONWebService {
         if (!Double.isNaN(v)) res.put(attribute, v);
     }
 
-    @Nonnull
     private JSONObject getJsonSat(SatInfo s) {
         try {
             JSONObject jSat = new JSONObject();

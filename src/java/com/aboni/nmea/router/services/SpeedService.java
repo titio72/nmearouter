@@ -58,7 +58,7 @@ public class SpeedService extends JSONWebService {
                         lastNull = false;
                         count++;
                     } else if (!lastNull) {
-                        // last one was speed=0 but it was written. Write a null.
+                        // last one was speed=0, but it was written. Write a null.
                         ret = new JSONObject[]{writeNull(s.getT0())};
                         lastNull = true;
                         count++;

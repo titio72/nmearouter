@@ -137,10 +137,10 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private boolean headingNotPresentOnStream() {
         return (
-                /* another source may have provided a heading but it's too old, presumably the source is down*/
+                /* another source may have provided a heading, but it's too old, presumably the source is down*/
                 cache.isHeadingOlderThan(timestampProvider.getNow(), SEND_HD_IDLE_TIME) ||
 
-                        /* there is a heading but it's mine (so no other sources are providing a heading  */
+                        /* there is a heading, but it's mine (so no other sources are providing a heading  */
                         getName().equals(cache.getLastHeading().getSource()));
     }
 

@@ -46,7 +46,7 @@ public class N2K126208RequestPilotMode extends N2KMessageImpl {
                     (byte) 0x04,  // Ind. code 4
                     (byte) 0x04,  // third parameter - 4 of pgn 65379 (mode)
                     (byte) 0x00,  // code 0 (STDBY)
-                    (byte) 0x00,  // fourth param - 0 (does not exists, seems to be a Raymarine hack)
+                    (byte) 0x00,  // fourth param - 0 (does not exist, seems to be a Raymarine hack)
                     (byte) 0x05   // value of weird raymarine param
             };
         } else if (mode==PilotMode.VANE) {
@@ -82,7 +82,7 @@ public class N2K126208RequestPilotMode extends N2KMessageImpl {
                     (byte) 0x04,  // Ind. code 4
                     (byte) 0x04,  // parameter 4 (mode)
                     (byte) 0x40,  // code 40 (AUTO)
-                    (byte) 0x00,  // fourth param - 0 (does not exists, seems to be a Raymarine hack)
+                    (byte) 0x00,  // fourth param - 0 (does not exist, seems to be a Raymarine hack)
                     (byte) 0x05   // value of weird raymarine param
             };
         } else {

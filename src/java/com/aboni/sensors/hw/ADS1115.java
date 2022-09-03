@@ -17,6 +17,7 @@ package com.aboni.sensors.hw;
 
 import com.aboni.sensors.I2CInterface;
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
+import com.pi4j.gpio.extension.ads.ADS1115Pin;
 
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class ADS1115 {
 
+    private ADS1115Pin pins;
 
     // =======================================================================
     // ADS1115 I2C ADDRESS
@@ -105,7 +107,7 @@ public class ADS1115 {
     protected static final int  ADS1X15_REG_CONFIG_CLAT_LATCH   = 0x0004;  // Latching comparator
 
     protected static final int  ADS1X15_REG_CONFIG_CQUE_MASK    = 0x0003;
-    protected static final int  ADS1X15_REG_CONFIG_CQUE_1CONV   = 0x0000;  // Assert ALERT/RDY after one conversions
+    protected static final int  ADS1X15_REG_CONFIG_CQUE_1CONV   = 0x0000;  // Assert ALERT/RDY after one conversion
     protected static final int  ADS1X15_REG_CONFIG_CQUE_2CONV   = 0x0001;  // Assert ALERT/RDY after two conversions
     protected static final int  ADS1X15_REG_CONFIG_CQUE_4CONV   = 0x0002;  // Assert ALERT/RDY after four conversions
     protected static final int  ADS1X15_REG_CONFIG_CQUE_NONE    = 0x0003;  // Disable the comparator and put ALERT/RDY in high state (default)

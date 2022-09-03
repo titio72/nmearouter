@@ -76,7 +76,7 @@ public class SensorCompass extends I2CSensor {
     }
 
     /**
-     * Get the the heading in degrees [0..360].
+     * Get the heading in degrees [0..360].
      *
      * @return The heading in degrees
      */

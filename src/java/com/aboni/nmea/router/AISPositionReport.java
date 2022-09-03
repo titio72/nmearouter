@@ -43,7 +43,7 @@ public interface AISPositionReport {
 
     void setOverrideTime(long t);
 
-    long getOverrrideTime();
+    long getOverrideTime();
 
     GNSSInfo getGPSInfo();
 

@@ -101,14 +101,14 @@ public class PositionFilter implements NMEAFilter {
     }
 
     private static boolean isValid(MsgPositionAndVector message) {
-        // duplicate some of the tests in MsgPositionAndVector but we should not rely on the implementation of the message class.
+        // duplicate some tests in MsgPositionAndVector, but we should not rely on the implementation of the message class.
         // The concept of "valid" may be different in this context.
         return message != null && message.isValid() && message.getPosition() != null && message.getTimestamp() != null
                 && !Double.isNaN(message.getCOG()) && !Double.isNaN(message.getSOG());
     }
 
     /**
-     * Accept or reject the a position message, basing the decision on speed, timing and distance.
+     * Accept or reject a position message, basing the decision on speed, timing and distance.
      * History is also considered so to avoid "jumps".
      * Use this method for testing - when integrated the entry point is the NMEAFilter interface.
      *

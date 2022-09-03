@@ -21,7 +21,6 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.data.*;
-import com.aboni.nmea.router.impl.DefaultTimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogAdmin;
@@ -37,8 +36,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class UpdateMeteo {
 
@@ -52,7 +49,7 @@ public class UpdateMeteo {
         }
     }
 
-    private static MyTimeProvider timeProvider = new MyTimeProvider();
+    private static final MyTimeProvider timeProvider = new MyTimeProvider();
 
     private static void load(Sampler sampler) {
         try (DBHelper db = new DBHelper(false)) {
@@ -128,11 +125,10 @@ public class UpdateMeteo {
 
     static final class DBRecordMessage implements Message {
 
-        private String type;
-        private double v;
-        private Timestamp ts;
-
-        private long id;
+        private final String type;
+        private final double v;
+        private final Timestamp ts;
+        private final long id;
 
         private DBRecordMessage(ResultSet rs) throws SQLException {
             v = rs.getDouble(2);

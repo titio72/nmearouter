@@ -225,7 +225,6 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             sendHeadingAndSpeed(hdg, speed);
             sendMeteo(temp, press, humidity);
             sendGyro(yaw, roll, pitch);
-            sendVoltage();
         }
     }
 
@@ -258,14 +257,6 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             if (data.isXdrMeteoHum()) postMessage(new MsgHumidityImpl(HumiditySource.INSIDE, hum));
             if (data.isMtw()) postMessage(new MsgTemperatureImpl(TemperatureSource.SEA, temp - 5));
         }
-    }
-
-
-    private void sendVoltage() {
-        /*if (data.isXdrDiagnostic()) {
-            notify(new MsgBatteryImpl(0, 13.56));
-            notify(new MsgBatteryImpl(1, 13.12));
-        }*/
     }
 
     private void sendPower(PowerData powerData) {

@@ -18,20 +18,16 @@ package com.aboni.nmea.router.data.meteo.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.utils.Log;
 import com.aboni.utils.db.DBHelper;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class DBMeteoStatsWriterInflux implements StatsWriter {
 
     private DBHelper helper;
-    private final Log log;
 
     @Inject
-    public DBMeteoStatsWriterInflux(@NotNull Log log) {
-        this.log = log;
+    public DBMeteoStatsWriterInflux() {
     }
 
     @Override
