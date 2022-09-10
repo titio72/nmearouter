@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo;
+package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.misc.Utils;
 

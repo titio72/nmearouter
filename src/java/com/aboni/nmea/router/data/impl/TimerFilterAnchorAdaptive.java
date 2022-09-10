@@ -13,11 +13,12 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.impl;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
+import com.aboni.nmea.router.data.TimerFilter;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,7 +27,6 @@ public class TimerFilterAnchorAdaptive implements TimerFilter {
     private final NMEACache cache;
     private final long period;
     private final long periodAnchor;
-
     private final long tolerance;
 
     public TimerFilterAnchorAdaptive(@NotNull NMEACache cache, long period, long periodAnchor) {

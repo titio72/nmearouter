@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,13 +13,28 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.impl;
 
-public final class PowerMetrics {
+import com.aboni.misc.Utils;
+import com.aboni.nmea.router.data.TimerFilter;
 
-    public static final Metric VOLTAGE_0 = new Metric("V_0", "Voltage service battery", Unit.VOLTS);
-    public static final Metric CURRENT_0 = new Metric("C_0", "Current service battery", Unit.AMPERE);
-    public static final Metric TEMPERATURE_0 = new Metric("T_0", "Temperature service battery", Unit.CELSIUS);
-    public static final Metric SOC_0 = new Metric("S_0", "SOC service battery", Unit.CELSIUS);
-    public static final Metric POWER_0 = new Metric("P_0", "Power service battery", Unit.WATT);
+public class TimerFilterFixed implements TimerFilter {
+
+    private final long period;
+    private final long tolerance;
+
+    public TimerFilterFixed(long periodInMs, long tolerance) {
+        this.period = periodInMs;
+        this.tolerance = tolerance;
+    }
+
+    public TimerFilterFixed(long periodInMs) {
+        this(periodInMs, 0);
+    }
+
+    @Override
+    public boolean accept(long timestamp, long now) {
+
+        return Utils.isNotNewerThan(timestamp, now + tolerance, period);
+    }
 }

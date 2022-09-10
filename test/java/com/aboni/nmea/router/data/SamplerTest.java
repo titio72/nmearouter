@@ -17,6 +17,7 @@ package com.aboni.nmea.router.data;
 
 import com.aboni.nmea.router.HeadingProvider;
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.impl.RouterMessageImpl;
 import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.message.impl.MsgHeadingImpl;

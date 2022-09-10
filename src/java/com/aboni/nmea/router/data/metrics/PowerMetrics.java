@@ -13,13 +13,16 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.metrics;
 
+import com.aboni.nmea.router.data.Unit;
 import com.aboni.nmea.router.data.metrics.Metric;
 
-import java.util.List;
+public final class PowerMetrics {
 
-public interface HistoryProvider {
-
-    List<StatsSample> getHistory(Metric metric);
+    public static final Metric VOLTAGE_0 = new Metric("V_0", "Voltage service battery", Unit.VOLTS);
+    public static final Metric CURRENT_0 = new Metric("C_0", "Current service battery", Unit.AMPERE);
+    public static final Metric TEMPERATURE_0 = new Metric("T_0", "Temperature service battery", Unit.CELSIUS);
+    public static final Metric SOC_0 = new Metric("S_0", "SOC service battery", Unit.CELSIUS);
+    public static final Metric POWER_0 = new Metric("P_0", "Power service battery", Unit.WATT);
 }

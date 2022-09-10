@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.utils.db.DBEventWriter;
@@ -24,11 +24,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class DBMeteoEventWriter implements DBEventWriter {
+public class DBMetricEventWriter implements DBEventWriter {
 
     private PreparedStatement stm;
 
-    public DBMeteoEventWriter() {
+    public DBMetricEventWriter() {
         // nothing to initialize
     }
 

@@ -13,7 +13,9 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.metrics;
+
+import com.aboni.nmea.router.data.Unit;
 
 import javax.validation.constraints.NotNull;
 
@@ -22,10 +24,6 @@ public class Metric {
     private final String id;
     private final String description;
     private final Unit unit;
-
-    public Metric(String id, Unit unit) {
-        this(id, "", unit);
-    }
 
     public Metric(@NotNull String id, @NotNull String description, @NotNull Unit unit) {
         this.id = id;

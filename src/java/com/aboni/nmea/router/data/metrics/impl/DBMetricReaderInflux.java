@@ -28,7 +28,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
@@ -42,7 +42,7 @@ import org.influxdb.dto.QueryResult;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
-public class DBMeteoReaderInflux implements DataReader {
+public class DBMetricReaderInflux implements DataReader {
 
     private static final String SQL_TIME = "select time, type, value, valueMax, valueMin from meteo where time>=$startTime and time<$endTime";
     private static final String SQL_TIME_AND_TYPE = "select time, type, value, valueMax, valueMin from meteo where time>=$startTime and time<$endTime and type=$type";

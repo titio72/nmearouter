@@ -13,7 +13,7 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.StatsSample;
@@ -22,12 +22,12 @@ import com.aboni.utils.db.DBHelper;
 
 import javax.inject.Inject;
 
-public class DBMeteoStatsWriterInflux implements StatsWriter {
+public class DBMetricStatsWriterInflux implements StatsWriter {
 
     private DBHelper helper;
 
     @Inject
-    public DBMeteoStatsWriterInflux() {
+    public DBMetricStatsWriterInflux() {
     }
 
     @Override

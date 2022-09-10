@@ -33,10 +33,9 @@ public abstract class TimestampProvider {
      * @return true if the time is synced
      * @see TimestampProvider:isSynced()
      */
-    public boolean setSkew(long referenceTime, long tolerance) {
+    public void setSkew(long referenceTime, long tolerance) {
         skew = getNow() - referenceTime;
         synced = Math.abs(skew) < tolerance;
-        return synced;
     }
 
     /**

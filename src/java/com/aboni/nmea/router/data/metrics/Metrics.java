@@ -13,7 +13,9 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.metrics;
+
+import com.aboni.nmea.router.data.Unit;
 
 public final class Metrics {
 

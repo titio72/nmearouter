@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.DataReader;
@@ -22,10 +22,10 @@ import com.aboni.utils.ThingsFactory;
 
 import javax.inject.Inject;
 
-public class DBMeteoSeriesReader extends DBSeriesReader {
+public class DBMetricSeriesReader extends DBSeriesReader {
 
     @Inject
-    public DBMeteoSeriesReader() {
+    public DBMetricSeriesReader() {
         // nothing to initialize
     }
 

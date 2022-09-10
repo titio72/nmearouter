@@ -17,8 +17,8 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.misc.Utils;
 import com.aboni.nmea.router.data.DataManagementException;
-import com.aboni.nmea.router.data.meteo.WindStats;
-import com.aboni.nmea.router.data.meteo.WindStatsReader;
+import com.aboni.nmea.router.data.metrics.WindStats;
+import com.aboni.nmea.router.data.metrics.WindStatsReader;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONArray;

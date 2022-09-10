@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.utils;
 
-import com.aboni.nmea.router.data.ScalarStatsSample;
+import com.aboni.nmea.router.data.impl.ScalarStatsSample;
 import com.aboni.nmea.router.data.StatsSample;
 
 import java.util.ArrayList;

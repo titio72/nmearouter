@@ -19,6 +19,10 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.Startable;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.data.impl.AngleStatsSample;
+import com.aboni.nmea.router.data.impl.ScalarStatsSample;
+import com.aboni.nmea.router.data.impl.TimerFilterFixed;
+import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
@@ -39,14 +43,10 @@ public class Sampler implements Startable {
         double getValue(Message msg);
     }
 
-    public interface MeteoListener {
+    public interface MetricListener {
         void onCollect(Metric metric, double value, long time);
 
         void onSample(Metric metric, StatsSample sample);
-    }
-
-    public interface SamplesFilter {
-        boolean accept(StatsSample sample);
     }
 
     private static final class Series {
@@ -72,12 +72,12 @@ public class Sampler implements Startable {
         }
     }
 
-    private MeteoListener collectListener;
+    private MetricListener collectListener;
     private final TimestampProvider timestampProvider;
     private final StatsWriter writer;
     private final String tag;
     private final Map<Metric, Series> series = new HashMap<>();
-    private final Map<String, SamplesFilter> sampleFilters = new HashMap<>();
+    //private final Map<String, SamplesFilter> sampleFilters = new HashMap<>();
     private final Log log;
     private boolean started;
 
@@ -106,10 +106,6 @@ public class Sampler implements Startable {
         }
     }
 
-    public void setSampleFilter(@NotNull String tag, SamplesFilter filter) {
-        sampleFilters.put(tag, filter);
-    }
-
     public StatsSample getCurrent(Metric metric) {
         synchronized (series) {
             Series s = series.getOrDefault(metric, null);
@@ -117,7 +113,7 @@ public class Sampler implements Startable {
         }
     }
 
-    public void setCollectListener(MeteoListener collectListener) {
+    public void setCollectListener(MetricListener collectListener) {
         this.collectListener = collectListener;
     }
 
@@ -216,11 +212,7 @@ public class Sampler implements Startable {
 
     private void write(StatsSample s, long ts) {
         if (writer != null && s != null && s.getSamples() > 0) {
-            // skip anomalous reading (like 80kn of max with avg of 4kn)
-            SamplesFilter f = sampleFilters.get(s.getTag());
-            if (f == null || f.accept(s)) {
-                writer.write(s, ts);
-            }
+            writer.write(s, ts);
         }
     }
 

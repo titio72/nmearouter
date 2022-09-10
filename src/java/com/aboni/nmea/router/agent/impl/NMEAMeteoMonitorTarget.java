@@ -21,6 +21,8 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
+import com.aboni.nmea.router.data.metrics.Metric;
+import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.message.*;
 import com.aboni.utils.Log;
 import com.aboni.utils.Pair;
@@ -89,7 +91,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     private final List<Pair<Metric, StatsChange>> alerts;
 
-    private class AlertManager implements Sampler.MeteoListener {
+    private class AlertManager implements Sampler.MetricListener {
 
         @Override
         public void onCollect(Metric metric, double value, long time) {

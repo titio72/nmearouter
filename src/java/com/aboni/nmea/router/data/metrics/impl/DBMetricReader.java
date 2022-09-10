@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
@@ -28,7 +28,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-public class DBMeteoReader implements DataReader {
+public class DBMetricReader implements DataReader {
 
     private static final String SQL_TIME = "select * from meteo where TS>=? and TS<?";
     private static final String SQL_TIME_AND_TYPE = "select * from meteo where TS>=? and TS<? and type=?";

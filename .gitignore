@@ -12,7 +12,6 @@
 /settime.log
 /shutdown.log
 /reset_can_bus.log
-/log/
 /db_dumps/
 /node_modules/
 /web/workspace.code-workspace

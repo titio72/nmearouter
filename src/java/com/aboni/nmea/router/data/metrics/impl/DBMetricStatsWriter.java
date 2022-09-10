@@ -13,7 +13,7 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.meteo.impl;
+package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.impl.DBStatsWriter;
@@ -24,10 +24,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
-public class DBMeteoStatsWriter extends DBStatsWriter {
+public class DBMetricStatsWriter extends DBStatsWriter {
 
     @Inject
-    public DBMeteoStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_METEO) String tag, @NotNull @Named(Constants.TAG_METEO) DBEventWriter writer) {
+    public DBMetricStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_METEO) String tag, @NotNull @Named(Constants.TAG_METEO) DBEventWriter writer) {
         super(log, tag, writer);
     }
 }

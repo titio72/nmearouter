@@ -13,7 +13,9 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.data.impl;
+
+import com.aboni.nmea.router.data.StatsSample;
 
 import java.util.Collections;
 import java.util.LinkedList;

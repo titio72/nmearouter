@@ -19,7 +19,7 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.PowerMetrics;
+import com.aboni.nmea.router.data.metrics.PowerMetrics;
 import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.message.Message;
