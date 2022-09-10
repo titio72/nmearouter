@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.aboni</groupId>
     <artifactId>NMEARouter</artifactId>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <build>
         <sourceDirectory>src/java</sourceDirectory>
         <testSourceDirectory>test/java</testSourceDirectory>
@@ -21,7 +21,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>
@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.2.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -42,15 +42,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.3.0</version>
                 <configuration>
                     <transformers>
                         <transformer
                             implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
                                 <Main-Class>com.aboni.nmea.router.StartRouter</Main-Class>
-                                <X-Compile-Source-JDK>1.8</X-Compile-Source-JDK>
-                                <X-Compile-Target-JDK>1.8</X-Compile-Target-JDK>
+                                <X-Compile-Source-JDK>11</X-Compile-Source-JDK>
+                                <X-Compile-Target-JDK>11</X-Compile-Target-JDK>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -64,33 +64,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>webdeps</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${basedir}/copydeps.sh</executable>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin-->
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>aboniInt</id>
-            <name>Andrea Repository</name>
-            <url>http://192.168.2.99:8100/repository/internal</url>
-            <layout>default</layout>
-        </repository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -177,11 +152,6 @@
             <groupId>com.fazecast</groupId>
             <artifactId>jSerialComm</artifactId>
             <version>2.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>tel.schich</groupId>
-            <artifactId>javacan-core</artifactId>
-            <version>3.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.influxdb</groupId>

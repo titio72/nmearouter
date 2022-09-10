@@ -38,10 +38,13 @@ public class UpdateDistanceAndSpeed {
 
     public void load() {
         try (DBHelper db = new DBHelper(false)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(
+/*            try (PreparedStatement st = db.getConnection().prepareStatement(
                     "select lat, lon, TS, id from track where " +
                             "TS>=(select fromTS from trip where id=215) and" +
-                            "TS<=(select toTS from trip where id=215)")) {
+                            "TS<=(select toTS from trip where id=215)")) {*/
+            try (PreparedStatement st = db.getConnection().prepareStatement(
+                    "select lat, lon, TS, id, speed, maxSpeed, anchor from track where " +
+                            "TS>'2022-07-22'")) {
 
                 if (st.execute()) {
                     try (ResultSet rs = st.getResultSet()) {
@@ -57,12 +60,17 @@ public class UpdateDistanceAndSpeed {
 
     private void scanAndUpdate(DBHelper db, ResultSet rs) throws SQLException {
         try (PreparedStatement stUpd = db.getConnection().prepareStatement(
-                "update track set dTime=?, dist=?, speed=? where id=?")) {
+                "update track set dTime=?, dist=?, speed=?, maxSpeed=? where id=?")) {
             int i = 0;
+            double totDist = 0.0;
             while (rs.next()) {
                 double lat = rs.getDouble(1);
                 double lon = rs.getDouble(2);
+                double _speed = rs.getDouble(5);
+                double _maxSpeed = rs.getDouble(6);
                 Timestamp ts = rs.getTimestamp(3);
+                boolean anchor = rs.getInt(7) == 1;
+                System.out.printf("Process %s speed %5.2f %5.2f ", ts, _speed, _maxSpeed);
                 int id = rs.getInt(4);
                 long t = ts.getTime();
                 GeoPositionT p = new GeoPositionT(t, lat, lon);
@@ -71,23 +79,39 @@ public class UpdateDistanceAndSpeed {
                     double interval = (c.getInterval()) / (1000.0 * 60.0 * 60.0); // interval in hours
                     if (interval < 5 /* less than 5 hours */) {
                         double dist = c.getDistance();
+                        if (!anchor) totDist += dist;
                         double speed = dist / interval;
                         stUpd.setInt(1, (int) (c.getInterval() / 1000));
                         stUpd.setDouble(2, dist);
-                        if (Double.isNaN(speed))
+                        if (Double.isNaN(speed)) {
                             stUpd.setDouble(3, 0.0);
-                        else
+                            stUpd.setDouble(4, 0.0);
+                            System.out.printf(" Update %5.2f %5.2f\n", 0.0, 0.0);
+                        } else {
                             stUpd.setDouble(3, speed);
-                        stUpd.setInt(4, id);
+                            if (Math.abs(_speed - _maxSpeed) < 0.00001) {
+                                stUpd.setDouble(4, speed);
+                                System.out.printf("Update %5.2f %5.2f\n", speed, speed);
+                            } else {
+                                stUpd.setDouble(4, _maxSpeed);
+                                System.out.printf("Update %5.2f %5.2f\n", speed, _maxSpeed);
+                            }
+                        }
+                        stUpd.setInt(5, id);
                         i += stUpd.executeUpdate();
                         if (i % 1000 == 0) {
                             db.getConnection().commit();
                         }
+                    } else {
+                        System.out.printf(" skip\n");
                     }
                 }
                 last = p;
             }
             db.getConnection().commit();
+            System.out.printf("Dist %5.2f Upd %d\n", totDist, i);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
