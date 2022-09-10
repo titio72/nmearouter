@@ -22,6 +22,7 @@ import com.aboni.utils.LogStringBuilder;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class SystemTimeChecker {
@@ -69,7 +70,7 @@ public class SystemTimeChecker {
         return timestampProvider.isSynced();
     }
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").withZone(ZoneId.of("UTC"));
 
     private void doChangeTime(Instant c) {
         try {
