@@ -63,6 +63,10 @@ public class SensorHMC5883 extends I2CSensor {
             Thread.sleep(500);
             hmc5883l.setScale(HMC5883L.Scale.Gauss_1_30);
             return true;
+        } catch (InterruptedException e) {
+            error("Failed initialization HMC5883L", e);
+            Thread.currentThread().interrupt();
+            return false;
         } catch (Exception e) {
             error("Failed initialization HMC5883L", e);
             return false;

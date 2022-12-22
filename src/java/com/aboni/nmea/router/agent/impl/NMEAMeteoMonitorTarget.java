@@ -19,7 +19,10 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.DataChange;
+import com.aboni.nmea.router.data.HistoryProvider;
+import com.aboni.nmea.router.data.Sampler;
+import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
@@ -241,8 +244,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     @Override
     public List<StatsSample> getHistory(Metric ix) {
-        List<StatsSample> _res = statsWriter.getHistory(ix);
-        List<StatsSample> res = new ArrayList<>(_res);
+        List<StatsSample> h = statsWriter.getHistory(ix);
+        List<StatsSample> res = new ArrayList<>(h);
         StatsSample current = meteoSampler.getCurrent(ix);
         if (current != null) res.add(current);
         return res;

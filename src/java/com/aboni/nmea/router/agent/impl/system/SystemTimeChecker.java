@@ -52,20 +52,20 @@ public class SystemTimeChecker {
 
     public void checkAndSetTime(Instant gpsTime) {
         try {
-            if (gpsTime != null && !checkAndSetTimeSkew(timestampProvider.getInstant(), gpsTime)) {
+            if (gpsTime != null && !checkAndSetTimeSkew(gpsTime)) {
                 // time skew from GPS is too high - reset time stamp
                 log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").wV("new time", gpsTime).toString());
                 if (changer != null) {
                     changer.doChangeTime(gpsTime);
                 }
-                checkAndSetTimeSkew(timestampProvider.getInstant(), gpsTime);
+                checkAndSetTimeSkew(gpsTime);
             }
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("changing system time").toString(), e);
         }
     }
 
-    private boolean checkAndSetTimeSkew(Instant now, Instant gpsTime) {
+    private boolean checkAndSetTimeSkew(Instant gpsTime) {
         timestampProvider.setSkew(gpsTime.toEpochMilli(), TOLERANCE_MS);
         return timestampProvider.isSynced();
     }
@@ -80,6 +80,9 @@ public class SystemTimeChecker {
             Process process = b.start();
             int retCode = process.waitFor();
             log.info(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").wV("return code", retCode).toString());
+        } catch (InterruptedException e) {
+            log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").toString(), e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start(SYSTEM_TIME_CHECKER_CATEGORY).wO("exec").toString(), e);
         }

@@ -45,6 +45,10 @@ public class ServiceDBBackup extends JSONWebService {
             } else {
                 return getError("Backup failed");
             }
+        } catch (InterruptedException e) {
+            log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            Thread.currentThread().interrupt();
+            return getError("Error " + e.getMessage());
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
             return getError("Error " + e.getMessage());

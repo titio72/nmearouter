@@ -114,6 +114,9 @@ public class NMEAPlayer extends NMEAAgentImpl {
             Sentence s = SentenceFactory.getInstance().createParser(line);
             Thread.sleep(55);
             postMessage(s);
+        } catch (InterruptedException e) {
+            getLogBuilder().wO("play").wV("line", line).error(log, e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             getLogBuilder().wO("play").wV("line", line).error(log, e);
         }

@@ -91,14 +91,15 @@ public class MyThreadPool implements Startable {
             while (active.get()) {
                 Runnable r;
                 try {
-                     r = q.take();
+                    r = q.take();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
                 try {
                     r.run();
-                } catch (Throwable t) {
-                    if (errorHandler!=null) errorHandler.onThrowable(t);
+                } catch (Exception t) {
+                    if (errorHandler != null) errorHandler.onThrowable(t);
                 }
                 c.incrementAndGet();
             }

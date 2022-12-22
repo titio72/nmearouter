@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,15 +13,16 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data.metrics;
+package com.aboni.nmea.router.data.track;
 
-import com.aboni.nmea.router.data.Unit;
+import java.time.Instant;
 
-public final class PowerMetrics {
+public interface TrackScanner {
 
-    public static final Metric VOLTAGE_0 = new Metric("V_0", "Voltage service battery", Unit.VOLTS);
-    public static final Metric CURRENT_0 = new Metric("C_0", "Current service battery", Unit.AMPERE);
-    public static final Metric TEMPERATURE_0 = new Metric("T_0", "Temperature service battery", Unit.CELSIUS);
-    public static final Metric SOC_0 = new Metric("S_0", "SOC service battery", Unit.CELSIUS);
-    public static final Metric POWER_0 = new Metric("P_0", "Power service battery", Unit.WATT);
+    interface TrackPointsScanner {
+        boolean onTrackPoint(int id, TrackPoint point);
+    }
+
+    void scanTrip(Instant d0, Instant d1, TrackPointsScanner scanner) throws TripManagerException;
+
 }

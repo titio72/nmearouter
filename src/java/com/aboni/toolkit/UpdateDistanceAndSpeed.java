@@ -15,10 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.toolkit;
 
-import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.data.track.TrackFixer;
+import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.data.track.TrackPointBuilder;
+import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.LogAdmin;
 import com.aboni.utils.ThingsFactory;
 import com.aboni.utils.db.DBHelper;
@@ -28,27 +31,37 @@ import com.google.inject.Injector;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UpdateDistanceAndSpeed {
 
-    private GeoPositionT last = null;
+    private static TrackPoint getTrackPoint(TrackPointBuilder builder, ResultSet rs) throws SQLException {
+        return builder.getNew().
+                withPosition(new GeoPositionT(
+                        rs.getTimestamp("TS").getTime(),
+                        rs.getDouble("lat"),
+                        rs.getDouble("lon"))).
+                withPeriod(rs.getInt("dTime")).
+                withSpeed(rs.getDouble("speed"), rs.getDouble("maxSpeed")).
+                withDistance(rs.getDouble("dist")).
+                withAnchor(rs.getInt("anchor") == 1).
+                withEngine(EngineStatus.valueOf(rs.getInt("engine"))).getPoint();
+    }
 
-    public void load() {
+    public void load(TrackPointBuilder builder) {
         try (DBHelper db = new DBHelper(false)) {
 /*            try (PreparedStatement st = db.getConnection().prepareStatement(
-                    "select lat, lon, TS, id from track where " +
+                    "select lat, lon, TS, id, speed, maxSpeed, anchor, dTime, engine from track where " +
                             "TS>=(select fromTS from trip where id=215) and" +
                             "TS<=(select toTS from trip where id=215)")) {*/
             try (PreparedStatement st = db.getConnection().prepareStatement(
-                    "select lat, lon, TS, id, speed, maxSpeed, anchor from track where " +
-                            "TS>'2022-07-22'")) {
+                    "select lat, lon, TS, id, speed, maxSpeed, anchor, dTime, engine from track where " +
+                            "TS>'2022-12-19'")) {
 
                 if (st.execute()) {
                     try (ResultSet rs = st.getResultSet()) {
-                        scanAndUpdate(db, rs);
+                        scanAndUpdate(builder, db, rs);
                     }
                 }
             }
@@ -58,60 +71,38 @@ public class UpdateDistanceAndSpeed {
         }
     }
 
-    private void scanAndUpdate(DBHelper db, ResultSet rs) throws SQLException {
+    private static final int P_UPD_DTIME = 1;
+    private static final int P_UPD_DISTANCE = 2;
+    private static final int P_UPD_SPEED = 3;
+    private static final int P_UPD_MAX_SPEED = 4;
+    private static final int P_UPD_ID = 5;
+
+
+    private void scanAndUpdate(TrackPointBuilder builder, DBHelper db, ResultSet rs) throws SQLException {
         try (PreparedStatement stUpd = db.getConnection().prepareStatement(
                 "update track set dTime=?, dist=?, speed=?, maxSpeed=? where id=?")) {
             int i = 0;
-            double totDist = 0.0;
+            TrackFixer fixer = new TrackFixer();
             while (rs.next()) {
-                double lat = rs.getDouble(1);
-                double lon = rs.getDouble(2);
-                double _speed = rs.getDouble(5);
-                double _maxSpeed = rs.getDouble(6);
-                Timestamp ts = rs.getTimestamp(3);
-                boolean anchor = rs.getInt(7) == 1;
-                System.out.printf("Process %s speed %5.2f %5.2f ", ts, _speed, _maxSpeed);
-                int id = rs.getInt(4);
-                long t = ts.getTime();
-                GeoPositionT p = new GeoPositionT(t, lat, lon);
-                if (last != null) {
-                    Course c = new Course(last, p);
-                    double interval = (c.getInterval()) / (1000.0 * 60.0 * 60.0); // interval in hours
-                    if (interval < 5 /* less than 5 hours */) {
-                        double dist = c.getDistance();
-                        if (!anchor) totDist += dist;
-                        double speed = dist / interval;
-                        stUpd.setInt(1, (int) (c.getInterval() / 1000));
-                        stUpd.setDouble(2, dist);
-                        if (Double.isNaN(speed)) {
-                            stUpd.setDouble(3, 0.0);
-                            stUpd.setDouble(4, 0.0);
-                            System.out.printf(" Update %5.2f %5.2f\n", 0.0, 0.0);
-                        } else {
-                            stUpd.setDouble(3, speed);
-                            if (Math.abs(_speed - _maxSpeed) < 0.00001) {
-                                stUpd.setDouble(4, speed);
-                                System.out.printf("Update %5.2f %5.2f\n", speed, speed);
-                            } else {
-                                stUpd.setDouble(4, _maxSpeed);
-                                System.out.printf("Update %5.2f %5.2f\n", speed, _maxSpeed);
-                            }
-                        }
-                        stUpd.setInt(5, id);
-                        i += stUpd.executeUpdate();
-                        if (i % 1000 == 0) {
-                            db.getConnection().commit();
-                        }
-                    } else {
-                        System.out.printf(" skip\n");
+                int id = rs.getInt("id");
+                TrackPoint pointOrig = getTrackPoint(builder, rs);
+                TrackPoint point = fixer.onTrackPoint(builder, pointOrig);
+                if (point != null) {
+                    i++;
+                    stUpd.setInt(P_UPD_DTIME, point.getPeriod());
+                    stUpd.setDouble(P_UPD_DISTANCE, point.getDistance());
+                    stUpd.setDouble(P_UPD_SPEED, point.getAverageSpeed());
+                    stUpd.setDouble(P_UPD_MAX_SPEED, point.getMaxSpeed());
+                    stUpd.setInt(P_UPD_ID, id);
+                    i += stUpd.executeUpdate();
+                    if (i % 1000 == 0) {
+                        // commit every 1000 updates
+                        db.getConnection().commit();
                     }
                 }
-                last = p;
             }
             db.getConnection().commit();
-            System.out.printf("Dist %5.2f Upd %d\n", totDist, i);
-        } catch (Exception e) {
-            e.printStackTrace();
+            System.out.printf("Dist %5.2f Upd %d over %d points\n", fixer.getTotDist(), fixer.getChangedPoints(), fixer.getPoints());
         }
     }
 
@@ -127,6 +118,6 @@ public class UpdateDistanceAndSpeed {
             e.printStackTrace();
         }
 
-        new UpdateDistanceAndSpeed().load();
+        new UpdateDistanceAndSpeed().load(ThingsFactory.getInstance(TrackPointBuilder.class));
     }
 }

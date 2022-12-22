@@ -126,6 +126,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
         bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
+        bind(TrackScanner.class).to(TrackScannerImpl.class);
 
     }
 }

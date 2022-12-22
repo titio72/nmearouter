@@ -215,8 +215,6 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             if (powerData.totAh < -250) powerData.charging = true;
             else if (powerData.totAh > -10) powerData.charging = false;
 
-            System.out.printf("AH %.3fAh A %.2f V %.2f SOC %.2f\n", powerData.totAh, powerData.current, powerData.voltage, powerData.getSOC());
-
             sendPower(powerData);
 
             sendGPS(posOut, hdg, speed);

@@ -230,6 +230,21 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     @Override
+    public void updateTripDistance(int id, double dist) throws TripManagerException {
+        init();
+        TripImpl t = (TripImpl) archive.getTrip(id);
+        if (t == null) throwUnknownTripException(id);
+        else {
+            t.setDistance(dist);
+            try (Connection c = new DBHelper(true).getConnection()) {
+                saveTrip(t, c);
+            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+                throw new TripManagerException("Error saving trip", e);
+            }
+        }
+    }
+
+    @Override
     public void trimTrip(int id) throws TripManagerException {
         init();
         Trip t = getTrip(id);

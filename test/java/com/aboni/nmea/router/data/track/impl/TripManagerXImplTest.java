@@ -166,6 +166,18 @@ public class TripManagerXImplTest {
     }
 
     @Test
+    public void testChangeDistance() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
+        tm.updateTripDistance(135, 91.2);
+        assertEquals(91.2, tm.getTrip(135).getDistance(), 0.0001);
+        try (DBHelper db = new DBHelper(true)) {
+            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, dist from trip_test where id=135")) {
+                rs.next();
+                assertEquals(91.2, rs.getDouble("dist"), 0.0001);
+            }
+        }
+    }
+
+    @Test
     public void testChangeDescriptionNonExisting() {
         try {
             tm.setTripDescription(137, "does not exists");
