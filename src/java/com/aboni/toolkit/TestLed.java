@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.toolkit;
 
-import com.aboni.utils.Tester;
+import com.aboni.nmea.router.utils.Tester;
 import com.pi4j.io.gpio.*;
 
 import java.io.PrintStream;

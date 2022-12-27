@@ -1,13 +1,13 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.*;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.util.Position;
@@ -123,7 +123,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         synchronized (this) {
             long now = timestampProvider.getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
-                LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).info(log);
+                log.info(() -> LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).toString());
                 SerialPort p = SerialPort.getCommPort(portName);
                 p.setComPortParameters(PORT_SPEED, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(
@@ -144,7 +144,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private void resetPortAndDisplay() {
         if (port != null) {
             reset();
-            LogStringBuilder.start("NextionAgent").wO("reset port").wV("port", portName).info(log);
+            log.info(() -> LogStringBuilder.start("NextionAgent").wO("reset port").wV("port", portName).toString());
             port.closePort();
             port = null;
         }

@@ -18,12 +18,12 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.data.HistoryProvider;
+import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
-import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.sampledquery.SampleWriter;
 import com.aboni.nmea.router.data.sampledquery.SamplesQueryToJSON;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

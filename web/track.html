@@ -145,7 +145,12 @@
 
   function askTrimTrip(d) {
     trip = extractTrip(d);
-    askConfirmationTrip(trip, trimTrip, "Confirm trimmin track for " + trip.description + "?");
+    askConfirmationTrip(trip, trimTrip, "Confirm trimming track for " + trip.description + "?");
+  }
+
+  function askFixTrip(d) {
+    trip = extractTrip(d);
+    askConfirmationTrip(trip, fixTrip, "Confirm fixing track for " + trip.description + "?");
   }
 
   function extractTrip(d) {
@@ -520,8 +525,16 @@
                                     <button ng-if="t.description!=''" id="btnTrimTrip|{{t.id}}|{{t.description}}"
                                             type="button"
                                             class="btn btn-circle btn-secondary" onclick="askTrimTrip(this.id);">
-                                    <span class="glyphicon glyphicon-scissors circle-icon-content"
-                                          aria-hidden="true"></span>
+                                      <span class="glyphicon glyphicon-scissors circle-icon-content"
+                                            aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button ng-if="t.description!=''" id="btnFixTrip|{{t.id}}|{{t.description}}"
+                                            type="button"
+                                            class="btn btn-circle btn-secondary" onclick="askFixTrip(this.id);">
+                                      <span class="glyphicon glyphicon glyphicon-wrench circle-icon-content"
+                                            aria-hidden="true"></span>
                                     </button>
                                 </td>
                                 <td>

@@ -7,15 +7,16 @@ import com.aboni.nmea.router.n2k.N2KMessageHandler;
 import com.aboni.nmea.router.n2k.evo.N2K126208RequestLockedHeading;
 import com.aboni.nmea.router.n2k.evo.N2K126208RequestPilotMode;
 import com.aboni.nmea.router.n2k.evo.N2K126208RequestWindDatum;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.toolkit.ProgrammableTimeStampProvider;
-import com.aboni.utils.ConsoleLog;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class EvoAPDriverTest {
 

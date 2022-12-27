@@ -16,13 +16,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.misc.Utils;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.DataEvent;
+import com.aboni.nmea.router.utils.DataEvent;
 import com.aboni.utils.Pair;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -33,6 +34,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Enrich HDG heading information:
@@ -55,7 +57,7 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
     }
 
     public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt, int year) {
-        m = new NMEAMagnetic2TrueConverter(year);
+        m = new NMEAMagnetic2TrueConverter(year, Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
         this.cache = cache;
         this.doHDM = hdm;
         this.doHDT = hdt;

@@ -19,13 +19,13 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.metrics.PowerMetrics;
 import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
+import com.aboni.nmea.router.data.metrics.PowerMetrics;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgBattery;
 import com.aboni.nmea.router.message.MsgDCDetailedStatus;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -88,7 +88,7 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
             powerSampler.start();
             return true;
         } catch (Exception e) {
-            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
             return false;
         }
     }

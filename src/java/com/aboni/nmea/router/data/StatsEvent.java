@@ -30,7 +30,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data;
 
-import com.aboni.utils.db.Event;
+import com.aboni.nmea.router.utils.db.Event;
 
 public class StatsEvent implements Event {
 

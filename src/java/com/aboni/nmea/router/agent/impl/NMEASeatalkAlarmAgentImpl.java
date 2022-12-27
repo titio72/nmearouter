@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.SeatalkAlarmsStatus;
@@ -8,8 +7,9 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.MsgSeatalkAlarm;
 import com.aboni.nmea.router.message.SeatalkAlarm;
 import com.aboni.nmea.router.message.SeatalkAlarmStatus;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.Pair;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -60,7 +60,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
         if (routerMessage.getMessage() instanceof MsgSeatalkAlarm) {
             Instant time = Instant.ofEpochMilli(routerMessage.getTimestamp());
             MsgSeatalkAlarm seatalkAlarm = (MsgSeatalkAlarm) routerMessage.getMessage();
-            getLogBuilder().wO("append alarm").wV("alarm", seatalkAlarm).info(log);
+            log.info(() -> getLogBuilder().wO("append alarm").wV("alarm", seatalkAlarm).toString());
             synchronized (alarms) {
                 alarms.put(
                         new AlarmId(seatalkAlarm.getSource(), seatalkAlarm.getAlarm()),
@@ -71,7 +71,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
                     try {
                         listener.onAlarm(seatalkAlarm, time);
                     } catch (Exception e) {
-                        getLogBuilder().wO("dispatch alarm").wV("listener", listener.toString()).error(log, e);
+                        log.error(() -> getLogBuilder().wO("dispatch alarm").wV("listener", listener.toString()).toString(), e);
                     }
                 }
             }

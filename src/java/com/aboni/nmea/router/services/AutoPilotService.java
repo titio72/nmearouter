@@ -21,7 +21,7 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.impl.EvoAPDriver;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

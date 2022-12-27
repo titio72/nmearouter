@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors.hw;
 
-import com.aboni.misc.Utils;
 import com.aboni.sensors.I2CInterface;
+import com.aboni.utils.Utils;
 
 import java.io.IOException;
 

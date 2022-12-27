@@ -15,8 +15,8 @@
 
 package com.aboni.nmea.router.data.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.data.TimerFilter;
+import com.aboni.utils.Utils;
 
 public class TimerFilterFixed implements TimerFilter {
 

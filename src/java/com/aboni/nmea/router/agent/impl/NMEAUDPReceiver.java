@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
@@ -23,7 +22,8 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.nmea.router.message.SpeedAndHeadingStream;
 import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -82,7 +82,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            getLogBuilder().wO("stats").w(s.toString(time)).info(log);
+            log.info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
         }
     }
 
@@ -91,9 +91,9 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             setup = true;
             setup(name, q);
             this.port = port;
-            getLogBuilder().wO("init").wV("port", port).info(log);
+            log.info(() -> getLogBuilder().wO("init").wV("port", port).toString());
         } else {
-            getLogBuilder().wO("init").wV("error", "already initialized").error(log);
+            log.error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
         }
     }
 
@@ -112,7 +112,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                     loopRead(socket);
                 }
             } catch (SocketException e) {
-                getLogBuilder().wO("open datagram socket").error(log, e);
+                log.error(() -> getLogBuilder().wO("open datagram socket").toString(), e);
             }
             if (!stop) Utils.pause(OPEN_SOCKET_RETRY_TIME);
         }
@@ -138,10 +138,11 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             }
         } catch (SocketTimeoutException e) {
             // read timeout
-            getLogBuilder().wO("read").error(log, e);
+            log.error(() -> getLogBuilder().wO("read").toString(), e);
             Utils.pause(1000);
         } catch (Exception e) {
-            getLogBuilder().wO("read").wV("sentence", sSentence).warn(log, e);
+            String logSentence = sSentence;
+            log.warning(() -> getLogBuilder().wO("read").wV("sentence", logSentence).toString(), e);
         }
         updateReadSentencesStats(true);
     }

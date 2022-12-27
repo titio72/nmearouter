@@ -20,9 +20,9 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.data.track.TrackManager;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.Log;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

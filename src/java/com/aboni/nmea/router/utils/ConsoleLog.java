@@ -1,5 +1,23 @@
-package com.aboni.utils;
+/*
+ * Copyright (c) 2022,  Andrea Boni
+ * This file is part of NMEARouter.
+ * NMEARouter is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * NMEARouter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+package com.aboni.nmea.router.utils;
+
+import com.aboni.utils.LogFormatter;
+
+import java.util.function.Supplier;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,8 +72,18 @@ public class ConsoleLog implements Log {
     }
 
     @Override
+    public void error(Supplier<String> msg) {
+        if (lgConsole.getLevel().intValue() <= Level.SEVERE.intValue()) error(msg.get());
+    }
+
+    @Override
     public void error(final String msg, final Throwable t) {
         lgConsole.log(Level.SEVERE, msg, t);
+    }
+
+    @Override
+    public void error(Supplier<String> supplier, Throwable t) {
+        if (lgConsole.getLevel().intValue() <= Level.SEVERE.intValue()) error(supplier.get(), t);
     }
 
     @Override
@@ -64,8 +92,18 @@ public class ConsoleLog implements Log {
     }
 
     @Override
+    public void errorForceStacktrace(Supplier<String> supplier, Throwable t) {
+        if (lgConsole.getLevel().intValue() <= Level.SEVERE.intValue()) errorForceStacktrace(supplier.get(), t);
+    }
+
+    @Override
     public void warning(String msg) {
         lgConsole.log(Level.WARNING, msg);
+    }
+
+    @Override
+    public void warning(Supplier<String> msg) {
+        if (lgConsole.getLevel().intValue() <= Level.WARNING.intValue()) warning(msg.get());
     }
 
     @Override
@@ -74,8 +112,18 @@ public class ConsoleLog implements Log {
     }
 
     @Override
+    public void warning(Supplier<String> msg, Exception e) {
+        if (lgConsole.getLevel().intValue() <= Level.WARNING.intValue()) warning(msg.get(), e);
+    }
+
+    @Override
     public void info(String msg) {
         lgConsole.log(Level.INFO, msg);
+    }
+
+    @Override
+    public void info(Supplier<String> msg) {
+        if (lgConsole.getLevel().intValue() <= Level.INFO.intValue()) info(msg.get());
     }
 
     @Override

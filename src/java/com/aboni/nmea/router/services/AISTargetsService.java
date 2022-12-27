@@ -1,10 +1,10 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.geo.Course;
-import com.aboni.misc.Utils;
+import com.aboni.utils.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;

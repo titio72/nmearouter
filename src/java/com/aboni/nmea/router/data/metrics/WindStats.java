@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics;
 
-import com.aboni.misc.Utils;
+import com.aboni.utils.Utils;
 
 public class WindStats {
 

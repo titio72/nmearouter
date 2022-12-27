@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors.hw;
 
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
@@ -43,7 +43,7 @@ public class PinDetector {
     private class InternalPinListener implements GpioPinListenerDigital {
         @Override
         public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-            LogStringBuilder.start("PinState").wO("state received").wV("state", pinOn).info(log);
+            log.info(() -> LogStringBuilder.start("PinState").wO("state received").wV("state", pinOn).toString());
             pinOn = event.getState().isHigh();
             List<PinListener> listeners;
             synchronized (this) {
@@ -53,7 +53,7 @@ public class PinDetector {
                 try {
                     l.engineStateEvent(pinOn);
                 } catch (Exception t) {
-                    LogStringBuilder.start("PinState").wO("state notification").wV("state", pinOn).error(log, t);
+                    log.error(() -> LogStringBuilder.start("PinState").wO("state notification").wV("state", pinOn).toString(), t);
                 }
             }
         }

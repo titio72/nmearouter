@@ -18,7 +18,7 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackQueryManager;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

@@ -20,7 +20,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.MsgPosition;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.pi4j.io.gpio.*;
 
 import javax.inject.Inject;

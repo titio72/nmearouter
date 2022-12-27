@@ -21,7 +21,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -80,7 +80,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            getLogBuilder().wO("stats").w(s.toString(time)).info(log);
+            log.info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
         }
     }
 
@@ -93,9 +93,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             baseDescription = "UDP Sender Port " + getPort() + "<br>";
             description = baseDescription;
 
-            getLogBuilder().wO("init").wV("port", portTarget).info(log);
+            log.info(() -> getLogBuilder().wO("init").wV("port", portTarget).toString());
         } else {
-            getLogBuilder().wO("init").wV("error", "already initialized").error(log);
+            log.error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
         }
     }
 
@@ -124,9 +124,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             targets.add(address);
             baseDescription += " " + address.getHostName();
             description = baseDescription;
-            getLogBuilder().wO("init").wV("target", target).info(log);
+            log.info(() -> getLogBuilder().wO("init").wV("target", target).toString());
         } catch (UnknownHostException e) {
-            getLogBuilder().wO("init").wV("target", target).error(log, e);
+            log.error(() -> getLogBuilder().wO("init").wV("target", target).toString(), e);
         }
     }
 
@@ -136,7 +136,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             serverSocket = new DatagramSocket();
             return true;
         } catch (IOException e) {
-            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
         }
         return false;
     }
@@ -146,7 +146,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         try {
             serverSocket.close();
         } catch (Exception e) {
-            getLogBuilder().wO("deactivate").errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
         }
     }
 
@@ -169,7 +169,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
                 updateStats(false);
             } catch (IOException e) {
                 updateStats(true);
-                getLogBuilder().wO("message").errorForceStacktrace(log, e);
+                log.errorForceStacktrace(() -> getLogBuilder().wO("message").toString(), e);
             }
         }
     }

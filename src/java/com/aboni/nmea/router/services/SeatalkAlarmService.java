@@ -4,7 +4,7 @@ import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.SeatalkAlarmsStatus;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.message.MsgSeatalkAlarm;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.Pair;
 import org.json.JSONObject;
 

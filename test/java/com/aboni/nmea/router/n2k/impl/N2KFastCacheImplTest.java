@@ -3,7 +3,7 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Before;

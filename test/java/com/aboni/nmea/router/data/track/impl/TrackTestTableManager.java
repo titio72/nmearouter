@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

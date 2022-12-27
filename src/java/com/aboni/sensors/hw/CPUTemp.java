@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors.hw;
 
-import com.aboni.misc.Sample;
-import com.aboni.utils.HWSettings;
-import com.aboni.utils.Log;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.HWSettings;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.utils.Sample;
 
 import java.io.FileInputStream;
 

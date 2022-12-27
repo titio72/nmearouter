@@ -19,8 +19,8 @@ import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.sentences.NMEASentenceItem;
-import com.aboni.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -73,7 +73,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
                     try {
                         dump();
                     } catch (IOException e1) {
-                        getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).error(log, e1);
+                        log.error(() -> getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).toString(), e1);
                     }
                 }
             }
@@ -96,7 +96,8 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
                 queue.clear();
                 w.flush();
             }
-            getLogBuilder().wO("dump").wV("bytes", bytes).wV("timestamp", new Date()).info(log);
+            long bString = bytes;
+            log.info(() -> getLogBuilder().wO("dump").wV("bytes", bString).wV("timestamp", new Date()).toString());
         }
     }
 }

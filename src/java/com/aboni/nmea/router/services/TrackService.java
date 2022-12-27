@@ -18,9 +18,9 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackDumperFactory;
 import com.aboni.nmea.router.data.track.TrackManagementException;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.Query;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -62,7 +62,8 @@ public class TrackService implements WebService {
                 response.error("Unknown format '" + f + "'");
             }
         } catch (IOException | TrackManagementException e) {
-            LogStringBuilder.start("TrackService").wO("response").wV("query", q).error(log, e);
+            String sQuery = "" + q;
+            log.error(() -> LogStringBuilder.start("TrackService").wO("response").wV("query", sQuery).toString(), e);
             response.setContentType(TEXT_HTML_CHARSET_UTF_8);
             sendError(response, e.getMessage());
         }
@@ -72,7 +73,7 @@ public class TrackService implements WebService {
         try {
             response.error(s);
         } catch (Exception ee) {
-            LogStringBuilder.start("TrackService").wO("response").error(log, ee);
+            log.error(() -> LogStringBuilder.start("TrackService").wO("response").toString(), ee);
         }
     }
 }

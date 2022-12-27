@@ -5,7 +5,7 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBImpl;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
 import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

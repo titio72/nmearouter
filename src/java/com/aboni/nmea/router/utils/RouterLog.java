@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,  Andrea Boni
+ * Copyright (c) 2022,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,12 +13,17 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.utils;
+package com.aboni.nmea.router.utils;
 
 import com.aboni.nmea.router.Constants;
+import com.aboni.utils.LogFormatter;
 
 import java.io.IOException;
-import java.util.logging.*;
+import java.util.function.Supplier;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RouterLog implements LogAdmin {
     private boolean debug = false;
@@ -87,6 +92,11 @@ public class RouterLog implements LogAdmin {
     }
 
     @Override
+    public void error(Supplier<String> msg) {
+        if (lg.getLevel().intValue() <= Level.SEVERE.intValue()) error(msg.get());
+    }
+
+    @Override
     public void error(final String msg, final Throwable t) {
         if (debug)
             lg.log(Level.SEVERE, msg, t);
@@ -95,13 +105,28 @@ public class RouterLog implements LogAdmin {
     }
 
     @Override
+    public void error(Supplier<String> supplier, Throwable t) {
+        if (lg.getLevel().intValue() <= Level.SEVERE.intValue()) error(supplier.get(), t);
+    }
+
+    @Override
     public void errorForceStacktrace(final String msg, final Throwable t) {
         lg.log(Level.SEVERE, msg, t);
     }
 
     @Override
+    public void errorForceStacktrace(Supplier<String> supplier, Throwable t) {
+        if (lg.getLevel().intValue() <= Level.SEVERE.intValue()) errorForceStacktrace(supplier.get(), t);
+    }
+
+    @Override
     public void warning(String msg) {
         lg.log(Level.WARNING, msg);
+    }
+
+    @Override
+    public void warning(Supplier<String> msg) {
+        if (lg.getLevel().intValue() <= Level.WARNING.intValue()) warning(msg.get());
     }
 
     @Override
@@ -113,8 +138,18 @@ public class RouterLog implements LogAdmin {
     }
 
     @Override
+    public void warning(Supplier<String> msg, Exception e) {
+        if (lg.getLevel().intValue() <= Level.WARNING.intValue()) warning(msg.get(), e);
+    }
+
+    @Override
     public void info(String msg) {
         lg.log(Level.INFO, msg);
+    }
+
+    @Override
+    public void info(Supplier<String> msg) {
+        if (lg.getLevel().intValue() <= Level.INFO.intValue()) info(msg.get());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.toolkit.ProgrammableTimeStampProvider;
-import com.aboni.utils.ConsoleLog;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -27,9 +27,9 @@ import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -240,7 +240,7 @@ public class NMEAAgentImpl implements NMEAAgent {
                 try {
                     toSend = processorSet.getSentences(m, getName());
                 } catch (NMEARouterProcessorException e) {
-                    getLogBuilder().wO("dispatch message").wV("sentence", sentence).error(log, e);
+                    log.error(() -> getLogBuilder().wO("dispatch message").wV("sentence", sentence).toString(), e);
                 }
                 if (toSend != null)
                     for (Message s : toSend)
@@ -271,7 +271,7 @@ public class NMEAAgentImpl implements NMEAAgent {
             try {
                 toSend = processorSet.getSentences(m, getName());
             } catch (NMEARouterProcessorException e) {
-                getLogBuilder().wO("dispatch message").wV("sentence", m).error(log, e);
+                log.error(() -> getLogBuilder().wO("dispatch message").wV("sentence", m).toString(), e);
             }
             if (toSend != null)
                 for (Message s : toSend)

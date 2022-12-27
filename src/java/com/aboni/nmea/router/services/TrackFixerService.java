@@ -17,8 +17,8 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.utils.Log;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Inject;
 import org.json.JSONObject;
 
@@ -44,20 +44,20 @@ public class TrackFixerService extends JSONWebService {
     public TrackFixerService(Log log, @NotNull TrackPointBuilder pointBuilder, @NotNull TripManagerX tripManager, @NotNull TrackScanner scanner) {
         super(log);
         this.tripManager = tripManager;
-        setLoader(config -> {
-            int trackId = config.getInteger("track", 0);
+        setLoader((ServiceConfig config) -> {
+            int trackId = config.getInteger("trip", 0);
             if (trackId != 0) {
                 try {
                     TrackFixer fixer = load(pointBuilder, scanner, trackId);
                     tripManager.updateTripDistance(trackId, fixer.getTotDist());
                     JSONObject res = new JSONObject();
-                    res.put("track", trackId);
+                    res.put("trip", trackId);
                     res.put("changedPoints", fixer.getChangedPoints());
                     res.put("points", fixer.getPoints());
                     res.put("distance", fixer.getTotDist());
                     return res;
                 } catch (Exception e) {
-                    throw new JSONGenerationException("Error fixing track", e);
+                    throw new JSONGenerationException("Error fixing track {" + e.getMessage() + "}", e);
                 }
             } else {
                 throw new JSONGenerationException("No track selected");

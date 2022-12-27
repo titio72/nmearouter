@@ -17,7 +17,7 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

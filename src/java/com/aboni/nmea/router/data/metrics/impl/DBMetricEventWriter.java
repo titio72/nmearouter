@@ -16,8 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.data.StatsEvent;
-import com.aboni.utils.db.DBEventWriter;
-import com.aboni.utils.db.Event;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.db.Event;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

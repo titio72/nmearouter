@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
@@ -23,8 +22,9 @@ import com.aboni.nmea.router.data.impl.TimerFilterAnchorAdaptive;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.message.*;
-import com.aboni.utils.HWSettings;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.HWSettings;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -102,7 +102,7 @@ public class NMEAMeteoDBTarget extends NMEAAgentImpl {
             meteoSampler.start();
             return true;
         } catch (Exception e) {
-            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
             return false;
         }
     }

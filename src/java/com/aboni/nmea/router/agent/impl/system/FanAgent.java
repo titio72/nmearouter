@@ -19,10 +19,10 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.TemperatureSource;
 import com.aboni.nmea.router.message.impl.MsgTemperatureImpl;
+import com.aboni.nmea.router.utils.HWSettings;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
-import com.aboni.utils.HWSettings;
-import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;

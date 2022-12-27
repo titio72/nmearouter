@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery;
 
-import com.aboni.utils.Query;
+import com.aboni.nmea.router.utils.Query;
 
 public interface RangeFinder {
     Range getRange(String table, Query q) throws SampledQueryException;

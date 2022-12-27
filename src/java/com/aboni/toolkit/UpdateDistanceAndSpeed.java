@@ -21,10 +21,10 @@ import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.data.track.TrackFixer;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
+import com.aboni.nmea.router.utils.LogAdmin;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.LogAdmin;
-import com.aboni.utils.ThingsFactory;
-import com.aboni.utils.db.DBHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 

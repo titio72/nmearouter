@@ -15,19 +15,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.toolkit;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.ConfJSON;
-import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.Sampler;
+import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.Log;
-import com.aboni.utils.LogAdmin;
-import com.aboni.utils.ThingsFactory;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.LogAdmin;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.json.JSONObject;
@@ -60,15 +62,15 @@ public class UpdateMeteo {
                             "TS>='2022-07-22 00:00:00' and " +
                             "TS<='2022-07-29 07:52:31'")) {
 
-                long firstId = 0, lastId = 0;
+                long firstId = 0;
+                long lastId = 0;
                 if (st.execute()) {
                     try (ResultSet rs = st.getResultSet()) {
                         long t0 = 0L;
                         while (rs.next()) {
                             DBRecordRouterMessage m = new DBRecordRouterMessage(rs);
-                            //System.out.println(m.getTimestamp() + " " + m.m.type);
                             timeProvider.time = m.getTimestamp();
-                            if (t0==0) {
+                            if (t0 == 0) {
                                 t0 = m.getTimestamp();
                                 firstId = m.m.id;
                             }
@@ -80,7 +82,6 @@ public class UpdateMeteo {
                             lastId = m.m.id;
                         }
                         sampler.dumpAndReset(true);
-                        System.out.println(firstId + " " + lastId);
                     }
                 }
             }
@@ -145,7 +146,7 @@ public class UpdateMeteo {
         }
     }
 
-    private final static long ONE_MINUTE = 60000L;
+    private static final long ONE_MINUTE = 60000L;
 
     public static void main(String[] args) {
         FileWriter w;
@@ -167,9 +168,8 @@ public class UpdateMeteo {
                 @Override
                 public void write(StatsSample s, long ts) {
                     try {
-                        String ss = String.format("%s,%dl,%.3f,%.3f,%.3f\n", s.getTag(), s.getT1(), s.getMin(), s.getAvg(), s.getMax());
+                        String ss = String.format("%s,%dl,%.3f,%.3f,%.3f%n", s.getTag(), s.getT1(), s.getMin(), s.getAvg(), s.getMax());
                         w.write(ss);
-                        System.out.print(ss);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

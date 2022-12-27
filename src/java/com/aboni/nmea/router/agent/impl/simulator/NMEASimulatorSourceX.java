@@ -16,16 +16,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
-import com.aboni.misc.PolarTable;
-import com.aboni.misc.PolarTableImpl;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.message.impl.*;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.PolarTable;
+import com.aboni.utils.PolarTableImpl;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
@@ -101,7 +101,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
                 lastPolarFile = data.getPolars();
             }
         } catch (Exception e) {
-            getLogBuilder().wO("load polars").error(log, e);
+            log.error(() -> getLogBuilder().wO("load polars").toString(), e);
         }
     }
 
@@ -116,7 +116,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
         if (data != null) {
             return true;
         } else {
-            getLogBuilder().wO("init").wV("error", "setup data missing").error(log);
+            log.error(() -> getLogBuilder().wO("init").wV("error", "setup data missing").toString());
             return false;
         }
     }
@@ -167,7 +167,7 @@ public class NMEASimulatorSourceX extends NMEAAgentImpl implements SimulatorDriv
             try {
                 data.loadConf();
             } catch (IOException e) {
-                getLogBuilder().wO("load setup data").error(log, e);
+                log.error(() -> getLogBuilder().wO("load setup data").toString(), e);
             }
             loadPolars();
 

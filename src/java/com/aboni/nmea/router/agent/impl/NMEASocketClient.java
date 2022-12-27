@@ -21,7 +21,7 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -82,9 +82,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
             this.port = conf.getPort();
             this.receive = conf.isRx();
             this.transmit = conf.isTx();
-            getLogBuilder().wO("init").wV("server", server).wV("port", port).wV("rx", receive).wV("tx", transmit).info(log);
+            log.info(() -> getLogBuilder().wO("init").wV("server", server).wV("port", port).wV("rx", receive).wV("tx", transmit).toString());
         } else {
-            getLogBuilder().wO("init").wV("error", "already setup").warn(log);
+            log.warning(() -> getLogBuilder().wO("init").wV("error", "already setup").toString());
         }
     }
 
@@ -110,7 +110,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
 
                     return true;
                 } catch (Exception e) {
-                    getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+                    log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
                     socket = null;
                 }
             }
@@ -126,7 +126,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    getLogBuilder().wO("deactivate").errorForceStacktrace(log, e);
+                    log.errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
                 } finally {
                     socket = null;
                 }
@@ -153,7 +153,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 }
             }
         } catch (Exception e) {
-            getLogBuilder().wO("message").error(log, e);
+            log.error(() -> getLogBuilder().wO("message").toString(), e);
         }
     }
 }

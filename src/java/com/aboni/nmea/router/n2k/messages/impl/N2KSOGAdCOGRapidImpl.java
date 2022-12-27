@@ -15,12 +15,12 @@
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.message.impl.MsgSOGAndCOGImpl;
 import com.aboni.nmea.router.n2k.N2KLookupTables;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import static com.aboni.nmea.router.n2k.N2KLookupTables.LOOKUP_MAPS.DIRECTION_REFERENCE;

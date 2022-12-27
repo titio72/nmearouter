@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
@@ -23,9 +22,10 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.MyThreadPool;
+import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -205,7 +205,7 @@ public class NMEARouterImpl implements NMEARouter {
                     try {
                         routeSentence(sentenceQueue.take());
                     } catch (InterruptedException e1) {
-                        LogStringBuilder.start(ROUTER_CATEGORY).wO("route loop").error(log, e1);
+                        log.error(() -> LogStringBuilder.start(ROUTER_CATEGORY).wO("route loop").toString(), e1);
                         Thread.currentThread().interrupt();
                     }
                 }

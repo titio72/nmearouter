@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.sentences.NMEASentenceItem;
-import com.aboni.utils.Log;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
@@ -102,7 +102,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                getLogBuilder().wO("play").error(log, e);
+                log.error(() -> getLogBuilder().wO("play").toString(), e);
                 Utils.pause(10000);
             }
         }
@@ -115,10 +115,10 @@ public class NMEAPlayer extends NMEAAgentImpl {
             Thread.sleep(55);
             postMessage(s);
         } catch (InterruptedException e) {
-            getLogBuilder().wO("play").wV("line", line).error(log, e);
+            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            getLogBuilder().wO("play").wV("line", line).error(log, e);
+            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
         }
     }
 
@@ -135,7 +135,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
             }
             postMessage(itm.getSentence());
         } catch (Exception e) {
-            getLogBuilder().wO("play").wV("line", line).error(log, e);
+            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
         }
         return logT;
     }

@@ -18,13 +18,13 @@ package com.aboni.nmea.router.data.metrics.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 
 import javax.inject.Inject;
 
 public class DBMetricStatsWriterInflux implements StatsWriter {
 
-    private DBHelper helper;
+    private DBMetricsHelper helper;
 
     @Inject
     public DBMetricStatsWriterInflux() {
@@ -33,8 +33,8 @@ public class DBMetricStatsWriterInflux implements StatsWriter {
     @Override
     public void init() {
         try {
-            helper = new DBHelper(true);
-        } catch (ClassNotFoundException | MalformedConfigurationException e) {
+            helper = new DBMetricsHelper();
+        } catch (MalformedConfigurationException e) {
             helper = null;
             // TODO
         }

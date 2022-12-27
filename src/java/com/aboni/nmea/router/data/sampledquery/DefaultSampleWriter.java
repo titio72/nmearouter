@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 class DefaultSampleWriter implements SampleWriter {

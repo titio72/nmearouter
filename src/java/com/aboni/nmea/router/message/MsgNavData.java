@@ -15,7 +15,7 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.misc.Utils;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 

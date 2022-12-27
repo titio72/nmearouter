@@ -21,12 +21,12 @@ import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
 import com.aboni.nmea.router.data.track.TrackReader;
+import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.utils.QueryById;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.Query;
-import com.aboni.utils.QueryByDate;
-import com.aboni.utils.QueryById;
-import com.aboni.utils.ThingsFactory;
-import com.aboni.utils.db.DBHelper;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.validation.constraints.NotNull;

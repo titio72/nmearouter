@@ -16,14 +16,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.TrueWind;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.message.MsgSpeed;
 import com.aboni.nmea.router.message.MsgWindData;
 import com.aboni.nmea.router.message.impl.MsgWindDataImpl;
+import com.aboni.utils.LPFFilter;
 import com.aboni.utils.Pair;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -82,7 +83,7 @@ public class NMEAMWVTrue implements NMEAPostProcess {
             double angle = Utils.normalizeDegrees0To360(t.getTrueWindDeg());
             double speed = t.getTrueWindSpeed();
             if (!Double.isNaN(lastSentTWindSpeed)) {
-                speed = com.aboni.misc.LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
+                speed = LPFFilter.getLPFReading(0.75, lastSentTWindSpeed, speed);
             }
             lastSentTWindSpeed = speed;
             MsgWindData trueWindMsg = new MsgWindDataImpl(speed, angle, false);

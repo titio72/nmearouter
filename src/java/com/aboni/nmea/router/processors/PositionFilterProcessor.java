@@ -19,7 +19,7 @@ import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.filters.impl.PositionFilter;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.Pair;
 
 import javax.inject.Inject;

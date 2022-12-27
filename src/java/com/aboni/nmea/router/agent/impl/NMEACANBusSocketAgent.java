@@ -1,6 +1,5 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
@@ -12,7 +11,8 @@ import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.Utils;
 import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
 import tel.schich.javacan.NetworkDevice;
@@ -148,7 +148,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 t.start();
             } catch (IOException e) {
                 run.set(false);
-                getLogBuilder().wO("activate").error(log, e);
+                log.error(() -> getLogBuilder().wO("activate").toString(), e);
                 channel = null;
                 return false;
             }
@@ -171,7 +171,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             }
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
-                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").error(log, e);
+                log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").toString(), e);
             } else {
                 try {
                     Thread.sleep(20);
@@ -180,11 +180,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 }
             }
         } catch (IOException e) {
-            getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").error(log, e);
+            log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").toString(), e);
         } catch (Exception e) {
             errors++;
             if (DEBUG) {
-                getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").error(log, e);
+                log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").toString(), e);
             }
         }
     }
@@ -197,7 +197,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             try {
                 channel.close();
             } catch (IOException e) {
-                getLogBuilder().wO("deactivate").error(log, e);
+                log.error(() -> getLogBuilder().wO("deactivate").toString(), e);
             }
             channel = null;
         }
@@ -212,7 +212,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);
                 }
-                getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).info(log);
+                log.info(() -> getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).toString());
                 if (stats.messages==0) {
                     onNoMessages();
                 }
@@ -231,10 +231,10 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     private void onNoMessages() {
         try {
-            getLogBuilder().wO("reset socket can").info(log);
+            log.info(() -> getLogBuilder().wO("reset socket can").toString());
             Runtime.getRuntime().exec("./reset_can_bus.sh");
         } catch (IOException e) {
-            getLogBuilder().wO("reset socket can").error(log, e);
+            log.error(() -> getLogBuilder().wO("reset socket can").toString(), e);
         }
     }
 }

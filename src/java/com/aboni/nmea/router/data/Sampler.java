@@ -17,15 +17,15 @@ package com.aboni.nmea.router.data;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.Startable;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.data.impl.AngleStatsSample;
 import com.aboni.nmea.router.data.impl.ScalarStatsSample;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Startable;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -131,7 +131,7 @@ public class Sampler implements Startable {
                     }
                     started = true;
                 } catch (Exception e) {
-                    LogStringBuilder.start("MeteoSampler").wO("activate").wV("tag", tag).errorForceStacktrace(log, e);
+                    log.errorForceStacktrace(() -> LogStringBuilder.start("MeteoSampler").wO("activate").wV("tag", tag).toString(), e);
                     started = false;
                 }
             }
@@ -196,7 +196,7 @@ public class Sampler implements Startable {
                     }
                 }
             } catch (Exception e) {
-                LogStringBuilder.start("MeteoSampler").wV("tag", tag).wO("process message").wV("message", m).error(log, e);
+                log.error(() -> LogStringBuilder.start("MeteoSampler").wV("tag", tag).wO("process message").wV("message", m).toString(), e);
             }
         }
     }

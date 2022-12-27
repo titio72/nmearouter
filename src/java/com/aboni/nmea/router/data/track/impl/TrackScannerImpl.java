@@ -21,9 +21,9 @@ import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
 import com.aboni.nmea.router.data.track.TrackScanner;
 import com.aboni.nmea.router.data.track.TripManagerException;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.Log;
-import com.aboni.utils.db.DBHelper;
 import com.google.inject.Inject;
 
 import javax.validation.constraints.NotNull;

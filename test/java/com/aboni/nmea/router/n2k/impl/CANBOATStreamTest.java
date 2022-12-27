@@ -6,7 +6,7 @@ import com.aboni.nmea.router.n2k.N2KMessageParserFactory;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageFactoryImpl;
-import com.aboni.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

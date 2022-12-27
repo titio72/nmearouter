@@ -17,7 +17,7 @@ package com.aboni.nmea.router.nmea0183.impl;
 
 import com.aboni.nmea.router.message.MsgWaterDepth;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.HWSettings;
+import com.aboni.nmea.router.utils.HWSettings;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.DBTSentence;
 

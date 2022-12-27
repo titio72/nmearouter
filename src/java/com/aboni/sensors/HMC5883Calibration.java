@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
-import com.aboni.misc.Utils;
+import com.aboni.utils.Utils;
 
 import java.io.FileWriter;
 import java.util.Iterator;

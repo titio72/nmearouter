@@ -18,8 +18,8 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

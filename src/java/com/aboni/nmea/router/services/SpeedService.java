@@ -15,14 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.sampledquery.*;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.Query;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -136,7 +136,7 @@ public class SpeedService extends JSONWebService {
             try {
                 return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
             } catch (SampledQueryException e) {
-                LogStringBuilder.start("SpeedService").wO("execute").wV("query", q).errorForceStacktrace(log, e);
+                log.errorForceStacktrace(() -> LogStringBuilder.start("SpeedService").wO("execute").wV("query", q).toString(), e);
                 return getError("Error executing query");
             }
         } else {
