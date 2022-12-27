@@ -208,5 +208,22 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <id>raspberry64</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>tel.schich</groupId>
+                    <artifactId>javacan-core</artifactId>
+                    <version>3.2.2</version>
+                    <classifier>aarch64</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 </project>
