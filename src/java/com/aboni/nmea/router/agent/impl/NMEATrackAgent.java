@@ -16,12 +16,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.Log;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -90,7 +90,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                 processPosition(posT, p.getSOG());
             }
         } catch (Exception e) {
-            getLogBuilder().wO("process sentence").wV("sentence", p).error(log, e);
+            log.error(() -> getLogBuilder().wO("process sentence").wV("sentence", p).toString(), e);
         }
     }
 
@@ -105,7 +105,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                getLogBuilder().wO("process point").wV("point", posT).error(log, e);
+                log.error(() -> getLogBuilder().wO("process point").wV("point", posT).toString(), e);
             }
             notifyTrackedPoint(point);
             synchronized (this) {
@@ -158,7 +158,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             if (now - lastStats > 30000) {
                 lastStats = now;
                 synchronized (this) {
-                    getLogBuilder().wO("stats").wV("avgWriteTime", "%.2f", avgTime).wV("samples", samples).wV("written", writes).info(log);
+                    log.info(() -> getLogBuilder().wO("stats").wV("avgWriteTime", "%.2f", avgTime).wV("samples", samples).wV("written", writes).toString());
                     avgTime = 0;
                     samples = 0;
                     writes = 0;

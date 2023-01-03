@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.track;
 
-import com.aboni.utils.Query;
+import com.aboni.nmea.router.utils.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

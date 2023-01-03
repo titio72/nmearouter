@@ -5,8 +5,8 @@ import com.aboni.nmea.router.n2k.N2KFastCache;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 

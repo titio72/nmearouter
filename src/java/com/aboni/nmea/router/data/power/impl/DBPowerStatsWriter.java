@@ -17,8 +17,8 @@ package com.aboni.nmea.router.data.power.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.impl.DBStatsWriter;
-import com.aboni.utils.Log;
-import com.aboni.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
 
 import javax.inject.Inject;
 import javax.inject.Named;

@@ -22,10 +22,10 @@ import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSource;
 import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSourceX;
 import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.*;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEA2JSONb;
-import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -187,7 +187,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 String src = extractSource(a);
                 nx.setup(a.getName(), a.getConfiguration().getString(PORT_ATTRIBUTE), src, q);
             } catch (Exception e) {
-                LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.NEXTION).errorForceStacktrace(log, e);
+                log.errorForceStacktrace(() -> LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.NEXTION).toString(), e);
             }
             return nx;
         } else {
@@ -201,7 +201,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             gps = ThingsFactory.getInstance(NMEAGPSStatusAgent.class);
             gps.setup(a.getName(), q);
         } catch (Exception e) {
-            LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.GPS).errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.GPS).toString(), e);
         }
         return gps;
     }
@@ -215,7 +215,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 gpx.setup(g.getName(), q);
                 gpx.setFile(file);
             } catch (Exception e) {
-                LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.GPX_PLAYER).errorForceStacktrace(log, e);
+                log.errorForceStacktrace(() -> LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", AgentTypes.GPX_PLAYER).toString(), e);
             }
             return gpx;
         } else {
@@ -384,7 +384,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
             a = ThingsFactory.getInstance(c);
             a.setup(s.getName(), q);
         } catch (Exception e) {
-            LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", type).errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> LogStringBuilder.start(AGENT_BUILDER_CATEGORY).wO(BUILD_AGENT_KEY_NAME).wV("type", type).toString(), e);
         }
         return a;
     }

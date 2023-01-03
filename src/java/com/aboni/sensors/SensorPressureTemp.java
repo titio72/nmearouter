@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
-import com.aboni.misc.DataFilter;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.Atmospheric;
 import com.aboni.sensors.hw.BME280;
 import com.aboni.sensors.hw.BMP180;
-import com.aboni.utils.Log;
+import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;

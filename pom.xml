@@ -141,7 +141,7 @@
         <dependency>
             <groupId>com.aboni</groupId>
             <artifactId>NMEAUtils</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -205,6 +205,23 @@
                     <artifactId>javacan-core</artifactId>
                     <version>3.2.2</version>
                     <classifier>armv7l</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>raspberry64</id>
+            <activation>
+                <os>
+                    <family>Linux</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>tel.schich</groupId>
+                    <artifactId>javacan-core</artifactId>
+                    <version>3.2.2</version>
+                    <classifier>aarch64</classifier>
                 </dependency>
             </dependencies>
         </profile>

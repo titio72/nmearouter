@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery;
 
-import com.aboni.utils.Query;
-import com.aboni.utils.TimeSeries;
+import com.aboni.nmea.router.data.TimeSeries;
+import com.aboni.nmea.router.utils.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

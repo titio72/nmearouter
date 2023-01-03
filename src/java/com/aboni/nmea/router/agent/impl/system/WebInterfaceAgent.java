@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
@@ -25,10 +24,11 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.nmea0183.impl.Message2NMEA0183Impl;
 import com.aboni.nmea.router.services.*;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEA2JSONb;
-import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
@@ -189,6 +189,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
         context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
+        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackFixerService.class))), "/fixtrack");
     }
 
     @Override
@@ -283,7 +284,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).error(log, e);
+                log.error(() -> getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).toString(), e);
             }
         }
     }
@@ -294,11 +295,11 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         long t = timestampProvider.getNow();
         synchronized (stats) {
             if (Utils.isOlderThan(stats.lastStatsTime, t, 29999)) {
-                getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
+                log.info(() -> getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
                         wV("NMEA0183", stats.jsonFromNMEA1083).
                         wV("direct", stats.jsonDirectConversion).
                         wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).
-                        info(log);
+                        toString());
                 stats.reset(t);
             }
         }

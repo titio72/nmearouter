@@ -21,8 +21,8 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSystemTime;
-import com.aboni.utils.Log;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

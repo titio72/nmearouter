@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.nmea0183.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.HWSettings;
+import com.aboni.nmea.router.utils.HWSettings;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;

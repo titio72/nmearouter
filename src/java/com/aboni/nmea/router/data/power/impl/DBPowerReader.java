@@ -19,7 +19,7 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
 import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;

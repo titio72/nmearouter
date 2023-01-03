@@ -15,10 +15,10 @@
 
 package com.aboni.nmea.router.data.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.data.TimerFilter;
+import com.aboni.utils.Utils;
 
 import javax.validation.constraints.NotNull;
 

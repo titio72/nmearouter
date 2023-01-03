@@ -22,7 +22,7 @@ import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;

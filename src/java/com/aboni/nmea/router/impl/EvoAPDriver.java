@@ -15,7 +15,6 @@
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
 import com.aboni.nmea.router.TimestampProvider;
@@ -25,8 +24,9 @@ import com.aboni.nmea.router.n2k.N2KMessageHandler;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.evo.EVO;
 import com.aboni.nmea.router.n2k.evo.EVOImpl;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Utils;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -91,10 +91,10 @@ public class EvoAPDriver implements AutoPilotDriver {
     public void setAuto() {
         N2KMessage m = evo.getAUTOMessage();
         try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").info(log);
+            log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").toString());
             msgSender.onMessage(m);
         } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").error(log, e);
+            log.error(() -> LogStringBuilder.start(AP_DRIVER).wO("Set AUTO").toString(), e);
         }
     }
 
@@ -113,14 +113,14 @@ public class EvoAPDriver implements AutoPilotDriver {
     @Override
     public void setStandby() {
         N2KMessage m = evo.getSTDBYMessage();
-        LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").info(log);
+        log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("Set STANDBY").toString());
         msgSender.onMessage(m);
     }
 
     @Override
     public void setWindVane() {
         N2KMessage m = evo.getVANEMessage();
-        LogStringBuilder.start(AP_DRIVER).wO("Set WIND VANE").info(log);
+        log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("Set WIND VANE").toString());
         msgSender.onMessage(m);
     }
 
@@ -165,24 +165,24 @@ public class EvoAPDriver implements AutoPilotDriver {
     }
 
     private void setHeading(double head) {
-        head = Utils.normalizeDegrees0To360(Math.round(head));
-        N2KMessage m = evo.getLockHeadingMessage(head);
+        double dHead = Utils.normalizeDegrees0To360(Math.round(head));
+        N2KMessage m = evo.getLockHeadingMessage(dHead);
         try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set locked heading").wV("head", head).info(log);
+            log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("Set locked heading").wV("head", dHead).toString());
             msgSender.onMessage(m);
         } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set Set locked heading").error(log, e);
+            log.error(() -> LogStringBuilder.start(AP_DRIVER).wO("Set Set locked heading").toString(), e);
         }
     }
 
     private void setWindDatum(double datum) {
-        datum = Utils.normalizeDegrees0To360(Math.round(datum));
-        N2KMessage m = evo.getWindDatumMessage(datum);
+        double dDatum = Utils.normalizeDegrees0To360(Math.round(datum));
+        N2KMessage m = evo.getWindDatumMessage(dDatum);
         try {
-            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").wV("wind datum", datum).info(log);
+            log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").wV("wind datum", dDatum).toString());
             msgSender.onMessage(m);
         } catch (Exception e) {
-            LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").error(log, e);
+            log.error(() -> LogStringBuilder.start(AP_DRIVER).wO("Set wind datum").toString(), e);
         }
     }
 
@@ -196,13 +196,13 @@ public class EvoAPDriver implements AutoPilotDriver {
             con.setReadTimeout(5000);
             int res = con.getResponseCode();
             if (res == 200) {
-                LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).info(log);
+                log.info(() -> LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).toString());
             } else {
-                LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).warn(log);
+                log.warning(() -> LogStringBuilder.start(AP_DRIVER).wO("send msg").wV("message", sURL).wV("res", res).toString());
             }
             con.disconnect();
         } catch (IOException e) {
-            LogStringBuilder.start(AP_DRIVER).wO("send msg to AP").wV("msg", m).error(log, e);
+            log.error(() -> LogStringBuilder.start(AP_DRIVER).wO("send msg to AP").wV("msg", m).toString(), e);
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.aboni.toolkit;
 
-import com.aboni.misc.Utils;
 import com.aboni.utils.MyThreadPool;
+import com.aboni.utils.Utils;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;

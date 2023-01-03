@@ -18,8 +18,8 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.*;
-import com.aboni.utils.DataEvent;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
@@ -57,7 +57,7 @@ public class NMEACacheImpl implements NMEACache {
                 lastVector = new DataEvent<>((MsgSOGAdCOG) s, timestampProvider.getNow(), src);
             }
         } catch (Exception e) {
-            LogStringBuilder.start("Cache").wO("cache sentence").wV("sentence", s).error(log, e);
+            log.error(() -> LogStringBuilder.start("Cache").wO("cache sentence").wV("sentence", s).toString(), e);
         }
     }
 

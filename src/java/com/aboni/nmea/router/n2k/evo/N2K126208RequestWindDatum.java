@@ -15,8 +15,8 @@
 
 package com.aboni.nmea.router.n2k.evo;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.n2k.messages.impl.N2KMessageImpl;
+import com.aboni.utils.Utils;
 
 import java.time.Instant;
 

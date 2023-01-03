@@ -7,8 +7,8 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 import com.aboni.nmea.router.n2k.can.N2KHeader;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import tel.schich.javacan.CanChannels;
@@ -63,10 +63,6 @@ public class TestSocketCAN {
             N2KMessageHeader h = new N2KHeader(frame.getId());
             N2KMessage msg = ThingsFactory.getInstance(N2KMessageFactory.class).newInstance(h, b);
             if (msg != null) cache.onMessage(msg);
-        /*} catch (LinuxNativeOperationException e) {
-            if (e.getErrorNumber() != 11) {
-                ConsoleLog.getLogger().error(ERROR_READING_FRAME, e);
-            }*/
         } catch (IOException e) {
             ConsoleLog.getLogger().error(ERROR_READING_FRAME, e);
         } catch (PGNDataParseException e) {

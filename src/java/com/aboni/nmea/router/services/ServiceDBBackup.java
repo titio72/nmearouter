@@ -15,9 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.db.DBHelper;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -45,6 +45,10 @@ public class ServiceDBBackup extends JSONWebService {
             } else {
                 return getError("Backup failed");
             }
+        } catch (InterruptedException e) {
+            log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            Thread.currentThread().interrupt();
+            return getError("Error " + e.getMessage());
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
             return getError("Error " + e.getMessage());

@@ -4,10 +4,10 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.utils.ThingsFactory;
-import com.aboni.utils.db.DBEventWriter;
-import com.aboni.utils.db.DBHelper;
-import com.aboni.utils.db.Event;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.Event;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.After;
@@ -161,6 +161,18 @@ public class TripManagerXImplTest {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 rs.next();
                 assertEquals("Capraia 1", rs.getString("description"));
+            }
+        }
+    }
+
+    @Test
+    public void testChangeDistance() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
+        tm.updateTripDistance(135, 91.2);
+        assertEquals(91.2, tm.getTrip(135).getDistance(), 0.0001);
+        try (DBHelper db = new DBHelper(true)) {
+            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, dist from trip_test where id=135")) {
+                rs.next();
+                assertEquals(91.2, rs.getDouble("dist"), 0.0001);
             }
         }
     }

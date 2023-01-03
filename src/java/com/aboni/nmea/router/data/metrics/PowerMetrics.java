@@ -16,9 +16,13 @@
 package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.nmea.router.data.Unit;
-import com.aboni.nmea.router.data.metrics.Metric;
 
 public final class PowerMetrics {
+
+    private PowerMetrics() {
+    }
+
+    ;
 
     public static final Metric VOLTAGE_0 = new Metric("V_0", "Voltage service battery", Unit.VOLTS);
     public static final Metric CURRENT_0 = new Metric("C_0", "Current service battery", Unit.AMPERE);

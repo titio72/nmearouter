@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.misc.SpeedMovingAverage;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.message.MsgSpeed;
+import com.aboni.utils.SpeedMovingAverage;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

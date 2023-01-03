@@ -3,7 +3,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.message.*;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;

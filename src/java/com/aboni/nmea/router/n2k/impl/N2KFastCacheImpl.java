@@ -1,11 +1,11 @@
 package com.aboni.nmea.router.n2k.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -156,7 +156,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
                     p.addMessage(msg);
                     callback.onMessage(p.getMessage());
                 } catch (Exception e) {
-                    LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("message received").wV(MESSAGE_KEY_NAME, msg).error(log, e);
+                    log.error(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("message received").wV(MESSAGE_KEY_NAME, msg).toString(), e);
                 }
             }
         }
@@ -182,15 +182,15 @@ public class N2KFastCacheImpl implements N2KFastCache {
             }
         } catch (PGNFastException e) {
             stats.incrOutOfSeq();
-            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "out of sequence message").debug(log);
+            log.debug(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "out of sequence message").toString());
             remove = true;
         } catch (PGNDataParseException e) {
             stats.incrParse();
-            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "parsing").debug(log);
+            log.debug(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).wV(ERROR_TYPE_KEY_NAME, "parsing").toString());
             remove = true;
         } catch (Exception e) {
             stats.incrUnknown();
-            LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(MESSAGE_KEY_NAME, msg).toString(), e);
             remove = true;
         }
         if (remove) {
@@ -206,7 +206,7 @@ public class N2KFastCacheImpl implements N2KFastCache {
             try {
                 callback.onMessage(p.getMessage());
             } catch (PGNDataParseException e) {
-                LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "premature end of message").error(log, e);
+                log.error(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO(FAST_MESSAGE_HANDLING_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "premature end of message").toString(), e);
             }
         }
         synchronized (cache) {
@@ -256,9 +256,9 @@ public class N2KFastCacheImpl implements N2KFastCache {
         if (Utils.isOlderThan(lastStatsTime, now, 30000)) {
             lastStatsTime = now;
             synchronized (stats) {
-                LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("Stats").wV("recv", stats.getRecv()).wV("fast", stats.fast)
+                log.info(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("Stats").wV("recv", stats.getRecv()).wV("fast", stats.fast)
                         .wV("oosError", stats.getOutOfSequenceErrors()).wV("parseError", stats.getParseErrors())
-                        .wV("unknownErros", stats.getUnknownErrors()).info(log);
+                        .wV("unknownErros", stats.getUnknownErrors()).toString());
                 stats.reset();
             }
         }

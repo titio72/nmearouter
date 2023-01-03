@@ -1,8 +1,11 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -91,6 +94,59 @@ public class TrackTestTableManager {
                 st.setDouble(5, (Double) t[4]);
                 assert (st.executeUpdate() == 1);
             }
+            db.getConnection().commit();
+        }
+    }
+
+    /*
+            "`lat` decimal(10,7) DEFAULT NULL," +
+            "`lon` decimal(10,7) DEFAULT NULL," +
+            "`TS` timestamp NOT NULL," +
+            "`anchor` int(11) DEFAULT '0'," +
+            "`dTime` int(11) DEFAULT NULL," +
+            "`dist` decimal(10,8) DEFAULT NULL," +
+            "`speed` double(10,2) DEFAULT NULL," +
+            "`maxSpeed` double(10,2) DEFAULT NULL," +
+            "`engine` TINYINT DEFAULT 2," +
+
+     */
+    public static void loadTrack(String file) throws SQLException, IOException, MalformedConfigurationException, ClassNotFoundException {
+        try (DBHelper db = new DBHelper(false)) {
+            PreparedStatement st = db.getConnection().prepareStatement("insert into track_test (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            FileReader f = new FileReader(file);
+            BufferedReader r = new BufferedReader(f);
+            r.readLine(); //skip header
+            String l;
+            while ((l = r.readLine()) != null) {
+                privateLoadCSVLine(st, l);
+                assert (st.executeUpdate() == 1);
+            }
+            f.close();
+            db.getConnection().commit();
+        }
+    }
+
+    private static void privateLoadCSVLine(PreparedStatement st, String l) throws SQLException {
+        String[] csv = l.split(",");
+        st.setDouble(1, Double.parseDouble(csv[0]));
+        st.setDouble(2, Double.parseDouble(csv[1]));
+        Instant d = Instant.parse(csv[2]);
+        st.setTimestamp(3, new Timestamp(d.toEpochMilli()));
+        st.setInt(4, Integer.parseInt(csv[4]));
+        st.setInt(5, Integer.parseInt(csv[5]));
+        st.setDouble(6, Double.parseDouble(csv[6]));
+        st.setDouble(7, Double.parseDouble(csv[7]));
+        st.setDouble(8, Double.parseDouble(csv[8]));
+        st.setDouble(9, Integer.parseInt(csv[9]));
+    }
+
+    public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException, ClassNotFoundException {
+        try (DBHelper db = new DBHelper(false)) {
+            PreparedStatement st = db.getConnection().prepareStatement("insert into track_test (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            for (String l : csv) {
+                privateLoadCSVLine(st, l);
+            }
+            assert (st.executeUpdate() == 1);
             db.getConnection().commit();
         }
     }

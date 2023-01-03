@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.DS18B20;
-import com.aboni.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
@@ -72,7 +72,7 @@ public class SensorTemp implements Sensor {
         try {
             sensor = new DS18B20();
         } catch (Exception e) {
-            LogStringBuilder.start("DS18B20Sensor").wO("init").error(log, e);
+            log.error(() -> LogStringBuilder.start("DS18B20Sensor").wO("init").toString(), e);
             sensor = null;
         }
     }

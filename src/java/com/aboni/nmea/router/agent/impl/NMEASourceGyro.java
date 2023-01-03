@@ -17,18 +17,15 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.misc.Utils;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.message.MsgAttitude;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
+import com.aboni.nmea.router.utils.HWSettings;
+import com.aboni.nmea.router.utils.LogAdmin;
 import com.aboni.sensors.*;
-import com.aboni.utils.HWSettings;
-import com.aboni.utils.LogAdmin;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 
@@ -36,6 +33,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class NMEASourceGyro extends NMEAAgentImpl {
 
@@ -157,7 +155,8 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 }
 
                 if (cache.getLastPosition().getData() != null) {
-                    NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter(timestampProvider.getYear());
+                    NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter(
+                            timestampProvider.getYear(), Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
                     m.setPosition(cache.getLastPosition().getData().getPosition());
 
                     if (SEND_HDT) {

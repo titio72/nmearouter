@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.message;
 
-import com.aboni.utils.HWSettings;
+import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.utils.JSONUtils;
 import org.json.JSONObject;
 

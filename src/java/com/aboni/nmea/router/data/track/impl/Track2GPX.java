@@ -21,7 +21,7 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
-import com.aboni.utils.Query;
+import com.aboni.nmea.router.utils.Query;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

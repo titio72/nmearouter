@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
-import com.aboni.utils.HWSettings;
+import com.aboni.nmea.router.utils.HWSettings;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;

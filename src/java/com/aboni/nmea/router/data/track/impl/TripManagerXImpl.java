@@ -18,8 +18,8 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.utils.db.DBEventWriter;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -226,6 +226,21 @@ public class TripManagerXImpl implements TripManagerX {
                 if (t.getMaxDate().getYear() == year || t.getMinDate().getYear() == year) l.add(t);
             }
             return Collections.unmodifiableList(l);
+        }
+    }
+
+    @Override
+    public void updateTripDistance(int id, double dist) throws TripManagerException {
+        init();
+        TripImpl t = (TripImpl) archive.getTrip(id);
+        if (t == null) throwUnknownTripException(id);
+        else {
+            t.setDistance(dist);
+            try (Connection c = new DBHelper(true).getConnection()) {
+                saveTrip(t, c);
+            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+                throw new TripManagerException("Error saving trip", e);
+            }
         }
     }
 

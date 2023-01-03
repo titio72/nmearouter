@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.toolkit;
 
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.Tester;
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorPressureTemp;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.Tester;
 
 import java.io.PrintStream;
 

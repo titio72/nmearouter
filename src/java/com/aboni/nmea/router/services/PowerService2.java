@@ -18,7 +18,7 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.SeriesReader;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

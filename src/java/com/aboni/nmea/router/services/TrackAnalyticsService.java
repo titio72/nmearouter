@@ -17,8 +17,8 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.data.track.JSONTrackAnalytics;
 import com.aboni.nmea.router.data.track.TrackManagementException;
-import com.aboni.utils.Log;
-import com.aboni.utils.Query;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

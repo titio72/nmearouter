@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgAttitude;
 import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
+import com.aboni.utils.Utils;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.ATTITUDE_PGN;
 

@@ -19,6 +19,9 @@ import com.aboni.nmea.router.data.Unit;
 
 public final class Metrics {
 
+    private Metrics() {
+    }
+
     public static final Metric PRESSURE = new Metric("P_ATM", "Atmospheric pressure", Unit.MILLIBAR);
     public static final Metric AIR_TEMPERATURE = new Metric("T_AIR", "Air temperature", Unit.CELSIUS);
     public static final Metric WATER_TEMPERATURE = new Metric("T_WTR", "Water temperature", Unit.CELSIUS);
@@ -26,4 +29,4 @@ public final class Metrics {
     public static final Metric WIND_SPEED = new Metric("W_SP", "Wind speed", Unit.KNOTS);
     public static final Metric WIND_DIRECTION = new Metric("W_DR", "Wind direction", Unit.DEGREES);
     public static final Metric ROLL = new Metric("ROLL", "Boat roll", Unit.DEGREES_SCALAR);
- }
+}

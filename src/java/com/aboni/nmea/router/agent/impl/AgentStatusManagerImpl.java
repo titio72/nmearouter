@@ -17,9 +17,9 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

@@ -15,9 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.n2k.messages.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.message.MsgSeatalkPilotHeading;
 import com.aboni.nmea.router.n2k.N2KMessageHeader;
+import com.aboni.utils.Utils;
 
 import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.SEATALK_PILOT_HEADING_PGN;
 

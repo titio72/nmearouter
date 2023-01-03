@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
-import com.aboni.misc.DataFilter;
-import com.aboni.misc.Utils;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.HMC5883L;
-import com.aboni.utils.Log;
+import com.aboni.utils.DataFilter;
+import com.aboni.utils.Utils;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
@@ -63,6 +63,10 @@ public class SensorHMC5883 extends I2CSensor {
             Thread.sleep(500);
             hmc5883l.setScale(HMC5883L.Scale.Gauss_1_30);
             return true;
+        } catch (InterruptedException e) {
+            error("Failed initialization HMC5883L", e);
+            Thread.currentThread().interrupt();
+            return false;
         } catch (Exception e) {
             error("Failed initialization HMC5883L", e);
             return false;

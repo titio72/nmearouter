@@ -15,7 +15,7 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.misc.Utils;
+import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 public interface MsgSeatalkPilotWindDatum extends Message {

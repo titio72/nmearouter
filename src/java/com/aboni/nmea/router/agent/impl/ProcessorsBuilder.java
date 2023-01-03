@@ -20,8 +20,8 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.impl.NMEASpeedFilter;
 import com.aboni.nmea.router.processors.*;
-import com.aboni.utils.Log;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 
 import java.util.ArrayList;
 import java.util.List;

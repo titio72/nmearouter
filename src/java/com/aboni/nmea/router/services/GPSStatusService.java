@@ -1,13 +1,13 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.GPSStatus;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.SatInfo;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
+import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,7 +93,7 @@ public class GPSStatusService extends JSONWebService {
             }
             return jSat;
         } catch (JSONException e) {
-            LogStringBuilder.start("GPSStatusService").w("JSON Serialization").error(getLogger(), e);
+            getLogger().error(() -> LogStringBuilder.start("GPSStatusService").w("JSON Serialization").toString(), e);
             return null;
         }
     }

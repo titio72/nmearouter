@@ -73,8 +73,8 @@ public class TrackPointBuilderImpl implements TrackPoint, TrackPointBuilder {
     }
 
     @Override
-    public synchronized TrackPointBuilder withPeriod(int period) {
-        this.period = period;
+    public synchronized TrackPointBuilder withPeriod(int periodSeconds) {
+        this.period = periodSeconds;
         return this;
     }
 

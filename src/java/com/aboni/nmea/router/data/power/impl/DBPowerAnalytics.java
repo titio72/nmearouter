@@ -18,11 +18,10 @@ package com.aboni.nmea.router.data.power.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.power.PowerAnalytics;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,12 +38,6 @@ public class DBPowerAnalytics implements PowerAnalytics {
                     "  from power where type='C_0' and TS>=? and TS<=? " +
                     "group by" +
                     "  FROM_UNIXTIME(round(UNIX_TIMESTAMP(TS)/?)*?)) T;";
-
-
-    @Inject
-    public DBPowerAnalytics() {
-
-    }
 
     @Override
     public JSONObject getPowerUsage(int samplingPeriod, Instant from, Instant to) throws DataManagementException {

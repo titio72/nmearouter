@@ -20,7 +20,7 @@ import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.agent.AgentStatusManager.STATUS;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

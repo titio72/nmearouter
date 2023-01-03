@@ -19,8 +19,8 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.Log;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 

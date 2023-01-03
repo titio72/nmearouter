@@ -30,11 +30,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics.impl;
 
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.utils.db.DBHelper;
+import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 import org.influxdb.dto.BoundParameterQuery;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -49,19 +48,19 @@ public class DBMetricReaderInflux implements DataReader {
 
     @Override
     public void readData(@NotNull Instant from, @NotNull Instant to, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBMetricsHelper db = new DBMetricsHelper()) {
             Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME)
                     .forDatabase("nmearouter")
                     .bind("startTime", from.toEpochMilli())
                     .bind("endTime", to.toEpochMilli())
                     .create();
             handleResult(target, db, query);
-        } catch (ClassNotFoundException | MalformedConfigurationException e) {
+        } catch (Exception e) {
             throw new DataManagementException("Error reading meteo", e);
         }
     }
 
-    private void handleResult(DataReaderListener target, DBHelper db, Query query) throws DataManagementException {
+    private void handleResult(DataReaderListener target, DBMetricsHelper db, Query query) throws DataManagementException {
         QueryResult queryResult = db.getInflux().query(query);
         for (QueryResult.Result r : queryResult.getResults()) {
             target.onRead(getSample(r));
@@ -78,7 +77,7 @@ public class DBMetricReaderInflux implements DataReader {
 
     @Override
     public void readData(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBMetricsHelper db = new DBMetricsHelper()) {
             Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME_AND_TYPE)
                     .forDatabase("nmearouter")
                     .bind("startTime", from.toEpochMilli())
@@ -86,7 +85,7 @@ public class DBMetricReaderInflux implements DataReader {
                     .bind("type", tag)
                     .create();
             handleResult(target, db, query);
-        } catch (ClassNotFoundException | MalformedConfigurationException e) {
+        } catch (Exception e) {
             throw new DataManagementException("Error reading meteo", e);
         }
     }

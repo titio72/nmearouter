@@ -15,10 +15,10 @@
 
 package com.aboni.nmea.router.data.impl;
 
-import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.StatScanner;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
+import com.aboni.nmea.router.data.metrics.Metric;
 
 import javax.inject.Inject;
 import java.util.*;

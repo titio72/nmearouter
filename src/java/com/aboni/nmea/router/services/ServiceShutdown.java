@@ -15,7 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
@@ -43,6 +43,10 @@ public class ServiceShutdown extends JSONWebService {
             int retCode = process.waitFor();
             log.info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).wV("return code", retCode).toString());
             return getOk();
+        } catch (InterruptedException e) {
+            log.errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
+            Thread.currentThread().interrupt();
+            return getError("Error " + e.getMessage());
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
             return getError("Error " + e.getMessage());

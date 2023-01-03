@@ -17,7 +17,7 @@ package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnJSONMessage;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;

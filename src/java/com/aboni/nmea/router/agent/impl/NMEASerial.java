@@ -15,7 +15,6 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
@@ -23,7 +22,8 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
@@ -169,7 +169,7 @@ public class NMEASerial extends NMEAAgentImpl {
             }
             return true;
         } catch (Exception e) {
-            getLogBuilder().w("activate").wV("device", toString()).error(log, e);
+            log.error(() -> getLogBuilder().w("activate").wV("device", toString()).toString(), e);
             port = null;
             bufferedReader = null;
         }
@@ -225,15 +225,16 @@ public class NMEASerial extends NMEAAgentImpl {
             s = reader.readLine();
             handleStringMessage(s);
         } catch (SerialPortTimeoutException e) {
-            getLogBuilder().wO("read").wV("status", "timeout").info(log);
+            log.info(() -> getLogBuilder().wO("read").wV("status", "timeout").toString());
             Utils.pause(PORT_WAIT_FOR_DATA);
         } catch (SerialPortIOException e) {
-            getLogBuilder().wO("read").wV("status", "reset").error(log, e);
+            log.error(() -> getLogBuilder().wO("read").wV("status", "reset").toString(), e);
             resetPortAndReader();
         } catch (IllegalArgumentException e) {
-            getLogBuilder().wO("read").wV("line", s).error(log, e);
+            String sLine = s;
+            log.error(() -> getLogBuilder().wO("read").wV("line", sLine).toString(), e);
         } catch (Exception e) {
-            getLogBuilder().wO("read").error(log, e);
+            log.error(() -> getLogBuilder().wO("read").toString(), e);
         }
     }
 
@@ -286,7 +287,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 port.closePort();
             }
         } catch (Exception e) {
-            getLogBuilder().wO("deactivate").error(log, e);
+            log.error(() -> getLogBuilder().wO("deactivate").toString(), e);
         } finally {
             resetPortAndReader();
         }
@@ -309,7 +310,7 @@ public class NMEASerial extends NMEAAgentImpl {
                         updateWriteStats(strSentence);
                         updateWriteStats();
                     } else {
-                        getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").error(log);
+                        log.error(() -> getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").toString());
                         resetPortAndReader();
                     }
                 }

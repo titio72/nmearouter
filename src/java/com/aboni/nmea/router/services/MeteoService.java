@@ -19,10 +19,10 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.sampledquery.SampledQuery;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.Query;
-import com.aboni.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -55,7 +55,8 @@ public class MeteoService extends JSONWebService {
             try {
                 return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
             } catch (SampledQueryException e) {
-                LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).errorForceStacktrace(log, e);
+                String sQuery = "" + q;
+                log.errorForceStacktrace(() -> LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).toString(), e);
                 return getError("Error executing query");
             }
         } else {

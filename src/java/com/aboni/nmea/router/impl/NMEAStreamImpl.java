@@ -18,7 +18,7 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;

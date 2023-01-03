@@ -18,7 +18,7 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import org.junit.Test;
 
 import java.util.ArrayList;

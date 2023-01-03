@@ -17,7 +17,7 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackDumperFactory;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ThingsFactory;
 
 import javax.inject.Inject;
 

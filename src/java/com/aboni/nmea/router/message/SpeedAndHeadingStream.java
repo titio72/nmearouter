@@ -15,9 +15,9 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.utils.DataEvent;
+import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

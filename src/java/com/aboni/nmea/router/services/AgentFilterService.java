@@ -22,7 +22,7 @@ import com.aboni.nmea.router.filters.impl.JSONFilterSetSerializer;
 import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.services.impl.AgentListSerializer;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;

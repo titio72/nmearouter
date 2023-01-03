@@ -58,10 +58,10 @@ import com.aboni.nmea.router.nmea0183.impl.Message2NMEA0183Impl;
 import com.aboni.nmea.router.nmea0183.impl.NMEA0183MessageFactoryImpl;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.impl.QueryFactoryImpl;
-import com.aboni.utils.Log;
-import com.aboni.utils.LogAdmin;
-import com.aboni.utils.RouterLog;
-import com.aboni.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.LogAdmin;
+import com.aboni.nmea.router.utils.RouterLog;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
@@ -126,6 +126,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
         bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
+        bind(TrackScanner.class).to(TrackScannerImpl.class);
 
     }
 }

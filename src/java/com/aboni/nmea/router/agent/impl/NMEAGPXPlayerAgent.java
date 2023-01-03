@@ -17,9 +17,9 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
@@ -63,10 +63,10 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
     public void setFile(@NotNull String file) {
         if (this.file == null) {
-            getLogBuilder().wO("init").wV("file", file).info(log);
+            log.info(() -> getLogBuilder().wO("init").wV("file", file).toString());
             this.file = file;
         } else {
-            getLogBuilder().wO("init").wV("error", file).wV("error", "already initialized").error(log);
+            log.error(() -> getLogBuilder().wO("init").wV("error", file).wV("error", "already initialized").toString());
         }
     }
 
@@ -110,7 +110,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
             d = builder.parse(new InputSource(file));
             d.getDocumentElement().normalize();
         } catch (Exception e) {
-            getLogBuilder().wO("play gpx").error(log, e);
+            log.error(() -> getLogBuilder().wO("play gpx").toString(), e);
             return false;
         }
 
@@ -132,7 +132,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
                         GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
                         doIt(pos);
                     } catch (Exception e) {
-                        getLogBuilder().wO("play gpx").error(log, e);
+                        log.error(() -> getLogBuilder().wO("play gpx").toString(), e);
                     }
                 }
             }

@@ -17,12 +17,12 @@ package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.conf.LogLevelType;
+import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.utils.LogAdmin;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
-import com.aboni.utils.ConsoleLog;
-import com.aboni.utils.LogAdmin;
-import com.aboni.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 

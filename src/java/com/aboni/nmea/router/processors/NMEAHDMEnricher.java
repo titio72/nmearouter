@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.processors;
 
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.misc.Utils;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.Message;
@@ -24,8 +24,9 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.message.impl.MsgHeadingImpl;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.utils.DataEvent;
+import com.aboni.nmea.router.utils.DataEvent;
 import com.aboni.utils.Pair;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -34,6 +35,7 @@ import net.sf.marineapi.nmea.util.Position;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.util.logging.Logger;
 
 /**
  * To be used when there's only HDM in the stream and one needs to enrich it with variation and deviation.
@@ -49,7 +51,7 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
 
     @Inject
     public NMEAHDMEnricher(@NotNull NMEACache cache, @NotNull TimestampProvider tp) {
-        m = new NMEAMagnetic2TrueConverter(tp.getYear());
+        m = new NMEAMagnetic2TrueConverter(tp.getYear(), Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
         this.cache = cache;
     }
 

@@ -21,7 +21,7 @@ import com.aboni.nmea.router.data.track.PositionStats;
 import com.aboni.nmea.router.data.track.TrackManager;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import net.sf.marineapi.nmea.util.Position;
 
 public class TrackManagerImpl implements TrackManager {

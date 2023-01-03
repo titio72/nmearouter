@@ -34,5 +34,7 @@ public interface TripManagerX {
 
     List<Trip> getTrips(int year, boolean sortDescendant) throws TripManagerException;
 
+    void updateTripDistance(int id, double dist) throws TripManagerException;
+
     void trimTrip(int id) throws TripManagerException;
 }

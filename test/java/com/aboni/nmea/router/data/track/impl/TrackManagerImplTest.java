@@ -1,11 +1,11 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.misc.Utils;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.track.TrackManager;
 import com.aboni.nmea.router.data.track.TrackPoint;
-import com.aboni.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.utils.Utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.sf.marineapi.nmea.util.Position;

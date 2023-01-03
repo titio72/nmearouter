@@ -276,9 +276,9 @@ function getGKey() {
   return xmlHttp.responseText;
 }
 
-function dropTrip(id, cback) {
+function manageTrip(id, action, cback) {
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/droptrip?trip=" + id);
+  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/" + action + "?trip=" + id);
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.readyState==4 && xmlHttp.status==200) {
       cback();
@@ -288,16 +288,16 @@ function dropTrip(id, cback) {
   xmlHttp.send(null);
 }
 
+function dropTrip(id, cback) {
+  manageTrip(id, "droptrip", cback);
+}
+
 function trimTrip(id, cback) {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + ":1112/trimtrip?trip=" + id);
-  xmlHttp.onreadystatechange = function() {
-    if (xmlHttp.readyState==4 && xmlHttp.status==200) {
-      cback();
-    }
-  };
-  xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-  xmlHttp.send(null);
+  manageTrip(id, "trimtrip", cback);
+}
+
+function fixTrip(id, cback) {
+  manageTrip(id, "fixtrip", cback);
 }
 
 function changeName(trip, name, cback) {

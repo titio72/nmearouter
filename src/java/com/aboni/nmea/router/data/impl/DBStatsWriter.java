@@ -33,10 +33,10 @@ package com.aboni.nmea.router.data.impl;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.db.DBEventWriter;
+import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.db.DBEventWriter;
-import com.aboni.utils.db.DBHelper;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -61,7 +61,7 @@ public class DBStatsWriter implements StatsWriter {
             try {
                 db = new DBHelper(true);
             } catch (Exception e) {
-                LogStringBuilder.start("DBStatsWriter").wV("type", tag).wO("init").error(log, e);
+                log.error(() -> LogStringBuilder.start("DBStatsWriter").wV("type", tag).wO("init").toString(), e);
             }
         }
     }

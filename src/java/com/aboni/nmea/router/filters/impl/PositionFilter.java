@@ -19,7 +19,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -208,7 +208,7 @@ public class PositionFilter implements NMEAFilter {
     public void dumpStats(Log log) {
         if (log != null) {
             synchronized (stats) {
-                LogStringBuilder.start("PositionFilter").wO("stats").w(stats.toString()).info(log);
+                log.info(() -> LogStringBuilder.start("PositionFilter").wO("stats").w(stats.toString()).toString());
                 stats.reset();
             }
         }

@@ -19,12 +19,15 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.DataChange;
+import com.aboni.nmea.router.data.HistoryProvider;
+import com.aboni.nmea.router.data.Sampler;
+import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.message.*;
-import com.aboni.utils.Log;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.Pair;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -132,7 +135,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                     NMEAMeteoMonitorTarget.this.postMessage(msg);
                 }
             } catch (JSONException e) {
-                getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").error(log, e);
+                log.error(() -> getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").toString(), e);
             }
         }
     }
@@ -213,7 +216,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
             meteoSampler.start();
             return true;
         } catch (Exception e) {
-            getLogBuilder().wO("activate").errorForceStacktrace(log, e);
+            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
             return false;
         }
     }
@@ -241,8 +244,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     @Override
     public List<StatsSample> getHistory(Metric ix) {
-        List<StatsSample> _res = statsWriter.getHistory(ix);
-        List<StatsSample> res = new ArrayList<>(_res);
+        List<StatsSample> h = statsWriter.getHistory(ix);
+        List<StatsSample> res = new ArrayList<>(h);
         StatsSample current = meteoSampler.getCurrent(ix);
         if (current != null) res.add(current);
         return res;
