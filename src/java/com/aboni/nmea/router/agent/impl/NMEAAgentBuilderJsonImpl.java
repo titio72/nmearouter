@@ -122,7 +122,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
                 agent = buildTrackTarget(a, q);
                 break;
             case AgentTypes.METEO:
-                agent = buildStandard(a, q, NMEAMeteoDBTarget.class, AgentTypes.METEO);
+                agent = buildStandard(a, q, NMEAMetricDBTarget.class, AgentTypes.METEO);
                 break;
             case AgentTypes.POWER:
                 agent = buildStandard(a, q, NMEAPowerDBTarget.class, AgentTypes.POWER);
