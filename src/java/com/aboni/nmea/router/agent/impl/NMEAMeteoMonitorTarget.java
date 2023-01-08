@@ -19,10 +19,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.DataChange;
-import com.aboni.nmea.router.data.HistoryProvider;
-import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
@@ -102,11 +99,11 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                 if (pc.first == metric) {
                     StatsChange c = pc.second;
                     AtomicReference<Pair<Long, Double>> res = new AtomicReference<>();
-                    statsWriter.scan(metric, (StatsSample s) -> {
-                        if (s.getT1() > (time - c.referencePeriodMs)) {
+                    statsWriter.scan(metric, (Sample s) -> {
+                        if (s.getTimestamp() > (time - c.referencePeriodMs)) {
                             return false;
                         } else {
-                            res.set(new Pair<>(s.getT1(), s.getAvg()));
+                            res.set(new Pair<>(s.getTimestamp(), s.getValue()));
                             return true;
                         }
                     }, false);
@@ -123,13 +120,13 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         @Override
         public void onSample(Metric metric, StatsSample sample) {
             try {
-                if (sample.getSamples() > 0 && !Double.isNaN(sample.getAvg())) {
+                if (sample.getSamples() > 0 && !Double.isNaN(sample.getValue())) {
                     JSONObject msg = new JSONObject();
                     msg.put("topic", "meteo_sample");
                     msg.put("tag", sample.getTag());
-                    msg.put("min", sample.getMin());
-                    msg.put("avg", sample.getAvg());
-                    msg.put("max", sample.getMax());
+                    msg.put("min", sample.getMinValue());
+                    msg.put("avg", sample.getValue());
+                    msg.put("max", sample.getMaxValue());
                     msg.put("samples", sample.getSamples());
                     msg.put("time", sample.getT0());
                     NMEAMeteoMonitorTarget.this.postMessage(msg);
@@ -243,11 +240,11 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
     }
 
     @Override
-    public List<StatsSample> getHistory(Metric ix) {
-        List<StatsSample> h = statsWriter.getHistory(ix);
-        List<StatsSample> res = new ArrayList<>(h);
+    public List<Sample> getHistory(Metric ix) {
+        List<Sample> h = statsWriter.getHistory(ix);
+        List<Sample> res = new ArrayList<>(h);
         StatsSample current = meteoSampler.getCurrent(ix);
-        if (current != null) res.add(current);
+        if (current != null) res.add(current.getImmutableCopy());
         return res;
     }
 }

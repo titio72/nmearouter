@@ -16,5 +16,5 @@
 package com.aboni.nmea.router.data;
 
 public interface StatScanner {
-    boolean scan(StatsSample sample);
+    boolean scan(Sample sample);
 }

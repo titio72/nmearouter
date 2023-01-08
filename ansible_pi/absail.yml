@@ -12,10 +12,8 @@
         - build-essential
         - mariadb-server
         - mariadb-client
-        - python-pymysql
         - python3-pymysql
         - can-utils
-        - wiringpi
         - i2c-tools
       state: latest
 

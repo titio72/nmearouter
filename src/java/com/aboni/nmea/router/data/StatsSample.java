@@ -30,7 +30,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data;
 
-public abstract class StatsSample {
+public abstract class StatsSample implements Sample {
 
     private final String tag;
     protected double avg;
@@ -40,6 +40,12 @@ public abstract class StatsSample {
     protected long t1;
     protected int samples = 0;
 
+    @Override
+    public Sample getImmutableCopy() {
+        return ImmutableSample.newInstance(getT0(), getTag(), getMinValue(), getValue(), getMaxValue());
+    }
+
+    @Override
     public String getTag() {
         return tag;
     }
@@ -48,16 +54,24 @@ public abstract class StatsSample {
         return samples;
     }
 
-    public double getAvg() {
+    @Override
+    public double getValue() {
         return avg;
     }
 
-    public double getMin() {
+    @Override
+    public double getMinValue() {
         return min;
     }
 
-    public double getMax() {
+    @Override
+    public double getMaxValue() {
         return max;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return getT0();
     }
 
     public long getT0() {

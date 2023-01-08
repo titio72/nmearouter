@@ -46,8 +46,8 @@ public class TripsToJSON {
             double distance = t.getDistance();
             totDuration += duration;
             totalDistance += distance;
-            if (minDate == null || minDate.compareTo(t.getMinDate()) > 0) minDate = t.getMinDate();
-            if (maxDate == null || maxDate.compareTo(t.getMaxDate()) < 0) maxDate = t.getMaxDate();
+            if (minDate == null || minDate.isAfter(t.getMinDate())) minDate = t.getMinDate();
+            if (maxDate == null || maxDate.isBefore(t.getMaxDate())) maxDate = t.getMaxDate();
             nDays += t.countDays();
             JSONObject trip = new JSONObject();
             trip.put("id", t.getTrip());

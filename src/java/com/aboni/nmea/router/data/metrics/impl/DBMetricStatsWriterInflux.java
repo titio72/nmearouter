@@ -16,7 +16,7 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 
@@ -41,9 +41,9 @@ public class DBMetricStatsWriterInflux implements StatsWriter {
     }
 
     @Override
-    public void write(StatsSample s, long ts) {
+    public void write(Sample s, long ts) {
         if (helper != null) {
-            helper.writeMetric(ts, "meteo", s.getTag(), s.getAvg(), s.getMin(), s.getMax());
+            helper.writeMetric(ts, "meteo", s.getTag(), s.getValue(), s.getMinValue(), s.getMaxValue());
         }
     }
 

@@ -20,6 +20,7 @@ import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.utils.LogAdmin;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -54,7 +55,7 @@ public class UpdateRoll {
         long last = 0;
         try (PreparedStatement stUpd = db.getConnection().prepareStatement("delete from meteo where id=?")) {
             while (rs.next()) {
-                Timestamp ts = rs.getTimestamp(2);
+                Timestamp ts = rs.getTimestamp(2, Utils.UTC_CALENDAR);
                 int id = rs.getInt(1);
                 long t = ts.getTime();
                 if (last == 0) {

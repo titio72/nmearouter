@@ -19,16 +19,16 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class SampleTest {
+public class ImmutableSampleTest {
 
     @Test
     public void newInstance() {
         long now = System.currentTimeMillis();
-        Sample s = Sample.newInstance(now, "TestTag", 0.1, 0.5, 0.9);
+        Sample s = ImmutableSample.newInstance(now, "TestTag", 0.1, 0.5, 0.9);
         assertEquals(0.1, s.getMinValue(), 0.00001);
         assertEquals(0.5, s.getValue(), 0.00001);
         assertEquals(0.9, s.getMaxValue(), 0.00001);
         assertEquals("TestTag", s.getTag());
-        assertEquals(now, s.getTs());
+        assertEquals(now, s.getTimestamp());
     }
 }

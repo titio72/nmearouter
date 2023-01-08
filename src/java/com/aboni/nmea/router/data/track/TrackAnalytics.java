@@ -223,7 +223,7 @@ public class TrackAnalytics {
         return stats;
     }
 
-    public void processSample(TrackPoint sample) {
+    public void processSample(int id, TrackPoint sample) {
         if (stats.currentLeg == null && !sample.isAnchor()) {
             // started moving
             stats.createLeg();

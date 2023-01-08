@@ -18,7 +18,7 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.data.HistoryProvider;
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.data.sampledquery.SampleWriter;
@@ -44,11 +44,11 @@ public class MeteoRollingWindowService extends JSONWebService {
 
     private static class SimpleWriter implements SampleWriter {
         @Override
-        public JSONObject[] getSampleNode(StatsSample sample) {
-            if (sample != null && !Double.isNaN(sample.getAvg())) {
+        public JSONObject[] getSampleNode(Sample sample) {
+            if (sample != null && !Double.isNaN(sample.getValue())) {
                 JSONObject res = new JSONObject();
-                res.put("x", sample.getT1());
-                res.put("y", sample.getAvg());
+                res.put("x", sample.getTimestamp());
+                res.put("y", sample.getValue());
                 return new JSONObject[]{res};
             } else {
                 return new JSONObject[]{};
@@ -83,7 +83,7 @@ public class MeteoRollingWindowService extends JSONWebService {
         }
         HistoryProvider meteoProvider = findService();
         if (meteoProvider != null) {
-            List<StatsSample> series = meteoProvider.getHistory(i);
+            List<Sample> series = meteoProvider.getHistory(i);
             toJSON.fillResponse(type, series);
             return toJSON.getResult();
         }

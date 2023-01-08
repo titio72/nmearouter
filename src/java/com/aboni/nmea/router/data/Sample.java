@@ -30,44 +30,22 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data;
 
-public class Sample {
+import java.time.Instant;
 
-    private final long ts;
-    private final String tag;
-    private final double maxValue;
-    private final double minValue;
-    private final double value;
+public interface Sample {
 
-    public static Sample newInstance(long time, String tag, double min, double v, double max) {
-        return new Sample(time, tag, min, v, max);
-    }
+    Sample getImmutableCopy();
 
-    private Sample(long time, String tag, double min, double v, double max) {
-        this.ts = time;
-        this.tag = tag;
-        this.minValue = min;
-        this.value = v;
-        this.maxValue = max;
-    }
+    long getTimestamp();
 
-    public long getTs() {
-        return ts;
-    }
+    default Instant getInstant() { return Instant.ofEpochMilli(getTimestamp()); }
 
-    public String getTag() {
-        return tag;
-    }
+    String getTag();
 
-    public double getMaxValue() {
-        return maxValue;
-    }
+    double getMaxValue();
 
-    public double getMinValue() {
-        return minValue;
-    }
+    double getMinValue();
 
-    public double getValue() {
-        return value;
-    }
+    double getValue();
 
 }

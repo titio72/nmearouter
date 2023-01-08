@@ -16,11 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.nmea.router.data.DataManagementException;
-
-import java.time.Instant;
+import com.aboni.nmea.router.utils.Query;
 
 public interface WindStatsReader {
 
-    WindStats getWindStats(Instant from, Instant to, int sectors) throws DataManagementException;
+    WindStats getWindStats(Query query, int sectors) throws DataManagementException;
 
 }

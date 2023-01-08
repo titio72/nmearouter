@@ -19,6 +19,7 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.track.TrackEvent;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.Event;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -68,7 +69,7 @@ public class DBTrackEventWriter implements DBEventWriter {
             stm.setDouble(1, t.getPoint().getPosition().getLatitude());
             stm.setDouble(2, t.getPoint().getPosition().getLongitude());
             Timestamp x = new Timestamp(e.getTime());
-            stm.setTimestamp(3, x);
+            stm.setTimestamp(3, x, Utils.UTC_CALENDAR);
             stm.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
             stm.setInt(5, t.getPoint().getPeriod());
             stm.setDouble(6, t.getPoint().getAverageSpeed());

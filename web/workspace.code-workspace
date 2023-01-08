@@ -12,6 +12,10 @@
 		{
 			"name": "RF",
 			"path": "../../../../Documents/PlatformIO/Projects/RF"
+		},
+		{
+			"name": "Test",
+			"path": "../../../../Documents/PlatformIO/Projects/Test"
 		}
 	]
 }

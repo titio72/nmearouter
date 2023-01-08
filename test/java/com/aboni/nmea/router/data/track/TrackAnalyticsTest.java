@@ -29,6 +29,7 @@ public class TrackAnalyticsTest {
             //skip header
             in.readLine();
             String l = null;
+            int id = 1000;
             while ((l = in.readLine()) != null) {
                 String[] p = l.split(",");
                 TrackPoint tp = new TrackPointBuilderImpl()
@@ -37,7 +38,7 @@ public class TrackAnalyticsTest {
                         .withDistance(Double.parseDouble(p[6]))
                         .withSpeed(Double.parseDouble(p[7]), Double.parseDouble(p[9]))
                         .withPeriod(Integer.parseInt(p[5])).getPoint();
-                a.processSample(tp);
+                a.processSample(id++, tp);
             }
             assertEquals(2, a.getStats().legs.size());
             System.out.printf(a.getStats().toJson().toString(2));
@@ -52,6 +53,7 @@ public class TrackAnalyticsTest {
             //skip header
             in.readLine();
             String l = null;
+            int id = 1000;
             while ((l = in.readLine()) != null) {
                 String[] p = l.split(",");
                 TrackPoint tp = new TrackPointBuilderImpl()
@@ -60,7 +62,7 @@ public class TrackAnalyticsTest {
                         .withDistance(Double.parseDouble(p[6]))
                         .withSpeed(Double.parseDouble(p[7]), Double.parseDouble(p[9]))
                         .withPeriod(Integer.parseInt(p[5])).getPoint();
-                a.processSample(tp);
+                a.processSample(id++, tp);
             }
             assertEquals(2, a.getStats().legs.size());
             assertEquals(87.0174665, a.getStats().totalNavigation.value, 0.000001);

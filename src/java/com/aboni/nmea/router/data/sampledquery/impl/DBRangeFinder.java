@@ -24,6 +24,7 @@ import com.aboni.nmea.router.utils.Query;
 import com.aboni.nmea.router.utils.QueryByDate;
 import com.aboni.nmea.router.utils.QueryById;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,8 +56,8 @@ public class DBRangeFinder implements RangeFinder {
 
     private void fillStatement(PreparedStatement stm, Query q) throws SQLException {
         if (q instanceof QueryByDate) {
-            stm.setTimestamp(1, new java.sql.Timestamp(((QueryByDate) q).getFrom().toEpochMilli()));
-            stm.setTimestamp(2, new java.sql.Timestamp(((QueryByDate) q).getTo().toEpochMilli()));
+            stm.setTimestamp(1, new java.sql.Timestamp(((QueryByDate) q).getFrom().toEpochMilli()), Utils.UTC_CALENDAR);
+            stm.setTimestamp(2, new java.sql.Timestamp(((QueryByDate) q).getTo().toEpochMilli()), Utils.UTC_CALENDAR);
         } else if (q instanceof QueryById) {
             stm.setInt(1, ((QueryById) q).getId());
             stm.setInt(2, ((QueryById) q).getId());
@@ -73,8 +74,8 @@ public class DBRangeFinder implements RangeFinder {
                     try (ResultSet rs = stm.executeQuery()) {
                         if (rs.next()) {
                             long count = rs.getLong(1);
-                            Instant tMax = rs.getTimestamp(2).toInstant();
-                            Instant tMin = rs.getTimestamp(3).toInstant();
+                            Instant tMax = rs.getTimestamp(2, Utils.UTC_CALENDAR).toInstant();
+                            Instant tMin = rs.getTimestamp(3, Utils.UTC_CALENDAR).toInstant();
                             if (tMax != null && tMin != null) {
                                 return new Range(tMax, tMin, count);
                             }

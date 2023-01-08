@@ -47,10 +47,10 @@ public class Track2JSONTest {
 
         @Override
         public void readTrack(@NotNull Query q, @NotNull TrackReaderListener target) throws TrackManagementException {
-            target.onRead(getSample(10001000, 43.10000000, 10.08000000));
-            target.onRead(getSample(10061000, 43.10000100, 10.08000100));
-            target.onRead(getSample(10121000, 43.10000200, 10.08000200));
-            target.onRead(getSample(10181000, 43.10000300, 10.08000300));
+            target.onRead(1001, getSample(10001000, 43.10000000, 10.08000000));
+            target.onRead(1002, getSample(10061000, 43.10000100, 10.08000100));
+            target.onRead(1003, getSample(10121000, 43.10000200, 10.08000200));
+            target.onRead(1004, getSample(10181000, 43.10000300, 10.08000300));
         }
     }
 

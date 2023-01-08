@@ -18,6 +18,7 @@ package com.aboni.toolkit;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -67,7 +68,7 @@ public class TrackToDB2 {
                                 st.setDouble(1, p.lat);
                                 st.setDouble(2, p.lon);
                                 Timestamp x = new Timestamp(p.timestamp.getTimeInMillis());
-                                st.setTimestamp(3, x);
+                                st.setTimestamp(3, x, Utils.UTC_CALENDAR);
                                 st.setInt(4, 0);
                                 st.setInt(5, (last != null) ? (int) (p.timestamp.getTimeInMillis() - last.timestamp.getTimeInMillis()) : 0);
                                 st.setDouble(6, 0.0);

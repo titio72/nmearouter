@@ -15,8 +15,8 @@
 
 package com.aboni.nmea.router.data.impl;
 
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatScanner;
-import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 
@@ -25,11 +25,11 @@ import java.util.*;
 
 public class MemoryStatsWriter implements StatsWriter {
 
-    private static final List<StatsSample> EMPTY = new LinkedList<>();
+    private static final List<Sample> EMPTY = new LinkedList<>();
 
     private static final long PERIOD_MS = 6 * 60 * 60 * 1000L; // 6 hours
 
-    private final Map<String, List<StatsSample>> history;
+    private final Map<String, List<Sample>> history;
 
     @Inject
     public MemoryStatsWriter() {
@@ -37,11 +37,11 @@ public class MemoryStatsWriter implements StatsWriter {
     }
 
     @Override
-    public void write(StatsSample sample, long now) {
-        List<StatsSample> hist = getOrCreateHistory(sample.getTag());
+    public void write(Sample sample, long now) {
+        List<Sample> hist = getOrCreateHistory(sample.getTag());
         synchronized (hist) {
-            hist.add(sample.cloneStats());
-            while (!hist.isEmpty() && hist.get(0).getT1() < (now - PERIOD_MS)) hist.remove(0);
+            hist.add(sample.getImmutableCopy());
+            while (!hist.isEmpty() && hist.get(0).getTimestamp() < (now - PERIOD_MS)) hist.remove(0);
         }
     }
 
@@ -55,8 +55,8 @@ public class MemoryStatsWriter implements StatsWriter {
         // nothing to destroy
     }
 
-    public List<StatsSample> getHistory(Metric metric) {
-        List<StatsSample> res;
+    public List<Sample> getHistory(Metric metric) {
+        List<Sample> res;
         synchronized (history) {
             res = history.getOrDefault(metric.getId(), null);
         }
@@ -65,19 +65,19 @@ public class MemoryStatsWriter implements StatsWriter {
     }
 
     public void scan(Metric tag, StatScanner scanner, boolean backward) {
-        List<StatsSample> list = getHistory(tag);
+        List<Sample> list = getHistory(tag);
         synchronized (list) {
             if (list.isEmpty()) return;
-            ListIterator<StatsSample> iterator = list.listIterator(backward ? (list.size() - 1) : 0);
+            ListIterator<Sample> iterator = list.listIterator(backward ? (list.size() - 1) : 0);
             while (backward ? iterator.hasPrevious() : iterator.hasNext()) {
-                StatsSample s = backward ? iterator.previous() : iterator.next();
+                Sample s = backward ? iterator.previous() : iterator.next();
                 if (!scanner.scan(s)) return;
             }
         }
     }
 
-    private List<StatsSample> getOrCreateHistory(String tag) {
-        List<StatsSample> res;
+    private List<Sample> getOrCreateHistory(String tag) {
+        List<Sample> res;
         synchronized (history) {
             res = history.getOrDefault(tag, null);
             if (res == null) {

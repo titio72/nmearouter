@@ -39,7 +39,7 @@ public class Track2KML implements TrackDumper {
         }
 
         @Override
-        public void onRead(TrackPoint sample) {
+        public void onRead(int id, TrackPoint sample) {
             if (TRACK_THEM_ALL) {
                 GeoPositionT p = sample.getPosition();
                 theWriter.addToCoordinates(p.getLatitude(), p.getLongitude());

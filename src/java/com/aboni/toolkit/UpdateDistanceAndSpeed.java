@@ -25,6 +25,7 @@ import com.aboni.nmea.router.utils.LogAdmin;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.utils.Utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -39,7 +40,7 @@ public class UpdateDistanceAndSpeed {
     private static TrackPoint getTrackPoint(TrackPointBuilder builder, ResultSet rs) throws SQLException {
         return builder.getNew().
                 withPosition(new GeoPositionT(
-                        rs.getTimestamp("TS").getTime(),
+                        rs.getTimestamp("TS", Utils.UTC_CALENDAR).getTime(),
                         rs.getDouble("lat"),
                         rs.getDouble("lon"))).
                 withPeriod(rs.getInt("dTime")).

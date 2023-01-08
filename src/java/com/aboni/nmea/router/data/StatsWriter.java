@@ -18,7 +18,7 @@ package com.aboni.nmea.router.data;
 
 public interface StatsWriter {
 
-    void write(StatsSample s, long ts);
+    void write(Sample s, long ts);
 
     void init();
 

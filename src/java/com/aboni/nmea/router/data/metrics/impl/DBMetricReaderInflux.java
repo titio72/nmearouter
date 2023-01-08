@@ -33,6 +33,7 @@ package com.aboni.nmea.router.data.metrics.impl;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
+import com.aboni.nmea.router.utils.QueryByDate;
 import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 import org.influxdb.dto.BoundParameterQuery;
 import org.influxdb.dto.Query;
@@ -47,17 +48,23 @@ public class DBMetricReaderInflux implements DataReader {
     private static final String SQL_TIME_AND_TYPE = "select time, type, value, valueMax, valueMin from meteo where time>=$startTime and time<$endTime and type=$type";
 
     @Override
-    public void readData(@NotNull Instant from, @NotNull Instant to, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
-        try (DBMetricsHelper db = new DBMetricsHelper()) {
-            Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME)
-                    .forDatabase("nmearouter")
-                    .bind("startTime", from.toEpochMilli())
-                    .bind("endTime", to.toEpochMilli())
-                    .create();
-            handleResult(target, db, query);
-        } catch (Exception e) {
-            throw new DataManagementException("Error reading meteo", e);
-        }
+    public void readData(@NotNull com.aboni.nmea.router.utils.Query q, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+        if (q instanceof QueryByDate) {
+            Instant from = ((QueryByDate) q).getFrom();
+            Instant to = ((QueryByDate) q).getTo();
+            try (DBMetricsHelper db = new DBMetricsHelper()) {
+                Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME)
+                        .forDatabase("nmearouter")
+                        .bind("startTime", from.toEpochMilli())
+                        .bind("endTime", to.toEpochMilli())
+                        .create();
+                handleResult(target, db, query);
+            } catch (Exception e) {
+                throw new DataManagementException("Error reading meteo", e);
+            }
+        } else {
+            throw new DataManagementException("Unsupported query");
+       }
     }
 
     private void handleResult(DataReaderListener target, DBMetricsHelper db, Query query) throws DataManagementException {
@@ -76,17 +83,23 @@ public class DBMetricReaderInflux implements DataReader {
     }
 
     @Override
-    public void readData(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
-        try (DBMetricsHelper db = new DBMetricsHelper()) {
-            Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME_AND_TYPE)
-                    .forDatabase("nmearouter")
-                    .bind("startTime", from.toEpochMilli())
-                    .bind("endTime", to.toEpochMilli())
-                    .bind("type", tag)
-                    .create();
-            handleResult(target, db, query);
-        } catch (Exception e) {
-            throw new DataManagementException("Error reading meteo", e);
+    public void readData(@NotNull com.aboni.nmea.router.utils.Query q, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+        if (q instanceof QueryByDate) {
+            Instant from = ((QueryByDate) q).getFrom();
+            Instant to = ((QueryByDate) q).getTo();
+            try (DBMetricsHelper db = new DBMetricsHelper()) {
+                Query query = BoundParameterQuery.QueryBuilder.newQuery(SQL_TIME_AND_TYPE)
+                        .forDatabase("nmearouter")
+                        .bind("startTime", from.toEpochMilli())
+                        .bind("endTime", to.toEpochMilli())
+                        .bind("type", tag)
+                        .create();
+                handleResult(target, db, query);
+            } catch (Exception e) {
+                throw new DataManagementException("Error reading meteo", e);
+            }
+        } else {
+            throw new DataManagementException("Unsupported query");
         }
     }
 }

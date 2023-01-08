@@ -55,7 +55,6 @@ public class MeteoService extends JSONWebService {
             try {
                 return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
             } catch (SampledQueryException e) {
-                String sQuery = "" + q;
                 log.errorForceStacktrace(() -> LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).toString(), e);
                 return getError("Error executing query");
             }

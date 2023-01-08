@@ -33,6 +33,7 @@ package com.aboni.nmea.router.data.power.impl;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.Event;
+import com.aboni.utils.Utils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -68,8 +69,8 @@ public class DBPowerEventWriter implements DBEventWriter {
             prepareStatement(c);
             StatsEvent m = (StatsEvent) e;
             stm.setString(1, m.getStatsSample().getTag());
-            stm.setDouble(2, m.getStatsSample().getAvg());
-            stm.setTimestamp(3, new Timestamp(e.getTime()));
+            stm.setDouble(2, m.getStatsSample().getValue());
+            stm.setTimestamp(3, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
             stm.execute();
         }
     }

@@ -2,6 +2,7 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.data.track.TripEvent;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class DBTripEventWriterTest {
         st.setInt(1, id);
         ResultSet rs = st.executeQuery();
         assertTrue(rs.next());
-        assertEquals(endTS, rs.getTimestamp("toTS").getTime());
+        assertEquals(endTS, rs.getTimestamp("toTS", Utils.UTC_CALENDAR).getTime());
         assertEquals(dist, rs.getDouble("dist"), 0.000001);
         return true;
     }

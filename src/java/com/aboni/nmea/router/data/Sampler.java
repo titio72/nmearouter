@@ -61,7 +61,6 @@ public class Sampler implements Startable {
         static Series getNew(@NotNull StatsSample series, @NotNull MessageFilter filter,
                              @NotNull MessageValueExtractor valueExtractor,
                              @NotNull TimerFilter timerFilter, @NotNull Metric metric) {
-            if (series == null || metric == null) throw new NullPointerException("Series cannot be null");
             Series s = new Series();
             s.timerFilter = timerFilter;
             s.metric = metric;
@@ -77,7 +76,6 @@ public class Sampler implements Startable {
     private final StatsWriter writer;
     private final String tag;
     private final Map<Metric, Series> series = new HashMap<>();
-    //private final Map<String, SamplesFilter> sampleFilters = new HashMap<>();
     private final Log log;
     private boolean started;
 
@@ -188,10 +186,8 @@ public class Sampler implements Startable {
             try {
                 if (timestampProvider.isSynced()) {
                     for (Series ss : series.values()) {
-                        if (ss != null) {
-                            if (ss.filter.match(m)) {
-                                process(ss.metric, ss.valueExtractor.getValue(m), msg.getTimestamp());
-                            }
+                        if (ss != null && ss.filter.match(m)) {
+                            process(ss.metric, ss.valueExtractor.getValue(m), msg.getTimestamp());
                         }
                     }
                 }
@@ -212,7 +208,7 @@ public class Sampler implements Startable {
 
     private void write(StatsSample s, long ts) {
         if (writer != null && s != null && s.getSamples() > 0) {
-            writer.write(s, ts);
+            writer.write(s.getImmutableCopy(), ts);
         }
     }
 

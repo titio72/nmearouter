@@ -19,6 +19,7 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.SeriesReader;
+import com.aboni.nmea.router.utils.QueryByDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,7 +34,7 @@ public abstract class DBSeriesReader implements SeriesReader {
     public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to, @NotNull String tag) throws DataManagementException {
         DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
-        m.readData(from, to, tag, (Sample sample) -> addSample(sample, res));
+        m.readData(new QueryByDate(from, to), tag, (Sample sample) -> addSample(sample, res));
         return res;
     }
 
@@ -41,7 +42,7 @@ public abstract class DBSeriesReader implements SeriesReader {
     public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to) throws DataManagementException {
         DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
-        m.readData(from, to, (Sample sample) -> addSample(sample, res));
+        m.readData(new QueryByDate(from, to), (Sample sample) -> addSample(sample, res));
         return res;
     }
 
@@ -54,7 +55,7 @@ public abstract class DBSeriesReader implements SeriesReader {
             res.put(sample.getTag(), a);
         }
         JSONObject s = new JSONObject();
-        s.put("time", sample.getTs());
+        s.put("time", sample.getTimestamp());
         s.put("vMin", sample.getMinValue());
         s.put("v", sample.getValue());
         s.put("vMax", sample.getMaxValue());

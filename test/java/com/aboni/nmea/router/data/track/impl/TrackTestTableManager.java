@@ -2,6 +2,7 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -10,13 +11,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class TrackTestTableManager {
 
-    private static String SQL_DROP = "DROP TABLE IF EXISTS `track_test`";
-    private static String SQL_DROP_TRIP = "DROP TABLE IF EXISTS `trip_test`";
+    public static final String TRACK_TABLE_NAME = "track_test";
+    public static final String TRIP_TABLE_NAME = "trip_test";
 
-    private static String SQL_CREATE = "CREATE TABLE `track_test` (" +
+    private static final String SQL_DROP = "DROP TABLE IF EXISTS `" + TRACK_TABLE_NAME + "`";
+    private static final String SQL_DROP_TRIP = "DROP TABLE IF EXISTS `" + TRIP_TABLE_NAME + "`";
+
+    private static final String SQL_CREATE = "CREATE TABLE `" + TRACK_TABLE_NAME + "` (" +
             "`lat` decimal(10,7) DEFAULT NULL," +
             "`lon` decimal(10,7) DEFAULT NULL," +
             "`TS` timestamp NOT NULL," +
@@ -31,7 +37,7 @@ public class TrackTestTableManager {
             " KEY `track_time` (`TS`)" +
             ");";
 
-    private static String SQL_CREATE_TRIP = "CREATE TABLE `trip_test` (" +
+    private static final String SQL_CREATE_TRIP = "CREATE TABLE `" + TRIP_TABLE_NAME + "` (" +
             "`id` int(11) NOT NULL," +
             "`description` varchar(256) DEFAULT ''," +
             "`fromTS` timestamp NULL DEFAULT NULL," +
@@ -85,14 +91,15 @@ public class TrackTestTableManager {
 
     public static void addTestData() throws SQLException, MalformedConfigurationException, ClassNotFoundException {
         try (DBHelper db = new DBHelper(false)) {
-            PreparedStatement st = db.getConnection().prepareStatement("insert into trip_test values (?, ?, ?, ?, ?)");
-            for (Object[] t : testTrips) {
-                st.setInt(1, (Integer) t[0]);
-                st.setString(2, (String) t[1]);
-                st.setTimestamp(3, new Timestamp(Instant.parse((String) t[2]).toEpochMilli()));
-                st.setTimestamp(4, new Timestamp(Instant.parse((String) t[3]).toEpochMilli()));
-                st.setDouble(5, (Double) t[4]);
-                assert (st.executeUpdate() == 1);
+            try (PreparedStatement st = db.getConnection().prepareStatement("insert into " + TRIP_TABLE_NAME + " values (?, ?, ?, ?, ?)")) {
+                for (Object[] t : testTrips) {
+                    st.setInt(1, (Integer) t[0]);
+                    st.setString(2, (String) t[1]);
+                    st.setTimestamp(3, new Timestamp(Instant.parse((String) t[2]).toEpochMilli()), Utils.UTC_CALENDAR);
+                    st.setTimestamp(4, new Timestamp(Instant.parse((String) t[3]).toEpochMilli()), Utils.UTC_CALENDAR);
+                    st.setDouble(5, (Double) t[4]);
+                    assert (st.executeUpdate() == 1);
+                }
             }
             db.getConnection().commit();
         }
@@ -110,28 +117,13 @@ public class TrackTestTableManager {
             "`engine` TINYINT DEFAULT 2," +
 
      */
-    public static void loadTrack(String file) throws SQLException, IOException, MalformedConfigurationException, ClassNotFoundException {
-        try (DBHelper db = new DBHelper(false)) {
-            PreparedStatement st = db.getConnection().prepareStatement("insert into track_test (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            FileReader f = new FileReader(file);
-            BufferedReader r = new BufferedReader(f);
-            r.readLine(); //skip header
-            String l;
-            while ((l = r.readLine()) != null) {
-                privateLoadCSVLine(st, l);
-                assert (st.executeUpdate() == 1);
-            }
-            f.close();
-            db.getConnection().commit();
-        }
-    }
 
     private static void privateLoadCSVLine(PreparedStatement st, String l) throws SQLException {
         String[] csv = l.split(",");
         st.setDouble(1, Double.parseDouble(csv[0]));
         st.setDouble(2, Double.parseDouble(csv[1]));
         Instant d = Instant.parse(csv[2]);
-        st.setTimestamp(3, new Timestamp(d.toEpochMilli()));
+        st.setTimestamp(3, new Timestamp(d.toEpochMilli()), Utils.UTC_CALENDAR);
         st.setInt(4, Integer.parseInt(csv[4]));
         st.setInt(5, Integer.parseInt(csv[5]));
         st.setDouble(6, Double.parseDouble(csv[6]));
@@ -142,11 +134,12 @@ public class TrackTestTableManager {
 
     public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException, ClassNotFoundException {
         try (DBHelper db = new DBHelper(false)) {
-            PreparedStatement st = db.getConnection().prepareStatement("insert into track_test (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement st = db.getConnection().prepareStatement("insert into " + TRACK_TABLE_NAME +
+                    " (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for (String l : csv) {
                 privateLoadCSVLine(st, l);
+                assert (st.executeUpdate() == 1);
             }
-            assert (st.executeUpdate() == 1);
             db.getConnection().commit();
         }
     }

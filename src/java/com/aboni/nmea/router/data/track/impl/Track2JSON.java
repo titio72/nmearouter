@@ -42,7 +42,7 @@ public class Track2JSON implements TrackDumper {
         }
 
         @Override
-        public void onRead(TrackPoint sample) {
+        public void onRead(int id, TrackPoint sample) {
             handlePoint(sample);
         }
 

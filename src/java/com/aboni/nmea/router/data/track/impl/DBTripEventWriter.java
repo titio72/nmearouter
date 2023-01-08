@@ -19,6 +19,7 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.track.TripEvent;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.Event;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -65,7 +66,7 @@ public class DBTripEventWriter implements DBEventWriter {
             lastUsedConnection = conn;
             prepareStatement(conn);
             TripEvent t = (TripEvent) e;
-            stm.setTimestamp(1, new Timestamp(t.getTime()));
+            stm.setTimestamp(1, new Timestamp(t.getTime()), Utils.UTC_CALENDAR);
             stm.setDouble(2, t.getTrip().getDistance());
             stm.setInt(3, t.getTrip().getTrip());
             stm.execute();

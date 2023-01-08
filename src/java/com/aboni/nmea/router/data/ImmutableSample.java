@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022,  Andrea Boni
+ * Copyright (c) 2021,  Andrea Boni
  * This file is part of NMEARouter.
  * NMEARouter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,44 +30,53 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data;
 
-import com.aboni.nmea.router.data.impl.ScalarStatsSample;
+public class ImmutableSample implements Sample {
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TimeSeries {
-
-    private final List<Sample> samples;
-
-    private StatsSample currentSample;
-    private final long samplingPeriod;
+    private final long ts;
     private final String tag;
+    private final double maxValue;
+    private final double minValue;
+    private final double value;
 
-    public TimeSeries(String tag, long samplingPeriod, int initialCapacity) {
-        this.samplingPeriod = samplingPeriod;
+    public static Sample newInstance(long time, String tag, double min, double v, double max) {
+        return new ImmutableSample(time, tag, min, v, max);
+    }
+
+    @Override
+    public Sample getImmutableCopy() {
+        return newInstance(getTimestamp(), getTag(), getMinValue(), getValue(), getMaxValue());
+    }
+
+    protected ImmutableSample(long time, String tag, double min, double v, double max) {
+        this.ts = time;
         this.tag = tag;
-        samples = new ArrayList<>(initialCapacity);
+        this.minValue = min;
+        this.value = v;
+        this.maxValue = max;
     }
 
-    public void doSampling(long time, double vMax, double v, double vMin) {
-        synchronized (this) {
-            if (currentSample == null) {
-                currentSample = new ScalarStatsSample(tag);
-            }
-            if (currentSample.getT0() > 0 && (time - currentSample.getT0()) > samplingPeriod) {
-                samples.add(currentSample.getImmutableCopy());
-                currentSample = new ScalarStatsSample(tag);
-            }
-            currentSample.add(vMax, v, vMin, time);
-        }
+    @Override
+    public long getTimestamp() {
+        return ts;
     }
 
-    public List<Sample> getSamples() {
-        ArrayList<Sample> res;
-        synchronized (this) {
-            res = new ArrayList<>(samples);
-            samples.add(currentSample.getImmutableCopy());
-        }
-        return res;
+    @Override
+    public String getTag() {
+        return tag;
+    }
+
+    @Override
+    public double getMaxValue() {
+        return maxValue;
+    }
+
+    @Override
+    public double getMinValue() {
+        return minValue;
+    }
+
+    @Override
+    public double getValue() {
+        return value;
     }
 }

@@ -19,6 +19,7 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.power.PowerAnalytics;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -48,13 +49,13 @@ public class DBPowerAnalytics implements PowerAnalytics {
                 st.executeQuery("set @total:=0;");
                 st.setInt(1, samplingPeriod);
                 st.setInt(2, samplingPeriod);
-                st.setTimestamp(3, new Timestamp(from.toEpochMilli()));
-                st.setTimestamp(4, new Timestamp(to.toEpochMilli()));
+                st.setTimestamp(3, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+                st.setTimestamp(4, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
                 st.setInt(5, samplingPeriod);
                 st.setInt(6, samplingPeriod);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
-                        long t = rs.getTimestamp(1).getTime();
+                        long t = rs.getTimestamp(1, Utils.UTC_CALENDAR).getTime();
                         double aH = rs.getDouble(2);
                         double aHT = rs.getDouble(3);
                         JSONObject s = new JSONObject();

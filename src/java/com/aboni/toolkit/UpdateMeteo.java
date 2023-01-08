@@ -19,8 +19,8 @@ import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.ConfJSON;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsSample;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
 import com.aboni.nmea.router.data.metrics.Metrics;
@@ -136,7 +136,7 @@ public class UpdateMeteo {
         private DBRecordMessage(ResultSet rs) throws SQLException {
             v = rs.getDouble(2);
             type = rs.getString(3);
-            ts = rs.getTimestamp(1);
+            ts = rs.getTimestamp(1, Utils.UTC_CALENDAR);
             id = rs.getLong(4);
         }
 
@@ -166,9 +166,9 @@ public class UpdateMeteo {
 
             Sampler meteoSampler = new Sampler(log, timeProvider, new StatsWriter() {
                 @Override
-                public void write(StatsSample s, long ts) {
+                public void write(Sample s, long ts) {
                     try {
-                        String ss = String.format("%s,%dl,%.3f,%.3f,%.3f%n", s.getTag(), s.getT1(), s.getMin(), s.getAvg(), s.getMax());
+                        String ss = String.format("%s,%dl,%.3f,%.3f,%.3f%n", s.getTag(), s.getTimestamp(), s.getMinValue(), s.getValue(), s.getMaxValue());
                         w.write(ss);
                     } catch (IOException e) {
                         throw new RuntimeException(e);

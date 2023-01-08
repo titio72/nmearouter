@@ -16,6 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.utils.Utils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WindStats {
 
@@ -46,7 +51,6 @@ public class WindStats {
         tot += dist;
         max = Math.max(m[iAngle], max);
         totalTime += intervalInSecond;
-
     }
 
     public long getWindTime(int sector) {
@@ -74,5 +78,27 @@ public class WindStats {
 
     public double getTot() {
         return tot;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject res = new JSONObject();
+        List<JSONObject> l = new ArrayList<>(360);
+        for (int i = 0; i < sectors; i++) {
+            JSONObject sample = new JSONObject();
+            sample.put("angle", i * (360 / sectors));
+            sample.put("windDistance", Utils.round(getWindDistance(i), 1));
+            sample.put("windMaxSpeed", Utils.round(getWindMaxSpeed(i), 1));
+            if (getWindTime(i) != 0)
+                sample.put("windAvgSpeed", Utils.round(getWindDistance(i) / (getWindTime(i) / 3600.0), 1));
+            else
+                sample.put("windAvgSpeed", 0.0);
+            l.add(sample);
+        }
+        res.put("values", new JSONArray(l));
+        res.put("interval", getTotalTime());
+        res.put("maxValue", Utils.round(getMaxWindDistance(), 1));
+        res.put("maxValueH", Utils.round(getMaxWindDistance() / (getTotalTime() / 3600.0), 1));
+        res.put("tot", getTot());
+        return res;
     }
 }

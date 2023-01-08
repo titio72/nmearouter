@@ -21,5 +21,5 @@ import java.util.List;
 
 public interface HistoryProvider {
 
-    List<StatsSample> getHistory(Metric metric);
+    List<Sample> getHistory(Metric metric);
 }

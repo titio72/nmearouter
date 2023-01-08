@@ -23,6 +23,7 @@ import com.aboni.nmea.router.data.track.impl.TrackManagerImpl;
 import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,7 +51,7 @@ public class UpdateAnchorDB {
 
         TrackItem itm = new TrackItem();
         itm.id = rs.getInt(5);
-        itm.position = new GeoPositionT(rs.getTimestamp(3).getTime(), rs.getDouble(1), rs.getDouble(2));
+        itm.position = new GeoPositionT(rs.getTimestamp(3, Utils.UTC_CALENDAR).getTime(), rs.getDouble(1), rs.getDouble(2));
         itm.anchor = (rs.getInt(4) == 1);
         itm.speed = rs.getDouble(6);
         return itm;

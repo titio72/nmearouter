@@ -34,15 +34,15 @@ import com.aboni.nmea.router.utils.db.Event;
 
 public class StatsEvent implements Event {
 
-    private final StatsSample statsSample;
+    private final Sample statsSample;
     private final long ts;
 
-    public StatsEvent(StatsSample s, long ts) {
+    public StatsEvent(Sample s, long ts) {
         this.statsSample = s;
         this.ts = ts;
     }
 
-    public StatsSample getStatsSample() {
+    public Sample getStatsSample() {
         return statsSample;
     }
 

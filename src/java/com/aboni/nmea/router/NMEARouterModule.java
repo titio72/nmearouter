@@ -25,7 +25,6 @@ import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.SeriesReader;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
-import com.aboni.nmea.router.data.metrics.WindStatsReader;
 import com.aboni.nmea.router.data.metrics.impl.*;
 import com.aboni.nmea.router.data.power.impl.DBPowerEventWriter;
 import com.aboni.nmea.router.data.power.impl.DBPowerReader;
@@ -105,8 +104,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO_MONITOR)).to(MemoryStatsWriter.class);
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMetricStatsWriter.class);
         bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerStatsWriter.class);
-        //bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMeteoStatsWriterInflux.class);
-        //bind(StatsWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerStatsWriterInflux.class);
         bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMetricEventWriter.class);
         bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerEventWriter.class);
         bind(SampledQueryConf.class).annotatedWith(Names.named(Constants.TAG_SPEED)).to(SampledQueryConfSpeed.class);
@@ -116,7 +113,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(TimeSeriesReader.class).to(DBTimeSeriesReader.class);
         bind(QueryFactory.class).to(QueryFactoryImpl.class);
         bind(FilterSetSerializer.class).annotatedWith(Names.named(Constants.TAG_JSON)).to(JSONFilterSetSerializer.class);
-        bind(WindStatsReader.class).to(DBWindStatsReader.class);
+        bind(com.aboni.nmea.router.data.metrics.WindStatsReader.class).to(WindStatsReaderImpl.class);
         bind(N2KMessageParserFactory.class).to(N2KMessageParserFactoryImpl.class);
         bind(Message2NMEA0183.class).to(Message2NMEA0183Impl.class);
         bind(N2KFastCache.class).to(N2KFastCacheImpl.class);
@@ -126,7 +123,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(DeviationManager.class).to(DeviationManagerImpl.class).in(Singleton.class);
         bind(NMEA0183MessageFactory.class).to(NMEA0183MessageFactoryImpl.class);
         bind(PGNSourceFilter.class).to(PGNSourceFilterImpl.class);
-        bind(TrackScanner.class).to(TrackScannerImpl.class);
 
     }
 }

@@ -52,12 +52,11 @@ public class SamplerTest {
 
     private static class MyStatsWriter implements StatsWriter {
 
-        List<Pair<StatsSample, Long>> events = new LinkedList<>();
+        List<Pair<Sample, Long>> events = new LinkedList<>();
 
         @Override
-        public void write(StatsSample s, long ts) {
-            StatsSample ss = s.cloneStats();
-            events.add(new Pair<>(ss, ts));
+        public void write(Sample s, long ts) {
+            events.add(new Pair<>(s, ts));
         }
 
         @Override
@@ -70,7 +69,7 @@ public class SamplerTest {
 
         }
 
-        List<Pair<StatsSample, Long>> getEvents() {
+        List<Pair<Sample, Long>> getEvents() {
             return events;
         }
     }
@@ -109,7 +108,7 @@ public class SamplerTest {
     private static void checkSample(StatsSample sample, double value, int samples) {
         assertNotNull(sample);
         assertEquals(samples, sample.getSamples());
-        assertEquals(value, sample.getAvg(), 0.0001);
+        assertEquals(value, sample.getValue(), 0.0001);
     }
 
     private void initWithTemperature() {
@@ -226,10 +225,10 @@ public class SamplerTest {
 
         assertEquals(1, writer.getEvents().size());
         assertEquals(dumpTime, writer.getEvents().get(0).second.longValue());
-        assertEquals(60, writer.getEvents().get(0).first.getSamples());
-        assertEquals(26.0, writer.getEvents().get(0).first.getAvg(), 0.0001);
-        assertEquals(25.0, writer.getEvents().get(0).first.getMin(), 0.0001);
-        assertEquals(27.0, writer.getEvents().get(0).first.getMax(), 0.0001);
+        //assertEquals(60, writer.getEvents().get(0).first.getSamples());
+        assertEquals(26.0, writer.getEvents().get(0).first.getValue(), 0.0001);
+        assertEquals(25.0, writer.getEvents().get(0).first.getMinValue(), 0.0001);
+        assertEquals(27.0, writer.getEvents().get(0).first.getMaxValue(), 0.0001);
 
         // check reset
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
@@ -254,6 +253,7 @@ public class SamplerTest {
         // check it reset
         assertEquals(0, sampler.getCurrent(Metrics.AIR_TEMPERATURE).getSamples());
     }
+
     @Test
     public void testDumpBeforeTimeoutExpire() {
         initWithTemperature();

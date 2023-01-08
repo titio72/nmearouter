@@ -94,7 +94,7 @@ public class ScalarStatsSampleX extends StatsSample {
     }
 
     @Override
-    public double getAvg() {
+    public double getValue() {
         if (theList.isEmpty()) return Double.NaN;
         else return theList.get(theList.size() / 2);
     }

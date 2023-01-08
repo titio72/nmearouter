@@ -18,6 +18,8 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.utils.QueryByDate;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Inject;
 import org.json.JSONObject;
@@ -41,7 +43,7 @@ public class TrackFixerService extends JSONWebService {
     private static final int P_UPD_ID = 5;
 
     @Inject
-    public TrackFixerService(Log log, @NotNull TrackPointBuilder pointBuilder, @NotNull TripManagerX tripManager, @NotNull TrackScanner scanner) {
+    public TrackFixerService(Log log, @NotNull TrackPointBuilder pointBuilder, @NotNull TripManagerX tripManager, @NotNull TrackReader scanner) {
         super(log);
         this.tripManager = tripManager;
         setLoader((ServiceConfig config) -> {
@@ -65,7 +67,7 @@ public class TrackFixerService extends JSONWebService {
         });
     }
 
-    private class TheFixer implements TrackScanner.TrackPointsScanner {
+    private class TheFixer implements TrackReader.TrackReaderListener {
 
         private final TrackFixer fixer = new TrackFixer();
         private final TrackPointBuilder builder;
@@ -84,7 +86,7 @@ public class TrackFixerService extends JSONWebService {
         }
 
         @Override
-        public boolean onTrackPoint(int id, TrackPoint p) {
+        public void onRead(int id, TrackPoint p) throws TrackManagementException {
             TrackPoint point = fixer.onTrackPoint(builder, p);
             if (point != null) {
                 i++;
@@ -101,14 +103,13 @@ public class TrackFixerService extends JSONWebService {
                     }
                 } catch (SQLException e) {
                     getLogger().error("Error fixing track", e);
-                    return false;
+                    throw new TrackManagementException(e);
                 }
             }
-            return true;
         }
     }
 
-    private TrackFixer load(TrackPointBuilder builder, TrackScanner scanner, int trackId) throws SQLException, MalformedConfigurationException, ClassNotFoundException, TripManagerException {
+    private TrackFixer load(TrackPointBuilder builder, TrackReader scanner, int trackId) throws SQLException, MalformedConfigurationException, ClassNotFoundException, TrackManagementException {
         TrackFixer res;
         Trip trip = tripManager.getTrip(trackId);
         if (trip != null) {
@@ -116,7 +117,8 @@ public class TrackFixerService extends JSONWebService {
                 try (PreparedStatement stUpd = helper.getConnection().prepareStatement(
                         "update track set dTime=?, dist=?, speed=?, maxSpeed=? where id=?")) {
                     TheFixer theFixer = new TheFixer(helper, builder, stUpd);
-                    scanner.scanTrip(trip.getStartTS(), trip.getEndTS(), theFixer);
+                    Query q = new QueryByDate(trip.getStartTS(), trip.getEndTS());
+                    scanner.readTrack(q, theFixer);
                     res = theFixer.getFixer();
                     helper.getConnection().commit();
                 }

@@ -16,22 +16,19 @@
 package com.aboni.nmea.router.data.power.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class DBPowerStatsWriterInflux implements StatsWriter {
 
     private DBMetricsHelper helper;
-    private final Log log;
 
     @Inject
-    public DBPowerStatsWriterInflux(@NotNull Log log) {
-        this.log = log;
+    public DBPowerStatsWriterInflux() {
+        // nothing to init
     }
 
     @Override
@@ -45,9 +42,9 @@ public class DBPowerStatsWriterInflux implements StatsWriter {
     }
 
     @Override
-    public void write(StatsSample s, long ts) {
+    public void write(Sample s, long ts) {
         if (helper != null) {
-            helper.writeMetric(ts, "battery", s.getTag(), s.getAvg());
+            helper.writeMetric(ts, "battery", s.getTag(), s.getValue());
         }
     }
 

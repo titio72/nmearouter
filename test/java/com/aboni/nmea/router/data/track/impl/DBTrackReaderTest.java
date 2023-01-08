@@ -16,10 +16,9 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.data.track.TrackPoint;
-import com.aboni.nmea.router.data.track.TrackPointBuilder;
-import com.aboni.nmea.router.data.track.TripManagerException;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.data.track.*;
+import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.utils.QueryByDate;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -29,12 +28,11 @@ import org.junit.Test;
 
 import java.time.Instant;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
-public class TrackScannerImplTest {
+public class DBTrackReaderTest {
 
-    private final static String[] TRACK = new String[]{
+    private final static String[] TEST_TRACK_DATA = new String[]{
             "43.6775263,10.2739236,2022-11-27T10:53:26.000Z,778766,1,1,0,0.01,0.23,0",
             "43.6775186,10.2739231,2022-11-27T11:03:26.000Z,778767,1,600,0.00104431,0.01,0.21,0",
             "43.6775117,10.273933,2022-11-27T11:13:26.000Z,778768,1,600,0.00109294,0.01,0.19,1",
@@ -85,7 +83,10 @@ public class TrackScannerImplTest {
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
         //TrackTestTableManager.loadTrack("track_test.csv");
-        TrackTestTableManager.loadTrackCSV(TRACK);
+        TrackTestTableManager.loadTrackCSV(TEST_TRACK_DATA);
+        scannedCount = 0;
+        referenceIndex = -1;
+        lastId = 0;
     }
 
     @After
@@ -93,38 +94,75 @@ public class TrackScannerImplTest {
         TrackTestTableManager.tearDown();
     }
 
-    int i = 0;
-    int lastId = 0;
+    private int referenceIndex = -1;
+
+    private int scannedCount = 0;
+    private int lastId = 0;
 
     @Test
-    public void testAll() throws TripManagerException {
-        TrackScannerImpl ts = new TrackScannerImpl(ConsoleLog.getLogger(), ThingsFactory.getInstance(TrackPointBuilder.class));
+    public void testAll() throws TrackManagementException {
+        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
         Instant d0 = Instant.parse("2022-11-27T10:53:26.000Z");
         Instant d1 = Instant.parse("2022-11-27T11:36:23.000Z");
-        ts.scanTrip(d0, d1, (int id, TrackPoint point) -> {
-            i++;
-            if (lastId != 0) assertEquals(lastId + 1, id); // check that they are in sequence
-            assertNotNull(point);
+        Query q = new QueryByDate(d0, d1);
+        ts.readTrack(q, (int id, TrackPoint point) -> {
+            scannedCount++;
+            referenceIndex = getNext(d0, d1, referenceIndex);
+            checkPoint(d0, d1, id, lastId, point, referenceIndex);
             //System.out.printf("%d %s %f %f %f%n", id, point.getPosition().getInstant(), point.getPosition().getLatitude(), point.getPosition().getLongitude(), point.getAverageSpeed());
+            referenceIndex++;
             lastId = id;
-            return true;
         });
-        assertEquals(43, i);
+        assertEquals(43, scannedCount);
+    }
+
+    private static void checkPoint(Instant fromTime, Instant toTime, int id, int last, TrackPoint point, int trackIndex) {
+        if (last != 0) assertEquals(last + 1, id); // check that they are in sequence
+        assertNotNull(point);
+        assertTrue(point.getPosition().getTimestamp() >= fromTime.toEpochMilli());
+        assertTrue(point.getPosition().getTimestamp() <= toTime.toEpochMilli());
+        assertNotEquals(-1, trackIndex);
+        Instant refTime = Instant.parse(TEST_TRACK_DATA[trackIndex].split(",")[2]);
+        assertEquals(refTime, point.getPosition().getInstant());
     }
 
     @Test
-    public void testPartial() throws TripManagerException {
-        TrackScannerImpl ts = new TrackScannerImpl(ConsoleLog.getLogger(), ThingsFactory.getInstance(TrackPointBuilder.class));
+    public void testPartial() throws TrackManagementException {
+        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
         Instant d0 = Instant.parse("2022-11-27T11:16:53.000Z");
         Instant d1 = Instant.parse("2022-11-27T11:17:53.000Z");
-        ts.scanTrip(d0, d1, (int id, TrackPoint point) -> {
-            i++;
-            if (lastId != 0) assertEquals(lastId + 1, id); // check that they are in sequence
-            assertNotNull(point);
+        Query q = new QueryByDate(d0, d1);
+        ts.readTrack(q, (int id, TrackPoint point) -> {
+            scannedCount++;
+            referenceIndex = getNext(d0, d1, referenceIndex);
+            checkPoint(d0, d1, id, lastId, point, referenceIndex);
             //System.out.printf("%d %s %f %f %f%n", id, point.getPosition().getInstant(), point.getPosition().getLatitude(), point.getPosition().getLongitude(), point.getAverageSpeed());
+            referenceIndex++;
             lastId = id;
-            return true;
         });
-        assertEquals(3, i);
+        assertEquals(3, scannedCount);
     }
+
+    @Test
+    public void testNoResult() throws TrackManagementException {
+        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
+        Instant d0 = Instant.parse("2022-11-28T11:16:53.000Z");
+        Instant d1 = Instant.parse("2022-11-28T11:17:53.000Z");
+        Query q = new QueryByDate(d0, d1);
+        ts.readTrack(q, (int id, TrackPoint point) -> {
+            scannedCount++;
+        });
+        assertEquals(0, scannedCount);
+    }
+
+    private int getNext(Instant timeFrom, Instant timeTo, int fromLine) {
+        int from = Math.max(fromLine, 0);
+        for (int k = from; k< DBTrackReaderTest.TEST_TRACK_DATA.length; k++) {
+            String[] csv = DBTrackReaderTest.TEST_TRACK_DATA[k].split(",");
+            Instant d = Instant.parse(csv[2]);
+            if (!d.isBefore(timeFrom) && !d.isAfter(timeTo)) return k;
+        }
+        return -1;
+    }
+
 }

@@ -42,7 +42,7 @@ public class TimerFilterAnchorAdaptive implements TimerFilter {
 
     @Override
     public boolean accept(long timestamp, long now) {
-        long p = cache.getStatus(NMEARouterStatuses.ANCHOR_STATUS, Boolean.FALSE) ? periodAnchor : period;
+        long p = Boolean.TRUE.equals(cache.getStatus(NMEARouterStatuses.ANCHOR_STATUS, Boolean.FALSE)) ? periodAnchor : period;
         return Utils.isNotNewerThan(timestamp, now + tolerance, p);
     }
 }

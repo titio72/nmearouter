@@ -21,7 +21,7 @@ public class StatsAlert implements StatScanner {
     private double change;
 
     @Override
-    public boolean scan(StatsSample sample) {
+    public boolean scan(Sample sample) {
         return false;
     }
 }

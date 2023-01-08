@@ -15,7 +15,7 @@
 
 package com.aboni.nmea.router.data.sampledquery;
 
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.Sample;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -59,10 +59,10 @@ public class SamplesQueryToJSON {
         }
     }
 
-    public void fillResponse(String type, List<StatsSample> samples) {
+    public void fillResponse(String type, List<Sample> samples) {
         SampleWriter w = ctx.getWriter(type);
         if (w != null) {
-            for (StatsSample sample : samples) {
+            for (Sample sample : samples) {
                 JSONArray a = getOrCreateSamplesArray(type);
                 JSONObject[] res = w.getSampleNode(sample);
                 if (res != null) {

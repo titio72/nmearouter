@@ -19,25 +19,19 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.Query;
 import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.Utils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 public class WindStatsService extends JSONWebService {
 
     @Inject
-    public WindStatsService(@NotNull final WindStatsReader reader, @NotNull Log log) {
+    public WindStatsService(@NotNull final QueryFactory queryFactory, @NotNull final WindStatsReader reader, @NotNull Log log) {
         super(log);
         setLoader((ServiceConfig config) -> {
-            Instant from = config.getParamAsInstant("from", Instant.now().minusSeconds(86400L), 0);
-            Instant to = config.getParamAsInstant("to", Instant.now(), 0);
+            Query query = queryFactory.getQuery(config);
             String sTicks = config.getParameter("ticks", "36");
             int ticks;
             try {
@@ -46,26 +40,8 @@ public class WindStatsService extends JSONWebService {
                 ticks = 36;
             }
             try {
-                WindStats stats = reader.getWindStats(from, to, ticks);
-                JSONObject res = new JSONObject();
-                List<JSONObject> l = new ArrayList<>(360);
-                for (int i = 0; i < ticks; i++) {
-                    JSONObject sample = new JSONObject();
-                    sample.put("angle", i * (360 / ticks));
-                    sample.put("windDistance", Utils.round(stats.getWindDistance(i), 1));
-                    sample.put("windMaxSpeed", Utils.round(stats.getWindMaxSpeed(i), 1));
-                    if (stats.getWindTime(i) != 0)
-                        sample.put("windAvgSpeed", Utils.round(stats.getWindDistance(i) / (stats.getWindTime(i) / 3600.0), 1));
-                    else
-                        sample.put("windAvgSpeed", 0.0);
-                    l.add(sample);
-                }
-                res.put("values", new JSONArray(l));
-                res.put("interval", stats.getTotalTime());
-                res.put("maxValue", Utils.round(stats.getMaxWindDistance(), 1));
-                res.put("maxValueH", Utils.round(stats.getMaxWindDistance() / (stats.getTotalTime() / 3600.0), 1));
-                res.put("tot", stats.getTot());
-                return res;
+                WindStats stats = reader.getWindStats(query, ticks);
+                return stats.toJSON();
             } catch (DataManagementException e) {
                 log.errorForceStacktrace(LogStringBuilder.start("WindStatService").wO("execute").toString(), e);
                 return null;

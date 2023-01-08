@@ -15,10 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics.impl;
 
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.Event;
+import com.aboni.utils.Utils;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -28,13 +33,16 @@ public class DBMetricEventWriter implements DBEventWriter {
 
     private PreparedStatement stm;
 
-    public DBMetricEventWriter() {
-        // nothing to initialize
+    private final String sTABLE;
+
+    @Inject
+    public DBMetricEventWriter(@NotNull @Named(Constants.TAG_METEO) String tableName) {
+        sTABLE = tableName;
     }
 
     private void prepareStatement(Connection c) throws SQLException {
         if (stm == null) {
-            stm = c.prepareStatement("insert into meteo (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
+            stm = c.prepareStatement("insert into " + sTABLE + " (type, v, vMax, vMin, TS) values (?, ?, ?, ?, ?)");
         }
     }
 
@@ -53,10 +61,10 @@ public class DBMetricEventWriter implements DBEventWriter {
             prepareStatement(c);
             StatsEvent m = (StatsEvent) e;
             stm.setString(1, m.getStatsSample().getTag());
-            stm.setDouble(2, m.getStatsSample().getAvg());
-            stm.setDouble(3, m.getStatsSample().getMax());
-            stm.setDouble(4, m.getStatsSample().getMin());
-            stm.setTimestamp(5, new Timestamp(e.getTime()));
+            stm.setDouble(2, m.getStatsSample().getValue());
+            stm.setDouble(3, m.getStatsSample().getMaxValue());
+            stm.setDouble(4, m.getStatsSample().getMinValue());
+            stm.setTimestamp(5, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
             stm.execute();
         }
     }

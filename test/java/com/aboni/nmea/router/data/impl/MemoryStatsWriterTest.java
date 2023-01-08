@@ -44,7 +44,7 @@ public class MemoryStatsWriterTest {
     private static void loadSample(MemoryStatsWriter writer, Metric metric, double value, long timestamp) {
         ScalarStatsSample s = new ScalarStatsSample(metric.getId());
         s.add(value, timestamp);
-        writer.write(s, timestamp);
+        writer.write(s.getImmutableCopy(), timestamp);
     }
 
     @Test

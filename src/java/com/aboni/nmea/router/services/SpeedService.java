@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.data.StatsSample;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.sampledquery.*;
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.Query;
@@ -48,18 +48,18 @@ public class SpeedService extends JSONWebService {
         private int count = 0;
 
         @Override
-        public JSONObject[] getSampleNode(StatsSample s) {
+        public JSONObject[] getSampleNode(Sample s) {
             JSONObject[] ret;
-            if (s.getAvg() <= 0.1 && lastV <= 0.1) {
+            if (s.getValue() <= 0.1 && lastV <= 0.1) {
                 if (count > 0) {
                     if (!lastSkipped) {
                         // speed is 0 but last sample was not skipped so write a 0 to bring chart to 0
-                        ret = new JSONObject[]{writeZero(s.getT0())};
+                        ret = new JSONObject[]{writeZero(s.getTimestamp())};
                         lastNull = false;
                         count++;
                     } else if (!lastNull) {
                         // last one was speed=0, but it was written. Write a null.
-                        ret = new JSONObject[]{writeNull(s.getT0())};
+                        ret = new JSONObject[]{writeNull(s.getTimestamp())};
                         lastNull = true;
                         count++;
                     } else {
@@ -82,16 +82,16 @@ public class SpeedService extends JSONWebService {
                 lastSkipped = false;
                 lastNull = false;
             }
-            lastV = s.getAvg();
-            lastTS = s.getT1();
+            lastV = s.getValue();
+            lastTS = s.getTimestamp();
             return ret;
         }
 
-        private JSONObject writeValue(StatsSample s) {
-            return write(s.getT0(),
-                    Utils.round(s.getMin(), 2),
-                    Utils.round(s.getAvg(), 2),
-                    Utils.round(s.getMax(), 2));
+        private JSONObject writeValue(Sample s) {
+            return write(s.getTimestamp(),
+                    Utils.round(s.getMinValue(), 2),
+                    Utils.round(s.getValue(), 2),
+                    Utils.round(s.getMaxValue(), 2));
         }
 
         private JSONObject writeNull(long ts) {

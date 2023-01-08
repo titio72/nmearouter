@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
@@ -27,8 +28,11 @@ import com.aboni.nmea.router.utils.QueryById;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,13 +44,15 @@ public class DBTrackReader implements TrackReader {
 
     private static final String ERROR_READING_TRACK = "Error reading track";
 
-    public DBTrackReader() {
-        // nothing to initialize
+    @Inject
+    public DBTrackReader(@Named(Constants.TAG_TRACK) String tableName) {
+        sqlByTrip = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon, id from " + tableName +
+            " where TS>=(select fromTS from trip where id=?) and TS<=(select toTS from trip where id=?)";
+        sqlByDate = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon, id from " + tableName + " where TS>=? and TS<=?";
     }
 
-    private static final String SQL_BY_TRIP = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon from track " +
-            "where TS>=(select fromTS from trip where id=?) and TS<=(select toTS from trip where id=?)";
-    private static final String SQL_BY_DATE = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon from track where TS>=? and TS<?";
+    private final String sqlByTrip;
+    private final String sqlByDate;
 
     public void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException {
         if (query instanceof QueryById) {
@@ -61,12 +67,12 @@ public class DBTrackReader implements TrackReader {
 
     private void readTrack(int tripId, @NotNull TrackReaderListener target) throws TrackManagementException {
         try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(SQL_BY_TRIP)) {
+            try (PreparedStatement st = db.getConnection().prepareStatement(sqlByTrip)) {
                 st.setInt(1, tripId);
                 st.setInt(2, tripId);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
-                        target.onRead(getSample(rs));
+                        target.onRead(rs.getInt(10), getSample(rs));
                     }
                 }
             }
@@ -77,12 +83,12 @@ public class DBTrackReader implements TrackReader {
 
     private void readTrack(@NotNull Instant from, @NotNull Instant to, @NotNull TrackReaderListener target) throws TrackManagementException {
         try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(SQL_BY_DATE)) {
-                st.setTimestamp(1, new Timestamp(from.toEpochMilli()));
-                st.setTimestamp(2, new Timestamp(to.toEpochMilli()));
+            try (PreparedStatement st = db.getConnection().prepareStatement(sqlByDate)) {
+                st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+                st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
                 try (ResultSet rs = st.executeQuery()) {
                     while (rs.next()) {
-                        target.onRead(getSample(rs));
+                        target.onRead(rs.getInt(10), getSample(rs));
                     }
                 }
             }
@@ -94,7 +100,7 @@ public class DBTrackReader implements TrackReader {
     private TrackPoint getSample(ResultSet rs) throws SQLException {
         TrackPointBuilder builder = ThingsFactory.getInstance(TrackPointBuilder.class);
         return builder
-                .withPosition(new GeoPositionT(rs.getTimestamp("TS").getTime(), new Position(rs.getDouble("lat"), rs.getDouble("lon"))))
+                .withPosition(new GeoPositionT(rs.getTimestamp("TS", Utils.UTC_CALENDAR).getTime(), new Position(rs.getDouble("lat"), rs.getDouble("lon"))))
                 .withAnchor(1 == rs.getInt("anchor"))
                 .withDistance(rs.getDouble("dist"))
                 .withSpeed(rs.getDouble("speed"), rs.getDouble("maxSpeed"))

@@ -21,12 +21,11 @@ public final class Metrics {
 
     private Metrics() {
     }
-
-    public static final Metric PRESSURE = new Metric("P_ATM", "Atmospheric pressure", Unit.MILLIBAR);
-    public static final Metric AIR_TEMPERATURE = new Metric("T_AIR", "Air temperature", Unit.CELSIUS);
-    public static final Metric WATER_TEMPERATURE = new Metric("T_WTR", "Water temperature", Unit.CELSIUS);
+    public static final Metric PRESSURE = new Metric("PR_", "Atmospheric pressure", Unit.MILLIBAR);
+    public static final Metric AIR_TEMPERATURE = new Metric("AT0", "Air temperature", Unit.CELSIUS);
+    public static final Metric WATER_TEMPERATURE = new Metric("WT_", "Water temperature", Unit.CELSIUS);
     public static final Metric HUMIDITY = new Metric("HUM", "Relative humidity", Unit.PERCENTAGE);
-    public static final Metric WIND_SPEED = new Metric("W_SP", "Wind speed", Unit.KNOTS);
-    public static final Metric WIND_DIRECTION = new Metric("W_DR", "Wind direction", Unit.DEGREES);
-    public static final Metric ROLL = new Metric("ROLL", "Boat roll", Unit.DEGREES_SCALAR);
+    public static final Metric WIND_SPEED = new Metric("TW_", "Wind speed", Unit.KNOTS);
+    public static final Metric WIND_DIRECTION = new Metric("TWD", "Wind direction", Unit.DEGREES);
+    public static final Metric ROLL = new Metric("ROL", "Boat roll", Unit.DEGREES_SCALAR);
 }

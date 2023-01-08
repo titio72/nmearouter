@@ -22,6 +22,7 @@ import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.utils.Utils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,8 +42,8 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
             int sampling = range.getSampling(maxSamples);
             String sql = getTimeSeriesSQL(conf);
             try (PreparedStatement stm = db.getConnection().prepareStatement(sql)) {
-                stm.setTimestamp(1, cFrom);
-                stm.setTimestamp(2, cTo);
+                stm.setTimestamp(1, cFrom, Utils.UTC_CALENDAR);
+                stm.setTimestamp(2, cTo, Utils.UTC_CALENDAR);
                 readSamples(res, stm, sampling, maxSamples);
             }
             return res;
@@ -54,7 +55,7 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
     private static void readSamples(Map<String, TimeSeries> res, PreparedStatement stm, int sampling, int maxSamples) throws SQLException {
         try (ResultSet rs = stm.executeQuery()) {
             while (rs.next()) {
-                Timestamp ts = rs.getTimestamp(1);
+                Timestamp ts = rs.getTimestamp(1, Utils.UTC_CALENDAR);
                 String type = rs.getString(2);
                 double vMax = rs.getDouble(3);
                 double v = rs.getDouble(4);

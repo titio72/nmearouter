@@ -26,9 +26,9 @@ public class ScalarStatsSampleTest {
     public void testEmpty() {
         ScalarStatsSample sample = new ScalarStatsSample("TW_");
         assertEquals(0, sample.getSamples());
-        assertTrue(Double.isNaN(sample.getAvg()));
-        assertTrue(Double.isNaN(sample.getMax()));
-        assertTrue(Double.isNaN(sample.getMin()));
+        assertTrue(Double.isNaN(sample.getValue()));
+        assertTrue(Double.isNaN(sample.getMaxValue()));
+        assertTrue(Double.isNaN(sample.getMinValue()));
     }
 
     @Test
@@ -38,13 +38,26 @@ public class ScalarStatsSampleTest {
         sample.add(8.0, t0);
 
         assertEquals(1, sample.getSamples());
-        assertEquals(8.0, sample.getAvg(), 0.001);
-        assertEquals(8.0, sample.getMin(), 0.001);
-        assertEquals(8.0, sample.getMax(), 0.001);
+        assertEquals(8.0, sample.getValue(), 0.001);
+        assertEquals(8.0, sample.getMinValue(), 0.001);
+        assertEquals(8.0, sample.getMaxValue(), 0.001);
         assertEquals(t0, sample.getT0());
         assertEquals(t0, sample.getT1());
     }
 
+    @Test
+    public void testOneSampleMaxMin() {
+        long t0 = System.currentTimeMillis();
+        ScalarStatsSample sample = new ScalarStatsSample("TW_");
+        sample.add(12.0, 8.0, 6.0, t0);
+
+        assertEquals(1, sample.getSamples());
+        assertEquals(8.0, sample.getValue(), 0.001);
+        assertEquals(6.0, sample.getMinValue(), 0.001);
+        assertEquals(12.0, sample.getMaxValue(), 0.001);
+        assertEquals(t0, sample.getT0());
+        assertEquals(t0, sample.getT1());
+    }
     @Test
     public void testMultipleSamples() {
         long t0 = System.currentTimeMillis();
@@ -54,9 +67,9 @@ public class ScalarStatsSampleTest {
         sample.add(13.0, t0 + 2000);
 
         assertEquals(3, sample.getSamples());
-        assertEquals(12, sample.getAvg(), 0.001);
-        assertEquals(11, sample.getMin(), 0.001);
-        assertEquals(13, sample.getMax(), 0.001);
+        assertEquals(12, sample.getValue(), 0.001);
+        assertEquals(11, sample.getMinValue(), 0.001);
+        assertEquals(13, sample.getMaxValue(), 0.001);
         assertEquals(t0, sample.getT0());
         assertEquals(t0 + 2000, sample.getT1());
     }

@@ -62,7 +62,7 @@ public class Track2GPX implements TrackDumper {
         }
 
         @Override
-        public void onRead(TrackPoint sample) throws TrackManagementException {
+        public void onRead(int id, TrackPoint sample) throws TrackManagementException {
             try {
                 GeoPositionT p = sample.getPosition();
                 if (TRACK_THEM_ALL) {

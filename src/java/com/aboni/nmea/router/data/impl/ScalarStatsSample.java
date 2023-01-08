@@ -53,7 +53,7 @@ public class ScalarStatsSample extends StatsSample {
     }
 
     @Override
-    public void add(double vMin, double v, double vMax, long time) {
+    public void add(double vMax, double v, double vMin, long time) {
         if (isInRange(v)) {
             if (samples == 0) {
                 initSample(vMin, v, vMax, time);

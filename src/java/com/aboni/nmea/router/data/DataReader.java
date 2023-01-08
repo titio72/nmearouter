@@ -30,8 +30,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data;
 
+import com.aboni.nmea.router.utils.Query;
+
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 
 public interface DataReader {
 
@@ -39,7 +40,7 @@ public interface DataReader {
         void onRead(Sample sample);
     }
 
-    void readData(@NotNull Instant from, @NotNull Instant to, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException;
+    void readData(@NotNull Query query, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException;
 
-    void readData(@NotNull Instant from, @NotNull Instant to, @NotNull DataReader.DataReaderListener target) throws DataManagementException;
+    void readData(@NotNull Query query, @NotNull DataReader.DataReaderListener target) throws DataManagementException;
 }
