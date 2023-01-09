@@ -40,7 +40,9 @@ public class TripListService extends JSONWebService {
     private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
         int year = config.getInteger("year", Calendar.getInstance().get(Calendar.YEAR));
         try {
-            List<Trip> trips = (year == 0) ? manager.getTrips(true) : manager.getTrips(year, true);
+            List<Trip> trips = (year == 0) ?
+                    manager.getTrips(true) :
+                    manager.getTrips(year, true);
             return new TripsToJSON(trips).go();
         } catch (Exception e) {
             throw new JSONGenerationException(e);
