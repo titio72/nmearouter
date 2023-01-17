@@ -22,7 +22,7 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;

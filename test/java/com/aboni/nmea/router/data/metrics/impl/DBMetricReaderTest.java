@@ -3,7 +3,7 @@ package com.aboni.nmea.router.data.metrics.impl;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Guice;

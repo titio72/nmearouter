@@ -17,8 +17,8 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
