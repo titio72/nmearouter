@@ -16,11 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.sensors.hw.DS18B20;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,11 +60,11 @@ public class SensorTemp implements Sensor {
     private final Log log;
 
     @Inject
-    public SensorTemp(@NotNull Log log) {
+    public SensorTemp(Log log) {
         readings = new HashMap<>();
         lastRead = 0;
         sensor = null;
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
     }
 
     @Override

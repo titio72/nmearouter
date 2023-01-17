@@ -24,7 +24,6 @@ import com.aboni.nmea.router.message.MsgSpeed;
 import com.aboni.utils.SpeedMovingAverage;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEASpeedFilter implements NMEAFilter {
 
@@ -43,8 +42,9 @@ public class NMEASpeedFilter implements NMEAFilter {
     private static final double SPEED_CHECK_GPS_THRESHOLD = 2.5;
 
     @Inject
-    public NMEASpeedFilter(@NotNull NMEACache cache) {
+    public NMEASpeedFilter(NMEACache cache) {
         this.cache = cache;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         speedMovingAverage = new SpeedMovingAverage(10000 /* 10 seconds */);
     }
 

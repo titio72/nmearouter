@@ -13,7 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -38,8 +37,9 @@ public class GPSStatusService extends JSONWebService {
     }
 
     @Inject
-    public GPSStatusService(@NotNull NMEARouter router, @NotNull Log log) {
+    public GPSStatusService(NMEARouter router, Log log) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("router is null");
         this.router = router;
         setLoader((ServiceConfig config) -> {
             GPSStatus st = findService();

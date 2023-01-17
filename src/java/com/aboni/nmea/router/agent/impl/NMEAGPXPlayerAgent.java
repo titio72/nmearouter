@@ -33,19 +33,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
-    private final SimpleDateFormat fmt;
-    private final TimestampProvider timestampProvider;
-    private final Log log;
     private GeoPositionT prevPos;
     private long t0Play;
     private long t0;
@@ -53,20 +48,16 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     private boolean stop;
 
     @Inject
-    public NMEAGPXPlayerAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAGPXPlayerAgent(Log log, TimestampProvider tp) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
-        this.fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        this.fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public void setFile(@NotNull String file) {
+    public void setFile(String file) {
         if (this.file == null) {
-            log.info(() -> getLogBuilder().wO("init").wV("file", file).toString());
+            getLog().info(() -> getLogBuilder().wO("init").wV("file", file).toString());
             this.file = file;
         } else {
-            log.error(() -> getLogBuilder().wO("init").wV("error", file).wV("error", "already initialized").toString());
+            getLog().error(() -> getLogBuilder().wO("init").wV("error", file).wV("error", "already initialized").toString());
         }
     }
 
@@ -110,7 +101,7 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
             d = builder.parse(new InputSource(file));
             d.getDocumentElement().normalize();
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("play gpx").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("play gpx").toString(), e);
             return false;
         }
 
@@ -128,11 +119,11 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
                         Element p = (Element)points.item(j);
                         Node t1 = p.getElementsByTagName("time").item(0);
                         String sTime = t1.getTextContent();
-                        Date dPos = fmt.parse(sTime);
+                        Date dPos = Utils.getISODateUTC(sTime);
                         GeoPositionT pos = new GeoPositionT(dPos.getTime(), Double.parseDouble(p.getAttribute("lat")), Double.parseDouble(p.getAttribute("lon")));
                         doIt(pos);
                     } catch (Exception e) {
-                        log.error(() -> getLogBuilder().wO("play gpx").toString(), e);
+                        getLog().error(() -> getLogBuilder().wO("play gpx").toString(), e);
                     }
                 }
             }
@@ -155,12 +146,12 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
 
     private void doIt(GeoPositionT pos) {
         if (t0==0) {
-            t0 = timestampProvider.getNow();
+            t0 = getTimestampProvider().getNow();
             t0Play = pos.getTimestamp();
         }
         if (prevPos!=null) {
             long dt = pos.getTimestamp() - t0Play;
-            long elapsed = timestampProvider.getNow() - t0;
+            long elapsed = getTimestampProvider().getNow() - t0;
             Utils.pause((int) (dt - elapsed));
             Course c = new Course(prevPos, pos);
             RMCSentence s = (RMCSentence) SentenceFactory.getInstance().createParser(TalkerId.GP, SentenceId.RMC);

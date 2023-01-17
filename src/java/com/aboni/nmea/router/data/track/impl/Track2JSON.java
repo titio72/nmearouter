@@ -21,11 +21,10 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,14 +85,17 @@ public class Track2JSON implements TrackDumper {
     public static final String JSON_TRACK_TAG = "track";
 
     @Inject
-    public Track2JSON(@NotNull TrackReader trackReader) {
+    public Track2JSON(TrackReader trackReader) {
+        if (trackReader==null) throw new IllegalArgumentException("Track reader is null");
         jsonTrack = new JSONObject();
         trackName = DEFAULT_TRACK_NAME;
         this.trackReader = trackReader;
     }
 
     @Override
-    public void dump(@NotNull Query query, @NotNull Writer w) throws TrackManagementException {
+    public void dump(Query query, Writer w) throws TrackManagementException {
+        if (query==null) throw new TrackManagementException("The query provided is null");
+        if (w==null) throw new TrackManagementException("Point writer is null");
         createPath();
         writePoints(query);
         writeIt(w);
@@ -135,7 +137,7 @@ public class Track2JSON implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(@NotNull String trackName) {
+    public void setTrackName(String trackName) {
         this.trackName = trackName;
     }
 }

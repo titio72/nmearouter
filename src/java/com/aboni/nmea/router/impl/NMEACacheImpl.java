@@ -18,12 +18,12 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,11 +38,11 @@ public class NMEACacheImpl implements NMEACache {
     private final Map<String, Object> statuses;
 
     @Inject
-    public NMEACacheImpl(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEACacheImpl(Log log, TimestampProvider tp) {
         lastHeading = new DataEvent<>(null, 0, "");
         lastPosition = new DataEvent<>(null, 0, "");
         statuses = new HashMap<>();
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
         this.timestampProvider = tp;
     }
 

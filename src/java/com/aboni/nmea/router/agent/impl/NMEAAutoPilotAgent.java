@@ -24,7 +24,6 @@ import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -91,12 +90,9 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     public static final String CHANGE_STATUS_OP = "change status";
     public static final String NEW_STATUS_KEY_NAME = "new status";
 
-    private final Log log;
-
     @Inject
-    public NMEAAutoPilotAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAAutoPilotAgent(Log log, TimestampProvider tp) {
         super(log, tp, false, false);
-        this.log = log;
     }
 
     @Override
@@ -125,7 +121,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "01", "FE");
-        log.info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "auto").toString());
+        getLog().info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "auto").toString());
         this.postMessage(s);
     }
 
@@ -134,7 +130,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "02", "FD");
-        log.info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "stand by").toString());
+        getLog().info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "stand by").toString());
         this.postMessage(s);
     }
 
@@ -143,7 +139,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
         STALKSentence s = (STALKSentence) SentenceFactory.getInstance().createParser(TalkerId.ST, SentenceId.ALK);
         s.setCommand("86");
         s.setParameters("21", "23", "DC");
-        log.info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "vane").toString());
+        getLog().info(() -> getLogBuilder().wO(CHANGE_STATUS_OP).wV(NEW_STATUS_KEY_NAME, "vane").toString());
         this.postMessage(s);
     }
     //11  05  FA     -1
@@ -156,7 +152,7 @@ public class NMEAAutoPilotAgent extends NMEAAgentImpl implements AutoPilotDriver
     // X1  08  F7    +10 (in auto mode)
 
     private void logDirection(boolean port, int deg) {
-        log.info(() -> getLogBuilder().wO("steer").wV("direction", port ? "port" : "starboard").wV("degrees", deg).toString());
+        getLog().info(() -> getLogBuilder().wO("steer").wV("direction", port ? "port" : "starboard").wV("degrees", deg).toString());
     }
 
     @Override

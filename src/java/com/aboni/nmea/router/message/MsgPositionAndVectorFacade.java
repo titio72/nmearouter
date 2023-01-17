@@ -17,7 +17,6 @@ package com.aboni.nmea.router.message;
 
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
@@ -25,7 +24,8 @@ public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
     private final MsgSOGAdCOG vector;
     private final MsgGNSSPosition position;
 
-    public MsgPositionAndVectorFacade(@NotNull MsgGNSSPosition position, @NotNull MsgSOGAdCOG vector) {
+    public MsgPositionAndVectorFacade(MsgGNSSPosition position, MsgSOGAdCOG vector) {
+        if (position==null || vector==null) throw new IllegalArgumentException("Position or vector is null");
         this.position = position;
         this.vector = vector;
     }
@@ -72,7 +72,7 @@ public class MsgPositionAndVectorFacade implements MsgPositionAndVector {
 
     @Override
     public String toString() {
-        return position.toString() + " " + vector.toString();
+        return position + " " + vector;
     }
 
     @Override

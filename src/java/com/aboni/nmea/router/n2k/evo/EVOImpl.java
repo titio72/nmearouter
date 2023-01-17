@@ -21,7 +21,6 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.PGNDataParseException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class EVOImpl implements EVO {
@@ -30,7 +29,7 @@ public class EVOImpl implements EVO {
     private final int src;
 
     @Inject
-    public EVOImpl(@NotNull TimestampProvider tp, int src) {
+    public EVOImpl(TimestampProvider tp, int src) {
         this.tp = tp;
         this.src = src;
     }

@@ -22,11 +22,10 @@ import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class WindStatsReaderImpl implements WindStatsReader {
 
@@ -81,11 +80,12 @@ public class WindStatsReaderImpl implements WindStatsReader {
     }
 
     @Inject
-    public WindStatsReaderImpl(@NotNull @Named(Constants.TAG_METEO) DataReader reader) {
+    public WindStatsReaderImpl(@Named(Constants.TAG_METEO) DataReader reader) {
         this(reader, 60);
     }
 
     WindStatsReaderImpl(DataReader reader, int defaultIntervalSeconds) {
+        if (reader==null) throw new IllegalArgumentException("Reader is null");
         this.reader = reader;
         this.defaultIntervalSeconds = defaultIntervalSeconds;
     }

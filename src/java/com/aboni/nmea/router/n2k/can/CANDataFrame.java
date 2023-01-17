@@ -2,7 +2,6 @@ package com.aboni.nmea.router.n2k.can;
 
 import com.google.common.hash.HashCode;
 
-import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
 public class CANDataFrame {
@@ -10,7 +9,7 @@ public class CANDataFrame {
     private final long id;
     private final byte[] data;
 
-    public static CANDataFrame create(long id, @NotNull byte[] data) {
+    public static CANDataFrame create(long id, byte[] data) {
         return new CANDataFrame(id, data);
     }
 

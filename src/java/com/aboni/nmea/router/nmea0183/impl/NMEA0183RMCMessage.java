@@ -24,12 +24,11 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.util.CompassPoint;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class NMEA0183RMCMessage extends NMEA0183Message implements MsgPositionAndVector, MsgSystemTime {
 
-    public NMEA0183RMCMessage(@NotNull RMCSentence sentence) {
+    public NMEA0183RMCMessage(RMCSentence sentence) {
         super(sentence);
     }
 

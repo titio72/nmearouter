@@ -25,7 +25,6 @@ import com.aboni.nmea.router.utils.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -43,21 +42,16 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private int portTarget = 1113;
     private final Set<InetAddress> targets;
     private boolean setup = false;
-
-    private final Log log;
-    private final TimestampProvider timestampProvider;
     private final Message2NMEA0183 converter;
-
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
     private String description;
     private String baseDescription;
 
     @Inject
-    public NMEAUDPSender(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull Message2NMEA0183 converter) {
+    public NMEAUDPSender(Log log, TimestampProvider tp, Message2NMEA0183 converter) {
         super(log, tp, false, true);
-        this.timestampProvider = tp;
-        this.log = log;
+        if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
         targets = new HashSet<>();
         baseDescription = "UDP Sender";
@@ -80,7 +74,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            log.info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
+            getLog().info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
         }
     }
 
@@ -93,9 +87,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             baseDescription = "UDP Sender Port " + getPort() + "<br>";
             description = baseDescription;
 
-            log.info(() -> getLogBuilder().wO("init").wV("port", portTarget).toString());
+            getLog().info(() -> getLogBuilder().wO("init").wV("port", portTarget).toString());
         } else {
-            log.error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
+            getLog().error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
         }
     }
 
@@ -124,9 +118,9 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             targets.add(address);
             baseDescription += " " + address.getHostName();
             description = baseDescription;
-            log.info(() -> getLogBuilder().wO("init").wV("target", target).toString());
+            getLog().info(() -> getLogBuilder().wO("init").wV("target", target).toString());
         } catch (UnknownHostException e) {
-            log.error(() -> getLogBuilder().wO("init").wV("target", target).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("init").wV("target", target).toString(), e);
         }
     }
 
@@ -136,7 +130,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
             serverSocket = new DatagramSocket();
             return true;
         } catch (IOException e) {
-            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
+            getLog().errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
         }
         return false;
     }
@@ -146,7 +140,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
         try {
             serverSocket.close();
         } catch (Exception e) {
-            log.errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
+            getLog().errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
         }
     }
 
@@ -169,7 +163,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
                 updateStats(false);
             } catch (IOException e) {
                 updateStats(true);
-                log.errorForceStacktrace(() -> getLogBuilder().wO("message").toString(), e);
+                getLog().errorForceStacktrace(() -> getLogBuilder().wO("message").toString(), e);
             }
         }
     }
@@ -196,7 +190,7 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long t = timestampProvider.getNow();
+            long t = getTimestampProvider().getNow();
             synchronized (stats) {
                 stats.onTimer(t);
                 fastStats.onTimer(t);

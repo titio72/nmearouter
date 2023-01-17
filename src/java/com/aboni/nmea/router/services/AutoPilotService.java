@@ -24,13 +24,11 @@ import com.aboni.nmea.router.impl.EvoAPDriver;
 import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class AutoPilotService extends JSONWebService {
 
     private AutoPilotDriver auto;
     private final NMEARouter router;
-    private final Log log;
     private final TimestampProvider tp;
 
     private AutoPilotDriver getDriver() {
@@ -38,7 +36,7 @@ public class AutoPilotService extends JSONWebService {
             for (String agentName : router.getAgents()) {
                 NMEAAgent agent = router.getAgent(agentName);
                 if (agent instanceof EvoAutoPilotStatus) {
-                    auto = new EvoAPDriver(log, (EvoAutoPilotStatus)agent, tp);
+                    auto = new EvoAPDriver(getLogger(), (EvoAutoPilotStatus)agent, tp);
                 }
             }
         }
@@ -46,9 +44,10 @@ public class AutoPilotService extends JSONWebService {
     }
 
     @Inject
-    public AutoPilotService(NMEARouter router, @NotNull TimestampProvider tp, @NotNull Log log) {
+    public AutoPilotService(NMEARouter router, TimestampProvider tp, Log log) {
         super(log);
-        this.log = log;
+        if (router==null) throw new IllegalArgumentException("router is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
         this.router = router;
         this.tp = tp;
         setLoader((ServiceConfig config) -> {

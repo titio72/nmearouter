@@ -23,7 +23,6 @@ import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorPressureTemp extends I2CSensor {
@@ -39,13 +38,13 @@ public class SensorPressureTemp extends I2CSensor {
     private Atmospheric atmospheric;
     private final Sensor sensor;
 
-    public SensorPressureTemp(Sensor s, @NotNull Log log) {
+    public SensorPressureTemp(Sensor s, Log log) {
         super(log);
         sensor = s;
     }
 
     @Inject
-    public SensorPressureTemp(@NotNull Log log) {
+    public SensorPressureTemp(Log log) {
         this(Sensor.BME280, log);
     }
 

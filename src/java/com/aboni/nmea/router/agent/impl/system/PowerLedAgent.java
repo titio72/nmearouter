@@ -24,7 +24,6 @@ import com.aboni.nmea.router.utils.Log;
 import com.pi4j.io.gpio.*;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,13 +33,11 @@ public class PowerLedAgent extends NMEAAgentImpl {
     private static final Pin PWR = RaspiPin.GPIO_02;
     private final GpioPinDigitalOutput pin;
     private final GpioPinDigitalOutput pinGps;
-    private final TimestampProvider timestampProvider;
     private long lastGps;
 
     @Inject
-    public PowerLedAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public PowerLedAgent(Log log, TimestampProvider tp) {
         super(log, tp, false, true);
-        this.timestampProvider = tp;
         lastGps = 0;
         GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);
@@ -51,7 +48,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return ((timestampProvider.getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
+        return ((getTimestampProvider().getNow() - lastGps) < 2000) ? "On Gps[on]" : "On Gps[off]";
     }
 
     @Override
@@ -61,7 +58,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
 
             @Override
             public void run() {
-                if ((timestampProvider.getNow() - lastGps) > 2000) {
+                if ((getTimestampProvider().getNow() - lastGps) > 2000) {
                     powerGPSDown();
                 }
             }
@@ -90,7 +87,7 @@ public class PowerLedAgent extends NMEAAgentImpl {
     @OnRouterMessage
     public void onMessage(RouterMessage s) {
         if (s.getPayload() instanceof MsgPosition) {
-            lastGps = timestampProvider.getNow();
+            lastGps = getTimestampProvider().getNow();
             powerGPSUp();
         }
     }

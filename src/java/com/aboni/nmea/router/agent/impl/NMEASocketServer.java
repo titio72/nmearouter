@@ -28,7 +28,6 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -51,7 +50,6 @@ public class NMEASocketServer extends NMEAAgentImpl {
     private final ByteBuffer writeBuffer;
     private final ByteBuffer readBuffer;
     private final Map<SocketChannel, ClientDescriptor> clients;
-    private final Log log;
     private final Message2NMEA0183 converter;
     private SentenceSerializer serializer;
 
@@ -76,25 +74,25 @@ public class NMEASocketServer extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketServer(@NotNull TimestampProvider tp, @NotNull Log log, @NotNull Message2NMEA0183 converter) {
+    public NMEASocketServer(TimestampProvider tp, Log log, Message2NMEA0183 converter) {
         super(log, tp, false, true);
-        this.log = log;
+        if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
         writeBuffer = ByteBuffer.allocate(16384);
         readBuffer = ByteBuffer.allocate(16384);
         clients = new HashMap<>();
     }
 
-    public void setup(String name, QOS qos, NetConf conf, @NotNull SentenceSerializer serializer) {
+    public void setup(String name, QOS qos, NetConf conf, SentenceSerializer serializer) {
         if (port == -1) {
             setup(name, qos);
             setSourceTarget(conf.isRx(), conf.isTx());
             port = conf.getPort();
-            log.info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("setup").wV("port", port).wV("rx", conf.isRx())
+            getLog().info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("setup").wV("port", port).wV("rx", conf.isRx())
                     .wV("tx", conf.isTx()).toString());
             this.serializer = serializer;
         } else {
-            log.warning(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("setup").wV("error", "already setup").toString());
+            getLog().warning(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("setup").wV("error", "already setup").toString());
         }
     }
 
@@ -134,7 +132,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
                         for (SelectionKey ky: selector.selectedKeys()) { handleSelectionKey(ky); }
                         selector.selectedKeys().clear();
                     } catch (IOException e) {
-                        log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("start").toString(), e);
+                        getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("start").toString(), e);
                     }
                 }
             }
@@ -172,13 +170,13 @@ public class NMEASocketServer extends NMEAAgentImpl {
 
     private void handleDisconnection(SocketChannel client) {
         try {
-            log.info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("disconnect").wV(CLIENT_KEY_NAME, clients.getOrDefault(client, null)).toString());
+            getLog().info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("disconnect").wV(CLIENT_KEY_NAME, clients.getOrDefault(client, null)).toString());
             synchronized (clients) {
                 clients.remove(client);
             }
             client.close();
         } catch (Exception e) {
-            log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("disconnect").toString(), e);
+            getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("disconnect").toString(), e);
         }
     }
 
@@ -192,9 +190,9 @@ public class NMEASocketServer extends NMEAAgentImpl {
             synchronized (clients) {
                 clients.put(client, desc);
             }
-            log.info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("connect").wV(CLIENT_KEY_NAME, desc).toString());
+            getLog().info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("connect").wV(CLIENT_KEY_NAME, desc).toString());
         } catch (Exception ee) {
-            log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("connect").toString(), ee);
+            getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("connect").toString(), ee);
         }
     }
 
@@ -205,19 +203,19 @@ public class NMEASocketServer extends NMEAAgentImpl {
                 try {
                     c.close();
                 } catch (Exception e) {
-                    log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").wV(CLIENT_KEY_NAME, c).toString(), e);
+                    getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").wV(CLIENT_KEY_NAME, c).toString(), e);
                 }
             }
             clients.clear();
             try {
                 serverSocket.close();
             } catch (Exception e) {
-                log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").toString(), e);
+                getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").toString(), e);
             }
             try {
                 selector.close();
             } catch (Exception e) {
-                log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").toString(), e);
+                getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("stop").toString(), e);
             }
         }
     }
@@ -257,7 +255,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
             int written = sc.write(writeBuffer);
             if (written==0) {
                 cd.errors++;
-                log.warning(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("send failure").wV("message", output)
+                getLog().warning(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("send failure").wV("message", output)
                         .wV(CLIENT_KEY_NAME, sc.getRemoteAddress()).toString());
             } else {
                 cd.errors = 0;
@@ -265,13 +263,13 @@ public class NMEASocketServer extends NMEAAgentImpl {
             return cd.errors < 10 /* allow a max of 10 failure, then close the channel */;
         } catch (IOException e) {
             try {
-                log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("close connection after send failure").toString(), e);
+                getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("close connection after send failure").toString(), e);
                 sc.close();
             } catch (IOException e1) {
-                log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("close connection after send failure").toString(), e);
+                getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("close connection after send failure").toString(), e);
             }
         } catch (Exception e) {
-            log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("send failure").wV("message", output).toString(), e);
+            getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("send failure").wV("message", output).toString(), e);
         }
         return false;
     }
@@ -279,7 +277,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
     private void createServerSocket() {
         try {
             selector = Selector.open();
-            log.info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("create socket").toString());
+            getLog().info(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("create socket").toString());
             serverSocket = ServerSocketChannel.open();
             InetSocketAddress hostAddress = new InetSocketAddress(getPort());
             serverSocket.bind(hostAddress);
@@ -287,7 +285,7 @@ public class NMEASocketServer extends NMEAAgentImpl {
             int ops = serverSocket.validOps();
             serverSocket.register(selector, ops, null);
         } catch (Exception e) {
-            log.error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("create socket").toString(), e);
+            getLog().error(LogStringBuilder.start(TCP_SERVER_CATEGORY).wO("create socket").toString(), e);
         }
     }
 

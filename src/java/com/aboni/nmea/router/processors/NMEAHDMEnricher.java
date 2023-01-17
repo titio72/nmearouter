@@ -24,7 +24,7 @@ import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.message.impl.MsgHeadingImpl;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.utils.Pair;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -32,9 +32,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +48,9 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
     private final NMEACache cache;
 
     @Inject
-    public NMEAHDMEnricher(@NotNull NMEACache cache, @NotNull TimestampProvider tp) {
+    public NMEAHDMEnricher(NMEACache cache, TimestampProvider tp) {
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
         m = new NMEAMagnetic2TrueConverter(tp.getYear(), Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
         this.cache = cache;
     }
@@ -70,7 +70,6 @@ public class NMEAHDMEnricher implements NMEAPostProcess {
         }
     }
 
-    @Nonnull
     private Pair<Boolean, Message[]> handleMessage(MsgHeading message) {
         if (!message.isTrueHeading()) {
             Message trueHead = enrich(message, getLastPosition());

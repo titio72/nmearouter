@@ -20,15 +20,15 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class YearlyAnalyticsService extends JSONWebService {
 
     private final TrackQueryManager trackQueryManager;
 
     @Inject
-    public YearlyAnalyticsService(@NotNull final TrackQueryManager manager, @NotNull Log log) {
+    public YearlyAnalyticsService(final TrackQueryManager manager, Log log) {
         super(log);
+        if (manager==null) throw new IllegalArgumentException("Track manager is null");
         this.trackQueryManager = manager;
         setLoader(this::getResult);
     }

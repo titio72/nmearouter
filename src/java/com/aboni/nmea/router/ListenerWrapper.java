@@ -16,10 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +32,8 @@ public class ListenerWrapper {
     private final Object listenerObject;
     private final Log log;
 
-    public ListenerWrapper(Object listener, @NotNull Log log) {
-        this.log = log;
+    public ListenerWrapper(Object listener, Log log) {
+        this.log = SafeLog.getSafeLog(log);
         listenersJSON = new ArrayList<>();
         listenersMsg = new ArrayList<>();
         fillMethodsAnnotatedWith(listener);

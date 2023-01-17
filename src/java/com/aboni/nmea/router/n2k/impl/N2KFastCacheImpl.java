@@ -4,11 +4,11 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -127,11 +127,14 @@ public class N2KFastCacheImpl implements N2KFastCache {
     private final N2KMessageParserFactory parserFactory;
 
     @Inject
-    public N2KFastCacheImpl(@NotNull Log log, TimestampProvider tsp, @NotNull N2KMessageFactory messageFactory,
-                            @NotNull N2KMessageParserFactory parserFactory) {
+    public N2KFastCacheImpl(Log log, TimestampProvider tsp, N2KMessageFactory messageFactory,
+                            N2KMessageParserFactory parserFactory) {
+        if (tsp==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (messageFactory==null) throw new IllegalArgumentException("Message factory is null");
+        if (parserFactory==null) throw new IllegalArgumentException("N2K Parser factory is null");
+        this.log = SafeLog.getSafeLog(log);
         this.cache = new HashMap<>();
         this.timestampProvider = tsp;
-        this.log = log;
         this.messageFactory = messageFactory;
         this.parserFactory = parserFactory;
     }
@@ -142,21 +145,23 @@ public class N2KFastCacheImpl implements N2KFastCache {
     }
 
     @Override
-    public void onMessage(@NotNull N2KMessage msg) {
-        N2KFastEnvelope id = new N2KFastEnvelope();
-        id.pgn = msg.getHeader().getPgn();
-        id.src = msg.getHeader().getSource();
-        stats.incrRecv();
-        if (messageFactory.isSupported(id.pgn)) {
-            if (messageFactory.isFast(id.pgn)) {
-                handleFastMessage(msg, id);
-            } else if (callback != null) {
-                N2KMessageParser p = parserFactory.getNewParser();
-                try {
-                    p.addMessage(msg);
-                    callback.onMessage(p.getMessage());
-                } catch (Exception e) {
-                    log.error(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("message received").wV(MESSAGE_KEY_NAME, msg).toString(), e);
+    public void onMessage(N2KMessage msg) {
+        if (msg!=null) {
+            N2KFastEnvelope id = new N2KFastEnvelope();
+            id.pgn = msg.getHeader().getPgn();
+            id.src = msg.getHeader().getSource();
+            stats.incrRecv();
+            if (messageFactory.isSupported(id.pgn)) {
+                if (messageFactory.isFast(id.pgn)) {
+                    handleFastMessage(msg, id);
+                } else if (callback != null) {
+                    N2KMessageParser p = parserFactory.getNewParser();
+                    try {
+                        p.addMessage(msg);
+                        callback.onMessage(p.getMessage());
+                    } catch (Exception e) {
+                        log.error(() -> LogStringBuilder.start(N2K_FAST_CACHE_CATEGORY).wO("message received").wV(MESSAGE_KEY_NAME, msg).toString(), e);
+                    }
                 }
             }
         }

@@ -18,17 +18,17 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.data.track.JSONTrackAnalytics;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class TrackAnalyticsService extends JSONWebService {
 
     @Inject
-    public TrackAnalyticsService(@NotNull Log log, @NotNull QueryFactory queryFactory, @NotNull JSONTrackAnalytics analytics) {
+    public TrackAnalyticsService(Log log, QueryFactory queryFactory, JSONTrackAnalytics analytics) {
         super(log);
-
+        if (queryFactory==null) throw new IllegalArgumentException("Query factory is null");
+        if (analytics==null) throw new IllegalArgumentException("Track analytics is null");
         setLoader((ServiceConfig config) -> {
             try {
                 Query q = queryFactory.getQuery(config);

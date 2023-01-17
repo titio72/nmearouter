@@ -15,15 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.track;
 
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.Writer;
 
 public interface TrackDumper {
 
-    void setTrackName(@NotNull String name);
+    void setTrackName(String name);
 
     String getTrackName();
 
@@ -31,6 +30,6 @@ public interface TrackDumper {
 
     String getExtension();
 
-    void dump(@NotNull Query query, @NotNull Writer w) throws TrackManagementException, IOException;
+    void dump(Query query, Writer w) throws TrackManagementException, IOException;
 
 }

@@ -21,23 +21,19 @@ import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class ServiceDBBackup extends JSONWebService {
 
-    private final Log log;
-
     @Inject
-    public ServiceDBBackup(@NotNull Log log) {
+    public ServiceDBBackup(Log log) {
         super(log);
-        this.log = log;
         setLoader(this::getResult);
     }
 
     private JSONObject getResult(ServiceConfig config) {
         try (DBHelper h = new DBHelper(true)) {
             String file = h.backup();
-            log.info(LogStringBuilder.start("DBBackupService").wO("backup").wV("file", file).toString());
+            getLogger().info(LogStringBuilder.start("DBBackupService").wO("backup").wV("file", file).toString());
             if (file != null) {
                 JSONObject res = getOk();
                 res.put("file", file);
@@ -46,11 +42,11 @@ public class ServiceDBBackup extends JSONWebService {
                 return getError("Backup failed");
             }
         } catch (InterruptedException e) {
-            log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
             Thread.currentThread().interrupt();
             return getError("Error " + e.getMessage());
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
             return getError("Error " + e.getMessage());
         }
     }

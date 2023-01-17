@@ -20,14 +20,13 @@ import com.aboni.nmea.router.data.sampledquery.SampledQuery;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class MeteoService extends JSONWebService {
 
@@ -37,12 +36,11 @@ public class MeteoService extends JSONWebService {
     private final QueryFactory queryFactory;
     private SampledQuery sampledQuery;
 
-    private final Log log;
-
     @Inject
-    public MeteoService(@NotNull Log log, @NotNull QueryFactory queryFactory, @Named(Constants.TAG_METEO) SampledQueryConf conf) {
+    public MeteoService(Log log, QueryFactory queryFactory, @Named(Constants.TAG_METEO) SampledQueryConf conf) {
         super(log);
-        this.log = log;
+        if (queryFactory==null) throw new IllegalArgumentException("Query factory is null");
+        if (conf==null) throw new IllegalArgumentException("Sampled query configuration is null");
         this.conf = conf;
         this.queryFactory = queryFactory;
         setLoader(this::getResult);
@@ -55,7 +53,7 @@ public class MeteoService extends JSONWebService {
             try {
                 return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
             } catch (SampledQueryException e) {
-                log.errorForceStacktrace(() -> LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).toString(), e);
+                getLogger().errorForceStacktrace(() -> LogStringBuilder.start("MeteoService").wO("execute").wV("query", q).toString(), e);
                 return getError("Error executing query");
             }
         } else {

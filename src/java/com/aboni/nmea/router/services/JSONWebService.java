@@ -16,10 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class JSONWebService implements WebService {
@@ -30,29 +30,34 @@ public class JSONWebService implements WebService {
     private WebServiceJSONLoader loader;
     private final Log log;
 
-    public JSONWebService(@NotNull WebServiceJSONLoader loader, @NotNull Log log) {
+    public JSONWebService(WebServiceJSONLoader loader, Log log) {
         this.loader = loader;
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
     }
 
-    public JSONWebService(@NotNull Log log) {
+    public JSONWebService(Log log) {
         loader = null;
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
     }
 
-    public void setLoader(@NotNull WebServiceJSONLoader loader) {
+    public void setLoader(WebServiceJSONLoader loader) {
+        if (loader==null) throw new IllegalArgumentException("Data loader is null");
         this.loader = loader;
     }
 
     @Override
     public final void doIt(ServiceConfig config, ServiceOutput response) {
+        if (loader==null) {
+            setResponse(response, getError("JSON result loader is null"));
+        }
         try {
             log.info(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("invoked")
                     .wV(SERVICE_KEY_NAME, this.getClass().getName()).wV("config", config.dump()).toString());
             setResponse(response, getJsonObjectResult(config));
         } catch (Exception e) {
-            log.info(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("invoked")
+            log.error(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("invoked")
                     .wV(SERVICE_KEY_NAME, this.getClass().getName()).toString());
+            setResponse(response, getErrorForException(e));
         }
     }
 
@@ -63,8 +68,7 @@ public class JSONWebService implements WebService {
         } catch (Exception e) {
             log.errorForceStacktrace(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("response")
                     .wV(SERVICE_KEY_NAME, this.getClass().getName()).toString(), e);
-            res = new JSONObject();
-            res.put("Error", "Error extracting JSON {" + e.getMessage() + "}");
+            res = getErrorForException(e);
         }
         return res;
     }
@@ -76,7 +80,7 @@ public class JSONWebService implements WebService {
                 response.getWriter().append(res.toString(2));
                 response.ok();
             } else {
-                response.error("Invalid response detected: something went wrong");
+                response.error("null JSON response: something went wrong");
             }
         } catch (IOException e) {
             log.errorForceStacktrace(LogStringBuilder.start(JSON_WEB_SERVICE_CATEGORY).wO("response")
@@ -98,6 +102,10 @@ public class JSONWebService implements WebService {
         JSONObject res = new JSONObject();
         res.put("error", message);
         return res;
+    }
+
+    private static JSONObject getErrorForException(Exception e) {
+        return getError("Error extracting JSON {" + e.getMessage() + "}");
     }
 
     protected Log getLogger() {

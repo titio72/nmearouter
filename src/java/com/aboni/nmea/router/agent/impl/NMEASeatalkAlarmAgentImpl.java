@@ -12,7 +12,6 @@ import com.aboni.utils.Pair;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.*;
 
@@ -40,17 +39,13 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
         }
     }
 
-    private final TimestampProvider tp;
-    private final Log log;
     private final Map<AlarmId, Pair<MsgSeatalkAlarm, Instant>> alarms;
     private final Set<AlarmListener> listeners;
     private static final long CLEANUP_TIMEOUT = 300000;
 
     @Inject
-    public NMEASeatalkAlarmAgentImpl(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEASeatalkAlarmAgentImpl(Log log, TimestampProvider tp) {
         super(log, tp, false, true);
-        this.log = log;
-        this.tp = tp;
         this.alarms = new HashMap<>();
         this.listeners = new HashSet<>();
     }
@@ -60,7 +55,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
         if (routerMessage.getMessage() instanceof MsgSeatalkAlarm) {
             Instant time = Instant.ofEpochMilli(routerMessage.getTimestamp());
             MsgSeatalkAlarm seatalkAlarm = (MsgSeatalkAlarm) routerMessage.getMessage();
-            log.info(() -> getLogBuilder().wO("append alarm").wV("alarm", seatalkAlarm).toString());
+            getLog().info(() -> getLogBuilder().wO("append alarm").wV("alarm", seatalkAlarm).toString());
             synchronized (alarms) {
                 alarms.put(
                         new AlarmId(seatalkAlarm.getSource(), seatalkAlarm.getAlarm()),
@@ -71,7 +66,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
                     try {
                         listener.onAlarm(seatalkAlarm, time);
                     } catch (Exception e) {
-                        log.error(() -> getLogBuilder().wO("dispatch alarm").wV("listener", listener.toString()).toString(), e);
+                        getLog().error(() -> getLogBuilder().wO("dispatch alarm").wV("listener", listener.toString()).toString(), e);
                     }
                 }
             }
@@ -119,7 +114,7 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     public void onTimer() {
         super.onTimer();
         synchronized (alarms) {
-            long now = tp.getNow();
+            long now = getTimestampProvider().getNow();
             alarms.entrySet().removeIf(
                     e -> e.getValue().first.getAlarmStatus()==SeatalkAlarmStatus.OFF &&
                             Utils.isOlderThan(e.getValue().second.toEpochMilli(), now, CLEANUP_TIMEOUT)

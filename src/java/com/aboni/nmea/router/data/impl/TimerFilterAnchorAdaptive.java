@@ -20,8 +20,6 @@ import com.aboni.nmea.router.NMEARouterStatuses;
 import com.aboni.nmea.router.data.TimerFilter;
 import com.aboni.utils.Utils;
 
-import javax.validation.constraints.NotNull;
-
 public class TimerFilterAnchorAdaptive implements TimerFilter {
 
     private final NMEACache cache;
@@ -29,12 +27,13 @@ public class TimerFilterAnchorAdaptive implements TimerFilter {
     private final long periodAnchor;
     private final long tolerance;
 
-    public TimerFilterAnchorAdaptive(@NotNull NMEACache cache, long period, long periodAnchor) {
+    public TimerFilterAnchorAdaptive(NMEACache cache, long period, long periodAnchor) {
         this(cache, period, periodAnchor, 500);
     }
 
-    public TimerFilterAnchorAdaptive(@NotNull NMEACache cache, long period, long periodAnchor, long tolerance) {
+    public TimerFilterAnchorAdaptive(NMEACache cache, long period, long periodAnchor, long tolerance) {
         this.cache = cache;
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
         this.periodAnchor = periodAnchor;
         this.period = period;
         this.tolerance = tolerance;

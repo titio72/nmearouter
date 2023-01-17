@@ -21,11 +21,9 @@ import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.MTWSentence;
 
-import javax.validation.constraints.NotNull;
-
 public class NMEA0183MTWMessage extends NMEA0183Message implements MsgTemperature {
 
-    public NMEA0183MTWMessage(@NotNull MTWSentence sentence) {
+    public NMEA0183MTWMessage(MTWSentence sentence) {
         super(sentence);
     }
 

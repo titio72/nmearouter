@@ -23,6 +23,7 @@ import com.aboni.nmea.router.agent.impl.simulator.NMEASimulatorSourceX;
 import com.aboni.nmea.router.agent.impl.system.*;
 import com.aboni.nmea.router.conf.*;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEA2JSONb;
 import com.aboni.utils.LogStringBuilder;
@@ -30,7 +31,6 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 @SuppressWarnings({"OverlyCoupledClass", "OverlyComplexClass", "ClassWithTooManyMethods"})
 public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
@@ -44,8 +44,8 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
     private final Log log;
 
     @Inject
-    public NMEAAgentBuilderJsonImpl(@NotNull Log log) {
-        this.log = log;
+    public NMEAAgentBuilderJsonImpl(Log log) {
+        this.log = SafeLog.getSafeLog(log);
     }
 
     @Override

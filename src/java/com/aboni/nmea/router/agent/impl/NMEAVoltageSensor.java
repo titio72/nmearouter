@@ -28,19 +28,16 @@ import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEAVoltageSensor extends NMEAAgentImpl {
 
     public static final String VOLTAGE_AGENT_CATEGORY = "VoltageAgent";
     private int errCounter;
     private SensorVoltage voltageSensor;
-    private final Log log;
 
     @Inject
-    public NMEAVoltageSensor(@NotNull TimestampProvider tp, @NotNull Log log) {
+    public NMEAVoltageSensor(TimestampProvider tp, Log log) {
         super(log, tp, true, false);
-        this.log = log;
     }
 
     @Override
@@ -67,7 +64,7 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
                     voltageSensor.init();
                     return true;
                 } catch (SensorException e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
+                    getLog().errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
                     voltageSensor = null;
                 }
             }
@@ -79,9 +76,9 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
 
     private SensorVoltage createVoltage() {
         try {
-            return new SensorVoltage(log);
+            return new SensorVoltage(getLog());
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
+            getLog().errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("init").toString(), e);
             return null;
         }
     }
@@ -112,11 +109,11 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
             errCounter = 0;
             return true;
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("read").wV("failures", errCounter)
+            getLog().errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("read").wV("failures", errCounter)
                     .wV("max failures", 10).toString(), e);
             errCounter++;
             if (errCounter == 10) {
-                log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("deactivate").toString(), e);
+                getLog().errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("deactivate").toString(), e);
                 stop();
             }
             return false;
@@ -133,7 +130,7 @@ public class NMEAVoltageSensor extends NMEAAgentImpl {
                 xdr.addMeasurement(new Measurement("V", Utils.round(voltageSensor.getVoltage3(), 3), "V", "V3"));
                 postMessage(xdr);
             } catch (Exception e) {
-                log.errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("message").toString(), e);
+                getLog().errorForceStacktrace(LogStringBuilder.start(VOLTAGE_AGENT_CATEGORY).wO("message").toString(), e);
             }
         }
     }

@@ -20,7 +20,6 @@ import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -38,13 +37,13 @@ public class SystemTimeChecker {
     }
 
     @Inject
-    public SystemTimeChecker(@NotNull TimestampProvider tp, @NotNull Log log) {
+    public SystemTimeChecker(TimestampProvider tp, Log log) {
         this.timestampProvider = tp;
         this.log = log;
         this.changer = this::doChangeTime;
     }
 
-    public SystemTimeChecker(@NotNull TimestampProvider timestampProvider, SystemTimeChanger changer, @NotNull Log log) {
+    public SystemTimeChecker(TimestampProvider timestampProvider, SystemTimeChanger changer, Log log) {
         this.timestampProvider = timestampProvider;
         this.changer = changer;
         this.log = log;

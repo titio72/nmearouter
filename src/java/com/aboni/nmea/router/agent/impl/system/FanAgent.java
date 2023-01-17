@@ -26,19 +26,16 @@ import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class FanAgent extends NMEAAgentImpl {
 
     private static final double FAN_THRESHOLD_ON = 55.0;
     private static final double FAN_THRESHOLD_OFF = 52.0;
     private final Fan fan;
-    private final Log log;
 
     @Inject
-    public FanAgent(@NotNull TimestampProvider tp, @NotNull Log log) {
+    public FanAgent(TimestampProvider tp, Log log) {
         super(log, tp, true, false);
-        this.log = log;
         this.fan = new Fan();
     }
 
@@ -73,7 +70,7 @@ public class FanAgent extends NMEAAgentImpl {
     }
 
     private void fan(boolean on) {
-        log.info(LogStringBuilder.start("Fan Manager").wO("switch").wV("status", on).toString());
+        getLog().info(LogStringBuilder.start("Fan Manager").wO("switch").wV("status", on).toString());
         fan.switchFan(on);
     }
 
@@ -81,7 +78,7 @@ public class FanAgent extends NMEAAgentImpl {
         try {
             postMessage(new MsgTemperatureImpl(0, 0, TemperatureSource.CPU, temp, 60.0));
         } catch (Exception e) {
-            log.debug(() -> LogStringBuilder.start("Fan Manager").wO("read temperature")
+            getLog().debug(() -> LogStringBuilder.start("Fan Manager").wO("read temperature")
                     .wV("error", e.getMessage()).toString());
         }
     }

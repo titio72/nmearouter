@@ -20,12 +20,11 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.ImmutableSample;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
-import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,7 +37,8 @@ public class DBPowerReader implements DataReader {
     private static final String SQL_TIME_AND_TYPE = "select * from power where TS>=? and TS<? and type=?";
 
     @Override
-    public void readData(@NotNull Query query, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+    public void readData(Query query, DataReader.DataReaderListener target) throws DataManagementException {
+        if (target==null) throw new IllegalArgumentException("Results target is null");
         if (query instanceof QueryByDate) {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();
@@ -61,7 +61,9 @@ public class DBPowerReader implements DataReader {
     }
 
     @Override
-    public void readData(@NotNull Query query, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+    public void readData(Query query, String tag, DataReader.DataReaderListener target) throws DataManagementException {
+        if (target==null) throw new IllegalArgumentException("Results target is null");
+        if (tag==null) throw new IllegalArgumentException("Query tag is null");
         if (query instanceof QueryByDate) {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();

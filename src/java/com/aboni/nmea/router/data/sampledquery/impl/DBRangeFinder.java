@@ -20,9 +20,9 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
-import com.aboni.nmea.router.utils.QueryById;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.QueryById;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 

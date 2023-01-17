@@ -26,7 +26,6 @@ import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -36,28 +35,22 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     private static final int FAST_STATS_PERIOD = 1; //number of timer ticks
     private static final int STATS_PERIOD = 60;
-
     private static final int OPEN_SOCKET_RETRY_TIME = 3000;
     private static final int SOCKET_READ_TIMEOUT = 60000;
-    private final TimestampProvider timestampProvider;
-
     private int port;
     private boolean stop;
     private boolean setup;
     private final NMEAInputManager input;
     private final NMEATrafficStats fastStats;
     private final NMEATrafficStats stats;
-    private final Log log;
     private final PositionAndVectorStream positionAndVectorStream;
     private final SpeedAndHeadingStream speedAndHeadingStream;
     private final byte[] buffer = new byte[2048];
     private String description;
 
     @Inject
-    public NMEAUDPReceiver(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAUDPReceiver(Log log, TimestampProvider tp) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
         input = new NMEAInputManager(log);
         positionAndVectorStream = new PositionAndVectorStream(tp);
         positionAndVectorStream.setListener(this::postMessage);
@@ -82,7 +75,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
 
     private void onStatsExpired(NMEATrafficStats s, long time) {
         synchronized (this) {
-            log.info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
+            getLog().info(() -> getLogBuilder().wO("stats").w(s.toString(time)).toString());
         }
     }
 
@@ -91,9 +84,9 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             setup = true;
             setup(name, q);
             this.port = port;
-            log.info(() -> getLogBuilder().wO("init").wV("port", port).toString());
+            getLog().info(() -> getLogBuilder().wO("init").wV("port", port).toString());
         } else {
-            log.error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
+            getLog().error(() -> getLogBuilder().wO("init").wV("error", "already initialized").toString());
         }
     }
 
@@ -112,7 +105,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
                     loopRead(socket);
                 }
             } catch (SocketException e) {
-                log.error(() -> getLogBuilder().wO("open datagram socket").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("open datagram socket").toString(), e);
             }
             if (!stop) Utils.pause(OPEN_SOCKET_RETRY_TIME);
         }
@@ -138,11 +131,11 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
             }
         } catch (SocketTimeoutException e) {
             // read timeout
-            log.error(() -> getLogBuilder().wO("read").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("read").toString(), e);
             Utils.pause(1000);
         } catch (Exception e) {
             String logSentence = sSentence;
-            log.warning(() -> getLogBuilder().wO("read").wV("sentence", logSentence).toString(), e);
+            getLog().warning(() -> getLogBuilder().wO("read").wV("sentence", logSentence).toString(), e);
         }
         updateReadSentencesStats(true);
     }
@@ -189,7 +182,7 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long t = timestampProvider.getNow();
+            long t = getTimestampProvider().getNow();
             synchronized (stats) {
                 stats.onTimer(t);
                 fastStats.onTimer(t);

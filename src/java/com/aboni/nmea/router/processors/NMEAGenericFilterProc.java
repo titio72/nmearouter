@@ -22,7 +22,6 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.utils.Pair;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEAGenericFilterProc implements NMEAPostProcess {
 
@@ -31,7 +30,10 @@ public class NMEAGenericFilterProc implements NMEAPostProcess {
     private final RouterMessageFactory messageFactory;
 
     @Inject
-    public NMEAGenericFilterProc(@NotNull TimestampProvider timestampProvider, @NotNull NMEAFilter filter, @NotNull RouterMessageFactory messageFactory) {
+    public NMEAGenericFilterProc(TimestampProvider timestampProvider, NMEAFilter filter, RouterMessageFactory messageFactory) {
+        if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (filter==null) throw new IllegalArgumentException("Filter is null");
+        if (messageFactory==null) throw new IllegalArgumentException("Message factory is null");
         this.timestampProvider = timestampProvider;
         this.filter = filter;
         this.messageFactory = messageFactory;

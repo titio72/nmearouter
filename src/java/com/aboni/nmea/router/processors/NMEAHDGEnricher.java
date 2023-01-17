@@ -21,7 +21,7 @@ import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.utils.Pair;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
@@ -30,7 +30,6 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -52,11 +51,12 @@ public class NMEAHDGEnricher implements NMEAPostProcess {
     private final NMEACache cache;
 
     @Inject
-    public NMEAHDGEnricher(@NotNull NMEACache cache) {
+    public NMEAHDGEnricher(NMEACache cache) {
         this(cache, true, true);
     }
 
     public NMEAHDGEnricher(NMEACache cache, boolean hdm, boolean hdt, int year) {
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
         m = new NMEAMagnetic2TrueConverter(year, Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
         this.cache = cache;
         this.doHDM = hdm;

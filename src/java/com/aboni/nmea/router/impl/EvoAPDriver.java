@@ -25,12 +25,11 @@ import com.aboni.nmea.router.n2k.N2KMessageHeader;
 import com.aboni.nmea.router.n2k.evo.EVO;
 import com.aboni.nmea.router.n2k.evo.EVOImpl;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -70,17 +69,22 @@ public class EvoAPDriver implements AutoPilotDriver {
     private final Request headRequest = new Request();
 
     @Inject
-    public EvoAPDriver(@NotNull Log log, @NotNull EvoAutoPilotStatus autoPilotStatus, @NotNull TimestampProvider tp) {
-        this.log = log;
+    public EvoAPDriver(Log log, EvoAutoPilotStatus autoPilotStatus, TimestampProvider tp) {
+        if (autoPilotStatus==null) throw new IllegalArgumentException("Autopilot driver is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
+        this.log = SafeLog.getSafeLog(log);
         this.tp = tp;
         this.evoAutoPilotStatus = autoPilotStatus;
         this.msgSender = this::sendMessageToPilot;
         evo = new EVOImpl(tp, SOURCE);
     }
 
-    public EvoAPDriver(@NotNull Log log, @NotNull EvoAutoPilotStatus autoPilotStatus,
-                       @NotNull TimestampProvider tp, @NotNull N2KMessageHandler msgSender) {
-        this.log = log;
+    public EvoAPDriver(Log log, EvoAutoPilotStatus autoPilotStatus,
+                       TimestampProvider tp, N2KMessageHandler msgSender) {
+        if (autoPilotStatus==null) throw new IllegalArgumentException("Autopilot driver is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (msgSender==null) throw new IllegalArgumentException("N2K message sender is null");
+        this.log = SafeLog.getSafeLog(log);
         this.tp = tp;
         this.evoAutoPilotStatus = autoPilotStatus;
         this.msgSender = msgSender;
@@ -98,8 +102,6 @@ public class EvoAPDriver implements AutoPilotDriver {
         }
     }
 
-
-    @Nonnull
     private String getURL(N2KMessage m) {
         N2KMessageHeader h = m.getHeader();
         String sURL = String.format("http://%s/message?pgn=%d&src=%d&dest=%d&priority=%d&data=",

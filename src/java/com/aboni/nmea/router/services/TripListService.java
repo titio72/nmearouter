@@ -22,7 +22,6 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.Calendar;
 import java.util.List;
 
@@ -31,8 +30,9 @@ public class TripListService extends JSONWebService {
     private final TripManagerX manager;
 
     @Inject
-    public TripListService(@NotNull TripManagerX manager, @NotNull Log log) {
+    public TripListService(TripManagerX manager, Log log) {
         super(log);
+        if (manager==null) throw new IllegalArgumentException("Trip manager is null");
         this.manager = manager;
         setLoader(this::getResult);
     }

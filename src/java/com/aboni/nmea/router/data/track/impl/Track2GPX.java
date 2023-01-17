@@ -21,19 +21,17 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Track2GPX implements TrackDumper {
 
-    private class PointWriter implements TrackReader.TrackReaderListener {
+    private static class PointWriter implements TrackReader.TrackReaderListener {
 
         private static final boolean TRACK_THEM_ALL = true;
         final Writer theWriter;
@@ -56,7 +54,7 @@ public class Track2GPX implements TrackDumper {
         private void writePoint(GeoPositionT p) throws IOException {
             String s = "<trkpt lat=\"" + p.getLatitude() +
                     "\" lon=\"" + p.getLongitude() +
-                    "\"><time>" + df.format(new Date(p.getTimestamp())) +
+                    "\"><time>" + Utils.formatISOTimestampUTC(new Date(p.getTimestamp())) +
                     "</time></trkpt>\n";
             theWriter.write(s);
         }
@@ -87,17 +85,17 @@ public class Track2GPX implements TrackDumper {
     private final TrackReader track;
     private String trackName = DEFAULT_TRACK_NAME;
     public static final String DEFAULT_TRACK_NAME = "track";
-    private final DateFormat df;
-
 
     @Inject
-    public Track2GPX(@NotNull TrackReader reader) {
-        df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    public Track2GPX(TrackReader reader) {
+        if (reader==null) throw new IllegalArgumentException("Track reader is null");
         track = reader;
     }
 
     @Override
-    public void dump(@NotNull Query query, @NotNull Writer w) throws IOException, TrackManagementException {
+    public void dump(Query query, Writer w) throws IOException, TrackManagementException {
+        if (query==null) throw new TrackManagementException("The query provided is null");
+        if (w==null) throw new TrackManagementException("Point writer is null");
         writeHeader(w);
         writePoints(query, w);
         writeFooter(w);
@@ -125,7 +123,7 @@ public class Track2GPX implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(@NotNull String trackName) {
+    public void setTrackName(String trackName) {
         this.trackName = trackName;
     }
 

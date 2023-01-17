@@ -20,11 +20,10 @@ import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.nmea.router.n2k.N2KStream;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Extract a Message from a string, typically received from a stream.
@@ -87,10 +86,10 @@ public class NMEAInputManager {
     private final StringInputHandler nmeaHandler;
 
 
-    public NMEAInputManager(@NotNull Log logger) {
+    public NMEAInputManager(Log logger) {
         n2kHandler = new N2KHandlerExp(logger);
         nmeaHandler = new NMEA0183Handler(logger);
-        this.logger = logger;
+        this.logger = SafeLog.getSafeLog(logger);
     }
 
     public Message[] getMessage(String string) {

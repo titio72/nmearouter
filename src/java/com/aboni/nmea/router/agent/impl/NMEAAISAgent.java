@@ -8,7 +8,6 @@ import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
 import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
@@ -20,7 +19,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
         private final long timestamp;
         private final AISPositionReport report;
 
-        private PositionReport(long timestamp, @NotNull AISPositionReport report) {
+        private PositionReport(long timestamp, AISPositionReport report) {
             this.report = report;
             this.timestamp = timestamp;
         }
@@ -40,12 +39,10 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     private final Map<String, PositionReport> reports = new HashMap<>();
     private final Map<String, AISStaticData> data = new HashMap<>();
-    private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEAAISAgent(@NotNull Log log, @NotNull TimestampProvider timestampProvider) {
+    public NMEAAISAgent(Log log, TimestampProvider timestampProvider) {
         super(log, timestampProvider, false, true);
-        this.timestampProvider = timestampProvider;
     }
 
     @OnRouterMessage
@@ -58,9 +55,9 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
     public void onMessage(N2KMessage message) {
         if (message instanceof AISPositionReport) {
             String mmsi = ((AISPositionReport) message).getMMSI();
-            ((AISPositionReport) message).setOverrideTime(timestampProvider.getNow());
+            ((AISPositionReport) message).setOverrideTime(getTimestampProvider().getNow());
             synchronized (reports) {
-                reports.put(mmsi, new PositionReport(timestampProvider.getNow(), (AISPositionReport) message));
+                reports.put(mmsi, new PositionReport(getTimestampProvider().getNow(), (AISPositionReport) message));
             }
         }
 
@@ -93,7 +90,7 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
     @Override
     public void onTimer() {
         super.onTimer();
-        long now = timestampProvider.getNow();
+        long now = getTimestampProvider().getNow();
         synchronized (reports) {
             Collection<PositionReport> reportsCopy = new ArrayList<>(reports.values());
             for (PositionReport rep : reportsCopy) {

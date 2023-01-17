@@ -23,7 +23,6 @@ import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,16 +35,12 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
     private static final long DUMP_PERIOD = 10L * 1000L;
     private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-    private final Log log;
     private long lastDump = 0;
     private final List<NMEASentenceItem> queue = new LinkedList<>();
-    private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEA2FileAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEA2FileAgent(Log log, TimestampProvider tp) {
         super(log, tp, false, true);
-        this.log = log;
-        this.timestampProvider = tp;
     }
 
     @Override
@@ -66,14 +61,14 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     @OnRouterMessage
     public void onSentence(RouterMessage rm) {
         if (rm.getMessage() instanceof NMEA0183Message) {
-            NMEASentenceItem e = new NMEASentenceItem(((NMEA0183Message) rm.getMessage()).getSentence(), timestampProvider.getNow(), "  ");
+            NMEASentenceItem e = new NMEASentenceItem(((NMEA0183Message) rm.getMessage()).getSentence(), getTimestampProvider().getNow(), "  ");
             synchronized (queue) {
                 if (isStarted()) {
                     queue.add(e);
                     try {
                         dump();
                     } catch (IOException e1) {
-                        log.error(() -> getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).toString(), e1);
+                        getLog().error(() -> getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).toString(), e1);
                     }
                 }
             }
@@ -81,7 +76,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     }
 
     private void dump() throws IOException {
-        long t = timestampProvider.getNow();
+        long t = getTimestampProvider().getNow();
         if (t - lastDump > DUMP_PERIOD) {
             lastDump = t;
             File f = new File("nmea" + df.format(new Date()) + ".log");
@@ -97,7 +92,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
                 w.flush();
             }
             long bString = bytes;
-            log.info(() -> getLogBuilder().wO("dump").wV("bytes", bString).wV("timestamp", new Date()).toString());
+            getLog().info(() -> getLogBuilder().wO("dump").wV("bytes", bString).wV("timestamp", new Date()).toString());
         }
     }
 }

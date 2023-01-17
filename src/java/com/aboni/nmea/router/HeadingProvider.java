@@ -16,7 +16,7 @@
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 
 public interface HeadingProvider {
     DataEvent<MsgHeading> getLastHeading();

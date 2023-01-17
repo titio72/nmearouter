@@ -17,11 +17,11 @@ package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class HMC5883MPU6050CompassDataProvider implements CompassDataProvider {
 
@@ -33,8 +33,8 @@ public class HMC5883MPU6050CompassDataProvider implements CompassDataProvider {
     private boolean init;
 
     @Inject
-    public HMC5883MPU6050CompassDataProvider(@NotNull Log log) {
-        this.log = log;
+    public HMC5883MPU6050CompassDataProvider(Log log) {
+        this.log = SafeLog.getSafeLog(log);
         this.bus = HWSettings.getPropertyAsInteger("bus", 1);
         this.init = false;
         gyro = new SensorMPU6050(log);

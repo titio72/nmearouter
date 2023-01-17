@@ -28,13 +28,13 @@ import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -118,9 +118,10 @@ public class NMEAAgentImpl implements NMEAAgent {
     private final Log log;
 
     @Inject
-    public NMEAAgentImpl(@NotNull Log log, @NotNull TimestampProvider timestampProvider, boolean source, boolean target) {
+    public NMEAAgentImpl(Log log, TimestampProvider timestampProvider, boolean source, boolean target) {
+        if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider cannot be null");
         this.timestampProvider = timestampProvider;
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
         this.targetIf = new InternalTarget();
         this.sourceIf = new InternalSource();
         this.attributes = new AgentAttributes();
@@ -290,6 +291,14 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     protected LogStringBuilder getLogBuilder() {
         return LogStringBuilder.start("Agent").wV("Agent", getName()).wV("Type", getType());
+    }
+
+    protected Log getLog() {
+        return log;
+    }
+
+    protected TimestampProvider getTimestampProvider() {
+        return timestampProvider;
     }
 
     @Override

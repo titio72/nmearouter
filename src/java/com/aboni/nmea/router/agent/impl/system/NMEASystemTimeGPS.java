@@ -22,20 +22,19 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSystemTime;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
     private final SystemTimeChecker systemTimeCHecker;
 
     @Inject
-    public NMEASystemTimeGPS(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEASystemTimeGPS(Log log, TimestampProvider tp, SystemTimeChecker checker) {
         super(log, tp, true, true);
-        systemTimeCHecker = ThingsFactory.getInstance(SystemTimeChecker.class);
+        if (checker==null) throw new IllegalArgumentException("SystemTimeChecker is null");
+        this.systemTimeCHecker = checker;
     }
 
     @Override

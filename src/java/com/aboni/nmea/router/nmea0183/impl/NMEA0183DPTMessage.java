@@ -20,11 +20,9 @@ import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.DPTSentence;
 
-import javax.validation.constraints.NotNull;
-
 public class NMEA0183DPTMessage extends NMEA0183Message implements MsgWaterDepth {
 
-    public NMEA0183DPTMessage(@NotNull DPTSentence sentence) {
+    public NMEA0183DPTMessage(DPTSentence sentence) {
         super(sentence);
     }
 

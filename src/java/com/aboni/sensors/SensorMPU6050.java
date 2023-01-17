@@ -20,7 +20,6 @@ import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorMPU6050 extends I2CSensor {
@@ -75,7 +74,7 @@ public class SensorMPU6050 extends I2CSensor {
     private I2CInterface device;
 
     @Inject
-    public SensorMPU6050(@NotNull Log log) {
+    public SensorMPU6050(Log log) {
         super(log);
     }
 

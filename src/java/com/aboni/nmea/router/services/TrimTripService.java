@@ -20,16 +20,16 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class TrimTripService extends JSONWebService {
 
-    private final TripManagerX q;
+    private final TripManagerX tripManager;
 
     @Inject
-    public TrimTripService(@NotNull TripManagerX manager, @NotNull Log log) {
+    public TrimTripService(TripManagerX manager, Log log) {
         super(log);
-        q = manager;
+        if (manager==null) throw new IllegalArgumentException("Trip manager is null");
+        tripManager = manager;
         setLoader(this::getResult);
     }
 
@@ -37,7 +37,7 @@ public class TrimTripService extends JSONWebService {
         try {
             int trip = config.getInteger("trip", -1);
             if (trip != -1) {
-                q.trimTrip(trip);
+                tripManager.trimTrip(trip);
                 return getOk();
             } else {
                 return getError("Trip not specified");

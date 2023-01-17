@@ -22,12 +22,11 @@ import com.aboni.nmea.router.utils.db.DBEventWriter;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class DBPowerStatsWriter extends DBStatsWriter {
 
     @Inject
-    public DBPowerStatsWriter(@NotNull Log log, @NotNull @Named(Constants.TAG_POWER) String tag, @NotNull @Named(Constants.TAG_POWER) DBEventWriter writer) {
+    public DBPowerStatsWriter(Log log, @Named(Constants.TAG_POWER) String tag, @Named(Constants.TAG_POWER) DBEventWriter writer) {
         super(log, tag, writer);
     }
 }

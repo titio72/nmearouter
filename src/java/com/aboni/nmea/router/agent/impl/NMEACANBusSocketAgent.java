@@ -20,7 +20,6 @@ import tel.schich.javacan.RawCanChannel;
 import tel.schich.javacan.platform.linux.LinuxNativeOperationException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,10 +28,8 @@ import static tel.schich.javacan.CanSocketOptions.SO_RCVTIMEO;
 
 public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
-    public static final String ERROR_READING_FRAME = "Error reading frame";
     public static final String ERROR_TYPE_KEY_NAME = "error type";
     public static final String READ_KEY_NAME = "read";
-    private final Log log;
     private final PositionAndVectorStream posAndVectorStream;
     private final SpeedAndHeadingStream speedAndHeadingStream;
     private String netDeviceName;
@@ -40,7 +37,6 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final N2KFastCache fastCache;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
-    private final TimestampProvider timestampProvider;
     private long lastStats;
     private String description;
     private final AtomicBoolean run = new AtomicBoolean();
@@ -69,7 +65,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             synchronized (this) {
                 messagesAccepted = 0;
                 messages = 0;
-                lastReset = timestampProvider.getNow();
+                lastReset = getTimestampProvider().getNow();
             }
         }
 
@@ -81,11 +77,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSocketAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
-                                 @NotNull N2KMessageFactory messageFactory) {
+    public NMEACANBusSocketAgent(Log log, TimestampProvider tp, N2KFastCache fastCache, N2KMessageFactory messageFactory) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
         this.srcFilter = new PGNSourceFilterImpl(log);
@@ -100,7 +93,8 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         fastCache.setCallback(this::onReceive);
     }
 
-    private void onReceive(@NotNull N2KMessage msg) {
+    private void onReceive(N2KMessage msg) {
+        assert msg!=null;
         stats.incrementMessages();
         stats.incrementAccepted();
         posAndVectorStream.onMessage(msg);
@@ -144,11 +138,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                         readFrame();
                     }
                 }, "CANBus Socket [" + getName() + "]");
-                lastStats = timestampProvider.getNow();
+                lastStats = getTimestampProvider().getNow();
                 t.start();
             } catch (IOException e) {
                 run.set(false);
-                log.error(() -> getLogBuilder().wO("activate").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("activate").toString(), e);
                 channel = null;
                 return false;
             }
@@ -163,7 +157,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             byte[] data = new byte[frame.getDataLength()];
             frame.getData(data, 0, frame.getDataLength());
             N2KMessageHeader h = new N2KHeader(frame.getId());
-            long now = timestampProvider.getNow();
+            long now = getTimestampProvider().getNow();
             if (srcFilter.accept(h.getSource(), h.getPgn(), now) && messageFactory.isSupported(h.getPgn()) && h.getDest() == 0xFF) {
                 srcFilter.setPGNTimestamp(h.getSource(), h.getPgn(), now);
                 N2KMessage msg = messageFactory.newUntypedInstance(h, data);
@@ -171,7 +165,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             }
         } catch (LinuxNativeOperationException e) {
             if (e.getErrorNumber() != 11) {
-                log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").toString(), e);
+                getLog().error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "native linux error").toString(), e);
             } else {
                 try {
                     Thread.sleep(20);
@@ -180,11 +174,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
                 }
             }
         } catch (IOException e) {
-            log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").toString(), e);
+            getLog().error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "IO").toString(), e);
         } catch (Exception e) {
             errors++;
             if (DEBUG) {
-                log.error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").toString(), e);
+                getLog().error(() -> getLogBuilder().wO(READ_KEY_NAME).wV(ERROR_TYPE_KEY_NAME, "unexpected error").toString(), e);
             }
         }
     }
@@ -197,7 +191,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             try {
                 channel.close();
             } catch (IOException e) {
-                log.error(() -> getLogBuilder().wO("deactivate").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("deactivate").toString(), e);
             }
             channel = null;
         }
@@ -207,12 +201,12 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     public void onTimerHR() {
         super.onTimerHR();
         if (isStarted()) {
-            long t = timestampProvider.getNow();
+            long t = getTimestampProvider().getNow();
             if ((Utils.isNotNewerThan(lastStats, t, 30000))) {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);
                 }
-                log.info(() -> getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).toString());
+                getLog().info(() -> getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).toString());
                 if (stats.messages==0) {
                     onNoMessages();
                 }
@@ -231,10 +225,10 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     private void onNoMessages() {
         try {
-            log.info(() -> getLogBuilder().wO("reset socket can").toString());
+            getLog().info(() -> getLogBuilder().wO("reset socket can").toString());
             Runtime.getRuntime().exec("./reset_can_bus.sh");
         } catch (IOException e) {
-            log.error(() -> getLogBuilder().wO("reset socket can").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("reset socket can").toString(), e);
         }
     }
 }

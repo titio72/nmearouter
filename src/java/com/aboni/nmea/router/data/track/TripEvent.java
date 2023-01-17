@@ -17,13 +17,12 @@ package com.aboni.nmea.router.data.track;
 
 import com.aboni.nmea.router.utils.db.Event;
 
-import javax.validation.constraints.NotNull;
-
 public class TripEvent implements Event {
 
     private final Trip t;
 
-    public TripEvent(@NotNull Trip t) {
+    public TripEvent(Trip t) {
+        if (t==null) throw new IllegalArgumentException("Trip is null");
         this.t = t;
     }
 

@@ -19,11 +19,10 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.SeriesReader;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.QueryByDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public abstract class DBSeriesReader implements SeriesReader {
@@ -31,7 +30,8 @@ public abstract class DBSeriesReader implements SeriesReader {
     protected abstract DataReader getNewDataReader();
 
     @Override
-    public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to, @NotNull String tag) throws DataManagementException {
+    public JSONObject getSeries(Instant from, Instant to, String tag) throws DataManagementException {
+        if (from==null || to==null || tag==null || from.isAfter(to)) throw new IllegalArgumentException("Invalid series arguments");
         DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
         m.readData(new QueryByDate(from, to), tag, (Sample sample) -> addSample(sample, res));
@@ -39,7 +39,8 @@ public abstract class DBSeriesReader implements SeriesReader {
     }
 
     @Override
-    public JSONObject getSeries(@NotNull Instant from, @NotNull Instant to) throws DataManagementException {
+    public JSONObject getSeries(Instant from, Instant to) throws DataManagementException {
+        if (from==null || to==null || from.isAfter(to)) throw new IllegalArgumentException("Invalid series arguments");
         DataReader m = getNewDataReader();
         JSONObject res = new JSONObject();
         m.readData(new QueryByDate(from, to), (Sample sample) -> addSample(sample, res));

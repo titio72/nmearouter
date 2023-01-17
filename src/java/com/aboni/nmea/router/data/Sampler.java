@@ -27,7 +27,6 @@ import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Startable;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +57,9 @@ public class Sampler implements Startable {
 
         TimerFilter timerFilter;
 
-        static Series getNew(@NotNull StatsSample series, @NotNull MessageFilter filter,
-                             @NotNull MessageValueExtractor valueExtractor,
-                             @NotNull TimerFilter timerFilter, @NotNull Metric metric) {
+        static Series getNew(StatsSample series, MessageFilter filter,
+                             MessageValueExtractor valueExtractor,
+                             TimerFilter timerFilter, Metric metric) {
             Series s = new Series();
             s.timerFilter = timerFilter;
             s.metric = metric;
@@ -79,20 +78,20 @@ public class Sampler implements Startable {
     private final Log log;
     private boolean started;
 
-    public Sampler(@NotNull Log log, @NotNull TimestampProvider tp, StatsWriter w, @NotNull String tag) {
+    public Sampler(Log log, TimestampProvider tp, StatsWriter w, String tag) {
         this.timestampProvider = tp;
         this.log = log;
         this.writer = w;
         this.tag = tag;
     }
 
-    public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
+    public void initMetric(Metric metric, MessageFilter filter, MessageValueExtractor valueExtractor,
                            long period, String tag, double min, double max) {
         initMetric(metric, filter, valueExtractor, new TimerFilterFixed(period), tag, min, max);
     }
 
-    public void initMetric(@NotNull Metric metric, @NotNull MessageFilter filter, @NotNull MessageValueExtractor valueExtractor,
-                           @NotNull TimerFilter timerFilter, String tag, double min, double max) {
+    public void initMetric(Metric metric, MessageFilter filter, MessageValueExtractor valueExtractor,
+                           TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
             StatsSample sample;
             if (DEGREES == metric.getUnit()) {

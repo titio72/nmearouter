@@ -28,7 +28,6 @@ import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -41,8 +40,6 @@ public class NMEASocketClient extends NMEAAgentImpl {
     private SentenceReader reader;
     private boolean receive;
     private boolean transmit;
-
-    private final Log log;
     private final Message2NMEA0183 converter;
 
     private class InternalSentenceReader implements SentenceListener {
@@ -69,9 +66,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
     }
 
     @Inject
-    public NMEASocketClient(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull Message2NMEA0183 converter) {
+    public NMEASocketClient(Log log, TimestampProvider tp, Message2NMEA0183 converter) {
         super(log, tp, true, false);
-        this.log = log;
+        if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
     }
 
@@ -82,9 +79,9 @@ public class NMEASocketClient extends NMEAAgentImpl {
             this.port = conf.getPort();
             this.receive = conf.isRx();
             this.transmit = conf.isTx();
-            log.info(() -> getLogBuilder().wO("init").wV("server", server).wV("port", port).wV("rx", receive).wV("tx", transmit).toString());
+            getLog().info(() -> getLogBuilder().wO("init").wV("server", server).wV("port", port).wV("rx", receive).wV("tx", transmit).toString());
         } else {
-            log.warning(() -> getLogBuilder().wO("init").wV("error", "already setup").toString());
+            getLog().warning(() -> getLogBuilder().wO("init").wV("error", "already setup").toString());
         }
     }
 
@@ -110,7 +107,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
 
                     return true;
                 } catch (Exception e) {
-                    log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
+                    getLog().errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
                     socket = null;
                 }
             }
@@ -126,7 +123,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    log.errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
+                    getLog().errorForceStacktrace(() -> getLogBuilder().wO("deactivate").toString(), e);
                 } finally {
                     socket = null;
                 }
@@ -153,7 +150,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
                 }
             }
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("message").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("message").toString(), e);
         }
     }
 }

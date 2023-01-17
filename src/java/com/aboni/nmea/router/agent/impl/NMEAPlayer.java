@@ -23,21 +23,16 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class NMEAPlayer extends NMEAAgentImpl {
 
-    private final Log log;
-    private final TimestampProvider timestampProvider;
     private String file;
 
     @Inject
-    public NMEAPlayer(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAPlayer(Log log, TimestampProvider tp) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
     }
 
     @Override
@@ -94,7 +89,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
                     while ((line = r.readLine()) != null) {
                         if (line.startsWith("[")) {
                             long logT = readLineWithTimestamp(line, logT0, t0);
-                            t0 = timestampProvider.getNow();
+                            t0 = getTimestampProvider().getNow();
                             logT0 = logT;
                         } else {
                             readLine(line);
@@ -102,7 +97,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                log.error(() -> getLogBuilder().wO("play").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("play").toString(), e);
                 Utils.pause(10000);
             }
         }
@@ -115,10 +110,10 @@ public class NMEAPlayer extends NMEAAgentImpl {
             Thread.sleep(55);
             postMessage(s);
         } catch (InterruptedException e) {
-            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
         }
     }
 
@@ -126,7 +121,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
         long logT = logT0;
         try {
             NMEASentenceItem itm = new NMEASentenceItem(line);
-            long t = timestampProvider.getNow();
+            long t = getTimestampProvider().getNow();
             logT = itm.getTimestamp();
             long dt = t - t0;
             long dLogT = logT - logT0;
@@ -135,7 +130,7 @@ public class NMEAPlayer extends NMEAAgentImpl {
             }
             postMessage(itm.getSentence());
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("play").wV("line", line).toString(), e);
         }
         return logT;
     }

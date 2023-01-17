@@ -9,7 +9,6 @@ import com.aboni.utils.Pair;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +19,9 @@ public class SeatalkAlarmService extends JSONWebService {
     private final NMEARouter router;
 
     @Inject
-    public SeatalkAlarmService(@NotNull NMEARouter router, @NotNull Log log) {
+    public SeatalkAlarmService(NMEARouter router, Log log) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("Router is null");
         this.router = router;
         setLoader(this::getResult);
     }

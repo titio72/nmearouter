@@ -20,12 +20,11 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.Writer;
 
 public class Track2KML implements TrackDumper {
@@ -51,13 +50,16 @@ public class Track2KML implements TrackDumper {
     private final Kml kml;
 
     @Inject
-    public Track2KML(@NotNull TrackReader reader) {
+    public Track2KML(TrackReader reader) {
+        if (reader==null) throw new IllegalArgumentException("track reader is null");
         kml = new Kml();
         track = reader;
     }
 
     @Override
-    public void dump(@NotNull Query query, @NotNull Writer w) throws TrackManagementException {
+    public void dump(Query query, Writer w) throws TrackManagementException {
+        if (query==null) throw new TrackManagementException("The query provided is null");
+        if (w==null) throw new TrackManagementException("Point writer is null");
         LineString s = createString();
         writePoints(query, s);
         kml.marshal(w);
@@ -79,7 +81,7 @@ public class Track2KML implements TrackDumper {
     }
 
     @Override
-    public void setTrackName(@NotNull String trackName) {
+    public void setTrackName(String trackName) {
         // unsupported
     }
 

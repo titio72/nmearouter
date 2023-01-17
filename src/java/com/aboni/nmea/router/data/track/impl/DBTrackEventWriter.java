@@ -23,7 +23,6 @@ import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -37,7 +36,7 @@ public class DBTrackEventWriter implements DBEventWriter {
     private Connection lastUsedConnection;
 
     @Inject
-    public DBTrackEventWriter(@NotNull @Named(Constants.TAG_TRACK) String tableName) {
+    public DBTrackEventWriter(@Named(Constants.TAG_TRACK) String tableName) {
         sTABLE = tableName;
     }
 

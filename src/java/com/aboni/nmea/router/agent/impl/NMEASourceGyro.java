@@ -22,7 +22,7 @@ import com.aboni.nmea.router.message.MsgAttitude;
 import com.aboni.nmea.router.message.MsgHeading;
 import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.nmea.router.utils.LogAdmin;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.*;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
@@ -30,7 +30,6 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -49,17 +48,15 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private SensorCompass compassSensor;
 
     private final DeviationManager deviationManager;
-    private final TimestampProvider timestampProvider;
     private final NMEACache cache;
-    private final LogAdmin log;
     private static final boolean SEND_HDM = false;
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(@NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull DeviationManager deviationManager, @NotNull LogAdmin log) {
+    public NMEASourceGyro(NMEACache cache, TimestampProvider tp, DeviationManager deviationManager, Log log) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
+        if (deviationManager==null) throw new IllegalArgumentException("Deviation manager cannot be null");
         this.cache = cache;
         this.deviationManager = deviationManager;
     }
@@ -99,13 +96,13 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
     private SensorCompass createCompass() {
         try {
-            SensorCompass r = new SensorCompass(log,
-                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(log),
+            SensorCompass r = new SensorCompass(getLog(),
+                    USE_CMPS11 ? new CMPS11CompassDataProvider() : new HMC5883MPU6050CompassDataProvider(getLog()),
                     deviationManager);
             r.init();
             return r;
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("init").toString(), e);
+            getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("init").toString(), e);
             return null;
         }
     }
@@ -117,7 +114,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 compassSensor = (SensorCompass) readSensor(compassSensor);
             }
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
+            getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
         }
     }
 
@@ -126,7 +123,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
             try {
                 s.read();
             } catch (SensorException e) {
-                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
+                getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("read").toString(), e);
                 return null;
             }
         }
@@ -136,7 +133,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private boolean headingNotPresentOnStream() {
         return (
                 /* another source may have provided a heading, but it's too old, presumably the source is down*/
-                cache.isHeadingOlderThan(timestampProvider.getNow(), SEND_HD_IDLE_TIME) ||
+                cache.isHeadingOlderThan(getTimestampProvider().getNow(), SEND_HD_IDLE_TIME) ||
 
                         /* there is a heading, but it's mine (so no other sources are providing a heading  */
                         getName().equals(cache.getLastHeading().getSource()));
@@ -156,7 +153,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
 
                 if (cache.getLastPosition().getData() != null) {
                     NMEAMagnetic2TrueConverter m = new NMEAMagnetic2TrueConverter(
-                            timestampProvider.getYear(), Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
+                            getTimestampProvider().getYear(), Logger.getLogger(Constants.LOG_CONTEXT), Constants.WMM);
                     m.setPosition(cache.getLastPosition().getData().getPosition());
 
                     if (SEND_HDT) {
@@ -176,7 +173,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 }
             }
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message").toString(), e);
+            getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message").toString(), e);
         }
 
     }
@@ -190,7 +187,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 MsgAttitude msgAttitude = new MsgAttitudeImpl(hd, pitch, roll);
                 postMessage(msgAttitude);
             } catch (Exception e) {
-                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message xdr").toString(), e);
+                getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("message xdr").toString(), e);
             }
         }
     }
@@ -205,7 +202,7 @@ public class NMEASourceGyro extends NMEAAgentImpl {
                 double headingSens = compassSensor.getUnfilteredSensorHeading();
                 dump(headingSens, headingBoat);
             } catch (Exception e) {
-                log.errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("learn").toString(), e);
+                getLog().errorForceStacktrace(LogStringBuilder.start(GYRO_AGENT_CATEGORY).wO("learn").toString(), e);
             }
         }
     }

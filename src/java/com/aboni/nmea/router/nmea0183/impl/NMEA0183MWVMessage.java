@@ -21,11 +21,9 @@ import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.MWVSentence;
 import net.sf.marineapi.nmea.util.Units;
 
-import javax.validation.constraints.NotNull;
-
 public class NMEA0183MWVMessage extends NMEA0183Message implements MsgWindData {
 
-    public NMEA0183MWVMessage(@NotNull MWVSentence sentence) {
+    public NMEA0183MWVMessage(MWVSentence sentence) {
         super(sentence);
     }
 

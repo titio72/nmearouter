@@ -15,14 +15,13 @@
 
 package com.aboni.nmea.router.message;
 
-import javax.validation.constraints.NotNull;
-
 public class MsgSpeedAndHeadingFacade implements MsgSpeedAndHeading {
 
     private final MsgSpeed speed;
     private final MsgHeading heading;
 
-    public MsgSpeedAndHeadingFacade(@NotNull MsgSpeed speed, @NotNull MsgHeading heading) {
+    public MsgSpeedAndHeadingFacade(MsgSpeed speed, MsgHeading heading) {
+        if (speed==null || heading==null) throw new IllegalArgumentException("SPeed or heading is null");
         this.heading = heading;
         this.speed = speed;
     }
@@ -80,7 +79,7 @@ public class MsgSpeedAndHeadingFacade implements MsgSpeedAndHeading {
 
     @Override
     public String toString() {
-        return heading.toString() + " " + speed.toString();
+        return heading + " " + speed;
     }
 
     @Override

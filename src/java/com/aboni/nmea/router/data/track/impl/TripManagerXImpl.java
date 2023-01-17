@@ -24,7 +24,6 @@ import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -190,7 +189,7 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     @Override
-    public void setTripDescription(int id, @NotNull String description) throws TripManagerException {
+    public void setTripDescription(int id, String description) throws TripManagerException {
         init();
         TripImpl t = (TripImpl) archive.getTrip(id);
         if (t == null) throwUnknownTripException(id);

@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.nmea.router.data.DataManagementException;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 
 public interface WindStatsReader {
 

@@ -18,7 +18,7 @@ package com.aboni.nmea.router;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgPosition;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 
 public interface NMEACache extends HeadingProvider {
 

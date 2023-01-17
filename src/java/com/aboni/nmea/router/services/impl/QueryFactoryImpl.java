@@ -17,9 +17,9 @@ package com.aboni.nmea.router.services.impl;
 
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.ServiceConfig;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
-import com.aboni.nmea.router.utils.QueryById;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.QueryById;
 
 import javax.inject.Inject;
 import java.time.Instant;

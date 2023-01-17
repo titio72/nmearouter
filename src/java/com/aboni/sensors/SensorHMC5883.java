@@ -22,7 +22,6 @@ import com.aboni.utils.Utils;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorHMC5883 extends I2CSensor {
@@ -35,7 +34,7 @@ public class SensorHMC5883 extends I2CSensor {
     private double[] mag;
 
     @Inject
-    public SensorHMC5883(@NotNull Log log) {
+    public SensorHMC5883(Log log) {
         super(log);
         setDefaultSmoothingAlpha(0.66);
     }

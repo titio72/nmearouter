@@ -27,7 +27,6 @@ import com.aboni.utils.Pair;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 /**
  * Calc true wind
@@ -37,7 +36,8 @@ import javax.validation.constraints.NotNull;
 public class NMEAMWVTrue implements NMEAPostProcess {
 
     @Inject
-    public NMEAMWVTrue(@NotNull TimestampProvider timestampProvider, boolean useSOG) {
+    public NMEAMWVTrue(TimestampProvider timestampProvider, boolean useSOG) {
+        if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider is null");
         this.useSOG = useSOG;
         this.timestampProvider = timestampProvider;
     }

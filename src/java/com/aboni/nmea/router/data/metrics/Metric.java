@@ -17,7 +17,6 @@ package com.aboni.nmea.router.data.metrics;
 
 import com.aboni.nmea.router.data.Unit;
 
-import javax.validation.constraints.NotNull;
 
 public class Metric {
 
@@ -25,7 +24,8 @@ public class Metric {
     private final String description;
     private final Unit unit;
 
-    public Metric(@NotNull String id, @NotNull String description, @NotNull Unit unit) {
+    public Metric(String id, String description, Unit unit) {
+        if (id==null || description==null || unit==null) throw new IllegalArgumentException("Illegal metric definition");
         this.id = id;
         this.description = description;
         this.unit = unit;

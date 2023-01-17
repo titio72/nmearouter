@@ -23,7 +23,6 @@ import com.aboni.utils.DataFilter;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -46,8 +45,10 @@ public class SensorCompass extends I2CSensor {
     private final DeviationManager devManager;
 
     @Inject
-    public SensorCompass(@NotNull Log log, @NotNull CompassDataProvider provider, DeviationManager deviationManager) {
+    public SensorCompass(Log log, CompassDataProvider provider, DeviationManager deviationManager) {
         super(log);
+        if (provider==null) throw new IllegalArgumentException("Compass data provider is null");
+        if (deviationManager==null) throw new IllegalArgumentException("Deviation manager is null");
         this.provider = provider;
         this.devManager = deviationManager;
     }

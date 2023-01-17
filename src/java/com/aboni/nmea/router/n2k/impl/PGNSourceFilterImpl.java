@@ -18,9 +18,9 @@ package com.aboni.nmea.router.n2k.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -64,8 +64,8 @@ public class PGNSourceFilterImpl implements PGNSourceFilter {
     private final Log logger;
 
     @Inject
-    public PGNSourceFilterImpl(@NotNull Log logger) {
-        this.logger = logger;
+    public PGNSourceFilterImpl(Log logger) {
+        this.logger = SafeLog.getSafeLog(logger);
         pgnSources = new HashMap<>();
         pgnSecondarySources = new HashMap<>();
         pgnLastTime = new HashMap<>();

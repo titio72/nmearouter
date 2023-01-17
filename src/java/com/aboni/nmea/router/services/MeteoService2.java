@@ -23,7 +23,6 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class MeteoService2 extends JSONWebService {
@@ -31,8 +30,9 @@ public class MeteoService2 extends JSONWebService {
     private final SeriesReader seriesReader;
 
     @Inject
-    public MeteoService2(@NotNull Log log, @NotNull @Named(Constants.TAG_METEO) SeriesReader reader) {
+    public MeteoService2(Log log, @Named(Constants.TAG_METEO) SeriesReader reader) {
         super(log);
+        if (reader==null) throw new IllegalArgumentException("Series reader is null");
         this.seriesReader = reader;
         setLoader(this::getResult);
     }

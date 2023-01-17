@@ -29,7 +29,6 @@ import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class NMEAPowerDBTarget extends NMEAAgentImpl {
 
@@ -40,9 +39,9 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public NMEAPowerDBTarget(@NotNull Log log, @NotNull TimestampProvider tp,
-                             @NotNull @Named(Constants.TAG_POWER) StatsWriter w) {
+    public NMEAPowerDBTarget(Log log, TimestampProvider tp, @Named(Constants.TAG_POWER) StatsWriter w) {
         super(log, tp, false, true);
+        if (w==null) throw new IllegalArgumentException("StatWriter cannot be null");
         this.log = log;
         powerSampler = new Sampler(log, tp, w, "Power2DB");
         powerSampler.initMetric(PowerMetrics.VOLTAGE_0,

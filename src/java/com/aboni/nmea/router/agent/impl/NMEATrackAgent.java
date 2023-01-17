@@ -26,24 +26,23 @@ import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 
     private final TrackManager tracker;
     private final TripManagerX tripManager;
-    private final TimestampProvider timestampProvider;
     private final NMEACache cache;
-    private final Log log;
     private final TrackPointBuilder pointBuilder;
 
     @Inject
-    public NMEATrackAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull NMEACache cache,
-                          @NotNull TrackManager trackManager, @NotNull TripManagerX tripManager,
-                          @NotNull TrackPointBuilder pointBuilder) {
+    public NMEATrackAgent(Log log, TimestampProvider tp, NMEACache cache,
+                          TrackManager trackManager, TripManagerX tripManager,
+                          TrackPointBuilder pointBuilder) {
         super(log, tp, true, true);
-        this.log = log;
-        this.timestampProvider = tp;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
+        if (trackManager==null) throw new IllegalArgumentException("TrackManager cannot be null");
+        if (tripManager==null) throw new IllegalArgumentException("TripManager cannot be null");
+        if (pointBuilder==null) throw new IllegalArgumentException("PointBuilder cannot be null");
         this.cache = cache;
         this.tracker = trackManager;
         this.tripManager = tripManager;
@@ -85,17 +84,17 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             double sog = p.getSOG();
             if (pos != null && !Double.isNaN(sog)) {
                 GeoPositionT posT = new GeoPositionT(
-                        (p.getTimestamp()==null)?timestampProvider.getNow():p.getTimestamp().toEpochMilli(),
+                        (p.getTimestamp()==null)?getTimestampProvider().getNow():p.getTimestamp().toEpochMilli(),
                         pos);
                 processPosition(posT, p.getSOG());
             }
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("process sentence").wV("sentence", p).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("process sentence").wV("sentence", p).toString(), e);
         }
     }
 
     private void processPosition(GeoPositionT posT, double sog) {
-        long t0 = timestampProvider.getNow();
+        long t0 = getTimestampProvider().getNow();
 
         TrackPoint point = tracker.processPosition(posT, sog);
         notifyAnchorStatus();
@@ -105,7 +104,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             try {
                 tripManager.onTrackPoint(new TrackEvent(point));
             } catch (TripManagerException e) {
-                log.error(() -> getLogBuilder().wO("process point").wV("point", posT).toString(), e);
+                getLog().error(() -> getLogBuilder().wO("process point").wV("point", posT).toString(), e);
             }
             notifyTrackedPoint(point);
             synchronized (this) {
@@ -113,7 +112,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
             }
         }
 
-        long t = timestampProvider.getNow() - t0;
+        long t = getTimestampProvider().getNow() - t0;
         synchronized (this) {
             avgTime = ((avgTime * samples) + t) / (samples + 1);
             samples++;
@@ -154,11 +153,11 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long now = timestampProvider.getNow();
+            long now = getTimestampProvider().getNow();
             if (now - lastStats > 30000) {
                 lastStats = now;
                 synchronized (this) {
-                    log.info(() -> getLogBuilder().wO("stats").wV("avgWriteTime", "%.2f", avgTime).wV("samples", samples).wV("written", writes).toString());
+                    getLog().info(() -> getLogBuilder().wO("stats").wV("avgWriteTime", "%.2f", avgTime).wV("samples", samples).wV("written", writes).toString());
                     avgTime = 0;
                     samples = 0;
                     writes = 0;

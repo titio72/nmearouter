@@ -22,7 +22,6 @@ import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 import com.aboni.nmea.router.n2k.messages.N2KMessagePGNs;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +70,7 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
         supported.put(N2KMessagePGNs.SOG_COG_RAPID_PGN, N2KDef.getInstance(N2KSOGAdCOGRapidImpl.class, false)); // COG & SOG, Rapid Update
         supported.put(N2KMessagePGNs.GNSS_POSITION_UPDATE_PGN, N2KDef.getInstance(N2KGNSSPositionUpdateImpl.class, true)); // GNSS Pos update
         supported.put(N2KMessagePGNs.GNSS_DOP_PGN, N2KDef.getInstance(N2KGNSSDOPsImpl.class, false)); // GNSS DOPs
-        supported.put(N2KMessagePGNs.SATELLITES_IN_VIEW_PGN, N2KDef.getInstance(N2KSatellitesImpl.class, true)); // List of sats
+        supported.put(N2KMessagePGNs.SATELLITES_IN_VIEW_PGN, N2KDef.getInstance(N2KSatellitesImpl.class, true)); // List of satellites
         supported.put(N2KMessagePGNs.SYSTEM_TIME_PGN, N2KDef.getInstance(N2KSystemTimeImpl.class, false)); // System time
         supported.put(N2KMessagePGNs.ATTITUDE_PGN, N2KDef.getInstance(N2KAttitudeImpl.class, false)); // Attitude)
         supported.put(N2KMessagePGNs.ENVIRONMENT_TEMPERATURE_PGN, N2KDef.getInstance(N2KTemperatureImpl.class, false)); // Env parameter: temperature
@@ -104,12 +103,14 @@ public class N2KMessageFactoryImpl implements N2KMessageFactory {
     }
 
     @Override
-    public N2KMessage newUntypedInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) {
+    public N2KMessage newUntypedInstance(N2KMessageHeader h, byte[] data) {
+        if (h==null || data==null) throw new IllegalArgumentException("N2K header or data is null");
         return new N2KGenericMessageImpl(h, data);
     }
 
     @Override
-    public N2KMessage newInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) throws PGNDataParseException {
+    public N2KMessage newInstance(N2KMessageHeader h, byte[] data) throws PGNDataParseException {
+        if (h==null || data==null) throw new IllegalArgumentException("N2K header or data is null");
         N2KDef def = getDefinition(h.getPgn());
         if (def != null && def.constructor != null) {
             try {

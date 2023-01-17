@@ -30,7 +30,6 @@ import com.fazecast.jSerialComm.SerialPortTimeoutException;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,7 +42,6 @@ public class NMEASerial extends NMEAAgentImpl {
     private static final int PORT_TIMEOUT = 1000;
     private static final int PORT_OPEN_RETRY_TIMEOUT = 5000;
     private static final int PORT_WAIT_FOR_DATA = 500;
-    private final Log log;
     private final Message2NMEA0183 converter;
 
     private static class Config {
@@ -99,14 +97,11 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private final NMEAInputManager input;
 
-    private final TimestampProvider timestampProvider;
-
     @Inject
-    public NMEASerial(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull Message2NMEA0183 converter) {
+    public NMEASerial(Log log, TimestampProvider tp, Message2NMEA0183 converter) {
         super(log, tp, true, false);
-        this.log = log;
+        if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
-        this.timestampProvider = tp;
         config = new Config();
         input = new NMEAInputManager(log);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired);
@@ -169,7 +164,7 @@ public class NMEASerial extends NMEAAgentImpl {
             }
             return true;
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().w("activate").wV("device", toString()).toString(), e);
+            getLog().error(() -> getLogBuilder().w("activate").wV("device", toString()).toString(), e);
             port = null;
             bufferedReader = null;
         }
@@ -178,7 +173,7 @@ public class NMEASerial extends NMEAAgentImpl {
 
     private SerialPort getPort() {
         synchronized (this) {
-            long now = timestampProvider.getNow();
+            long now = getTimestampProvider().getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
                 resetPortAndReader();
                 getLogBuilder().wO("create port").wV("device", toString());
@@ -225,16 +220,16 @@ public class NMEASerial extends NMEAAgentImpl {
             s = reader.readLine();
             handleStringMessage(s);
         } catch (SerialPortTimeoutException e) {
-            log.info(() -> getLogBuilder().wO("read").wV("status", "timeout").toString());
+            getLog().info(() -> getLogBuilder().wO("read").wV("status", "timeout").toString());
             Utils.pause(PORT_WAIT_FOR_DATA);
         } catch (SerialPortIOException e) {
-            log.error(() -> getLogBuilder().wO("read").wV("status", "reset").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("read").wV("status", "reset").toString(), e);
             resetPortAndReader();
         } catch (IllegalArgumentException e) {
             String sLine = s;
-            log.error(() -> getLogBuilder().wO("read").wV("line", sLine).toString(), e);
+            getLog().error(() -> getLogBuilder().wO("read").wV("line", sLine).toString(), e);
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("read").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("read").toString(), e);
         }
     }
 
@@ -287,7 +282,7 @@ public class NMEASerial extends NMEAAgentImpl {
                 port.closePort();
             }
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("deactivate").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("deactivate").toString(), e);
         } finally {
             resetPortAndReader();
         }
@@ -310,7 +305,7 @@ public class NMEASerial extends NMEAAgentImpl {
                         updateWriteStats(strSentence);
                         updateWriteStats();
                     } else {
-                        log.error(() -> getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").toString());
+                        getLog().error(() -> getLogBuilder().wO("received").wV("sentence", s).wV("error", "cannot write to serial port").toString());
                         resetPortAndReader();
                     }
                 }
@@ -329,7 +324,7 @@ public class NMEASerial extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        long t = timestampProvider.getNow();
+        long t = getTimestampProvider().getNow();
         synchronized (stats) {
             stats.onTimer(t);
             fastStats.onTimer(t);

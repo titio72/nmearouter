@@ -30,7 +30,6 @@ import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -64,14 +63,11 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private final NavData navData = new NavData();
     private long lastTS = 0;
 
-    private final Log log;
-
     private final Random rnd = new Random();
 
     @Inject
-    public NMEASimulatorSource(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEASimulatorSource(Log log, TimestampProvider tp) {
         super(log, tp, true, true);
-        this.log = log;
         id = TalkerId.GP;
         polars = null;
     }
@@ -94,7 +90,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
                 lastPolarFile = data.getPolars();
             }
         } catch (Exception e) {
-            log.error(() -> getLogBuilder().wO("load polars").toString(), e);
+            getLog().error(() -> getLogBuilder().wO("load polars").toString(), e);
         }
     }
 
@@ -109,7 +105,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (data != null) {
             return true;
         } else {
-            log.error(() -> getLogBuilder().wO("init").wV("error", "setup data missing").toString());
+            getLog().error(() -> getLogBuilder().wO("init").wV("error", "setup data missing").toString());
             return false;
         }
     }
@@ -156,7 +152,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             try {
                 data.loadConf();
             } catch (IOException e) {
-                log.error(() -> getLogBuilder().wO("load setup data").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("load setup data").toString(), e);
             }
             loadPolars();
 

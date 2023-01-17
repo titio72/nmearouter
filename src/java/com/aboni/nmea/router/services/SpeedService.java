@@ -19,7 +19,7 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.sampledquery.*;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
@@ -27,7 +27,6 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class SpeedService extends JSONWebService {
 
@@ -36,8 +35,6 @@ public class SpeedService extends JSONWebService {
     private final SampledQueryConf conf;
     private final QueryFactory queryFactory;
     private SampledQuery sampledQuery;
-
-    private final Log log;
 
     private static class SpeedSampleWriter implements SampleWriter {
 
@@ -121,9 +118,10 @@ public class SpeedService extends JSONWebService {
     }
 
     @Inject
-    public SpeedService(@NotNull Log log, @NotNull QueryFactory queryFactory, @Named(Constants.TAG_SPEED) SampledQueryConf conf) {
+    public SpeedService(Log log, QueryFactory queryFactory, @Named(Constants.TAG_SPEED) SampledQueryConf conf) {
         super(log);
-        this.log = log;
+        if (queryFactory==null) throw new IllegalArgumentException("Query factory is null");
+        if (conf==null) throw new IllegalArgumentException("Sampled query conf is null");
         this.queryFactory = queryFactory;
         this.conf = conf;
         setLoader(this::getResult);
@@ -136,7 +134,7 @@ public class SpeedService extends JSONWebService {
             try {
                 return sq.execute(q, config.getInteger("samples", DEFAULT_MAX_SAMPLES));
             } catch (SampledQueryException e) {
-                log.errorForceStacktrace(() -> LogStringBuilder.start("SpeedService").wO("execute").wV("query", q).toString(), e);
+                getLogger().errorForceStacktrace(() -> LogStringBuilder.start("SpeedService").wO("execute").wV("query", q).toString(), e);
                 return getError("Error executing query");
             }
         } else {

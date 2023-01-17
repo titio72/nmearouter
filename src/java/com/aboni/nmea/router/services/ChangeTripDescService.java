@@ -21,15 +21,15 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class ChangeTripDescService extends JSONWebService {
 
     private final TripManagerX manager;
 
     @Inject
-    public ChangeTripDescService(@NotNull TripManagerX manager, @NotNull Log log) {
+    public ChangeTripDescService(TripManagerX manager, Log log) {
         super(log);
+        if (manager==null) throw new IllegalArgumentException("Trip manager is null");
         this.manager = manager;
         setLoader(this::getResult);
     }

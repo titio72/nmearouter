@@ -34,12 +34,12 @@ import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class DBStatsWriter implements StatsWriter {
 
@@ -49,8 +49,9 @@ public class DBStatsWriter implements StatsWriter {
     private final String tag;
 
     @Inject
-    public DBStatsWriter(@NotNull Log log, @NotNull String tag, @NotNull DBEventWriter statsWriter) {
-        this.log = log;
+    public DBStatsWriter(Log log, String tag, DBEventWriter statsWriter) {
+        this.log = SafeLog.getSafeLog(log);
+        if (tag==null || statsWriter==null) throw new IllegalArgumentException("Invalid argument: tag and writers cannot be null");
         this.ee = statsWriter;
         this.tag = tag;
     }

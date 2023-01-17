@@ -17,9 +17,8 @@ package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
-
-import javax.validation.constraints.NotNull;
 
 public abstract class I2CSensor implements Sensor {
 
@@ -53,8 +52,8 @@ public abstract class I2CSensor implements Sensor {
     private final Log log;
     private long lastReadingTS;
 
-    protected I2CSensor(@NotNull Log log) {
-        this.log = log;
+    protected I2CSensor(Log log) {
+        this.log = SafeLog.getSafeLog(log);
         setDefaultSmoothingAlpha(LPF_ALPHA);
         instanceCounter++;
         instance = instanceCounter;

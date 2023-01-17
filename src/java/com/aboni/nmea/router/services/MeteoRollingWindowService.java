@@ -27,7 +27,6 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class MeteoRollingWindowService extends JSONWebService {
@@ -36,8 +35,9 @@ public class MeteoRollingWindowService extends JSONWebService {
     private HistoryProvider meteoTarget;
 
     @Inject
-    public MeteoRollingWindowService(@NotNull NMEARouter router, @NotNull Log log) {
+    public MeteoRollingWindowService(NMEARouter router, Log log) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("NMEARouter is null");
         this.router = router;
         setLoader((ServiceConfig c) -> getJSON(c.getParameter("type", "PR_")));
     }

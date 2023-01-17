@@ -26,7 +26,6 @@ import com.aboni.sensors.SensorHMC5883;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.Properties;
 
@@ -51,7 +50,7 @@ public class StartRouter {
 
     private static LogAdmin logAdmin = null;
 
-    public static void main(@NotNull String[] args) {
+    public static void main(String[] args) {
 
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);

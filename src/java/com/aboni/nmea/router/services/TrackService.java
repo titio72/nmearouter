@@ -19,11 +19,11 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackDumperFactory;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class TrackService implements WebService {
@@ -35,9 +35,11 @@ public class TrackService implements WebService {
     private final Log log;
 
     @Inject
-    public TrackService(@NotNull Log log, QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
+    public TrackService(Log log, QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
+        this.log = SafeLog.getSafeLog(log);
+        if (queryFactory==null) throw new IllegalArgumentException("Query factory is nukll");
+        if (trackerDumperFactory==null) throw new IllegalArgumentException("Track dumper factory is null");
         this.queryFactory = queryFactory;
-        this.log = log;
         this.trackerDumperFactory = trackerDumperFactory;
     }
 

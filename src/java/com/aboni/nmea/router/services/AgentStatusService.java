@@ -24,7 +24,6 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class AgentStatusService extends JSONWebService {
@@ -33,8 +32,10 @@ public class AgentStatusService extends JSONWebService {
     private final AgentStatusManager agentStatusManager;
 
     @Inject
-    public AgentStatusService(NMEARouter router, AgentStatusManager agentStatusManager, @NotNull Log log) {
+    public AgentStatusService(NMEARouter router, AgentStatusManager agentStatusManager, Log log) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("router is null");
+        if (agentStatusManager==null) throw new IllegalArgumentException("Agent status manager is null");
         this.router = router;
         this.agentStatusManager = agentStatusManager;
         setLoader((ServiceConfig config) -> {

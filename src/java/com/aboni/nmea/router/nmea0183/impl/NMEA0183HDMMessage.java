@@ -21,11 +21,9 @@ import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.HDMSentence;
 
-import javax.validation.constraints.NotNull;
-
 public class NMEA0183HDMMessage extends NMEA0183Message implements MsgHeading {
 
-    public NMEA0183HDMMessage(@NotNull HDMSentence sentence) {
+    public NMEA0183HDMMessage(HDMSentence sentence) {
         super(sentence);
     }
 

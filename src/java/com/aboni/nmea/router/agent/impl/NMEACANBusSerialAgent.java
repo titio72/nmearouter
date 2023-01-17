@@ -16,7 +16,6 @@ import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 
@@ -25,8 +24,6 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     private final SerialCANReader serialCanReader;
     private final PGNSourceFilter srcFilter;
     private final N2KMessageFactory messageFactory;
-    private final TimestampProvider timestampProvider;
-    private final Log log;
     private final PositionAndVectorStream posAndVectorStream;
     private final SpeedAndHeadingStream speedAndHeadingStream;
     private long lastStats;
@@ -61,7 +58,7 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
                 messagesAccepted = 0;
                 messages = 0;
                 errors = 0;
-                lastReset = timestampProvider.getNow();
+                lastReset = getTimestampProvider().getNow();
             }
         }
 
@@ -73,12 +70,10 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSerialAgent(@NotNull Log log, @NotNull TimestampProvider tp, @NotNull N2KFastCache fastCache,
-                                 @NotNull SerialCANReader serialCanReader,
-                                 @NotNull N2KMessageFactory msgFactory) {
+    public NMEACANBusSerialAgent(Log log, TimestampProvider tp, N2KFastCache fastCache,
+                                 SerialCANReader serialCanReader,
+                                 N2KMessageFactory msgFactory) {
         super(log, tp, true, false);
-        this.log = log;
-        this.timestampProvider = tp;
         this.messageFactory = msgFactory;
         this.serialReader = new SerialReader(tp, log);
         this.serialCanReader = serialCanReader;
@@ -102,13 +97,14 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
         if (buffer != null) {
             for (byte b : buffer) builder.append(String.format(" %02x", b));
         }
-        log.error(() -> lb.wV("buffer", builder.toString()).wV("error", errorMessage).toString());
+        getLog().error(() -> lb.wV("buffer", builder.toString()).wV("error", errorMessage).toString());
         stats.incrementErrors();
     }
 
-    private void onReceive(@NotNull N2KMessage msg) {
+    private void onReceive(N2KMessage msg) {
+        assert msg!=null;
         stats.incrementMessages();
-        long now = timestampProvider.getNow();
+        long now = getTimestampProvider().getNow();
         if (srcFilter.accept(msg.getHeader().getSource(), msg.getHeader().getPgn(), now)
                 && messageFactory.isSupported(msg.getHeader().getPgn())) {
             srcFilter.setPGNTimestamp(msg.getHeader().getSource(), msg.getHeader().getPgn(), now);
@@ -160,15 +156,15 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     public void onTimer() {
         super.onTimer();
         if (isStarted()) {
-            long t = timestampProvider.getNow();
+            long t = getTimestampProvider().getNow();
             if ((Utils.isOlderThan(lastStats, t, 30000))) {
                 synchronized (this) {
                     description = getType() + " " + stats.toString(t);
                 }
 
-                log.info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + stats.toString(t)).toString());
-                log.info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialCanReader.getStats().toString(t)).toString());
-                log.info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialReader.getStats().toString(t)).toString());
+                getLog().info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + stats.toString(t)).toString());
+                getLog().info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialCanReader.getStats().toString(t)).toString());
+                getLog().info(() -> getLogBuilder().wO(STATS_KEY_NAME).w(" " + serialReader.getStats().toString(t)).toString());
 
                 stats.reset();
                 serialCanReader.getStats().reset(t);

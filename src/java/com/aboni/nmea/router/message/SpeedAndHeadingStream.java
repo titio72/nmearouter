@@ -16,11 +16,10 @@
 package com.aboni.nmea.router.message;
 
 import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.utils.DataEvent;
+import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class SpeedAndHeadingStream {
 
@@ -34,7 +33,8 @@ public class SpeedAndHeadingStream {
 
 
     @Inject
-    public SpeedAndHeadingStream(@NotNull TimestampProvider tp) {
+    public SpeedAndHeadingStream(TimestampProvider tp) {
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
         this.timestampProvider = tp;
     }
 

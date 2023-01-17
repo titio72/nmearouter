@@ -23,7 +23,6 @@ import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -36,7 +35,7 @@ public class DBMetricEventWriter implements DBEventWriter {
     private final String sTABLE;
 
     @Inject
-    public DBMetricEventWriter(@NotNull @Named(Constants.TAG_METEO) String tableName) {
+    public DBMetricEventWriter(@Named(Constants.TAG_METEO) String tableName) {
         sTABLE = tableName;
     }
 

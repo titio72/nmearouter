@@ -28,17 +28,7 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.utils;
+package com.aboni.nmea.router.data;
 
-public class QueryById implements Query {
-
-    private final int id;
-
-    public QueryById(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
+public interface Query {
 }

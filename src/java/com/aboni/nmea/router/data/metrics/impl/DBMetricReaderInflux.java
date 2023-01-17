@@ -33,13 +33,12 @@ package com.aboni.nmea.router.data.metrics.impl;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 import org.influxdb.dto.BoundParameterQuery;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class DBMetricReaderInflux implements DataReader {
@@ -48,7 +47,8 @@ public class DBMetricReaderInflux implements DataReader {
     private static final String SQL_TIME_AND_TYPE = "select time, type, value, valueMax, valueMin from meteo where time>=$startTime and time<$endTime and type=$type";
 
     @Override
-    public void readData(@NotNull com.aboni.nmea.router.utils.Query q, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+    public void readData(com.aboni.nmea.router.data.Query q, DataReader.DataReaderListener target) throws DataManagementException {
+        if (target==null) throw new IllegalArgumentException("Results target is null");
         if (q instanceof QueryByDate) {
             Instant from = ((QueryByDate) q).getFrom();
             Instant to = ((QueryByDate) q).getTo();
@@ -83,7 +83,9 @@ public class DBMetricReaderInflux implements DataReader {
     }
 
     @Override
-    public void readData(@NotNull com.aboni.nmea.router.utils.Query q, @NotNull String tag, @NotNull DataReader.DataReaderListener target) throws DataManagementException {
+    public void readData(com.aboni.nmea.router.data.Query q, String tag, DataReader.DataReaderListener target) throws DataManagementException {
+        if (target==null) throw new IllegalArgumentException("Results target is null");
+        if (tag==null) throw new IllegalArgumentException("Query tag  is null");
         if (q instanceof QueryByDate) {
             Instant from = ((QueryByDate) q).getFrom();
             Instant to = ((QueryByDate) q).getTo();

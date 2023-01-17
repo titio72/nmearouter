@@ -17,11 +17,11 @@ package com.aboni.nmea.router.n2k.impl;
 
 import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.google.common.hash.HashCode;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,16 +43,18 @@ public class N2KStreamImpl implements N2KStream {
     private final N2KMessageParserFactory parserFactory;
 
     @Inject
-    public N2KStreamImpl(@NotNull Log log, @NotNull PGNSourceFilter pgnSrcFilter, @NotNull N2KMessageParserFactory parserFactory) {
+    public N2KStreamImpl(Log log, PGNSourceFilter pgnSrcFilter, N2KMessageParserFactory parserFactory) {
         this(log, false, pgnSrcFilter, parserFactory);
     }
 
-    public N2KStreamImpl(Log logger, boolean throttling, @NotNull PGNSourceFilter pgnSrcFilter, @NotNull N2KMessageParserFactory parserFactory) {
+    public N2KStreamImpl(Log logger, boolean throttling, PGNSourceFilter pgnSrcFilter, N2KMessageParserFactory parserFactory) {
+        if (parserFactory==null) throw new IllegalArgumentException("N2K message parser factory is null");
+        if (pgnSrcFilter==null) throw new IllegalArgumentException("PGN filter is null");
+        this.logger = SafeLog.getSafeLog(logger);
         this.srcFilter = pgnSrcFilter;
         this.parserFactory = parserFactory;
-        this.logger = logger;
-        payloadMap = new HashMap<>();
         this.throttling = throttling;
+        payloadMap = new HashMap<>();
     }
 
     @Override

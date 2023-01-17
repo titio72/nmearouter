@@ -19,16 +19,15 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class WindStatsService extends JSONWebService {
 
     @Inject
-    public WindStatsService(@NotNull final QueryFactory queryFactory, @NotNull final WindStatsReader reader, @NotNull Log log) {
+    public WindStatsService(final QueryFactory queryFactory, final WindStatsReader reader, Log log) {
         super(log);
         setLoader((ServiceConfig config) -> {
             Query query = queryFactory.getQuery(config);

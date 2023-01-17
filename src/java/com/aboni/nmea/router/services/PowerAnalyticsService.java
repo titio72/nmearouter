@@ -22,13 +22,12 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 public class PowerAnalyticsService extends JSONWebService {
 
     @Inject
-    public PowerAnalyticsService(@NotNull Log log) {
+    public PowerAnalyticsService(Log log) {
         super(log);
         setLoader(this::getResult);
     }

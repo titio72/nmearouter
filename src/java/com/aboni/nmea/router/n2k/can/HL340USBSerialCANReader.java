@@ -5,7 +5,6 @@ import com.aboni.nmea.router.n2k.N2KMessageHandler;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
@@ -177,7 +176,7 @@ public class HL340USBSerialCANReader implements SerialCANReader {
     private final CANReaderStats stats = new CANReaderStats();
 
     @Inject
-    public HL340USBSerialCANReader(@NotNull N2KMessageFactory msgFactory) {
+    public HL340USBSerialCANReader(N2KMessageFactory msgFactory) {
         this.msgFactory = msgFactory;
     }
 

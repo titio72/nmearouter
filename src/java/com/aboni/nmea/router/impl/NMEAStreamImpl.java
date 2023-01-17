@@ -19,10 +19,10 @@ import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,14 +35,14 @@ public class NMEAStreamImpl implements NMEAStream {
     private final List<Object> toRemove = new ArrayList<>();
 
     @Inject
-    public NMEAStreamImpl(@NotNull Log log) {
+    public NMEAStreamImpl(Log log) {
         this.annotatedListeners = new HashMap<>();
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
     }
 
     @Override
-    public void pushMessage(RouterMessage message, @NotNull ListenerChecker checker) {
-        if (message != null) {
+    public void pushMessage(RouterMessage message, ListenerChecker checker) {
+        if (message != null && checker != null) {
             synchronized (annotatedListeners) {
                 toRemove.clear();
                 for (ListenerWrapper i : annotatedListeners.values()) {
@@ -58,6 +58,8 @@ public class NMEAStreamImpl implements NMEAStream {
                 }
                 for (Object listener: toRemove) annotatedListeners.remove(listener);
             }
+        } else {
+            log.warning(LogStringBuilder.start("Stream").wO("push message").wV("Warning", "message or checker is null").toString());
         }
     }
 

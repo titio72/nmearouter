@@ -28,7 +28,6 @@ import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 public class NMEAMetricDBTarget extends NMEAAgentImpl {
 
@@ -36,13 +35,11 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
 
     private final Sampler metricSampler;
-    private final Log log;
 
     @Inject
-    public NMEAMetricDBTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp,
-                              @NotNull @Named(Constants.TAG_METEO) StatsWriter w) {
+    public NMEAMetricDBTarget(Log log, NMEACache cache, TimestampProvider tp, @Named(Constants.TAG_METEO) StatsWriter w) {
         super(log, tp, false, true);
-        this.log = log;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         metricSampler = new Sampler(log, tp, w, "Meteo2DB");
         metricSampler.initMetric(Metrics.PRESSURE,
                 MsgPressure.class::isInstance,
@@ -102,7 +99,7 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
             metricSampler.start();
             return true;
         } catch (Exception e) {
-            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
+            getLog().errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
             return false;
         }
     }

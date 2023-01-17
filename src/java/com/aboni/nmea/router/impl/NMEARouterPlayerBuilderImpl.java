@@ -23,7 +23,6 @@ import com.aboni.nmea.router.conf.AgentTypes;
 import com.aboni.nmea.router.conf.SimpleConf;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.Properties;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
@@ -31,12 +30,13 @@ public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {
     private final NMEAAgentBuilderJson builder;
 
     @Inject
-    public NMEARouterPlayerBuilderImpl(@NotNull NMEAAgentBuilderJson builder) {
+    public NMEARouterPlayerBuilderImpl(NMEAAgentBuilderJson builder) {
+        if (builder==null) throw new IllegalArgumentException("Agent builder is null");
         this.builder = builder;
     }
 
     @Override
-    public void init(@NotNull NMEARouter router, Properties props) {
+    public void init(NMEARouter router, Properties props) {
         String playFile = props.getProperty("file");
 
         NMEAAgent sock = builder.createAgent(new SimpleConf(AgentTypes.TCP, "TCP").

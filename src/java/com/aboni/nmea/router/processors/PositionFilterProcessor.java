@@ -20,10 +20,10 @@ import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.filters.impl.PositionFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.Pair;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class PositionFilterProcessor implements NMEAPostProcess {
 
@@ -33,8 +33,10 @@ public class PositionFilterProcessor implements NMEAPostProcess {
     private final RouterMessageFactory messageFactory;
 
     @Inject
-    public PositionFilterProcessor(@NotNull Log log, @NotNull TimestampProvider timestampProvider, @NotNull RouterMessageFactory messageFactory) {
-        this.log = log;
+    public PositionFilterProcessor(Log log, TimestampProvider timestampProvider, RouterMessageFactory messageFactory) {
+        if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (messageFactory==null) throw new IllegalArgumentException("Message factory is null");
+        this.log = SafeLog.getSafeLog(log);
         this.timestampProvider = timestampProvider;
         this.filter = new PositionFilter();
         this.messageFactory = messageFactory;

@@ -20,35 +20,32 @@ import com.aboni.utils.LogStringBuilder;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class ServiceShutdown extends JSONWebService {
 
     public static final String SHUTDOWN_SERVICE_CATEGORY = "ShutdownService";
     public static final String SHUTDOWN_KEY_NAME = "Shutdown";
-    private final Log log;
 
     @Inject
-    public ServiceShutdown(@NotNull Log log) {
+    public ServiceShutdown(Log log) {
         super(log);
-        this.log = log;
         setLoader(this::getResult);
     }
 
     private JSONObject getResult(ServiceConfig config) {
         try {
-            log.info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString());
+            getLogger().info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString());
             ProcessBuilder b = new ProcessBuilder("./shutdown");
             Process process = b.start();
             int retCode = process.waitFor();
-            log.info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).wV("return code", retCode).toString());
+            getLogger().info(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).wV("return code", retCode).toString());
             return getOk();
         } catch (InterruptedException e) {
-            log.errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
             Thread.currentThread().interrupt();
             return getError("Error " + e.getMessage());
         } catch (Exception e) {
-            log.errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start(SHUTDOWN_SERVICE_CATEGORY).wO(SHUTDOWN_KEY_NAME).toString(), e);
             return getError("Error " + e.getMessage());
         }
     }

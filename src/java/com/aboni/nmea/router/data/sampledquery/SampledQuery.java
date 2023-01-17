@@ -16,11 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.sampledquery;
 
 import com.aboni.nmea.router.data.TimeSeries;
-import com.aboni.nmea.router.utils.Query;
+import com.aboni.nmea.router.data.Query;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 public class SampledQuery {
@@ -31,7 +30,9 @@ public class SampledQuery {
     private final TimeSeriesReader reader;
 
     @Inject
-    public SampledQuery(@NotNull RangeFinder rangeFinder, @NotNull TimeSeriesReader reader) {
+    public SampledQuery(RangeFinder rangeFinder, TimeSeriesReader reader) {
+        if (reader==null) throw new IllegalArgumentException("TimeSeriesReader cannot be null");
+        if (rangeFinder==null) throw new IllegalArgumentException("RangeFinder cannot be null");
         this.rangeFinder = rangeFinder;
         this.reader = reader;
     }

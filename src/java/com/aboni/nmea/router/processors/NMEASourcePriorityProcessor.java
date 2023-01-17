@@ -22,7 +22,6 @@ import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class NMEASourcePriorityProcessor implements NMEAPostProcess {
@@ -39,7 +38,8 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public NMEASourcePriorityProcessor(@NotNull TimestampProvider timestampProvider) {
+    public NMEASourcePriorityProcessor(TimestampProvider timestampProvider) {
+        if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider is null");
         this.timestampProvider = timestampProvider;
         priorities = new HashMap<>();
         lastSourceTimestamp = new HashMap<>();
@@ -64,7 +64,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
         priorities.put(source, priority);
     }
 
-    private void recordInput(@NotNull Sentence sentence, @NotNull String source) {
+    private void recordInput(Sentence sentence, String source) {
         if (sentences.contains(sentence.getSentenceId())) {
             lastSourceTimestamp.put(source, timestampProvider.getNow());
 
@@ -94,7 +94,7 @@ public class NMEASourcePriorityProcessor implements NMEAPostProcess {
 
     @Override
     public Pair<Boolean, Message[]> process(Message message, String src) {
-        if (message instanceof NMEA0183Message) {
+        if (message instanceof NMEA0183Message && src!=null) {
             Sentence sentence = ((NMEA0183Message) message).getSentence();
             if (sentences.contains(sentence.getSentenceId())) {
                 recordInput(sentence, src);

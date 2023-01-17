@@ -41,7 +41,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -53,11 +52,9 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private boolean webStarted;
     private Server server;
 
-    private final Log log;
     private final NMEAStream stream;
     private final NMEA2JSONb jsonConverter;
     private final Message2NMEA0183Impl nmeaConverter;
-    private final TimestampProvider timestampProvider;
 
     private static class Stats {
         long jsonFromMsgToNMEA0183;
@@ -96,13 +93,11 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public WebInterfaceAgent(@NotNull TimestampProvider tp, @NotNull NMEAStream stream, @NotNull Log log) {
+    public WebInterfaceAgent(TimestampProvider tp, NMEAStream stream, Log log) {
         super(log, tp, false, true);
-        this.log = log;
         this.stream = stream;
         this.jsonConverter = new NMEA2JSONb();
         this.nmeaConverter = new Message2NMEA0183Impl();
-        this.timestampProvider = tp;
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {
@@ -124,7 +119,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     protected final boolean onActivate() {
         synchronized (this) {
             if (!webStarted) {
-                log.info(LogStringBuilder.start(WEB_UI_CATEGORY).wO("init").toString());
+                getLog().info(LogStringBuilder.start(WEB_UI_CATEGORY).wO("init").toString());
                 org.eclipse.jetty.util.log.Logger l = new org.eclipse.jetty.util.log.JavaUtilLog("jetty");
                 org.eclipse.jetty.util.log.Log.setLog(l);
                 server = new Server(1112);
@@ -134,13 +129,13 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 try {
                     resourceHandler.setResourceBase(base.getCanonicalPath());
                 } catch (Exception e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
+                    getLog().errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
                     return false;
                 }
 
                 ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
                 context.setContextPath("/");
-                context.addServlet(new ServletHolder(new MyWebSocketServlet(stream, log)), "/events");
+                context.addServlet(new ServletHolder(new MyWebSocketServlet(stream, getLog())), "/events");
                 context.addAliasCheck(new AllowSymLinkAliasChecker());
                 registerServlets(context);
 
@@ -153,43 +148,43 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                 try {
                     server.start();
                     webStarted = true;
-                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString());
+                    getLog().info(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString());
                 } catch (Exception e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
+                    getLog().errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO(WEB_UI_START_LOG_TOKEN).toString(), e);
                     return false;
                 }
 
-                stats.reset(timestampProvider.getNow());
+                stats.reset(getTimestampProvider().getNow());
             }
             return true;
         }
     }
 
     private void registerServlets(ServletContextHandler context) {
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(WindStatsService.class))), "/windanalytics");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AISTargetsService.class))), "/ais");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(GPSStatusService.class))), "/gps");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackAnalyticsService.class))), "/trackanalytics");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackService.class))), "/track");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AgentStatusService.class))), "/agentsj");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceShutdown.class))), "/shutdown");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SimulatorService.class))), "/sim");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService.class))), "/meteo");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoService2.class))), "/meteo2");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(PowerService2.class))), "/power2");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(PowerAnalyticsService.class))), "/poweranalysis");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrimTripService.class))), "/trimtrip");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(ServiceDBBackup.class))), "/backup");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AgentFilterService.class))), "/filter");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
-        context.addServlet(new ServletHolder(new RouterServlet<>(ThingsFactory.getInstance(TrackFixerService.class))), "/fixtrack");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(WindStatsService.class))), "/windanalytics");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AISTargetsService.class))), "/ais");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(GPSStatusService.class))), "/gps");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackAnalyticsService.class))), "/trackanalytics");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackService.class))), "/track");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AgentStatusService.class))), "/agentsj");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ServiceShutdown.class))), "/shutdown");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SimulatorService.class))), "/sim");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoService.class))), "/meteo");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoService2.class))), "/meteo2");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerService2.class))), "/power2");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerAnalyticsService.class))), "/poweranalysis");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrimTripService.class))), "/trimtrip");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ServiceDBBackup.class))), "/backup");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AgentFilterService.class))), "/filter");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackFixerService.class))), "/fixtrack");
     }
 
     @Override
@@ -197,10 +192,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         synchronized (this) {
             if (webStarted) {
                 try {
-                    log.info(LogStringBuilder.start(WEB_UI_CATEGORY).wO("stop").toString());
+                    getLog().info(LogStringBuilder.start(WEB_UI_CATEGORY).wO("stop").toString());
                     server.stop();
                 } catch (Exception e) {
-                    log.errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("stop").toString(), e);
+                    getLog().errorForceStacktrace(LogStringBuilder.start(WEB_UI_CATEGORY).wO("stop").toString(), e);
                 }
                 server = null;
             }
@@ -284,7 +279,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
                     }
                 }
             } catch (Exception e) {
-                log.error(() -> getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).toString(), e);
+                getLog().error(() -> getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).toString(), e);
             }
         }
     }
@@ -292,10 +287,10 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-        long t = timestampProvider.getNow();
+        long t = getTimestampProvider().getNow();
         synchronized (stats) {
             if (Utils.isOlderThan(stats.lastStatsTime, t, 29999)) {
-                log.info(() -> getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
+                getLog().info(() -> getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
                         wV("NMEA0183", stats.jsonFromNMEA1083).
                         wV("direct", stats.jsonDirectConversion).
                         wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).

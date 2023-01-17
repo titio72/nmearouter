@@ -23,13 +23,10 @@ import com.aboni.nmea.router.utils.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.Deque;
 import java.util.LinkedList;
 
 public class DepthStatsAgent extends NMEAAgentImpl {
-
-    private final TimestampProvider timestampProvider;
 
     private static class DepthT {
         int depth;
@@ -44,9 +41,8 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
     @Inject
-    public DepthStatsAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public DepthStatsAgent(Log log, TimestampProvider tp) {
         super(log, tp, true, true);
-        timestampProvider = tp;
         queue = new LinkedList<>();
     }
 
@@ -70,7 +66,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     @OnRouterMessage
     public void onMessage(RouterMessage msg) {
         if (msg.getPayload() instanceof MsgWaterDepth) {
-            DepthT d = handleDepth(((MsgWaterDepth) msg.getMessage()).getDepth(), timestampProvider.getNow());
+            DepthT d = handleDepth(((MsgWaterDepth) msg.getMessage()).getDepth(), getTimestampProvider().getNow());
 
             JSONObject j = new JSONObject();
             j.put("topic", "depth_stats");

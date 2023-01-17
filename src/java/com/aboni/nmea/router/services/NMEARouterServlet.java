@@ -7,11 +7,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class RouterServlet<T extends WebService> extends HttpServlet {
+public class NMEARouterServlet<T extends WebService> extends HttpServlet {
 
     private final T service;
 
-    public RouterServlet(T service) {
+    public NMEARouterServlet(T service) {
         this.service = service;
     }
 

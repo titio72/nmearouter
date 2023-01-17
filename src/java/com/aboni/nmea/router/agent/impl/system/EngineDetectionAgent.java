@@ -25,19 +25,16 @@ import com.aboni.sensors.EngineStatus;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class EngineDetectionAgent extends NMEAAgentImpl {
 
     private final NMEACache cache;
     private EngineStatus engineRunning;
 
-    private final Log log;
-
     @Inject
-    public EngineDetectionAgent(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull Log log) {
+    public EngineDetectionAgent(TimestampProvider tp, NMEACache cache, Log log) {
         super(log, tp, true, false);
-        this.log = log;
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
         this.cache = cache;
         engineRunning = EngineStatus.UNKNOWN;
     }
@@ -52,7 +49,7 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
         EngineDetector.getInstance().refresh();
         EngineStatus localEngineRunning = EngineDetector.getInstance().isEngineOn() ? EngineStatus.ON : EngineStatus.OFF;
         if (engineRunning != localEngineRunning) {
-            log.info(getLogBuilder().wO("status change").wV("status", localEngineRunning).toString());
+            getLog().info(getLogBuilder().wO("status change").wV("status", localEngineRunning).toString());
         }
         engineRunning = localEngineRunning;
         cache.setStatus(NMEARouterStatuses.ENGINE_STATUS, engineRunning);

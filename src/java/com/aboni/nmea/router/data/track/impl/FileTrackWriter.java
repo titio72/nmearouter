@@ -19,9 +19,9 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackWriter;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 
-import javax.validation.constraints.NotNull;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -37,9 +37,9 @@ public class FileTrackWriter implements TrackWriter {
 
     private final Log log;
 
-    public FileTrackWriter(@NotNull Log log, String file) {
+    public FileTrackWriter(Log log, String file) {
         fileName = file;
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
     }
 
     @Override

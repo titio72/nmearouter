@@ -21,7 +21,6 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -116,7 +115,7 @@ public class SerialReader {
     private long lastSuccessfulLoop;
 
     @Inject
-    public SerialReader(@NotNull TimestampProvider ts, @NotNull Log logger) {
+    public SerialReader(TimestampProvider ts, Log logger) {
         this.ts = ts;
         this.logger = logger;
         config = new Config();
@@ -124,11 +123,11 @@ public class SerialReader {
     }
 
     @Inject
-    public SerialReader(@NotNull Log logger) {
+    public SerialReader(Log logger) {
         this(ThingsFactory.getInstance(TimestampProvider.class), logger);
     }
 
-    public void setup(@NotNull String threadName, @NotNull String portName, int speed, ReaderCallback callback) {
+    public void setup(String threadName, String portName, int speed, ReaderCallback callback) {
         setup(portName, speed, DEFAULT_BUFFER_SIZE, callback);
         this.threadName = threadName;
         config.setPortName(portName);

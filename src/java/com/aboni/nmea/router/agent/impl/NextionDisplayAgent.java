@@ -13,7 +13,6 @@ import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,8 +58,6 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private final Dimmer dimmer = new Dimmer();
     private final NextionReader reader = new NextionReader();
-    private final Log log;
-    private final TimestampProvider timestampProvider;
     private final NMEACache cache;
 
     private long lastPortRetryTime;
@@ -73,11 +70,10 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private String src;
 
     @Inject
-    public NextionDisplayAgent(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp) {
+    public NextionDisplayAgent(Log log, NMEACache cache, TimestampProvider tp) {
         super(log, tp, false, true);
-        this.timestampProvider = tp;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.cache = cache;
-        this.log = log;
     }
 
     public void setup(String name, String portName, String src, QOS qos) {
@@ -121,9 +117,9 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
     private SerialPort getPort() {
         synchronized (this) {
-            long now = timestampProvider.getNow();
+            long now = getTimestampProvider().getNow();
             if ((port == null && Utils.isOlderThan(lastPortRetryTime, now, PORT_OPEN_RETRY_TIMEOUT))) {
-                log.info(() -> LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).toString());
+                getLog().info(() -> LogStringBuilder.start("NextionAgent").wO("init").wV("port", portName).toString());
                 SerialPort p = SerialPort.getCommPort(portName);
                 p.setComPortParameters(PORT_SPEED, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
                 p.setComPortTimeouts(
@@ -144,7 +140,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private void resetPortAndDisplay() {
         if (port != null) {
             reset();
-            log.info(() -> LogStringBuilder.start("NextionAgent").wO("reset port").wV("port", portName).toString());
+            getLog().info(() -> LogStringBuilder.start("NextionAgent").wO("reset port").wV("port", portName).toString());
             port.closePort();
             port = null;
         }
@@ -157,9 +153,8 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         reset();
     }
 
-    private void sendCommand(@NotNull String cmd) {
-        if (getPort() != null) {
-
+    private void sendCommand(String cmd) {
+        if (cmd!=null && getPort() != null) {
             port.writeBytes(cmd.getBytes(), cmd.getBytes().length);
             port.writeBytes(CMD_TERM, 3);
         }
@@ -172,7 +167,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private <T> void setData(T s, int field, ExtractString e) {
         try {
             sendCommand(FIELDS[field] + ".txt=\"" + e.getValue(s) + "\"");
-            lastTime[field] = timestampProvider.getNow();
+            lastTime[field] = getTimestampProvider().getNow();
         } catch (DataNotAvailableException ee) {
             reset(field);
         }
@@ -184,7 +179,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         if (!run.get()) return;
 
         if (src.isEmpty() || src.equals(rm.getSource())) {
-            lastInput = timestampProvider.getNow();
+            lastInput = getTimestampProvider().getNow();
         }
 
         Message m = rm.getMessage();
@@ -236,7 +231,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
             ConsoleLog.getLogger().info("Nextion input:" + dump(b));
         }
         if (isDisplayTouched(b)) {
-            dimmer.lightUp(timestampProvider.getNow());
+            dimmer.lightUp(getTimestampProvider().getNow());
         }
     }
 
@@ -251,7 +246,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
 
         if (!run.get()) return;
 
-        long now = timestampProvider.getNow();
+        long now = getTimestampProvider().getNow();
 
         final ZonedDateTime dt = ZonedDateTime.now();
         final DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MMM HH:mm:ss");

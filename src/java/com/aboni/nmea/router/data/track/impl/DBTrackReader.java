@@ -22,9 +22,9 @@ import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
 import com.aboni.nmea.router.data.track.TrackReader;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
-import com.aboni.nmea.router.utils.QueryById;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.QueryById;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
@@ -33,7 +33,6 @@ import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,6 +42,7 @@ import java.time.Instant;
 public class DBTrackReader implements TrackReader {
 
     private static final String ERROR_READING_TRACK = "Error reading track";
+    public static final String TRACK_READER_LISTENER_IS_NULL = "Track reader listener is null";
 
     @Inject
     public DBTrackReader(@Named(Constants.TAG_TRACK) String tableName) {
@@ -54,7 +54,8 @@ public class DBTrackReader implements TrackReader {
     private final String sqlByTrip;
     private final String sqlByDate;
 
-    public void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException {
+    public void readTrack(Query query, TrackReaderListener target) throws TrackManagementException {
+        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
         if (query instanceof QueryById) {
             readTrack(((QueryById) query).getId(), target);
         } else if (query instanceof QueryByDate) {
@@ -65,7 +66,8 @@ public class DBTrackReader implements TrackReader {
 
     }
 
-    private void readTrack(int tripId, @NotNull TrackReaderListener target) throws TrackManagementException {
+    private void readTrack(int tripId, TrackReaderListener target) throws TrackManagementException {
+        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(sqlByTrip)) {
                 st.setInt(1, tripId);
@@ -81,7 +83,9 @@ public class DBTrackReader implements TrackReader {
         }
     }
 
-    private void readTrack(@NotNull Instant from, @NotNull Instant to, @NotNull TrackReaderListener target) throws TrackManagementException {
+    private void readTrack(Instant from, Instant to, TrackReaderListener target) throws TrackManagementException {
+        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
+        if (from==null || to==null || from.isAfter(to)) throw new TrackManagementException("Invalid query dates");
         try (DBHelper db = new DBHelper(true)) {
             try (PreparedStatement st = db.getConnection().prepareStatement(sqlByDate)) {
                 st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);

@@ -16,12 +16,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors.hw;
 
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
-import javax.validation.constraints.NotNull;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,8 +59,8 @@ public class PinDetector {
         }
     }
 
-    public PinDetector(@NotNull Log log, Pin p, boolean active) {
-        this.log = log;
+    public PinDetector(Log log, Pin p, boolean active) {
+        this.log = SafeLog.getSafeLog(log);
         listener = new HashSet<>();
         name = "pin_" + p.getName();
         if (RPIHelper.isRaspberry()) {

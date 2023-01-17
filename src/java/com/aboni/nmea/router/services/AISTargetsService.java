@@ -10,9 +10,7 @@ import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +20,11 @@ public class AISTargetsService extends JSONWebService {
     private final TimestampProvider timestampProvider;
 
     @Inject
-    public AISTargetsService(@NotNull final NMEARouter router, @NotNull NMEACache cache, @NotNull TimestampProvider tp, @NotNull Log log) {
+    public AISTargetsService(final NMEARouter router, NMEACache cache, TimestampProvider tp, Log log) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("router is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
         this.timestampProvider = tp;
         setLoader((ServiceConfig config) -> {
             findService(router);
@@ -45,8 +46,7 @@ public class AISTargetsService extends JSONWebService {
         });
     }
 
-    @Nonnull
-    private List<JSONObject> getListOfTargets(@NotNull NMEACache cache, List<AISPositionReport> reports) {
+    private List<JSONObject> getListOfTargets(NMEACache cache, List<AISPositionReport> reports) {
         List<JSONObject> l = new ArrayList<>();
         if (reports != null) {
             Position myPos = getCurrentPosition(cache);
@@ -119,7 +119,7 @@ public class AISTargetsService extends JSONWebService {
         return myPos;
     }
 
-    private void findService(@NotNull NMEARouter router) {
+    private void findService(NMEARouter router) {
         if (targetsProvider==null) {
             for (String ag_id : router.getAgents()) {
                 NMEAAgent ag = router.getAgent(ag_id);

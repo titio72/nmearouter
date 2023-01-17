@@ -18,13 +18,12 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.Query;
-import com.aboni.nmea.router.utils.QueryByDate;
+import com.aboni.nmea.router.data.Query;
+import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Inject;
 import org.json.JSONObject;
 
-import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -43,8 +42,11 @@ public class TrackFixerService extends JSONWebService {
     private static final int P_UPD_ID = 5;
 
     @Inject
-    public TrackFixerService(Log log, @NotNull TrackPointBuilder pointBuilder, @NotNull TripManagerX tripManager, @NotNull TrackReader scanner) {
+    public TrackFixerService(Log log, TrackPointBuilder pointBuilder, TripManagerX tripManager, TrackReader scanner) {
         super(log);
+        if (tripManager==null) throw new IllegalArgumentException("Trip manager is null");
+        if (pointBuilder==null) throw new IllegalArgumentException("Track point builder is null");
+        if (scanner==null) throw new IllegalArgumentException("Track reader is null");
         this.tripManager = tripManager;
         setLoader((ServiceConfig config) -> {
             int trackId = config.getInteger("trip", 0);

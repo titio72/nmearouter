@@ -28,26 +28,29 @@ You should have received a copy of the GNU General Public License
 along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package com.aboni.nmea.router.utils;
+package com.aboni.nmea.router.data;
 
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+public class DataEvent<T> {
 
-public class QueryByDate implements Query {
+    private final T data;
+    private final long timestamp;
+    private final String source;
 
-    private final Instant from;
-    private final Instant to;
-
-    public QueryByDate(@NotNull Instant from, @NotNull Instant to) {
-        this.from = from;
-        this.to = to;
+    public DataEvent(T data, long timestamp, String source) {
+        this.data = data;
+        this.timestamp = timestamp;
+        this.source = source;
     }
 
-    public Instant getFrom() {
-        return from;
+    public T getData() {
+        return data;
     }
 
-    public Instant getTo() {
-        return to;
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getSource() {
+        return source;
     }
 }

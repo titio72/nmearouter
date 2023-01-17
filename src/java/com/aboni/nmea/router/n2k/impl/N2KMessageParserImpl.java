@@ -19,7 +19,6 @@ import com.aboni.nmea.router.n2k.*;
 import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -72,11 +71,12 @@ public class N2KMessageParserImpl implements N2KMessageParser {
     private final N2KMessageFactory factory;
 
     @Inject
-    public N2KMessageParserImpl(@NotNull N2KMessageFactory factory) {
+    public N2KMessageParserImpl(N2KMessageFactory factory) {
+        if (factory==null) throw new IllegalArgumentException("N2K message factory is null");
         this.factory = factory;
     }
 
-    private void set(@NotNull PGNDecoded dec) throws PGNDataParseException {
+    private void set(PGNDecoded dec) throws PGNDataParseException {
         pgnData = dec;
         fast = factory.isFast(dec.pgn);
         boolean supported = factory.isSupported(dec.pgn);

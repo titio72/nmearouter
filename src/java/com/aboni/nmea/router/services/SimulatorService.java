@@ -21,12 +21,11 @@ import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class SimulatorService extends JSONWebService {
 
     @Inject
-    public SimulatorService(@NotNull Log log) {
+    public SimulatorService(Log log) {
         super(log);
         setLoader(this::getResult);
     }

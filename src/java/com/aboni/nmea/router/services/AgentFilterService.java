@@ -25,7 +25,6 @@ import com.aboni.nmea.router.services.impl.AgentListSerializer;
 import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class AgentFilterService extends JSONWebService {
 
@@ -50,8 +49,11 @@ public class AgentFilterService extends JSONWebService {
     }
 
     @Inject
-    public AgentFilterService(@NotNull Log log, @NotNull NMEARouter router, @NotNull AgentListSerializer serializer, @NotNull AgentStatusManager agentStatusManager) {
+    public AgentFilterService(Log log, NMEARouter router, AgentListSerializer serializer, AgentStatusManager agentStatusManager) {
         super(log);
+        if (router==null) throw new IllegalArgumentException("router is null");
+        if (agentStatusManager==null) throw new IllegalArgumentException("Agent status manager is null");
+        if (serializer==null) throw new IllegalArgumentException("Agent serializer is null");
         setLoader((ServiceConfig config) -> {
             try {
                 String agentName = config.getParameter("agent");
@@ -84,12 +86,15 @@ public class AgentFilterService extends JSONWebService {
         return fs;
     }
 
-    private String setFilter(@NotNull NMEARouter router, @NotNull AgentStatusManager agentStatusManager,
-                             @NotNull String agentName, NMEAFilterSetImpl fs, IN_OUT inOut) {
+    private String setFilter(NMEARouter router, AgentStatusManager agentStatusManager,
+                             String agentName, NMEAFilterSetImpl fs, IN_OUT inOut) {
+        if (router==null) throw new IllegalArgumentException("Router is null");
+        if (agentName==null || agentName.isEmpty()) throw new IllegalArgumentException("Agent name " + agentName + " is invalid or null");
+        if (fs==null) throw new IllegalArgumentException("Filter set implementation is null");
         NMEAAgent a = router.getAgent(agentName);
         String msg;
         if (a != null) {
-            String sfs = (fs != null) ? new JSONFilterSetSerializer().exportFilter(fs) : null;
+            String sfs = new JSONFilterSetSerializer().exportFilter(fs);
             switch (inOut) {
                 case OUT:
                     if (a.getTarget() != null) {

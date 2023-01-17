@@ -23,7 +23,6 @@ import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
     public static final String NEW_STATUS_KEY_NAME = "new status";
 
     @Inject
-    public EvoAutoPilotAgent(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public EvoAutoPilotAgent(Log log, TimestampProvider tp) {
         super(log, tp, false, true);
     }
 

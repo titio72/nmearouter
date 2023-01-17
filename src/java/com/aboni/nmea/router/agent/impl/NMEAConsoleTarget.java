@@ -22,12 +22,11 @@ import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.Log;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @Inject
-    public NMEAConsoleTarget(@NotNull Log log, @NotNull TimestampProvider tp) {
+    public NMEAConsoleTarget(Log log, TimestampProvider tp) {
         super(log, tp, false, true);
     }
 

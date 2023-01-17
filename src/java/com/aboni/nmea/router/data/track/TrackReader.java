@@ -15,9 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.track;
 
-import com.aboni.nmea.router.utils.Query;
-
-import javax.validation.constraints.NotNull;
+import com.aboni.nmea.router.data.Query;
 
 public interface TrackReader {
 
@@ -25,5 +23,5 @@ public interface TrackReader {
         void onRead(int id, TrackPoint point) throws TrackManagementException;
     }
 
-    void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException;
+    void readTrack(Query query, TrackReaderListener target) throws TrackManagementException;
 }

@@ -18,11 +18,11 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.agent.AgentStatusManager;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.nmea.router.utils.db.DBHelper;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,8 +49,8 @@ public class AgentStatusManagerImpl implements AgentStatusManager {
             "PRIMARY KEY (`id`))";
 
     @Inject
-    public AgentStatusManagerImpl(@NotNull Log log) {
-        this.log = log;
+    public AgentStatusManagerImpl(Log log) {
+        this.log = SafeLog.getSafeLog(log);
         status = new HashMap<>();
         filterOut = new HashMap<>();
         filterIn = new HashMap<>();

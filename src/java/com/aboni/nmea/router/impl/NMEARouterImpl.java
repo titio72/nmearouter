@@ -23,13 +23,13 @@ import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.MyThreadPool;
 import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -120,9 +120,12 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     @Inject
-    public NMEARouterImpl(@NotNull TimestampProvider tp, @NotNull NMEACache cache, @NotNull RouterMessageFactory messageFactory, @NotNull Log log) {
+    public NMEARouterImpl(TimestampProvider tp, NMEACache cache, RouterMessageFactory messageFactory, Log log) {
         agents = new HashMap<>();
-        this.log = log;
+        this.log = SafeLog.getSafeLog(log);
+        if (cache==null) throw new IllegalArgumentException("Cache is null");
+        if (tp==null) throw new IllegalArgumentException("Timestamp provider is null");
+        if (messageFactory==null) throw new IllegalArgumentException("Message factory is null");
         this.messageFactory = messageFactory;
         this.cache = cache;
         this.timestampProvider = tp;

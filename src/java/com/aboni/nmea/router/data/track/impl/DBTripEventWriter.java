@@ -23,7 +23,6 @@ import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -37,7 +36,7 @@ public class DBTripEventWriter implements DBEventWriter {
     private Connection lastUsedConnection;
 
     @Inject
-    public DBTripEventWriter(@NotNull @Named(Constants.TAG_TRIP) String tableName) {
+    public DBTripEventWriter(@Named(Constants.TAG_TRIP) String tableName) {
         sTABLE = tableName;
     }
 

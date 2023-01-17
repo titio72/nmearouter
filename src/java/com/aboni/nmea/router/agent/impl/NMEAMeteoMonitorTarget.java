@@ -30,7 +30,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +38,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProvider {
 
     private final Sampler meteoSampler;
-
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
-
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
     private int timerCount;
-
-    private final Log log;
-
     private final MemoryStatsWriter statsWriter;
 
     private static class StatsChange {
@@ -132,15 +126,15 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
                     NMEAMeteoMonitorTarget.this.postMessage(msg);
                 }
             } catch (JSONException e) {
-                log.error(() -> getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").toString(), e);
+                getLog().error(() -> getLogBuilder().wO("send_sample").wV("error", "error converting meteo sample to JSON").toString(), e);
             }
         }
     }
 
     @Inject
-    public NMEAMeteoMonitorTarget(@NotNull Log log, @NotNull NMEACache cache, @NotNull TimestampProvider tp) {
+    public NMEAMeteoMonitorTarget(Log log, NMEACache cache, TimestampProvider tp) {
         super(log, tp, false, true);
-        this.log = log;
+        if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.statsWriter = new MemoryStatsWriter();
         this.meteoSampler = new Sampler(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
@@ -213,7 +207,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
             meteoSampler.start();
             return true;
         } catch (Exception e) {
-            log.errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
+            getLog().errorForceStacktrace(() -> getLogBuilder().wO("activate").toString(), e);
             return false;
         }
     }

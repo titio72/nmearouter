@@ -22,7 +22,6 @@ import com.aboni.utils.DataFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 public class SensorVoltage extends I2CSensor {
@@ -35,7 +34,7 @@ public class SensorVoltage extends I2CSensor {
     private double smoothing;
     private final double[] adj;
 
-    public SensorVoltage(int address, @NotNull Log log) {
+    public SensorVoltage(int address, Log log) {
         super(log);
         ads = null;
         this.address = address;
@@ -45,7 +44,7 @@ public class SensorVoltage extends I2CSensor {
     }
 
     @Inject
-    public SensorVoltage(@NotNull Log log) {
+    public SensorVoltage(Log log) {
         this(ADS1115.ADS1115_ADDRESS_0X48, log);
 
         String sAddress = HWSettings.getProperty("analog.voltage", "0x48");
