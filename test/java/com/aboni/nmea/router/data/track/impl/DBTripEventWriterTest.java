@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.data.track.TripEvent;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 import org.junit.After;
@@ -35,7 +36,7 @@ public class DBTripEventWriterTest {
         TripImpl trip = TrackTestTableManager.getTrip(136);
         trip.setTS(trip.getEndTS().plusSeconds(30));
         trip.addDistance(0.0543);
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             evW.write(new TripEvent(trip), db.getConnection());
             check(db, 136, trip.getEndTS().toEpochMilli(), trip.getDistance());
         }

@@ -18,59 +18,64 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.nmea.router.data.track.TrackQueryManager;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.sql.PreparedStatement;
+import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DBTrackQueryManager implements TrackQueryManager {
 
     private static final String SQL_YEAR_STATS = "select year(TS), month(TS), sum(dist*(1-anchor)), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
+    private final Log log;
+
+    @Inject
+    public DBTrackQueryManager(Log log) {
+        this.log = log;
+    }
 
     @Override
     public JSONObject getYearlyStats() throws TrackManagementException {
-        try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement stm = db.getConnection().prepareStatement(SQL_YEAR_STATS)) {
-                JSONObject res = new JSONObject();
-                JSONArray samples = new JSONArray();
-                try (ResultSet rs = stm.executeQuery()) {
-                    int lastM = 0;
-                    int lastY = 0;
-                    while (rs.next()) {
-                        int y = rs.getInt(1);
-                        if (lastY < y && lastY > 0) {
-                            for (int i = lastM + 1; i <= 12; i++) {
-                                JSONArray e = new JSONArray(new Object[]{lastY, i, 0.0, 0, 0});
-                                samples.put(e);
-                            }
-                            lastM = 0;
-                        }
-                        lastY = y;
-
-                        int m = rs.getInt(2);
-                        if ((m - lastM) > 1) {
-                            for (int i = lastM + 1; i < m; i++) {
-                                JSONArray e = new JSONArray(new Object[]{y, i, 0.0, 0, 0});
-                                samples.put(e);
-                            }
-                        }
-                        lastM = m;
-                        double dist = rs.getDouble(3);
-                        double sailTime = rs.getDouble(4);
-                        double days = rs.getDouble(5);
-                        JSONArray e = new JSONArray(new Object[]{y, m, dist, sailTime / 3600, days});
-                        samples.put(e);
-                    }
-                }
-                res.put("NM_per_month", samples);
-                return res;
-            }
+        try (DBHelper helper = new DBHelper(log,true)) {
+            JSONObject res = new JSONObject();
+            helper.executeQuery(SQL_YEAR_STATS, (ResultSet rs)-> fillResults(rs, res));
+            return res;
         } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
             throw new TrackManagementException("Error reading distance stats", e);
         }
     }
 
+    private void fillResults(ResultSet rs, JSONObject res) throws SQLException {
+        JSONArray samples = new JSONArray();
+        int lastM = 0;
+        int lastY = 0;
+        while (rs.next()) {
+            int y = rs.getInt(1);
+            int m = rs.getInt(2);
+            double dist = rs.getDouble(3);
+            double sailTime = rs.getDouble(4);
+            double days = rs.getDouble(5);
+            if (lastY < y && lastY > 0) {
+                for (int i = lastM + 1; i <= 12; i++) {
+                    JSONArray e = new JSONArray(new Object[]{lastY, i, 0.0, 0, 0});
+                    samples.put(e);
+                }
+                lastM = 0;
+            }
+            lastY = y;
+            if ((m - lastM) > 1) {
+                for (int i = lastM + 1; i < m; i++) {
+                    JSONArray e = new JSONArray(new Object[]{y, i, 0.0, 0, 0});
+                    samples.put(e);
+                }
+            }
+            lastM = m;
+            JSONArray e = new JSONArray(new Object[]{y, m, dist, sailTime / 3600, days});
+            samples.put(e);
+        }
+        res.put("NM_per_month", samples);
+    }
 }

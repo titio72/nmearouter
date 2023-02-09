@@ -21,7 +21,8 @@ import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.filters.DummyFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.processors.NMEAPostProcess;
@@ -29,7 +30,6 @@ import com.aboni.nmea.router.processors.NMEAProcessorSet;
 import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
@@ -45,16 +45,16 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private static class InternalSource implements NMEASource {
 
-        private NMEAFilterSet filterSet;
+        private NMEAFilter filterSet;
         private NMEASentenceListener listener;
 
         @Override
-        public NMEAFilterSet getFilter() {
+        public NMEAFilter getFilter() {
             return filterSet;
         }
 
         @Override
-        public void setFilter(NMEAFilterSet s) {
+        public void setFilter(NMEAFilter s) {
             filterSet = s;
         }
 
@@ -66,15 +66,15 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     private class InternalTarget implements NMEATarget {
 
-        private NMEAFilterSet filterSet;
+        private NMEAFilter filterSet;
 
         @Override
-        public NMEAFilterSet getFilter() {
+        public NMEAFilter getFilter() {
             return filterSet;
         }
 
         @Override
-        public void setFilter(NMEAFilterSet s) {
+        public void setFilter(NMEAFilter s) {
             filterSet = s;
         }
 
@@ -112,7 +112,9 @@ public class NMEAAgentImpl implements NMEAAgent {
     private final NMEAProcessorSet processorSet;
     private final TimestampProvider timestampProvider;
     private final AgentAttributes attributes;
-    private final RouterMessageFactory messageFactory;
+
+    @Inject
+    private RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
 
     private final Log log;
@@ -126,7 +128,6 @@ public class NMEAAgentImpl implements NMEAAgent {
         this.sourceIf = new InternalSource();
         this.attributes = new AgentAttributes();
         this.processorSet = new NMEAProcessorSet();
-        this.messageFactory = ThingsFactory.getInstance(RouterMessageFactory.class);
         this.attributes.canStartStop = true;
         setSourceTarget(source, target);
     }
@@ -344,5 +345,37 @@ public class NMEAAgentImpl implements NMEAAgent {
         if (isStarted()) {
             processorSet.onTimer();
         }
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject agJSON = new JSONObject();
+        agJSON.put("agent", getName());
+        agJSON.put("description", getDescription());
+        agJSON.put("type", getType());
+        agJSON.put("started", isStarted());
+        agJSON.put("source", (getSource() != null));
+        agJSON.put("target", (getTarget() != null));
+        agJSON.put("startStop", isUserCanStartAndStop());
+        agJSON.put("builtin", isBuiltIn());
+        NMEASource src = getSource();
+        if (src!=null) {
+            agJSON.put("hasSourceFilter", hasFilter(src));
+            if (hasFilter(src)) agJSON.put("sourceFilter", src.getFilter().toJSON());
+        } else {
+            agJSON.put("hasSourceFilter", false);
+        }
+        NMEATarget trg = getTarget();
+        if (trg!=null) {
+            agJSON.put("hasTargetFilter", !(trg.getFilter() == null || trg.getFilter() instanceof DummyFilter));
+            if (trg.getFilter()!=null) agJSON.put("targetFilter", trg.getFilter().toJSON());
+        } else {
+            agJSON.put("hasTargetFilter", false);
+        }
+        return agJSON;
+    }
+
+    private static boolean hasFilter(NMEAFilterable f) {
+        return !(f.getFilter() == null || f.getFilter() instanceof DummyFilter);
     }
 }

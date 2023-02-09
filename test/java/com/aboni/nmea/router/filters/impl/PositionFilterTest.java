@@ -15,7 +15,7 @@
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.toolkit.PositionGenerator;
+import com.aboni.nmea.router.utils.PositionGenerator;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Before;

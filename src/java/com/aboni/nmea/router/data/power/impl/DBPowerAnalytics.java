@@ -18,11 +18,14 @@ package com.aboni.nmea.router.data.power.impl;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.power.PowerAnalytics;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,44 +35,51 @@ import java.time.Instant;
 public class DBPowerAnalytics implements PowerAnalytics {
 
     private static final String SQL = /*"set @total:=0;\r\n" +*/
-            "select T.t, T.AHh, @total := @total + T.AHh AS AHt from (" +
-                    "select " +
-                    "  FROM_UNIXTIME(round(UNIX_TIMESTAMP(TS)/?)*?) as t, " +
-                    "  sum(v) as AHh " +
-                    "  from power where type='C_0' and TS>=? and TS<=? " +
-                    "group by" +
-                    "  FROM_UNIXTIME(round(UNIX_TIMESTAMP(TS)/?)*?)) T;";
+            "select T.t, T.AHh, @total := @total + T.AHh AS AHt from (" + "select " + "  FROM_UNIXTIME(round(UNIX_TIMESTAMP(TS)/?)*?) as t, " + "  sum(v) as AHh " + "  from power where type='C_0' and TS>=? and TS<=? " + "group by" + "  FROM_UNIXTIME(round(UNIX_TIMESTAMP(TS)/?)*?)) T;";
+    private final Log log;
+
+    @Inject
+    public DBPowerAnalytics(Log log) {
+        this.log = SafeLog.getSafeLog(log);
+    }
 
     @Override
     public JSONObject getPowerUsage(int samplingPeriod, Instant from, Instant to) throws DataManagementException {
-        try (DBHelper db = new DBHelper(true)) {
-            JSONObject res = new JSONObject();
-            JSONArray a = new JSONArray();
-            try (PreparedStatement st = db.getConnection().prepareStatement(SQL)) {
-                st.executeQuery("set @total:=0;");
-                st.setInt(1, samplingPeriod);
-                st.setInt(2, samplingPeriod);
-                st.setTimestamp(3, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
-                st.setTimestamp(4, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
-                st.setInt(5, samplingPeriod);
-                st.setInt(6, samplingPeriod);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        long t = rs.getTimestamp(1, Utils.UTC_CALENDAR).getTime();
-                        double aH = rs.getDouble(2);
-                        double aHT = rs.getDouble(3);
-                        JSONObject s = new JSONObject();
-                        s.put("t", t);
-                        s.put("Ah", aH);
-                        s.put("AhT", aHT);
-                        a.put(s);
-                    }
-                }
-                res.put("C_0", a);
-            }
+        JSONObject res = new JSONObject();
+        JSONArray a = new JSONArray();
+        try (DBHelper db = new DBHelper(log, true)) {
+            db.executeQuery(SQL,
+                    (PreparedStatement st) -> prepareStatement(st, samplingPeriod, from, to),
+                    (ResultSet rs) -> readResults(rs, a)
+            );
+            res.put("C_0", a);
             return res;
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             throw new DataManagementException("Error reading power", e);
         }
+    }
+
+    private void readResults(ResultSet rs, JSONArray a) throws SQLException {
+        while (rs.next()) {
+            long t = rs.getTimestamp(1, Utils.UTC_CALENDAR).getTime();
+            double aH = rs.getDouble(2);
+            double aHT = rs.getDouble(3);
+            JSONObject s = new JSONObject();
+            s.put("t", t);
+            s.put("Ah", aH);
+            s.put("AhT", aHT);
+            a.put(s);
+        }
+    }
+
+
+    private void prepareStatement(PreparedStatement st, int samplingPeriod, Instant from, Instant to) throws SQLException {
+        st.execute("set @total:=0;");
+        st.setInt(1, samplingPeriod);
+        st.setInt(2, samplingPeriod);
+        st.setTimestamp(3, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+        st.setTimestamp(4, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
+        st.setInt(5, samplingPeriod);
+        st.setInt(6, samplingPeriod);
     }
 }

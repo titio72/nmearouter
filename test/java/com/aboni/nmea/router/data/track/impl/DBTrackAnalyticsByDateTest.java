@@ -10,7 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
@@ -30,7 +29,7 @@ public class DBTrackAnalyticsByDateTest {
         }
 
         @Override
-        public void readTrack(@NotNull Query query, @NotNull TrackReaderListener target) throws TrackManagementException {
+        public void readTrack(Query query, TrackReaderListener target) throws TrackManagementException {
             assertTrue(query instanceof QueryByDate);
             assertEquals(from, ((QueryByDate) query).getFrom());
             assertEquals(to, ((QueryByDate) query).getTo());

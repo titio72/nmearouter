@@ -15,8 +15,8 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.toolkit.PositionGenerator;
-import com.aboni.toolkit.ProgrammableTimeStampProvider;
+import com.aboni.nmea.router.utils.PositionGenerator;
+import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Test;
 

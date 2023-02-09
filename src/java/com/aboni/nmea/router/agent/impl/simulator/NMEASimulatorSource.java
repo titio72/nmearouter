@@ -81,16 +81,14 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         if (polars == null) {
             polars = new PolarTableImpl();
         }
-        try {
-            if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
-                File f = new File(Constants.CONF_DIR, data.getPolars());
-                try (FileReader reader = new FileReader(f)) {
-                    polars.load(reader);
-                }
-                lastPolarFile = data.getPolars();
+        if (data.getPolars()!=null && !data.getPolars().equals(lastPolarFile)) {
+            File f = new File(Constants.CONF_DIR, data.getPolars());
+            try (FileReader reader = new FileReader(f)) {
+                polars.load(reader);
+            } catch (Exception e) {
+                getLog().error(() -> getLogBuilder().wO("load polars").toString(), e);
             }
-        } catch (Exception e) {
-            getLog().error(() -> getLogBuilder().wO("load polars").toString(), e);
+            lastPolarFile = data.getPolars();
         }
     }
 

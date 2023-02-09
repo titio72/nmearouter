@@ -22,11 +22,13 @@ import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.message.MsgSpeed;
 import com.aboni.utils.SpeedMovingAverage;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 
 public class NMEASpeedFilter implements NMEAFilter {
 
+    public static final String FILTER = "filter";
     private final NMEACache cache;
     private final SpeedMovingAverage speedMovingAverage;
     private static final boolean USE_GPS = false;
@@ -95,5 +97,21 @@ public class NMEASpeedFilter implements NMEAFilter {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        JSONObject fltObj = new JSONObject();
+        obj.put(FILTER, fltObj);
+        fltObj.put("type", FILTER_TYPE);
+        return obj;
+    }
+
+    public static final String FILTER_TYPE = "speed";
+
+    public static NMEASpeedFilter parseFilter(JSONObject obj, NMEACache cache) {
+        JSONFilterUtils.getFilter(obj, FILTER_TYPE);
+        return new NMEASpeedFilter(cache);
     }
 }

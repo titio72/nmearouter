@@ -51,7 +51,9 @@ public class StartRouter {
     private static LogAdmin logAdmin = null;
 
     public static void main(String[] args) {
-
+        if (args==null) {
+            args = new String[] {"no_app"};
+        }
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         logAdmin = ThingsFactory.getInstance(LogAdmin.class);

@@ -81,19 +81,19 @@ public class NMEAPlayer extends NMEAAgentImpl {
 
     private void go() {
         while (!stop) {
-            try (FileReader fr = new FileReader(getFile())) {
-                try (BufferedReader r = new BufferedReader(fr)) {
-                    String line;
-                    long logT0 = 0;
-                    long t0 = 0;
-                    while ((line = r.readLine()) != null) {
-                        if (line.startsWith("[")) {
-                            long logT = readLineWithTimestamp(line, logT0, t0);
-                            t0 = getTimestampProvider().getNow();
-                            logT0 = logT;
-                        } else {
-                            readLine(line);
-                        }
+            try (
+                    FileReader fr = new FileReader(getFile());
+                    BufferedReader r = new BufferedReader(fr)) {
+                String line;
+                long logT0 = 0;
+                long t0 = 0;
+                while ((line = r.readLine()) != null) {
+                    if (line.startsWith("[")) {
+                        long logT = readLineWithTimestamp(line, logT0, t0);
+                        t0 = getTimestampProvider().getNow();
+                        logT0 = logT;
+                    } else {
+                        readLine(line);
                     }
                 }
             } catch (Exception e) {

@@ -17,28 +17,14 @@ package com.aboni.nmea.router.data.track;
 
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Pair;
+import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 public class TrackAnalytics {
-
-    private static final DateFormat DF_ISO;
-
-    static {
-        DF_ISO = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        DF_ISO.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
-    private static String formatDate(long l) {
-        return DF_ISO.format(new Date(l));
-    }
 
     private static String formatDuration(long milliSeconds) {
         long s = milliSeconds / 1000;
@@ -80,8 +66,8 @@ public class TrackAnalytics {
         long end = 0L;
 
         void toJSON(JSONObject j) {
-            j.put("start", formatDate(start));
-            j.put("end", formatDate(end));
+            j.put("start", Utils.formatISOTimestampUTC(start));
+            j.put("end", Utils.formatISOTimestampUTC(end));
         }
     }
 
@@ -95,7 +81,7 @@ public class TrackAnalytics {
         }
 
         void toJSONSpeedAndTime(String label, JSONObject j) {
-            j.put(label + "SpeedTime", formatDate(time));
+            j.put(label + "SpeedTime", Utils.formatISOTimestampUTC(time));
             j.put(label + "Speed", value);
         }
     }
@@ -161,8 +147,8 @@ public class TrackAnalytics {
         protected static void fillRes(BestMileSpeed m, JSONObject result) {
             if (m.getMaxSpeed() > 0.0) {
                 result.put("max" + m.getTag() + "Speed", m.getMaxSpeed());
-                result.put("max" + m.getTag() + "SpeedTime0", formatDate(m.getMaxSpeedT0()));
-                result.put("max" + m.getTag() + "SpeedTime1", formatDate(m.getMaxSpeedT1()));
+                result.put("max" + m.getTag() + "SpeedTime0", Utils.formatISOTimestampUTC(m.getMaxSpeedT0()));
+                result.put("max" + m.getTag() + "SpeedTime1", Utils.formatISOTimestampUTC(m.getMaxSpeedT1()));
             }
         }
     }
@@ -223,7 +209,7 @@ public class TrackAnalytics {
         return stats;
     }
 
-    public void processSample(int id, TrackPoint sample) {
+    public void processSample(TrackPoint sample) {
         if (stats.currentLeg == null && !sample.isAnchor()) {
             // started moving
             stats.createLeg();

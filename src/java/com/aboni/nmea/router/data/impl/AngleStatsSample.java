@@ -57,7 +57,6 @@ public class AngleStatsSample extends StatsSample {
             t1 = time;
             double a = Utils.getNormal180(avg, v);
             avg = ((avg * samples) + a) / (samples + 1);
-            //avg = (avg * (t1 - t0) + a * (time - t1)) / (time - t0);
             avg = Utils.normalizeDegrees0To360(avg);
             max = Utils.normalizeDegrees0To360(Math.max(max, a));
             min = Utils.normalizeDegrees0To360(Math.min(min, a));

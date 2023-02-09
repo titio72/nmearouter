@@ -4,6 +4,7 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.track.TrackEvent;
 import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
@@ -51,7 +52,7 @@ public class DBTrackDBEventWriterTest {
                 .withDistance(0.0002)
                 .withSpeed(3.4, 5.4)
                 .withPeriod(30).withEngine(EngineStatus.OFF).getPoint();
-        DBHelper h = new DBHelper(true);
+        DBHelper h = new DBHelper(ConsoleLog.getLogger(), true);
         evW.write(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.OFF));
     }
@@ -63,7 +64,7 @@ public class DBTrackDBEventWriterTest {
                 .withPosition(new GeoPositionT(l, 43.112234, 9.534534))
                 .withDistance(0.0002)
                 .withSpeed(3.4, 5.4).withPeriod(30).withEngine(EngineStatus.ON).getPoint();
-        DBHelper h = new DBHelper(true);
+        DBHelper h = new DBHelper(ConsoleLog.getLogger(), true);
         evW.write(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.ON));
     }

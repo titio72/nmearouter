@@ -33,7 +33,7 @@ public class PowerAnalyticsService extends JSONWebService {
     }
 
     private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
-        PowerAnalytics analytics = new DBPowerAnalytics();
+        PowerAnalytics analytics = new DBPowerAnalytics(getLogger());
         Instant from = config.getParamAsInstant("dateFrom", Instant.now().minusSeconds(86400L), 0);
         Instant to = config.getParamAsInstant("dateTo", Instant.now(), 1);
         int period = config.getInteger("period", 3600);

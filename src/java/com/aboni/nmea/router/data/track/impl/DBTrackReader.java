@@ -25,6 +25,8 @@ import com.aboni.nmea.router.data.track.TrackReader;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.data.QueryById;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
@@ -43,9 +45,11 @@ public class DBTrackReader implements TrackReader {
 
     private static final String ERROR_READING_TRACK = "Error reading track";
     public static final String TRACK_READER_LISTENER_IS_NULL = "Track reader listener is null";
+    private final Log log;
 
     @Inject
-    public DBTrackReader(@Named(Constants.TAG_TRACK) String tableName) {
+    public DBTrackReader(Log log, @Named(Constants.TAG_TRACK) String tableName) {
+        this.log = SafeLog.getSafeLog(log);
         sqlByTrip = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon, id from " + tableName +
             " where TS>=(select fromTS from trip where id=?) and TS<=(select toTS from trip where id=?)";
         sqlByDate = "select TS, dist, speed, maxSpeed, engine, anchor, dTime, lat, lon, id from " + tableName + " where TS>=? and TS<=?";
@@ -63,39 +67,32 @@ public class DBTrackReader implements TrackReader {
         } else {
             throw new TrackManagementException("Unknown query " + query);
         }
-
     }
 
     private void readTrack(int tripId, TrackReaderListener target) throws TrackManagementException {
-        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
-        try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(sqlByTrip)) {
-                st.setInt(1, tripId);
-                st.setInt(2, tripId);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        target.onRead(rs.getInt(10), getSample(rs));
-                    }
-                }
-            }
-        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
-            throw new TrackManagementException(ERROR_READING_TRACK, e);
-        }
+        if (tripId<0) throw new IllegalArgumentException("Invalid trip id");
+        readTrack(sqlByTrip, (PreparedStatement st)->{
+            st.setInt(1, tripId);
+            st.setInt(2, tripId);
+            }, target);
     }
 
     private void readTrack(Instant from, Instant to, TrackReaderListener target) throws TrackManagementException {
-        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
         if (from==null || to==null || from.isAfter(to)) throw new TrackManagementException("Invalid query dates");
-        try (DBHelper db = new DBHelper(true)) {
-            try (PreparedStatement st = db.getConnection().prepareStatement(sqlByDate)) {
-                st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
-                st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) {
-                        target.onRead(rs.getInt(10), getSample(rs));
-                    }
+        readTrack(sqlByDate, (PreparedStatement st)->{
+            st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+            st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
+            }, target);
+    }
+
+    private void readTrack(String sql, DBHelper.QueryPreparer preparer, TrackReaderListener target) throws TrackManagementException {
+        if (target==null) throw new TrackManagementException(TRACK_READER_LISTENER_IS_NULL);
+        try (DBHelper db = new DBHelper(log, true)) {
+            db.executeQuery(sql, preparer, (ResultSet rs)->{
+                while (rs.next()) {
+                    target.onRead(rs.getInt(10), getSample(rs));
                 }
-            }
+            });
         } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }

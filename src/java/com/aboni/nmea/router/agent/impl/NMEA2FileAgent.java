@@ -77,7 +77,7 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
     private void dump() throws IOException {
         long t = getTimestampProvider().getNow();
-        if (t - lastDump > DUMP_PERIOD) {
+        if ((t - lastDump) > DUMP_PERIOD) {
             lastDump = t;
             File f = new File("nmea" + df.format(new Date()) + ".log");
             long bytes = 0;

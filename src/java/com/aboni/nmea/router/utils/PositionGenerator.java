@@ -13,7 +13,7 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.toolkit;
+package com.aboni.nmea.router.utils;
 
 import com.aboni.geo.Course;
 import com.aboni.nmea.router.message.MsgGNSSPosition;

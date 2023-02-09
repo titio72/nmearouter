@@ -4,6 +4,7 @@ import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Guice;
@@ -527,7 +528,7 @@ public class DBMetricReaderTest extends TestCase {
         ThingsFactory.setInjector(injector);
         MetricTestTableManager.setUp();
         MetricTestTableManager.loadTrackCSV(TEST_DATA);
-        helper = new DBHelper(true);
+        helper = new DBHelper(ConsoleLog.getLogger(), true);
         count = 0;
         ref = -1;
     }
@@ -543,7 +544,7 @@ public class DBMetricReaderTest extends TestCase {
     public void testLoadWindSpeed() throws DataManagementException {
         Instant d0 = Instant.parse("2022-12-11T10:26:17Z");
         Instant d1 = Instant.parse("2022-12-11T12:06:59Z");
-        new DBMetricReader().readData(new QueryByDate(d0, d1), "TW_", (Sample sample) -> {
+        new DBMetricReader(ConsoleLog.getLogger()).readData(new QueryByDate(d0, d1), "TW_", (Sample sample) -> {
             count++;
             ref = getTestData("TW_", d0, d1, ref);
             assertNotSame(-1, ref);

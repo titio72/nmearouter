@@ -8,6 +8,7 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.utils.LogStringBuilder;
 import com.aboni.utils.Utils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,35 +42,38 @@ public class GPSStatusService extends JSONWebService {
         super(log);
         if (router==null) throw new IllegalArgumentException("router is null");
         this.router = router;
-        setLoader((ServiceConfig config) -> {
-            GPSStatus st = findService();
-            if (st != null) {
-                JSONObject res = new JSONObject();
-                List<JSONObject> l = new ArrayList<>();
-                for (SatInfo s : st.getSatellites()) {
-                    JSONObject jSat = getJsonSat(s);
-                    if (jSat!=null) l.add(jSat);
-                }
-                res.put("satsList", new JSONArray(l));
+        setLoader((ServiceConfig config) -> getResult());
+    }
 
-                GeoPositionT p = st.getPosition();
-                if (p != null) {
-                    res.put("latitude", Utils.formatLatitude(p.getLatitude()));
-                    res.put("longitude", Utils.formatLongitude(p.getLongitude()));
-                }
-
-                Instant time = st.getPositionTime();
-                if (time != null) {
-                    res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(time));
-                }
-                setDoubleValue(res, st.getCOG(), "COG");
-                setDoubleValue(res, st.getSOG(), "SOG");
-                setDoubleValue(res, st.getHDOP(), "HDOP");
-                res.put("fix", st.getGPSFix());
-                return res;
+    @Nullable
+    private JSONObject getResult() {
+        GPSStatus st = findService();
+        if (st != null) {
+            JSONObject res = new JSONObject();
+            List<JSONObject> l = new ArrayList<>();
+            for (SatInfo s : st.getSatellites()) {
+                JSONObject jSat = getJsonSat(s);
+                if (jSat!=null) l.add(jSat);
             }
-            return null;
-        });
+            res.put("satsList", new JSONArray(l));
+
+            GeoPositionT p = st.getPosition();
+            if (p != null) {
+                res.put("latitude", Utils.formatLatitude(p.getLatitude()));
+                res.put("longitude", Utils.formatLongitude(p.getLongitude()));
+            }
+
+            Instant time = st.getPositionTime();
+            if (time != null) {
+                res.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(time));
+            }
+            setDoubleValue(res, st.getCOG(), "COG");
+            setDoubleValue(res, st.getSOG(), "SOG");
+            setDoubleValue(res, st.getHDOP(), "HDOP");
+            res.put("fix", st.getGPSFix());
+            return res;
+        }
+        return null;
     }
 
     private void setDoubleValue(JSONObject res, double v, String attribute) {

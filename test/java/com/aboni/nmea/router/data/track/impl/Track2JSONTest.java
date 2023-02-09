@@ -26,7 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import javax.validation.constraints.NotNull;
 import java.io.StringWriter;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +45,7 @@ public class Track2JSONTest {
         }
 
         @Override
-        public void readTrack(@NotNull Query q, @NotNull TrackReaderListener target) throws TrackManagementException {
+        public void readTrack(Query q, TrackReaderListener target) throws TrackManagementException {
             target.onRead(1001, getSample(10001000, 43.10000000, 10.08000000));
             target.onRead(1002, getSample(10061000, 43.10000100, 10.08000100));
             target.onRead(1003, getSample(10121000, 43.10000200, 10.08000200));

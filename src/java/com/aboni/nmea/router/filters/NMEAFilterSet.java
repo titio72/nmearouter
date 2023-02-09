@@ -19,9 +19,19 @@ import java.util.Iterator;
 
 public interface NMEAFilterSet extends NMEAFilter {
 
+
+    enum TYPE {
+        BLACKLIST,
+        WHITELIST
+    }
+
     Iterator<NMEAFilter> getFilters();
 
     void addFilter(NMEAFilter f);
 
     void dropFilter(NMEAFilter f);
+
+    boolean isEmpty();
+
+    TYPE getType();
 }

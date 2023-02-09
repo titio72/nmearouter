@@ -47,15 +47,13 @@ public class DBMetricsHelper implements AutoCloseable {
     }
 
     private void readConf() throws MalformedConfigurationException {
-        try {
-            File f = new File(Constants.DB);
-            try (FileInputStream propInput = new FileInputStream(f)) {
-                Properties p = new Properties();
-                p.load(propInput);
-                synchronized (influxSemaphore) {
-                    influxURL = p.getProperty("influx.url");
-                    influxDB = p.getProperty("influx.db");
-                }
+        File f = new File(Constants.DB);
+        try (FileInputStream propInput = new FileInputStream(f)) {
+            Properties p = new Properties();
+            p.load(propInput);
+            synchronized (influxSemaphore) {
+                influxURL = p.getProperty("influx.url");
+                influxDB = p.getProperty("influx.db");
             }
         } catch (Exception e) {
             log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Read configuration")

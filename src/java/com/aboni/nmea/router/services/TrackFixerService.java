@@ -29,6 +29,7 @@ import java.sql.SQLException;
 
 public class TrackFixerService extends JSONWebService {
 
+    public static final String SQL_UPDATE_TRACK = "update track set dTime=?, dist=?, speed=?, maxSpeed=? where id=?";
     private final TripManagerX tripManager;
 
     private static final int P_UPD_DTIME = 1;
@@ -115,15 +116,14 @@ public class TrackFixerService extends JSONWebService {
         TrackFixer res;
         Trip trip = tripManager.getTrip(trackId);
         if (trip != null) {
-            try (DBHelper helper = new DBHelper(false)) {
-                try (PreparedStatement stUpd = helper.getConnection().prepareStatement(
-                        "update track set dTime=?, dist=?, speed=?, maxSpeed=? where id=?")) {
-                    TheFixer theFixer = new TheFixer(helper, builder, stUpd);
-                    Query q = new QueryByDate(trip.getStartTS(), trip.getEndTS());
-                    scanner.readTrack(q, theFixer);
-                    res = theFixer.getFixer();
-                    helper.getConnection().commit();
-                }
+            try (
+                    DBHelper helper = new DBHelper(getLogger(), false);
+                    PreparedStatement stUpd = helper.getConnection().prepareStatement(SQL_UPDATE_TRACK)) {
+                TheFixer theFixer = new TheFixer(helper, builder, stUpd);
+                Query q = new QueryByDate(trip.getStartTS(), trip.getEndTS());
+                scanner.readTrack(q, theFixer);
+                res = theFixer.getFixer();
+                helper.getConnection().commit();
             }
         } else {
             throw new TripManagerException("Trip " + trackId + " not found");

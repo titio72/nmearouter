@@ -8,8 +8,6 @@ import com.aboni.nmea.router.n2k.messages.impl.N2KGenericMessageImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.validation.constraints.NotNull;
-
 import static org.junit.Assert.*;
 
 public class SerialHL340SerialCANReaderTest {
@@ -78,17 +76,17 @@ public class SerialHL340SerialCANReaderTest {
             }
 
             @Override
-            public N2KMessage newUntypedInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) {
+            public N2KMessage newUntypedInstance(N2KMessageHeader h, byte[] data) {
                 return new N2KGenericMessageImpl(h, data);
             }
 
             @Override
-            public N2KMessage newInstance(@NotNull N2KMessageHeader h, @NotNull byte[] data) throws PGNDataParseException {
+            public N2KMessage newInstance(N2KMessageHeader h, byte[] data) throws PGNDataParseException {
                 return null;
             }
 
             @Override
-            public N2KMessage newInstance(int pgn, @NotNull byte[] data) throws PGNDataParseException {
+            public N2KMessage newInstance(int pgn, byte[] data) throws PGNDataParseException {
                 return null;
             }
         });

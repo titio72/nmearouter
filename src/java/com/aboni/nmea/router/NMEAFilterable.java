@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilter;
 
 public interface NMEAFilterable {
-    NMEAFilterSet getFilter();
+    NMEAFilter getFilter();
 
-    void setFilter(NMEAFilterSet s);
+    void setFilter(NMEAFilter s);
 }

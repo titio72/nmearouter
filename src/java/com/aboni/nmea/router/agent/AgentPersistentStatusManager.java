@@ -15,24 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent;
 
-public interface AgentStatusManager {
+import com.aboni.nmea.router.filters.NMEAFilter;
 
-    enum STATUS {
-        AUTO,
-        MANUAL,
-        UNKNOWN
-    }
+public interface AgentPersistentStatusManager {
 
-    STATUS getStartMode(String agent);
+    AgentPersistentStatus getPersistentStatus(String agent);
 
-    void setStartMode(String agent, STATUS status);
+    void setStartMode(String agent, AgentActivationMode status);
 
-    String getFilterOutData(String agent);
+    void setTargetFilter(String agent, NMEAFilter filter);
 
-    void setFilterOutData(String agent, String data);
-
-    String getFilterInData(String agent);
-
-    void setFilterInData(String agent, String agData);
+    void setSourceFilter(String agent, NMEAFilter filter);
 
 }

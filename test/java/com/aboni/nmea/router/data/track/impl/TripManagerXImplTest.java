@@ -4,6 +4,7 @@ import com.aboni.geo.GeoPositionT;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.DBHelper;
@@ -50,7 +51,7 @@ public class TripManagerXImplTest {
         TrackTestTableManager.addTestData();
         trackWriter = new MockDBEventWriter();
         tripWriter = new MockDBEventWriter();
-        tm = new TripManagerXImpl("trip_test", "track_test", trackWriter, tripWriter);
+        tm = new TripManagerXImpl(ConsoleLog.getLogger(), "trip_test", "track_test", trackWriter, tripWriter);
         tm.init();
     }
 
@@ -157,7 +158,7 @@ public class TripManagerXImplTest {
     public void testChangeDescription() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         tm.setTripDescription(136, "Capraia 1");
         assertEquals("Capraia 1", tm.getTrip(136).getTripDescription());
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 rs.next();
                 assertEquals("Capraia 1", rs.getString("description"));
@@ -169,7 +170,7 @@ public class TripManagerXImplTest {
     public void testChangeDistance() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         tm.updateTripDistance(135, 91.2);
         assertEquals(91.2, tm.getTrip(135).getDistance(), 0.0001);
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, dist from trip_test where id=135")) {
                 rs.next();
                 assertEquals(91.2, rs.getDouble("dist"), 0.0001);
@@ -190,7 +191,7 @@ public class TripManagerXImplTest {
     @Test
     public void testDelete() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
         tm.deleteTrip(136);
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 assertFalse(rs.next());
                 assertNull(tm.getTrip(136));
@@ -218,7 +219,7 @@ public class TripManagerXImplTest {
         assertNotNull(trip);
         assertEquals(t, trip.getStartTS());
         assertEquals(0.04826200, trip.getDistance(), 0.00001);
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=" + trip.getTrip())) {
                 assertTrue(rs.next());
             }

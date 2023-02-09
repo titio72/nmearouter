@@ -1,10 +1,11 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -58,4 +59,51 @@ public class NMEABasicSentenceFilterTest {
 		assertFalse(f.match(s, "ANOTHERSRC"));
 	}
 
+    @Test
+    public void testTOJson() {
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL");
+        JSONObject jF = f.toJSON().getJSONObject("filter");
+        assertEquals(NMEABasicSentenceFilter.FILTER_TYPE, jF.getString("type"));
+        assertEquals("GLL", jF.getString("sentence"));
+        assertEquals("", jF.getString("source"));
+        assertFalse(jF.has("talker"));
+    }
+
+    @Test
+    public void testTOJson1() {
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL", "mySRC");
+        JSONObject jF = f.toJSON().getJSONObject("filter");
+        assertEquals(NMEABasicSentenceFilter.FILTER_TYPE, jF.getString("type"));
+        assertEquals("GLL", jF.getString("sentence"));
+        assertEquals("mySRC", jF.getString("source"));
+        assertFalse(jF.has("talker"));
+    }
+
+    @Test
+    public void testTOJson2() {
+        NMEABasicSentenceFilter f = new NMEABasicSentenceFilter("GLL", TalkerId.II, "mySRC");
+        JSONObject jF = f.toJSON().getJSONObject("filter");
+        assertEquals(NMEABasicSentenceFilter.FILTER_TYPE, jF.getString("type"));
+        assertEquals("GLL", jF.getString("sentence"));
+        assertEquals("mySRC", jF.getString("source"));
+        assertEquals("II", jF.getString("talker"));
+    }
+
+    @Test
+    public void testParse() {
+        String json = "{ \"filter\": { \"type\": \"nmea\", \"sentence\": \"GLL\" }}";
+        NMEABasicSentenceFilter f = NMEABasicSentenceFilter.parseFilter(new JSONObject(json));
+        assertEquals("GLL", f.getSentenceId());
+        assertNull(f.getTalkerId());
+        assertTrue("", f.isAllSources());
+    }
+
+    @Test
+    public void testParseSource() {
+        String json = "{ \"filter\": { \"type\": \"nmea\", \"sentence\": \"GLL\", \"source\": \"mysrc\" }}";
+        NMEABasicSentenceFilter f = NMEABasicSentenceFilter.parseFilter(new JSONObject(json));
+        assertEquals("GLL", f.getSentenceId());
+        assertNull(f.getTalkerId());
+        assertEquals("mysrc", f.getSource());
+    }
 }

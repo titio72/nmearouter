@@ -18,11 +18,14 @@ package com.aboni.nmea.router.filters.impl;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
+import com.aboni.utils.JSONUtils;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
+import org.json.JSONObject;
 
 public class STalkFilter implements NMEAFilter {
 
+    public static final String FILTER = "filter";
     private final String command;
     private final boolean negate;
 
@@ -50,4 +53,24 @@ public class STalkFilter implements NMEAFilter {
         }
     }
 
+    @Override
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        JSONObject fltObj = new JSONObject();
+        obj.put(FILTER, fltObj);
+        fltObj.put("type", FILTER_TYPE);
+        fltObj.put("command", command);
+        fltObj.put("negate", negate);
+        return obj;
+    }
+
+    public static final String FILTER_TYPE = "seatalk";
+
+    public static STalkFilter parseFilter(JSONObject obj) {
+        obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
+        return new STalkFilter(
+                JSONUtils.getAttribute(obj, "command", ""),
+                JSONUtils.getAttribute(obj, "negate", false)
+        );
+    }
 }

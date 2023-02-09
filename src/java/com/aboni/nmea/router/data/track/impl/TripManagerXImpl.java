@@ -18,6 +18,8 @@ package com.aboni.nmea.router.data.track.impl;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.*;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
@@ -40,18 +42,21 @@ public class TripManagerXImpl implements TripManagerX {
     private final DBEventWriter trackEventWriter;
     private final DBEventWriter tripEventWriter;
     private final AtomicBoolean initialized;
+    private final Log log;
 
     @Inject
-    public TripManagerXImpl(@Named(Constants.TAG_TRIP) String tripTableName,
-                            @Named(Constants.TAG_TRACK) String trackTableName,
-                            @Named(Constants.TAG_TRACK) DBEventWriter trackEventWriter,
-                            @Named(Constants.TAG_TRIP) DBEventWriter tripEventWriter) {
+    public TripManagerXImpl(Log log, @Named(Constants.TAG_TRIP) String tripTableName, @Named(Constants.TAG_TRACK) String trackTableName, @Named(Constants.TAG_TRACK) DBEventWriter trackEventWriter, @Named(Constants.TAG_TRIP) DBEventWriter tripEventWriter) {
         initialized = new AtomicBoolean();
         tripTable = tripTableName;
         trackTable = trackTableName;
         archive = new TripArchive();
         this.trackEventWriter = trackEventWriter;
         this.tripEventWriter = tripEventWriter;
+        this.log = SafeLog.getSafeLog(log);
+    }
+
+    private static void throwUnknownTripException(int id) throws TripManagerException {
+        throw new TripManagerException("Unknown trip " + id);
     }
 
     public void init() throws TripManagerException {
@@ -64,8 +69,8 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     private void loadArchive(TripArchive archive) throws TripManagerException {
-        try (DBHelper helper = new DBHelper(true)) {
-            try (ResultSet rs = helper.getConnection().createStatement().executeQuery("select id, description, fromTS, toTS, dist from " + tripTable)) {
+        try (DBHelper helper = new DBHelper(log, true)) {
+            helper.executeQuery("select id, description, fromTS, toTS, dist from " + tripTable, (ResultSet rs) -> {
                 while (rs.next()) {
                     TripImpl t = new TripImpl(rs.getInt("id"), rs.getString("description"));
                     t.setTS(rs.getTimestamp("fromTS", Utils.UTC_CALENDAR).toInstant());
@@ -73,17 +78,14 @@ public class TripManagerXImpl implements TripManagerX {
                     t.setDistance(rs.getDouble("dist"));
                     archive.setTrip(t);
                 }
-            } catch (SQLException e) {
-                throw new TripManagerException("Error loading trips in memory", e);
-            }
-        } catch (ClassNotFoundException | MalformedConfigurationException e) {
+            });
+        } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
             throw new TripManagerException("Error loading trips in memory", e);
         }
     }
 
     private void saveTrip(Trip t, Connection conn) throws SQLException {
-        String sql = "INSERT INTO " + tripTable + " (id, description, fromTS, toTS, dist) VALUES(?, ?, ?, ?, ?) "
-                + "ON DUPLICATE KEY UPDATE description=?, fromTS=?, toTS=?, dist=?";
+        String sql = "INSERT INTO " + tripTable + " (id, description, fromTS, toTS, dist) VALUES(?, ?, ?, ?, ?) " + "ON DUPLICATE KEY UPDATE description=?, fromTS=?, toTS=?, dist=?";
         try (PreparedStatement stm = conn.prepareStatement(sql)) {
             stm.setInt(1, t.getTrip());
             stm.setString(2, t.getTripDescription());
@@ -117,7 +119,7 @@ public class TripManagerXImpl implements TripManagerX {
                 t = (TripImpl) archive.getNew();
                 t.setTS(point.getPosition().getInstant());
                 t.addDistance(event.getPoint().isAnchor() ? 0.0 : point.getDistance());
-                try (DBHelper db = new DBHelper(false)) {
+                try (DBHelper db = new DBHelper(log, false)) {
                     try (Connection conn = db.getConnection()) {
                         saveTrip(t, conn);
                         archive.setTrip(t);
@@ -128,7 +130,7 @@ public class TripManagerXImpl implements TripManagerX {
                     throw new TripManagerException("Error starting a new trip from track point", e);
                 }
             } else {
-                try (DBHelper db = new DBHelper(false)) {
+                try (DBHelper db = new DBHelper(log, false)) {
                     try (Connection conn = db.getConnection()) {
                         t.setTS(point.getPosition().getInstant());
                         t.addDistance(point.getDistance());
@@ -162,15 +164,12 @@ public class TripManagerXImpl implements TripManagerX {
         if (t == null) throwUnknownTripException(id);
         else {
             archive.delete(id);
-            try (DBHelper db = new DBHelper(false)) {
+            try (DBHelper db = new DBHelper(log, false)) {
                 try (PreparedStatement stm = db.getConnection().prepareStatement("delete from " + tripTable + " where id=?")) {
                     stm.setInt(1, id);
                     stm.execute();
                 }
-                deleteFromTrack(
-                        new Timestamp(t.getStartTS().toEpochMilli()),
-                        new Timestamp(t.getStartTS().toEpochMilli()),
-                        db.getConnection(), true);
+                deleteFromTrack(new Timestamp(t.getStartTS().toEpochMilli()), new Timestamp(t.getStartTS().toEpochMilli()), db.getConnection(), true);
                 db.getConnection().commit();
             } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error deleting trip " + id, e);
@@ -178,10 +177,8 @@ public class TripManagerXImpl implements TripManagerX {
         }
     }
 
-    private void deleteFromTrack(Timestamp t0, Timestamp t1, Connection connection,
-                                 boolean includeStart) throws SQLException {
-        try (PreparedStatement stm = connection.prepareStatement("delete from " + trackTable +
-                " where TS" + (includeStart ? ">=" : ">") + "? and TS" + (includeStart ? "<=" : "<") + "?")) {
+    private void deleteFromTrack(Timestamp t0, Timestamp t1, Connection connection, boolean includeStart) throws SQLException {
+        try (PreparedStatement stm = connection.prepareStatement("delete from " + trackTable + " where TS" + (includeStart ? ">=" : ">") + "? and TS" + (includeStart ? "<=" : "<") + "?")) {
             stm.setTimestamp(1, t0, Utils.UTC_CALENDAR);
             stm.setTimestamp(2, t1, Utils.UTC_CALENDAR);
             stm.execute();
@@ -195,20 +192,12 @@ public class TripManagerXImpl implements TripManagerX {
         if (t == null) throwUnknownTripException(id);
         else {
             t.setTripDescription(description);
-            try (DBHelper helper = new DBHelper(true)) {
-                try (Connection c = helper.getConnection()) {
-                    saveTrip(t, c);
-                } catch (SQLException e) {
-                    throw new TripManagerException(ERROR_SAVING_TRIP, e);
-                }
-            } catch (ClassNotFoundException | MalformedConfigurationException e) {
+            try (DBHelper helper = new DBHelper(log, true); Connection c = helper.getConnection()) {
+                saveTrip(t, c);
+            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
                 throw new TripManagerException(ERROR_SAVING_TRIP, e);
             }
         }
-    }
-
-    private static void throwUnknownTripException(int id) throws TripManagerException {
-        throw new TripManagerException("Unknown trip " + id);
     }
 
     @Override
@@ -245,13 +234,9 @@ public class TripManagerXImpl implements TripManagerX {
         if (t == null) throwUnknownTripException(id);
         else {
             t.setDistance(dist);
-            try (DBHelper helper = new DBHelper(true)) {
-                try (Connection c = helper.getConnection()) {
-                    saveTrip(t, c);
-                } catch (SQLException e) {
-                    throw new TripManagerException(ERROR_SAVING_TRIP, e);
-                }
-            } catch (ClassNotFoundException | MalformedConfigurationException e) {
+            try (DBHelper helper = new DBHelper(log, true); Connection c = helper.getConnection()) {
+                saveTrip(t, c);
+            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
                 throw new TripManagerException(ERROR_SAVING_TRIP, e);
             }
         }
@@ -263,17 +248,13 @@ public class TripManagerXImpl implements TripManagerX {
         Trip t = getTrip(id);
         if (t == null) throwUnknownTripException(id);
         else {
-            try (DBHelper db = new DBHelper(false)) {
+            try (DBHelper db = new DBHelper(log, false)) {
                 TripImpl newT = getTrimmedTrip(t, db.getConnection());
                 if (newT != null) {
                     saveTrip(newT, db.getConnection());
                     archive.setTrip(newT);
-                    deleteFromTrack(new Timestamp(t.getStartTS().toEpochMilli()),
-                            new Timestamp(newT.getStartTS().toEpochMilli()),
-                            db.getConnection(), true);
-                    deleteFromTrack(new Timestamp(newT.getEndTS().toEpochMilli()),
-                            new Timestamp(t.getEndTS().toEpochMilli()),
-                            db.getConnection(), false);
+                    deleteFromTrack(new Timestamp(t.getStartTS().toEpochMilli()), new Timestamp(newT.getStartTS().toEpochMilli()), db.getConnection(), true);
+                    deleteFromTrack(new Timestamp(newT.getEndTS().toEpochMilli()), new Timestamp(t.getEndTS().toEpochMilli()), db.getConnection(), false);
                     db.getConnection().commit();
                 }
             } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
@@ -283,8 +264,7 @@ public class TripManagerXImpl implements TripManagerX {
     }
 
     private TripImpl getTrimmedTrip(Trip t, Connection connection) throws SQLException {
-        try (PreparedStatement stm = connection.prepareStatement("select min(TS), max(TS), sum(dist) from " + trackTable +
-                " where TS>=? and TS<=? and anchor=0")) {
+        try (PreparedStatement stm = connection.prepareStatement("select min(TS), max(TS), sum(dist) from " + trackTable + " where TS>=? and TS<=? and anchor=0")) {
             stm.setTimestamp(1, new Timestamp(t.getStartTS().toEpochMilli()), Utils.UTC_CALENDAR);
             stm.setTimestamp(2, new Timestamp(t.getEndTS().toEpochMilli()), Utils.UTC_CALENDAR);
             ResultSet rs = stm.executeQuery();

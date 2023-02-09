@@ -1,14 +1,19 @@
-package com.aboni.nmea.router.filters;
+package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl.TYPE;
-import com.aboni.nmea.router.filters.impl.STalkFilter;
+import com.aboni.nmea.router.filters.DummyFilter;
+import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.NMEAFilterSet.TYPE;
 import com.aboni.nmea.router.impl.RouterMessageFactoryImpl;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
+import org.json.JSONObject;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -21,7 +26,6 @@ public class NMEAFilterSetImplTest {
         // any sentence fails
         assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
-	
 
 	@Test
 	public void testWhiteList() {
@@ -40,7 +44,6 @@ public class NMEAFilterSetImplTest {
         test = SentenceFactory.getInstance().createParser(TalkerId.II, "GGA");
         assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
-
 
 	@Test
 	public void testEmptyBlackList() {
@@ -130,4 +133,31 @@ public class NMEAFilterSetImplTest {
         assertFalse(set.match(new RouterMessageFactoryImpl().createMessage(test, "WHATEVER", System.currentTimeMillis())));
     }
 
+    @Test
+    public void testToJSONWhite() {
+        DummyFilter f = new DummyFilter("aa");
+        NMEAFilterSetImpl set = new NMEAFilterSetImpl(TYPE.WHITELIST);
+        set.addFilter(f);
+        JSONObject jFSet = set.toJSON().getJSONObject("filter");
+        System.out.println(jFSet);
+        assertEquals("set", jFSet.getString("type"));
+        assertEquals("whitelist", jFSet.getString("logic"));
+        assertEquals(1, jFSet.getJSONArray("filters").length());
+        JSONObject jF = jFSet.getJSONArray("filters").getJSONObject(0).getJSONObject("filter");
+        assertEquals("dummy", jF.getString("type"));
+        assertEquals("aa", jF.getString("data"));
+    }
+
+    @Test
+    public void testParse() {
+        JSONObject j = new JSONObject("{\"filter\": {\"logic\":\"whitelist\",\"filters\":[{\"filter\":{\"data\":\"aa\",\"type\":\"dummy\"}}],\"type\":\"set\"}}");
+        NMEAFilterSet fSet = NMEAFilterSetImpl.parseFilter(j, DummyFilter::parseFilter);
+        assertEquals(TYPE.WHITELIST, fSet.getType());
+        assertFalse(fSet.isEmpty());
+        List<NMEAFilter> list = new ArrayList<>();
+        for (Iterator<NMEAFilter> i = fSet.getFilters(); i.hasNext(); ) list.add(i.next());
+        assertEquals(1, list.size());
+        assertEquals(DummyFilter.class, list.get(0).getClass());
+        assertEquals("aa", ((DummyFilter)list.get(0)).getData());
+    }
 }

@@ -2,7 +2,7 @@ package com.aboni.nmea.router.processors;
 
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.toolkit.ProgrammableTimeStampProvider;
+import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
 import com.aboni.utils.Pair;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;

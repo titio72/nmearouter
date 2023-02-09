@@ -33,7 +33,7 @@ public class JSONTrackAnalytics {
     public JSONObject getAnalysis(Query query) throws TrackManagementException {
         if (query==null) throw new IllegalArgumentException("Query is null");
         TrackAnalytics analytics = new TrackAnalytics("");
-        reader.readTrack(query, analytics::processSample);
+        reader.readTrack(query, (int id, TrackPoint p)->analytics.processSample(p));
         return analytics.getJSONStats();
     }
 

@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
@@ -28,14 +29,14 @@ public class MetricTestTableManager {
 
 
     public static void setUp() throws Exception {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             db.getConnection().createStatement().executeUpdate(SQL_DROP);
             db.getConnection().createStatement().executeUpdate(SQL_CREATE);
         }
     }
 
     public static void tearDown() throws Exception {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             db.getConnection().createStatement().executeUpdate(SQL_DROP);
         }
     }
@@ -51,7 +52,7 @@ public class MetricTestTableManager {
     }
 
     public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException, ClassNotFoundException {
-        try (DBHelper db = new DBHelper(false)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), false)) {
             PreparedStatement st = db.getConnection().prepareStatement("insert into " + METRIC_TABLE_NAME +
                     " (TS, type, vMin, v, vMax) values (?, ?, ?, ?, ?)");
             for (String l : csv) {

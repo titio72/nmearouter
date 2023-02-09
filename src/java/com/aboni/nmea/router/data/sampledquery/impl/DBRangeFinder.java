@@ -17,12 +17,13 @@ package com.aboni.nmea.router.data.sampledquery.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.sampledquery.Range;
-import com.aboni.nmea.router.data.sampledquery.RangeFinder;
-import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.data.QueryById;
+import com.aboni.nmea.router.data.sampledquery.Range;
+import com.aboni.nmea.router.data.sampledquery.RangeFinder;
+import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
+import com.aboni.nmea.router.utils.Log;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
@@ -32,13 +33,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DBRangeFinder implements RangeFinder {
 
     private final String tripTable;
+    private final Log log;
 
     @Inject
-    public DBRangeFinder(@Named(Constants.TAG_TRIP) String tripTable) {
+    public DBRangeFinder(Log log, @Named(Constants.TAG_TRIP) String tripTable) {
+        this.log = log;
         this.tripTable = tripTable;
     }
 
@@ -66,28 +70,27 @@ public class DBRangeFinder implements RangeFinder {
 
     @Override
     public Range getRange(String table, Query q) throws SampledQueryException {
-        try (DBHelper h = new DBHelper(true)) {
-            String sql = getSQL(table, q);
-            if (sql != null) {
-                try (PreparedStatement stm = h.getConnection().prepareStatement(sql)) {
-                    fillStatement(stm, q);
-                    try (ResultSet rs = stm.executeQuery()) {
-                        if (rs.next()) {
-                            long count = rs.getLong(1);
-                            Instant tMax = rs.getTimestamp(2, Utils.UTC_CALENDAR).toInstant();
-                            Instant tMin = rs.getTimestamp(3, Utils.UTC_CALENDAR).toInstant();
-                            if (tMax != null && tMin != null) {
-                                return new Range(tMax, tMin, count);
+        String sql = getSQL(table, q);
+        if (sql != null) {
+            try (DBHelper h = new DBHelper(log, true)) {
+                AtomicReference<Range> result = new AtomicReference<>();
+                h.executeQuery(sql, (PreparedStatement st) -> fillStatement(st, q),
+                        (ResultSet rs) -> {
+                            if (rs.next()) {
+                                long count = rs.getLong(1);
+                                Instant tMax = rs.getTimestamp(2, Utils.UTC_CALENDAR).toInstant();
+                                Instant tMin = rs.getTimestamp(3, Utils.UTC_CALENDAR).toInstant();
+                                if (tMax != null && tMin != null) {
+                                    result.set(new Range(tMax, tMin, count));
+                                }
                             }
-                        }
-                    }
-                }
-            } else {
-                throw new SampledQueryException("Unsupported query type " + q);
+                        });
+                return result.get();
+            } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+                throw new SampledQueryException("Cannot create time range for {" + table + "}", e);
             }
-        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
-            throw new SampledQueryException("Cannot create time range for {" + table + "}", e);
+        } else {
+            throw new SampledQueryException("Unsupported query type " + q);
         }
-        return null;
     }
 }

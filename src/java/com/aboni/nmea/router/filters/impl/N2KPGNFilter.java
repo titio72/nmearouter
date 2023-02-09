@@ -3,8 +3,12 @@ package com.aboni.nmea.router.filters.impl;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.n2k.N2KMessage;
+import com.aboni.utils.JSONUtils;
+import org.json.JSONObject;
 
 public class N2KPGNFilter implements NMEAFilter {
+
+    public static final String FILTER = "filter";
 
     private final int pgn;
     private final int src;
@@ -82,4 +86,29 @@ public class N2KPGNFilter implements NMEAFilter {
             return true;
         }
     }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        JSONObject fltObj = new JSONObject();
+        obj.put(FILTER, fltObj);
+        fltObj.put("type", FILTER_TYPE);
+        fltObj.put("pgn", pgn);
+        fltObj.put("dst", dst);
+        fltObj.put("src", src);
+        fltObj.put("source", source);
+        return obj;
+    }
+
+    public static N2KPGNFilter parseFilter(JSONObject obj) {
+        obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
+        return new N2KPGNFilter(
+                JSONUtils.getAttribute(obj, "pgn", 0x00),
+                JSONUtils.getAttribute(obj, "dst", 0xFF),
+                JSONUtils.getAttribute(obj, "src", 0xFF),
+                JSONUtils.getAttribute(obj, "source", "")
+        );
+    }
+
+    public static final String FILTER_TYPE = "pgn";
 }

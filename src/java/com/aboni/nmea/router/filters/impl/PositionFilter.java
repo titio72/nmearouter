@@ -20,8 +20,10 @@ import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.message.Message;
 import com.aboni.nmea.router.message.MsgPositionAndVector;
 import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.JSONUtils;
 import com.aboni.utils.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
+import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.time.Instant;
@@ -37,6 +39,7 @@ public class PositionFilter implements NMEAFilter {
     private static final int MAGIC_DISTANCE = 15;        // Points farther from the median of samples will be discarded
     private static final double SMALL_MAGIC_DISTANCE = 0.3; // Points farther from the last valid point will be discarded
     private static final int SIZE = 30;                    // ~30s of samples
+    public static final String FILTER = "filter";
 
     private final List<Position> positions = new LinkedList<>();
     private final int queueSize;
@@ -222,5 +225,22 @@ public class PositionFilter implements NMEAFilter {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        JSONObject fltObj = new JSONObject();
+        obj.put(FILTER, fltObj);
+        fltObj.put("type", FILTER_TYPE);
+        fltObj.put("queue_size", queueSize);
+        return obj;
+    }
+
+    public static final String FILTER_TYPE = "position";
+
+    public static PositionFilter parseFilter(JSONObject obj) {
+        obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
+        return new PositionFilter(JSONUtils.getAttribute(obj, "queue_size", SIZE));
     }
 }

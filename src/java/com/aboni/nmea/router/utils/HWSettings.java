@@ -46,18 +46,16 @@ public class HWSettings {
 
     private static void readConf() {
         Log log = ThingsFactory.getInstance(Log.class);
-        try {
-            File f = new File(Constants.SENSOR);
-            if (f.exists() && f.lastModified() > lastProp) {
-                log.info(LogStringBuilder.start("HWSettings").wO("load").wV("file", f.getAbsolutePath()).toString());
-                try (FileInputStream propInput = new FileInputStream(f)) {
-                    prop.clear();
-                    prop.load(propInput);
-                    lastProp = f.lastModified();
-                }
+        File f = new File(Constants.SENSOR);
+        if (f.exists() && f.lastModified() > lastProp) {
+            log.info(LogStringBuilder.start("HWSettings").wO("load").wV("file", f.getAbsolutePath()).toString());
+            try (FileInputStream propInput = new FileInputStream(f)) {
+                prop.clear();
+                prop.load(propInput);
+                lastProp = f.lastModified();
+            } catch (Exception e) {
+                log.error(LogStringBuilder.start("HWSettings").wO("load").toString(), e);
             }
-        } catch (Exception e) {
-            log.error(LogStringBuilder.start("HWSettings").wO("load").toString(), e);
         }
     }
 

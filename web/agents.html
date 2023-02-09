@@ -116,29 +116,30 @@
 	}
 	
 	
-	function showFilter(a, inout) {
+	function showFilter(a, srctrg) {
 		document.getElementById("filterDialogLabel").innerHTML = "Filter for "
-				+ a.name + " [" + inout + "]";
+				+ a.name + " [" + srctrg + "]";
 		document.getElementById("agent").value = a.name;
 
 		for (var i = 0; i < agentList.length; i++) {
 			if (a.name == agentList[i].agent) {
-				document.getElementById("inout").value = inout;
-				if (("out" == inout && agentList[i].hasFilterOut)
-						|| ("in" == inout && agentList[i].hasFilterIn)) {
-					var x = ("out" == inout) ? agentList[i].filterOut
-							: agentList[i].filterIn;
+				document.getElementById("srctrg").value = srctrg;
+				if (("target" == srctrg && agentList[i].hasTargetFilter)
+						|| ("source" == srctrg && agentList[i].hasSourceFilter)) {
+					var x = ("target" == srctrg) ? agentList[i].targetFilter.filter
+							: agentList[i].sourceFilter.filter;
 					var ss = "";
 					for (var j = 0; j < x.filters.length; j++) {
+						var xf = x.filters[j].filter; 
 						if (j != 0)
 							ss += ",";
-						ss += x.filters[j].sentence;
-						if (x.filters[j].source!=null && x.filters[j].source!="") {
-						  ss += "@" + x.filters[j].source;
+						ss += xf.sentence;
+						if (xf.source!=null && xf.source!="") {
+						  ss += "@" + xf.source;
 						}
 					}
 					document.getElementById("sentences").value = ss;
-					document.getElementById("filtertype").selectedIndex = (x.type == "whitelist") ? 1: 0;
+					document.getElementById("filtertype").selectedIndex = (x.logic == "whitelist") ? 1: 0;
 				} else {
 					document.getElementById("sentences").value = "";
 					document.getElementById("filtertype").selectedIndex = 0;
@@ -156,17 +157,17 @@
 	function commitFilter() {
 		hideFilter();
 		updateFilter(document.getElementById("agent").value, document
-				.getElementById("inout").value, document
+				.getElementById("srctrg").value, document
 				.getElementById("sentences").value, document
 				.getElementById("filtertype").selectedIndex == 0 ? "blacklist"
 				: "whitelist");
 
 	}
 
-	function updateFilter(agent, inout, sentences, tp) {
+	function updateFilter(agent, srctrg, sentences, tp) {
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", "http://" + window.location.hostname
-				+ ":1112/filter?direction=" + inout + "&agent=" + agent + "&sentences="
+				+ ":1112/filter?direction=" + srctrg + "&agent=" + agent + "&sentences="
 				+ sentences + "&type=" + tp, true);
 		xmlHttp.setRequestHeader('Content-Type', 'text/plain');
 		xmlHttp.onreadystatechange = function() {
@@ -247,20 +248,20 @@
                 <tr>
                     <td>
                         <div ng-if="a.source">
-                            <div ng-if="a.hasFilterIn">
+                            <div ng-if="a.hasSourceFilter">
                                 <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
-                                        onclick="showFilter(this, 'in')">
+                                        onclick="showFilter(this, 'source')">
                                         <span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on"
                                               aria-hidden="true"></span>
-                                    </button>
-                                </div>
-                                <div ng-if="a.hasFilterIn==false">
-                                    <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
-                                            onclick="showFilter(this, 'in')">
-                                        <span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
-                                    </button>
-                                </div>
+                                </button>
                             </div>
+                            <div ng-if="a.hasSourceFilter==false">
+                                <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
+                                            onclick="showFilter(this, 'source')">
+                                        <span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
                             <div ng-if="a.source==false">
                                 <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary" disabled>
                                     <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
@@ -269,16 +270,16 @@
                         </td>
                         <td>
                             <div ng-if="a.target">
-                                <div ng-if="a.hasFilterOut">
+                                <div ng-if="a.hasTargetFilter">
                                     <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
-                                            onclick="showFilter(this, 'out')">
+                                            onclick="showFilter(this, 'target')">
                                         <span class="glyphicon glyphicon glyphicon-filter ab-glyphicon-on"
                                               aria-hidden="true"></span>
                                     </button>
                                 </div>
-                                <div ng-if="a.hasFilterOut==false">
+                                <div ng-if="a.hasTargetFilter==false">
                                     <button name="{{a.agent}}" type="button" class="btn btn-circle btn-secondary"
-                                            onclick="showFilter(this, 'out')">
+                                            onclick="showFilter(this, 'target')">
                                         <span class="glyphicon glyphicon glyphicon-filter" aria-hidden="true"></span>
                                     </button>
                                 </div>
@@ -364,7 +365,7 @@
 				</div>
 				<div class="card-body">
 					<form>
-						<input type="hidden" id="agent" /> <input type="hidden" id="inout" />
+						<input type="hidden" id="agent" /> <input type="hidden" id="srctrg" />
 						<div class="form-group">
 							<label for="sentences">Sentence list (comma separated):</label> <input
 								type="text" class="form-control" id="sentences">

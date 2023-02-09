@@ -19,6 +19,7 @@ import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -101,7 +102,7 @@ public class DBTrackReaderTest {
 
     @Test
     public void testAll() throws TrackManagementException {
-        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
+        TrackReader ts = new DBTrackReader(ConsoleLog.getLogger(), TrackTestTableManager.TRACK_TABLE_NAME);
         Instant d0 = Instant.parse("2022-11-27T10:53:26.000Z");
         Instant d1 = Instant.parse("2022-11-27T11:36:23.000Z");
         Query q = new QueryByDate(d0, d1);
@@ -128,7 +129,7 @@ public class DBTrackReaderTest {
 
     @Test
     public void testPartial() throws TrackManagementException {
-        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
+        TrackReader ts = new DBTrackReader(ConsoleLog.getLogger(), TrackTestTableManager.TRACK_TABLE_NAME);
         Instant d0 = Instant.parse("2022-11-27T11:16:53.000Z");
         Instant d1 = Instant.parse("2022-11-27T11:17:53.000Z");
         Query q = new QueryByDate(d0, d1);
@@ -145,7 +146,7 @@ public class DBTrackReaderTest {
 
     @Test
     public void testNoResult() throws TrackManagementException {
-        TrackReader ts = new DBTrackReader(TrackTestTableManager.TRACK_TABLE_NAME);
+        TrackReader ts = new DBTrackReader(ConsoleLog.getLogger(), TrackTestTableManager.TRACK_TABLE_NAME);
         Instant d0 = Instant.parse("2022-11-28T11:16:53.000Z");
         Instant d1 = Instant.parse("2022-11-28T11:17:53.000Z");
         Query q = new QueryByDate(d0, d1);

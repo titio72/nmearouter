@@ -60,7 +60,7 @@ public class DBStatsWriter implements StatsWriter {
     public void init() {
         if (db == null) {
             try {
-                db = new DBHelper(true);
+                db = new DBHelper(log, true);
             } catch (Exception e) {
                 log.error(() -> LogStringBuilder.start("DBStatsWriter").wV("type", tag).wO("init").toString(), e);
             }

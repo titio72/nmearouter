@@ -33,15 +33,13 @@ package com.aboni.nmea.router.utils.db;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.utils.LogStringBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -63,26 +61,23 @@ public class DBHelper implements AutoCloseable {
 
     private final Log log;
 
-
-    public DBHelper(boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
+    public DBHelper(Log log, boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
         readConf();
         this.autocommit = autocommit;
         Class.forName(jdbc);
-        log = ThingsFactory.getInstance(Log.class);
+        this.log = SafeLog.getSafeLog(log);
         reconnect();
     }
 
     private void readConf() throws MalformedConfigurationException {
-        try {
-            File f = new File(Constants.DB);
-            try (FileInputStream propInput = new FileInputStream(f)) {
-                Properties p = new Properties();
-                p.load(propInput);
-                jdbc = p.getProperty("jdbc.driver.class", JDBC_DRIVER);
-                dbUrl = p.getProperty("jdbc.url", DB_URL);
-                user = p.getProperty("user");
-                password = p.getProperty("pwd");
-            }
+        File f = new File(Constants.DB);
+        try (FileInputStream propInput = new FileInputStream(f)) {
+            Properties p = new Properties();
+            p.load(propInput);
+            jdbc = p.getProperty("jdbc.driver.class", JDBC_DRIVER);
+            dbUrl = p.getProperty("jdbc.url", DB_URL);
+            user = p.getProperty("user");
+            password = p.getProperty("pwd");
         } catch (Exception e) {
             log.debug(LogStringBuilder.start(DB_HELPER_CATEGORY).wO("Read configuration")
                     .wV("error", e.getMessage()).toString());
@@ -165,5 +160,39 @@ public class DBHelper implements AutoCloseable {
         } catch (SQLException ignored) {
             // do nothing
         }
+    }
+
+    private PreparedStatement prepareNewStatement(String query, QueryPreparer preparer) throws SQLException {
+        PreparedStatement p = getConnection().prepareStatement(query);
+        preparer.prepare(p);
+        return p;
+    }
+
+    public <T extends Exception> void executeQuery(String query, QueryReader<T> reader) throws SQLException, T {
+        if (query==null) throw new IllegalArgumentException("Query is null");
+        try (
+                Statement statement = getConnection().createStatement();
+                ResultSet rs = statement.executeQuery(query)
+        ) {
+            if (reader != null) reader.readQuery(rs);
+        }
+    }
+
+    public <T extends Exception> void executeQuery(String query, QueryPreparer preparer, QueryReader<T> reader) throws SQLException, T {
+        if (query==null) throw new IllegalArgumentException("Query is null");
+        try (
+            PreparedStatement statement = prepareNewStatement(query, preparer);
+            ResultSet rs = statement.executeQuery()
+        ) {
+            if (reader!=null) reader.readQuery(rs);
+        }
+    }
+
+    public interface QueryPreparer {
+        void prepare(PreparedStatement statement) throws SQLException;
+    }
+
+    public interface QueryReader<T extends Exception> {
+        void readQuery(ResultSet reader) throws SQLException, T;
     }
 }

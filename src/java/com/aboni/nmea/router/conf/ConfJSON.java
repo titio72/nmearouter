@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +43,7 @@ public class ConfJSON {
 
     private final JSONObject conf;
 
-    public ConfJSON() throws IOException {
+    public ConfJSON() throws MalformedConfigurationException {
         StringBuilder b = new StringBuilder();
         try (FileReader reader = new FileReader(Constants.ROUTER_CONF_JSON)) {
             char[] bf = new char[1024];
@@ -52,6 +51,8 @@ public class ConfJSON {
             while ((bytesRead = reader.read(bf)) != -1) {
                 b.append(bf, 0, bytesRead);
             }
+        } catch (Exception exception) {
+            throw new MalformedConfigurationException("Error reading router configuration", exception);
         }
         conf = new JSONObject(b.toString());
     }

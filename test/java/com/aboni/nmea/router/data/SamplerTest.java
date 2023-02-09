@@ -24,7 +24,7 @@ import com.aboni.nmea.router.message.impl.MsgHeadingImpl;
 import com.aboni.nmea.router.message.impl.MsgTemperatureImpl;
 import com.aboni.nmea.router.message.impl.MsgWindDataImpl;
 import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.toolkit.ProgrammableTimeStampProvider;
+import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
 import com.aboni.utils.Pair;
 import org.junit.Before;
 import org.junit.Test;

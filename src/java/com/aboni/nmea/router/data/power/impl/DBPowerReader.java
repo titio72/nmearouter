@@ -16,15 +16,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.power.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.DataManagementException;
-import com.aboni.nmea.router.data.DataReader;
-import com.aboni.nmea.router.data.ImmutableSample;
-import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.data.Query;
-import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
+import javax.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,23 +33,26 @@ public class DBPowerReader implements DataReader {
 
     private static final String SQL_TIME = "select * from power where TS>=? and TS<?";
     private static final String SQL_TIME_AND_TYPE = "select * from power where TS>=? and TS<? and type=?";
+    private final Log log;
+
+    @Inject
+    public DBPowerReader(Log log) {
+        this.log = SafeLog.getSafeLog(log);
+    }
 
     @Override
     public void readData(Query query, DataReader.DataReaderListener target) throws DataManagementException {
-        if (target==null) throw new IllegalArgumentException("Results target is null");
+        if (target == null) throw new IllegalArgumentException("Results target is null");
         if (query instanceof QueryByDate) {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();
-            try (DBHelper db = new DBHelper(true)) {
-                try (PreparedStatement st = db.getConnection().prepareStatement(SQL_TIME)) {
-                    st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
-                    st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
-                    try (ResultSet rs = st.executeQuery()) {
-                        while (rs.next()) {
-                            target.onRead(getSample(rs));
-                        }
-                    }
-                }
+            try (DBHelper db = new DBHelper(log, true)) {
+                db.executeQuery(SQL_TIME,
+                        (PreparedStatement st) -> {
+                            st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+                            st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
+                        },
+                        (ResultSet rs)->readResults(rs, target));
             } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading meteo", e);
             }
@@ -62,27 +63,30 @@ public class DBPowerReader implements DataReader {
 
     @Override
     public void readData(Query query, String tag, DataReader.DataReaderListener target) throws DataManagementException {
-        if (target==null) throw new IllegalArgumentException("Results target is null");
-        if (tag==null) throw new IllegalArgumentException("Query tag is null");
+        if (target == null) throw new IllegalArgumentException("Results target is null");
+        if (tag == null) throw new IllegalArgumentException("Query tag is null");
         if (query instanceof QueryByDate) {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();
-            try (DBHelper db = new DBHelper(true)) {
-                try (PreparedStatement st = db.getConnection().prepareStatement(SQL_TIME_AND_TYPE)) {
-                    st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
-                    st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
-                    st.setString(3, tag);
-                    try (ResultSet rs = st.executeQuery()) {
-                        while (rs.next()) {
-                            target.onRead(getSample(rs));
-                        }
-                    }
-                }
+            try (DBHelper db = new DBHelper(log, true)) {
+                db.executeQuery(SQL_TIME_AND_TYPE,
+                        (PreparedStatement st) -> {
+                            st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
+                            st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
+                            st.setString(3, tag);
+                        },
+                        (ResultSet rs)->readResults(rs, target));
             } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading power", e);
             }
         } else {
             throw new DataManagementException("Unsupported query");
+        }
+    }
+
+    private void readResults(ResultSet rs, DataReaderListener target) throws SQLException {
+        while (rs.next()) {
+            target.onRead(getSample(rs));
         }
     }
 

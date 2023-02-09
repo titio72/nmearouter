@@ -1,6 +1,7 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.nmea.router.utils.ConsoleLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
@@ -47,7 +48,7 @@ public class TrackTestTableManager {
             ");";
 
     public static void setUp() throws Exception {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             db.getConnection().createStatement().executeUpdate(SQL_DROP);
             db.getConnection().createStatement().executeUpdate(SQL_CREATE);
             db.getConnection().createStatement().executeUpdate(SQL_DROP_TRIP);
@@ -56,7 +57,7 @@ public class TrackTestTableManager {
     }
 
     public static void tearDown() throws Exception {
-        try (DBHelper db = new DBHelper(true)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             db.getConnection().createStatement().executeUpdate(SQL_DROP);
             db.getConnection().createStatement().executeUpdate(SQL_DROP_TRIP);
         }
@@ -90,7 +91,7 @@ public class TrackTestTableManager {
     }
 
     public static void addTestData() throws SQLException, MalformedConfigurationException, ClassNotFoundException {
-        try (DBHelper db = new DBHelper(false)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), false)) {
             try (PreparedStatement st = db.getConnection().prepareStatement("insert into " + TRIP_TABLE_NAME + " values (?, ?, ?, ?, ?)")) {
                 for (Object[] t : testTrips) {
                     st.setInt(1, (Integer) t[0]);
@@ -133,7 +134,7 @@ public class TrackTestTableManager {
     }
 
     public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException, ClassNotFoundException {
-        try (DBHelper db = new DBHelper(false)) {
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), false)) {
             PreparedStatement st = db.getConnection().prepareStatement("insert into " + TRACK_TABLE_NAME +
                     " (lat, lon, TS, anchor, dTime, dist, speed, maxSpeed, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for (String l : csv) {

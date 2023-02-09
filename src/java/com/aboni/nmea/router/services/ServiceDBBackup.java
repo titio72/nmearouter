@@ -24,6 +24,9 @@ import javax.inject.Inject;
 
 public class ServiceDBBackup extends JSONWebService {
 
+    public static final String DB_BACKUP_SERVICE = "DBBackupService";
+    public static final String OPERATION = "backup";
+
     @Inject
     public ServiceDBBackup(Log log) {
         super(log);
@@ -31,9 +34,9 @@ public class ServiceDBBackup extends JSONWebService {
     }
 
     private JSONObject getResult(ServiceConfig config) {
-        try (DBHelper h = new DBHelper(true)) {
+        try (DBHelper h = new DBHelper(getLogger(), true)) {
             String file = h.backup();
-            getLogger().info(LogStringBuilder.start("DBBackupService").wO("backup").wV("file", file).toString());
+            getLogger().info(LogStringBuilder.start(DB_BACKUP_SERVICE).wO(OPERATION).wV("file", file).toString());
             if (file != null) {
                 JSONObject res = getOk();
                 res.put("file", file);
@@ -42,11 +45,11 @@ public class ServiceDBBackup extends JSONWebService {
                 return getError("Backup failed");
             }
         } catch (InterruptedException e) {
-            getLogger().errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start(DB_BACKUP_SERVICE).wO(OPERATION).toString(), e);
             Thread.currentThread().interrupt();
             return getError("Error " + e.getMessage());
         } catch (Exception e) {
-            getLogger().errorForceStacktrace(LogStringBuilder.start("DBBackupService").wO("backup").toString(), e);
+            getLogger().errorForceStacktrace(LogStringBuilder.start(DB_BACKUP_SERVICE).wO(OPERATION).toString(), e);
             return getError("Error " + e.getMessage());
         }
     }
