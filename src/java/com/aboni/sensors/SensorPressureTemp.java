@@ -19,7 +19,7 @@ import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.Atmospheric;
 import com.aboni.sensors.hw.BME280;
 import com.aboni.sensors.hw.BMP180;
-import com.aboni.utils.DataFilter;
+import com.aboni.utils.LPFFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
@@ -86,12 +86,12 @@ public class SensorPressureTemp extends I2CSensor {
 
     private void readPressurePA() {
         double p = atmospheric.readPressure();
-        pressurePA = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), pressurePA, p);
+        pressurePA = LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), pressurePA, p);
     }
 
     private void readHumidity() {
         double h = atmospheric.readHumidity();
-        humidity = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), humidity, h);
+        humidity = LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), humidity, h);
     }
 
     public double getAltitude(double seaLevelPressure) {
@@ -99,7 +99,7 @@ public class SensorPressureTemp extends I2CSensor {
     }
 
     private void readTemperatureCelsius() {
-        temperatureC = DataFilter.getLPFReading(getDefaultSmoothingAlpha(), temperatureC, atmospheric.readTemperature());
+        temperatureC = LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), temperatureC, atmospheric.readTemperature());
     }
 
     public double getTemperatureCelsius() {

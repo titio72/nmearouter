@@ -18,29 +18,25 @@ import org.junit.Test;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class DBTrackDBEventWriterTest {
+public class TrackDAOTest {
 
-    private DBTrackEventWriter evW;
+    private TrackDAO evW;
 
     @Before
     public void setUp() throws Exception {
         Injector injector = Guice.createInjector(new NMEARouterModule());
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
-        evW = new DBTrackEventWriter("track_test");
+        evW = new TrackDAO("track_test");
     }
 
     @After
     public void tearDown() throws Exception {
-        evW.reset();
         TrackTestTableManager.tearDown();
     }
 
@@ -53,7 +49,7 @@ public class DBTrackDBEventWriterTest {
                 .withSpeed(3.4, 5.4)
                 .withPeriod(30).withEngine(EngineStatus.OFF).getPoint();
         DBHelper h = new DBHelper(ConsoleLog.getLogger(), true);
-        evW.write(new TrackEvent(p), h.getConnection());
+        evW.writeEvent(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.OFF));
     }
 
@@ -65,7 +61,7 @@ public class DBTrackDBEventWriterTest {
                 .withDistance(0.0002)
                 .withSpeed(3.4, 5.4).withPeriod(30).withEngine(EngineStatus.ON).getPoint();
         DBHelper h = new DBHelper(ConsoleLog.getLogger(), true);
-        evW.write(new TrackEvent(p), h.getConnection());
+        evW.writeEvent(new TrackEvent(p), h.getConnection());
         assertTrue(check(h, l, 43.112234, 9.534534, 0.0002, 3.4, 5.4, 30, false, EngineStatus.ON));
     }
 

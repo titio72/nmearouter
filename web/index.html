@@ -28,7 +28,7 @@
 	    var total = JSON.parse(xmlHttp.responseText).total;
 
 	    app.controller("myCtrl", function($scope) {
-			$scope.trips = tripList  
+			$scope.trips = tripList
 			$scope.total = total;
 		});
 
@@ -126,38 +126,44 @@
             </div>
         </div>
 		<div class="row alert alert-primary" style="margin-left: 0px; margin-right: 0px;">
-            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12">
                 <strong>{{total.end}}</strong>
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+            <div class="col-lg-3 col-md-2 col-sm-2 col-xs-12">
                 <strong>Total</strong>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="text-align: right">
                 <strong>{{total.nOfDays}}</strong>
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
+            <div class="col-lg-3 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
                 <strong>{{total.duration}}</strong>
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" style="text-align: right">
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3" style="text-align: right">
                 <strong>{{total.distance}}NM</strong>
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3" style="text-align: right">
+                <strong>{{total.distancePercentageSail}}%</strong>
             </div>
         </div>
         <div class="row alert" ng-repeat="t in trips">
-            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
                 {{t.start}}
             </div>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+            <div class="col-lg-3 col-md-3 col-sm-2 col-xs-12">
                 <a id="linkTrip|{{t.id}}|{{t.description}}" href="#"
                    onclick="showAnalytics(this.id)">{{t.description}}</a>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" style="text-align: right">
                 {{t.nOfDays}}
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
+            <div class="col-lg-3 col-md-2 col-sm-3 col-xs-4" style="text-align: right">
                 {{t.duration}}
             </div>
-            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" style="text-align: right">
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3" style="text-align: right">
                 {{t.distance}}NM
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3" style="text-align: right">
+                {{t.distancePercentageSail}}%
             </div>
         </div>
 	</div>

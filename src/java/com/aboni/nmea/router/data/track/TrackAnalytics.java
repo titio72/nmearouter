@@ -21,10 +21,18 @@ import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TrackAnalytics {
+
+    private LegListener legListener;
+
+    public interface LegListener {
+        void onLeg(StatsLeg leg);
+    }
 
     private static String formatDuration(long milliSeconds) {
         long s = milliSeconds / 1000;
@@ -86,7 +94,7 @@ public class TrackAnalytics {
         }
     }
 
-    static class StatsLeg {
+    public static class StatsLeg {
 
         long samples;
         final StartEnd startEnd = new StartEnd();
@@ -137,6 +145,30 @@ public class TrackAnalytics {
             j.put("speedDistributionSail", speedDistributionSail.toJSON());
             for (BestMileSpeed mm : movingAvgMaxes) fillRes(mm, j);
             return j;
+        }
+
+        public Instant getStart() {
+            return Instant.ofEpochMilli(startEnd.start);
+        }
+
+        public Instant getEnd() {
+            return Instant.ofEpochMilli(startEnd.end);
+        }
+
+        public long getDuration() {
+            return totalNavigation.time;
+        }
+
+        public double getDistance() {
+            return totalNavigation.value;
+        }
+
+        public double getSailDistance() {
+            return sailEngineNavigation[0].value;
+        }
+
+        public double getMotorDistance() {
+            return sailEngineNavigation[1].value;
         }
 
         void addTime(long l) {
@@ -192,6 +224,11 @@ public class TrackAnalytics {
         void resetLeg() {
             currentLeg = null;
         }
+
+        void clear() {
+            legs.clear();
+            currentLeg = null;
+        }
     }
 
     private final Stats stats;
@@ -209,13 +246,22 @@ public class TrackAnalytics {
         return stats;
     }
 
+    public void setListener(LegListener listener) {
+        this.legListener = listener;
+    }
+
     public void processSample(TrackPoint sample) {
         if (stats.currentLeg == null && !sample.isAnchor()) {
             // started moving
             stats.createLeg();
         } else if (stats.currentLeg != null && sample.isAnchor()) {
             // just stopped
-            stats.resetLeg();
+            if (legListener!=null) {
+                legListener.onLeg(stats.currentLeg);
+                stats.clear();
+            } else {
+                stats.resetLeg();
+            }
         }
         stats.samples++;
         stats.addTime(sample.getPosition().getTimestamp());

@@ -37,4 +37,5 @@ public interface TripManagerX {
     void updateTripDistance(int id, double dist) throws TripManagerException;
 
     void trimTrip(int id) throws TripManagerException;
+
 }

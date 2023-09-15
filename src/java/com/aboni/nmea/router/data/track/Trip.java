@@ -36,6 +36,10 @@ public interface Trip {
 
     double getDistance();
 
+    double getDistanceSail();
+
+    double getDistanceMotor();
+
     long getTotalTime();
 
     int countDays();

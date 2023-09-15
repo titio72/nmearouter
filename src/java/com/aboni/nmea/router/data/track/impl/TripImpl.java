@@ -16,6 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.data.track.Trip;
+import com.aboni.sensors.EngineStatus;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +31,10 @@ class TripImpl implements Trip {
     private Instant startTS;
     private Instant endTS;
     private double distance;
+
+    private double distanceSail;
+
+    private double distanceMotor;
 
     TripImpl(int id, String desc) {
         this.desc = desc;
@@ -47,8 +52,13 @@ class TripImpl implements Trip {
         distance = d;
     }
 
-    void addDistance(double d) {
+    void addDistance(double d, EngineStatus engineStatus) {
         distance += d;
+        switch (engineStatus) {
+            case ON: distanceMotor += d; break;
+            case OFF: distanceSail += d; break;
+            default: break;
+        }
     }
 
     void setTS(Instant ts) {
@@ -107,6 +117,16 @@ class TripImpl implements Trip {
     }
 
     @Override
+    public double getDistanceSail() {
+        return distanceSail;
+    }
+
+    @Override
+    public double getDistanceMotor() {
+        return distanceMotor;
+    }
+
+    @Override
     public long getTotalTime() {
         return endTS.toEpochMilli() - startTS.toEpochMilli();
     }
@@ -119,5 +139,13 @@ class TripImpl implements Trip {
     @Override
     public Instant getEndTS() {
         return endTS;
+    }
+
+    public void setDistanceSail(double distanceSail) {
+        this.distanceSail = distanceSail;
+    }
+
+    public void setDistanceMotor(double distMotor) {
+        distanceMotor = distMotor;
     }
 }

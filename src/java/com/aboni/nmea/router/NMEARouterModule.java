@@ -94,8 +94,6 @@ public class NMEARouterModule extends AbstractModule {
         bind(DataReader.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMetricReader.class);
         bind(DataReader.class).annotatedWith(Names.named(Constants.TAG_POWER)).to(DBPowerReader.class);
         bind(TrackReader.class).to(DBTrackReader.class);
-        bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_TRACK)).to(DBTrackEventWriter.class);
-        bind(DBEventWriter.class).annotatedWith(Names.named(Constants.TAG_TRIP)).to(DBTripEventWriter.class);
         bind(String.class).annotatedWith(Names.named(Constants.TAG_TRACK)).toInstance("track");
         bind(String.class).annotatedWith(Names.named(Constants.TAG_TRIP)).toInstance("trip");
         bind(String.class).annotatedWith(Names.named(Constants.TAG_METEO)).toInstance("meteo");

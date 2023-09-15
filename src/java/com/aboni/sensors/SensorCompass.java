@@ -19,7 +19,7 @@ import com.aboni.geo.DeviationManager;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.DataFilter;
+import com.aboni.utils.LPFFilter;
 import com.aboni.utils.LogStringBuilder;
 
 import javax.inject.Inject;
@@ -153,9 +153,9 @@ public class SensorCompass extends I2CSensor {
             unfilteredData.pitch = res[0];
             unfilteredData.roll = res[1];
             unfilteredData.head = res[2];
-            data.pitch = DataFilter.getLPFReading(attitudeSmoothing, data.pitch, res[0]);
-            data.roll = DataFilter.getLPFReading(attitudeSmoothing, data.roll, res[1]);
-            data.head = DataFilter.getLPFReading(compassSmoothing, data.head, res[2]);
+            data.pitch = LPFFilter.getLPFReading(attitudeSmoothing, data.pitch, res[0]);
+            data.roll = LPFFilter.getLPFReading(attitudeSmoothing, data.roll, res[1]);
+            data.head = LPFFilter.getLPFReading(compassSmoothing, data.head, res[2]);
         }
     }
 

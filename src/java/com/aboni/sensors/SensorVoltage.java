@@ -18,7 +18,7 @@ package com.aboni.sensors;
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.ADS1115;
-import com.aboni.utils.DataFilter;
+import com.aboni.utils.LPFFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
@@ -112,7 +112,7 @@ public class SensorVoltage extends I2CSensor {
         for (int i = 0; i<4; i++) {
             try {
                 double voltage = ads.getVoltage(i);
-                v[i] = DataFilter.getLPFReading(smoothing, v[i], voltage);
+                v[i] = LPFFilter.getLPFReading(smoothing, v[i], voltage);
             } catch (IOException e) {
                 throw new SensorException("Error reading voltage", e);
             }

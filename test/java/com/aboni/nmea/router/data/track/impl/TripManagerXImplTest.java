@@ -51,7 +51,7 @@ public class TripManagerXImplTest {
         TrackTestTableManager.addTestData();
         trackWriter = new MockDBEventWriter();
         tripWriter = new MockDBEventWriter();
-        tm = new TripManagerXImpl(ConsoleLog.getLogger(), "trip_test", "track_test", trackWriter, tripWriter);
+        tm = new TripManagerXImpl(ConsoleLog.getLogger(), "trip_test", "track_test");
         tm.init();
     }
 

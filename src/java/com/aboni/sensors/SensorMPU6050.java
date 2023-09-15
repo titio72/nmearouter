@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.DataFilter;
+import com.aboni.utils.LPFFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import javax.inject.Inject;
@@ -104,9 +104,9 @@ public class SensorMPU6050 extends I2CSensor {
             scaledAccel = scaledAccel1;
         } else {
             scaledAccel = new double[] {
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[X], scaledAccel1[X]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Z], scaledAccel1[Z])
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[X], scaledAccel1[X]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Y], scaledAccel1[Y]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledAccel[Z], scaledAccel1[Z])
             };
         }
     }
@@ -124,9 +124,9 @@ public class SensorMPU6050 extends I2CSensor {
             scaledGyro = scaledGyro1;
         } else {
             scaledGyro = new double[]{
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[X], scaledGyro1[X]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Z], scaledGyro1[Z])
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[X], scaledGyro1[X]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Y], scaledGyro1[Y]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), scaledGyro[Z], scaledGyro1[Z])
             };
         }
     }

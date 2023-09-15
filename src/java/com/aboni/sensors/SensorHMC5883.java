@@ -17,7 +17,7 @@ package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.hw.HMC5883L;
-import com.aboni.utils.DataFilter;
+import com.aboni.utils.LPFFilter;
 import com.aboni.utils.Utils;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
@@ -90,9 +90,9 @@ public class SensorHMC5883 extends I2CSensor {
             mag = m;
         } else {
             mag = new double[]{
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[X], m[X]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Y], m[Y]),
-                    DataFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Z], m[Z])
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[X], m[X]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Y], m[Y]),
+                    LPFFilter.getLPFReading(getDefaultSmoothingAlpha(), mag[Z], m[Z])
             };
         }
     }
