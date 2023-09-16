@@ -45,12 +45,12 @@ public class N2KPressureImpl extends N2KMessageImpl implements MsgPressure {
 
     private void fill() {
 
-        sid = BitUtils.getByte(data, 0, 0xFF);
-        instance = BitUtils.getByte(data, 1, 0xFF);
+        sid = N2KBitUtils.getByte(data, 0, 0xFF);
+        instance = N2KBitUtils.getByte(data, 1, 0xFF);
 
-        PressureSource source = PressureSource.valueOf(BitUtils.getByte(data, 2, 0));
+        PressureSource source = PressureSource.valueOf(N2KBitUtils.getByte(data, 2, 0));
 
-        Double dT = BitUtils.parseDouble(data, 24, 32, 0.1, false);
+        Double dT = N2KBitUtils.parseDouble(data, 24, 32, 0.1, false);
         double pressure = (dT == null) ? Double.NaN : Utils.round(dT / 100.0, 1);
 
         pressureData = new MsgPressureImpl(source, pressure);

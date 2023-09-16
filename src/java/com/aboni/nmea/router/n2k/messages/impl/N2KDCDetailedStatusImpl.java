@@ -41,13 +41,13 @@ public class N2KDCDetailedStatusImpl extends N2KMessageImpl implements MsgDCDeta
     }
 
     private static MsgDCDetailedStatus fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0xFF);
-        int instance = BitUtils.getByte(data, 1, 0xFF);
-        int type = BitUtils.getByte(data, 2, DCType.UNKNOWN.toValue());
-        int soc = BitUtils.getByte(data, 3, 0xFF);
-        int soh = BitUtils.getByte(data, 4, 0xFF);
-        int ttg = BitUtils.get2ByteInt(data, 5);
-        double ripple = BitUtils.parseDoubleSafe(data, 56, 16, 0.01, false);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
+        int instance = N2KBitUtils.getByte(data, 1, 0xFF);
+        int type = N2KBitUtils.getByte(data, 2, DCType.UNKNOWN.toValue());
+        int soc = N2KBitUtils.getByte(data, 3, 0xFF);
+        int soh = N2KBitUtils.getByte(data, 4, 0xFF);
+        int ttg = N2KBitUtils.get2ByteInt(data, 5);
+        double ripple = N2KBitUtils.parseDoubleSafe(data, 56, 16, 0.01, false);
         return new MsgDCDetailedStatusImpl(sid, instance, DCType.valueOf(type), soc / 100.0, soh / 100.0, ttg, ripple);
     }
 

@@ -38,11 +38,11 @@ public class N2KSeatalkAlarmImpl extends N2KMessageImpl implements MsgSeatalkAla
     }
 
     private static MsgSeatalkAlarm fill(byte[] data, N2KMessageHeader h) {
-        int sid = BitUtils.getByte(data, 2);
-        SeatalkAlarmStatus alarmStatus = SeatalkAlarmStatus.valueOf(BitUtils.getByte(data, 3));
-        SeatalkAlarm alarm = SeatalkAlarm.valueOf(BitUtils.getByte(data, 4));
-        int groupId = BitUtils.getByte(data, 5);
-        int priority = BitUtils.get2ByteInt(data,6);
+        int sid = N2KBitUtils.getByte(data, 2);
+        SeatalkAlarmStatus alarmStatus = SeatalkAlarmStatus.valueOf(N2KBitUtils.getByte(data, 3));
+        SeatalkAlarm alarm = SeatalkAlarm.valueOf(N2KBitUtils.getByte(data, 4));
+        int groupId = N2KBitUtils.getByte(data, 5);
+        int priority = N2KBitUtils.get2ByteInt(data,6);
         return new MsgSeatalkAlarmImpl(sid, alarmStatus, alarm, groupId, priority, h.getSource());
     }
 

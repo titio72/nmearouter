@@ -43,15 +43,15 @@ public class N2KHumidityImpl extends N2KMessageImpl implements MsgHumidity {
 
     private static MsgHumidity fill(byte[] data) {
 
-        int sid = BitUtils.getByte(data, 0, 0xFF);
-        int instance = BitUtils.getByte(data, 1, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
+        int instance = N2KBitUtils.getByte(data, 1, 0xFF);
 
-        HumiditySource source = HumiditySource.valueOf(BitUtils.getByte(data, 2, 0));
+        HumiditySource source = HumiditySource.valueOf(N2KBitUtils.getByte(data, 2, 0));
 
-        Double dT = BitUtils.parseDouble(data, 24, 16, 0.004, true);
+        Double dT = N2KBitUtils.parseDouble(data, 24, 16, 0.004, true);
         double humidity = (dT == null) ? Double.NaN : Utils.round(dT, 1);
 
-        Double dST = BitUtils.parseDouble(data, 40, 16, 0.004, true);
+        Double dST = N2KBitUtils.parseDouble(data, 40, 16, 0.004, true);
         double setHumidity = (dST == null) ? Double.NaN : Utils.round(dST, 1);
 
         return new MsgHumidityImpl(sid, instance, source, humidity, setHumidity);

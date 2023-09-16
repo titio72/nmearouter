@@ -32,7 +32,7 @@ import static com.aboni.nmea.router.n2k.messages.N2KMessagePGNs.AIS_POSITION_REP
 public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPositionReport {
 
     private int messageId;
-    private String repeatIndicator;
+    private int repeatIndicator;
     private String sMMSI;
     private String positionAccuracy;
     private boolean sRAIM;
@@ -62,38 +62,38 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
     }
 
     protected void fill() {
-        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = (int)N2KBitUtils.parseIntegerSafe(data, 6, 6, 2, 0);
+        sMMSI = String.format("%d", N2KBitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = N2KBitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = N2KBitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gpsInfo.setPosition(new Position(lat, lon));
         }
 
-        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
+        positionAccuracy = N2KBitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = N2KBitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        timestamp = (int) N2KBitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        gpsInfo.setCOG(BitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false));
+        gpsInfo.setCOG(N2KBitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false));
         gpsInfo.setCOG(Double.isNaN(gpsInfo.getCOG()) ? gpsInfo.getCOG() : Utils.round(Math.toDegrees(gpsInfo.getCOG()), 1));
-        gpsInfo.setSOG(BitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
+        gpsInfo.setSOG(N2KBitUtils.parseDoubleSafe(data, 128, 16, 0.01, false));
         if (!Double.isNaN(gpsInfo.getSOG())) gpsInfo.setSOG(Utils.round(gpsInfo.getSOG() * 3600.0 / 1852.0, 1));
-        heading = BitUtils.parseDoubleSafe(data, 168, 16, 0.0001, false);
+        heading = N2KBitUtils.parseDoubleSafe(data, 168, 16, 0.0001, false);
         heading = Double.isNaN(heading) ? heading : Utils.round(Math.toDegrees(heading), 1);
 
-        aisTransceiverInfo = BitUtils.parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisTransceiverInfo = N2KBitUtils.parseEnum(data, 163, 3, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
-        int i = (int) BitUtils.parseIntegerSafe(data, 194, 2, 1, 0xFF);
+        int i = (int) N2KBitUtils.parseIntegerSafe(data, 194, 2, 1, 0xFF);
         unitType = getUnitType(i);
 
-        sDSC = BitUtils.parseIntegerSafe(data, 196, 4, 1, 0) == 1;
-        canHandleMsg22 = BitUtils.parseIntegerSafe(data, 198, 6, 1, 0) == 1;
+        sDSC = N2KBitUtils.parseIntegerSafe(data, 196, 4, 1, 0) == 1;
+        canHandleMsg22 = N2KBitUtils.parseIntegerSafe(data, 198, 6, 1, 0) == 1;
 
-        band = BitUtils.parseIntegerSafe(data, 197, 5, 1, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
-        aisMode = BitUtils.parseIntegerSafe(data, 199, 7, 1, 0) == 0 ? "Autonomous" : "Assigned";
-        aisCommunicationState = BitUtils.parseIntegerSafe(data, 200, 0, 1, 0) == 0 ? "SOTDMA" : "ITDMA";
+        band = N2KBitUtils.parseIntegerSafe(data, 197, 5, 1, 0) == 0 ? "top 525 kHz of marine band" : "Entire marine band";
+        aisMode = N2KBitUtils.parseIntegerSafe(data, 199, 7, 1, 0) == 0 ? "Autonomous" : "Assigned";
+        aisCommunicationState = N2KBitUtils.parseIntegerSafe(data, 200, 0, 1, 0) == 0 ? "SOTDMA" : "ITDMA";
 
     }
 
@@ -153,7 +153,7 @@ public class N2KAISPositionReportBImpl extends N2KMessageImpl implements AISPosi
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         return repeatIndicator;
     }
 

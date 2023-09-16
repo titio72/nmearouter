@@ -32,7 +32,7 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
 
     private int messageId;
     private String sMMSI;
-    private String repeatIndicator;
+    private int repeatIndicator;
     private String positionAccuracy;
     private boolean sRAIM;
     private int timestamp;
@@ -59,28 +59,28 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     }
 
     private void fill() {
-        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        messageId = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = (int)N2KBitUtils.parseIntegerSafe(data, 6, 6, 2, 0);
+        sMMSI = String.format("%d", N2KBitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
 
-        double lon = BitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
-        double lat = BitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
+        double lon = N2KBitUtils.parseDoubleSafe(data, 40, 32, 0.0000001, true);
+        double lat = N2KBitUtils.parseDoubleSafe(data, 72, 32, 0.0000001, true);
         if (!(Double.isNaN(lon) || Double.isNaN(lat))) {
             gpsInfo.setPosition(new Position(lat, lon));
         }
         gpsInfo.setCOG(0.0);
         gpsInfo.setSOG(0.0);
 
-        positionAccuracy = BitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
-        sRAIM = BitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
-        timestamp = (int) BitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
+        positionAccuracy = N2KBitUtils.parseEnum(data, 104, 0, 1, N2KLookupTables.getTable(POSITION_ACCURACY));
+        sRAIM = N2KBitUtils.parseIntegerSafe(data, 105, 1, 1, 0) == 1;
+        timestamp = (int) N2KBitUtils.parseIntegerSafe(data, 106, 2, 6, 0xFF);
 
-        sAtoNType = BitUtils.parseEnum(data, 176, 0, 5, N2KLookupTables.getTable(ATON_TYPE));
-        name = BitUtils.getText(data, 26, 34);
+        sAtoNType = N2KBitUtils.parseEnum(data, 176, 0, 5, N2KLookupTables.getTable(ATON_TYPE));
+        name = N2KBitUtils.getText(data, 26, 34);
 
-        aisTransceiverInfo = BitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
-        aisSpare = (int) BitUtils.parseIntegerSafe(data, 184, 0, 1, 0xFF);
-        positionFixingDeviceType = BitUtils.parseEnum(data, 185, 1, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
+        aisTransceiverInfo = N2KBitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        aisSpare = (int) N2KBitUtils.parseIntegerSafe(data, 184, 0, 1, 0xFF);
+        positionFixingDeviceType = N2KBitUtils.parseEnum(data, 185, 1, 4, N2KLookupTables.getTable(POSITION_FIX_DEVICE));
     }
 
     @Override
@@ -163,7 +163,7 @@ public class N2KAISAtoN extends N2KMessageImpl implements AISPositionReport, AIS
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         return repeatIndicator;
     }
 

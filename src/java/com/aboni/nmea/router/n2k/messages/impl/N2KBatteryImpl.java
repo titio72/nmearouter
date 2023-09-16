@@ -40,11 +40,11 @@ public class N2KBatteryImpl extends N2KMessageImpl implements MsgBattery {
     }
 
     private static MsgBattery fill(byte[] data) {
-        int instance = BitUtils.getByte(data, 0, 0xFF);
-        double voltage = BitUtils.parseDoubleSafe(data, 8, 16, 0.01, true);
-        double current = BitUtils.parseDoubleSafe(data, 24, 16, 0.1, true);
-        double temperature = BitUtils.parseDoubleSafe(data, 40, 16, 0.01, false);
-        int sid = BitUtils.getByte(data, 7, 0xFF);
+        int instance = N2KBitUtils.getByte(data, 0, 0xFF);
+        double voltage = N2KBitUtils.parseDoubleSafe(data, 8, 16, 0.01, true);
+        double current = N2KBitUtils.parseDoubleSafe(data, 24, 16, 0.1, true);
+        double temperature = N2KBitUtils.parseDoubleSafe(data, 40, 16, 0.01, false);
+        int sid = N2KBitUtils.getByte(data, 7, 0xFF);
         return new MsgBatteryImpl(sid, instance, voltage, current, temperature);
     }
 

@@ -45,10 +45,10 @@ public class N2KPositionRapidImpl extends N2KMessageImpl implements MsgPosition 
         "Order": 1, "Id": "latitude","BitLength": 32,"BitOffset": 0,"BitStart": 0,"Units": "deg","Type": "Latitude","Resolution": "0.0000001","Signed": true
         "Order": 2,"Id": "longitude","BitLength": 32,"BitOffset": 32,"BitStart": 0,"Units": "deg","Type": "Longitude","Resolution": "0.0000001","Signed": true
          */
-        Double dLat = BitUtils.parseDouble(data, 0, 32, 0.0000001, true);
+        Double dLat = N2KBitUtils.parseDouble(data, 0, 32, 0.0000001, true);
         latitude = dLat == null ? Double.NaN : dLat;
 
-        Double dLon = BitUtils.parseDouble(data, 32, 32, 0.0000001, true);
+        Double dLon = N2KBitUtils.parseDouble(data, 32, 32, 0.0000001, true);
         longitude = dLon == null ? Double.NaN : dLon;
     }
 
@@ -62,7 +62,7 @@ public class N2KPositionRapidImpl extends N2KMessageImpl implements MsgPosition 
 
     @Override
     public Position getPosition() {
-        if (BitUtils.isValidDouble(latitude) && BitUtils.isValidDouble(longitude))
+        if (N2KBitUtils.isValidDouble(latitude) && N2KBitUtils.isValidDouble(longitude))
             return new Position(latitude, longitude);
         else
             return null;

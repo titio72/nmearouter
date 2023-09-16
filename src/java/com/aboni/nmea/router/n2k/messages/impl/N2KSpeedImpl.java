@@ -45,17 +45,17 @@ public class N2KSpeedImpl extends N2KMessageImpl implements MsgSpeed {
 
     private static MsgSpeed fill(byte[] data) {
 
-        int sid = BitUtils.getByte(data, 0, 0);
+        int sid = N2KBitUtils.getByte(data, 0, 0);
 
-        Double dSpeedW = BitUtils.parseDouble(data, 8, 16, 0.01, false);
+        Double dSpeedW = N2KBitUtils.parseDouble(data, 8, 16, 0.01, false);
         double speedWaterRef = dSpeedW == null ? Double.NaN : Utils.round(dSpeedW * 3600.0 / 1852.0, 2);
 
-        Double dSpeedG = BitUtils.parseDouble(data, 24, 16, 0.01, false);
+        Double dSpeedG = N2KBitUtils.parseDouble(data, 24, 16, 0.01, false);
         double speedGroundRef = dSpeedG == null ? Double.NaN : Utils.round(dSpeedG * 3600.0 / 1852.0, 2);
 
-        String waterRefType = BitUtils.parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(WATER_REFERENCE));
+        String waterRefType = N2KBitUtils.parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(WATER_REFERENCE));
 
-        int speedDirection = (int) BitUtils.parseIntegerSafe(data, 48, 0, 4, 1);
+        int speedDirection = (int) N2KBitUtils.parseIntegerSafe(data, 48, 0, 4, 1);
 
         return new MsgSpeedImpl(sid, speedWaterRef, speedGroundRef, waterRefType, speedDirection);
     }

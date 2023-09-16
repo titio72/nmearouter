@@ -53,10 +53,10 @@ public class N2KAISStaticDataBImpl implements AISStaticData {
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         if (partA != null) return partA.getRepeatIndicator();
         else if (partB != null) return partB.getRepeatIndicator();
-        else return null;
+        else return 0;
     }
 
     @Override

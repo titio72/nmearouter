@@ -44,15 +44,15 @@ public class N2KTemperatureImpl extends N2KMessageImpl implements MsgTemperature
 
     private MsgTemperature fill(byte[] data) {
 
-        int sid = BitUtils.getByte(data, 0, 0xFF);
-        int instance = BitUtils.getByte(data, 1, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
+        int instance = N2KBitUtils.getByte(data, 1, 0xFF);
 
-        TemperatureSource source = TemperatureSource.valueOf(BitUtils.getByte(data, 2, 0));
+        TemperatureSource source = TemperatureSource.valueOf(N2KBitUtils.getByte(data, 2, 0));
 
-        Double dT = BitUtils.parseDouble(data, 24, 16, 0.01, false);
+        Double dT = N2KBitUtils.parseDouble(data, 24, 16, 0.01, false);
         double temperature = (dT == null) ? Double.NaN : Utils.round(kelvinToCelsius(dT), 1);
 
-        Double dST = BitUtils.parseDouble(data, 40, 16, 0.01, false);
+        Double dST = N2KBitUtils.parseDouble(data, 40, 16, 0.01, false);
         double setTemperature = (dST == null) ? Double.NaN : Utils.round(kelvinToCelsius(dST), 1);
 
         return new MsgTemperatureImpl(sid, instance, source, temperature, setTemperature);

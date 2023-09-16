@@ -42,18 +42,18 @@ public class N2KHeadingImpl extends N2KMessageImpl implements MsgHeading {
     }
 
     private static MsgHeading fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Double dH = BitUtils.parseDouble(data, 8, 16, 0.0001, false);
+        Double dH = N2KBitUtils.parseDouble(data, 8, 16, 0.0001, false);
         double heading = dH == null ? Double.NaN : Utils.round(Math.toDegrees(dH), 1);
 
-        Double dD = BitUtils.parseDouble(data, 24, 16, 0.0001, true);
+        Double dD = N2KBitUtils.parseDouble(data, 24, 16, 0.0001, true);
         double deviation = dD == null ? Double.NaN : Utils.round(Math.toDegrees(dD), 1);
 
-        Double dV = BitUtils.parseDouble(data, 40, 16, 0.0001, true);
+        Double dV = N2KBitUtils.parseDouble(data, 40, 16, 0.0001, true);
         double variation = dV == null ? Double.NaN : Utils.round(Math.toDegrees(dV), 1);
 
-        DirectionReference reference = DirectionReference.valueOf((int) BitUtils.parseIntegerSafe(data, 56, 0, 2, 0));
+        DirectionReference reference = DirectionReference.valueOf((int) N2KBitUtils.parseIntegerSafe(data, 56, 0, 2, 0));
 
         return new MsgHeadingImpl(sid, heading, variation, deviation, reference == DirectionReference.MAGNETIC);
     }

@@ -41,17 +41,17 @@ public class N2KAttitudeImpl extends N2KMessageImpl implements MsgAttitude {
     }
 
     private static MsgAttitude fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Double dYaw = BitUtils.parseDouble(data, 8, 16, 0.0001, true);
+        Double dYaw = N2KBitUtils.parseDouble(data, 8, 16, 0.0001, true);
         double yaw = (dYaw == null) ? Double.NaN : Utils.round(Math.toDegrees(dYaw), 1);
 
-        Double dPitch = BitUtils.parseDouble(data, 24, 16, 0.0001, true);
+        Double dPitch = N2KBitUtils.parseDouble(data, 24, 16, 0.0001, true);
         double pitch = (dPitch == null) ?
                 Double.NaN :
                 Utils.round(Math.toDegrees(dPitch), 1);
 
-        Double dRoll = BitUtils.parseDouble(data, 40, 16, 0.0001, true);
+        Double dRoll = N2KBitUtils.parseDouble(data, 40, 16, 0.0001, true);
         double roll = (dRoll == null) ?
                 Double.NaN :
                 Utils.round(Math.toDegrees(dRoll), 1);

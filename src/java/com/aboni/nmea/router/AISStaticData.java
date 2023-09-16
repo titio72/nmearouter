@@ -21,7 +21,7 @@ public interface AISStaticData {
 
     String getMMSI();
 
-    String getRepeatIndicator();
+    int getRepeatIndicator();
 
     String getName();
 

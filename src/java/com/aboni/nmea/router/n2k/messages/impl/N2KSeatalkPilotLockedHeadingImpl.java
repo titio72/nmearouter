@@ -41,10 +41,10 @@ public class N2KSeatalkPilotLockedHeadingImpl extends N2KMessageImpl implements 
     }
 
     private void fill() {
-        Double d = BitUtils.parseDouble(data, 40, 16, 0.0001, false);
+        Double d = N2KBitUtils.parseDouble(data, 40, 16, 0.0001, false);
         lockedHeadingMagnetic = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
 
-        d = BitUtils.parseDouble(data, 24, 16, 0.0001, false);
+        d = N2KBitUtils.parseDouble(data, 24, 16, 0.0001, false);
         lockedHeadingTrue = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
     }
 

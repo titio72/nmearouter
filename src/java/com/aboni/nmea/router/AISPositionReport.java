@@ -25,7 +25,7 @@ public interface AISPositionReport {
 
     String getPositionAccuracy();
 
-    String getRepeatIndicator();
+    int getRepeatIndicator();
 
     boolean issRAIM();
 

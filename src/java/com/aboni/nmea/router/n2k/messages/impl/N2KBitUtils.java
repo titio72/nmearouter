@@ -17,9 +17,9 @@ package com.aboni.nmea.router.n2k.messages.impl;
 
 import java.util.Map;
 
-public class BitUtils {
+public class N2KBitUtils {
 
-    private BitUtils() {
+    private N2KBitUtils() {
     }
 
     public static int getByte(byte[] data, int ix, int def) {

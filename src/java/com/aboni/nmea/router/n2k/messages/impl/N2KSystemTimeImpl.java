@@ -47,10 +47,10 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
 
     private MsgSystemTime fill(byte[] data) {
 
-        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Long lDate = BitUtils.parseInteger(data, 16, 16);
-        Double dTime = BitUtils.parseDouble(data, 32, 32, 0.0001, false);
+        Long lDate = N2KBitUtils.parseInteger(data, 16, 16);
+        Double dTime = N2KBitUtils.parseDouble(data, 32, 32, 0.0001, false);
 
         Instant time;
         if (lDate != null && dTime != null && !dTime.isNaN()) {
@@ -60,7 +60,7 @@ public class N2KSystemTimeImpl extends N2KMessageImpl implements MsgSystemTime {
             time = null;
         }
 
-        String timeSourceType = BitUtils.parseEnum(data, 8, 0, 4, N2KLookupTables.getTable(SYSTEM_TIME));
+        String timeSourceType = N2KBitUtils.parseEnum(data, 8, 0, 4, N2KLookupTables.getTable(SYSTEM_TIME));
 
         return new MsgSystemTimeImpl(sid, timeSourceType, time);
     }

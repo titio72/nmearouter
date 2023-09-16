@@ -84,17 +84,17 @@ public class N2KSatellitesImpl extends N2KMessageImpl implements MsgSatellites {
     private static final int SIZE_OF_SAT = 96;
 
     private void fill() {
-        sid = (int) BitUtils.parseIntegerSafe(data, 0, 0, 8, 0xFF);
-        int nSat = (int) BitUtils.parseIntegerSafe(data, 16, 0, 8, 0);
+        sid = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 8, 0xFF);
+        int nSat = (int) N2KBitUtils.parseIntegerSafe(data, 16, 0, 8, 0);
 
         for (int i = 0; i < nSat; i++) {
             int offset = SIZE_OF_SAT * i + 24;
             Satellite s = new Satellite(
-                    BitUtils.getByte(data, offset / 8, 0xFF),
-                    (int) Math.toDegrees(BitUtils.parseDoubleSafe(data, 8 + offset, 16, 0.0001, false)),
-                    (int) Math.toDegrees(BitUtils.parseDoubleSafe(data, 24 + offset, 16, 0.0001, false)),
-                    (int) BitUtils.parseDoubleSafe(data, 40 + offset, 16, 0.01, false),
-                    BitUtils.getByte(data, (88 + offset) / 8, 0xFF) & 0x0F);
+                    N2KBitUtils.getByte(data, offset / 8, 0xFF),
+                    (int) Math.toDegrees(N2KBitUtils.parseDoubleSafe(data, 8 + offset, 16, 0.0001, false)),
+                    (int) Math.toDegrees(N2KBitUtils.parseDoubleSafe(data, 24 + offset, 16, 0.0001, false)),
+                    (int) N2KBitUtils.parseDoubleSafe(data, 40 + offset, 16, 0.01, false),
+                    N2KBitUtils.getByte(data, (88 + offset) / 8, 0xFF) & 0x0F);
             satellites.add(s);
         }
     }

@@ -44,15 +44,15 @@ public class N2KSOGAdCOGRapidImpl extends N2KMessageImpl implements MsgSOGAdCOG 
     }
 
     private static MsgSOGAdCOG fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Double dCog = BitUtils.parseDouble(data, 16, 16, 0.0001, false);
+        Double dCog = N2KBitUtils.parseDouble(data, 16, 16, 0.0001, false);
         double cog = dCog == null ? Double.NaN : Utils.round(Math.toDegrees(dCog), 1);
 
-        Double dSog = BitUtils.parseDouble(data, 32, 16, 0.01, false);
+        Double dSog = N2KBitUtils.parseDouble(data, 32, 16, 0.01, false);
         double sog = dSog == null ? Double.NaN : Utils.round(dSog * 3600.0 / 1852.0, 2);
 
-        String cogReference = BitUtils.parseEnum(data, 8, 0, 2, N2KLookupTables.getTable(DIRECTION_REFERENCE));
+        String cogReference = N2KBitUtils.parseEnum(data, 8, 0, 2, N2KLookupTables.getTable(DIRECTION_REFERENCE));
 
         return new MsgSOGAndCOGImpl(sid, sog, cog, cogReference);
     }

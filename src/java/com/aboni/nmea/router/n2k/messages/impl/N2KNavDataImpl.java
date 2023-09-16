@@ -111,12 +111,12 @@ public class N2KNavDataImpl extends N2KMessageImpl implements MsgNavData {
     }
 
     private void fill() {
-        navData.setSID(BitUtils.getByte(data, 0, 0xFF));
-        navData.setDTW(BitUtils.parseDoubleSafe(data, 8, 32, 0.01, false) / 1852);
-        navData.setBTWReference(DirectionReference.valueOf((int) BitUtils.parseIntegerSafe(data, 40, 0, 2, 0)));
-        navData.setPerpendicularCrossed(1 == BitUtils.parseIntegerSafe(data, 42, 2, 2, 0));
-        navData.setArrived(1 == BitUtils.parseIntegerSafe(data, 44, 4, 2, 0));
-        switch ((int) BitUtils.parseIntegerSafe(data, 46, 6, 2, 0xFF)) {
+        navData.setSID(N2KBitUtils.getByte(data, 0, 0xFF));
+        navData.setDTW(N2KBitUtils.parseDoubleSafe(data, 8, 32, 0.01, false) / 1852);
+        navData.setBTWReference(DirectionReference.valueOf((int) N2KBitUtils.parseIntegerSafe(data, 40, 0, 2, 0)));
+        navData.setPerpendicularCrossed(1 == N2KBitUtils.parseIntegerSafe(data, 42, 2, 2, 0));
+        navData.setArrived(1 == N2KBitUtils.parseIntegerSafe(data, 44, 4, 2, 0));
+        switch ((int) N2KBitUtils.parseIntegerSafe(data, 46, 6, 2, 0xFF)) {
             case 0:
                 navData.setCalculationType("Great Circle");
                 break;
@@ -126,17 +126,17 @@ public class N2KNavDataImpl extends N2KMessageImpl implements MsgNavData {
             default:
                 navData.setCalculationType("Unknown");
         }
-        navData.setBearingFromOriginToDestination(Math.toDegrees(BitUtils.parseDoubleSafe(data, 96, 16, 0.0001, false)));
-        navData.setBTW(Math.toDegrees(BitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false)));
-        navData.setOriginWaypointNo((int) BitUtils.parseIntegerSafe(data, 128, 0, 32, 0xFF));
-        navData.setDestinationWaypointNo((int) BitUtils.parseIntegerSafe(data, 160, 0, 32, 0xFF));
-        double lat = BitUtils.parseDoubleSafe(data, 192, 32, 0.0000001, true);
-        double lon = BitUtils.parseDoubleSafe(data, 224, 32, 0.0000001, true);
+        navData.setBearingFromOriginToDestination(Math.toDegrees(N2KBitUtils.parseDoubleSafe(data, 96, 16, 0.0001, false)));
+        navData.setBTW(Math.toDegrees(N2KBitUtils.parseDoubleSafe(data, 112, 16, 0.0001, false)));
+        navData.setOriginWaypointNo((int) N2KBitUtils.parseIntegerSafe(data, 128, 0, 32, 0xFF));
+        navData.setDestinationWaypointNo((int) N2KBitUtils.parseIntegerSafe(data, 160, 0, 32, 0xFF));
+        double lat = N2KBitUtils.parseDoubleSafe(data, 192, 32, 0.0000001, true);
+        double lon = N2KBitUtils.parseDoubleSafe(data, 224, 32, 0.0000001, true);
         navData.setWaypoint((Double.isNaN(lat) || Double.isNaN(lon)) ? null : new Position(lat, lon));
-        navData.setWaypointClosingVelocity(BitUtils.parseDoubleSafe(data, 256, 16, 0.01, true) * 3600.0 / 1852.0);
+        navData.setWaypointClosingVelocity(N2KBitUtils.parseDoubleSafe(data, 256, 16, 0.01, true) * 3600.0 / 1852.0);
 
-        Long lDate = BitUtils.parseInteger(data, 80, 16);
-        Double dTime = BitUtils.parseDouble(data, 48, 32, 0.0001, false);
+        Long lDate = N2KBitUtils.parseInteger(data, 80, 16);
+        Double dTime = N2KBitUtils.parseDouble(data, 48, 32, 0.0001, false);
 
         if (lDate != null && dTime != null && !dTime.isNaN()) {
             Instant i = Instant.ofEpochMilli(0);

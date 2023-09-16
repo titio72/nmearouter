@@ -40,10 +40,10 @@ public class N2KWaterDepthImpl extends N2KMessageImpl implements MsgWaterDepth {
     }
 
     private static MsgWaterDepth fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0);
-        double depth = BitUtils.parseDoubleSafe(data, 8, 32, 0.01, false);
-        double offset = BitUtils.parseDoubleSafe(data, 40, 8, 0.001, false);
-        double range = BitUtils.parseDoubleSafe(data, 56, 8, 10, false);
+        int sid = N2KBitUtils.getByte(data, 0, 0);
+        double depth = N2KBitUtils.parseDoubleSafe(data, 8, 32, 0.01, false);
+        double offset = N2KBitUtils.parseDoubleSafe(data, 40, 8, 0.001, false);
+        double range = N2KBitUtils.parseDoubleSafe(data, 56, 8, 10, false);
         return new MsgWaterDepthImpl(sid, depth, offset, range);
     }
 

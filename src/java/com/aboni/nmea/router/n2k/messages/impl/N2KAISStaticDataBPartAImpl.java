@@ -28,7 +28,7 @@ public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISSta
 
     private int messageId;
     private String sMMSI;
-    private String repeatIndicator;
+    private int repeatIndicator;
     private String name;
     private String transceiverInfo;
     private int seqId;
@@ -47,12 +47,12 @@ public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISSta
     }
 
     private void fill() {
-        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
-        name = BitUtils.getText(data, 5, 20);
-        transceiverInfo = BitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
-        seqId = (int) BitUtils.parseIntegerSafe(data, 208, 0, 8, 0xFF);
+        messageId = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = (int)N2KBitUtils.parseIntegerSafe(data, 6, 6, 2, 0);
+        sMMSI = String.format("%d", N2KBitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        name = N2KBitUtils.getText(data, 5, 20);
+        transceiverInfo = N2KBitUtils.parseEnum(data, 200, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        seqId = (int) N2KBitUtils.parseIntegerSafe(data, 208, 0, 8, 0xFF);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class N2KAISStaticDataBPartAImpl extends N2KMessageImpl implements AISSta
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         return repeatIndicator;
     }
 

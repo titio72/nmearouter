@@ -77,7 +77,7 @@ public class AISTargetsService extends JSONWebService {
             setDoubleAttribute(j, r.getGPSInfo().getCOG(), "COG");
             setDoubleAttribute(j, r.getHeading(), "heading");
             setStringAttribute(j, r.getNavStatus(), "status");
-            setStringAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
+            setIntAttribute(j, r.getRepeatIndicator(), "repeatIndicator");
             setStringAttribute(j, r.getTimestampStatus(), "timeStampStatus");
             if (r.getTimestamp() != 0xFF) j.put("timestamp", r.getTimestamp());
             if (myPos != null) {
@@ -107,6 +107,10 @@ public class AISTargetsService extends JSONWebService {
 
     private void setStringAttribute(JSONObject j, String value, String attribute) {
         if (value != null) j.put(attribute, value);
+    }
+
+    private void setIntAttribute(JSONObject j, long value, String attribute) {
+        j.put(attribute, value);
     }
 
     private Position getCurrentPosition(NMEACache cache) {

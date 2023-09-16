@@ -27,7 +27,7 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
 
     private int messageId;
     private String sMMSI;
-    private String repeatIndicator;
+    private int repeatIndicator;
     private String typeOfShip;
     private String callSign;
     private double length;
@@ -48,14 +48,14 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
     }
 
     private void fill() {
-        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
-        typeOfShip = BitUtils.parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
-        callSign = BitUtils.getText(data, 13, 7);
-        length = BitUtils.parseDoubleSafe(data, 160, 16, 0.1, false);
-        beam = BitUtils.parseDoubleSafe(data, 176, 16, 0.1, false);
-        aisTransceiverInformation = BitUtils.parseEnum(data, 264, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        messageId = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = (int)N2KBitUtils.parseIntegerSafe(data, 6, 6, 2, 0);
+        sMMSI = String.format("%d", N2KBitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        typeOfShip = N2KBitUtils.parseEnum(data, 40, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
+        callSign = N2KBitUtils.getText(data, 13, 7);
+        length = N2KBitUtils.parseDoubleSafe(data, 160, 16, 0.1, false);
+        beam = N2KBitUtils.parseDoubleSafe(data, 176, 16, 0.1, false);
+        aisTransceiverInformation = N2KBitUtils.parseEnum(data, 264, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class N2KAISStaticDataBPartBImpl extends N2KMessageImpl implements AISSta
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         return repeatIndicator;
     }
 

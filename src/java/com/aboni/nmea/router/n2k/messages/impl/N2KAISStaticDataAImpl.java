@@ -27,7 +27,7 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
 
     private int messageId;
     private String sMMSI;
-    private String repeatIndicator;
+    private int repeatIndicator;
     private int imo;
     private String callSign;
     private String name;
@@ -50,21 +50,21 @@ public class N2KAISStaticDataAImpl extends N2KMessageImpl implements AISStaticDa
     }
 
     private void fill() {
-        messageId = (int) BitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
-        repeatIndicator = BitUtils.parseEnum(data, 6, 6, 2, N2KLookupTables.getTable(REPEAT_INDICATOR));
-        sMMSI = String.format("%d", BitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
-        imo = (int) BitUtils.parseIntegerSafe(data, 40, 0, 32, 0xFFFFFF);
-        callSign = BitUtils.getText(data, 9, 7);
-        name = BitUtils.getText(data, 16, 20);
-        typeOfShip = BitUtils.parseEnum(data, 288, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
-        length = BitUtils.parseDoubleSafe(data, 296, 16, 0.1, false);
-        beam = BitUtils.parseDoubleSafe(data, 312, 16, 0.1, false);
-        aisTransceiverInformation = BitUtils.parseEnum(data, 592, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
+        messageId = (int) N2KBitUtils.parseIntegerSafe(data, 0, 0, 6, 0xFF);
+        repeatIndicator = (int)N2KBitUtils.parseIntegerSafe(data, 6, 6, 2, 0);
+        sMMSI = String.format("%d", N2KBitUtils.parseIntegerSafe(data, 8, 0, 32, 0));
+        imo = (int) N2KBitUtils.parseIntegerSafe(data, 40, 0, 32, 0xFFFFFF);
+        callSign = N2KBitUtils.getText(data, 9, 7);
+        name = N2KBitUtils.getText(data, 16, 20);
+        typeOfShip = N2KBitUtils.parseEnum(data, 288, 0, 8, N2KLookupTables.getTable(SHIP_TYPE));
+        length = N2KBitUtils.parseDoubleSafe(data, 296, 16, 0.1, false);
+        beam = N2KBitUtils.parseDoubleSafe(data, 312, 16, 0.1, false);
+        aisTransceiverInformation = N2KBitUtils.parseEnum(data, 592, 0, 5, N2KLookupTables.getTable(AIS_TRANSCEIVER));
 
     }
 
     @Override
-    public String getRepeatIndicator() {
+    public int getRepeatIndicator() {
         return repeatIndicator;
     }
 

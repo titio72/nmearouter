@@ -41,10 +41,10 @@ public class N2KSeatalkPilotWindDatumImpl extends N2KMessageImpl implements MsgS
     }
 
     private void fill() {
-        Double d = BitUtils.parseDouble(data, 16, 16, 0.0001, false);
+        Double d = N2KBitUtils.parseDouble(data, 16, 16, 0.0001, false);
         windDatum = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
 
-        d = BitUtils.parseDouble(data, 32, 16, 0.0001, false);
+        d = N2KBitUtils.parseDouble(data, 32, 16, 0.0001, false);
         rollingAverageWind = (d == null) ? Double.NaN : Utils.round(Math.toDegrees(d), 1);
     }
 

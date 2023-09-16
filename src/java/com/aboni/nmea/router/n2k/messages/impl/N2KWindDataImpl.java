@@ -41,15 +41,15 @@ public class N2KWindDataImpl extends N2KMessageImpl implements MsgWindData {
     }
 
     private static MsgWindData fill(byte[] data) {
-        int sid = BitUtils.getByte(data, 0, 0xFF);
+        int sid = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Double dSpeed = BitUtils.parseDouble(data, 8, 16, 0.01, false);
+        Double dSpeed = N2KBitUtils.parseDouble(data, 8, 16, 0.01, false);
         double speed = (dSpeed != null) ? Utils.round(dSpeed * 3600.0 / 1852.0, 2) : Double.NaN;
 
-        Double dAngleRad = BitUtils.parseDouble(data, 24, 16, 0.0001, false);
+        Double dAngleRad = N2KBitUtils.parseDouble(data, 24, 16, 0.0001, false);
         double angle = (dAngleRad != null) ? Utils.round(Math.toDegrees(dAngleRad), 1) : Double.NaN;
 
-        boolean apparent = (BitUtils.getByte(data, 5, 1) & 0x07) != 0;
+        boolean apparent = (N2KBitUtils.getByte(data, 5, 1) & 0x07) != 0;
 
         return new MsgWindDataImpl(sid, speed, angle, apparent);
     }

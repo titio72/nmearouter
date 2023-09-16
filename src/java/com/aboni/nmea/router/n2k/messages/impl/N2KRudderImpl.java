@@ -42,15 +42,15 @@ public class N2KRudderImpl extends N2KMessageImpl implements MsgRudder {
 
     private static MsgRudder fill(byte[] data) {
 
-        int instance = BitUtils.getByte(data, 0, 0xFF);
+        int instance = N2KBitUtils.getByte(data, 0, 0xFF);
 
-        Long i = BitUtils.parseInteger(data, 8, 2);
+        Long i = N2KBitUtils.parseInteger(data, 8, 2);
         int directionOrder = (i == null) ? -1 : i.intValue();
 
-        Double dAO = BitUtils.parseDouble(data, 16, 16, 0.0001, true);
+        Double dAO = N2KBitUtils.parseDouble(data, 16, 16, 0.0001, true);
         double angleOrder = dAO == null ? Double.NaN : Utils.round(Math.toDegrees(dAO), 1);
 
-        Double dP = BitUtils.parseDouble(data, 32, 16, 0.0001, true);
+        Double dP = N2KBitUtils.parseDouble(data, 32, 16, 0.0001, true);
         double position = dP == null ? Double.NaN : Utils.round(Math.toDegrees(dP), 1);
 
         return new MsgRudderImpl(instance, position, angleOrder, directionOrder);
