@@ -62,7 +62,7 @@ public class StartRouter {
         );
         ConfJSON cJ;
         try {
-            cJ = new ConfJSON();
+            cJ = new ConfJSON(Constants.ROUTER_CONF_JSON);
             LogLevelType logLevel = cJ.getLogLevel();
             configureLog(logLevel);
         } catch (Exception e) {

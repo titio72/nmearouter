@@ -41,7 +41,7 @@ public class RouterLog implements LogAdmin {
         try {
             lg.setUseParentHandlers(false);
 
-            fh = new FileHandler(Constants.LOG, 0, 1, true);
+            fh = new FileHandler(Constants.LOG, 200L * 1024L * 1024L, 5, true);
             lg.addHandler(fh);
 
             Formatter formatter = new LogFormatter();
