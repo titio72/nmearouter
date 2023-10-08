@@ -44,8 +44,8 @@
 		function loadme(res, controllerScope) {
 			var p = res.NM_per_month;
 			if (p!=null && p.length!=0) {
-				var minYear = p[0][0];
-				var maxYear = p[p.length-1][0];
+				var minYear = p[0].Y;
+				var maxYear = p[p.length-1].Y;
 				var milesPerYear = fillsYearsStats(p);
 				var monthly = fillMonthlyStats(p, minYear, maxYear);
 				controllerScope.years = milesPerYear.years;
@@ -94,7 +94,7 @@
 								beginAtZero: true
 							}
 						}]
-					}					
+					}
 				}
 			});
 		}
@@ -107,10 +107,10 @@
 			var colorLastYear = colors[maxYear-minYear-1];
 
 			values.forEach(x => {
-				if (x[0]==maxYear) {
-					dataThisYear[x[1]-1] = x[2];
-				} else if (x[0]==(maxYear-1)) {
-					dataLastYear[x[1]-1] = x[2];
+				if (x.Y==maxYear) {
+					dataThisYear[x.M-1] = x.dist;
+				} else if (x.Y==(maxYear-1)) {
+					dataLastYear[x.M-1] = x.dist;
 				}
 			});
 
@@ -170,7 +170,7 @@
 								beginAtZero: true
 							}
 						}]
-					}					
+					}
 				}
 			});
 		}
@@ -180,20 +180,25 @@
 			var y = 0;
 			var currentY;
 			values.forEach(x => {
-				if (x[0]!=y) {
+				if (x.Y!=y) {
 					currentY = {
-						"year": x[0],
-						"NM": x[2],
-						"sailTime": x[3],
-						"days": x[4]
-						
+						"year": x.Y,
+						"NM": x.dist,
+						"NMSail": x.distSail,
+						"NMMotor": x.distMotor,
+						"sailed": (x.dist==0)?0:(x.distSail/x.dist * 100),
+						"sailTime": x.hours,
+						"days": x.days
 					}
 					yearlyStats.years.push(currentY);
-					y = x[0];
+					y = x.Y;
 				} else {
-					currentY.NM += x[2];
-					currentY.sailTime += x[3];
-					currentY.days += x[4];
+					currentY.NM += x.dist;
+					currentY.NMSail += x.distSail;
+					currentY.NMMotor += x.distMotor;
+					currentY.sailTime += x.hours;
+					currentY.days += x.days;
+					currentY.sailed = (currentY.NM==0)?0:(currentY.NMSail/currentY.NM * 100);
 				}
 			});
 			return yearlyStats;
@@ -222,11 +227,11 @@
 			});*/
 
 			values.forEach(x => {
-				var m = x[1] - 1;
+				var m = x.M - 1;
 				if (m==0) {
-					mStats.months[m]["Y"+x[0]] = x[2];
+					mStats.months[m]["Y"+x.Y] = x.dist;
 				} else {
-					mStats.months[m]["Y"+x[0]] = mStats.months[m-1]["Y"+x[0]] + x[2];
+					mStats.months[m]["Y"+x.Y] = mStats.months[m-1]["Y"+x.Y] + x.dist;
 				}
 			});
 
@@ -261,7 +266,7 @@
 				{{t.year}}
 			</div>
             <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12" style="text-align: right">
-				{{t.NM | number:1}} NM
+				{{t.NM | number:1}} NM ({{t.sailed | number:1}}%)
             </div>
             <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="text-align: right">
                 {{t.sailTime | number:0}} h

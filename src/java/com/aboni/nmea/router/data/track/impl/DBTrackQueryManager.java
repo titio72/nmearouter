@@ -29,7 +29,10 @@ import java.sql.SQLException;
 
 public class DBTrackQueryManager implements TrackQueryManager {
 
-    private static final String SQL_YEAR_STATS = "select year(TS), month(TS), sum(dist*(1-anchor)), sum(dTime*(1-anchor)), count(distinct day(TS)) from track group by year(TS), month(TS)";
+    private static final String SQL_YEAR_STATS = "select year(TS), month(TS), sum(dist*(1-anchor)), sum(dTime*(1-anchor)), " +
+            "sum(dist*(1-anchor)*if(engine=0,1,0)), " +
+            "sum(dist*(1-anchor)*if(engine=1,1,0)), " +
+            "count(distinct day(TS)) from track group by year(TS), month(TS)";
     private final Log log;
 
     @Inject
@@ -48,6 +51,18 @@ public class DBTrackQueryManager implements TrackQueryManager {
         }
     }
 
+    private static JSONObject getMonthsObject(int y, int m, double dist, double distSail, double distMotor, double sailTime, double days) {
+        JSONObject res = new JSONObject();
+        res.put("Y", y);
+        res.put("M", m);
+        res.put("dist", dist);
+        res.put("distSail", distSail);
+        res.put("distMotor", distMotor);
+        res.put("hours", sailTime);
+        res.put("days", days);
+        return res;
+    }
+
     private void fillResults(ResultSet rs, JSONObject res) throws SQLException {
         JSONArray samples = new JSONArray();
         int lastM = 0;
@@ -57,24 +72,23 @@ public class DBTrackQueryManager implements TrackQueryManager {
             int m = rs.getInt(2);
             double dist = rs.getDouble(3);
             double sailTime = rs.getDouble(4);
-            double days = rs.getDouble(5);
+            double distSail = rs.getDouble(5);
+            double distMotor = rs.getDouble(6);
+            double days = rs.getDouble(7);
             if (lastY < y && lastY > 0) {
                 for (int i = lastM + 1; i <= 12; i++) {
-                    JSONArray e = new JSONArray(new Object[]{lastY, i, 0.0, 0, 0});
-                    samples.put(e);
+                    samples.put(getMonthsObject(lastY, i, 0.0, 0.0, 0.0, 0, 0));
                 }
                 lastM = 0;
             }
             lastY = y;
             if ((m - lastM) > 1) {
                 for (int i = lastM + 1; i < m; i++) {
-                    JSONArray e = new JSONArray(new Object[]{y, i, 0.0, 0, 0});
-                    samples.put(e);
+                    samples.put(getMonthsObject(lastY, i, 0.0, 0.0, 0.0, 0, 0));
                 }
             }
             lastM = m;
-            JSONArray e = new JSONArray(new Object[]{y, m, dist, sailTime / 3600, days});
-            samples.put(e);
+            samples.put(getMonthsObject(y, m, dist, distSail, distMotor, sailTime/3600, days));
         }
         res.put("NM_per_month", samples);
     }
