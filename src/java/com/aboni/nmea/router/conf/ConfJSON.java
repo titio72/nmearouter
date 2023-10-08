@@ -1,17 +1,19 @@
 package com.aboni.nmea.router.conf;
 
-import com.aboni.nmea.router.Constants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class ConfJSON {
+
+    public static final LogLevelType DEFAULT_LOG_LEVEL = LogLevelType.INFO;
 
     private static class AgentConf implements AgentConfJSON {
 
@@ -41,24 +43,30 @@ public class ConfJSON {
         }
     }
 
-    private final JSONObject conf;
+    private JSONObject conf;
 
-    public ConfJSON() throws MalformedConfigurationException {
+    public ConfJSON(String file) throws IOException {
         StringBuilder b = new StringBuilder();
-        try (FileReader reader = new FileReader(Constants.ROUTER_CONF_JSON)) {
+        try (FileReader reader = new FileReader(file)) {
             char[] bf = new char[1024];
             int bytesRead;
             while ((bytesRead = reader.read(bf)) != -1) {
                 b.append(bf, 0, bytesRead);
             }
-        } catch (Exception exception) {
-            throw new MalformedConfigurationException("Error reading router configuration", exception);
         }
-        conf = new JSONObject(b.toString());
+        init(new JSONObject(b.toString()));
+    }
+
+    public ConfJSON(StringBuffer jsonConf) {
+        init(new JSONObject(jsonConf.toString()));
+    }
+
+    private void init(JSONObject obj) {
+        conf = obj;
     }
 
     public LogLevelType getLogLevel() {
-        return conf.has("logLevel") ? LogLevelType.fromValue(conf.getString("logLevel")) : LogLevelType.INFO;
+        return conf.has("logLevel") ? LogLevelType.fromValue(conf.getString("logLevel")) : DEFAULT_LOG_LEVEL;
     }
 
     public List<String> getGPSPriority() throws MalformedConfigurationException {
