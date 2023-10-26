@@ -19,17 +19,86 @@
 </head>
 <body ng-app="nmearouter">
 	<script>
+        var year = (new Date()).getFullYear();
+	    var tripList = {};
+	    var total = {};
+        changeYear(0);
 
-	    var xmlHttp = new XMLHttpRequest();
-	    xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/trips" , false);
-	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
-	    xmlHttp.send( null );
-	    var tripList = JSON.parse(xmlHttp.responseText).trips;
-	    var total = JSON.parse(xmlHttp.responseText).total;
+        var buttons = {
+            size: "col-lg-2 col-md-2 col-sm-6 col-xs-6",
+            list: [
+                {
+                    action: "sensors",
+                    glyph: "glyphicon-equalizer",
+                    text: "Sensors"
+                }, {
+                    action: "gps",
+                    glyph: "glyphicon-flag",
+                    text: "GPS"
+                }, {
+                    action: "ais",
+                    glyph: "glyphicon-tags",
+                    text: "AIS"
+                }, {
+                    action: "map",
+                    glyph: "glyphicon-globe",
+                    text: "Map"
+                }, {
+                    action: "track",
+                    glyph: "glyphicon-map-marker",
+                    text: "Track"
+                }, {
+                    action: "stats",
+                    glyph: "glyphicon-stats",
+                    text: "Stats"
+                }, {
+                    action: "agents",
+                    glyph: "glyphicon-cog",
+                    text: "Agents"
+                }, {
+                    action: "power",
+                    glyph: "glyphicon-flash",
+                    text: "Power"
+                }, {
+                    action: "backup",
+                    glyph: "glyphicon-floppy-save",
+                    text: "Backup"
+                }, {
+                    action: "",
+                    glyph: "",
+                    text: ""
+                }, {
+                    action: "",
+                    glyph: "",
+                    text: ""
+                }, {
+                    action: "shutdown",
+                    glyph: "glyphicon-stop",
+                    text: "Shutdown"
+                }
+            ]
+        };
 
-	    app.controller("myCtrl", function($scope) {
+        function doClick(action) {
+            switch (action) {
+                case "sensors": window.open('sensors.html', '_self'); break;
+                case "gps": window.open('gps.html', '_self'); break;
+                case "ais": window.open('ais.html', '_self'); break;
+                case "map": window.open('map.html', '_self'); break;
+                case "track": window.open('track.html', '_self'); break;
+                case "stats": window.open('stats.html', '_self'); break;
+                case "agents": window.open('agents.html', '_self'); break;
+                case "power": window.open('power.html', '_self'); break;
+                case "backup": backup(); break;
+                case "shutdown": httpGetShutdown(); break;
+            }
+        }
+
+        app.controller("myCtrl", function($scope) {
 			$scope.trips = tripList
 			$scope.total = total;
+            $scope.year = year;
+            $scope.buttons = buttons;
 		});
 
 		function showAnalytics(s) {
@@ -38,96 +107,48 @@
 			var name = ss[2];
 			window.location.href = "trip.html?trip=" + trip + "&name=" + encodeURI(name);
 		}
-	</script>
 
-	<div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-		<div class="row">
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('sensors.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-equalizer" aria-hidden="true"></span><br>
-                    Sensors
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('gps.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-flag" aria-hidden="true"></span><br>
-                    GPS
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('ais.html', '_self');">
-                    <span class="glyphiconlg glyphicon glyphicon-tags" aria-hidden="true"></span><br>
-                    AIS
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('map.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-globe" aria-hidden="true"></span><br>
-                    Map
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('track.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-map-marker" aria-hidden="true"></span><br>
-                    Track
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('stats.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-stats" aria-hidden="true"></span><br>
-                    Stats
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('agents.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-cog" aria-hidden="true"></span><br>
-                    Agents
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="window.open('power.html', '_self');">
-                    <span class="glyphicon-lg glyphicon-flash" aria-hidden="true"></span><br>
-                    Power
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="backup();">
-                    <span class="glyphicon-lg glyphicon-floppy-save" aria-hidden="true"></span><br>
-                    Backup
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="">
-                    <span class="" aria-hidden="true"></span><br>
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="">
-                    <span class="" aria-hidden="true"></span><br>
-                </button>
-            </div>
-            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 ">
-                <button type="button" class="btn btn-secondary tile-button"
-                        onclick="httpGetShutdown();">
-                    <span class="glyphiconlg glyphicon glyphicon-stop" aria-hidden="true"></span><br>
-                    Shutdown
+
+        function changeYearAndRefresh(delta) {
+            changeYear(delta);
+            refresh();
+        }
+
+        function changeYear(delta) {
+            year += delta;
+            maxYear = (new Date()).getFullYear();
+            if (year>maxYear) year = maxYear;
+            var xmlHttp = new XMLHttpRequest();
+	        xmlHttp.open( "GET", "http://" + window.location.hostname + ":1112/trips?year=" + year , false);
+    	    xmlHttp.setRequestHeader('Content-Type', 'text/plain');
+	        xmlHttp.send( null );
+	        tripList = JSON.parse(xmlHttp.responseText).trips;
+	        total = JSON.parse(xmlHttp.responseText).total;
+        }
+
+        function refresh() {
+            controllerElement = document.getElementById('triplist');
+            controllerScope = angular.element(controllerElement).scope();
+            controllerScope.trips = tripList;
+            controllerScope.total = total;
+            controllerScope.year = year;
+            controllerScope.$evalAsync();
+        }
+
+    </script>
+
+	<div id="triplist" class="container-fluid" ng-controller="myCtrl">
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6" ng-repeat="b in buttons.list">
+                <button id="{{b.action}}" type="button" class="btn btn-secondary tile-button" onclick="doClick(this.id);">
+                    <span class="glyphicon-lg {{b.glyph}}" aria-hidden="true"></span><br>{{b.text}}
                 </button>
             </div>
         </div>
-		<div class="row alert alert-primary" style="margin-left: 0px; margin-right: 0px;">
+
+        <div class="row alert alert-primary" style="margin-left: 0px; margin-right: 0px;">
             <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12">
-                <strong>{{total.end}}</strong>
+                <strong><a href="" onclick="changeYearAndRefresh(-1)"><b>&lt;</b>&nbsp;</a>{{year}}<a href="" onclick="changeYearAndRefresh(1)">&nbsp;<b>&gt;</b></a></strong>
             </div>
             <div class="col-lg-3 col-md-2 col-sm-2 col-xs-12">
                 <strong>Total</strong>

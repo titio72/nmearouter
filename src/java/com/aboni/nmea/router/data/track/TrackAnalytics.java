@@ -21,7 +21,6 @@ import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +175,7 @@ public class TrackAnalytics {
             startEnd.end = l;
         }
 
-        protected static void fillRes(BestMileSpeed m, JSONObject result) {
+        static void fillRes(BestMileSpeed m, JSONObject result) {
             if (m.getMaxSpeed() > 0.0) {
                 result.put("max" + m.getTag() + "Speed", m.getMaxSpeed());
                 result.put("max" + m.getTag() + "SpeedTime0", Utils.formatISOTimestampUTC(m.getMaxSpeedT0()));

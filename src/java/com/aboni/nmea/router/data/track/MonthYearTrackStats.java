@@ -17,7 +17,7 @@ package com.aboni.nmea.router.data.track;
 
 import org.json.JSONObject;
 
-public interface TrackQueryManager {
+public interface MonthYearTrackStats {
 
     JSONObject getYearlyStats() throws TrackManagementException;
 

@@ -43,10 +43,11 @@
 
 		function loadme(res, controllerScope) {
 			var p = res.NM_per_month;
+			var q = res.NM_per_year;
 			if (p!=null && p.length!=0) {
 				var minYear = p[0].Y;
 				var maxYear = p[p.length-1].Y;
-				var milesPerYear = fillsYearsStats(p);
+				var milesPerYear = fillsYearsStats(q);
 				var monthly = fillMonthlyStats(p, minYear, maxYear);
 				controllerScope.years = milesPerYear.years;
 				loadYearBarChart(milesPerYear, minYear, maxYear);
@@ -180,7 +181,6 @@
 			var y = 0;
 			var currentY;
 			values.forEach(x => {
-				if (x.Y!=y) {
 					currentY = {
 						"year": x.Y,
 						"NM": x.dist,
@@ -191,15 +191,6 @@
 						"days": x.days
 					}
 					yearlyStats.years.push(currentY);
-					y = x.Y;
-				} else {
-					currentY.NM += x.dist;
-					currentY.NMSail += x.distSail;
-					currentY.NMMotor += x.distMotor;
-					currentY.sailTime += x.hours;
-					currentY.days += x.days;
-					currentY.sailed = (currentY.NM==0)?0:(currentY.NMSail/currentY.NM * 100);
-				}
 			});
 			return yearlyStats;
 		}

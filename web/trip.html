@@ -98,8 +98,11 @@
 
 <script type="text/javascript">
 
-  var tripId = getUrlVars()["trip"];
-  var tripName = decodeURI(getUrlVars()["name"]);
+  var trips = httpGetTrips();
+
+  var tripId = parseInt(getUrlVars()["trip"]);
+  var tripName = getTripDescription(tripId, trips); //decodeURI(getUrlVars()["name"]);
+
   var tripObject = httpGetTripAnalytics(tripId);
   var current = tripObject;
   var currentLegIx = 0;
@@ -155,6 +158,7 @@
     $scope.trip = tripObject;
     $scope.current = tripObject;
     $scope.tripName = tripName;
+    $scope.tripId = tripId;
     $scope.currentLegIx = currentLegIx;
     $scope.legLabel = "Trip";
     $scope.numberOfLegs = tripObject.legs.length;
@@ -166,6 +170,32 @@
       return $filter('number')(input * 100, decimals) + '%';
     };
   }]);
+
+  function getTripDescription() {
+    for (i = 0; i<trips.trips.length; i++) {
+      t = trips.trips[i];
+      if (t.id==tripId) return t.description;
+    }
+    return "**";
+  }
+
+  function goNextTrip() {
+    x = 999999;
+    for (i = 0; i<trips.trips.length; i++) {
+      t = trips.trips[i];
+      if (t.id>tripId && t.id<x) x = t.id;
+    }
+    if (x!=-999999) window.location.href = "trip.html?trip=" + x;
+  }
+
+  function goPrevTrip() {
+    x = -1;
+    for (i = 0; i<trips.trips.length; i++) {
+      t = trips.trips[i];
+      if (t.id<tripId && t.id>x) x = t.id;
+    }
+    if (x!=-1) window.location.href = "trip.html?trip=" + x;
+  }
 
   function getUrlVars() {
       var vars = {};
@@ -423,7 +453,7 @@
           legend: { display: false },
           scales: { xAxes: [{ type: 'time', }] }
         }
-      });    
+      });
     return _chart;
   }
 
@@ -453,7 +483,7 @@
     res = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     var sr = data[name];
     var lastT = 0;
-    
+
     for (i = 0; i<sr.length; i++) {
       var item = sr[i];
       var t = item['time'];
@@ -462,7 +492,7 @@
 
         rA = Math.min(Math.round(Math.abs(r) / 5), 9);
         if (r>=0.0) {
-          rA = 9 + rA; 
+          rA = 9 + rA;
           res[rA]++;
         } else {
           rA = 9 - rA;
@@ -846,7 +876,12 @@
                                                                       aria-hidden="true"></span></a> {{legLabel}} of
                             {{numberOfLegs}} Legs&nbsp;
                             <a href="" onclick="nextLeg();"><span class="glyphicon glyphicon-chevron-right"
-                                                                  aria-hidden="true"></span></a> "{{tripName}}"
+                                                                  aria-hidden="true"></span></a> "{{tripName}} ({{tripId}})"
+                                                                  &nbsp;&nbsp;
+                                                                  <a href="" onclick="goPrevTrip()"><span class="glyphicon glyphicon-chevron-left"
+                                                                    aria-hidden="true"></span></a>Tracks
+                                                                  <a href="" onclick="goNextTrip()"><span class="glyphicon glyphicon-chevron-right"
+                                                                    aria-hidden="true"></span></a>
                         </td>
                         <td style="text-align: right;">
                             <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"

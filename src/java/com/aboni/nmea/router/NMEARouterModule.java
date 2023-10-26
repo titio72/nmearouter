@@ -83,7 +83,7 @@ public class NMEARouterModule extends AbstractModule {
         bind(NMEAStream.class).to(NMEAStreamImpl.class);
         bind(NMEARouter.class).to(NMEARouterImpl.class).in(Singleton.class);
         bind(NMEAAgentBuilderJson.class).to(NMEAAgentBuilderJsonImpl.class);
-        bind(TrackQueryManager.class).to(DBTrackQueryManager.class);
+        bind(MonthYearTrackStats.class).to(DBMonthYearTrackStats.class);
         bind(TripManagerX.class).to(TripManagerXImpl.class).in(Singleton.class);
         bind(TrackManager.class).to(TrackManagerImpl.class);
         bind(SeriesReader.class).annotatedWith(Names.named(Constants.TAG_METEO)).to(DBMetricSeriesReader.class);
