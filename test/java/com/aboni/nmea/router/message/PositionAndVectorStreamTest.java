@@ -15,8 +15,10 @@
 
 package com.aboni.nmea.router.message;
 
-import com.aboni.nmea.router.utils.PositionGenerator;
-import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
+import com.aboni.nmea.message.MsgPositionAndVector;
+import com.aboni.nmea.router.message.PositionAndVectorStream;
+import com.aboni.nmea.router.utils.PositionBuilder;
+import com.aboni.utils.ProgrammableTimeStampProvider;
 import net.sf.marineapi.nmea.util.Position;
 import org.junit.Test;
 
@@ -36,9 +38,9 @@ public class PositionAndVectorStreamTest {
         final MsgWrapper w = new MsgWrapper();
         stream.setListener(msg -> w.pv = msg);
         tp.setTimestamp(0);
-        stream.onMessage(PositionGenerator.getMessage(270, 5.4));
+        stream.onMessage(PositionBuilder.getMessage(270, 5.4));
         tp.incrementBy(200);
-        stream.onMessage(PositionGenerator.getMessage(new Position(43.123, 10.432), tp.getNow()));
+        stream.onMessage(PositionBuilder.getMessage(new Position(43.123, 10.432), tp.getNow()));
         assertNotNull(w.pv);
         assertEquals(270, w.pv.getCOG(), 0.0001);
         assertEquals(5.4, w.pv.getSOG(), 0.0001);
@@ -51,10 +53,10 @@ public class PositionAndVectorStreamTest {
         final MsgWrapper w = new MsgWrapper();
         stream.setListener(msg -> w.pv = msg);
         tp.setTimestamp(0);
-        stream.onMessage(PositionGenerator.getMessage(270, 5.4));
+        stream.onMessage(PositionBuilder.getMessage(270, 5.4));
         // let too much time pass to consider position and speed consistent
         tp.incrementBy(1500);
-        stream.onMessage(PositionGenerator.getMessage(new Position(43.123, 10.432), tp.getNow()));
+        stream.onMessage(PositionBuilder.getMessage(new Position(43.123, 10.432), tp.getNow()));
         assertNull(w.pv);
     }
 }

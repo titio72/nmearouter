@@ -16,7 +16,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.data.track;
 
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.Pair;
+import com.aboni.data.Pair;
 import com.aboni.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;

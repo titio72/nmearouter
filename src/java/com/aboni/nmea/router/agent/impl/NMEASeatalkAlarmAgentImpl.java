@@ -3,12 +3,12 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.SeatalkAlarmsStatus;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.MsgSeatalkAlarm;
-import com.aboni.nmea.router.message.SeatalkAlarm;
-import com.aboni.nmea.router.message.SeatalkAlarmStatus;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.MsgSeatalkAlarm;
+import com.aboni.nmea.message.SeatalkAlarm;
+import com.aboni.nmea.message.SeatalkAlarmStatus;
+import com.aboni.log.Log;
+import com.aboni.data.Pair;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
@@ -52,9 +52,9 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
 
     @OnRouterMessage
     public void onMessage(RouterMessage routerMessage) {
-        if (routerMessage.getMessage() instanceof MsgSeatalkAlarm) {
+        if (routerMessage.getPayload() instanceof MsgSeatalkAlarm) {
             Instant time = Instant.ofEpochMilli(routerMessage.getTimestamp());
-            MsgSeatalkAlarm seatalkAlarm = (MsgSeatalkAlarm) routerMessage.getMessage();
+            MsgSeatalkAlarm seatalkAlarm = (MsgSeatalkAlarm) routerMessage.getPayload();
             getLog().info(() -> getLogBuilder().wO("append alarm").wV("alarm", seatalkAlarm).toString());
             synchronized (alarms) {
                 alarms.put(

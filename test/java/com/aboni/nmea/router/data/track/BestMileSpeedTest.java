@@ -15,7 +15,8 @@
 
 package com.aboni.nmea.router.data.track;
 
-import com.aboni.utils.Pair;
+import com.aboni.data.Pair;
+import com.aboni.nmea.router.data.track.BestMileSpeed;
 import org.junit.Test;
 
 import java.time.Instant;

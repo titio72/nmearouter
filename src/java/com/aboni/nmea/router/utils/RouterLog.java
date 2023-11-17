@@ -16,7 +16,8 @@
 package com.aboni.nmea.router.utils;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.LogFormatter;
+import com.aboni.log.LogAdmin;
+import com.aboni.log.LogFormatter;
 
 import java.io.IOException;
 import java.util.function.Supplier;

@@ -1,56 +1,52 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.data.track.TrackEvent;
+import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.data.track.Trip;
+import com.aboni.nmea.router.data.track.TripManagerException;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
-import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.DBHelper;
-import com.aboni.nmea.router.utils.db.Event;
+import com.aboni.sensors.EngineStatus;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
 public class TripManagerXImplTest {
 
-    TripManagerXImpl tm;
-    MockDBEventWriter trackWriter;
-    MockDBEventWriter tripWriter;
+    private TripManagerXImpl tm;
 
-    private class MockDBEventWriter implements DBEventWriter {
+    private int last_trip = -1;
+    private int first_trip = -1;
+    private int a_trip = -1;
 
-        Event e;
-
-        @Override
-        public void write(Event e, Connection c) throws SQLException {
-            this.e = e;
-        }
-
-        @Override
-        public void reset() {
-        }
-    }
+    private int no_trip = -1;
 
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
         TrackTestTableManager.addTestData();
-        trackWriter = new MockDBEventWriter();
-        tripWriter = new MockDBEventWriter();
+        first_trip = (int) TrackTestTableManager.testTrips[0][0];
+        a_trip = (int) TrackTestTableManager.testTrips[TrackTestTableManager.testTrips.length-2][0];
+        last_trip = (int) TrackTestTableManager.testTrips[TrackTestTableManager.testTrips.length-1][0];
+        no_trip = last_trip + 1; // non existent trip
         tm = new TripManagerXImpl(ConsoleLog.getLogger(), "trip_test", "track_test");
         tm.init();
     }
@@ -83,34 +79,34 @@ public class TripManagerXImplTest {
 
     @Test
     public void testGetTripById() throws TripManagerException {
-        Trip t = tm.getTrip(136);
-        Trip test = TrackTestTableManager.getTrip(136);
+        Trip t = tm.getTrip(last_trip);
+        Trip test = TrackTestTableManager.getTrip(last_trip);
         assertTrips(test, t);
     }
 
     @Test
     public void testGetTripById_notFound() throws TripManagerException {
-        Trip t = tm.getTrip(999);
+        Trip t = tm.getTrip(no_trip);
         assertNull(t);
     }
 
     @Test
     public void testGetTripByTimeExactStart() throws TripManagerException {
-        Trip test = TrackTestTableManager.getTrip(135);
+        Trip test = TrackTestTableManager.getTrip(a_trip);
         Trip t = tm.getTrip(test.getStartTS());
         assertTrips(test, t);
     }
 
     @Test
     public void testGetTripByTimeExactEnd() throws TripManagerException {
-        Trip test = TrackTestTableManager.getTrip(135);
+        Trip test = TrackTestTableManager.getTrip(a_trip);
         Trip t = tm.getTrip(test.getEndTS());
         assertTrips(test, t);
     }
 
     @Test
     public void testGetTripByTimeMidOfaTrip() throws TripManagerException {
-        Trip test = TrackTestTableManager.getTrip(135);
+        Trip test = TrackTestTableManager.getTrip(a_trip);
         Instant midOfTheTrip = Instant.ofEpochMilli((test.getEndTS().toEpochMilli() + test.getEndTS().toEpochMilli()) / 2);
         Trip t = tm.getTrip(midOfTheTrip);
         assertTrips(test, t);
@@ -139,7 +135,7 @@ public class TripManagerXImplTest {
 
     @Test
     public void testGetCurrentTrip() {
-        Trip t = TrackTestTableManager.getTrip(136);
+        Trip t = TrackTestTableManager.getTrip(last_trip);
         Instant timestamp = t.getEndTS().plusSeconds(30 * 60 /*30 minutes since last trip end time*/);
         Trip current = tm.getCurrentTrip(timestamp);
         assertNotNull(t);
@@ -148,7 +144,7 @@ public class TripManagerXImplTest {
 
     @Test
     public void testGetCurrentTripNone() {
-        Trip t = TrackTestTableManager.getTrip(136);
+        Trip t = TrackTestTableManager.getTrip(last_trip);
         Instant timestamp = t.getEndTS().plusSeconds(6 * 60 * 60 /*6 hours since last trip end time - too much time*/);
         Trip current = tm.getCurrentTrip(timestamp);
         assertNull(current);
@@ -156,8 +152,8 @@ public class TripManagerXImplTest {
 
     @Test
     public void testChangeDescription() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
-        tm.setTripDescription(136, "Capraia 1");
-        assertEquals("Capraia 1", tm.getTrip(136).getTripDescription());
+        tm.setTripDescription(last_trip, "Capraia 1");
+        assertEquals("Capraia 1", tm.getTrip(last_trip).getTripDescription());
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 rs.next();
@@ -168,10 +164,10 @@ public class TripManagerXImplTest {
 
     @Test
     public void testChangeDistance() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
-        tm.updateTripDistance(135, 91.2);
-        assertEquals(91.2, tm.getTrip(135).getDistance(), 0.0001);
+        tm.updateTripDistance(a_trip, 91.2);
+        assertEquals(91.2, tm.getTrip(a_trip).getDistance(), 0.0001);
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
-            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, dist from trip_test where id=135")) {
+            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, dist from trip_test where id=" + a_trip)) {
                 rs.next();
                 assertEquals(91.2, rs.getDouble("dist"), 0.0001);
             }
@@ -181,7 +177,7 @@ public class TripManagerXImplTest {
     @Test
     public void testChangeDescriptionNonExisting() {
         try {
-            tm.setTripDescription(137, "does not exists");
+            tm.setTripDescription(no_trip, "does not exists");
             fail();
         } catch (TripManagerException e) {
         }
@@ -190,11 +186,11 @@ public class TripManagerXImplTest {
 
     @Test
     public void testDelete() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
-        tm.deleteTrip(136);
+        tm.deleteTrip(last_trip);
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 assertFalse(rs.next());
-                assertNull(tm.getTrip(136));
+                assertNull(tm.getTrip(last_trip));
             }
         }
     }
@@ -202,57 +198,77 @@ public class TripManagerXImplTest {
     @Test
     public void testDeleteNonExisting() {
         try {
-            tm.deleteTrip(137);
+            tm.deleteTrip(no_trip);
             fail();
         } catch (TripManagerException e) {
         }
     }
 
     @Test
-    public void testOnTrackPointNewTrip() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
+    public void testStartNewTrip() throws Exception {
         Instant t = Instant.ofEpochMilli(System.currentTimeMillis());
         TrackPoint p = new TrackPointBuilderImpl().
                 withPosition(new GeoPositionT(t.toEpochMilli(), 43.6484500, 10.2660330)).
-                withPeriod(30).withSpeed(5.79, 7.1).withDistance(0.04826200).getPoint();
+                withPeriod(30).withSpeed(5.79, 7.1).withDistance(0.04826200).withEngine(EngineStatus.ON).getPoint();
         tm.onTrackPoint(new TrackEvent(p));
         Trip trip = tm.getCurrentTrip(t);
         assertNotNull(trip);
         assertEquals(t, trip.getStartTS());
+        assertEquals(t, trip.getEndTS());
         assertEquals(0.04826200, trip.getDistance(), 0.00001);
+        assertEquals(0.00000000, trip.getDistanceSail(), 0.00001);
+        assertEquals(0.04826200, trip.getDistanceMotor(), 0.00001);
+        checkDB(trip);
+    }
+
+    private void checkDB(Trip t) throws Exception {
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
-            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=" + trip.getTrip())) {
+            try (ResultSet rs = db.getConnection().createStatement().executeQuery("select * from trip_test where id=" + t.getTrip())) {
                 assertTrue(rs.next());
+                assertEquals(roundSecond(t.getStartTS()), rs.getTimestamp("fromTS", Calendar.getInstance(TimeZone.getTimeZone("UTC"))).toInstant());
+                assertEquals(roundSecond(t.getEndTS()), rs.getTimestamp("toTS", Calendar.getInstance(TimeZone.getTimeZone("UTC"))).toInstant());
+                assertEquals(t.getDistance(), rs.getDouble("dist"), 0.00001);
+                assertEquals(t.getDistanceSail(), rs.getDouble("distSail"), 0.00001);
+                assertEquals(t.getDistanceMotor(), rs.getDouble("distMotor"), 0.00001);
             }
         }
     }
 
-    @Test
-    public void testOnTrackPointAddToTrip() throws TripManagerException, ClassNotFoundException, SQLException {
-        Trip testTrip = TrackTestTableManager.getTrip(136);
-        System.out.println(testTrip.getEndTS());
-        Instant t = testTrip.getEndTS().plusSeconds(30);
+    private static Instant roundSecond(Instant t) {
+        // have to do it because apparently MySQL truncate the millisecond part...
+        return Instant.ofEpochMilli((t.toEpochMilli()/1000)*1000);
+    }
 
+    @Test
+    public void testOnTrackPointAddToTrip() throws Exception {
+        Trip testTrip = TrackTestTableManager.getTrip(last_trip);
+        Instant t = testTrip.getEndTS().plusSeconds(30); // simulate a point 30 seconds from the end of the lsat trip
         TrackPoint p = new TrackPointBuilderImpl().
                 withPosition(new GeoPositionT(t.toEpochMilli(), 43.6484500, 10.2660330)).
-                withPeriod(30).withSpeed(5.79, 7.1).withDistance(0.04826200).getPoint();
-        tm.onTrackPoint(new TrackEvent(p));
+                withPeriod(30).withSpeed(5.79, 7.1).withDistance(0.04826200).withEngine(EngineStatus.ON).getPoint();
+        tm.onTrackPoint(new TrackEvent(p)); // make 0.04826200 with engine on
         Trip trip = tm.getCurrentTrip(t);
         assertNotNull(trip);
-        assertEquals(136, trip.getTrip());
+        assertEquals(last_trip, trip.getTrip());
         assertEquals(testTrip.getDistance() + 0.04826200, trip.getDistance(), 0.00001);
-        assertEquals(t, trip.getEndTS());
-        assertEquals(136, ((TripEvent) (tripWriter.e)).getTrip().getTrip());
+        assertEquals(testTrip.getDistanceMotor() + 0.04826200, trip.getDistanceMotor(), 0.00001);
+        assertEquals(testTrip.getDistanceSail(), trip.getDistanceSail(), 0.00001);
+        assertEquals(trip.getEndTS(), t);
+        checkDB(trip);
     }
 
     @Test
     public void testList() throws TripManagerException {
         List<Trip> l = tm.getTrips(false);
-        assertEquals(8, l.size());
+        assertEquals(TrackTestTableManager.testTrips.length, l.size());
     }
 
     @Test
     public void testListPerYear() throws TripManagerException {
-        List<Trip> l = tm.getTrips(2019, false);
-        assertEquals(2, l.size());
+        List<Trip> l = tm.getTrips(2020, false);
+        assertEquals(TrackTestTableManager.testTrips.length, l.size());
+
+        l = tm.getTrips(2019, false);
+        assertEquals(0, l.size());
     }
 }

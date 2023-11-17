@@ -15,11 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services.impl;
 
-import com.aboni.nmea.router.services.QueryFactory;
-import com.aboni.nmea.router.services.ServiceConfig;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.data.QueryById;
+import com.aboni.nmea.router.services.QueryFactory;
+import com.aboni.nmea.router.services.ServiceConfig;
 
 import javax.inject.Inject;
 import java.time.Instant;

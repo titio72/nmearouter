@@ -17,14 +17,18 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.message.MsgAttitude;
-import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.message.impl.MsgAttitudeImpl;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.message.MsgAttitude;
+import com.aboni.nmea.message.MsgHeading;
+import com.aboni.nmea.message.impl.MsgAttitudeImpl;
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.*;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -195,10 +199,10 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     @OnRouterMessage
     public void onMessage(RouterMessage s) {
         if (HWSettings.getPropertyAsInteger("compass.dump", 0) > 0 &&
-                s.getMessage() instanceof MsgHeading &&
+                s.getPayload() instanceof MsgHeading &&
                 compassSensor != null) {
             try {
-                double headingBoat = ((MsgHeading) s.getMessage()).getHeading();
+                double headingBoat = ((MsgHeading) s.getPayload()).getHeading();
                 double headingSens = compassSensor.getUnfilteredSensorHeading();
                 dump(headingSens, headingBoat);
             } catch (Exception e) {

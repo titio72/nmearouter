@@ -16,11 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.data.DataManagementException;
+import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.data.Query;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 
 import javax.inject.Inject;
 

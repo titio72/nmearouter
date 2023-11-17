@@ -1,6 +1,6 @@
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.utils.Pair;
+import com.aboni.data.Pair;
 import org.json.JSONObject;
 
 public class JSONFilterUtils {

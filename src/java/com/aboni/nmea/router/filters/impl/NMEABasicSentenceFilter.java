@@ -1,9 +1,9 @@
 package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
 import com.aboni.utils.JSONUtils;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
@@ -80,9 +80,9 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
     @Override
     public boolean match(RouterMessage m) {
         if (m.getPayload() instanceof N2KMessage) {
-            return matchN2K((N2KMessage) m.getMessage(), m.getSource());
+            return matchN2K((N2KMessage) m.getPayload(), m.getAgentSource());
         } else if (m.getPayload() instanceof NMEA0183Message) {
-            return match(((NMEA0183Message) m.getMessage()).getSentence(), m.getSource());
+            return match(((NMEA0183Message) m.getPayload()).getSentence(), m.getAgentSource());
         } else {
             return true;
         }

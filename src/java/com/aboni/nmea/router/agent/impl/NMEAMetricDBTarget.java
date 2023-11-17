@@ -15,15 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.data.Sampler;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.impl.TimerFilterAnchorAdaptive;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
+import com.aboni.nmea.message.*;
 import com.aboni.nmea.router.data.metrics.Metrics;
-import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
@@ -34,7 +38,7 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
     public static final long ONE_MINUTE = 60000L;
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
 
-    private final Sampler metricSampler;
+    private final Sampler<Message> metricSampler;
 
     @Inject
     public NMEAMetricDBTarget(Log log, NMEACache cache, TimestampProvider tp, @Named(Constants.TAG_METEO) StatsWriter w) {
@@ -118,6 +122,6 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentence(RouterMessage msg) {
-        metricSampler.onSentence(msg);
+        metricSampler.doSampling(msg.getPayload(), msg.getTimestamp());
     }
 }

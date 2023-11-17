@@ -15,14 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.NMEATrafficStats;
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.router.NMEATrafficStats;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.message.Message;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.nmea.router.message.SpeedAndHeadingStream;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
+import com.aboni.log.Log;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
@@ -49,9 +50,9 @@ public class NMEAUDPReceiver extends NMEAAgentImpl {
     private String description;
 
     @Inject
-    public NMEAUDPReceiver(Log log, TimestampProvider tp) {
+    public NMEAUDPReceiver(Log log, TimestampProvider tp, NMEA0183MessageFactory messageFactory) {
         super(log, tp, true, false);
-        input = new NMEAInputManager(log);
+        input = new NMEAInputManager(log, messageFactory);
         positionAndVectorStream = new PositionAndVectorStream(tp);
         positionAndVectorStream.setListener(this::postMessage);
         speedAndHeadingStream = new SpeedAndHeadingStream(tp);

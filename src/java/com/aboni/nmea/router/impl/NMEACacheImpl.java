@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.*;
 import com.aboni.nmea.router.data.DataEvent;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.nmea.message.*;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
 
 import javax.inject.Inject;
 import java.util.HashMap;

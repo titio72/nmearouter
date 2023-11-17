@@ -17,8 +17,8 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.RMCSentence;

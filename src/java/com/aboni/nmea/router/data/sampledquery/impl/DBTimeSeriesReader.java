@@ -21,8 +21,8 @@ import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryConf;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
 import com.aboni.nmea.router.data.sampledquery.TimeSeriesReader;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 

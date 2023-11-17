@@ -16,11 +16,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouterStatuses;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.message.MsgPositionAndVector;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.message.MsgPositionAndVector;
-import com.aboni.nmea.router.utils.Log;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
@@ -49,11 +53,6 @@ public class NMEATrackAgent extends NMEAAgentImpl {
         this.pointBuilder = pointBuilder;
     }
 
-    @Override
-    protected boolean onActivate() {
-        return true;
-    }
-
     /**
      * Set the sampling time in ms.
      * @param period Period in milliseconds
@@ -73,8 +72,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onRouterMessage(RouterMessage msg) {
-        if (isStarted() && msg.getMessage() instanceof MsgPositionAndVector) {
-            onPosition((MsgPositionAndVector) msg.getMessage());
+        if (isStarted() && msg.getPayload() instanceof MsgPositionAndVector) {
+            onPosition((MsgPositionAndVector) msg.getPayload());
         }
     }
 

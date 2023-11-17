@@ -18,9 +18,9 @@ package com.aboni.nmea.router.impl;
 import com.aboni.nmea.router.ListenerWrapper;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class NMEAStreamImpl implements NMEAStream {
                 for (ListenerWrapper i : annotatedListeners.values()) {
                     if (checker.isValid(i.getListenerObject())) {
                         try {
-                            i.dispatchAll(message);
+                            i.dispatch(message);
                         } catch (Exception e) {
                             log.warning(LogStringBuilder.start("Stream").wO("push message").toString(), e);
                         }

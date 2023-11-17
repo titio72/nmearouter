@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.NetConf;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.nmea0183.Message2NMEA0183;
+import com.aboni.log.Log;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
@@ -141,7 +141,7 @@ public class NMEASocketClient extends NMEAAgentImpl {
     public void onMessage(RouterMessage rm) {
         try {
             if (socket != null && transmit) {
-                Sentence[] s = converter.convert(rm.getMessage());
+                Sentence[] s = converter.convert(rm.getPayload());
                 if (s!=null) {
                     for (Sentence sentence: s) {
                         socket.getOutputStream().write(sentence.toSentence().getBytes());

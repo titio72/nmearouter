@@ -15,12 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.RouterMessageFactory;
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.filters.impl.NMEASpeedFilter;
 import com.aboni.nmea.router.processors.*;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.ThingsFactory;
 
 import java.util.ArrayList;

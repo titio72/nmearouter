@@ -15,9 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
 import org.json.JSONObject;
 
 import java.io.IOException;

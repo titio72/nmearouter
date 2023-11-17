@@ -15,17 +15,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.*;
-import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
+import com.aboni.nmea.message.*;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
-import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.Pair;
+import com.aboni.log.Log;
+import com.aboni.data.Pair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProvider {
 
-    private final Sampler meteoSampler;
+    private final Sampler<Message> meteoSampler;
     private static final TemperatureSource AIR_TEMPERATURE_SOURCE = TemperatureSource.MAIN_CABIN_ROOM;
     private static final int SAMPLING_FACTOR = 60; // every 60 timers dumps
     private int timerCount;
@@ -136,7 +136,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         super(log, tp, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.statsWriter = new MemoryStatsWriter();
-        this.meteoSampler = new Sampler(log, tp, statsWriter, "MeteoMonitor");
+        this.meteoSampler = new Sampler<Message>(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
 
         initMetricX(Metrics.PRESSURE,
@@ -180,8 +180,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
     }
 
     private void initMetricX(Metric metric,
-                             Sampler.MessageFilter filter,
-                             Sampler.MessageValueExtractor valueExtractor,
+                             Sampler.MessageFilter<Message> filter,
+                             Sampler.MessageValueExtractor<Message> valueExtractor,
                              double min, double max) {
         meteoSampler.initMetric(metric, filter, valueExtractor, 60000L, metric.getId(), min, max);
     }
@@ -230,7 +230,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
 
     @OnRouterMessage
     public void onSentence(RouterMessage msg) {
-        meteoSampler.onSentence(msg);
+        meteoSampler.doSampling(msg.getPayload(), msg.getTimestamp());
     }
 
     @Override

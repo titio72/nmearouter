@@ -15,7 +15,8 @@
 
 package com.aboni.nmea.router.utils;
 
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;

@@ -1,15 +1,18 @@
 package com.aboni.nmea.router.services.impl;
 
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.agent.*;
+import com.aboni.nmea.router.agent.AgentActivationMode;
+import com.aboni.nmea.router.agent.AgentPersistentStatus;
+import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
+import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.impl.AgentPersistentStatusImpl;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.DefaultTimestampProvider;
+import com.aboni.log.NullLog;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.filters.DummyFilter;
-import com.aboni.nmea.router.impl.DefaultTimestampProvider;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.NullLog;
+import com.aboni.log.Log;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +38,7 @@ public class JSONAgentListSerializerTest {
         }
     }
 
-    private class MyAgentPersistentStatusManager implements AgentPersistentStatusManager {
+    private static class MyAgentPersistentStatusManager implements AgentPersistentStatusManager {
 
         @Override
         public AgentPersistentStatus getPersistentStatus(String agent) {

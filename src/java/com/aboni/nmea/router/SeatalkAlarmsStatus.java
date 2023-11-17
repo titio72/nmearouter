@@ -1,8 +1,8 @@
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.MsgSeatalkAlarm;
-import com.aboni.nmea.router.message.SeatalkAlarm;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.MsgSeatalkAlarm;
+import com.aboni.nmea.message.SeatalkAlarm;
+import com.aboni.data.Pair;
 
 import java.time.Instant;
 import java.util.List;

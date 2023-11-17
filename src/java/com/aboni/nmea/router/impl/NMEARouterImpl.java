@@ -15,18 +15,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.*;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.processors.NMEAPostProcess;
-import com.aboni.nmea.router.processors.NMEAProcessorSet;
-import com.aboni.nmea.router.processors.NMEARouterProcessorException;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.MyThreadPool;
-import com.aboni.utils.Utils;
+import com.aboni.nmea.message.Message;
+import com.aboni.utils.*;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -45,7 +44,6 @@ public class NMEARouterImpl implements NMEARouter {
 
     private final Map<String, NMEAAgent> agents;
     private final BlockingQueue<RouterMessage> sentenceQueue;
-    private final NMEAProcessorSet processors;
     private final NMEACache cache;
     private final TimestampProvider timestampProvider;
     private final RouterMessageFactory messageFactory;
@@ -130,7 +128,6 @@ public class NMEARouterImpl implements NMEARouter {
         this.cache = cache;
         this.timestampProvider = tp;
         sentenceQueue = new LinkedBlockingQueue<>();
-        processors = new NMEAProcessorSet();
         started = new AtomicBoolean(false);
         threadPool = new MyThreadPool(THREADS_POOL, -1);
         threadPool.start();
@@ -206,7 +203,7 @@ public class NMEARouterImpl implements NMEARouter {
                 }
                 while (started.get()) {
                     try {
-                        routeSentence(sentenceQueue.take());
+                        routeMessage(sentenceQueue.take());
                     } catch (InterruptedException e1) {
                         log.error(() -> LogStringBuilder.start(ROUTER_CATEGORY).wO("route loop").toString(), e1);
                         Thread.currentThread().interrupt();
@@ -233,11 +230,6 @@ public class NMEARouterImpl implements NMEARouter {
     @Override
     public boolean isStarted() {
         return started.get();
-    }
-
-    @Override
-    public void addProcessor(NMEAPostProcess processor) {
-        processors.addProcessor(processor);
     }
 
     @Override
@@ -275,34 +267,17 @@ public class NMEARouterImpl implements NMEARouter {
         }
     }
 
-    private void routeSentence(RouterMessage m) {
+    private void routeMessage(RouterMessage routerMessage) {
         if (started.get()) {
-            if (m.getPayload() instanceof JSONObject) {
-                dispatchToTargets(new RouterMessage[] {m});
-            } else if (m.getPayload() instanceof Message) {
-                Message s = (Message) m.getPayload();
-                Collection<Message> toSend = null;
-                try {
-                    toSend = processors.getSentences(s, m.getSource());
-                } catch (NMEARouterProcessorException e) {
-                    log.error(LogStringBuilder.start(ROUTER_CATEGORY).wO("route message").wV("message", m.getPayload()).toString(), e);
-                }
-                if (toSend != null) {
-                    final RouterMessage[] messages = new RouterMessage[toSend.size()];
-                    int counter = 0;
-                    for (Message ss : toSend) {
-                        cache.onSentence(ss, m.getSource());
-                        RouterMessage mm = messageFactory.createMessage(ss, m.getSource(), m.getTimestamp());
-                        messages[counter] = mm;
-                        counter++;
-                    }
-                    dispatchToTargets(messages);
-                }
+            if (routerMessage.getPayload() instanceof Message) {
+                Message s = (Message) routerMessage.getPayload();
+                cache.onSentence(s, routerMessage.getAgentSource());
             }
+            dispatchToTargets(routerMessage);
         }
     }
 
-    private void dispatchToTargets(final RouterMessage[] mm) {
+    private void dispatchToTargets(final RouterMessage mm) {
         synchronized (agents) {
             stats.onDispatchedMessage();
             for (NMEAAgent nmeaAgent : agents.values()) {
@@ -312,10 +287,8 @@ public class NMEARouterImpl implements NMEARouter {
                         final String name = nmeaAgent.getName();
                         if (target != null) {
                             runMe(() -> {
-                                for (RouterMessage m : mm) {
-                                    dispatchToTarget(name, target, m);
-                                }
-                            }, "dispatch message", "messages", "" + mm.length);
+                                    dispatchToTarget(name, target, mm);
+                            }, "dispatch message", "messages", "" + 1);
                         }
                     }
                 } catch (Exception e) {
@@ -326,7 +299,7 @@ public class NMEARouterImpl implements NMEARouter {
     }
 
     private void dispatchToTarget(String targetName, NMEATarget targetInterface, RouterMessage m) {
-        if (!m.getSource().equals(targetName)) {
+        if (!m.getAgentSource().equals(targetName)) {
             try {
                 targetInterface.pushMessage(m);
             } catch (Exception e) {

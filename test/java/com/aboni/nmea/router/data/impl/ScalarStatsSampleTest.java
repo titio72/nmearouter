@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.data.impl;
 
+import com.aboni.nmea.router.data.impl.ScalarStatsSample;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +27,7 @@ public class ScalarStatsSampleTest {
     @Test
     public void testEmpty() {
         ScalarStatsSample sample = new ScalarStatsSample("TW_");
-        assertEquals(0, sample.getSamples());
+        Assert.assertEquals(0, sample.getSamples());
         assertTrue(Double.isNaN(sample.getValue()));
         assertTrue(Double.isNaN(sample.getMaxValue()));
         assertTrue(Double.isNaN(sample.getMinValue()));
@@ -37,12 +39,12 @@ public class ScalarStatsSampleTest {
         ScalarStatsSample sample = new ScalarStatsSample("TW_");
         sample.add(8.0, t0);
 
-        assertEquals(1, sample.getSamples());
-        assertEquals(8.0, sample.getValue(), 0.001);
-        assertEquals(8.0, sample.getMinValue(), 0.001);
-        assertEquals(8.0, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0, sample.getT1());
+        Assert.assertEquals(1, sample.getSamples());
+        Assert.assertEquals(8.0, sample.getValue(), 0.001);
+        Assert.assertEquals(8.0, sample.getMinValue(), 0.001);
+        Assert.assertEquals(8.0, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0, sample.getT1());
     }
 
     @Test
@@ -51,12 +53,12 @@ public class ScalarStatsSampleTest {
         ScalarStatsSample sample = new ScalarStatsSample("TW_");
         sample.add(12.0, 8.0, 6.0, t0);
 
-        assertEquals(1, sample.getSamples());
-        assertEquals(8.0, sample.getValue(), 0.001);
-        assertEquals(6.0, sample.getMinValue(), 0.001);
-        assertEquals(12.0, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0, sample.getT1());
+        Assert.assertEquals(1, sample.getSamples());
+        Assert.assertEquals(8.0, sample.getValue(), 0.001);
+        Assert.assertEquals(6.0, sample.getMinValue(), 0.001);
+        Assert.assertEquals(12.0, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0, sample.getT1());
     }
     @Test
     public void testMultipleSamples() {
@@ -66,11 +68,11 @@ public class ScalarStatsSampleTest {
         sample.add(12.0, t0 + 1000);
         sample.add(13.0, t0 + 2000);
 
-        assertEquals(3, sample.getSamples());
-        assertEquals(12, sample.getValue(), 0.001);
-        assertEquals(11, sample.getMinValue(), 0.001);
-        assertEquals(13, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0 + 2000, sample.getT1());
+        Assert.assertEquals(3, sample.getSamples());
+        Assert.assertEquals(12, sample.getValue(), 0.001);
+        Assert.assertEquals(11, sample.getMinValue(), 0.001);
+        Assert.assertEquals(13, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0 + 2000, sample.getT1());
     }
 }

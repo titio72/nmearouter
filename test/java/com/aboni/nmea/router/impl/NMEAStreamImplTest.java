@@ -15,10 +15,12 @@
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.message.Message;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.log.ConsoleLog;
+import com.aboni.nmea.router.impl.NMEAStreamImpl;
+import com.aboni.nmea.router.impl.RouterMessageImpl;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -58,7 +60,7 @@ public class NMEAStreamImplTest {
 
     @Test
     public void test1Obs() {
-        RouterMessage mSend = new RouterMessageImpl<Message>(new MyMessage(), "TEST", 0);
+        RouterMessage mSend = new RouterMessageImpl(new MyMessage(), "TEST", 0);
         NMEAStreamImpl s = new NMEAStreamImpl(ConsoleLog.getLogger());
         MyObserver obs = new MyObserver();
         s.subscribe(obs);
@@ -69,7 +71,7 @@ public class NMEAStreamImplTest {
 
     @Test
     public void test2Obs() {
-        RouterMessage mSend = new RouterMessageImpl<Message>(new MyMessage(), "TEST", 0);
+        RouterMessage mSend = new RouterMessageImpl(new MyMessage(), "TEST", 0);
         NMEAStreamImpl s = new NMEAStreamImpl(ConsoleLog.getLogger());
         MyObserver obs1 = new MyObserver();
         MyObserver obs2 = new MyObserver();
@@ -85,7 +87,7 @@ public class NMEAStreamImplTest {
 
     @Test
     public void testDropErrObs() {
-        RouterMessage mSend = new RouterMessageImpl<Message>(new MyMessage(), "TEST", 0);
+        RouterMessage mSend = new RouterMessageImpl(new MyMessage(), "TEST", 0);
         NMEAStreamImpl s = new NMEAStreamImpl(ConsoleLog.getLogger());
         MyObserver obs1 = new MyObserver();
         MyObserver obs2 = new MyObserver();

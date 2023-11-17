@@ -15,18 +15,18 @@
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.message.PilotMode;
+import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.PilotMode;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageHandler;
-import com.aboni.nmea.router.n2k.N2KMessageHeader;
-import com.aboni.nmea.router.n2k.evo.EVO;
-import com.aboni.nmea.router.n2k.evo.EVOImpl;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.nmea.n2k.N2KMessageHeader;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.n2k.N2KMessageHandler;
+import com.aboni.nmea.n2k.evo.EVO;
+import com.aboni.nmea.n2k.evo.EVOImpl;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
@@ -51,7 +51,7 @@ public class EvoAPDriver implements AutoPilotDriver {
 
         public double getValue(long now) {
             if (Utils.isOlderThan(requestTime, now, 500)) {
-                if (evoAutoPilotStatus.getMode()==PilotMode.AUTO) return evoAutoPilotStatus.getApLockedHeading();
+                if (evoAutoPilotStatus.getMode()== PilotMode.AUTO) return evoAutoPilotStatus.getApLockedHeading();
                 else if (evoAutoPilotStatus.getMode()==PilotMode.VANE) return evoAutoPilotStatus.getApWindDatum();
                 else return Double.NaN;
             } else {

@@ -31,7 +31,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.utils;
 
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;

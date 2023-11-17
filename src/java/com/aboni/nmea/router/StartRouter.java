@@ -15,14 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.conf.LogLevelType;
-import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.nmea.router.utils.LogAdmin;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
+import com.aboni.log.ConsoleLog;
+import com.aboni.log.LogAdmin;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -54,7 +55,7 @@ public class StartRouter {
         if (args==null) {
             args = new String[] {"no_app"};
         }
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         logAdmin = ThingsFactory.getInstance(LogAdmin.class);
         Thread.setDefaultUncaughtExceptionHandler(

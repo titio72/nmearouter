@@ -2,8 +2,7 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.track.TrackEvent;
-import com.aboni.nmea.router.utils.db.Event;
-import com.aboni.utils.Pair;
+import com.aboni.data.Pair;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;

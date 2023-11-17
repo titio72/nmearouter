@@ -16,14 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router;
 
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.processors.NMEAPostProcess;
 import com.aboni.utils.Startable;
 
 import java.util.Collection;
 
 public interface NMEARouter extends Startable {
-
-    void addProcessor(NMEAPostProcess p);
 
     void addAgent(NMEAAgent source);
 

@@ -17,10 +17,10 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
 import com.aboni.nmea.sentences.NMEASentenceItem;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -60,15 +60,15 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentence(RouterMessage rm) {
-        if (rm.getMessage() instanceof NMEA0183Message) {
-            NMEASentenceItem e = new NMEASentenceItem(((NMEA0183Message) rm.getMessage()).getSentence(), getTimestampProvider().getNow(), "  ");
+        if (rm.getPayload() instanceof NMEA0183Message) {
+            NMEASentenceItem e = new NMEASentenceItem(((NMEA0183Message) rm.getPayload()).getSentence(), getTimestampProvider().getNow(), "  ");
             synchronized (queue) {
                 if (isStarted()) {
                     queue.add(e);
                     try {
                         dump();
                     } catch (IOException e1) {
-                        getLog().error(() -> getLogBuilder().wO("dump sentence").wV("sentence", rm.getMessage()).toString(), e1);
+                        getLog().error(() -> getLogBuilder().wO("dump sentence").wV("sentence", rm.getPayload()).toString(), e1);
                     }
                 }
             }

@@ -1,8 +1,8 @@
 package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.n2k.N2KMessage;
 import com.aboni.utils.JSONUtils;
 import org.json.JSONObject;
 
@@ -70,8 +70,8 @@ public class N2KPGNFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        if (m.getMessage() instanceof N2KMessage)
-            return match((N2KMessage) m.getMessage(), m.getSource());
+        if (m.getPayload() instanceof N2KMessage)
+            return match((N2KMessage) m.getPayload(), m.getAgentSource());
         else
             return true;
     }

@@ -17,10 +17,10 @@ package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
 import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.utils.PolarTable;
 import com.aboni.utils.PolarTableImpl;

@@ -16,10 +16,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.sensors;
 
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.sensors.hw.PinDetector;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.RaspiPin;
 

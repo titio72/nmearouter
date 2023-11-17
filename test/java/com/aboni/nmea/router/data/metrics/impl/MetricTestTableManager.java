@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 

@@ -32,9 +32,9 @@ package com.aboni.nmea.router.utils.db;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
 
 import java.io.File;
 import java.io.FileInputStream;

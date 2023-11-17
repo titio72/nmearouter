@@ -15,18 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.Message;
-import org.json.JSONObject;
+import com.aboni.nmea.message.Message;
 
 public interface RouterMessage {
 
     long getTimestamp();
 
-    String getSource();
+    String getAgentSource();
 
-    Object getPayload();
-
-    Message getMessage();
-
-    JSONObject getJSON();
+    Message getPayload();
 }

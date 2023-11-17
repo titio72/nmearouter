@@ -1,11 +1,15 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBImpl;
-import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
-import com.aboni.nmea.router.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.*;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBImpl;
+import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
+import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
+import com.aboni.log.Log;
+import com.aboni.nmea.router.AISTargets;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -47,8 +51,8 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
 
     @OnRouterMessage
     public void onRouterMessage(RouterMessage m) {
-        if (m.getMessage() instanceof N2KMessage) {
-            onMessage((N2KMessage) m.getMessage());
+        if (m.getPayload() instanceof N2KMessage) {
+            onMessage((N2KMessage) m.getPayload());
         }
     }
 

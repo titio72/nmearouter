@@ -33,11 +33,11 @@ package com.aboni.nmea.router.data.impl;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 import com.aboni.nmea.router.utils.db.DBHelper;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 
 import javax.inject.Inject;
 

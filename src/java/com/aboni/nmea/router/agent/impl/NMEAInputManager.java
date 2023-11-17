@@ -15,12 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KStream;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.n2k.N2KStream;
+import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -61,7 +61,7 @@ public class NMEAInputManager {
 
     }
 
-    private static class NMEA0183Handler implements StringInputHandler {
+    private class NMEA0183Handler implements StringInputHandler {
 
         private final Log logger;
 
@@ -73,7 +73,7 @@ public class NMEAInputManager {
         public Message[] getSentences(String sSentence) {
             try {
                 Sentence s = SentenceFactory.getInstance().createParser(sSentence);
-                return new Message[] {NMEA0183Message.get(s)};
+                return new Message[] {messageFactory.getMessage(s)};
             } catch (Exception e) {
                 logger.debug("Can't read NMEA sentence {" + sSentence + "} {" + e + "}");
             }
@@ -84,11 +84,12 @@ public class NMEAInputManager {
     private final Log logger;
     private final StringInputHandler n2kHandler;
     private final StringInputHandler nmeaHandler;
+    private final NMEA0183MessageFactory messageFactory;
 
-
-    public NMEAInputManager(Log logger) {
+    public NMEAInputManager(Log logger, NMEA0183MessageFactory messageFactory) {
         n2kHandler = new N2KHandlerExp(logger);
         nmeaHandler = new NMEA0183Handler(logger);
+        this.messageFactory = messageFactory;
         this.logger = SafeLog.getSafeLog(logger);
     }
 

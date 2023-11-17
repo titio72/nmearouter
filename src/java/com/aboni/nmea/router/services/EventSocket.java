@@ -16,17 +16,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.services;
 
 import com.aboni.nmea.router.NMEAStream;
-import com.aboni.nmea.router.OnJSONMessage;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -79,12 +79,12 @@ public class EventSocket {
         return err;
     }
 
-    @OnJSONMessage
-    public void onSentence(JSONObject obj) {
-        if (obj != null) {
+    @OnRouterMessage
+    public void onSentence(RouterMessage msg) {
+        if (msg != null && msg.getPayload() != null) {
             try {
                 RemoteEndpoint remote = session.getRemote();
-                remote.sendString(obj.toString());
+                remote.sendString(msg.getPayload().toJSON().toString());
             } catch (Exception e) {
                 log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("message").wV("id", id).toString(), e);
             }

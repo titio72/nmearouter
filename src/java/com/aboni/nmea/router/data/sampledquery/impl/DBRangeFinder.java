@@ -15,15 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.sampledquery.impl;
 
-import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.data.QueryById;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.sampledquery.Range;
 import com.aboni.nmea.router.data.sampledquery.RangeFinder;
 import com.aboni.nmea.router.data.sampledquery.SampledQueryException;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 

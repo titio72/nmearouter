@@ -17,11 +17,11 @@ package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgSOGAdCOG;
+import com.aboni.nmea.message.MsgSpeed;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.message.MsgSpeed;
-import com.aboni.utils.SpeedMovingAverage;
+import com.aboni.data.SpeedMovingAverage;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -82,7 +82,7 @@ public class NMEASpeedFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        Message s = m.getMessage();
+        Message s = m.getPayload();
         if (s instanceof MsgSpeed) {
             MsgSpeed msgSpeed = (MsgSpeed) s;
             double speed = msgSpeed.getSpeedWaterRef();

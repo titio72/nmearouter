@@ -15,8 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.Message;
+import com.aboni.data.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;

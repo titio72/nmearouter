@@ -30,6 +30,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.utils;
 
+import com.aboni.log.Log;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;

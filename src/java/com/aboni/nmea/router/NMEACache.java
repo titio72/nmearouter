@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgPosition;
-import com.aboni.nmea.router.message.MsgSOGAdCOG;
 import com.aboni.nmea.router.data.DataEvent;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgPosition;
+import com.aboni.nmea.message.MsgSOGAdCOG;
 
 public interface NMEACache extends HeadingProvider {
 

@@ -15,14 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics.impl;
 
-import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
+import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.Sample;
+import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
-import com.aboni.nmea.router.data.Query;
 
 import javax.inject.Inject;
 import javax.inject.Named;

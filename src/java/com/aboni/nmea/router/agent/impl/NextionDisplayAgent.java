@@ -1,13 +1,16 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.*;
+import com.aboni.log.ConsoleLog;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.NMEARouterStatuses;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.*;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.LogStringBuilder;
-import com.aboni.utils.Utils;
+import com.aboni.utils.*;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.util.Position;
@@ -178,11 +181,11 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     public void onSentence(RouterMessage rm) {
         if (!run.get()) return;
 
-        if (src.isEmpty() || src.equals(rm.getSource())) {
+        if (src.isEmpty() || src.equals(rm.getAgentSource())) {
             lastInput = getTimestampProvider().getNow();
         }
 
-        Message m = rm.getMessage();
+        Message m = rm.getPayload();
         if (m instanceof MsgPositionAndVector) {
             sendPosition(((MsgPositionAndVector)m).getPosition());
             setData(m, Fields.COG, (Object ss) -> String.format("%d°", Math.round(((MsgPositionAndVector) ss).getCOG())));

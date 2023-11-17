@@ -1,10 +1,11 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.track.TrackEvent;
 import com.aboni.nmea.router.data.track.TrackPoint;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
@@ -29,7 +30,7 @@ public class TrackDAOTest {
 
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
         evW = new TrackDAO("track_test");

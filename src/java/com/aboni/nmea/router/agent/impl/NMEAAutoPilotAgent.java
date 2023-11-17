@@ -16,8 +16,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.AutoPilotDriver;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;

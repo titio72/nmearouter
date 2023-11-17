@@ -15,13 +15,15 @@
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.impl.DefaultTimestampProvider;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.message.MsgWindData;
-import com.aboni.nmea.router.message.impl.MsgSOGAndCOGImpl;
-import com.aboni.nmea.router.message.impl.MsgWindDataImpl;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgSOGAdCOG;
+import com.aboni.nmea.message.MsgWindData;
+import com.aboni.nmea.message.impl.MsgSOGAndCOGImpl;
+import com.aboni.nmea.message.impl.MsgWindDataImpl;
+import com.aboni.nmea.router.processors.NMEAMWVTrue;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
+import com.aboni.utils.DefaultTimestampProvider;
+import com.aboni.data.Pair;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

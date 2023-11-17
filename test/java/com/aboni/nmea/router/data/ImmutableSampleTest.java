@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.data;
 
+import com.aboni.nmea.router.data.ImmutableSample;
+import com.aboni.nmea.router.data.Sample;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

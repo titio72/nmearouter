@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.data.impl;
 
+import com.aboni.nmea.router.data.impl.AngleStatsSample;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +27,7 @@ public class AngleStatsSampleTest {
     @Test
     public void testEmpty() {
         AngleStatsSample sample = new AngleStatsSample("TWD");
-        assertEquals(0, sample.getSamples());
+        Assert.assertEquals(0, sample.getSamples());
         assertTrue(Double.isNaN(sample.getValue()));
         assertTrue(Double.isNaN(sample.getMaxValue()));
         assertTrue(Double.isNaN(sample.getMinValue()));
@@ -37,12 +39,12 @@ public class AngleStatsSampleTest {
         AngleStatsSample sample = new AngleStatsSample("TWD");
         sample.add(45 /* degrees */, t0);
 
-        assertEquals(1, sample.getSamples());
-        assertEquals(45, sample.getValue(), 0.001);
-        assertEquals(45, sample.getMinValue(), 0.001);
-        assertEquals(45, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0, sample.getT1());
+        Assert.assertEquals(1, sample.getSamples());
+        Assert.assertEquals(45, sample.getValue(), 0.001);
+        Assert.assertEquals(45, sample.getMinValue(), 0.001);
+        Assert.assertEquals(45, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0, sample.getT1());
     }
 
     @Test
@@ -53,12 +55,12 @@ public class AngleStatsSampleTest {
         sample.add(44 /* degrees */, t0 + 1000);
         sample.add(46 /* degrees */, t0 + 2000);
 
-        assertEquals(3, sample.getSamples());
-        assertEquals(45, sample.getValue(), 0.001);
-        assertEquals(44, sample.getMinValue(), 0.001);
-        assertEquals(46, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0 + 2000, sample.getT1());
+        Assert.assertEquals(3, sample.getSamples());
+        Assert.assertEquals(45, sample.getValue(), 0.001);
+        Assert.assertEquals(44, sample.getMinValue(), 0.001);
+        Assert.assertEquals(46, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0 + 2000, sample.getT1());
     }
 
     @Test
@@ -69,12 +71,12 @@ public class AngleStatsSampleTest {
         sample.add(5 /* degrees */, t0 + 1000);
         sample.add(20 /* degrees */, t0 + 2000);
 
-        assertEquals(3, sample.getSamples());
-        assertEquals(5, sample.getValue(), 0.001);
-        assertEquals(350, sample.getMinValue(), 0.001);
-        assertEquals(20, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0 + 2000, sample.getT1());
+        Assert.assertEquals(3, sample.getSamples());
+        Assert.assertEquals(5, sample.getValue(), 0.001);
+        Assert.assertEquals(350, sample.getMinValue(), 0.001);
+        Assert.assertEquals(20, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0 + 2000, sample.getT1());
     }
 
     @Test
@@ -85,12 +87,12 @@ public class AngleStatsSampleTest {
         sample.add(358 /* degrees */, t0 + 1000);
         sample.add(6 /* degrees */, t0 + 2000);
 
-        assertEquals(3, sample.getSamples());
-        assertEquals(358, sample.getValue(), 0.001);
-        assertEquals(350, sample.getMinValue(), 0.001);
-        assertEquals(6, sample.getMaxValue(), 0.001);
-        assertEquals(t0, sample.getT0());
-        assertEquals(t0 + 2000, sample.getT1());
+        Assert.assertEquals(3, sample.getSamples());
+        Assert.assertEquals(358, sample.getValue(), 0.001);
+        Assert.assertEquals(350, sample.getMinValue(), 0.001);
+        Assert.assertEquals(6, sample.getMaxValue(), 0.001);
+        Assert.assertEquals(t0, sample.getT0());
+        Assert.assertEquals(t0 + 2000, sample.getT1());
     }
 
 

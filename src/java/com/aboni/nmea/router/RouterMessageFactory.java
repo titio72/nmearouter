@@ -1,6 +1,6 @@
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.Message;
+import com.aboni.nmea.message.Message;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 

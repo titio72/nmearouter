@@ -22,7 +22,7 @@ import com.aboni.nmea.router.filters.NMEAFilterSet;
 import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
 import com.aboni.nmea.router.services.impl.JSONAgentListSerializer;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

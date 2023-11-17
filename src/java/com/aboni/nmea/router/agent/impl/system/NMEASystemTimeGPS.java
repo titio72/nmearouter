@@ -17,11 +17,11 @@ package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgSystemTime;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgSystemTime;
+import com.aboni.log.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -49,7 +49,7 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentence(RouterMessage msg) {
-        Message m = msg.getMessage();
+        Message m = msg.getPayload();
         if (m instanceof MsgSystemTime) {
             systemTimeCHecker.checkAndSetTime(((MsgSystemTime) m).getTime());
             postMsg();

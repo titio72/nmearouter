@@ -18,18 +18,16 @@ package com.aboni.nmea.router.agent.impl.system;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.nmea0183.impl.Message2NMEA0183Impl;
+import com.aboni.nmea.router.message.JSONMessage;
+import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.router.services.*;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.ThingsFactory;
-import com.aboni.nmea.sentences.NMEA2JSONb;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
-import net.sf.marineapi.nmea.sentence.Sentence;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -38,7 +36,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -53,39 +50,37 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private Server server;
 
     private final NMEAStream stream;
-    private final NMEA2JSONb jsonConverter;
-    private final Message2NMEA0183Impl nmeaConverter;
 
     private static class Stats {
-        long jsonFromMsgToNMEA0183;
-        long jsonDirectConversion;
-        long jsonFromNMEA1083;
+        long n2k;
+        long n0183;
+        long json;
         long lastStatsTime;
 
         void incrNMEA083() {
             synchronized (this) {
-                jsonFromNMEA1083++;
+                n0183++;
             }
         }
 
-        void incrMsgToNMEA083() {
+        void incrN2k() {
             synchronized (this) {
-                jsonFromMsgToNMEA0183++;
+                n2k++;
             }
         }
 
-        void incrDirect() {
+        void incrJson() {
             synchronized (this) {
-                jsonDirectConversion++;
+                json++;
             }
         }
 
         void reset(long t) {
             synchronized (this) {
                 lastStatsTime = t;
-                jsonDirectConversion = 0;
-                jsonFromMsgToNMEA0183 = 0;
-                jsonFromNMEA1083 = 0;
+                json = 0;
+                n0183 = 0;
+                n2k = 0;
             }
         }
     }
@@ -96,8 +91,6 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     public WebInterfaceAgent(TimestampProvider tp, NMEAStream stream, Log log) {
         super(log, tp, false, true);
         this.stream = stream;
-        this.jsonConverter = new NMEA2JSONb();
-        this.nmeaConverter = new Message2NMEA0183Impl();
     }
 
     public static class MyWebSocketServlet extends WebSocketServlet {
@@ -209,79 +202,13 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentenceMessage(RouterMessage msg) {
-        AutoJSONMessage m = new AutoJSONMessage(msg);
-        stream.pushMessage(m,  (Object listener)->{
+        if (msg.getPayload() instanceof JSONMessage) stats.incrJson();
+        else if (msg.getPayload() instanceof NMEA0183Message) stats.incrNMEA083();
+        else if (msg.getPayload() instanceof N2KMessage) stats.incrN2k();
+        stream.pushMessage(msg,  (Object listener)->{
             EventSocket eventSocket = (EventSocket)listener;
             return !eventSocket.isErr();
         });
-    }
-
-
-    /**
-     * Wraps a RouterMessage and automatically convert to JSON all the NMEA sentences (note: N2K are ignored)
-     */
-    private class AutoJSONMessage implements RouterMessage {
-
-        private final RouterMessage message;
-        private JSONObject jsonMessage;
-
-        private AutoJSONMessage(RouterMessage message) {
-            this.message = message;
-            this.jsonMessage = (message.getPayload() instanceof JSONObject)? (JSONObject) message.getPayload() :null;
-        }
-
-        @Override
-        public long getTimestamp() {
-            return message.getTimestamp();
-        }
-
-        @Override
-        public String getSource() {
-            return message.getSource();
-        }
-
-        @Override
-        public Object getPayload() {
-            return getJSON();
-        }
-
-        @Override
-        public Message getMessage() {
-            return null;
-        }
-
-        @Override
-        public JSONObject getJSON() {
-            if (jsonMessage == null) {
-                if (message.getMessage() instanceof NMEA0183Message) {
-                    jsonMessage = jsonConverter.convert(((NMEA0183Message) message.getMessage()).getSentence());
-                    stats.incrNMEA083();
-                } else if (message.getMessage() != null) {
-                    try {
-                        jsonMessage = message.getMessage().toJSON();
-                        stats.incrDirect();
-                    } catch (UnsupportedOperationException ignored) {
-                        fallbackStrategy();
-                    }
-                }
-            }
-            return jsonMessage;
-        }
-
-        private void fallbackStrategy() {
-            Sentence[] ss = nmeaConverter.convert(message.getMessage());
-            try {
-                if (ss != null && ss.length != 0) {
-                    // just take the first... to be removed anyway
-                    jsonMessage = jsonConverter.convert(ss[0]);
-                    if (jsonMessage!=null) {
-                        stats.incrMsgToNMEA083();
-                    }
-                }
-            } catch (Exception e) {
-                getLog().error(() -> getLogBuilder().wO("convert to JSON").wV("sentence", message.getMessage()).toString(), e);
-            }
-        }
     }
 
     @Override
@@ -291,9 +218,9 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         synchronized (stats) {
             if (Utils.isOlderThan(stats.lastStatsTime, t, 29999)) {
                 getLog().info(() -> getLogBuilder().wO(WEB_UI_STATS_LOG_TOKEN).
-                        wV("NMEA0183", stats.jsonFromNMEA1083).
-                        wV("direct", stats.jsonDirectConversion).
-                        wV("msgToNMEA1083", stats.jsonFromMsgToNMEA0183).
+                        wV("NMEA0183", stats.n0183).
+                        wV("NMEA2000", stats.n2k).
+                        wV("json", stats.json).
                         toString());
                 stats.reset(t);
             }

@@ -15,17 +15,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.data.Sampler;
+import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.metrics.PowerMetrics;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgBattery;
-import com.aboni.nmea.router.message.MsgDCDetailedStatus;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgBattery;
+import com.aboni.nmea.message.MsgDCDetailedStatus;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +35,7 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
     private static final long ONE_MINUTE = 60000L;
     private static final int BATTERY_INSTANCE = 0;
 
-    private final Sampler powerSampler;
+    private final Sampler<Message> powerSampler;
     private final Log log;
 
     @Inject
@@ -43,7 +43,7 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
         super(log, tp, false, true);
         if (w==null) throw new IllegalArgumentException("StatWriter cannot be null");
         this.log = log;
-        powerSampler = new Sampler(log, tp, w, "Power2DB");
+        powerSampler = new Sampler<Message>(log, tp, w, "Power2DB");
         powerSampler.initMetric(PowerMetrics.VOLTAGE_0,
                 (Message m) -> ((m instanceof MsgBattery) && ((MsgBattery) m).getInstance() == BATTERY_INSTANCE),
                 (Message m) -> ((MsgBattery) m).getVoltage(),
@@ -105,6 +105,6 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onSentence(RouterMessage msg) {
-        powerSampler.onSentence(msg);
+        powerSampler.doSampling(msg.getPayload(), msg.getTimestamp());
     }
 }

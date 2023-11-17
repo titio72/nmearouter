@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.sensors;
 
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.sensors.hw.DS18B20;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

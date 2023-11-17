@@ -15,6 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.AISPositionReport;
+import com.aboni.nmea.AISStaticData;
+
 import java.util.List;
 
 public interface AISTargets {

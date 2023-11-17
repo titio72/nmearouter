@@ -1,5 +1,7 @@
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.router.GPSSat;
+import com.aboni.nmea.router.GPSSatsRepository;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

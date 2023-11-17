@@ -17,7 +17,7 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.data.track.PositionStats;
+import com.aboni.nmea.router.data.track.AveragePosition;
 import com.aboni.nmea.router.data.track.TrackManager;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackPointBuilder;
@@ -32,7 +32,7 @@ public class TrackManagerImpl implements TrackManager {
     private GeoPositionT lastPoint;
     private GeoPositionT lastTrackedPoint;
     private final StationaryManager stationaryStatus;
-    private final PositionStats stats;
+    private final AveragePosition stats;
 
     private final boolean reportAll;
 
@@ -56,7 +56,7 @@ public class TrackManagerImpl implements TrackManager {
         staticPeriod = STATIC_DEFAULT_PERIOD;
         maxSpeed = 0.0;
         stationaryStatus = new StationaryManager();
-        stats = new PositionStats();
+        stats = new AveragePosition();
         this.reportAll = reportAll;
     }
 

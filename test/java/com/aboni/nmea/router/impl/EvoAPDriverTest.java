@@ -1,14 +1,16 @@
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.message.PilotMode;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.n2k.evo.N2K126208RequestLockedHeading;
+import com.aboni.nmea.n2k.evo.N2K126208RequestPilotMode;
+import com.aboni.nmea.n2k.evo.N2K126208RequestWindDatum;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
-import com.aboni.nmea.router.message.PilotMode;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageHandler;
-import com.aboni.nmea.router.n2k.evo.N2K126208RequestLockedHeading;
-import com.aboni.nmea.router.n2k.evo.N2K126208RequestPilotMode;
-import com.aboni.nmea.router.n2k.evo.N2K126208RequestWindDatum;
-import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
+import com.aboni.nmea.n2k.N2KMessageHandler;
+import com.aboni.log.ConsoleLog;
+import com.aboni.nmea.router.impl.EvoAPDriver;
+import com.aboni.utils.ProgrammableTimeStampProvider;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -134,7 +136,7 @@ public class EvoAPDriverTest {
             default: fail("Unsupported mode " + to);
         }
         assertEquals(1, sender.getList().size());
-        assertEquals(to, ((N2K126208RequestPilotMode)sender.getList().get(0)).getMode());
+        Assert.assertEquals(to, ((N2K126208RequestPilotMode)sender.getList().get(0)).getMode());
     }
 
     @Test
@@ -144,7 +146,7 @@ public class EvoAPDriverTest {
         tp.setTimestamp(System.currentTimeMillis());
         driver.starboard1();
         assertEquals(1, sender.getList().size());
-        assertEquals(23, ((N2K126208RequestLockedHeading)sender.getList().get(0)).getLockedHeading(), 0.01);
+        Assert.assertEquals(23, ((N2K126208RequestLockedHeading)sender.getList().get(0)).getLockedHeading(), 0.01);
     }
 
     @Test
@@ -212,7 +214,7 @@ public class EvoAPDriverTest {
         tp.setTimestamp(System.currentTimeMillis());
         driver.starboard10();
         assertEquals(1, sender.getList().size());
-        assertEquals(38, ((N2K126208RequestWindDatum)sender.getList().get(0)).getWindDatum(), 0.01);
+        Assert.assertEquals(38, ((N2K126208RequestWindDatum)sender.getList().get(0)).getWindDatum(), 0.01);
     }
 
     @Test

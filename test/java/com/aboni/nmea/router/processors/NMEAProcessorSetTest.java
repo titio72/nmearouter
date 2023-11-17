@@ -15,8 +15,11 @@
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.message.Message;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.Message;
+import com.aboni.data.Pair;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEAProcessorSet;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import org.junit.Before;
 import org.junit.Test;
 

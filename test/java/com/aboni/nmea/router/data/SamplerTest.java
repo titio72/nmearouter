@@ -15,17 +15,16 @@
 
 package com.aboni.nmea.router.data;
 
+import com.aboni.nmea.message.*;
+import com.aboni.nmea.message.impl.MsgHeadingImpl;
+import com.aboni.nmea.message.impl.MsgTemperatureImpl;
+import com.aboni.nmea.message.impl.MsgWindDataImpl;
 import com.aboni.nmea.router.HeadingProvider;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.data.metrics.Metrics;
-import com.aboni.nmea.router.impl.RouterMessageImpl;
-import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.message.impl.MsgHeadingImpl;
-import com.aboni.nmea.router.message.impl.MsgTemperatureImpl;
-import com.aboni.nmea.router.message.impl.MsgWindDataImpl;
-import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.nmea.router.utils.ProgrammableTimeStampProvider;
-import com.aboni.utils.Pair;
+import com.aboni.log.ConsoleLog;
+import com.aboni.data.Pair;
+import com.aboni.utils.ProgrammableTimeStampProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,20 +72,18 @@ public class SamplerTest {
         }
     }
 
-    private Sampler sampler;
+    private Sampler<Message> sampler;
     private MyStatsWriter writer;
     private MyHeadingProvider headingProvider;
     private ProgrammableTimeStampProvider timeProvider;
     private final long t0 = Instant.parse("2021-12-25T12:00:00Z").toEpochMilli(); // arbitrary
 
-    private static RouterMessage getTemperature(double t, long ts) {
-        return new RouterMessageImpl<>(
-                new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, t), "TestSource", ts);
+    private static Message getTemperature(double t) {
+        return new MsgTemperatureImpl(TemperatureSource.MAIN_CABIN_ROOM, t);
     }
 
-    private static RouterMessage getWind(double speed, double direction, long ts) {
-        return new RouterMessageImpl<>(
-                new MsgWindDataImpl(speed, direction, false), "TestSource", ts);
+    private static Message getWind(double speed, double direction) {
+        return new MsgWindDataImpl(speed, direction, false);
     }
 
     @Before
@@ -94,7 +91,7 @@ public class SamplerTest {
         timeProvider = new ProgrammableTimeStampProvider();
         writer = new MyStatsWriter();
         headingProvider = new MyHeadingProvider();
-        sampler = new Sampler(ConsoleLog.getLogger(), timeProvider, writer, "TestTag");
+        sampler = new Sampler<>(ConsoleLog.getLogger(), timeProvider, writer, "TestTag");
     }
 
     @Test
@@ -148,7 +145,7 @@ public class SamplerTest {
         initWithTemperature();
 
         // post metric and check that it is NOT collected (because it is not started)
-        sampler.onSentence(getTemperature(25.2, t0));
+        sampler.doSampling(getTemperature(25.2), t0);
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
     }
 
@@ -160,17 +157,17 @@ public class SamplerTest {
         sampler.start();
 
         // post metric and check that it is collected
-        sampler.onSentence(getTemperature(25.2, t0));
+        sampler.doSampling(getTemperature(25.2), t0);
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.2, 1);
 
         // post metric after 1 second and check that it is collected
         timeProvider.setTimestamp(t0 + 1000);
-        sampler.onSentence(getTemperature(25.4, t0 + 1000));
+        sampler.doSampling(getTemperature(25.4), t0 + 1000);
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.3, 2);
 
         // post metric after 1 second and check that it is collected
         timeProvider.setTimestamp(t0 + 2000);
-        sampler.onSentence(getTemperature(25.6, t0 + 2000));
+        sampler.doSampling(getTemperature(25.6), t0 + 2000);
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.4, 3);
     }
 
@@ -182,11 +179,11 @@ public class SamplerTest {
         sampler.start();
 
         // post metric and check that it is collected
-        sampler.onSentence(getTemperature(25.2, t0));
+        sampler.doSampling(getTemperature(25.2), t0);
 
         // post invalid metric after 1 second and check that it is collected
         timeProvider.setTimestamp(t0 + 1000);
-        sampler.onSentence(getTemperature(125.4, t0 + 1000));
+        sampler.doSampling(getTemperature(125.4), t0 + 1000);
 
         // the second measurement has been discarded because out of range
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), 25.2, 1);
@@ -200,7 +197,7 @@ public class SamplerTest {
         sampler.start();
 
         // post metric and check that it is collected
-        sampler.onSentence(getTemperature(125.2, t0));
+        sampler.doSampling(getTemperature(125.2), t0);
         checkSample(sampler.getCurrent(Metrics.AIR_TEMPERATURE), Double.NaN, 0);
     }
 
@@ -213,7 +210,7 @@ public class SamplerTest {
         // post 60 measurements in 1 minute
         for (int i = 0; i < 60; i++) {
             timeProvider.setTimestamp(t0 + i * 1000);
-            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+            sampler.doSampling(getTemperature(25.0 + (i % 3)), t0 + i * 1000);
         }
 
         // one more second to let the 1m timeout to expire
@@ -242,7 +239,7 @@ public class SamplerTest {
         // post 30 measurements in 30 seconds (timeout for the metric is 1m)
         for (int i = 0; i < 30; i++) {
             timeProvider.setTimestamp(t0 + i * 1000);
-            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+            sampler.doSampling(getTemperature(25.0 + (i % 3)), t0 + i * 1000);
         }
 
         sampler.dumpAndReset(true);
@@ -262,7 +259,7 @@ public class SamplerTest {
         // post 30 measurements in 30 seconds (timeout for the metric is 1m)
         for (int i = 0; i < 30; i++) {
             timeProvider.setTimestamp(t0 + i * 1000);
-            sampler.onSentence(getTemperature(25.0 + (i % 3), t0 + i * 1000));
+            sampler.doSampling(getTemperature(25.0 + (i % 3)), t0 + i * 1000);
         }
 
         sampler.dumpAndReset();
@@ -277,7 +274,7 @@ public class SamplerTest {
     public void testWindDirectionNoHeading() {
         initWithWind();
         sampler.start();
-        sampler.onSentence(getWind(12.2, 93.0, t0));
+        sampler.doSampling(getWind(12.2, 93.0), t0);
         assertEquals(0, writer.getEvents().size());
     }
 
@@ -286,7 +283,7 @@ public class SamplerTest {
         initWithWind();
         sampler.start();
         headingProvider.lastHeading = new DataEvent<>(new MsgHeadingImpl(30.0, true), t0, "TEST_SOURCE");
-        sampler.onSentence(getWind(12.2, 93.0, t0 + 250)); //add a small time-skew to verify that the threshold works
+        sampler.doSampling(getWind(12.2, 93.0), t0 + 250); //add a small time-skew to verify that the threshold works
         checkSample(sampler.getCurrent(Metrics.WIND_DIRECTION), 123.0, 1);
     }
 
@@ -295,7 +292,7 @@ public class SamplerTest {
         initWithWind();
         sampler.start();
         headingProvider.lastHeading = new DataEvent<>(new MsgHeadingImpl(30.0, true), t0, "TEST_SOURCE");
-        sampler.onSentence(getWind(12.2, 93.0, t0 + HEADING_AGE_THRESHOLD_MS + 150)); //add time-skew to make heading old compared to wind
+        sampler.doSampling(getWind(12.2, 93.0), t0 + HEADING_AGE_THRESHOLD_MS + 150); //add time-skew to make heading old compared to wind
         assertEquals(0, writer.getEvents().size());
     }
 }

@@ -18,9 +18,9 @@ package com.aboni.sensors;
 import com.aboni.geo.DeviationManager;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.LPFFilter;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.data.LPFFilter;
+import com.aboni.log.LogStringBuilder;
 
 import javax.inject.Inject;
 import java.io.File;

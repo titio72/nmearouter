@@ -15,20 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
+import com.aboni.nmea.message.Message;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.message.Message;
-import org.json.JSONObject;
 
-public class RouterMessageImpl<T> implements RouterMessage {
+public class RouterMessageImpl implements RouterMessage {
 
     private final long timestamp;
-    private final T theMessage;
-    private final String source;
+    private final Message theMessage;
+    private final String agentSource;
 
-    public RouterMessageImpl(T msg, String source, long timestamp) {
+    public RouterMessageImpl(Message msg, String agentSource, long timestamp) {
         this.timestamp = timestamp;
         this.theMessage = msg;
-        this.source = source;
+        this.agentSource = agentSource;
     }
 
     @Override
@@ -37,24 +36,12 @@ public class RouterMessageImpl<T> implements RouterMessage {
     }
 
     @Override
-    public Object getPayload() {
+    public Message getPayload() {
         return theMessage;
     }
 
     @Override
-    public Message getMessage() {
-        if (theMessage instanceof Message) return (Message) theMessage;
-        return null;
-    }
-
-    @Override
-    public JSONObject getJSON() {
-        if (theMessage instanceof JSONObject) return (JSONObject) theMessage;
-        return null;
-    }
-
-    @Override
-    public String getSource() {
-        return source;
+    public String getAgentSource() {
+        return agentSource;
     }
 }

@@ -1,6 +1,6 @@
 package com.aboni.nmea.router;
 
-import com.aboni.nmea.router.message.PilotMode;
+import com.aboni.nmea.message.PilotMode;
 
 public interface EvoAutoPilotStatus {
 

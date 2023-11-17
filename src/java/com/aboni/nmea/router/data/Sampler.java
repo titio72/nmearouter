@@ -15,31 +15,26 @@
 
 package com.aboni.nmea.router.data;
 
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.data.impl.AngleStatsSample;
 import com.aboni.nmea.router.data.impl.ScalarStatsSample;
 import com.aboni.nmea.router.data.impl.TimerFilterFixed;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.data.metrics.Metric;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Startable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.aboni.nmea.router.data.Unit.DEGREES;
+public class Sampler<T> implements Startable {
 
-public class Sampler implements Startable {
-
-    public interface MessageFilter {
-        boolean match(Message msg);
+    public interface MessageFilter<X> {
+        boolean match(X msg);
     }
 
-    public interface MessageValueExtractor {
-        double getValue(Message msg);
+    public interface MessageValueExtractor<X> {
+        double getValue(X msg);
     }
 
     public interface MetricListener {
@@ -48,19 +43,19 @@ public class Sampler implements Startable {
         void onSample(Metric metric, StatsSample sample);
     }
 
-    private static final class Series {
+    private static final class Series<X> {
         StatsSample statsSample;
         long lastStatTimeMs;
         Metric metric;
-        MessageFilter filter;
-        MessageValueExtractor valueExtractor;
+        MessageFilter<X> filter;
+        MessageValueExtractor<X> valueExtractor;
 
         TimerFilter timerFilter;
 
-        static Series getNew(StatsSample series, MessageFilter filter,
-                             MessageValueExtractor valueExtractor,
+        static<X> Series<X> getNew(StatsSample series, MessageFilter<X> filter,
+                             MessageValueExtractor<X> valueExtractor,
                              TimerFilter timerFilter, Metric metric) {
-            Series s = new Series();
+            Series<X> s = new Series<>();
             s.timerFilter = timerFilter;
             s.metric = metric;
             s.statsSample = series;
@@ -74,7 +69,7 @@ public class Sampler implements Startable {
     private final TimestampProvider timestampProvider;
     private final StatsWriter writer;
     private final String tag;
-    private final Map<Metric, Series> series = new HashMap<>();
+    private final Map<Metric, Series<T>> series = new HashMap<>();
     private final Log log;
     private boolean started;
 
@@ -85,16 +80,16 @@ public class Sampler implements Startable {
         this.tag = tag;
     }
 
-    public void initMetric(Metric metric, MessageFilter filter, MessageValueExtractor valueExtractor,
+    public void initMetric(Metric metric, MessageFilter<T> filter, MessageValueExtractor<T> valueExtractor,
                            long period, String tag, double min, double max) {
         initMetric(metric, filter, valueExtractor, new TimerFilterFixed(period), tag, min, max);
     }
 
-    public void initMetric(Metric metric, MessageFilter filter, MessageValueExtractor valueExtractor,
+    public void initMetric(Metric metric, MessageFilter<T> filter, MessageValueExtractor<T> valueExtractor,
                            TimerFilter timerFilter, String tag, double min, double max) {
         synchronized (series) {
             StatsSample sample;
-            if (DEGREES == metric.getUnit()) {
+            if (Unit.DEGREES == metric.getUnit()) {
                 sample = new AngleStatsSample(tag);
             } else {
                 sample = new ScalarStatsSample(tag, min, max);
@@ -105,7 +100,7 @@ public class Sampler implements Startable {
 
     public StatsSample getCurrent(Metric metric) {
         synchronized (series) {
-            Series s = series.getOrDefault(metric, null);
+            Series<T> s = series.getOrDefault(metric, null);
             return (s == null) ? null : s.statsSample.cloneStats();
         }
     }
@@ -122,7 +117,7 @@ public class Sampler implements Startable {
                     if (writer != null) writer.init();
                     synchronized (series) {
                         long now = timestampProvider.getNow();
-                        for (Series s : series.values()) {
+                        for (Series<T> s : series.values()) {
                             if (s != null) s.lastStatTimeMs = now;
                         }
                     }
@@ -142,7 +137,7 @@ public class Sampler implements Startable {
     public void dumpAndReset(boolean force) {
         synchronized (series) {
             long ts = timestampProvider.getNow();
-            for (Series s : series.values()) {
+            for (Series<T> s : series.values()) {
                 if (s != null) {
                     StatsSample statsSample = s.statsSample;
                     if (statsSample != null && (force || s.timerFilter.accept(s.lastStatTimeMs, ts))) {
@@ -175,18 +170,14 @@ public class Sampler implements Startable {
         }
     }
 
-    @OnRouterMessage
-    public void onSentence(RouterMessage msg) {
-
+    public void doSampling(T m, long timestamp) {
         if (!isStarted()) return;
-
         synchronized (series) {
-            Message m = msg.getMessage();
             try {
                 if (timestampProvider.isSynced()) {
-                    for (Series ss : series.values()) {
+                    for (Series<T> ss : series.values()) {
                         if (ss != null && ss.filter.match(m)) {
-                            process(ss.metric, ss.valueExtractor.getValue(m), msg.getTimestamp());
+                            process(ss.metric, ss.valueExtractor.getValue(m), timestamp);
                         }
                     }
                 }

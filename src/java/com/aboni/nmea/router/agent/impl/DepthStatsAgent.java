@@ -17,9 +17,9 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.MsgWaterDepth;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.MsgWaterDepth;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -66,7 +66,7 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     @OnRouterMessage
     public void onMessage(RouterMessage msg) {
         if (msg.getPayload() instanceof MsgWaterDepth) {
-            DepthT d = handleDepth(((MsgWaterDepth) msg.getMessage()).getDepth(), getTimestampProvider().getNow());
+            DepthT d = handleDepth(((MsgWaterDepth) msg.getPayload()).getDepth(), getTimestampProvider().getNow());
 
             JSONObject j = new JSONObject();
             j.put("topic", "depth_stats");

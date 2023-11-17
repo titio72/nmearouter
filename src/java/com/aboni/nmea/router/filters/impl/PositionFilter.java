@@ -16,12 +16,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.filters.impl;
 
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgPositionAndVector;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgPositionAndVector;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.utils.JSONUtils;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -219,7 +219,7 @@ public class PositionFilter implements NMEAFilter {
 
     @Override
     public boolean match(RouterMessage m) {
-        Message s = m.getMessage();
+        Message s = m.getPayload();
         if (s instanceof MsgPositionAndVector) {
             return acceptPoint((MsgPositionAndVector) s);
         } else {

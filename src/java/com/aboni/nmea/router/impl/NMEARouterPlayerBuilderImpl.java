@@ -15,12 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.impl;
 
-import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.NMEARouterBuilder;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentBuilderJson;
 import com.aboni.nmea.router.conf.AgentTypes;
 import com.aboni.nmea.router.conf.SimpleConf;
+import com.aboni.nmea.router.NMEARouter;
+import com.aboni.nmea.router.NMEARouterBuilder;
 
 import javax.inject.Inject;
 import java.util.Properties;

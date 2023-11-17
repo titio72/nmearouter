@@ -18,9 +18,9 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.*;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Set;
 
 public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStatus {
-
-    public static final String NEW_STATUS_KEY_NAME = "new status";
 
     @Inject
     public EvoAutoPilotAgent(Log log, TimestampProvider tp) {
@@ -52,11 +50,6 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
         return "Raymarine SeaTalk autopilot driver [" + getMode() + "]";
     }
 
-    @Override
-    protected boolean onActivate() {
-        return true;
-    }
-
     private double apHeading;
     private double apLockedHeading;
     private double apWindDatum;
@@ -65,7 +58,7 @@ public class EvoAutoPilotAgent extends NMEAAgentImpl implements EvoAutoPilotStat
 
     @OnRouterMessage
     public void onMessage(RouterMessage routerMessage) {
-        Message m = routerMessage.getMessage();
+        Message m = routerMessage.getPayload();
         if (m instanceof MsgSeatalkPilotHeading) {
             apHeading = ((MsgSeatalkPilotHeading) m).getHeadingMagnetic();
         } else if (m instanceof MsgSeatalkPilotLockedHeading) {

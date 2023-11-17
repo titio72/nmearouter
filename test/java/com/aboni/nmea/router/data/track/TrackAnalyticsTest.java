@@ -1,6 +1,8 @@
 package com.aboni.nmea.router.data.track;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.nmea.router.data.track.TrackAnalytics;
+import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.impl.TrackPointBuilderImpl;
 import org.junit.Test;
 

@@ -1,5 +1,6 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.NMEARouterModule;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
@@ -9,6 +10,7 @@ import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.metrics.impl.WindStatsReaderImpl;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -26,7 +28,7 @@ public class WindStatsReaderImplTest {
 
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         loadData();
     }

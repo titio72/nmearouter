@@ -15,21 +15,18 @@
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.impl.DefaultTimestampProvider;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.utils.ThingsFactory;
+import com.aboni.log.ConsoleLog;
+import com.aboni.utils.DefaultTimestampProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -40,7 +37,7 @@ public class NMEAAgentImplTest {
 
     @Before
     public void setup() {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
     }
 

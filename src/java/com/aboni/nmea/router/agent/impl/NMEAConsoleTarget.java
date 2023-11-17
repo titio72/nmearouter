@@ -17,9 +17,9 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.utils.ConsoleLog;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.ConsoleLog;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 
@@ -32,7 +32,7 @@ public class NMEAConsoleTarget extends NMEAAgentImpl {
 
     @OnRouterMessage
     public void onMessage(RouterMessage rm) {
-        ConsoleLog.getLogger().info("[" + rm.getSource() + "] " + rm.getPayload());
+        ConsoleLog.getLogger().info("[" + rm.getAgentSource() + "] " + rm.getPayload());
     }
 
     @Override

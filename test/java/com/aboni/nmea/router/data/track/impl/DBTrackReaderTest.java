@@ -15,11 +15,14 @@
 
 package com.aboni.nmea.router.data.track.impl;
 
-import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.data.track.*;
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.data.track.TrackManagementException;
+import com.aboni.nmea.router.data.track.TrackPoint;
+import com.aboni.nmea.router.data.track.TrackReader;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -80,10 +83,9 @@ public class DBTrackReaderTest {
 
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
-        //TrackTestTableManager.loadTrack("track_test.csv");
         TrackTestTableManager.loadTrackCSV(TEST_TRACK_DATA);
         scannedCount = 0;
         referenceIndex = -1;

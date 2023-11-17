@@ -1,10 +1,11 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
-import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.NMEAMessagesModule;
 import com.aboni.nmea.router.data.ImmutableSample;
 import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.StatsEvent;
-import com.aboni.nmea.router.utils.ConsoleLog;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
@@ -25,7 +26,7 @@ public class DBMetricEventWriterTest extends TestCase {
 
     public void setUp() throws Exception {
         super.setUp();
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
         MetricTestTableManager.setUp();
         helper = new DBHelper(ConsoleLog.getLogger(), true);

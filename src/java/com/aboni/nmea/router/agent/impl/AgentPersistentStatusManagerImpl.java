@@ -19,13 +19,13 @@ import com.aboni.nmea.router.agent.AgentActivationMode;
 import com.aboni.nmea.router.agent.AgentPersistentStatus;
 import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.nmea.router.filters.DummyFilter;
 import com.aboni.nmea.router.filters.JSONFilterParser;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.nmea.router.filters.DummyFilter;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.nmea.router.utils.db.DBHelper;
+import com.aboni.log.SafeLog;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

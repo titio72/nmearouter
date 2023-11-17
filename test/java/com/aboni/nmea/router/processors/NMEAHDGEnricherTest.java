@@ -15,14 +15,18 @@
 
 package com.aboni.nmea.router.processors;
 
+import com.aboni.nmea.NMEAMessagesModule;
+import com.aboni.nmea.router.data.DataEvent;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.message.MsgHeading;
+import com.aboni.nmea.message.MsgPosition;
+import com.aboni.nmea.message.MsgSOGAdCOG;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
+import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.message.MsgHeading;
-import com.aboni.nmea.router.message.MsgPosition;
-import com.aboni.nmea.router.message.MsgSOGAdCOG;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.data.DataEvent;
+import com.aboni.nmea.router.processors.NMEAHDGEnricher;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -94,10 +98,13 @@ public class NMEAHDGEnricherTest {
         }
     }
 
+    private NMEA0183MessageFactory msgFactory;
+
     @Before
     public void setUp() {
-        Injector injector = Guice.createInjector(new NMEARouterModule());
+        Injector injector = Guice.createInjector(new NMEARouterModule(), new NMEAMessagesModule());
         ThingsFactory.setInjector(injector);
+        msgFactory = ThingsFactory.getInstance(NMEA0183MessageFactory.class);
     }
 
     @Test
@@ -106,7 +113,7 @@ public class NMEAHDGEnricherTest {
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
-        filler.process(NMEA0183Message.get(hdg), "SRC");
+        filler.process(msgFactory.getMessage(hdg), "SRC");
         assertEquals(2.5, hdg.getVariation(), 0.1);
     }
 
@@ -116,7 +123,7 @@ public class NMEAHDGEnricherTest {
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
-        filler.process(NMEA0183Message.get(hdg), "SRC");
+        filler.process(msgFactory.getMessage(hdg), "SRC");
         assertEquals(2.5, hdg.getVariation(), 0.1);
     }
 
@@ -126,7 +133,7 @@ public class NMEAHDGEnricherTest {
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
-        Message[] res = filler.process(NMEA0183Message.get(hdg), "SRC").second;
+        Message[] res = filler.process(msgFactory.getMessage(hdg), "SRC").second;
         assertEquals(1, res.length);
         HDTSentence hdt = (HDTSentence) ((NMEA0183Message)res[0]).getSentence();
         assertEquals(322.5, hdt.getHeading(), 0.1);
@@ -138,7 +145,7 @@ public class NMEAHDGEnricherTest {
 
         HDGSentence hdg = (HDGSentence) SentenceFactory.getInstance().createParser(TalkerId.II, "HDG");
         hdg.setHeading(320.0);
-        Message[] res = filler.process(NMEA0183Message.get(hdg), "SRC").second;
+        Message[] res = filler.process(msgFactory.getMessage(hdg), "SRC").second;
         assertEquals(1, res.length);
         HDMSentence hdm = (HDMSentence) ((NMEA0183Message)res[0]).getSentence();
         assertEquals(320.0, hdm.getHeading(), 0.1);

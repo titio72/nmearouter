@@ -32,8 +32,8 @@ package com.aboni.nmea.router.data.metrics.impl;
 
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.DataReader;
-import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.Sample;
 import com.aboni.nmea.router.utils.db.DBMetricsHelper;
 import org.influxdb.dto.BoundParameterQuery;
 import org.influxdb.dto.Query;

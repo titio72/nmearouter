@@ -17,11 +17,11 @@ package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
 import com.aboni.nmea.router.utils.db.DBHelper;
-import com.aboni.utils.Pair;
+import com.aboni.data.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Named;

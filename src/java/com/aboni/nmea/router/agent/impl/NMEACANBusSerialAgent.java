@@ -1,18 +1,17 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.nmea.router.message.SpeedAndHeadingStream;
-import com.aboni.nmea.router.n2k.N2KFastCache;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.PGNSourceFilter;
-import com.aboni.nmea.router.n2k.can.SerialCANReader;
-import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
-import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.n2k.N2KFastCache;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.n2k.PGNSourceFilter;
+import com.aboni.nmea.n2k.can.SerialCANReader;
+import com.aboni.nmea.n2k.messages.N2KMessageFactory;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.SerialReader;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
@@ -72,18 +71,17 @@ public class NMEACANBusSerialAgent extends NMEAAgentImpl {
     @Inject
     public NMEACANBusSerialAgent(Log log, TimestampProvider tp, N2KFastCache fastCache,
                                  SerialCANReader serialCanReader,
-                                 N2KMessageFactory msgFactory) {
+                                 N2KMessageFactory msgFactory,
+                                 PGNSourceFilter srcFilter) {
         super(log, tp, true, false);
         this.messageFactory = msgFactory;
         this.serialReader = new SerialReader(tp, log);
         this.serialCanReader = serialCanReader;
-        this.srcFilter = new PGNSourceFilterImpl(log);
+        this.srcFilter = srcFilter;
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
         this.posAndVectorStream.setListener(this::postMessage);
         this.speedAndHeadingStream.setListener(this::postMessage);
-
-        srcFilter.init();
 
         stats.reset();
         fastCache.setCallback(this::onReceive);

@@ -15,6 +15,8 @@
 
 package com.aboni.nmea.router.data.impl;
 
+import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
+import com.aboni.nmea.router.data.impl.ScalarStatsSample;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
 import org.junit.Test;

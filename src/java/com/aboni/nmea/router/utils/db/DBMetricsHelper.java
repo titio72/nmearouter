@@ -17,9 +17,9 @@ package com.aboni.nmea.router.utils.db;
 
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.ThingsFactory;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.log.LogStringBuilder;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;

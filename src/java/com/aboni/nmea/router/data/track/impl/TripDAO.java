@@ -21,6 +21,7 @@ public class TripDAO {
     public interface TripCallback {
         void onTrip(Trip trip);
     }
+
     public void loadArchive(TripCallback callback, Connection c) throws SQLException {
         try (Statement s = c.createStatement()) {
             try (ResultSet rs = s.executeQuery("select id, description, fromTS, toTS, dist, distSail, distMotor from " + tripTable)) {

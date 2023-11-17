@@ -15,6 +15,8 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.nmea.router.agent.NMEASource;
+
 public interface NMEAStream {
 
     interface ListenerChecker {
@@ -27,7 +29,7 @@ public interface NMEAStream {
      * Push a sentence into the stream.
      *
      * @param msg The message to be distributed.
-     * @see com.aboni.nmea.router.agent.NMEASource
+     * @see NMEASource
      */
     void pushMessage(RouterMessage msg);
 
@@ -38,7 +40,7 @@ public interface NMEAStream {
      *
      * @param observer The object to be registered as observer.
      * @see com.aboni.nmea.router.OnJSONMessage
-     * @see com.aboni.nmea.router.OnRouterMessage
+     * @see OnRouterMessage
      */
     void subscribe(Object observer);
 

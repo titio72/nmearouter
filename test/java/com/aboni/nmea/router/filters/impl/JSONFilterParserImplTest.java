@@ -3,6 +3,8 @@ package com.aboni.nmea.router.filters.impl;
 import com.aboni.nmea.router.filters.DummyFilter;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
+import com.aboni.nmea.router.filters.impl.JSONFilterParserImpl;
+import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
 import org.json.JSONObject;
 import org.junit.Test;
 

@@ -1,17 +1,16 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.TimestampProvider;
 import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.message.PositionAndVectorStream;
 import com.aboni.nmea.router.message.SpeedAndHeadingStream;
-import com.aboni.nmea.router.n2k.N2KFastCache;
-import com.aboni.nmea.router.n2k.N2KMessage;
-import com.aboni.nmea.router.n2k.N2KMessageHeader;
-import com.aboni.nmea.router.n2k.PGNSourceFilter;
-import com.aboni.nmea.router.n2k.can.N2KHeader;
-import com.aboni.nmea.router.n2k.impl.PGNSourceFilterImpl;
-import com.aboni.nmea.router.n2k.messages.N2KMessageFactory;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.n2k.N2KFastCache;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.n2k.N2KMessageHeader;
+import com.aboni.nmea.n2k.PGNSourceFilter;
+import com.aboni.nmea.n2k.can.N2KMessageHeaderImpl;
+import com.aboni.nmea.n2k.messages.N2KMessageFactory;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import tel.schich.javacan.CanChannels;
 import tel.schich.javacan.CanFrame;
@@ -77,17 +76,19 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public NMEACANBusSocketAgent(Log log, TimestampProvider tp, N2KFastCache fastCache, N2KMessageFactory messageFactory) {
+    public NMEACANBusSocketAgent(Log log, TimestampProvider tp,
+                                 N2KFastCache fastCache,
+                                 N2KMessageFactory messageFactory,
+                                 PGNSourceFilter srcFilter) {
         super(log, tp, true, false);
         this.messageFactory = messageFactory;
         this.fastCache = fastCache;
-        this.srcFilter = new PGNSourceFilterImpl(log);
+        this.srcFilter = srcFilter;
         this.posAndVectorStream = new PositionAndVectorStream(tp);
         this.speedAndHeadingStream = new SpeedAndHeadingStream(tp);
         this.posAndVectorStream.setListener(this::postMessage);
         this.speedAndHeadingStream.setListener(this::postMessage);
         this.errors = 0;
-        srcFilter.init();
 
         stats.reset();
         fastCache.setCallback(this::onReceive);
@@ -156,7 +157,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             CanFrame frame = channel.read();
             byte[] data = new byte[frame.getDataLength()];
             frame.getData(data, 0, frame.getDataLength());
-            N2KMessageHeader h = new N2KHeader(frame.getId());
+            N2KMessageHeader h = new N2KMessageHeaderImpl(frame.getId());
             long now = getTimestampProvider().getNow();
             if (srcFilter.accept(h.getSource(), h.getPgn(), now) && messageFactory.isSupported(h.getPgn()) && h.getDest() == 0xFF) {
                 srcFilter.setPGNTimestamp(h.getSource(), h.getPgn(), now);

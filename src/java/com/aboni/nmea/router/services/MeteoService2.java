@@ -15,10 +15,10 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.SeriesReader;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.Constants;
+import com.aboni.log.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

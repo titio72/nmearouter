@@ -17,10 +17,10 @@ package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.message.MsgPosition;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.message.MsgPosition;
+import com.aboni.log.Log;
 import com.pi4j.io.gpio.*;
 
 import javax.inject.Inject;

@@ -21,7 +21,7 @@ import com.aboni.nmea.router.agent.AgentActivationMode;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.filters.JSONFilterParser;
 import com.aboni.nmea.router.services.impl.JSONAgentListSerializer;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

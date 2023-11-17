@@ -3,9 +3,9 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.SeatalkAlarmsStatus;
 import com.aboni.nmea.router.agent.NMEAAgent;
-import com.aboni.nmea.router.message.MsgSeatalkAlarm;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.utils.Pair;
+import com.aboni.nmea.message.MsgSeatalkAlarm;
+import com.aboni.log.Log;
+import com.aboni.data.Pair;
 import org.json.JSONObject;
 
 import javax.inject.Inject;

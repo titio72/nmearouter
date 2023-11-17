@@ -18,10 +18,10 @@ package com.aboni.nmea.router.services;
 import com.aboni.nmea.router.AutoPilotDriver;
 import com.aboni.nmea.router.EvoAutoPilotStatus;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.impl.EvoAPDriver;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 
 import javax.inject.Inject;
 

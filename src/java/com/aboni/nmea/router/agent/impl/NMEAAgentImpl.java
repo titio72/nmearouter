@@ -16,21 +16,22 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEAProcessorSet;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.filters.DummyFilter;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.nmea0183.NMEA0183Message;
-import com.aboni.nmea.router.processors.NMEAPostProcess;
-import com.aboni.nmea.router.processors.NMEAProcessorSet;
-import com.aboni.nmea.router.processors.NMEARouterProcessorException;
-import com.aboni.nmea.router.utils.Log;
-import com.aboni.nmea.router.utils.SafeLog;
-import com.aboni.utils.LogStringBuilder;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
@@ -82,7 +83,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         public void pushMessage(RouterMessage mm) {
             try {
                 if (mm != null && isStarted()) {
-                    getListenerWrapper().dispatchAll(mm);
+                    getListenerWrapper().dispatch(mm);
                 }
             } catch (Exception t) {
                 log.warning(getLogBuilder().wC(AGENT_MESSAGE_CATEGORY).wO("receive from router").toString(), t);
@@ -115,6 +116,10 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     @Inject
     private RouterMessageFactory messageFactory;
+
+    @Inject
+    private NMEA0183MessageFactory nmea0183MessageFactory;
+
     private ListenerWrapper listenerWrapper;
 
     private final Log log;
@@ -236,7 +241,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      */
     protected final void postMessage(Sentence sentence) {
         if (sentence!=null) {
-            Message m = NMEA0183Message.get(sentence);
+            Message m = nmea0183MessageFactory.getMessage(sentence);
             if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
                 List<Message> toSend = null;
                 try {
@@ -245,8 +250,8 @@ public class NMEAAgentImpl implements NMEAAgent {
                     log.error(() -> getLogBuilder().wO("dispatch message").wV("sentence", sentence).toString(), e);
                 }
                 if (toSend != null)
-                    for (Message s : toSend)
-                        sourceIf.listener.onSentence(messageFactory.createMessage(s, getName(), timestampProvider.getNow()));
+                    for (Message mToSend : toSend)
+                        sourceIf.listener.onSentence(messageFactory.createMessage(mToSend, getName(), timestampProvider.getNow()));
             }
         }
     }

@@ -1,9 +1,13 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.message.*;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.nmea.router.GPSStatus;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.SatInfo;
+import com.aboni.nmea.message.*;
+import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.util.Position;
 
 import javax.inject.Inject;
@@ -50,8 +54,8 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
 
     @OnRouterMessage
     public void onMessage(RouterMessage rm) {
-        if (rm != null && rm.getMessage() != null) {
-            Message message = rm.getMessage();
+        if (rm != null && rm.getPayload() != null) {
+            Message message = rm.getPayload();
             if (message instanceof MsgSystemTime) {
                 handleSystemTime((MsgSystemTime) message);
             } else if (message instanceof MsgPositionAndVector) {

@@ -17,9 +17,9 @@ package com.aboni.nmea.router.agent.impl.system;
 
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.TimestampProvider;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.log.Log;
 import com.aboni.sensors.EngineDetector;
 import com.aboni.sensors.EngineStatus;
 import org.json.JSONObject;

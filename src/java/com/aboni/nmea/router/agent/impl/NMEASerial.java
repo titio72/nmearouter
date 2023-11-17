@@ -15,14 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.TimestampProvider;
-import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.message.Message;
-import com.aboni.nmea.router.nmea0183.Message2NMEA0183;
-import com.aboni.nmea.router.utils.Log;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.nmea0183.Message2NMEA0183;
+import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
+import com.aboni.log.Log;
 import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortIOException;
@@ -98,12 +99,12 @@ public class NMEASerial extends NMEAAgentImpl {
     private final NMEAInputManager input;
 
     @Inject
-    public NMEASerial(Log log, TimestampProvider tp, Message2NMEA0183 converter) {
+    public NMEASerial(Log log, TimestampProvider tp, Message2NMEA0183 converter, NMEA0183MessageFactory messageFactory) {
         super(log, tp, true, false);
         if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
         config = new Config();
-        input = new NMEAInputManager(log);
+        input = new NMEAInputManager(log, messageFactory);
         fastStats = new NMEATrafficStats(this::onFastStatsExpired);
         stats = new NMEATrafficStats(this::onStatsExpired);
     }
@@ -289,7 +290,7 @@ public class NMEASerial extends NMEAAgentImpl {
     }
 
     private Sentence[] getSentenceToSend(RouterMessage rm) {
-        return converter.convert(rm.getMessage());
+        return converter.convert(rm.getPayload());
     }
 
     @OnRouterMessage
