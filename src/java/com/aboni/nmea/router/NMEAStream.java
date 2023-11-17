@@ -39,7 +39,6 @@ public interface NMEAStream {
      * The argument of the method annotated with OnSentence can be either a JSONObject or a Sentence.
      *
      * @param observer The object to be registered as observer.
-     * @see com.aboni.nmea.router.OnJSONMessage
      * @see OnRouterMessage
      */
     void subscribe(Object observer);

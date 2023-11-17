@@ -26,9 +26,15 @@ import java.util.List;
 
 public class ListenerWrapper {
 
-    public class MessageDispatchException extends Exception {
-        public MessageDispatchException(Exception sourceE) {
+    public static class MessageDispatchException extends Exception {
+        MessageDispatchException(Exception sourceE) {
             super(sourceE);
+        }
+    }
+
+    public static class MessageListenerException extends RuntimeException {
+        MessageListenerException(String msg) {
+            super(msg);
         }
     }
 
@@ -58,13 +64,13 @@ public class ListenerWrapper {
             // move to the upper class in the hierarchy in search for more methods
             aClass = aClass.getSuperclass();
         }
-        throw new RuntimeException("No annotated method found");
+        throw new MessageListenerException("No annotated method found");
     }
 
     public void dispatch(RouterMessage message) throws MessageDispatchException {
         // it is important to check if the listeners set is empty because the getXXX may lazy load stuff, in this way
         // we avoid executing code that is not needed (because no one would listen)
-        if (message!=null & listenerMethod!=null) {
+        if (message!=null && listenerMethod!=null) {
             try {
                 listenerMethod.invoke(listenerObject, message);
             } catch (Exception e) {

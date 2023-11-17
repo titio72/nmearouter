@@ -43,7 +43,7 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
         super(log, tp, false, true);
         if (w==null) throw new IllegalArgumentException("StatWriter cannot be null");
         this.log = log;
-        powerSampler = new Sampler<Message>(log, tp, w, "Power2DB");
+        powerSampler = new Sampler<>(log, tp, w, "Power2DB");
         powerSampler.initMetric(PowerMetrics.VOLTAGE_0,
                 (Message m) -> ((m instanceof MsgBattery) && ((MsgBattery) m).getInstance() == BATTERY_INSTANCE),
                 (Message m) -> ((MsgBattery) m).getVoltage(),

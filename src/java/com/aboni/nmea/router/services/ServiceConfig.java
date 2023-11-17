@@ -58,7 +58,7 @@ public interface ServiceConfig {
 
     default Instant getParamAsInstant(String param, Instant def, int offset) {
         String f = getParameter(param);
-        if (f == null || f.length() == 0) {
+        if (f == null || f.isEmpty()) {
             return def;
         } else {
             try {

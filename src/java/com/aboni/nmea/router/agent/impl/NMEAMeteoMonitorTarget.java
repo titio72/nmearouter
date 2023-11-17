@@ -136,7 +136,7 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
         super(log, tp, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.statsWriter = new MemoryStatsWriter();
-        this.meteoSampler = new Sampler<Message>(log, tp, statsWriter, "MeteoMonitor");
+        this.meteoSampler = new Sampler<>(log, tp, statsWriter, "MeteoMonitor");
         this.alerts = new ArrayList<>();
 
         initMetricX(Metrics.PRESSURE,

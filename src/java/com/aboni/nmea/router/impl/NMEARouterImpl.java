@@ -269,8 +269,8 @@ public class NMEARouterImpl implements NMEARouter {
 
     private void routeMessage(RouterMessage routerMessage) {
         if (started.get()) {
-            if (routerMessage.getPayload() instanceof Message) {
-                Message s = (Message) routerMessage.getPayload();
+            if (routerMessage.getPayload() != null) {
+                Message s = routerMessage.getPayload();
                 cache.onSentence(s, routerMessage.getAgentSource());
             }
             dispatchToTargets(routerMessage);
@@ -286,9 +286,7 @@ public class NMEARouterImpl implements NMEARouter {
                         final NMEATarget target = nmeaAgent.getTarget();
                         final String name = nmeaAgent.getName();
                         if (target != null) {
-                            runMe(() -> {
-                                    dispatchToTarget(name, target, mm);
-                            }, "dispatch message", "messages", "" + 1);
+                            runMe(() -> dispatchToTarget(name, target, mm), "dispatch message", "messages", "" + 1);
                         }
                     }
                 } catch (Exception e) {

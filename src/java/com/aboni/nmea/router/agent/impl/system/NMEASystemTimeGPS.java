@@ -66,9 +66,4 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
         postMessage(msg);
 
     }
-
-    @Override
-    protected boolean onActivate() {
-        return true;
-    }
 }

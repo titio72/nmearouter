@@ -44,7 +44,7 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
     public NMEAMetricDBTarget(Log log, NMEACache cache, TimestampProvider tp, @Named(Constants.TAG_METEO) StatsWriter w) {
         super(log, tp, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
-        metricSampler = new Sampler(log, tp, w, "Meteo2DB");
+        metricSampler = new Sampler<>(log, tp, w, "Meteo2DB");
         metricSampler.initMetric(Metrics.PRESSURE,
                 MsgPressure.class::isInstance,
                 (Message m) -> ((MsgPressure) m).getPressure(),
