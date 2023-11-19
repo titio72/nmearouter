@@ -62,32 +62,34 @@ public class TripsToJSON {
             JSONObject trip = new JSONObject();
             trip.put("id", t.getTrip());
             trip.put("description", t.getTripDescription());
-            fillTimeAndDistance(trip, duration, distance, distanceSail, distanceMotor, distanceUnknown,
-                    t.getMinDate(), t.getMaxDate(), t.countDays());
+            fillTime(trip, duration, t.getMinDate(), t.getMaxDate(), t.countDays());
+            fillDistance(trip, distance, distanceSail, distanceMotor, distanceUnknown);
             trip.put("startTS", t.getStartTS().toString());
             trip.put("endTS", t.getEndTS().toString());
             trips.put(trip);
         }
         JSONObject tot = new JSONObject();
-        fillTimeAndDistance(tot, totDuration, totalDistance, totalDistanceSail, totalDistanceMotor, totalDistanceUnknown,
-                minDate, maxDate, nDays);
+        fillDistance(tot, totalDistance, totalDistanceSail, totalDistanceMotor, totalDistanceUnknown);
+        fillTime(tot, totDuration, minDate, maxDate, nDays);
         res.put("total", tot);
 
         return res;
     }
 
-    private static void fillTimeAndDistance(JSONObject trip, long duration, double d, double dSail, double dMotor, double dUnkn,
-                                            LocalDate start, LocalDate end, int n) {
-        long days = duration / (60 * 60 * 24 * 1000);
-        duration = duration % (60 * 60 * 24 * 1000) / 1000L;
-        trip.put("duration", (days == 0) ?
-                String.format("%dh %02dm", duration / 3600, (duration % 3600) / 60) :
-                String.format("%dd %dh %02dm", days, duration / 3600, (duration % 3600) / 60));
+    private static void fillDistance(JSONObject trip, double d, double dSail, double dMotor, double dUnkn) {
         trip.put("distance", String.format("%.2f", d));
         trip.put("distanceSail", String.format("%.2f", dSail));
         trip.put("distanceMotor", String.format("%.2f", dMotor));
         trip.put("distanceUnknown", String.format("%.2f", dUnkn));
         trip.put("distancePercentageSail", String.format("%.1f", (dSail+dMotor)>0?dSail/(dSail+dMotor)*100.0:0.0));
+    }
+
+    private static void fillTime(JSONObject trip, long duration, LocalDate start, LocalDate end, int n) {
+        long days = duration / (60 * 60 * 24 * 1000);
+        duration = duration % (60 * 60 * 24 * 1000) / 1000L;
+        trip.put("duration", (days == 0) ?
+                String.format("%dh %02dm", duration / 3600, (duration % 3600) / 60) :
+                String.format("%dd %dh %02dm", days, duration / 3600, (duration % 3600) / 60));
         if (start!=null) {
             trip.put("start", start.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
             trip.put("startISO", start.toString());
