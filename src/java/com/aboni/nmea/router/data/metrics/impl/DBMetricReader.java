@@ -55,7 +55,7 @@ public class DBMetricReader implements DataReader {
                         target.onRead(getSample(rs));
                     }
                 });
-            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            } catch (MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading meteo", e);
             }
         } else {
@@ -80,7 +80,7 @@ public class DBMetricReader implements DataReader {
                         target.onRead(getSample(rs));
                     }
                 });
-            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            } catch (MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading meteo", e);
             }
         } else {

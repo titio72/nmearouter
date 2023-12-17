@@ -164,7 +164,7 @@ public class DBMonthYearTrackStats implements MonthYearTrackStats {
             JSONObject res = new JSONObject();
             helper.executeQuery(SQL_YEAR_STATS, (ResultSet rs)-> fillResults(rs, res));
             return res;
-        } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+        } catch (SQLException | MalformedConfigurationException e) {
             throw new TrackManagementException("Error reading distance stats", e);
         }
     }

@@ -86,7 +86,7 @@ public class DBTimeSeriesReader implements TimeSeriesReader {
                 st.setTimestamp(2, cTo, Utils.UTC_CALENDAR);
             }, (ResultSet rs) -> readSamples(rs, res, sampling, maxSamples));
             return res;
-        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+        } catch (MalformedConfigurationException | SQLException e) {
             throw new SampledQueryException("Cannot read time series", e);
         }
     }

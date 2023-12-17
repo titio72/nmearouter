@@ -46,12 +46,10 @@ import java.util.Properties;
 
 public class DBHelper implements AutoCloseable {
 
-    private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/nmearouter";
     private static final String DEFAULT_USER = "user";
     public static final String DB_HELPER_CATEGORY = "DBHelper";
 
-    private String jdbc = JDBC_DRIVER;
     private String dbUrl = DB_URL;
     private String user = DEFAULT_USER;
     private String password;
@@ -61,10 +59,9 @@ public class DBHelper implements AutoCloseable {
 
     private final Log log;
 
-    public DBHelper(Log log, boolean autocommit) throws ClassNotFoundException, MalformedConfigurationException {
+    public DBHelper(Log log, boolean autocommit) throws MalformedConfigurationException {
         readConf();
         this.autocommit = autocommit;
-        Class.forName(jdbc);
         this.log = SafeLog.getSafeLog(log);
         reconnect();
     }
@@ -74,7 +71,6 @@ public class DBHelper implements AutoCloseable {
         try (FileInputStream propInput = new FileInputStream(f)) {
             Properties p = new Properties();
             p.load(propInput);
-            jdbc = p.getProperty("jdbc.driver.class", JDBC_DRIVER);
             dbUrl = p.getProperty("jdbc.url", DB_URL);
             user = p.getProperty("user");
             password = p.getProperty("pwd");

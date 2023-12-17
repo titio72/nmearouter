@@ -53,7 +53,7 @@ public class DBPowerReader implements DataReader {
                             st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
                         },
                         (ResultSet rs)->readResults(rs, target));
-            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            } catch (MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading meteo", e);
             }
         } else {
@@ -76,7 +76,7 @@ public class DBPowerReader implements DataReader {
                             st.setString(3, tag);
                         },
                         (ResultSet rs)->readResults(rs, target));
-            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            } catch (MalformedConfigurationException | SQLException e) {
                 throw new DataManagementException("Error reading power", e);
             }
         } else {

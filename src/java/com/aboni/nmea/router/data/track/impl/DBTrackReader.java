@@ -93,7 +93,7 @@ public class DBTrackReader implements TrackReader {
                     target.onRead(rs.getInt(10), getSample(rs));
                 }
             });
-        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+        } catch (MalformedConfigurationException | SQLException e) {
             throw new TrackManagementException(ERROR_READING_TRACK, e);
         }
     }

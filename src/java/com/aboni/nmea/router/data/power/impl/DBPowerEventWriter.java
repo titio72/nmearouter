@@ -50,7 +50,7 @@ public class DBPowerEventWriter implements DBEventWriter {
 
     private void prepareStatement(Connection c) throws SQLException {
         if (stm == null) {
-            stm = c.prepareStatement("insert into power (type, v, TS) values (?, ?, ?)");
+            stm = c.prepareStatement("insert into power (type, v, TS, origTS) values (?, ?, ?, ?)");
         }
     }
 
@@ -71,6 +71,7 @@ public class DBPowerEventWriter implements DBEventWriter {
             stm.setString(1, m.getStatsSample().getTag());
             stm.setDouble(2, m.getStatsSample().getValue());
             stm.setTimestamp(3, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
+            stm.setInt(4, (int) (e.getTime()/1000));
             stm.execute();
         }
     }

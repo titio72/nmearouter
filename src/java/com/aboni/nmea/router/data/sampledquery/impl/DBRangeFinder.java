@@ -86,7 +86,7 @@ public class DBRangeFinder implements RangeFinder {
                             }
                         });
                 return result.get();
-            } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+            } catch (SQLException | MalformedConfigurationException e) {
                 throw new SampledQueryException("Cannot create time range for {" + table + "}", e);
             }
         } else {

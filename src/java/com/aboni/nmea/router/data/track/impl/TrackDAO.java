@@ -42,7 +42,7 @@ public class TrackDAO {
     }
 
     public void writeEvent(TrackEvent t, Connection conn) throws SQLException{
-        try (PreparedStatement stm = conn.prepareStatement("insert into " + trackTable + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+        try (PreparedStatement stm = conn.prepareStatement("insert into " + trackTable + " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine, origTS) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             stm.setDouble(1, t.getPoint().getPosition().getLatitude());
             stm.setDouble(2, t.getPoint().getPosition().getLongitude());
             Timestamp x = new Timestamp(t.getTime());
@@ -53,6 +53,7 @@ public class TrackDAO {
             stm.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
             stm.setDouble(8, t.getPoint().getDistance());
             stm.setByte(9, t.getPoint().getEngine().toByte());
+            stm.setInt(10, (int) (t.getTime()/1000));
             stm.execute();
         }
     }

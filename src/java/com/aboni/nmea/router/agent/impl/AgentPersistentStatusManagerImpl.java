@@ -149,7 +149,7 @@ public class AgentPersistentStatusManagerImpl implements AgentPersistentStatusMa
             updateStatusSt.setInt(2, (s == AgentActivationMode.AUTO) ? 1 : 0);
             updateStatusSt.setInt(3, (s == AgentActivationMode.AUTO) ? 1 : 0);
             updateStatusSt.executeUpdate();
-        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+        } catch (SQLException | MalformedConfigurationException e) {
             log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
                     .wO("Set Startup Mode").wV(AGENT_KEY_NAME, agent).wV("mode", s).toString(), e);
         }
@@ -188,7 +188,7 @@ public class AgentPersistentStatusManagerImpl implements AgentPersistentStatusMa
             updateFilterStatement.setString(2, filterSerialized);
             updateFilterStatement.setString(3, filterSerialized);
             updateFilterStatement.executeUpdate();
-        } catch (SQLException | MalformedConfigurationException | ClassNotFoundException e) {
+        } catch (SQLException | MalformedConfigurationException e) {
             log.errorForceStacktrace(LogStringBuilder.start(AGENT_STATUS_MANAGER_CATEGORY)
                     .wO("Set Filter").wV(AGENT_KEY_NAME, agent).wV(FILTER_KEY_NAME, filterSerialized).toString(), e);
         }

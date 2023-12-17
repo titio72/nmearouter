@@ -54,7 +54,7 @@ public class DBPowerAnalytics implements PowerAnalytics {
             );
             res.put("C_0", a);
             return res;
-        } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+        } catch (MalformedConfigurationException | SQLException e) {
             throw new DataManagementException("Error reading power", e);
         }
     }

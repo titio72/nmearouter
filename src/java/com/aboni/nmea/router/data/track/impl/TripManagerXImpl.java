@@ -66,7 +66,7 @@ public class TripManagerXImpl implements TripManagerX {
     private void loadArchive(TripArchive archive) throws TripManagerException {
         try (DBHelper helper = new DBHelper(log, true)) {
             tripDAO.loadArchive(archive::setTrip, helper.getConnection());
-        } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+        } catch (SQLException | MalformedConfigurationException e) {
             throw new TripManagerException("Error loading trips in memory", e);
         }
     }
@@ -98,7 +98,7 @@ public class TripManagerXImpl implements TripManagerX {
                         trackDAO.writeEvent(event, conn);
                         conn.commit();
                     }
-                } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+                } catch (MalformedConfigurationException | SQLException e) {
                     throw new TripManagerException("Error starting a new trip from track point", e);
                 }
             } else {
@@ -110,7 +110,7 @@ public class TripManagerXImpl implements TripManagerX {
                         tripDAO.updateTrip(new TripEvent(t), conn);
                         conn.commit();
                     }
-                } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+                } catch (MalformedConfigurationException | SQLException e) {
                     throw new TripManagerException("Error writing rack point", e);
                 }
             }
@@ -141,7 +141,7 @@ public class TripManagerXImpl implements TripManagerX {
                 tripDAO.deleteTrip(id, c);
                 trackDAO.deleteFromTrack(t.getStartTS(), t.getStartTS(), c, true);
                 c.commit();
-            } catch (ClassNotFoundException | MalformedConfigurationException | SQLException e) {
+            } catch (MalformedConfigurationException | SQLException e) {
                 throw new TripManagerException("Error deleting trip " + id, e);
             }
         }
@@ -156,7 +156,7 @@ public class TripManagerXImpl implements TripManagerX {
             t.setTripDescription(description);
             try (DBHelper helper = new DBHelper(log, true); Connection c = helper.getConnection()) {
                 tripDAO.saveTrip(t, c);
-            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+            } catch (SQLException | MalformedConfigurationException e) {
                 throw new TripManagerException(ERROR_SAVING_TRIP, e);
             }
         }
@@ -198,7 +198,7 @@ public class TripManagerXImpl implements TripManagerX {
             t.setDistance(dist);
             try (DBHelper helper = new DBHelper(log, true); Connection c = helper.getConnection()) {
                 tripDAO.saveTrip(t, c);
-            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+            } catch (SQLException | MalformedConfigurationException e) {
                 throw new TripManagerException(ERROR_SAVING_TRIP, e);
             }
         }
@@ -220,7 +220,7 @@ public class TripManagerXImpl implements TripManagerX {
                     trackDAO.deleteFromTrack(newT.getEndTS(), t.getEndTS(), c, false);
                     c.commit();
                 }
-            } catch (SQLException | ClassNotFoundException | MalformedConfigurationException e) {
+            } catch (SQLException | MalformedConfigurationException e) {
                 throw new TripManagerException(ERROR_SAVING_TRIP, e);
             }
         }
