@@ -15,18 +15,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.data.DefaultSampleWriter;
+import com.aboni.nmea.router.data.ImmutableSample;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.Constants;
-import com.aboni.log.Log;
 import com.aboni.nmea.router.data.sampledquery.*;
 import com.aboni.nmea.router.utils.ThingsFactory;
-import com.aboni.log.LogStringBuilder;
-import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SpeedService extends JSONWebService {
 
@@ -38,7 +41,7 @@ public class SpeedService extends JSONWebService {
 
     private static class SpeedSampleWriter implements SampleWriter {
 
-        private long lastTS = 0;
+        private final SampleWriter writer = new DefaultSampleWriter();
         private double lastV = 0.0;
         private boolean lastSkipped = true;
         private boolean lastNull = false;
@@ -48,64 +51,53 @@ public class SpeedService extends JSONWebService {
         public JSONObject[] getSampleNode(Sample s) {
             JSONObject[] ret;
             if (s.getValue() <= 0.1 && lastV <= 0.1) {
+                Sample s1;
                 if (count > 0) {
                     if (!lastSkipped) {
                         // speed is 0 but last sample was not skipped so write a 0 to bring chart to 0
-                        ret = new JSONObject[]{writeZero(s.getTimestamp())};
+                        s1 = ImmutableSample.newInstance(s.getTimestamp(), s.getTag(), 0, 0, 0);
                         lastNull = false;
                         count++;
                     } else if (!lastNull) {
                         // last one was speed=0, but it was written. Write a null.
-                        ret = new JSONObject[]{writeNull(s.getTimestamp())};
+                        s1 = ImmutableSample.newInstance(s.getTimestamp(), s.getTag(), Double.NaN, Double.NaN, Double.NaN);
                         lastNull = true;
                         count++;
                     } else {
                         // last one was skipped and speed is still 0 - skip again
-                        ret = null;
+                        s1 = null;
                     }
                 } else {
                     // skip
-                    ret = null;
+                    s1 = null;
                 }
                 lastSkipped = true;
+                ret = writer.getSampleNode(s1);
             } else {
                 if (lastSkipped && count > 0) {
-                    ret = new JSONObject[]{writeNull(lastTS - 1), writeZero(lastTS), writeValue(s)};
+                    List<JSONObject> list = new ArrayList<>();
+                    addToList(list, writer.getSampleNode(ImmutableSample.newInstance(s.getTimestamp(), s.getTag(), Double.NaN, Double.NaN, Double.NaN)));
+                    addToList(list, writer.getSampleNode(ImmutableSample.newInstance(s.getTimestamp(), s.getTag(), 0, 0, 0)));
+                    addToList(list, writer.getSampleNode(s));
                     count += 2;
+                    ret = list.toArray(new JSONObject[]{});
                 } else {
-                    ret = new JSONObject[]{writeValue(s)};
                     count++;
+                    ret = writer.getSampleNode(s);
                 }
                 lastSkipped = false;
                 lastNull = false;
             }
             lastV = s.getValue();
-            lastTS = s.getTimestamp();
             return ret;
         }
 
-        private JSONObject writeValue(Sample s) {
-            return write(s.getTimestamp(),
-                    Utils.round(s.getMinValue(), 2),
-                    Utils.round(s.getValue(), 2),
-                    Utils.round(s.getMaxValue(), 2));
-        }
-
-        private JSONObject writeNull(long ts) {
-            return write(ts, "null", "null", "null");
-        }
-
-        private JSONObject writeZero(long ts) {
-            return write(ts, "0.0", "0.0", "0.0");
-        }
-
-        private JSONObject write(long ts, Object min, Object avg, Object max) {
-            JSONObject s = new JSONObject();
-            s.put("time", ts);
-            s.put("vMin", min);
-            s.put("v", avg);
-            s.put("vMax", max);
-            return s;
+        private static void addToList(List<JSONObject> list, JSONObject[] objs) {
+            if (objs != null) {
+                for (JSONObject obj : objs) {
+                    if (obj != null) list.add(obj);
+                }
+            }
         }
     }
 

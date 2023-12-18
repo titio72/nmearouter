@@ -99,3 +99,13 @@ input:checked + .slider:before {
   font-size: 12px;
   line-height: 1.42857;
 }
+
+.chart-wrapper {
+  position: relative;
+  margin-top: 5px;
+  min-width: 300px;
+  min-height: 300px;
+}
+
+.chart-canvas {
+}

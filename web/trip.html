@@ -75,16 +75,6 @@
       grid-gap: 5px;
     }
 
-    .chart-wrapper {
-      position: relative;
-      margin-top: 5px;
-      min-width: 300px;
-      min-height: 300px;
-    }
-
-    .chart-canvas {
-    }
-
     .map {
       margin-top: 5px;
       min-width: 300px;
@@ -183,9 +173,10 @@
     x = 999999;
     for (i = 0; i<trips.trips.length; i++) {
       t = trips.trips[i];
-      if (t.id>tripId && t.id<x) x = t.id;
+      if (t.id>tripId) x = t.id;
     }
-    if (x!=-999999) window.location.href = "trip.html?trip=" + x;
+    if (x!=999999) window.location.href = "trip.html?trip=" + x;
+    else window.location.href = "trip.html?trip=" + trips.trips[trips.trips.length-1].id;
   }
 
   function goPrevTrip() {
@@ -195,6 +186,7 @@
       if (t.id<tripId && t.id>x) x = t.id;
     }
     if (x!=-1) window.location.href = "trip.html?trip=" + x;
+    else window.location.href = "trip.html?trip=" + trips.trips[0].id;
   }
 
   function getUrlVars() {
@@ -219,7 +211,7 @@
     windChart = createLineChart('windChart', 'Wind speed (Kn)');
     rollChart = createLineChart('rollChart', 'Boat roll (Deg)');
     pressChart = createLineChart('pressChart', 'Atmo (MB)');
-    speedDistrChart = createBarChart('speedDistrChart', '', getLabelArray(0.5, 0.5, 32, 1), ['Nm motoring', 'Nm sailing'], ['Orange', 'Blue'], false);    
+    speedDistrChart = createBarChart('speedDistrChart', '', getLabelArray(0.5, 0.5, 32, 1), ['Nm motoring', 'Nm sailing'], ['Orange', 'Blue'], false);
     rollDistrChart = createBarChart('rollDistrChart', '', getLabelArray(-45, 5, 19, 0), ['Time heeling'], ['Orange'], true);
     createWindStatsChart();
     loadTimeChart();
@@ -900,7 +892,8 @@
                     </div>
                     <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
                         <div class="col-2">Trip</div>
-                        <div class="col-4">{{trip.startT | date:'short'}}<br>{{trip.endT | date:'short'}}
+                        <div class="col-4">{{trip.startT | date:'yyyy-MM-dd HH:mm:ss'}}<br>{{trip.endT |
+                            date:'yyyy-MM-dd HH:mm:ss'}}
                         </div>
                         <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
                             number:2}}KN
@@ -912,7 +905,8 @@
                     <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
                          onclick="switchLeg(this)" id="L{{leg.leg}}">
                         <div class="col-2">Leg {{leg.leg}}</div>
-                        <div class="col-4">{{leg.startT | date:'short'}}<br>{{leg.endT | date:'short'}}
+                        <div class="col-4">{{leg.startT | date:'yyyy-MM-dd HH:mm:ss'}}<br>{{leg.endT | date:'yyyy-MM-dd
+                            HH:mm:ss'}}
                         </div>
                         <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
                             number:2}}KN
@@ -929,10 +923,10 @@
         <div class="col">
             <div class="tile-container">
                 <div class="tile-wrapper">
-                    <my-tile title="Trip" value1="{{current.start | date:'short'}}"
-                             value2="{{current.end | date:'short'}}"
-                             value3="{{current.totalTime}}"
-                    ></my-tile>
+                    <my-tile title="Trip" value1="{{current.start | date:'yyyy-MM-dd HH:mm:ss'}}"
+                             value2="{{current.end | date:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.totalTime}}">
+                    </my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Navigation" value1="{{current.navTime}}"
@@ -951,26 +945,26 @@
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 1 NM" value1="{{current.max01NMSpeed | number:2}} KN"
-                             value2="{{current.max01NMSpeedTime0T | date:'short'}}"
-                             value3="{{current.max01NMSpeedTime1T | date:'short'}}"></my-tile>
+                             value2="{{current.max01NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max01NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 5 NM" value1="{{current.max05NMSpeed | number:2}} KN"
-                             value2="{{current.max05NMSpeedTime0T | date:'short'}}"
-                             value3="{{current.max05NMSpeedTime1T | date:'short'}}"></my-tile>
+                             value2="{{current.max05NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max05NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 10 NM" value1="{{current.max10NMSpeed | number:2}} KN"
-                             value2="{{current.max10NMSpeedTime0T | date:'short'}}"
-                             value3="{{current.max10NMSpeedTime1T | date:'short'}}"></my-tile>
+                             value2="{{current.max10NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max10NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <!--div class="tile-wrapper">
                     <my-tile title="30s Speed" value1="Max {{current.maxAvgSpeed | number:2}} KN"
-                             value2="{{current.maxAvgSpeedTimeT | date:'short'}}" value3=""></my-tile>
+                             value2="{{current.maxAvgSpeedTimeT | date:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
                 </div-->
                 <div class="tile-wrapper">
                     <my-tile title="Speed" value1="Max {{current.maxSpeed | number:2}} KN"
-                             value2="{{current.maxSpeedTimeT | date:'short'}}" value3=""></my-tile>
+                             value2="{{current.maxSpeedTimeT | date:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Distance%" value1="Sail {{current.relativeEngOffDist | percentage:1}}"

@@ -193,11 +193,11 @@
     var ctx = document.getElementById(chart);
     if (tripId!=null)
       httpLoadSpeedById(tripId, function(res) {
-        drawSpeedChart(res, chart);
+        drawSpeedChart(res, chart, "Boat speed");
       });
     else
       httpLoadSpeedDateRange(dateFrom, dateTo, function(res) {
-        drawSpeedChart(res, chart);
+        drawSpeedChart(res, chart, "Boat speed");
       });
   }
 
@@ -211,7 +211,7 @@
       	};
   }
 
-  function drawSpeedChart(data, chart) {
+  function drawSpeedChart(data, chart, chartTitle) {
     var ctx = document.getElementById(chart);
     var c = chartMap.get(chart);
       if (c != null) {
@@ -236,18 +236,10 @@
               type: 'time',
             }]
           },
-		  /*plugins: {
-			zoom: {
-				pan: {
-					enabled: true,
-					mode: 'x'
-				},
-				zoom: {
-					enabled: true,
-					mode: 'x'
-				}
-			}
-		  },*/
+          title: {
+            display: true,
+            text: chartTitle
+          },
           tooltips: {
             callbacks: {
               label: function (tooltipItem, data) {
@@ -269,7 +261,7 @@
       chartMap.set(chart, c1);
   }
 
-  function drawMeteoChart(data, chart, serie, min, avg, max) {
+  function drawMeteoChart(data, chart, serie, min, avg, max, chartTitle) {
     var ctx = document.getElementById(chart);
     var c = chartMap.get(chart);
       if (c != null) {
@@ -288,23 +280,15 @@
           legend: {
             display: false
           },
+          title: {
+            display: true,
+            text: chartTitle
+          },
           scales: {
             xAxes: [{
               type: 'time',
             }]
-          }/*,
-		  plugins: {
-			zoom: {
-					pan: {
-						enabled: true,
-						mode: 'x'
-					},
-					zoom: {
-						enabled: true,
-						mode: 'x'
-					}
-				}
-			}*/
+          }
         }
       });
       chartMap.set(chart, c1);
@@ -312,21 +296,17 @@
 
   function refreshMeteoCharts() {
     if (tripId!=null)
-    httpLoadAllMeteoById(tripId, function(res) {
-        drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
-        drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
-        drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
-        drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
-        drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
-      });
+      httpLoadAllMeteoById(tripId, drawAllCharts);
     else
-    httpLoadAllMeteoDateRange(dateFrom, dateTo, function(res) {
-        drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0);
-        drawMeteoChart(res, "windChart", "TW_", 1, 1, 1);
-        drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0);
-        drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1);
-        drawMeteoChart(res, "humChart", "HUM", 0, 1, 0);
-      });
+      httpLoadAllMeteoDateRange(dateFrom, dateTo, drawAllCharts);
+  }
+
+  function drawAllCharts(res) {
+    drawMeteoChart(res, "tempChart", "AT0", 0, 1, 0, "Temperature");
+    drawMeteoChart(res, "windChart", "TW_", 1, 1, 1, "Wind speed");
+    drawMeteoChart(res, "windAngleChart", "TWD", 0, 1, 0, "Wind angle");
+    drawMeteoChart(res, "pressChart", "PR_", 0, 0, 1, "Pressure");
+    drawMeteoChart(res, "humChart", "HUM", 0, 1, 0, "Humidiity");
   }
 
   function getDataPoints(data, name, attr) {
@@ -490,10 +470,10 @@
     <div class="row">
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div id="TripsPanel" class="card-router card-track" ng-controller="myCtrl">
-                <div class="card-router-header card-track-header">Tracking <span style="float: right"
+                <!--div class="card-router-header card-track-header">Tracking <span style="float: right"
                                                                                  class="glyphicon glyphicon-refresh"
                                                                                  aria-hidden="true"
-                                                                                 onclick="refreshTrips();"></span></div>
+                                                                                 onclick="refreshTrips();"></span></div-->
                 <div id="panel_details" class="card-router-body card-track-body">
                     <div class="table-responsive documentList" style="height: 100%">
                         <table class="table table-sm">
@@ -554,7 +534,6 @@
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Map</div>
                 <div class="card-router-body card-track-body" style="padding: 0%; margin: 0%">
                     <div id="map" style="width: 100%; height: 100%"></div>
                     <div id="mapToolbar">
@@ -570,7 +549,6 @@
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Trip</div>
                 <div id="panelInfo" class="card-router-body card-track-body" ng-controller="infoController">
                     <table>
                         <tr ng-if="trip.name!=''">
@@ -619,48 +597,42 @@
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Speed</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="speedChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Wind</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="windChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Wind Angle</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="windAngleChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Pressure</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="pressChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Humidity</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="humChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div class="card-router card-track">
-                <div class="card-router-header card-track-header">Temperature</div>
-                <div class="card-router-body card-track-body">
+                <div class="chart-wrapper">
                     <canvas class="chart-canvas" id="tempChart" ondblclick="resetZoom(this.id);"></canvas>
                 </div>
             </div>

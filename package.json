@@ -2,8 +2,8 @@
   "name": "nmearouter",
   "version": "0.1.7",
   "dependencies": {
-    "angular": "^1.7.9",
-    "angular-sanitize": "^1.7.9",
+    "angular": "^1.8.2",
+    "angular-sanitize": "^1.8.2",
     "bootbox": "^5.4.0",
     "bootstrap": "^4.4.1",
     "bootstrap-datepicker": "^1.7.1",

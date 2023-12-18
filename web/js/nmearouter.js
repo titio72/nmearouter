@@ -302,7 +302,7 @@ function fixTrip(id, cback) {
 
 function changeName(trip, name, cback) {
   var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open("GET", "http://" + window.location.hostname + 
+  xmlHttp.open("GET", "http://" + window.location.hostname +
       ":1112/changetripdesc?trip=" + trip + "&desc=" + encodeURIComponent(name));
   xmlHttp.onreadystatechange = function() {
     if (xmlHttp.readyState==4 && xmlHttp.status==200) {
@@ -324,7 +324,7 @@ function httpGetTrips() {
 
 function httpGetTrackByDate(dtF, dtT, cback) {
   var xmlHttp = new XMLHttpRequest();
-  var url = "http://" + window.location.hostname + ":1112/track?format=json&from=" + encodeURIComponent(dtF) + 
+  var url = "http://" + window.location.hostname + ":1112/track?format=json&from=" + encodeURIComponent(dtF) +
     "&to=" + encodeURIComponent(dtT);
   xmlHttp.open("GET", url, true);
   xmlHttp.onreadystatechange = function() {
