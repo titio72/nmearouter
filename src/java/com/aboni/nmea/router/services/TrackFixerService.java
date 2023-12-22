@@ -15,10 +15,10 @@
 
 package com.aboni.nmea.router.services;
 
+import com.aboni.log.Log;
 import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.QueryByDate;
-import com.aboni.log.Log;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.google.inject.Inject;
@@ -112,7 +112,7 @@ public class TrackFixerService extends JSONWebService {
         }
     }
 
-    private TrackFixer load(TrackPointBuilder builder, TrackReader scanner, int trackId) throws SQLException, MalformedConfigurationException, ClassNotFoundException, TrackManagementException {
+    private TrackFixer load(TrackPointBuilder builder, TrackReader scanner, int trackId) throws SQLException, MalformedConfigurationException, TrackManagementException {
         TrackFixer res;
         Trip trip = tripManager.getTrip(trackId);
         if (trip != null) {

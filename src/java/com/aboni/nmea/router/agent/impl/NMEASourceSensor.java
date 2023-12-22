@@ -15,14 +15,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.sensors.Sensor;
 import com.aboni.sensors.SensorException;
 import com.aboni.sensors.SensorPressureTemp;
 import com.aboni.sensors.SensorTemp;
 import com.aboni.sensors.hw.CPUTemp;
-import com.aboni.log.Log;
-import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -46,8 +47,8 @@ public class NMEASourceSensor extends NMEAAgentImpl {
     private final Map<String, Measurement> xDrMap;
 
     @Inject
-    public NMEASourceSensor(TimestampProvider tp, Log log) {
-        super(log, tp, true, false);
+    public NMEASourceSensor(TimestampProvider tp, Log log, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, false);
         xDrMap = new HashMap<>();
     }
 

@@ -15,13 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.utils.TimestampProvider;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.log.Log;
 import com.aboni.nmea.message.Message;
 import com.aboni.nmea.message.MsgSystemTime;
-import com.aboni.log.Log;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -31,8 +32,8 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
     private final SystemTimeChecker systemTimeCHecker;
 
     @Inject
-    public NMEASystemTimeGPS(Log log, TimestampProvider tp, SystemTimeChecker checker) {
-        super(log, tp, true, true);
+    public NMEASystemTimeGPS(Log log, TimestampProvider tp, RouterMessageFactory messageFactory, SystemTimeChecker checker) {
+        super(log, tp, messageFactory, true, true);
         if (checker==null) throw new IllegalArgumentException("SystemTimeChecker is null");
         this.systemTimeCHecker = checker;
     }

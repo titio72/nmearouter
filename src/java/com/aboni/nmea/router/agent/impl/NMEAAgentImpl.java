@@ -15,22 +15,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
+import com.aboni.nmea.message.Message;
 import com.aboni.nmea.router.*;
-import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.processors.NMEAPostProcess;
-import com.aboni.nmea.router.processors.NMEAProcessorSet;
-import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.agent.NMEAAgentStatusListener;
 import com.aboni.nmea.router.agent.NMEASource;
 import com.aboni.nmea.router.agent.NMEATarget;
-import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.router.filters.DummyFilter;
-import com.aboni.nmea.message.Message;
-import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
-import com.aboni.log.Log;
-import com.aboni.log.SafeLog;
-import com.aboni.log.LogStringBuilder;
+import com.aboni.nmea.router.filters.NMEAFilter;
+import com.aboni.nmea.router.processors.NMEAPostProcess;
+import com.aboni.nmea.router.processors.NMEAProcessorSet;
+import com.aboni.nmea.router.processors.NMEARouterProcessorException;
 import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
@@ -107,27 +106,22 @@ public class NMEAAgentImpl implements NMEAAgent {
         boolean canStartStop;
     }
 
-    private NMEAAgentStatusListener sl;
+    private NMEAAgentStatusListener statusListener;
     private final InternalTarget targetIf;
     private final InternalSource sourceIf;
     private final NMEAProcessorSet processorSet;
     private final TimestampProvider timestampProvider;
     private final AgentAttributes attributes;
-
-    @Inject
-    private RouterMessageFactory messageFactory;
-
-    @Inject
-    private NMEA0183MessageFactory nmea0183MessageFactory;
-
+    private final RouterMessageFactory messageFactory;
     private ListenerWrapper listenerWrapper;
-
     private final Log log;
 
     @Inject
-    public NMEAAgentImpl(Log log, TimestampProvider timestampProvider, boolean source, boolean target) {
+    public NMEAAgentImpl(Log log, TimestampProvider timestampProvider, RouterMessageFactory messageFactory, boolean source, boolean target) {
         if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider cannot be null");
+        if (messageFactory == null) throw new IllegalArgumentException("MessageFactory provider cannot be null");
         this.timestampProvider = timestampProvider;
+        this.messageFactory = messageFactory;
         this.log = SafeLog.getSafeLog(log);
         this.targetIf = new InternalTarget();
         this.sourceIf = new InternalSource();
@@ -194,7 +188,7 @@ public class NMEAAgentImpl implements NMEAAgent {
     }
 
     private void notifyStatus() {
-        if (sl!=null) sl.onStatusChange(this);
+        if (statusListener != null) statusListener.onStatusChange(this);
     }
 
     @Override
@@ -211,7 +205,7 @@ public class NMEAAgentImpl implements NMEAAgent {
 
     @Override
     public final void setStatusListener(NMEAAgentStatusListener listener) {
-        sl = listener;
+        statusListener = listener;
     }
 
     @Override
@@ -240,12 +234,12 @@ public class NMEAAgentImpl implements NMEAAgent {
      * @param sentence The sentence to be notified to agents
      */
     protected final void postMessage(Sentence sentence) {
-        if (sentence!=null) {
-            Message m = nmea0183MessageFactory.getMessage(sentence);
-            if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
+        if (sentence != null && sourceIf.listener != null && isStarted()) {
+            RouterMessage theMsg = messageFactory.createMessage(sentence, getName(), timestampProvider.getNow());
+            if (checkSourceFilter(theMsg.getPayload())) {
                 List<Message> toSend = null;
                 try {
-                    toSend = processorSet.getSentences(m, getName());
+                    toSend = processorSet.getSentences(theMsg.getPayload(), getName());
                 } catch (NMEARouterProcessorException e) {
                     log.error(() -> getLogBuilder().wO("dispatch message").wV("sentence", sentence).toString(), e);
                 }
@@ -262,7 +256,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      * @param m The message to be notified to agents
      */
     protected final void postMessage(JSONObject m) {
-        if (isStarted()) {
+        if (m != null && sourceIf.listener != null && isStarted()) {
             sourceIf.listener.onSentence(messageFactory.createMessage(m, getName(), timestampProvider.getNow()));
         }
     }
@@ -273,7 +267,7 @@ public class NMEAAgentImpl implements NMEAAgent {
      * @param m The message to be notified to agents
      */
     protected final void postMessage(Message m) {
-        if (isStarted() && checkSourceFilter(m) && sourceIf.listener != null) {
+        if (m != null && sourceIf.listener != null && isStarted() && checkSourceFilter(m)) {
             List<Message> toSend = null;
             try {
                 toSend = processorSet.getSentences(m, getName());
@@ -372,7 +366,7 @@ public class NMEAAgentImpl implements NMEAAgent {
         }
         NMEATarget trg = getTarget();
         if (trg!=null) {
-            agJSON.put("hasTargetFilter", !(trg.getFilter() == null || trg.getFilter() instanceof DummyFilter));
+            agJSON.put("hasTargetFilter", hasFilter(trg));
             if (trg.getFilter()!=null) agJSON.put("targetFilter", trg.getFilter().toJSON());
         } else {
             agJSON.put("hasTargetFilter", false);

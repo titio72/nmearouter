@@ -15,8 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.log.Log;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -31,8 +32,8 @@ public class NMEAPlayer extends NMEAAgentImpl {
     private String file;
 
     @Inject
-    public NMEAPlayer(Log log, TimestampProvider tp) {
-        super(log, tp, true, false);
+    public NMEAPlayer(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, false);
     }
 
     @Override

@@ -15,12 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.message.Message;
 import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.n2k.N2KStream;
 import com.aboni.nmea.nmea0183.NMEA0183MessageFactory;
-import com.aboni.log.Log;
-import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -61,12 +61,14 @@ public class NMEAInputManager {
 
     }
 
-    private class NMEA0183Handler implements StringInputHandler {
+    private static class NMEA0183Handler implements StringInputHandler {
 
         private final Log logger;
+        private final NMEA0183MessageFactory messageFactory;
 
         NMEA0183Handler(Log logger) {
             this.logger = logger;
+            this.messageFactory = ThingsFactory.getInstance(NMEA0183MessageFactory.class, logger);
         }
 
         @Override
@@ -84,12 +86,10 @@ public class NMEAInputManager {
     private final Log logger;
     private final StringInputHandler n2kHandler;
     private final StringInputHandler nmeaHandler;
-    private final NMEA0183MessageFactory messageFactory;
 
-    public NMEAInputManager(Log logger, NMEA0183MessageFactory messageFactory) {
+    public NMEAInputManager(Log logger) {
         n2kHandler = new N2KHandlerExp(logger);
         nmeaHandler = new NMEA0183Handler(logger);
-        this.messageFactory = messageFactory;
         this.logger = SafeLog.getSafeLog(logger);
     }
 

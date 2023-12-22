@@ -15,14 +15,18 @@
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.NMEAMessagesModule;
-import com.aboni.nmea.router.NMEARouterModule;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.log.ConsoleLog;
+import com.aboni.nmea.NMEAMessagesModule;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.utils.DefaultTimestampProvider;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import net.sf.marineapi.nmea.sentence.Sentence;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +45,23 @@ public class NMEAAgentImplTest {
         ThingsFactory.setInjector(injector);
     }
 
+    private static class MyMessageFactory implements RouterMessageFactory {
+        @Override
+        public RouterMessage createMessage(Sentence obj, String source, long timestamp) {
+            return null;
+        }
+
+        @Override
+        public RouterMessage createMessage(JSONObject obj, String source, long timestamp) {
+            return null;
+        }
+
+        @Override
+        public RouterMessage createMessage(Message obj, String source, long timestamp) {
+            return null;
+        }
+    }
+
     private class MyAgent extends NMEAAgentImpl {
 
         private final List<String> trail = new ArrayList<>();
@@ -48,7 +69,7 @@ public class NMEAAgentImplTest {
         private boolean activateAnswer = true;
 
         public MyAgent(boolean source, boolean target) {
-            super(ConsoleLog.getLogger(), tp, source, target);
+            super(ConsoleLog.getLogger(), tp, new MyMessageFactory(), source, target);
         }
 
         void setOnActivateAnswer(boolean b) {

@@ -15,13 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.log.Log;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.log.Log;
 import com.aboni.sensors.EngineDetector;
 import com.aboni.sensors.EngineStatus;
+import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -32,8 +33,8 @@ public class EngineDetectionAgent extends NMEAAgentImpl {
     private EngineStatus engineRunning;
 
     @Inject
-    public EngineDetectionAgent(TimestampProvider tp, NMEACache cache, Log log) {
-        super(log, tp, true, false);
+    public EngineDetectionAgent(TimestampProvider tp, NMEACache cache, Log log, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, false);
         if (cache==null) throw new IllegalArgumentException("Cache is null");
         this.cache = cache;
         engineRunning = EngineStatus.UNKNOWN;

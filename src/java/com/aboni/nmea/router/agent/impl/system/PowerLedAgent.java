@@ -15,12 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.log.Log;
+import com.aboni.nmea.message.MsgPosition;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.message.MsgPosition;
-import com.aboni.log.Log;
+import com.aboni.utils.TimestampProvider;
 import com.pi4j.io.gpio.*;
 
 import javax.inject.Inject;
@@ -36,8 +37,8 @@ public class PowerLedAgent extends NMEAAgentImpl {
     private long lastGps;
 
     @Inject
-    public PowerLedAgent(Log log, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public PowerLedAgent(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
         lastGps = 0;
         GpioController gpio = GpioFactory.getInstance();
         pin = gpio.provisionDigitalOutputPin(PWR, "pwr", PinState.LOW);

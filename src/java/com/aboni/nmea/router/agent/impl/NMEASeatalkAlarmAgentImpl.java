@@ -1,13 +1,14 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.SeatalkAlarmsStatus;
+import com.aboni.data.Pair;
+import com.aboni.log.Log;
 import com.aboni.nmea.message.MsgSeatalkAlarm;
 import com.aboni.nmea.message.SeatalkAlarm;
 import com.aboni.nmea.message.SeatalkAlarmStatus;
-import com.aboni.log.Log;
-import com.aboni.data.Pair;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.SeatalkAlarmsStatus;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
@@ -44,8 +45,8 @@ public class NMEASeatalkAlarmAgentImpl extends NMEAAgentImpl implements SeatalkA
     private static final long CLEANUP_TIMEOUT = 300000;
 
     @Inject
-    public NMEASeatalkAlarmAgentImpl(Log log, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public NMEASeatalkAlarmAgentImpl(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
         this.alarms = new HashMap<>();
         this.listeners = new HashSet<>();
     }

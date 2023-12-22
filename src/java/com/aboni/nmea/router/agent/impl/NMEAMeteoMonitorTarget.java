@@ -15,17 +15,18 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.data.*;
-import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
+import com.aboni.data.Pair;
+import com.aboni.log.Log;
+import com.aboni.nmea.message.*;
 import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.message.*;
-import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.impl.MemoryStatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 import com.aboni.nmea.router.data.metrics.Metrics;
-import com.aboni.log.Log;
-import com.aboni.data.Pair;
+import com.aboni.utils.TimestampProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -132,8 +133,8 @@ public class NMEAMeteoMonitorTarget extends NMEAAgentImpl implements HistoryProv
     }
 
     @Inject
-    public NMEAMeteoMonitorTarget(Log log, NMEACache cache, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public NMEAMeteoMonitorTarget(Log log, NMEACache cache, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.statsWriter = new MemoryStatsWriter();
         this.meteoSampler = new Sampler<>(log, tp, statsWriter, "MeteoMonitor");

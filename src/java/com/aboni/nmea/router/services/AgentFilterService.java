@@ -15,14 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
+import com.aboni.log.Log;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgent;
+import com.aboni.nmea.router.filters.DummyFilter;
+import com.aboni.nmea.router.filters.FilterFactory;
+import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
-import com.aboni.nmea.router.filters.impl.NMEABasicSentenceFilter;
-import com.aboni.nmea.router.filters.impl.NMEAFilterSetImpl;
-import com.aboni.nmea.router.services.impl.JSONAgentListSerializer;
-import com.aboni.log.Log;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -45,55 +45,69 @@ public class AgentFilterService extends JSONWebService {
             source = (tokens.length == 2) ? tokens[1] : "";
         }
 
-        NMEABasicSentenceFilter getFilter() {
-            return new NMEABasicSentenceFilter(sentence, source);
+        NMEAFilter getFilter(FilterFactory factory) {
+            return factory.getNMEA0183Filter(sentence, source);
         }
     }
+
+    private final FilterFactory filterFactory;
+
     @Inject
     public AgentFilterService(Log log, NMEARouter router,
-                              JSONAgentListSerializer serializer,
-                              AgentPersistentStatusManager agentStatusManager) {
+                              AgentPersistentStatusManager agentStatusManager,
+                              FilterFactory filterFactory) {
         super(log);
-        if (router==null) throw new IllegalArgumentException("router is null");
-        if (agentStatusManager==null) throw new IllegalArgumentException("Agent status manager is null");
-        if (serializer==null) throw new IllegalArgumentException("Agent list serializer is null");
-        setLoader((ServiceConfig config) -> {
-            try {
-                String agentName = config.getParameter("agent");
-                String[] sentences = config.getParameter("sentences").split(",");
-                String type = config.getParameter("type");
-                SOURCE_TARGET sourceTarget =
-                        "source".equals(config.getParameter("direction", "source"))?SOURCE_TARGET.SOURCE:SOURCE_TARGET.TARGET;
-                NMEAFilterSetImpl fs = getNMEAFilterSet(sentences, type);
-                String msg = setFilter(router, agentStatusManager, agentName, fs, sourceTarget);
-                List<NMEAAgent> agents = new ArrayList<>();
-                for (String ag: router.getAgents()) {
-                    NMEAAgent a = router.getAgent(ag);
-                    if (a!=null) agents.add(a);
-                }
-                return serializer.getJSON(agents, msg);
-            } catch (Exception e) {
-                throw new JSONGenerationException(e);
+        if (filterFactory == null) throw new IllegalArgumentException("FilterFactory is null");
+        this.filterFactory = filterFactory;
+        setLoader(new AgentServiceHelper(router, agentStatusManager) {
+            @Override
+            protected String execute(ServiceConfig config) throws ServiceException {
+                return executeFilter(getRouter(), getAgentStatusManager(), config);
             }
         });
     }
 
-    private static NMEAFilterSetImpl getNMEAFilterSet(String[] sentences, String type) {
-        NMEAFilterSetImpl fs;
-        fs = new NMEAFilterSetImpl("whitelist".equals(type) ? NMEAFilterSet.TYPE.WHITELIST : NMEAFilterSet.TYPE.BLACKLIST);
-        for (String str : sentences) {
-            str = str.trim();
-            FltSentence fltSentence = new FltSentence(str.trim());
-            if (!fltSentence.sentence.isEmpty()) {
-                NMEABasicSentenceFilter f = fltSentence.getFilter();
-                fs.addFilter(f);
-            }
+    protected String executeFilter(NMEARouter router, AgentPersistentStatusManager agentPersistentStatusManager, ServiceConfig config) throws ServiceException {
+        try {
+            String agentName = config.getParameter("agent");
+            String[] sentences = cleanSentences(config.getParameter("sentences", "").split(","));
+            String type = config.getParameter("type");
+            SOURCE_TARGET sourceTarget =
+                    "source".equals(config.getParameter("direction", "source")) ? SOURCE_TARGET.SOURCE : SOURCE_TARGET.TARGET;
+            NMEAFilter fs = getNMEAFilterSet(sentences, type);
+            return setFilter(router, agentPersistentStatusManager, agentName, fs, sourceTarget);
+        } catch (Exception e) {
+            throw new ServiceException(e);
         }
-        return fs;
+    }
+
+
+    private static String[] cleanSentences(String[] sentences) {
+        List<String> listSentences = new ArrayList<>();
+        for (String s : sentences) if (s != null && !s.trim().isEmpty()) listSentences.add(s.trim());
+        return listSentences.toArray(new String[0]);
+    }
+
+    private NMEAFilter getNMEAFilterSet(String[] sentences, String type) {
+        if (sentences == null) sentences = new String[0];
+        if (sentences.length == 0 && "blacklist".equals(type)) {
+            return new DummyFilter("");
+        } else {
+            NMEAFilterSet fs = filterFactory.createFilterSet("whitelist".equals(type) ? NMEAFilterSet.TYPE.WHITELIST : NMEAFilterSet.TYPE.BLACKLIST);
+            for (String str : sentences) {
+                str = str.trim();
+                FltSentence fltSentence = new FltSentence(str.trim());
+                if (!fltSentence.sentence.isEmpty()) {
+                    NMEAFilter f = fltSentence.getFilter(filterFactory);
+                    fs.addFilter(f);
+                }
+            }
+            return fs;
+        }
     }
 
     private String setFilter(NMEARouter router, AgentPersistentStatusManager agentStatusManager,
-                             String agentName, NMEAFilterSetImpl fs, SOURCE_TARGET inOut) {
+                             String agentName, NMEAFilter fs, SOURCE_TARGET inOut) {
         if (router==null) throw new IllegalArgumentException("Router is null");
         if (agentName==null || agentName.isEmpty()) throw new IllegalArgumentException("Agent name " + agentName + " is invalid or null");
         if (fs==null) throw new IllegalArgumentException("Filter set implementation is null");
@@ -108,7 +122,7 @@ public class AgentFilterService extends JSONWebService {
         return msg;
     }
 
-    private static void saveFilter(AgentPersistentStatusManager agentStatusManager, String agentName, NMEAFilterSetImpl fs, SOURCE_TARGET inOut, NMEAAgent a) {
+    private static void saveFilter(AgentPersistentStatusManager agentStatusManager, String agentName, NMEAFilter fs, SOURCE_TARGET inOut, NMEAAgent a) {
         switch (inOut) {
             case TARGET:
                 if (a.getTarget() != null) {

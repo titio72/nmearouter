@@ -3,14 +3,12 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.log.ConsoleLog;
 import com.aboni.log.Log;
 import com.aboni.log.LogStringBuilder;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.conf.QOS;
 import com.aboni.nmea.message.*;
+import com.aboni.nmea.router.*;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.utils.*;
+import com.aboni.utils.TimestampProvider;
+import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.util.Position;
@@ -73,8 +71,8 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
     private String src;
 
     @Inject
-    public NextionDisplayAgent(Log log, NMEACache cache, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public NextionDisplayAgent(Log log, NMEACache cache, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         this.cache = cache;
     }

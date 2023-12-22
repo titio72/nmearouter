@@ -15,13 +15,14 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.conf.QOS;
+import com.aboni.log.Log;
+import com.aboni.nmea.nmea0183.Message2NMEA0183;
 import com.aboni.nmea.router.NMEATrafficStats;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.TimestampProvider;
-import com.aboni.nmea.nmea0183.Message2NMEA0183;
-import com.aboni.log.Log;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
 import javax.inject.Inject;
@@ -49,8 +50,8 @@ public class NMEAUDPSender extends NMEAAgentImpl {
     private String baseDescription;
 
     @Inject
-    public NMEAUDPSender(Log log, TimestampProvider tp, Message2NMEA0183 converter) {
-        super(log, tp, false, true);
+    public NMEAUDPSender(Log log, TimestampProvider tp, RouterMessageFactory messageFactory, Message2NMEA0183 converter) {
+        super(log, tp, messageFactory, false, true);
         if (converter==null) throw new IllegalArgumentException("NMEA converter cannot be null");
         this.converter = converter;
         targets = new HashSet<>();

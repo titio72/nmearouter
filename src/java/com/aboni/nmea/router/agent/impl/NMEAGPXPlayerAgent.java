@@ -18,6 +18,7 @@ package com.aboni.nmea.router.agent.impl;
 import com.aboni.geo.Course;
 import com.aboni.geo.GeoPositionT;
 import com.aboni.log.Log;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -48,8 +49,8 @@ public class NMEAGPXPlayerAgent extends NMEAAgentImpl {
     private boolean stop;
 
     @Inject
-    public NMEAGPXPlayerAgent(Log log, TimestampProvider tp) {
-        super(log, tp, true, false);
+    public NMEAGPXPlayerAgent(Log log, RouterMessageFactory messageFactory, TimestampProvider tp) {
+        super(log, tp, messageFactory, true, false);
     }
 
     public void setFile(String file) {

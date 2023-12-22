@@ -15,17 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.impl;
 
-import com.aboni.nmea.router.data.DataManagementException;
-import com.aboni.nmea.router.data.DataReader;
-import com.aboni.nmea.router.data.Sample;
-import com.aboni.nmea.router.data.SeriesReader;
-import com.aboni.nmea.router.data.QueryByDate;
+import com.aboni.nmea.router.data.*;
+import com.aboni.nmea.router.data.sampledquery.SampleWriter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.time.Instant;
 
 public abstract class DBSeriesReader implements SeriesReader {
+
+    final SampleWriter defaultWriter = new DefaultSampleWriter();
 
     protected abstract DataReader getNewDataReader();
 
@@ -55,11 +54,6 @@ public abstract class DBSeriesReader implements SeriesReader {
             a = new JSONArray();
             res.put(sample.getTag(), a);
         }
-        JSONObject s = new JSONObject();
-        s.put("time", sample.getTimestamp());
-        s.put("vMin", sample.getMinValue());
-        s.put("v", sample.getValue());
-        s.put("vMax", sample.getMaxValue());
-        a.put(s);
+        a.put(defaultWriter.getSampleNode(sample));
     }
 }

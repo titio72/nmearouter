@@ -1,12 +1,9 @@
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.GPSStatus;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.SatInfo;
-import com.aboni.nmea.message.*;
 import com.aboni.log.Log;
+import com.aboni.nmea.message.*;
+import com.aboni.nmea.router.*;
 import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.util.Position;
 
@@ -48,8 +45,8 @@ public class NMEAGPSStatusAgent extends NMEAAgentImpl implements GPSStatus {
     private int nSat;
 
     @Inject
-    public NMEAGPSStatusAgent(Log log, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public NMEAGPSStatusAgent(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
     }
 
     @OnRouterMessage

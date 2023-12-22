@@ -15,14 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics.impl;
 
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.log.Log;
 import com.aboni.log.SafeLog;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.*;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,12 +33,14 @@ import java.time.Instant;
 
 public class DBMetricReader implements DataReader {
 
-    private static final String SQL_TIME = "select * from meteo where TS>=? and TS<=?";
-    private static final String SQL_TIME_AND_TYPE = "select * from meteo where TS>=? and TS<=? and type=?";
+    private final String sqlTime;
+    private final String sqlTimeAndType;
     private final Log log;
 
     @Inject
-    public DBMetricReader(Log log) {
+    public DBMetricReader(Log log, @Named(Constants.TAG_METEO) String tableName) {
+        this.sqlTime = "select * from " + tableName + " where TS>=? and TS<=?";
+        this.sqlTimeAndType = "select * from " + tableName + " where TS>=? and TS<=? and type=?";
         this.log = SafeLog.getSafeLog(log);
     }
 
@@ -47,7 +51,7 @@ public class DBMetricReader implements DataReader {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();
             try (DBHelper db = new DBHelper(log, true)) {
-                db.executeQuery(SQL_TIME, (PreparedStatement st) -> {
+                db.executeQuery(sqlTime, (PreparedStatement st) -> {
                     st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
                     st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
                 }, (ResultSet rs) -> {
@@ -71,7 +75,7 @@ public class DBMetricReader implements DataReader {
             Instant from = ((QueryByDate) query).getFrom();
             Instant to = ((QueryByDate) query).getTo();
             try (DBHelper db = new DBHelper(log, true)) {
-                db.executeQuery(SQL_TIME_AND_TYPE, (PreparedStatement st) -> {
+                db.executeQuery(sqlTimeAndType, (PreparedStatement st) -> {
                     st.setTimestamp(1, new Timestamp(from.toEpochMilli()), Utils.UTC_CALENDAR);
                     st.setTimestamp(2, new Timestamp(to.toEpochMilli()), Utils.UTC_CALENDAR);
                     st.setString(3, tag);

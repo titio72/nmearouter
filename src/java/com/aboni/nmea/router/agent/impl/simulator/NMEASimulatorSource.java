@@ -16,14 +16,15 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl.simulator;
 
 import com.aboni.geo.ApparentWind;
+import com.aboni.log.Log;
 import com.aboni.nmea.router.Constants;
-import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.conf.QOS;
-import com.aboni.log.Log;
 import com.aboni.nmea.sentences.VWRSentence;
 import com.aboni.utils.PolarTable;
 import com.aboni.utils.PolarTableImpl;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
@@ -66,8 +67,8 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
     private final Random rnd = new Random();
 
     @Inject
-    public NMEASimulatorSource(Log log, TimestampProvider tp) {
-        super(log, tp, true, true);
+    public NMEASimulatorSource(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, true);
         id = TalkerId.GP;
         polars = null;
     }

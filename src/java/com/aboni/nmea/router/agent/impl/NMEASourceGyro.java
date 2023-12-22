@@ -17,17 +17,14 @@ package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.DeviationManager;
 import com.aboni.geo.NMEAMagnetic2TrueConverter;
-import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.nmea.message.MsgAttitude;
 import com.aboni.nmea.message.MsgHeading;
 import com.aboni.nmea.message.impl.MsgAttitudeImpl;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.sensors.*;
-import com.aboni.log.Log;
-import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
@@ -57,8 +54,9 @@ public class NMEASourceGyro extends NMEAAgentImpl {
     private static final boolean SEND_HDT = false;
 
     @Inject
-    public NMEASourceGyro(NMEACache cache, TimestampProvider tp, DeviationManager deviationManager, Log log) {
-        super(log, tp, true, false);
+    public NMEASourceGyro(NMEACache cache, TimestampProvider tp, DeviationManager deviationManager, Log log,
+                          RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, false);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         if (deviationManager==null) throw new IllegalArgumentException("Deviation manager cannot be null");
         this.cache = cache;

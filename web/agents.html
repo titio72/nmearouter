@@ -23,11 +23,11 @@
 		background-color: rgb(0, 0, 0); /* Fallback color */
 		background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 	}
-	
+
 	.ab-glyphicon-on {
 		color: yellowgreen;
 	}
-	
+
 	/* Modal Content */
 	.modal-content {
 		background-color: #fefefe;
@@ -36,11 +36,11 @@
 		border: 1px solid #888;
 		width: 50%;
 	}
-	
+
 	.agentPanel {
 	    padding: 10px;
 	}
-	
+
 	table, tr, td {
         padding-left: 3px;
 	}
@@ -114,8 +114,7 @@
 				return 0;
 		}
 	}
-	
-	
+
 	function showFilter(a, srctrg) {
 		document.getElementById("filterDialogLabel").innerHTML = "Filter for "
 				+ a.name + " [" + srctrg + "]";
@@ -209,7 +208,6 @@
                 controllerScope.$evalAsync();
             }
         }
-		
 		xmlHttp.send(null);
 	}
 
@@ -292,13 +290,13 @@
                         </td>
                         <td>
                             <div ng-if="a.startStop && a.builtin==false">
-                                <div ng-if="a.auto==false">
+                                <div ng-if="a.configuration.auto==false">
                                     <button name="{{a.agent}}" type="button"
                                             class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 1)">
                                         <span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>
                                     </button>
                                 </div>
-                                <div ng-if="a.auto">
+                                <div ng-if="a.configuration.auto">
                                     <button name="{{a.agent}}" type="button"
                                             class="btn btn-circle btn-secondary" onclick="httpGetSynAuto(this, 0)">
                                         <span class="glyphicon glyphicon-pushpin ab-glyphicon-on"

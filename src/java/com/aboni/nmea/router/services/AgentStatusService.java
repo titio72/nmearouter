@@ -15,52 +15,30 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
+import com.aboni.log.Log;
 import com.aboni.nmea.router.NMEARouter;
-import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
 import com.aboni.nmea.router.agent.AgentActivationMode;
+import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.filters.JSONFilterParser;
-import com.aboni.nmea.router.services.impl.JSONAgentListSerializer;
-import com.aboni.log.Log;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AgentStatusService extends JSONWebService {
-
-    private final NMEARouter router;
-    private final AgentPersistentStatusManager agentStatusManager;
 
     @Inject
     public AgentStatusService(NMEARouter router, AgentPersistentStatusManager agentStatusManager, JSONFilterParser filterSerializer, Log log) {
         super(log);
-        if (router==null) throw new IllegalArgumentException("router is null");
-        if (agentStatusManager==null) throw new IllegalArgumentException("Agent status manager is null");
         if (filterSerializer==null) throw new IllegalArgumentException("Filter serializer is null");
-        this.router = router;
-        this.agentStatusManager = agentStatusManager;
-        setLoader((ServiceConfig config) -> {
-            try {
-                String msg = doActivate(config);
-                List<NMEAAgent> agents = new ArrayList<>();
-                for (String agName: router.getAgents()) {
-                    NMEAAgent a = router.getAgent(agName);
-                    if (a!=null) agents.add(a);
-                }
-
-                JSONObject res = new JSONAgentListSerializer(agentStatusManager).getJSON(agents, msg);
-                res.put("time", Instant.now().toString());
-                return res;
-            } catch (Exception e) {
-                throw new JSONGenerationException(e);
+        setLoader(new AgentServiceHelper(router, agentStatusManager) {
+            @Override
+            protected String execute(ServiceConfig config) throws ServiceException {
+                return executeService(getRouter(), getAgentStatusManager(), config);
             }
         });
     }
 
-    private String doActivate(ServiceConfig config) {
+    protected String executeService(NMEARouter router, AgentPersistentStatusManager statusManager, ServiceConfig config) {
         String msg = "";
         String agent = config.getParameter("agent");
         String auto = config.getParameter("auto");
@@ -73,7 +51,7 @@ public class AgentStatusService extends JSONWebService {
                 }
 
                 if (auto!=null) {
-                    agentStatusManager.setStartMode(agent, "1".equals(auto) ? AgentActivationMode.AUTO : AgentActivationMode.MANUAL);
+                    statusManager.setStartMode(agent, "1".equals(auto) ? AgentActivationMode.AUTO : AgentActivationMode.MANUAL);
                 }
             } else {
                 msg = "Cannot change status of agent '" + agent + "'. Agent unknown.";

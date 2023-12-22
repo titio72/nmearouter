@@ -15,10 +15,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.nmea.message.MsgWaterDepth;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.message.MsgWaterDepth;
-import com.aboni.log.Log;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
@@ -41,8 +42,8 @@ public class DepthStatsAgent extends NMEAAgentImpl {
     private static final long DEFAULT_WINDOW = 60L * 60L * 1000L; // 1 hour
 
     @Inject
-    public DepthStatsAgent(Log log, TimestampProvider tp) {
-        super(log, tp, true, true);
+    public DepthStatsAgent(Log log, TimestampProvider tp, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, true);
         queue = new LinkedList<>();
     }
 

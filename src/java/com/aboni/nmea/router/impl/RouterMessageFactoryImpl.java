@@ -13,8 +13,12 @@ import javax.inject.Inject;
 
 public class RouterMessageFactoryImpl implements RouterMessageFactory {
 
+    private final NMEA0183MessageFactory nmea0183factory;
+
     @Inject
-    NMEA0183MessageFactory nmea0183factory;
+    public RouterMessageFactoryImpl(NMEA0183MessageFactory nmea0183MessageFactory) {
+        this.nmea0183factory = nmea0183MessageFactory;
+    }
 
     @Override
     public RouterMessage createMessage(Sentence obj, String agentSource, long timestamp) {

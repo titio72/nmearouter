@@ -15,18 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.message.JSONMessage;
-import com.aboni.nmea.n2k.N2KMessage;
-import com.aboni.nmea.router.services.*;
-import com.aboni.utils.TimestampProvider;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
-import com.aboni.nmea.nmea0183.NMEA0183Message;
-import com.aboni.log.Log;
+import com.aboni.nmea.router.message.JSONMessage;
+import com.aboni.nmea.router.services.*;
 import com.aboni.nmea.router.utils.ThingsFactory;
-import com.aboni.log.LogStringBuilder;
+import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
@@ -88,8 +89,8 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     private final Stats stats = new Stats();
 
     @Inject
-    public WebInterfaceAgent(TimestampProvider tp, NMEAStream stream, Log log) {
-        super(log, tp, false, true);
+    public WebInterfaceAgent(TimestampProvider tp, NMEAStream stream, Log log, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, false, true);
         this.stream = stream;
     }
 

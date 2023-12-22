@@ -1,7 +1,7 @@
 package com.aboni.nmea.router.data.metrics.impl;
 
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.log.ConsoleLog;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.utils.Utils;
 
@@ -19,7 +19,7 @@ public class MetricTestTableManager {
     private static final String SQL_CREATE = "CREATE TABLE `" + METRIC_TABLE_NAME + "` (" +
             "`id` int(11) NOT NULL AUTO_INCREMENT," +
             "`type` char(3) NOT NULL," +
-            "`TS` timestamp NOT NULL," +
+            "`TS` datetime NOT NULL," +
             "`vMin` double DEFAULT NULL," +
             "`v` double NOT NULL," +
             "`vMax` double DEFAULT NULL," +
@@ -51,7 +51,15 @@ public class MetricTestTableManager {
         st.setDouble(5, Double.parseDouble(csv[4]));
     }
 
-    public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException, ClassNotFoundException {
+    /**
+     * Load a csv to populate the test DB
+     * Each line is in the form "TWD,2022-12-18T00:47:51Z,88.33,105.83,126.26"
+     *
+     * @param csv An array of strings, each represent a record.
+     * @throws SQLException
+     * @throws MalformedConfigurationException
+     */
+    public static void loadTrackCSV(String[] csv) throws SQLException, MalformedConfigurationException {
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), false)) {
             PreparedStatement st = db.getConnection().prepareStatement("insert into " + METRIC_TABLE_NAME +
                     " (TS, type, vMin, v, vMax) values (?, ?, ?, ?, ?)");

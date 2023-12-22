@@ -16,14 +16,11 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 package com.aboni.nmea.router.agent.impl;
 
 import com.aboni.geo.GeoPositionT;
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.NMEARouterStatuses;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.log.Log;
 import com.aboni.nmea.message.MsgPositionAndVector;
+import com.aboni.nmea.router.*;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.sensors.EngineStatus;
-import com.aboni.log.Log;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
@@ -41,8 +38,8 @@ public class NMEATrackAgent extends NMEAAgentImpl {
     @Inject
     public NMEATrackAgent(Log log, TimestampProvider tp, NMEACache cache,
                           TrackManager trackManager, TripManagerX tripManager,
-                          TrackPointBuilder pointBuilder) {
-        super(log, tp, true, true);
+                          TrackPointBuilder pointBuilder, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         if (trackManager==null) throw new IllegalArgumentException("TrackManager cannot be null");
         if (tripManager==null) throw new IllegalArgumentException("TripManager cannot be null");
@@ -85,7 +82,7 @@ public class NMEATrackAgent extends NMEAAgentImpl {
                 GeoPositionT posT = new GeoPositionT(
                         (p.getTimestamp()==null)?getTimestampProvider().getNow():p.getTimestamp().toEpochMilli(),
                         pos);
-                processPosition(posT, p.getSOG());
+                processPosition(posT, sog);
             }
         } catch (Exception e) {
             getLog().error(() -> getLogBuilder().wO("process sentence").wV("sentence", p).toString(), e);

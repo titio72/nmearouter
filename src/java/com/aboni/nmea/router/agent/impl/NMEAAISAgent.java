@@ -1,14 +1,16 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.*;
+import com.aboni.log.Log;
+import com.aboni.nmea.AISPositionReport;
+import com.aboni.nmea.AISStaticData;
 import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBImpl;
 import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBPartAImpl;
 import com.aboni.nmea.n2k.messages.impl.N2KAISStaticDataBPartBImpl;
-import com.aboni.log.Log;
 import com.aboni.nmea.router.AISTargets;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
@@ -45,8 +47,8 @@ public class NMEAAISAgent extends NMEAAgentImpl implements AISTargets {
     private final Map<String, AISStaticData> data = new HashMap<>();
 
     @Inject
-    public NMEAAISAgent(Log log, TimestampProvider timestampProvider) {
-        super(log, timestampProvider, false, true);
+    public NMEAAISAgent(Log log, RouterMessageFactory messageFactory, TimestampProvider timestampProvider) {
+        super(log, timestampProvider, messageFactory, false, true);
     }
 
     @OnRouterMessage

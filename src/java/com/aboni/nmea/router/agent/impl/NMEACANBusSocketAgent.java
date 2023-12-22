@@ -1,15 +1,16 @@
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.conf.QOS;
-import com.aboni.nmea.router.message.PositionAndVectorStream;
-import com.aboni.nmea.router.message.SpeedAndHeadingStream;
+import com.aboni.log.Log;
 import com.aboni.nmea.n2k.N2KFastCache;
 import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.n2k.N2KMessageHeader;
 import com.aboni.nmea.n2k.PGNSourceFilter;
 import com.aboni.nmea.n2k.can.N2KMessageHeaderImpl;
 import com.aboni.nmea.n2k.messages.N2KMessageFactory;
-import com.aboni.log.Log;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.conf.QOS;
+import com.aboni.nmea.router.message.PositionAndVectorStream;
+import com.aboni.nmea.router.message.SpeedAndHeadingStream;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import tel.schich.javacan.CanChannels;
@@ -78,10 +79,11 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     @Inject
     public NMEACANBusSocketAgent(Log log, TimestampProvider tp,
                                  N2KFastCache fastCache,
-                                 N2KMessageFactory messageFactory,
+                                 RouterMessageFactory messageFactory,
+                                 N2KMessageFactory n2kMessageFactory,
                                  PGNSourceFilter srcFilter) {
-        super(log, tp, true, false);
-        this.messageFactory = messageFactory;
+        super(log, tp, messageFactory, true, false);
+        this.messageFactory = n2kMessageFactory;
         this.fastCache = fastCache;
         this.srcFilter = srcFilter;
         this.posAndVectorStream = new PositionAndVectorStream(tp);

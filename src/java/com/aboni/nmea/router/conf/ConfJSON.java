@@ -57,10 +57,6 @@ public class ConfJSON {
         init(new JSONObject(b.toString()));
     }
 
-    public ConfJSON(StringBuffer jsonConf) {
-        init(new JSONObject(jsonConf.toString()));
-    }
-
     private void init(JSONObject obj) {
         conf = obj;
     }

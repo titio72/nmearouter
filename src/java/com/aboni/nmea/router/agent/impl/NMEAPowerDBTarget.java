@@ -15,16 +15,17 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
-import com.aboni.nmea.router.data.Sampler;
-import com.aboni.nmea.router.data.StatsWriter;
-import com.aboni.nmea.router.Constants;
-import com.aboni.nmea.router.OnRouterMessage;
-import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.router.data.metrics.PowerMetrics;
+import com.aboni.log.Log;
 import com.aboni.nmea.message.Message;
 import com.aboni.nmea.message.MsgBattery;
 import com.aboni.nmea.message.MsgDCDetailedStatus;
-import com.aboni.log.Log;
+import com.aboni.nmea.router.Constants;
+import com.aboni.nmea.router.OnRouterMessage;
+import com.aboni.nmea.router.RouterMessage;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.data.Sampler;
+import com.aboni.nmea.router.data.StatsWriter;
+import com.aboni.nmea.router.data.metrics.PowerMetrics;
 import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
@@ -39,8 +40,8 @@ public class NMEAPowerDBTarget extends NMEAAgentImpl {
     private final Log log;
 
     @Inject
-    public NMEAPowerDBTarget(Log log, TimestampProvider tp, @Named(Constants.TAG_POWER) StatsWriter w) {
-        super(log, tp, false, true);
+    public NMEAPowerDBTarget(Log log, TimestampProvider tp, RouterMessageFactory messageFactory, @Named(Constants.TAG_POWER) StatsWriter w) {
+        super(log, tp, messageFactory, false, true);
         if (w==null) throw new IllegalArgumentException("StatWriter cannot be null");
         this.log = log;
         powerSampler = new Sampler<>(log, tp, w, "Power2DB");

@@ -15,11 +15,12 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.nmea.nmea0183.NMEA0183Message;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.nmea.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.sentences.NMEASentenceItem;
-import com.aboni.log.Log;
 import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
@@ -39,8 +40,8 @@ public class NMEA2FileAgent extends NMEAAgentImpl {
     private final List<NMEASentenceItem> queue = new LinkedList<>();
 
     @Inject
-    public NMEA2FileAgent(Log log, TimestampProvider tp) {
-        super(log, tp, false, true);
+    public NMEA2FileAgent(Log log, RouterMessageFactory messageFactory, TimestampProvider tp) {
+        super(log, tp, messageFactory, false, true);
     }
 
     @Override

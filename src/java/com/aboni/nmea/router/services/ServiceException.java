@@ -13,24 +13,19 @@
  * along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.aboni.nmea.router.data;
+package com.aboni.nmea.router.services;
 
-import com.aboni.nmea.router.data.sampledquery.SampleWriter;
-import com.aboni.utils.Utils;
-import org.json.JSONObject;
+public class ServiceException extends Exception {
 
-public class DefaultSampleWriter implements SampleWriter {
-    @Override
-    public JSONObject[] getSampleNode(Sample sample) {
-        if (sample != null) {
-            JSONObject s = new JSONObject();
-            s.put("time", sample.getTimestamp());
-            s.put("vMin", Utils.round(sample.getMinValue(), 2));
-            s.put("v", Utils.round(sample.getValue(), 2));
-            s.put("vMax", Utils.round(sample.getMaxValue(), 2));
-            return new JSONObject[]{s};
-        } else {
-            return new JSONObject[]{};
-        }
+    public ServiceException(String exception, Exception source) {
+        super(exception, source);
+    }
+
+    public ServiceException(Exception source) {
+        super(source);
+    }
+
+    public ServiceException(String exception) {
+        super(exception);
     }
 }

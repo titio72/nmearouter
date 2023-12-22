@@ -1,14 +1,14 @@
 package com.aboni.nmea.router.data.track.impl;
 
 import com.aboni.geo.GeoPositionT;
+import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.NMEAMessagesModule;
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.NMEARouterModule;
+import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.data.track.TrackEvent;
 import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.Trip;
 import com.aboni.nmea.router.data.track.TripManagerException;
-import com.aboni.log.ConsoleLog;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
@@ -206,7 +206,7 @@ public class TripManagerXImplTest {
 
     @Test
     public void testStartNewTrip() throws Exception {
-        Instant t = Instant.ofEpochMilli(System.currentTimeMillis());
+        Instant t = Instant.parse("2022-07-05T08:00:00Z");
         TrackPoint p = new TrackPointBuilderImpl().
                 withPosition(new GeoPositionT(t.toEpochMilli(), 43.6484500, 10.2660330)).
                 withPeriod(30).withSpeed(5.79, 7.1).withDistance(0.04826200).withEngine(EngineStatus.ON).getPoint();

@@ -15,6 +15,9 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.agent.AgentActivationMode;
 import com.aboni.nmea.router.agent.AgentPersistentStatus;
 import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
@@ -22,10 +25,7 @@ import com.aboni.nmea.router.conf.MalformedConfigurationException;
 import com.aboni.nmea.router.filters.DummyFilter;
 import com.aboni.nmea.router.filters.JSONFilterParser;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.log.Log;
-import com.aboni.log.LogStringBuilder;
 import com.aboni.nmea.router.utils.db.DBHelper;
-import com.aboni.log.SafeLog;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -73,7 +73,7 @@ public class AgentPersistentStatusManagerImpl implements AgentPersistentStatusMa
         return sql.replace("TO_BE_REPLACED", table);
     }
 
-    public static void createTable(Log log, String table) throws SQLException, ClassNotFoundException, MalformedConfigurationException {
+    public static void createTable(Log log, String table) throws SQLException, MalformedConfigurationException {
         try (
                 DBHelper db = new DBHelper(log, true);
                 Statement st = db.getConnection().createStatement()) {
@@ -87,7 +87,7 @@ public class AgentPersistentStatusManagerImpl implements AgentPersistentStatusMa
         }
     }
 
-    private void loadAllWithRetry() throws SQLException, ClassNotFoundException, MalformedConfigurationException {
+    private void loadAllWithRetry() throws SQLException, MalformedConfigurationException {
         try {
             loadAll();
         } catch (SQLException e) {
@@ -98,7 +98,7 @@ public class AgentPersistentStatusManagerImpl implements AgentPersistentStatusMa
         }
     }
 
-    private void loadAll() throws SQLException, ClassNotFoundException, MalformedConfigurationException {
+    private void loadAll() throws SQLException, MalformedConfigurationException {
         try (DBHelper db = new DBHelper(log, true)) {
             String sqlLoadAll = getSQL("select id, autostart, " + FILTER_TARGET_FIELD_NAME + ", " + FILTER_SOURCE_FIELD_NAME + " from TO_BE_REPLACED");
             db.executeQuery(sqlLoadAll, (ResultSet rs)->{

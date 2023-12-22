@@ -15,15 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.agent.impl.system;
 
-import com.aboni.utils.TimestampProvider;
-import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.nmea.message.TemperatureSource;
 import com.aboni.nmea.message.impl.MsgTemperatureImpl;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.nmea.router.utils.HWSettings;
-import com.aboni.log.Log;
 import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
-import com.aboni.log.LogStringBuilder;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 
@@ -34,8 +35,8 @@ public class FanAgent extends NMEAAgentImpl {
     private final Fan fan;
 
     @Inject
-    public FanAgent(TimestampProvider tp, Log log) {
-        super(log, tp, true, false);
+    public FanAgent(TimestampProvider tp, Log log, RouterMessageFactory messageFactory) {
+        super(log, tp, messageFactory, true, false);
         this.fan = new Fan();
     }
 
