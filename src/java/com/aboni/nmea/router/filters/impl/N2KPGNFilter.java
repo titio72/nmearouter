@@ -1,14 +1,18 @@
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.n2k.N2KMessage;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.utils.JSONUtils;
 import org.json.JSONObject;
 
 public class N2KPGNFilter implements NMEAFilter {
 
-    public static final String FILTER = "filter";
+    public static final String FILTER_TYPE = "pgn";
+    public static final String PGN_JSON_TAG = "pgn";
+    public static final String N2K_DST_JSON_TAG = "dst";
+    public static final String N2K_SRC_JSON_TAG = "src";
+    public static final String SOURCE_JSON_TAG = "source";
 
     private final int pgn;
     private final int src;
@@ -89,26 +93,21 @@ public class N2KPGNFilter implements NMEAFilter {
 
     @Override
     public JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-        JSONObject fltObj = new JSONObject();
-        obj.put(FILTER, fltObj);
-        fltObj.put("type", FILTER_TYPE);
-        fltObj.put("pgn", pgn);
-        fltObj.put("dst", dst);
-        fltObj.put("src", src);
-        fltObj.put("source", source);
-        return obj;
+        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> {
+            fltObj.put(PGN_JSON_TAG, pgn);
+            fltObj.put(N2K_DST_JSON_TAG, dst);
+            fltObj.put(N2K_SRC_JSON_TAG, src);
+            fltObj.put(SOURCE_JSON_TAG, source);
+        });
     }
 
     public static N2KPGNFilter parseFilter(JSONObject obj) {
         obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
         return new N2KPGNFilter(
-                JSONUtils.getAttribute(obj, "pgn", 0x00),
-                JSONUtils.getAttribute(obj, "dst", 0xFF),
-                JSONUtils.getAttribute(obj, "src", 0xFF),
-                JSONUtils.getAttribute(obj, "source", "")
+                JSONUtils.getAttribute(obj, PGN_JSON_TAG, 0x00),
+                JSONUtils.getAttribute(obj, N2K_DST_JSON_TAG, 0xFF),
+                JSONUtils.getAttribute(obj, N2K_SRC_JSON_TAG, 0xFF),
+                JSONUtils.getAttribute(obj, SOURCE_JSON_TAG, "")
         );
     }
-
-    public static final String FILTER_TYPE = "pgn";
 }

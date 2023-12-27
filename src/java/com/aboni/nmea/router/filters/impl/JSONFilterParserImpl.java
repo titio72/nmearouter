@@ -1,9 +1,11 @@
 package com.aboni.nmea.router.filters.impl;
 
+import com.aboni.data.Pair;
+import com.aboni.nmea.router.NMEACache;
 import com.aboni.nmea.router.filters.DummyFilter;
 import com.aboni.nmea.router.filters.JSONFilterParser;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.data.Pair;
+import com.aboni.nmea.router.utils.ThingsFactory;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -22,8 +24,6 @@ public class JSONFilterParserImpl implements JSONFilterParser {
         switch (x.second) {
             case DummyFilter.FILTER_TYPE:
                 return DummyFilter.parseFilter(obj);
-            case STalkFilter.FILTER_TYPE:
-                return STalkFilter.parseFilter(obj);
             case NMEABasicSentenceFilter.FILTER_TYPE:
                 return NMEABasicSentenceFilter.parseFilter(obj);
             case N2KPGNFilter.FILTER_TYPE:
@@ -31,7 +31,7 @@ public class JSONFilterParserImpl implements JSONFilterParser {
             case PositionFilter.FILTER_TYPE:
                 return PositionFilter.parseFilter(obj);
             case NMEASpeedFilter.FILTER_TYPE:
-                throw new UnsupportedOperationException("Speed filter is unsupported by the factory");
+                return NMEASpeedFilter.parseFilter(obj, ThingsFactory.getInstance(NMEACache.class));
             case NMEAFilterSetImpl.FILTER_TYPE:
                 return NMEAFilterSetImpl.parseFilter(obj, this);
             default:

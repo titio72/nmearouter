@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.processors;
 
-import com.aboni.nmea.router.RouterMessageFactory;
-import com.aboni.utils.TimestampProvider;
-import com.aboni.nmea.router.filters.impl.PositionFilter;
-import com.aboni.nmea.message.Message;
+import com.aboni.data.Pair;
 import com.aboni.log.Log;
 import com.aboni.log.SafeLog;
-import com.aboni.data.Pair;
+import com.aboni.nmea.message.Message;
+import com.aboni.nmea.router.RouterMessageFactory;
+import com.aboni.nmea.router.filters.impl.PositionFilter;
+import com.aboni.utils.TimestampProvider;
 
 import javax.inject.Inject;
 
@@ -33,12 +33,12 @@ public class PositionFilterProcessor implements NMEAPostProcess {
     private final RouterMessageFactory messageFactory;
 
     @Inject
-    public PositionFilterProcessor(Log log, TimestampProvider timestampProvider, RouterMessageFactory messageFactory) {
+    public PositionFilterProcessor(Log log, TimestampProvider timestampProvider, RouterMessageFactory messageFactory, PositionFilter positionFilter) {
         if (timestampProvider==null) throw new IllegalArgumentException("Timestamp provider is null");
         if (messageFactory==null) throw new IllegalArgumentException("Message factory is null");
         this.log = SafeLog.getSafeLog(log);
         this.timestampProvider = timestampProvider;
-        this.filter = new PositionFilter();
+        this.filter = positionFilter;
         this.messageFactory = messageFactory;
     }
 

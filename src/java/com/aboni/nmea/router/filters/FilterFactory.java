@@ -23,4 +23,6 @@ public interface FilterFactory {
     NMEAFilter getNMEA0183Filter(String sentence, String source);
 
     NMEAFilter getDummy(String data);
+
+    NMEAFilter getPositionFilter();
 }

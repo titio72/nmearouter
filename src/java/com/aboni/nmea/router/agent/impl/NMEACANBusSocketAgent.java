@@ -70,7 +70,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
         }
 
         String toString(long t) {
-            return String.format("Message {%d} Accepted {%d} Period {%d}", messages, messagesAccepted, t - lastReset);
+            return String.format("[%s] Message {%d} Accepted {%d} Period {%d}", netDeviceName, messages, messagesAccepted, t - lastReset);
         }
     }
 
@@ -124,7 +124,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
 
     @Override
     public String toString() {
-        return getType();
+        return getType() + " " + netDeviceName;
     }
 
     @Override

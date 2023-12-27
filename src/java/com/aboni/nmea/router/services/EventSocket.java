@@ -15,18 +15,19 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.services;
 
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
+import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.NMEAStream;
 import com.aboni.nmea.router.OnRouterMessage;
 import com.aboni.nmea.router.RouterMessage;
-import com.aboni.log.Log;
-import com.aboni.log.SafeLog;
-import com.aboni.log.LogStringBuilder;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,6 +45,8 @@ public class EventSocket {
     private Session session;
     private String id;
     private boolean err;
+
+    private boolean hasLoggedUnsupportedJSON = false;
 
     public EventSocket(NMEAStream stream, Log log) {
         this.log = SafeLog.getSafeLog(log);
@@ -84,10 +87,25 @@ public class EventSocket {
         if (msg != null && msg.getPayload() != null) {
             try {
                 RemoteEndpoint remote = session.getRemote();
-                remote.sendString(msg.getPayload().toJSON().toString());
+                JSONObject jsonMessage = getJson(msg);
+                if (jsonMessage != null) remote.sendString(jsonMessage.toString());
             } catch (Exception e) {
                 log.errorForceStacktrace(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("message").wV("id", id).toString(), e);
             }
         }
+    }
+
+    private JSONObject getJson(RouterMessage msg) {
+        try {
+            return msg.getPayload().toJSON();
+        } catch (UnsupportedOperationException e) {
+            if (!hasLoggedUnsupportedJSON) {
+                hasLoggedUnsupportedJSON = true;
+                log.error(LogStringBuilder.start(WEB_SOCKET_CATEGORY).wO("json_conversion_error").
+                        wV("class", msg.getPayload().getClass()).wV("id", id).toString(), e);
+            }
+            return null;
+        }
+
     }
 }

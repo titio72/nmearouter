@@ -27,6 +27,7 @@ import java.util.*;
 
 public class NMEAFilterSetImpl implements NMEAFilterSet {
 
+    public static final String FILTER_TYPE = "set";
     public static final String WHITELIST = "whitelist";
     public static final String BLACKLIST = "blacklist";
     public static final String FILTERS = "filters";
@@ -85,20 +86,15 @@ public class NMEAFilterSetImpl implements NMEAFilterSet {
 
     @Override
     public JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-        JSONObject fltObj = new JSONObject();
-        obj.put("filter", fltObj);
-        fltObj.put("type", FILTER_TYPE);
-        fltObj.put("logic", whiteOrBlackList==TYPE.BLACKLIST? BLACKLIST : WHITELIST);
-        JSONArray jFilters = new JSONArray();
-        for (Iterator<NMEAFilter> i = getFilters(); i.hasNext(); ) {
-            jFilters.put(i.next().toJSON());
-        }
-        fltObj.put(FILTERS, jFilters);
-        return obj;
+        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> {
+            fltObj.put("logic", whiteOrBlackList == TYPE.BLACKLIST ? BLACKLIST : WHITELIST);
+            JSONArray jFilters = new JSONArray();
+            for (Iterator<NMEAFilter> i = getFilters(); i.hasNext(); ) {
+                jFilters.put(i.next().toJSON());
+            }
+            fltObj.put(FILTERS, jFilters);
+        });
     }
-
-    public static final String FILTER_TYPE = "set";
 
     public static NMEAFilterSet parseFilter(JSONObject obj, JSONFilterParser factory) {
         obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);

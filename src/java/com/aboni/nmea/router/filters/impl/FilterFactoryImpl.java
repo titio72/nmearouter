@@ -42,4 +42,9 @@ public class FilterFactoryImpl implements FilterFactory {
     public NMEAFilter getDummy(String data) {
         return new DummyFilter(data);
     }
+
+    @Override
+    public NMEAFilter getPositionFilter() {
+        return new PositionFilter();
+    }
 }

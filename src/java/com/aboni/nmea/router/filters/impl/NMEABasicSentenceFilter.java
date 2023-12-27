@@ -1,8 +1,8 @@
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.n2k.N2KMessage;
 import com.aboni.nmea.nmea0183.NMEA0183Message;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.utils.JSONUtils;
 import net.sf.marineapi.nmea.sentence.Sentence;
@@ -11,9 +11,10 @@ import org.json.JSONObject;
 
 public class NMEABasicSentenceFilter implements NMEAFilter {
 
-    public static final String FILTER = "filter";
-    public static final String TALKER = "talker";
-    public static final String SENTENCE = "sentence";
+    public static final String FILTER_TYPE = "nmea";
+    public static final String NMEA_TALKER_JSON_TAG = "talker";
+    public static final String NMEA_SENTENCE_JSON_TAG = "sentence";
+    public static final String NMEA_SOURCE_JSON_TAG = "source";
     private final String sentenceId;
     private final TalkerId talkerId;
     private final String source;
@@ -44,14 +45,12 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
     public static NMEABasicSentenceFilter parseFilter(JSONObject obj) {
         obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
         return new NMEABasicSentenceFilter(
-                JSONUtils.getAttribute(obj, SENTENCE, ""),
-                obj.has(TALKER) ?
-                        TalkerId.parse(obj.getString(TALKER)) : null,
-                JSONUtils.getAttribute(obj, "source", "")
+                JSONUtils.getAttribute(obj, NMEA_SENTENCE_JSON_TAG, ""),
+                obj.has(NMEA_TALKER_JSON_TAG) ?
+                        TalkerId.parse(obj.getString(NMEA_TALKER_JSON_TAG)) : null,
+                JSONUtils.getAttribute(obj, NMEA_SOURCE_JSON_TAG, "")
         );
     }
-
-    public static final String FILTER_TYPE =  "nmea";
 
     public TalkerId getTalkerId() {
         return talkerId;
@@ -123,13 +122,10 @@ public class NMEABasicSentenceFilter implements NMEAFilter {
 
     @Override
     public JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-        JSONObject fltObj = new JSONObject();
-        obj.put(FILTER, fltObj);
-        fltObj.put("type", FILTER_TYPE);
-        if (talkerId != null) fltObj.put(TALKER, talkerId.toString());
-        fltObj.put(SENTENCE, sentenceId);
-        fltObj.put("source", source);
-        return obj;
+        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> {
+            if (talkerId != null) fltObj.put(NMEA_TALKER_JSON_TAG, talkerId.toString());
+            fltObj.put(NMEA_SENTENCE_JSON_TAG, sentenceId);
+            fltObj.put(NMEA_SOURCE_JSON_TAG, source);
+        });
     }
 }

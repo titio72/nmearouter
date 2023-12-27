@@ -15,20 +15,21 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.NMEACache;
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.data.SpeedMovingAverage;
 import com.aboni.nmea.message.Message;
 import com.aboni.nmea.message.MsgSOGAdCOG;
 import com.aboni.nmea.message.MsgSpeed;
+import com.aboni.nmea.router.NMEACache;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.data.SpeedMovingAverage;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
 
 public class NMEASpeedFilter implements NMEAFilter {
 
-    public static final String FILTER = "filter";
+
+    public static final String FILTER_TYPE = "speed";
     private final NMEACache cache;
     private final SpeedMovingAverage speedMovingAverage;
     private static final boolean USE_GPS = false;
@@ -101,16 +102,11 @@ public class NMEASpeedFilter implements NMEAFilter {
 
     @Override
     public JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-        JSONObject fltObj = new JSONObject();
-        obj.put(FILTER, fltObj);
-        fltObj.put("type", FILTER_TYPE);
-        return obj;
+        return JSONFilterUtils.createFilter(this, null);
     }
 
-    public static final String FILTER_TYPE = "speed";
-
     public static NMEASpeedFilter parseFilter(JSONObject obj, NMEACache cache) {
+        // throw an exception is the JSON filter is not right
         JSONFilterUtils.getFilter(obj, FILTER_TYPE);
         return new NMEASpeedFilter(cache);
     }

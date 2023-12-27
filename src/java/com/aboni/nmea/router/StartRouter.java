@@ -15,15 +15,16 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router;
 
+import com.aboni.log.ConsoleLog;
+import com.aboni.log.LogAdmin;
 import com.aboni.nmea.NMEAMessagesModule;
+import com.aboni.nmea.n2k.PGNSourceFilter;
 import com.aboni.nmea.router.conf.ConfJSON;
 import com.aboni.nmea.router.conf.LogLevelType;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.sentences.NMEAUtils;
 import com.aboni.sensors.HMC5883Calibration;
 import com.aboni.sensors.SensorHMC5883;
-import com.aboni.log.ConsoleLog;
-import com.aboni.log.LogAdmin;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -113,6 +114,7 @@ public class StartRouter {
         logAdmin.infoFill("Start " + ZonedDateTime.now());
         logAdmin.infoFill("");
         NMEAUtils.registerExtraSentences();
+        ThingsFactory.getInstance(PGNSourceFilter.class).init(Constants.CONF_DIR + "/pgns.csv");
         injector.getInstance(NMEAStream.class); // be sure the stream started
         NMEARouter router = ThingsFactory.getInstance(NMEARouter.class);
         builder.init(router, p);

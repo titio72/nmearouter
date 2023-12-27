@@ -15,13 +15,13 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.filters.impl;
 
-import com.aboni.nmea.router.RouterMessage;
+import com.aboni.log.Log;
+import com.aboni.log.LogStringBuilder;
 import com.aboni.nmea.message.Message;
 import com.aboni.nmea.message.MsgPositionAndVector;
+import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
-import com.aboni.log.Log;
 import com.aboni.utils.JSONUtils;
-import com.aboni.log.LogStringBuilder;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
@@ -34,12 +34,13 @@ import java.util.List;
 
 public class PositionFilter implements NMEAFilter {
 
+    public static final String FILTER_TYPE = "position";
     private static final int RESET_TIMEOUT = 5 * 60000;    // 5 minutes
     private static final int SPEED_GATE = 35;            // Kn - if faster reject
     private static final int MAGIC_DISTANCE = 15;        // Points farther from the median of samples will be discarded
     private static final double SMALL_MAGIC_DISTANCE = 0.3; // Points farther from the last valid point will be discarded
     private static final int SIZE = 30;                    // ~30s of samples
-    public static final String FILTER = "filter";
+    public static final String JSON_TAG_QUEUE_SIZE = "queue_size";
 
     private final List<Position> positions = new LinkedList<>();
     private final int queueSize;
@@ -229,18 +230,13 @@ public class PositionFilter implements NMEAFilter {
 
     @Override
     public JSONObject toJSON() {
-        JSONObject obj = new JSONObject();
-        JSONObject fltObj = new JSONObject();
-        obj.put(FILTER, fltObj);
-        fltObj.put("type", FILTER_TYPE);
-        fltObj.put("queue_size", queueSize);
-        return obj;
+        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> {
+            fltObj.put(JSON_TAG_QUEUE_SIZE, queueSize);
+        });
     }
-
-    public static final String FILTER_TYPE = "position";
 
     public static PositionFilter parseFilter(JSONObject obj) {
         obj = JSONFilterUtils.getFilter(obj, FILTER_TYPE);
-        return new PositionFilter(JSONUtils.getAttribute(obj, "queue_size", SIZE));
+        return new PositionFilter(JSONUtils.getAttribute(obj, JSON_TAG_QUEUE_SIZE, SIZE));
     }
 }
