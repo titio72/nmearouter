@@ -108,6 +108,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
     public void setup(String name, QOS qos, String netDevice) {
         super.setup(name, qos);
         netDeviceName = netDevice;
+        description = getType() + " device (" + netDeviceName + ")";
     }
 
     @Override
@@ -207,7 +208,7 @@ public class NMEACANBusSocketAgent extends NMEAAgentImpl {
             long t = getTimestampProvider().getNow();
             if ((Utils.isNotNewerThan(lastStats, t, 30000))) {
                 synchronized (this) {
-                    description = getType() + " " + stats.toString(t);
+                    description = getType() + " device (" + netDeviceName + ") " + stats.toString(t);
                 }
                 getLog().info(() -> getLogBuilder().wO("stats").w(" " + stats.toString(t)).wV("errors", errors).toString());
                 if (stats.messages==0) {

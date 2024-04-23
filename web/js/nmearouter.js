@@ -1,16 +1,26 @@
+loadStylesheet("css/bootstrap.min.css");
+loadJavascript("js/bootstrap.min.js");
+
+loadStylesheet("css/bootstrap-datepicker.min.css");
+
 loadJavascript("js/hammer.min.js");
 loadJavascript("js/jquery.min.js");
 loadJavascript("js/angular.min.js");
 loadJavascript("js/angular-sanitize.min.js");
-loadJavascript("js/bootbox.min.js");
-loadJavascript("js/bootstrap.min.js");
 loadJavascript("js/moment-with-locales.min.js");
 loadJavascript("js/Chart.min.js");
 loadJavascript("js/hammer.min.js");
-loadJavascript("js/chartjs-plugin-zoom.min.js");
 
-loadStylesheet("css/bootstrap.min.css");
-loadStylesheet("css/bootstrap-datepicker.min.css");
+var useUTC = readUTCCookie();
+
+function readUTCCookie() {
+  return "true"==getCookie("useUTC");
+}
+
+function setUTCCookie(yesNo) {
+  useUTC = yesNo;
+  document.cookie = "useUTC=" + (yesNo?"true":"false") + ";path=/";
+}
 
 var app = angular.module("nmearouter", ['ngSanitize'])
 .filter('numberFixedLen', function () {
@@ -27,7 +37,32 @@ var app = angular.module("nmearouter", ['ngSanitize'])
         }
         return num;
     };
+})
+.filter('datex', function($filter) {
+  var standardDateFilterFn = $filter('date');
+  return function(dateToFormat, fmt) {
+    if (useUTC)
+      return standardDateFilterFn(dateToFormat, fmt, "+0000");
+    else
+      return standardDateFilterFn(dateToFormat, fmt);
+  }
 });
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 
 function HSVtoRGB(h, s, v) {
   var r, g, b, i, f, p, q, t;
@@ -71,7 +106,7 @@ function calcTrueWind(speed, appWindDeg, appWindSpeed) {
   }
 
   r.angle = r.angle % 360;
-  if (r.angle<0) r.angle = 360 + r.angle; 
+  if (r.angle<0) r.angle = 360 + r.angle;
 
   return r;
 }

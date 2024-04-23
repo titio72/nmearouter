@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xml:lang="en">
+<html xml:lang="en" data-bs-theme="dark">
 
 <head>
     <meta charset="ISO-8859-1">
@@ -97,6 +97,10 @@
   app.controller("myCtrl", function ($scope) {
     $scope.days = days;
   });
+
+  function onLoad() {
+    document.getElementById("UTC").innerText = useUTC?"UTC":"Local";
+  }
 
   function showTrip(d) {
     trip = searchTrip(d.name);
@@ -444,6 +448,11 @@
     }
     var controllerElement = document.getElementById('panelInfo');
     var controllerScope = angular.element(controllerElement).scope();
+    info.startTS = Date.parse(info.start);
+    info.endTS = Date.parse(info.start);
+    info.max01NMSpeedTime0TS = Date.parse(info.max01NMSpeedTime0);
+    info.max05NMSpeedTime0TS = Date.parse(info.max05NMSpeedTime0);
+    info.max10NMSpeedTime0TS = Date.parse(info.max10NMSpeedTime0);
     controllerScope.trip = info;
     controllerScope.$evalAsync();
   }
@@ -461,12 +470,19 @@
 
 </script>
 
-<body ng-app="nmearouter">
+<body ng-app="nmearouter" onload="onLoad();">
 <div id="nmearouter" class="container-fluid">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Track</li>
-    </ol>
+    <div class="row">
+      <div class="col">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active">Track</li>
+        </ol>
+      </div>
+      <div class="col-auto" id="UTC">
+        AAA
+      </div>
+    </div>
     <div class="row">
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div id="TripsPanel" class="card-router card-track" ng-controller="myCtrl">
@@ -557,7 +573,7 @@
                         </tr>
                         <tr>
                             <td class="info_cell">Dates</td>
-                            <td class="info_cell">{{trip.start}} - {{trip.end}}</td>
+                            <td class="info_cell">{{trip.startTS | datex:'yyyy-MM-dd HH:mm:ss'}} - {{trip.endTS | datex:'yyyy-MM-dd HH:mm:ss'}}</td>
                         </tr>
                         <tr>
                             <td class="info_cell">Trip</td>
@@ -576,19 +592,19 @@
                         <tr ng-if="trip.max01NMSpeed>0">
                             <td class="info_cell">1NM Max Speed</td>
                             <td class="info_cell"><strong>{{trip.max01NMSpeed | number:2}}Kn
-                                {{trip.max01NMSpeedTime0}}
+                                {{trip.max01NMSpeedTime0TS | datex:'yyyy-MM-dd HH:mm:ss'}}
                             </strong></td>
                         </tr>
                         <tr ng-if="trip.max05NMSpeed>0">
                             <td class="info_cell">5NM Max Speed</td>
                             <td class="info_cell"><strong>{{trip.max05NMSpeed | number:2}}Kn
-                                {{trip.max05NMSpeedTime0}}
+                                {{trip.max05NMSpeedTime0TS | datex:'yyyy-MM-dd HH:mm:ss'}}
                             </strong></td>
                         </tr>
                         <tr ng-if="trip.max10NMSpeed>0">
                             <td class="info_cell">10NM Max Speed</td>
                             <td class="info_cell"><strong>{{trip.max10NMSpeed | number:2}}Kn
-                                {{trip.max10NMSpeedTime0}}
+                                {{trip.max10NMSpeedTime0TS | datex:'yyyy-MM-dd HH:mm:ss'}}
                             </strong></td>
                         </tr>
                     </table>

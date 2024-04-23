@@ -4,12 +4,10 @@
   "dependencies": {
     "angular": "^1.8.2",
     "angular-sanitize": "^1.8.2",
-    "bootbox": "^5.4.0",
-    "bootstrap": "^4.4.1",
+    "bootstrap": "^v5.3.3",
     "bootstrap-datepicker": "^1.7.1",
     "bootswatch": "^4.4.1",
     "chart.js": "^2.9.3",
-    "chartjs-plugin-zoom": "^0.7.5",
     "google-maps": "^3.3.0",
     "jquery": "^3.4.1",
     "locales": "0.0.2",

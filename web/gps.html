@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xml:lang="en">
+<html xml:lang="en" data-bs-theme="dark">
 <head>
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -74,10 +74,9 @@
                 gps_data.local_timestamp = m.format();
             }
         } else {
-            gps_data = gps_data_empty;      
+            gps_data = gps_data_empty;
         }
     }
-    
 
 	function compare(a, b) {
 		if (a.used && !b.used)
@@ -101,7 +100,7 @@
     <li class="breadcrumb-item active">GPS</li>
 </ol>
 <div id="nmearouter" class="container-fluid" ng-controller="myCtrl">
-    <div class="row alert alert-primary">
+    <div class="row alert alert-secondary">
         <div class="col-4 col-md-4  col-sm-12">
             <table width="100%">
                 <tr>
@@ -152,7 +151,7 @@
             </svg>
         </div>
     </div>
-    <div class="row alert alert-heading">
+    <div class="row alert alert-secondary">
         <div class="col-1">SRN</div>
         <div class="col-2">Name</div>
         <div class="col-2">Signal</div>
@@ -163,7 +162,7 @@
         <div class="col-1">Noise</div>
         <div class="col-1">In use</div>
     </div>
-    <div class="row alert alert-primary" ng-repeat="s in data.satsList" ng-if="s.id!='255'">
+    <div class="row alert" ng-repeat="s in data.satsList" ng-if="s.id!='255'">
         <div class="col-1">{{s.id}}</div>
         <div class="col-2">{{s.name}}</div>
         <div class="col-2">{{s.signal}}</div>

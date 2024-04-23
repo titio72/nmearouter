@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html xml:lang="en">
+<html xml:lang="en" data-bs-theme="dark">
 
 <head>
     <meta charset="UTF8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrea Boni NMEARouter</title>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-    <script src="js/nmearouter.js?b14"></script>
+    <script src="js/nmearouter.js?b15"></script>
     <link href="css/nmearouter.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="nmeasail.png">
     <script>
@@ -118,6 +118,7 @@
   document.addEventListener('keydown', anKeyPress);
 
   {
+    // all dates are in the ISO format 2024-04-03T21:12:32Z
     tripObject["startT"] = Date.parse(tripObject.start);
     tripObject["endT"] = Date.parse(tripObject.end);
     tripObject["max01NMSpeedTime0T"] = Date.parse(tripObject.max01NMSpeedTime0);
@@ -160,6 +161,10 @@
       return $filter('number')(input * 100, decimals) + '%';
     };
   }]);
+
+  function onLoad() {
+    document.getElementById("UTC").innerText = useUTC?"UTC":"Local";
+  }
 
   function getTripDescription() {
     for (i = 0; i<trips.trips.length; i++) {
@@ -211,7 +216,7 @@
     windChart = createLineChart('windChart', 'Wind speed (Kn)');
     rollChart = createLineChart('rollChart', 'Boat roll (Deg)');
     pressChart = createLineChart('pressChart', 'Atmo (MB)');
-    speedDistrChart = createBarChart('speedDistrChart', '', getLabelArray(0.5, 0.5, 32, 1), ['Nm motoring', 'Nm sailing'], ['Orange', 'Blue'], false);
+    speedDistrChart = createBarChart('speedDistrChart', '', getLabelArray(0.5, 0.5, 32, 1), ['Nm motoring', 'Nm sailing'], ['Red', 'Blue'], false);
     rollDistrChart = createBarChart('rollDistrChart', '', getLabelArray(-45, 5, 19, 0), ['Time heeling'], ['Orange'], true);
     createWindStatsChart();
     loadTimeChart();
@@ -220,7 +225,7 @@
 
   function loadSpeedDistrChart() {
     res = []; resS = [];
-    for (i = 0; i<current.speedDistribution.length; i++) { res.push(current.speedDistribution[i].distance); }
+    for (i = 0; i<current.speedDistribution.length; i++) { res.push(current.speedDistribution[i].distance - current.speedDistributionSail[i].distance); }
     for (i = 0; i<current.speedDistributionSail.length; i++) { resS.push(current.speedDistributionSail[i].distance); }
     speedDistrChart.data.datasets[0].data = res;
     speedDistrChart.data.datasets[1].data = resS;
@@ -383,11 +388,11 @@
       sL = "L" + i;
       panel = document.getElementById(sL);
       if (panel!=null) {
-        panel.className = "row alert alert-primary";  // Otherwise, use `second_name`
+        panel.className = "row alert";  // Otherwise, use `second_name`
       }
     }
     panel = document.getElementById("L"+currentLegIx);
-    panel.className = "row alert alert-secondary";   // Set other class name
+    panel.className = "row alert alert-primary";   // Set other class name
 
     if (currentLegIx==0) current = tripObject;
     else current = tripObject.legs[currentLegIx-1];
@@ -451,17 +456,17 @@
 
   function onFillMeteoData(data) {
 
-    pressChart.data.datasets = [
-      getSerie(data, 'PR_', 'v', 'blue', false, 0.0)
-    ];
-    pressChart.update();
-
     windChart.data.datasets = [
       getSerie(data, "TW_", "v",    "blue", false, 0.0),
       getSerie(data, "TW_", "vMin", "gray", false, 0.0),
       getSerie(data, "TW_", "vMax", "orange", false, 0.0)
     ];
     windChart.update();
+
+    pressChart.data.datasets = [
+      getSerie(data, 'PR_', 'v', 'blue', false, 0.0)
+    ];
+    pressChart.update();
 
     fillRollDistrData(data, "ROL", "v", 5.5);
 
@@ -618,9 +623,9 @@
         datapoint.x = new Date(t);
         datapoint.y = parseFloat(item[attr]) + correction;
         lastT = t;
-      } else {
-        console.log("Out of sync items!")
-      }
+      }// else {
+      //  console.log("Out of sync items!")
+      //}
       dt.push(datapoint);
     }
     return dt;
@@ -846,17 +851,20 @@
   }
 </script>
 
-<body ng-app="nmearouter">
+<body ng-app="nmearouter" onload="onLoad();">
 
 <div id="nmearouter" class="container-fluid" ng-controller="infoController">
-    <div class="row">
-        <div class="col-12">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
-                <li class="breadcrumb-item active">Trip</li>
-            </ol>
-        </div>
+  <div class="row">
+      <div class="col">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active"><a href="track.html">Track</a></li>
+            <li class="breadcrumb-item active">Trip</li>
+        </ol>
+      </div>
+      <div class="col-auto" id="UTC">
+        AAA
+      </div>
     </div>
     <div class="row">
         <div class="col" id="legPanel">
@@ -884,16 +892,16 @@
             </div>
             <div class="collapse" id="legListContainer">
                 <div class="legs-list" id="legList">
-                    <div class="row alert alert-success">
+                    <div class="row alert alert-secondary">
                         <div class="col-2">Leg</div>
                         <div class="col-4">Date & time</div>
                         <div class="col-3">Duration & dist</div>
                         <div class="col-3">Sail dur & dist</div>
                     </div>
-                    <div class="row alert alert-secondary" onclick="switchLeg(this)" id="L0">
+                    <div class="row alert alert-primary" onclick="switchLeg(this)" id="L0">
                         <div class="col-2">Trip</div>
-                        <div class="col-4">{{trip.startT | date:'yyyy-MM-dd HH:mm:ss'}}<br>{{trip.endT |
-                            date:'yyyy-MM-dd HH:mm:ss'}}
+                        <div class="col-4">{{trip.startT | datex:'yyyy-MM-dd HH:mm:ss'}}<br>{{trip.endT |
+                            datex:'yyyy-MM-dd HH:mm:ss'}}
                         </div>
                         <div class="col-3">{{trip.navTime}}<br>{{trip.navDist | number:2}}NM<br>{{trip.speedAverage |
                             number:2}}KN
@@ -902,10 +910,10 @@
                             | number:2}}KN
                         </div>
                     </div>
-                    <div class="row alert alert-primary" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
+                    <div class="row alert" ng-repeat="leg in trip.legs" ng-if="leg.navDist>1.0"
                          onclick="switchLeg(this)" id="L{{leg.leg}}">
                         <div class="col-2">Leg {{leg.leg}}</div>
-                        <div class="col-4">{{leg.startT | date:'yyyy-MM-dd HH:mm:ss'}}<br>{{leg.endT | date:'yyyy-MM-dd
+                        <div class="col-4">{{leg.startT | datex:'yyyy-MM-dd HH:mm:ss'}}<br>{{leg.endT | datex:'yyyy-MM-dd
                             HH:mm:ss'}}
                         </div>
                         <div class="col-3">{{leg.navTime}}<br>{{leg.navDist | number:2}}NM<br>{{leg.speedAverage |
@@ -923,8 +931,8 @@
         <div class="col">
             <div class="tile-container">
                 <div class="tile-wrapper">
-                    <my-tile title="Trip" value1="{{current.start | date:'yyyy-MM-dd HH:mm:ss'}}"
-                             value2="{{current.end | date:'yyyy-MM-dd HH:mm:ss'}}"
+                    <my-tile title="Trip" value1="{{current.start | datex:'yyyy-MM-dd HH:mm:ss'}}"
+                             value2="{{current.end | datex:'yyyy-MM-dd HH:mm:ss'}}"
                              value3="{{current.totalTime}}">
                     </my-tile>
                 </div>
@@ -945,26 +953,26 @@
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 1 NM" value1="{{current.max01NMSpeed | number:2}} KN"
-                             value2="{{current.max01NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
-                             value3="{{current.max01NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
+                             value2="{{current.max01NMSpeedTime0T | datex:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max01NMSpeedTime1T | datex:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 5 NM" value1="{{current.max05NMSpeed | number:2}} KN"
-                             value2="{{current.max05NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
-                             value3="{{current.max05NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
+                             value2="{{current.max05NMSpeedTime0T | datex:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max05NMSpeedTime1T | datex:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Best 10 NM" value1="{{current.max10NMSpeed | number:2}} KN"
-                             value2="{{current.max10NMSpeedTime0T | date:'yyyy-MM-dd HH:mm:ss'}}"
-                             value3="{{current.max10NMSpeedTime1T | date:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
+                             value2="{{current.max10NMSpeedTime0T | datex:'yyyy-MM-dd HH:mm:ss'}}"
+                             value3="{{current.max10NMSpeedTime1T | datex:'yyyy-MM-dd HH:mm:ss'}}"></my-tile>
                 </div>
                 <!--div class="tile-wrapper">
                     <my-tile title="30s Speed" value1="Max {{current.maxAvgSpeed | number:2}} KN"
-                             value2="{{current.maxAvgSpeedTimeT | date:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
+                             value2="{{current.maxAvgSpeedTimeT | datex:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
                 </div-->
                 <div class="tile-wrapper">
                     <my-tile title="Speed" value1="Max {{current.maxSpeed | number:2}} KN"
-                             value2="{{current.maxSpeedTimeT | date:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
+                             value2="{{current.maxSpeedTimeT | datex:'yyyy-MM-dd HH:mm:ss'}}" value3=""></my-tile>
                 </div>
                 <div class="tile-wrapper">
                     <my-tile title="Distance%" value1="Sail {{current.relativeEngOffDist | percentage:1}}"

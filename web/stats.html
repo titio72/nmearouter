@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xml:lang="en">
+<html xml:lang="en" data-bs-theme="dark">
 <head>
     <meta charset="ISO-8859-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -252,7 +252,7 @@
                 <canvas class="chart-canvas" id="monthsChartThisYear"></canvas>
             </div>
 		</div>
-        <div class="row alert alert-primary" ng-repeat="t in years | orderBy:'-year'">
+        <div class="row alert alert-secondary" ng-repeat="t in years | orderBy:'-year'">
             <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
 				{{t.year}}
 			</div>

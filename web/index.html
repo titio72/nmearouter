@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html xml:lang="en">
+<html xml:lang="en" data-bs-theme="dark">
 <head>
 	<meta charset="ISO-8859-1">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Andrea Boni NMEARouter</title>
-	<script src="js/nmearouter.js?g2"></script>
+	<script src="js/nmearouter.js?g4"></script>
 	<link href="css/nmearouter.css" rel="stylesheet"/>
 	<link rel="icon" type="image/png" href="nmeasail.png">
 	<style>
@@ -17,8 +17,10 @@
 		}
 	</style>
 </head>
-<body ng-app="nmearouter">
+<body ng-app="nmearouter" onload="onLoad()">
 	<script>
+
+
         var year = (new Date()).getFullYear();
 	    var tripList = {};
 	    var total = {};
@@ -108,7 +110,6 @@
 			window.location.href = "trip.html?trip=" + trip + "&name=" + encodeURI(name);
 		}
 
-
         function changeYearAndRefresh(delta) {
             changeYear(delta);
             refresh();
@@ -135,9 +136,21 @@
             controllerScope.$evalAsync();
         }
 
+        function switchUTC(yesNo) {
+            setUTCCookie(yesNo);
+        }
+
+        function onLoad() {
+            document.getElementById("utcToggle").checked = useUTC;
+        }
+
     </script>
 
 	<div id="triplist" class="container-fluid" ng-controller="myCtrl">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="utcToggle" onclick="switchUTC(this.checked);">
+            <label class="form-check-label" for="utcToggle">UTC</label>
+          </div>
         <div class="row">
             <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6" ng-repeat="b in buttons.list">
                 <button id="{{b.action}}" type="button" class="btn btn-secondary tile-button" onclick="doClick(this.id);">
@@ -146,7 +159,7 @@
             </div>
         </div>
 
-        <div class="row alert alert-primary" style="margin-left: 0px; margin-right: 0px;">
+        <div class="row alert alert-secondary" style="margin-left: 0px; margin-right: 0px;">
             <div class="col-lg-2 col-md-3 col-sm-2 col-xs-12">
                 <strong><a href="" onclick="changeYearAndRefresh(-1)"><b>&lt;</b>&nbsp;</a>{{year}}<a href="" onclick="changeYearAndRefresh(1)">&nbsp;<b>&gt;</b></a></strong>
             </div>
