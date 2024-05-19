@@ -136,10 +136,12 @@ public class Sampler<T> implements Startable {
 
     public void dumpAndReset(boolean force) {
         synchronized (series) {
+            log.info("Sampler dump and reset");
             long ts = timestampProvider.getNow();
             for (Series<T> s : series.values()) {
                 if (s != null) {
                     StatsSample statsSample = s.statsSample;
+                    log.info("Stat sample " + statsSample + " " + s.lastStatTimeMs + " " + ts + " " + s.timerFilter.accept(s.lastStatTimeMs, ts));
                     if (statsSample != null && (force || s.timerFilter.accept(s.lastStatTimeMs, ts))) {
                         write(statsSample, ts);
                         if (collectListener != null) {
@@ -197,6 +199,7 @@ public class Sampler<T> implements Startable {
     }
 
     private void write(StatsSample s, long ts) {
+        log.info("writer" +writer);
         if (writer != null && s != null && s.getSamples() > 0) {
             writer.write(s.getImmutableCopy(), ts);
         }

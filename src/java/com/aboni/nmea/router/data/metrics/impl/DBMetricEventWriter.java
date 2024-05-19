@@ -15,6 +15,7 @@ along with NMEARouter.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.aboni.nmea.router.data.metrics.impl;
 
+import com.aboni.log.Log;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.StatsEvent;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
@@ -27,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 public class DBMetricEventWriter implements DBEventWriter {
 
@@ -65,6 +67,8 @@ public class DBMetricEventWriter implements DBEventWriter {
             stm.setDouble(4, m.getStatsSample().getMinValue());
             stm.setTimestamp(5, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
             stm.execute();
+        } else {
+            throw new RuntimeException("AAAAAA");
         }
     }
 
