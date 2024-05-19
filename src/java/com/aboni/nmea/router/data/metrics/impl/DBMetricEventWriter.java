@@ -35,10 +35,12 @@ public class DBMetricEventWriter implements DBEventWriter {
     private PreparedStatement stm;
 
     private final String sTABLE;
+    private final Log log;
 
     @Inject
-    public DBMetricEventWriter(@Named(Constants.TAG_METEO) String tableName) {
+    public DBMetricEventWriter(@Named(Constants.TAG_METEO) String tableName, Log log) {
         sTABLE = tableName;
+        this.log = log;
     }
 
     private void prepareStatement(Connection c) throws SQLException {
@@ -59,14 +61,18 @@ public class DBMetricEventWriter implements DBEventWriter {
     @Override
     public void write(Event e, Connection c) throws SQLException {
         if (c != null && e instanceof StatsEvent) {
-            prepareStatement(c);
-            StatsEvent m = (StatsEvent) e;
-            stm.setString(1, m.getStatsSample().getTag());
-            stm.setDouble(2, m.getStatsSample().getValue());
-            stm.setDouble(3, m.getStatsSample().getMaxValue());
-            stm.setDouble(4, m.getStatsSample().getMinValue());
-            stm.setTimestamp(5, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
-            stm.execute();
+            try {
+                prepareStatement(c);
+                StatsEvent m = (StatsEvent) e;
+                stm.setString(1, m.getStatsSample().getTag());
+                stm.setDouble(2, m.getStatsSample().getValue());
+                stm.setDouble(3, m.getStatsSample().getMaxValue());
+                stm.setDouble(4, m.getStatsSample().getMinValue());
+                stm.setTimestamp(5, new Timestamp(e.getTime()), Utils.UTC_CALENDAR);
+                stm.execute();
+            } catch (Exception ex) {
+                log.errorForceStacktrace("AAAAAAAAAAAAA", ex);
+            }
         } else {
             throw new RuntimeException("AAAAAA");
         }
