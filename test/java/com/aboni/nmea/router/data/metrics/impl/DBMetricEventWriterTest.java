@@ -30,7 +30,7 @@ public class DBMetricEventWriterTest extends TestCase {
         ThingsFactory.setInjector(injector);
         MetricTestTableManager.setUp();
         helper = new DBHelper(ConsoleLog.getLogger(), true);
-        evW = new DBMetricEventWriter(MetricTestTableManager.METRIC_TABLE_NAME);
+        evW = new DBMetricEventWriter(MetricTestTableManager.METRIC_TABLE_NAME, ConsoleLog.getLogger());
     }
 
     public void tearDown() throws Exception {
