@@ -89,7 +89,7 @@ public class TrackAnalytics {
 
         void toJSONSpeedAndTime(String label, JSONObject j) {
             j.put(label + "SpeedTime", Utils.formatISOTimestampUTC(time));
-            j.put(label + "Speed", value);
+            j.put(label + "Speed", (Double.isFinite(value))?value:0.0);
         }
     }
 

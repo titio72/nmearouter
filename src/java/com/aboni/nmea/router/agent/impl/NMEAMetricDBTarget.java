@@ -42,36 +42,43 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
         super(log, tp, messageFactory, false, true);
         if (cache==null) throw new IllegalArgumentException("Cache cannot be null");
         metricSampler = new Sampler<>(log, tp, w, "Meteo2DB");
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.PRESSURE.getDescription()).toString());
         metricSampler.initMetric(Metrics.PRESSURE,
                 MsgPressure.class::isInstance,
                 (Message m) -> ((MsgPressure) m).getPressure(),
                 new TimerFilterFixed(5 * ONE_MINUTE, 500),
                 "PR_", 800.0, 1100.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.WATER_TEMPERATURE.getDescription()).toString());
         metricSampler.initMetric(Metrics.WATER_TEMPERATURE,
                 (Message m) -> (m instanceof MsgTemperature && TemperatureSource.SEA == ((MsgTemperature) m).getTemperatureSource()),
                 (Message m) -> ((MsgTemperature) m).getTemperature(),
                 new TimerFilterFixed(30 * ONE_MINUTE, 500),
                 "WT_", -20.0, 60.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.AIR_TEMPERATURE.getDescription()).toString());
         metricSampler.initMetric(Metrics.AIR_TEMPERATURE,
                 (Message m) -> (m instanceof MsgTemperature && AIR_TEMPERATURE_SOURCE == ((MsgTemperature) m).getTemperatureSource()),
                 (Message m) -> ((MsgTemperature) m).getTemperature(),
                 new TimerFilterFixed(30 * ONE_MINUTE, 500),
                 "AT0", -20.0, 60.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.HUMIDITY.getDescription()).toString());
         metricSampler.initMetric(Metrics.HUMIDITY,
                 MsgHumidity.class::isInstance,
                 (Message m) -> ((MsgHumidity) m).getHumidity(),
                 new TimerFilterFixed(10 * ONE_MINUTE, 500),
                 "HUM", 0.0, 150.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.WIND_SPEED.getDescription()).toString());
         metricSampler.initMetric(Metrics.WIND_SPEED,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue()),
                 (Message m) -> ((MsgWindData) m).getSpeed(),
                 new TimerFilterFixed(ONE_MINUTE, 500),
                 "TW_", 0.0, 100.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.WIND_DIRECTION.getDescription()).toString());
         metricSampler.initMetric(Metrics.WIND_DIRECTION,
                 (Message m) -> (m instanceof MsgWindData && ((MsgWindData) m).isTrue() && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> ((MsgWindData) m).getAngle() + cache.getLastHeading().getData().getHeading(),
                 new TimerFilterFixed(ONE_MINUTE, 500),
                 "TWD", -360.0, 360.0);
+        getLog().info(() -> getLogBuilder().wO("Init").wV("metric", Metrics.ROLL.getDescription()).toString());
         metricSampler.initMetric(Metrics.ROLL,
                 (Message m) -> (m instanceof MsgAttitude && !cache.isHeadingOlderThan(tp.getNow(), 800)),
                 (Message m) -> Utils.normalizeDegrees180To180(((MsgAttitude) m).getRoll()) + HWSettings.getPropertyAsDouble("roll.offset", 0.0),
@@ -108,7 +115,6 @@ public class NMEAMetricDBTarget extends NMEAAgentImpl {
     @Override
     public void onTimer() {
         super.onTimer();
-
         metricSampler.dumpAndReset();
     }
 
