@@ -440,7 +440,7 @@ public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {
     private NMEAAgent buildEngineDetector() {
         QOS q = createBuiltInQOS();
         q.addProp(QOSKeys.CANNOT_START_STOP);
-        EngineDetectionAgent eng = ThingsFactory.getInstance(EngineDetectionAgent.class);
+        EngineDetectionAgentRPM eng = ThingsFactory.getInstance(EngineDetectionAgentRPM.class);
         eng.setup("EngineManager", q);
         return eng;
     }

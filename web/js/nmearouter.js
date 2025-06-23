@@ -10,6 +10,7 @@ loadJavascript("js/angular-sanitize.min.js");
 loadJavascript("js/moment-with-locales.min.js");
 loadJavascript("js/Chart.min.js");
 loadJavascript("js/hammer.min.js");
+loadJavascript("js/bootbox.min.js");
 
 var useUTC = readUTCCookie();
 
@@ -290,7 +291,7 @@ function backup() {
   xmlHttp.onload = function() {
     if (this.status == 200) {
       var json = JSON.parse(xmlHttp.responseText);
-      window.open("http://" + window.location.hostname + ":1112/" + json.file);
+      window.open("http://" + window.location.hostname + ":1112/" + json.file + ".tgz");
     } else {
       bootbox.alert({
         title: "Backup",

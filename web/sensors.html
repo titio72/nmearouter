@@ -158,6 +158,11 @@
     return temperature - (100.0 - humidity) / 5;
   }
 
+function pad(v, n) {
+  var s = "00000000000000" + v;
+  return s.substring(s.length - n, s.length);
+}
+
   function processEvent(event) {
     var msg = JSON.parse(event.data);
     if (msg.topic == 'nav') {
@@ -194,6 +199,14 @@
       doWithScope(msg, (m, scope) => { scope['time'] = m; });
     } else if (msg.topic == "engine") {
       doWithScope(msg, (m, scope) => { scope['engine'] = m; });
+    } else if (msg.topic == "engine_params") {
+      doWithScope(msg, (m, scope) => {
+        var ss = Math.floor(m.hours);
+        var h = Math.floor(ss / 3600);
+        var m = Math.floor((ss % 3600) / 60);
+        var s = ss % 60;
+        scope['engine_hours'] = h + ":" + pad(m, 2) + ":" + pad(s, 2); 
+      });
     } else if (msg.topic == 'RMC') {
       doWithScope(msg, (m, scope) => {
         m.s_dir = direction(m.COG);
@@ -711,7 +724,11 @@
               </tr>
               <tr>
                 <td>Engine status</td>
-                <td style="text-align: right">{{engine.status}}</td>
+                <td style="text-align: right">{{engine.rpm}} - {{engine.status}}</td>
+              </tr>
+              <tr>
+                <td>Engine hours</td>
+                <td style="text-align: right">{{engine_hours}}</td>
               </tr>
               <tr>
                 <td>CPU</td>

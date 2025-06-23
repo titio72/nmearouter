@@ -61,9 +61,9 @@ public class DBMetricEventWriter implements DBEventWriter {
     @Override
     public void write(Event e, Connection c) throws SQLException {
         if (c != null && e instanceof StatsEvent) {
+            StatsEvent m = (StatsEvent) e;
             try {
                 prepareStatement(c);
-                StatsEvent m = (StatsEvent) e;
                 stm.setString(1, m.getStatsSample().getTag());
                 stm.setDouble(2, m.getStatsSample().getValue());
                 stm.setDouble(3, m.getStatsSample().getMaxValue());
@@ -78,4 +78,8 @@ public class DBMetricEventWriter implements DBEventWriter {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format("BWMetricEventWriter {%s}", sTABLE);
+    }
 }
