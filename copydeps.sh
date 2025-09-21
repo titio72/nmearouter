@@ -26,8 +26,8 @@ echo "Copy angular"
 cp -f ../node_modules/angular/angular.min.js js/
 echo "Copy angular-sanitize"
 cp -f ../node_modules/angular-sanitize/angular-sanitize.min.js js/
-#echo "Copy bootbox"
-#cp -f ../node_modules/bootbox/dist/bootbox.min.js js/
+echo "Copy bootbox"
+cp -f ../node_modules/bootbox/dist/bootbox.min.js js/
 echo "Copy jquery"
 cp -f ../node_modules/jquery/dist/jquery.min.js js/
 echo "Copy Chart.js"

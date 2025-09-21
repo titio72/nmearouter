@@ -98,4 +98,18 @@ public class TripDAOTest {
         }
     }
 
+    @Test
+    public void testMergeTrips() throws Exception {
+        TripImpl t137 = TrackTestTableManager.getTrip(137);
+        TripImpl t138 = TrackTestTableManager.getTrip(138);
+        t137.setDistance(t138.getDistance()+ t137.getDistance());
+        t137.setDistanceSail(t138.getDistanceSail()+ t137.getDistanceSail());
+        t137.setDistanceMotor(t138.getDistanceMotor()+ t137.getDistanceMotor());
+        t137.setTS(t138.getEndTS());
+        try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
+            tripDAO.mergeTrip(137, 138, db.getConnection());
+            checkDOesNotExist(db, 138);
+            check(db, t137);
+        }
+    }
 }

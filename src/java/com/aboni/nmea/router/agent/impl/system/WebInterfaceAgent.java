@@ -179,6 +179,7 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackFixerService.class))), "/fixtrack");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TripMergeService.class))), "/mergetrips");
     }
 
     @Override

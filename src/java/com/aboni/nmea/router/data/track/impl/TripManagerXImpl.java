@@ -226,6 +226,38 @@ public class TripManagerXImpl implements TripManagerX {
         }
     }
 
+    @Override
+    public void mergeTrip(int id0, int id1) throws TripManagerException {
+        Trip t0 = getTrip(id0);
+        if (t0==null) throw new TripManagerException("Trip " + id0 + " does not exist!");
+        else {
+            if (id1==-1) {
+                int last = archive.getLastTrip().getTrip();
+                for (int i = id0 + 1; i <= last; i++) {
+                    if (getTrip(i) != null) {
+                        id1 = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (id0 >= 0 && id1 > id0) {
+            try (DBHelper db = new DBHelper(log, true)) {
+                Connection c = db.getConnection();
+                Trip t = tripDAO.mergeTrip(id0, id1, c);
+                if (t!=null) {
+                    archive.setTrip(t);
+                    for (int i = id0 + 1; i <= id1; i++) archive.delete(i);
+                } else {
+                    throw new TripManagerException("Error mering trips - no resulting trip!");
+                }
+            } catch (SQLException | MalformedConfigurationException e) {
+                throw new TripManagerException("Error merging trips", e);
+            }
+        }
+    }
+
     private TripImpl getTrimmedTrip(Trip t, Connection connection) throws SQLException {
         Pair<Instant, Instant> bounds = trackDAO.getTrimmedTrip(t.getStartTS(), t.getEndTS(), connection);
         if (bounds!=null) {
@@ -256,17 +288,20 @@ public class TripManagerXImpl implements TripManagerX {
         void setTrip(Trip t) {
             synchronized (this) {
                 Trip existingTrip = tripsMap.getOrDefault(t.getTrip(), null);
-                if (existingTrip == null) {
-                    tripsMap.put(t.getTrip(), t);
-                } else {
+                if (existingTrip != null) {
                     int position = Collections.binarySearch(tripsByDate, existingTrip, Comparator.comparing(Trip::getStartTS));
                     tripsByDate.remove(position);
                 }
+                tripsMap.put(t.getTrip(), t);
                 int insertAt = -Collections.binarySearch(tripsByDate, t, Comparator.comparing(Trip::getStartTS)) - 1;
                 if (insertAt == tripsByDate.size()) tripsByDate.add(t);
                 else tripsByDate.add(insertAt, t);
 
             }
+        }
+
+        int size() {
+            return tripsMap.size();
         }
 
         Trip getTrip(int id) {

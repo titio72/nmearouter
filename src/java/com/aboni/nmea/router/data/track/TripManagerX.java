@@ -38,4 +38,5 @@ public interface TripManagerX {
 
     void trimTrip(int id) throws TripManagerException;
 
+    void mergeTrip(int id0, int id1) throws TripManagerException;
 }

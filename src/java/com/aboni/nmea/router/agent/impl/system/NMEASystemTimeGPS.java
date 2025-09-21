@@ -29,13 +29,13 @@ import javax.inject.Inject;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
-    private final SystemTimeChecker systemTimeCHecker;
+    private final SystemTimeChecker systemTimeChecker;
 
     @Inject
     public NMEASystemTimeGPS(Log log, TimestampProvider tp, RouterMessageFactory messageFactory, SystemTimeChecker checker) {
         super(log, tp, messageFactory, true, true);
         if (checker==null) throw new IllegalArgumentException("SystemTimeChecker is null");
-        this.systemTimeCHecker = checker;
+        this.systemTimeChecker = checker;
     }
 
     @Override
@@ -45,21 +45,21 @@ public class NMEASystemTimeGPS extends NMEAAgentImpl {
 
     @Override
     public String getDescription() {
-        return "Sync up system time with GPS UTC time feed [" + (systemTimeCHecker.isSynced() ? "Sync " + systemTimeCHecker.getTimeSkew() : "Not Sync") + "]";
+        return "Sync up system time with GPS UTC time feed [" + (systemTimeChecker.isSynced() ? "Sync " + systemTimeChecker.getTimeSkew() : "Not Sync") + "]";
     }
 
     @OnRouterMessage
     public void onSentence(RouterMessage msg) {
         Message m = msg.getPayload();
         if (m instanceof MsgSystemTime) {
-            systemTimeCHecker.checkAndSetTime(((MsgSystemTime) m).getTime());
+            systemTimeChecker.checkAndSetTime(((MsgSystemTime) m).getTime());
             postMsg();
         }
     }
 
     private void postMsg() {
-        long skew = systemTimeCHecker.getTimeSkew();
-        boolean sync = systemTimeCHecker.isSynced();
+        long skew = systemTimeChecker.getTimeSkew();
+        boolean sync = systemTimeChecker.isSynced();
         JSONObject msg = new JSONObject();
         msg.put("topic", "time");
         msg.put("synced", sync);

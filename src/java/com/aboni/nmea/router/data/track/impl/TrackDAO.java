@@ -46,14 +46,20 @@ public class TrackDAO {
                 " (lat, lon, TS, anchor, dTime, speed, maxSpeed, dist, engine) " +
                 "values (?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             stm.setDouble(1, t.getPoint().getPosition().getLatitude());
+            assert !Double.isNaN(t.getPoint().getPosition().getLatitude());
             stm.setDouble(2, t.getPoint().getPosition().getLongitude());
+            assert !Double.isNaN(t.getPoint().getPosition().getLongitude());
             Timestamp x = new Timestamp(t.getTime());
             stm.setTimestamp(3, x, Utils.UTC_CALENDAR);
             stm.setInt(4, t.getPoint().isAnchor() ? 1 : 0);
             stm.setInt(5, t.getPoint().getPeriod());
             stm.setDouble(6, t.getPoint().getAverageSpeed());
+            assert !Double.isNaN(t.getPoint().getAverageSpeed());
             stm.setDouble(7, Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
+            assert !Double.isNaN(t.getPoint().getMaxSpeed());
+            assert !Double.isNaN(Math.max(t.getPoint().getMaxSpeed(), t.getPoint().getAverageSpeed()));
             stm.setDouble(8, t.getPoint().getDistance());
+            assert !Double.isNaN(t.getPoint().getDistance());
             stm.setByte(9, t.getPoint().getEngine().toByte());
             stm.execute();
         }

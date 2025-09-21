@@ -32,7 +32,6 @@ public class TripManagerXImplTest {
     private TripManagerXImpl tm;
 
     private int last_trip = -1;
-    private int first_trip = -1;
     private int a_trip = -1;
 
     private int no_trip = -1;
@@ -43,7 +42,6 @@ public class TripManagerXImplTest {
         ThingsFactory.setInjector(injector);
         TrackTestTableManager.setUp();
         TrackTestTableManager.addTestData();
-        first_trip = (int) TrackTestTableManager.testTrips[0][0];
         a_trip = (int) TrackTestTableManager.testTrips[TrackTestTableManager.testTrips.length-2][0];
         last_trip = (int) TrackTestTableManager.testTrips[TrackTestTableManager.testTrips.length-1][0];
         no_trip = last_trip + 1; // non existent trip
@@ -79,8 +77,8 @@ public class TripManagerXImplTest {
 
     @Test
     public void testGetTripById() throws TripManagerException {
-        Trip t = tm.getTrip(last_trip);
-        Trip test = TrackTestTableManager.getTrip(last_trip);
+        Trip t = tm.getTrip(136);
+        Trip test = TrackTestTableManager.getTrip(136);
         assertTrips(test, t);
     }
 
@@ -147,13 +145,13 @@ public class TripManagerXImplTest {
         Trip t = TrackTestTableManager.getTrip(last_trip);
         Instant timestamp = t.getEndTS().plusSeconds(6 * 60 * 60 /*6 hours since last trip end time - too much time*/);
         Trip current = tm.getCurrentTrip(timestamp);
-        assertNull(current);
+        assertNull(current); // too much time has elapsed since last trip end, so we assume thereś no current trip
     }
 
     @Test
     public void testChangeDescription() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
-        tm.setTripDescription(last_trip, "Capraia 1");
-        assertEquals("Capraia 1", tm.getTrip(last_trip).getTripDescription());
+        tm.setTripDescription(136, "Capraia 1");
+        assertEquals("Capraia 1", tm.getTrip(136).getTripDescription());
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 rs.next();
@@ -186,11 +184,11 @@ public class TripManagerXImplTest {
 
     @Test
     public void testDelete() throws TripManagerException, ClassNotFoundException, SQLException, MalformedConfigurationException {
-        tm.deleteTrip(last_trip);
+        tm.deleteTrip(136);
         try (DBHelper db = new DBHelper(ConsoleLog.getLogger(), true)) {
             try (ResultSet rs = db.getConnection().createStatement().executeQuery("select id, description from trip_test where id=136")) {
                 assertFalse(rs.next());
-                assertNull(tm.getTrip(last_trip));
+                assertNull(tm.getTrip(136));
             }
         }
     }
@@ -270,5 +268,37 @@ public class TripManagerXImplTest {
 
         l = tm.getTrips(2019, false);
         assertEquals(0, l.size());
+    }
+
+    @Test
+    public void testMerge() throws TripManagerException {
+        Trip t137 = tm.getTrip(137);
+        Trip t138 = tm.getTrip(138);
+        Instant tEnd = t138.getEndTS();
+        double dist = t137.getDistance() + t138.getDistance();
+        double distSail = t137.getDistanceSail() + t138.getDistanceSail();
+        double distMotor = t137.getDistanceMotor() + t138.getDistanceMotor();
+        tm.mergeTrip(137, 138);
+        assertNull(tm.getTrip(138)); // the second trip is gone
+        assertEquals(dist, tm.getTrip(137).getDistance(), 0.0001);
+        assertEquals(distSail, tm.getTrip(137).getDistanceSail(), 0.0001);
+        assertEquals(distMotor, tm.getTrip(137).getDistanceMotor(), 0.0001);
+        assertEquals(tEnd, tm.getTrip(137).getEndTS());
+    }
+
+    @Test
+    public void testMergeNoEndId() throws TripManagerException {
+        Trip t137 = tm.getTrip(137);
+        Trip t138 = tm.getTrip(138);
+        Instant tEnd = t138.getEndTS();
+        double dist = t137.getDistance() + t138.getDistance();
+        double distSail = t137.getDistanceSail() + t138.getDistanceSail();
+        double distMotor = t137.getDistanceMotor() + t138.getDistanceMotor();
+        tm.mergeTrip(137, -1 /* the implementation will figure out the end id */);
+        assertNull(tm.getTrip(138)); // the second trip is gone
+        assertEquals(dist, tm.getTrip(137).getDistance(), 0.0001);
+        assertEquals(distSail, tm.getTrip(137).getDistanceSail(), 0.0001);
+        assertEquals(distMotor, tm.getTrip(137).getDistanceMotor(), 0.0001);
+        assertEquals(tEnd, tm.getTrip(137).getEndTS());
     }
 }
