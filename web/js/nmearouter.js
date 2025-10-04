@@ -1,16 +1,14 @@
 loadStylesheet("css/bootstrap.min.css");
+loadJavascript("js/popper.min.js")
 loadJavascript("js/bootstrap.min.js");
-
-loadStylesheet("css/bootstrap-datepicker.min.css");
-
-loadJavascript("js/hammer.min.js");
+//loadJavascript("js/hammer.min.js");
 loadJavascript("js/jquery.min.js");
 loadJavascript("js/angular.min.js");
 loadJavascript("js/angular-sanitize.min.js");
 loadJavascript("js/moment-with-locales.min.js");
 loadJavascript("js/Chart.min.js");
-loadJavascript("js/hammer.min.js");
 loadJavascript("js/bootbox.min.js");
+loadStylesheet("css/bootstrap-datepicker.min.css");
 
 var useUTC = readUTCCookie();
 
@@ -326,6 +324,10 @@ function manageTrip(id, action, cback) {
 
 function dropTrip(id, cback) {
   manageTrip(id, "droptrip", cback);
+}
+
+function mergeTrips(id, cback) {
+  manageTrip(id, "mergetrips", cback);
 }
 
 function trimTrip(id, cback) {

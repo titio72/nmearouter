@@ -126,6 +126,11 @@
     window.location.href = "trip.html?trip=" + trip + "&name=" + encodeURI(name);
   }
 
+  function askMergeTrips(s) {
+    trip = extractTrip(s);
+    askConfirmationTrip(trip, mergeTrips, "Confirm merge trip for " + trip.description + "?");
+  }
+
   function editName(s) {
     var ss = s.split("|");
     var trip = ss[1];
@@ -163,7 +168,6 @@
     trip = searchTrip(tripId);
     return trip;
   }
-
 
   function askConfirmationTrip(trip, action, message) {
     bootbox.confirm({
@@ -486,52 +490,64 @@
     <div class="row">
         <div class="col-xl-4 col-lg-6 col-md-6">
             <div id="TripsPanel" class="card-router card-track" ng-controller="myCtrl">
-                <!--div class="card-router-header card-track-header">Tracking <span style="float: right"
-                                                                                 class="glyphicon glyphicon-refresh"
-                                                                                 aria-hidden="true"
-                                                                                 onclick="refreshTrips();"></span></div-->
                 <div id="panel_details" class="card-router-body card-track-body">
                     <div class="table-responsive documentList" style="height: 100%">
                         <table class="table table-sm">
                             <tr ng-repeat="t in days.trips">
+                                
                                 <td>
-                                    <button id="btnDropTrip|{{t.id}}" type="button" class="btn btn-circle btn-secondary"
-                                            onclick="askDeleteTrip(this.id)">
-                                      <span class="glyphicon glyphicon-trash circle-icon-content"
-                                            aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button ng-if="t.description!=''" id="btnTripLabel|{{t.id}}|{{t.description}}"
-                                            type="button"
-                                            class="btn btn-circle btn-secondary" onclick="editName(this.id);">
-                                      <span class="glyphicon glyphicon-pencil circle-icon-content"
-                                            aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button ng-if="t.description!=''" id="btnTripAnalytics|{{t.id}}|{{t.description}}"
-                                            type="button"
-                                            class="btn btn-circle btn-secondary" onclick="showAnalytics(this.id);">
-                                      <span class="glyphicon glyphicon-info-sign circle-icon-content"
-                                            aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button ng-if="t.description!=''" id="btnTrimTrip|{{t.id}}|{{t.description}}"
-                                            type="button"
-                                            class="btn btn-circle btn-secondary" onclick="askTrimTrip(this.id);">
-                                      <span class="glyphicon glyphicon-scissors circle-icon-content"
-                                            aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button ng-if="t.description!=''" id="btnFixTrip|{{t.id}}|{{t.description}}"
-                                            type="button"
-                                            class="btn btn-circle btn-secondary" onclick="askFixTrip(this.id);">
-                                      <span class="glyphicon glyphicon glyphicon-wrench circle-icon-content"
-                                            aria-hidden="true"></span>
-                                    </button>
+                                <div class="dropend">
+                                  <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    ...
+                                  </button>
+                                  <ul class="dropdown-menu">
+                                    <li>
+                                      <button id="btnDropTrip|{{t.id}}" type="button" class="btn btn-circle btn-secondary" onclick="askDeleteTrip(this.id)">
+                                        <span class="glyphicon glyphicon-trash circle-icon-content" aria-hidden="true"></span>
+                                      </button> Delete
+                                    </li>
+                                    <li>
+                                      <button ng-if="t.description!=''" id="btnTripLabel|{{t.id}}|{{t.description}}"
+                                              type="button"
+                                              class="btn btn-circle btn-secondary" onclick="editName(this.id);">
+                                        <span class="glyphicon glyphicon-pencil circle-icon-content"
+                                              aria-hidden="true"></span>
+                                      </button> Edit name
+                                    </li>
+                                    <li>
+                                      <button ng-if="t.description!=''" id="btnTripAnalytics|{{t.id}}|{{t.description}}"
+                                              type="button"
+                                              class="btn btn-circle btn-secondary" onclick="showAnalytics(this.id);">
+                                        <span class="glyphicon glyphicon-info-sign circle-icon-content"
+                                              aria-hidden="true"></span>
+                                      </button> Analytics
+                                    </li>
+                                    <li>
+                                      <button ng-if="t.description!=''" id="btnMergeTrips|{{t.id}}|{{t.description}}"
+                                              type="button"
+                                              class="btn btn-circle btn-secondary" onclick="askMergeTrips(this.id);">
+                                          <span class="glyphicon glyphicon-resize-full circle-icon-content"
+                                                aria-hidden="true"></span>
+                                      </button> Merge with next
+                                    </li>
+                                    <li>
+                                      <button ng-if="t.description!=''" id="btnTrimTrip|{{t.id}}|{{t.description}}"
+                                              type="button"
+                                              class="btn btn-circle btn-secondary" onclick="askTrimTrip(this.id);">
+                                        <span class="glyphicon glyphicon-scissors circle-icon-content"
+                                              aria-hidden="true"></span>
+                                      </button> Trim
+                                    </li>
+                                    <li>
+                                      <button ng-if="t.description!=''" id="btnFixTrip|{{t.id}}|{{t.description}}"
+                                              type="button"
+                                              class="btn btn-circle btn-secondary" onclick="askFixTrip(this.id);">
+                                        <span class="glyphicon glyphicon glyphicon-wrench circle-icon-content"
+                                              aria-hidden="true"></span>
+                                      </button> Fix
+                                    </li>    
+                                  </ul>
+                                </div>
                                 </td>
                                 <td>
                                     <a href="#" name="{{t.id}}"
@@ -542,6 +558,7 @@
                                         <a name="{{d.dateRef}}" href="#" onclick="showDay(this)">{{d.dateLabel}}</a>&nbsp;
                                     </div>
                                 </td>
+                              
                             </tr>
                         </table>
                     </div>
