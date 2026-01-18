@@ -34,7 +34,7 @@ import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 

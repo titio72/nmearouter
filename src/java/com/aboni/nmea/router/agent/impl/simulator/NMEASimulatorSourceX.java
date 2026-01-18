@@ -29,7 +29,7 @@ import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;

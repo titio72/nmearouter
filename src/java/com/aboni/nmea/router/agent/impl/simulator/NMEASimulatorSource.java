@@ -30,7 +30,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.*;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -333,13 +333,13 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
         MWVSentence v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
         v.setAngle(aWDirection);
         v.setTrue(false);
-        v.setSpeedUnit(Units.KNOT);
+        v.setSpeedUnit(Units.NAUTICAL_MILES);
         v.setStatus(DataStatus.ACTIVE);
         NMEASimulatorSource.this.postMessage(v);
 
         v = (MWVSentence) SentenceFactory.getInstance().createParser(TalkerId.II, SentenceId.MWV);
         v.setTrue(false);
-        v.setSpeedUnit(Units.KMH);
+        v.setSpeedUnit(Units.KILOMETERS);
         v.setSpeed(aWSpeed * 1.852);
         v.setStatus(DataStatus.ACTIVE);
         NMEASimulatorSource.this.postMessage(v);
@@ -390,7 +390,7 @@ public class NMEASimulatorSource extends NMEAAgentImpl implements SimulatorDrive
             v.setSpeedUnit(Units.METER);
             v.setSpeed(aWSpeed / 1.947);
         } else {
-            v.setSpeedUnit(Units.KNOT);
+            v.setSpeedUnit(Units.NAUTICAL_MILES);
             v.setSpeed(aWSpeed);
         }
     }

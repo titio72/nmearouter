@@ -5,8 +5,8 @@ import com.aboni.nmea.router.data.track.Trip;
 import com.aboni.nmea.router.data.track.TripEvent;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.sql.*;
 
 public class TripDAO {
@@ -103,7 +103,7 @@ public class TripDAO {
         String sql2 = "delete from " + tripTable + " where id>? and id<=?";
         try (
                 PreparedStatement stmMerge = c.prepareStatement(sql1);
-                PreparedStatement stmDelete = c.prepareStatement(sql2);
+                PreparedStatement stmDelete = c.prepareStatement(sql2)
             ) {
             stmMerge.setInt(1, id1);
             stmMerge.setInt(2, id0);

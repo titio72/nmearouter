@@ -24,8 +24,8 @@ import com.aboni.nmea.router.data.metrics.Metrics;
 import com.aboni.nmea.router.data.metrics.WindStats;
 import com.aboni.nmea.router.data.metrics.WindStatsReader;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class WindStatsReaderImpl implements WindStatsReader {
 

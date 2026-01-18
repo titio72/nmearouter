@@ -29,7 +29,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;

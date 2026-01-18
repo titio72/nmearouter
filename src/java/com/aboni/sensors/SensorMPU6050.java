@@ -19,7 +19,7 @@ import com.aboni.log.Log;
 import com.aboni.data.LPFFilter;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 
 public class SensorMPU6050 extends I2CSensor {

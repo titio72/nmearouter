@@ -23,7 +23,7 @@ import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.sentences.NMEASentenceItem;
 import com.aboni.utils.TimestampProvider;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

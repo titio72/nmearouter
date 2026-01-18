@@ -21,7 +21,7 @@ import com.aboni.nmea.router.data.track.TripsToJSON;
 import com.aboni.log.Log;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Calendar;
 import java.util.List;
 
@@ -38,6 +38,16 @@ public class TripListService extends JSONWebService {
     }
 
     private JSONObject getResult(ServiceConfig config) throws JSONGenerationException {
+        int tripId = config.getInteger("trip", -1);
+        if (tripId != -1) {
+            try {
+                Trip trip = manager.getTrip(tripId);
+                List<Trip> trips = List.of(trip);
+                return new TripsToJSON(trips).go();
+            } catch (Exception e) {
+                throw new JSONGenerationException(e);
+            }
+        }
         int year = config.getInteger("year", Calendar.getInstance().get(Calendar.YEAR));
         try {
             List<Trip> trips = (year == 0) ?

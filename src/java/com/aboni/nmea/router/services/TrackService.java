@@ -23,7 +23,7 @@ import com.aboni.log.Log;
 import com.aboni.log.SafeLog;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 
 public class TrackService implements WebService {
@@ -37,7 +37,7 @@ public class TrackService implements WebService {
     @Inject
     public TrackService(Log log, QueryFactory queryFactory, TrackDumperFactory trackerDumperFactory) {
         this.log = SafeLog.getSafeLog(log);
-        if (queryFactory==null) throw new IllegalArgumentException("Query factory is nukll");
+        if (queryFactory==null) throw new IllegalArgumentException("Query factory is null");
         if (trackerDumperFactory==null) throw new IllegalArgumentException("Track dumper factory is null");
         this.queryFactory = queryFactory;
         this.trackerDumperFactory = trackerDumperFactory;
@@ -48,7 +48,7 @@ public class TrackService implements WebService {
         Query q = null;
         try {
             q = queryFactory.getQuery(config);
-            String f = config.getParameter("format", "gpx");
+            String f = config.getParameter("format", "json");
             boolean download = "1".equals(config.getParameter("download", "0"));
             TrackDumper dumper = trackerDumperFactory.getDumper(f);
             if (dumper != null) {

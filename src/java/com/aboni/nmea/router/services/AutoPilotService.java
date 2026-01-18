@@ -23,7 +23,7 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.impl.EvoAPDriver;
 import com.aboni.log.Log;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class AutoPilotService extends JSONWebService {
 

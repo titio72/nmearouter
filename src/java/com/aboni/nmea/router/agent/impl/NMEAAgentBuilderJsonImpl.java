@@ -30,7 +30,7 @@ import com.aboni.log.SafeLog;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 @SuppressWarnings({"OverlyCoupledClass", "OverlyComplexClass", "ClassWithTooManyMethods"})
 public class NMEAAgentBuilderJsonImpl implements NMEAAgentBuilderJson {

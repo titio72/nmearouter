@@ -18,7 +18,7 @@ package com.aboni.nmea.router.data.track;
 import com.aboni.nmea.router.data.Query;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class JSONTrackAnalytics {
 

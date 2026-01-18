@@ -16,16 +16,11 @@
 package com.aboni.nmea.router.services;
 
 import com.aboni.log.Log;
-import com.aboni.nmea.router.conf.MalformedConfigurationException;
-import com.aboni.nmea.router.data.Query;
-import com.aboni.nmea.router.data.QueryByDate;
 import com.aboni.nmea.router.data.track.*;
-import com.aboni.nmea.router.utils.db.DBHelper;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import com.google.inject.Inject;
+
 
 public class TripMergeService extends JSONWebService {
 

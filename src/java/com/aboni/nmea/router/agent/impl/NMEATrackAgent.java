@@ -26,7 +26,7 @@ import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEATrackAgent extends NMEAAgentImpl {
 

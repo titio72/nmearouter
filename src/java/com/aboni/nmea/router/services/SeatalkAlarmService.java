@@ -8,7 +8,7 @@ import com.aboni.log.Log;
 import com.aboni.data.Pair;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

@@ -20,7 +20,7 @@ import com.aboni.log.Log;
 import com.aboni.utils.Utils;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class SimulatorService extends JSONWebService {
 

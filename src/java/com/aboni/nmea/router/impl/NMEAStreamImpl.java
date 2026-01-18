@@ -22,7 +22,7 @@ import com.aboni.log.Log;
 import com.aboni.log.SafeLog;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

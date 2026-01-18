@@ -25,7 +25,7 @@ import com.aboni.utils.JSONUtils;
 import net.sf.marineapi.nmea.util.Position;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -230,9 +230,7 @@ public class PositionFilter implements NMEAFilter {
 
     @Override
     public JSONObject toJSON() {
-        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> {
-            fltObj.put(JSON_TAG_QUEUE_SIZE, queueSize);
-        });
+        return JSONFilterUtils.createFilter(this, (JSONObject fltObj) -> fltObj.put(JSON_TAG_QUEUE_SIZE, queueSize));
     }
 
     public static PositionFilter parseFilter(JSONObject obj) {

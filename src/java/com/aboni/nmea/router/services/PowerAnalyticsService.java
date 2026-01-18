@@ -21,7 +21,7 @@ import com.aboni.nmea.router.data.power.impl.DBPowerAnalytics;
 import com.aboni.log.Log;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 
 public class PowerAnalyticsService extends JSONWebService {

@@ -23,7 +23,7 @@ import com.aboni.log.Log;
 import com.aboni.log.SafeLog;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 

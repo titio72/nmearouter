@@ -26,8 +26,8 @@ import com.aboni.nmea.router.data.sampledquery.*;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -30,7 +30,7 @@ import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Logger;

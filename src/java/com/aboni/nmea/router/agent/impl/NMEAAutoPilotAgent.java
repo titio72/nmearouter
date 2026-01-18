@@ -24,7 +24,7 @@ import net.sf.marineapi.nmea.sentence.STALKSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 /**
  *

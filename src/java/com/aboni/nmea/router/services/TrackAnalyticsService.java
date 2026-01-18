@@ -20,7 +20,7 @@ import com.aboni.nmea.router.data.track.JSONTrackAnalytics;
 import com.aboni.nmea.router.data.track.TrackManagementException;
 import com.aboni.log.Log;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class TrackAnalyticsService extends JSONWebService {
 

@@ -24,7 +24,7 @@ import com.aboni.nmea.router.data.track.TrackPoint;
 import com.aboni.nmea.router.data.track.TrackReader;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;

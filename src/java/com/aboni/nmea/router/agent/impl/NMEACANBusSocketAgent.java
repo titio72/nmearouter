@@ -19,7 +19,7 @@ import tel.schich.javacan.NetworkDevice;
 import tel.schich.javacan.RawCanChannel;
 import tel.schich.javacan.platform.linux.LinuxNativeOperationException;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;

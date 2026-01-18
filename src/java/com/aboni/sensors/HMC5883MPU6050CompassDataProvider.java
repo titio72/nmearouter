@@ -21,7 +21,7 @@ import com.aboni.log.SafeLog;
 import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class HMC5883MPU6050CompassDataProvider implements CompassDataProvider {
 

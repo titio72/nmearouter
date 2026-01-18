@@ -30,7 +30,7 @@ import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.*;
 import net.sf.marineapi.nmea.util.Measurement;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.*;
 
 public class NMEASourceSensor extends NMEAAgentImpl {

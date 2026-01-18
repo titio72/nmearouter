@@ -21,7 +21,7 @@ import com.aboni.utils.Utils;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 

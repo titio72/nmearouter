@@ -30,7 +30,7 @@ import com.aboni.utils.TimestampProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

@@ -22,7 +22,7 @@ import com.aboni.nmea.router.agent.AgentPersistentStatusManager;
 import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.nmea.router.filters.JSONFilterParser;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class AgentStatusService extends JSONWebService {
 
@@ -32,7 +32,7 @@ public class AgentStatusService extends JSONWebService {
         if (filterSerializer==null) throw new IllegalArgumentException("Filter serializer is null");
         setLoader(new AgentServiceHelper(router, agentStatusManager) {
             @Override
-            protected String execute(ServiceConfig config) throws ServiceException {
+            protected String execute(ServiceConfig config) {
                 return executeService(getRouter(), getAgentStatusManager(), config);
             }
         });

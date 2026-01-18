@@ -19,7 +19,7 @@ import com.aboni.utils.TimestampProvider;
 import com.aboni.log.Log;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;

@@ -9,7 +9,7 @@ import com.aboni.nmea.router.message.JSONMessage;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class RouterMessageFactoryImpl implements RouterMessageFactory {
 

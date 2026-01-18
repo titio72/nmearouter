@@ -19,7 +19,7 @@ import com.aboni.nmea.router.data.Query;
 import com.aboni.nmea.router.data.TimeSeries;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Map;
 
 public class SampledQuery {

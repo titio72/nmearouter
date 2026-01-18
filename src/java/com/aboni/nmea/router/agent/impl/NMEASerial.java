@@ -31,7 +31,7 @@ import com.fazecast.jSerialComm.SerialPortIOException;
 import com.fazecast.jSerialComm.SerialPortTimeoutException;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.atomic.AtomicBoolean;

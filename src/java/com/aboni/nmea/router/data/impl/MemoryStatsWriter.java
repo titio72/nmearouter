@@ -20,7 +20,7 @@ import com.aboni.nmea.router.data.StatScanner;
 import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.metrics.Metric;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.*;
 
 public class MemoryStatsWriter implements StatsWriter {

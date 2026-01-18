@@ -22,7 +22,7 @@ import com.aboni.log.Log;
 import com.aboni.data.LPFFilter;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 

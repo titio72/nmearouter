@@ -31,10 +31,10 @@ import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.Utils;
+import com.google.inject.Inject;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.name.Named;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

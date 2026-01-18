@@ -13,7 +13,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -259,7 +259,7 @@ public class NextionDisplayAgent extends NMEAAgentImpl {
         Boolean anchor = cache.getStatus(NMEARouterStatuses.ANCHOR_STATUS, null);
         int anchorIcon;
         if (anchor == null) anchorIcon = 0;
-        else if (Boolean.TRUE.equals(anchor)) anchorIcon = 1;
+        else if (anchor) anchorIcon = 1;
         else anchorIcon = 13;
         sendCommand(String.format("nav.pic=%d", anchorIcon));
 

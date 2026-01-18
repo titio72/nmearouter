@@ -18,7 +18,7 @@ package com.aboni.sensors;
 import com.aboni.nmea.router.utils.HWSettings;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 
 public class CMPS11CompassDataProvider implements CompassDataProvider {

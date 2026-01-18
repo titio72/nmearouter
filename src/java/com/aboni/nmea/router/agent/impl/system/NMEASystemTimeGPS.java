@@ -25,7 +25,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEASystemTimeGPS extends NMEAAgentImpl {
 

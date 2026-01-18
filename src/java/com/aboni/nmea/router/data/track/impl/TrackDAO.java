@@ -5,8 +5,8 @@ import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.data.track.TrackEvent;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.sql.*;
 import java.time.Instant;
 

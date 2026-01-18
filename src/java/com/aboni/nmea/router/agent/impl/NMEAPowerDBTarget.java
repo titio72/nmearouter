@@ -28,8 +28,8 @@ import com.aboni.nmea.router.data.StatsWriter;
 import com.aboni.nmea.router.data.metrics.PowerMetrics;
 import com.aboni.utils.TimestampProvider;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class NMEAPowerDBTarget extends NMEAAgentImpl {
 

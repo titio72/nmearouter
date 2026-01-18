@@ -26,7 +26,7 @@ import com.aboni.data.LPFFilter;
 import com.aboni.data.Pair;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 /**
  * Calc true wind

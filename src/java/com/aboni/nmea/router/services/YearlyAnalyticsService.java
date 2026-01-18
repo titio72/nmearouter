@@ -19,7 +19,7 @@ import com.aboni.nmea.router.data.track.MonthYearTrackStats;
 import com.aboni.log.Log;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class YearlyAnalyticsService extends JSONWebService {
 

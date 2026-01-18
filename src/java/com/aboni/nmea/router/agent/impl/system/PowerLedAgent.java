@@ -24,7 +24,7 @@ import com.aboni.nmea.router.agent.impl.NMEAAgentImpl;
 import com.aboni.utils.TimestampProvider;
 import com.pi4j.io.gpio.*;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Timer;
 import java.util.TimerTask;
 

@@ -21,7 +21,7 @@ import com.aboni.nmea.nmea0183.NMEA0183Message;
 import com.aboni.data.Pair;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.*;
 
 public class NMEASourcePriorityProcessor implements NMEAPostProcess {

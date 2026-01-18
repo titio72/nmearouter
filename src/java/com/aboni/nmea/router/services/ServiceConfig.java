@@ -62,6 +62,11 @@ public interface ServiceConfig {
             return def;
         } else {
             try {
+                Instant res = Instant.parse(f);
+                return res.plusSeconds(offset * 86400L);
+            } catch (DateTimeParseException ignored) {
+            }
+            try {
                 DateTimeFormatter p = new DateTimeFormatterBuilder()
                         .appendValue(ChronoField.YEAR, 4)
                         .appendValue(ChronoField.MONTH_OF_YEAR, 2)

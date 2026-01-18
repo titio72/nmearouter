@@ -15,7 +15,7 @@ import com.aboni.nmea.router.utils.SerialReader;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEACANBusSerialAgent extends NMEAAgentImpl {
 

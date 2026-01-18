@@ -26,7 +26,7 @@ import com.aboni.nmea.router.data.sampledquery.SamplesQueryToJSON;
 import com.aboni.log.Log;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.List;
 
 public class MeteoRollingWindowService extends JSONWebService {

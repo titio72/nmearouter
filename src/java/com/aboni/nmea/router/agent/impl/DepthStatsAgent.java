@@ -23,7 +23,7 @@ import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.utils.TimestampProvider;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Deque;
 import java.util.LinkedList;
 

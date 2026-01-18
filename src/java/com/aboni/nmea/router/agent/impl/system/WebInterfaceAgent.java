@@ -38,7 +38,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -155,29 +155,34 @@ public class WebInterfaceAgent extends NMEAAgentImpl {
     }
 
     private void registerServlets(ServletContextHandler context) {
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(WindStatsService.class))), "/windanalytics");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AISTargetsService.class))), "/ais");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(GPSStatusService.class))), "/gps");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackAnalyticsService.class))), "/trackanalytics");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackService.class))), "/track");
+
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AgentStatusService.class))), "/agentsj");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ServiceShutdown.class))), "/shutdown");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SimulatorService.class))), "/sim");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
+
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerAnalyticsService.class))), "/poweranalysis");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerService2.class))), "/power2");
+
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(WindStatsService.class))), "/windanalytics");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoService.class))), "/meteo");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoService2.class))), "/meteo2");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerService2.class))), "/power2");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(PowerAnalyticsService.class))), "/poweranalysis");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
+
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackAnalyticsService.class))), "/trackanalytics");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackService.class))), "/track");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
+        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
+
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ChangeTripDescService.class))), "/changetripdesc");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(DropTripService.class))), "/droptrip");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrimTripService.class))), "/trimtrip");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TripListService.class))), "/trips");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SpeedService.class))), "/speed");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(ServiceDBBackup.class))), "/backup");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AgentFilterService.class))), "/filter");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(YearlyAnalyticsService.class))), "/distanalysis");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(AutoPilotService.class))), "/ap");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(SeatalkAlarmService.class))), "/alarms");
-        context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(MeteoRollingWindowService.class))), "/meteorolling");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TrackFixerService.class))), "/fixtrack");
         context.addServlet(new ServletHolder(new NMEARouterServlet<>(ThingsFactory.getInstance(TripMergeService.class))), "/mergetrips");
     }

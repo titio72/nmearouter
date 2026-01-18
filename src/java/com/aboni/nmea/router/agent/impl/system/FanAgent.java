@@ -26,7 +26,7 @@ import com.aboni.sensors.hw.CPUTemp;
 import com.aboni.sensors.hw.Fan;
 import com.aboni.utils.TimestampProvider;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class FanAgent extends NMEAAgentImpl {
 

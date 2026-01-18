@@ -77,6 +77,7 @@ public class JSONWebService implements WebService {
         response.setContentType(APPLICATION_JSON);
         try {
             if (res!=null) {
+                response.setHeader("Access-Control-Allow-Origin", "*"); // Allow all origins (less secure, good for dev)
                 response.getWriter().append(res.toString(2));
                 response.ok();
             } else {

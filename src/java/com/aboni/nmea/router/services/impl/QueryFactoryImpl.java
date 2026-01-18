@@ -21,7 +21,7 @@ import com.aboni.nmea.router.data.QueryById;
 import com.aboni.nmea.router.services.QueryFactory;
 import com.aboni.nmea.router.services.ServiceConfig;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 
 public class QueryFactoryImpl implements QueryFactory {

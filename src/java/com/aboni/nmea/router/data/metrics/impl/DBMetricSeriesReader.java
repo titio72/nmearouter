@@ -20,7 +20,7 @@ import com.aboni.nmea.router.data.impl.DBSeriesReader;
 import com.aboni.nmea.router.Constants;
 import com.aboni.nmea.router.utils.ThingsFactory;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class DBMetricSeriesReader extends DBSeriesReader {
 

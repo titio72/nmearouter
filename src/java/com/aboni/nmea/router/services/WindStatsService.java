@@ -22,7 +22,7 @@ import com.aboni.nmea.router.data.metrics.WindStatsReader;
 import com.aboni.log.Log;
 import com.aboni.log.LogStringBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class WindStatsService extends JSONWebService {
 

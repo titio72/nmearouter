@@ -28,7 +28,7 @@ import com.aboni.nmea.message.Message;
 import com.aboni.utils.*;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

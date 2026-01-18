@@ -24,7 +24,7 @@ import com.aboni.utils.ScanThrough;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;

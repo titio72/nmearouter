@@ -8,12 +8,12 @@ import com.aboni.nmea.router.agent.NMEAAgent;
 import com.aboni.log.Log;
 import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
-import org.jetbrains.annotations.Nullable;
+//import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class GPSStatusService extends JSONWebService {
         setLoader((ServiceConfig config) -> getResult());
     }
 
-    @Nullable
+    //@Nullable
     private JSONObject getResult() {
         GPSStatus st = findService();
         if (st != null) {

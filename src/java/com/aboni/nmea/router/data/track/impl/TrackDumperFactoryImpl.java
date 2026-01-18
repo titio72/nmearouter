@@ -19,7 +19,7 @@ import com.aboni.nmea.router.data.track.TrackDumper;
 import com.aboni.nmea.router.data.track.TrackDumperFactory;
 import com.aboni.nmea.router.utils.ThingsFactory;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class TrackDumperFactoryImpl implements TrackDumperFactory {
 

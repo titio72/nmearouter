@@ -7,7 +7,7 @@ import com.aboni.nmea.router.*;
 import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.util.Position;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

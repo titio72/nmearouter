@@ -27,8 +27,8 @@ import com.aboni.nmea.router.utils.HWSettings;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class NMEAMetricDBTarget extends NMEAAgentImpl {
 

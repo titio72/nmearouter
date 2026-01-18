@@ -19,7 +19,7 @@ import com.aboni.log.Log;
 import com.aboni.log.LogStringBuilder;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class ServiceShutdown extends JSONWebService {
 

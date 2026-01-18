@@ -21,7 +21,7 @@ import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.message.Message;
 import com.aboni.data.Pair;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEAGenericFilterProc implements NMEAPostProcess {
 

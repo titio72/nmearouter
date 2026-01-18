@@ -6,7 +6,7 @@ import com.aboni.nmea.router.*;
 import com.aboni.sensors.EngineStatus;
 import com.aboni.utils.TimestampProvider;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class EngineDetectionAgentRPM extends NMEAAgentImpl {
 

@@ -25,8 +25,8 @@ import com.aboni.nmea.router.utils.ThingsFactory;
 import com.aboni.log.LogStringBuilder;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class MeteoService extends JSONWebService {
 

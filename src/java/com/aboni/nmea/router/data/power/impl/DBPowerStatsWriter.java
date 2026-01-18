@@ -20,8 +20,8 @@ import com.aboni.nmea.router.data.impl.DBStatsWriter;
 import com.aboni.log.Log;
 import com.aboni.nmea.router.utils.db.DBEventWriter;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class DBPowerStatsWriter extends DBStatsWriter {
 

@@ -28,7 +28,7 @@ import net.sf.marineapi.nmea.sentence.TalkerId;
 import net.sf.marineapi.nmea.sentence.XDRSentence;
 import net.sf.marineapi.nmea.util.Measurement;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEAVoltageSensor extends NMEAAgentImpl {
 

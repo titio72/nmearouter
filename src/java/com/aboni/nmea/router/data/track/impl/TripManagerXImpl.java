@@ -22,9 +22,9 @@ import com.aboni.log.SafeLog;
 import com.aboni.nmea.router.data.track.*;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import com.aboni.data.Pair;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

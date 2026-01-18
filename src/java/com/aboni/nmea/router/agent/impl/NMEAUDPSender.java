@@ -25,7 +25,7 @@ import com.aboni.nmea.router.conf.QOS;
 import com.aboni.utils.TimestampProvider;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

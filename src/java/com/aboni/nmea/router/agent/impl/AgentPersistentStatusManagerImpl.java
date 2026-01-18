@@ -28,7 +28,7 @@ import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.utils.db.DBHelper;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

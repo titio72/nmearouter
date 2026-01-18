@@ -22,7 +22,7 @@ import com.aboni.nmea.router.conf.SimpleConf;
 import com.aboni.nmea.router.NMEARouter;
 import com.aboni.nmea.router.NMEARouterBuilder;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.Properties;
 
 public class NMEARouterPlayerBuilderImpl implements NMEARouterBuilder {

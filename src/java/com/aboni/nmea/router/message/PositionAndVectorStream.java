@@ -20,7 +20,7 @@ import com.aboni.nmea.router.data.DataEvent;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class PositionAndVectorStream {
 

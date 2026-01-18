@@ -24,7 +24,7 @@ import com.aboni.nmea.router.filters.FilterFactory;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.filters.NMEAFilterSet;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 

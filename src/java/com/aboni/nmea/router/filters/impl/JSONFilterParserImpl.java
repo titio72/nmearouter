@@ -8,7 +8,7 @@ import com.aboni.nmea.router.filters.NMEAFilter;
 import com.aboni.nmea.router.utils.ThingsFactory;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class JSONFilterParserImpl implements JSONFilterParser {
 

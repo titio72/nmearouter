@@ -24,7 +24,7 @@ import com.aboni.nmea.router.data.track.TrackReader;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.Writer;
 
 public class Track2KML implements TrackDumper {

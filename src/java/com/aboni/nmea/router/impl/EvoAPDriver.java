@@ -29,7 +29,7 @@ import com.aboni.log.SafeLog;
 import com.aboni.log.LogStringBuilder;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;

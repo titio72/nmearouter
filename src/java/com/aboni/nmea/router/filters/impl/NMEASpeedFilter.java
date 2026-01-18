@@ -24,7 +24,7 @@ import com.aboni.nmea.router.RouterMessage;
 import com.aboni.nmea.router.filters.NMEAFilter;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class NMEASpeedFilter implements NMEAFilter {
 
@@ -51,8 +51,8 @@ public class NMEASpeedFilter implements NMEAFilter {
         speedMovingAverage = new SpeedMovingAverage(10000 /* 10 seconds */);
     }
 
-    private boolean checkGPS(double speed) {
-        if (USE_GPS && speed > SPEED_CHECK_GPS_THRESHOLD) {
+    private boolean checkSpeedJumps(double speed) {
+        if (speed > SPEED_CHECK_GPS_THRESHOLD) {
             MsgSOGAdCOG vector = cache.getLastVector().getData();
             if (vector!=null && !Double.isNaN(vector.getSOG())) {
                 return (speed <= (vector.getSOG() * SPEED_TOLERANCE_FACTOR));
@@ -69,13 +69,9 @@ public class NMEASpeedFilter implements NMEAFilter {
     }
 
     private boolean checkMovingAverage(double speed) {
-        if (USE_AVERAGE) {
-            double movingAvg = speedMovingAverage.getAvg();
-            if (!Double.isNaN(movingAvg)) {
-                return (speed <= (movingAvg * SPEED_TOLERANCE_FACTOR));
-            } else {
-                return true;
-            }
+        double movingAvg = speedMovingAverage.getAvg();
+        if (!Double.isNaN(movingAvg)) {
+            return (speed <= (movingAvg * SPEED_TOLERANCE_FACTOR));
         } else {
             return true;
         }
@@ -92,8 +88,8 @@ public class NMEASpeedFilter implements NMEAFilter {
             } else {
                 speedMovingAverage.setSample(System.currentTimeMillis(), speed);
                 return checkThresholds(speed)
-                        && checkGPS(speed)
-                        && checkMovingAverage(speed);
+                        && (!USE_GPS || checkSpeedJumps(speed))
+                        && (!USE_AVERAGE || checkMovingAverage(speed));
             }
         } else {
             return true;

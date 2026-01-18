@@ -23,7 +23,7 @@ import com.aboni.nmea.router.RouterMessageFactory;
 import com.aboni.nmea.router.filters.impl.PositionFilter;
 import com.aboni.utils.TimestampProvider;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 public class PositionFilterProcessor implements NMEAPostProcess {
 

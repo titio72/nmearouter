@@ -19,10 +19,10 @@ import com.aboni.nmea.router.data.DataManagementException;
 import com.aboni.nmea.router.data.SeriesReader;
 import com.aboni.nmea.router.Constants;
 import com.aboni.log.Log;
+import com.google.inject.name.Named;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.Inject;
 import java.time.Instant;
 
 public class PowerService2 extends JSONWebService {

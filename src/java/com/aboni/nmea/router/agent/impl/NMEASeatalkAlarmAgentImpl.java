@@ -12,7 +12,7 @@ import com.aboni.nmea.router.SeatalkAlarmsStatus;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.time.Instant;
 import java.util.*;
 

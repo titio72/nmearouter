@@ -26,7 +26,7 @@ import com.aboni.nmea.router.message.SpeedAndHeadingStream;
 import com.aboni.utils.TimestampProvider;
 import com.aboni.utils.Utils;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;

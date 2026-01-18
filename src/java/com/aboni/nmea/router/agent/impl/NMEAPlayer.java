@@ -23,7 +23,7 @@ import com.aboni.utils.Utils;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.Sentence;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
